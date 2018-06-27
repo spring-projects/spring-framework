@@ -7664,6 +7664,22 @@ straight JNDI `InitialContext` usage shown above, but not the `JndiObjectFactory
 variant which would force you to declare the return type as the `FactoryBean` type.
 ====
 
+The profile string may contain a simple profile name (for example `production`) or a
+profile expression. A profile expression allows for more complicated profile logic to be
+expressed, for example `production & us-east`. The following operators are supported in
+profile expressions:
+
+* `!` - A logical _not_ of the profile
+* `&` - A logical _and_ of the profiles
+* `|` - A logical _or_ of the profiles
+
+[NOTE]
+====
+The `&` and `|` operators may not be mixed without using parentheses. For example
+`production & us-east | eu-central` is not a valid expression; it must be expressed as
+`production & (us-east | eu-central)`.
+====
+
 `@Profile` can be used as a <<beans-meta-annotations,meta-annotation>> for the purpose
 of creating a custom _composed annotation_. The following example defines a custom
 `@Production` annotation that can be used as a drop-in replacement for
@@ -7803,6 +7819,35 @@ It is also possible to avoid that split and nest `<beans/>` elements within the 
 The `spring-bean.xsd` has been constrained to allow such elements only as the
 last ones in the file. This should help provide flexibility without incurring
 clutter in the XML files.
+
+[NOTE]
+====
+The XML counterpart does not support profile expressions described above. It is possible
+however to negate a profile using the `!` operator. It is also possible to apply a logical
+and by nesting the profiles:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xsi:schemaLocation="...">
+
+		<!-- other bean definitions -->
+
+		<beans profile="production">
+			<beans profile="us-east">
+				<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/datasource"/>
+			</beans>
+		</beans>
+	</beans>
+----
+
+In the example above, the `dataSource` bean will be exposed if both the `production` and
+`us-east` profiles are active.
+====
 
 
 [[beans-definition-profiles-enable]]

@@ -43,6 +43,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
@@ -74,12 +75,13 @@ public class ClientCodecConfigurerTests {
 	@Test
 	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertEquals(10, readers.size());
+		assertEquals(11, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
+		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass()); // SPR-16804
 		assertEquals(Jackson2JsonDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2SmileDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());

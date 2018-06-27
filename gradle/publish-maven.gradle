@@ -18,6 +18,11 @@ def customizePom(pom, gradleProject) {
 			"$dep.scope:$dep.groupId:$dep.artifactId"
 		}
 
+		def managedVersions = dependencyManagement.managedVersions
+		generatedPom.dependencies.findAll{dep -> !dep.version }.each { dep ->
+			dep.version = managedVersions["${dep.groupId}:${dep.artifactId}"]
+		}
+
 		// add all items necessary for maven central publication
 		generatedPom.project {
 			name = gradleProject.description

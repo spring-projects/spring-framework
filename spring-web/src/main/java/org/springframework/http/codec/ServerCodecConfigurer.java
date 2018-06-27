@@ -19,27 +19,52 @@ package org.springframework.http.codec;
 import org.springframework.core.codec.Encoder;
 
 /**
- * Helps to configure a list of server-side HTTP message readers and writers
- * with support for built-in defaults and options to register additional custom
- * readers and writers via {@link #customCodecs()}.
+ * Extension of {@link CodecConfigurer} for HTTP message reader and writer
+ * options relevant on the server side.
  *
- * <p>The built-in defaults include basic data types such as various byte
- * representations, resources, strings, forms, but also others like JAXB2 and
- * Jackson 2 based on classpath detection. There are options to
- * {@link #defaultCodecs() override} some of the defaults or to have them
- * {@link #registerDefaults(boolean) turned off} completely.
+ * <p>HTTP message readers for the following are registered by default:
+ * <ul>{@code byte[]}
+ * <li>{@link java.nio.ByteBuffer}
+ * <li>{@link org.springframework.core.io.buffer.DataBuffer DataBuffer}
+ * <li>{@link org.springframework.core.io.Resource Resource}
+ * <li>{@link String}
+ * <li>{@link org.springframework.util.MultiValueMap
+ * MultiValueMap&lt;String,String&gt;} for form data
+ * <li>{@link org.springframework.util.MultiValueMap
+ * MultiValueMap&lt;String,Object&gt;} for multipart data
+ * <li>JSON and Smile, if Jackson is present
+ * <li>XML, if JAXB2 is present
+ * </ul>
+ *
+ * <p>HTTP message writers registered by default:
+ * <ul>{@code byte[]}
+ * <li>{@link java.nio.ByteBuffer}
+ * <li>{@link org.springframework.core.io.buffer.DataBuffer DataBuffer}
+ * <li>{@link org.springframework.core.io.Resource Resource}
+ * <li>{@link String}
+ * <li>{@link org.springframework.util.MultiValueMap
+ * MultiValueMap&lt;String,String&gt;} for form data
+ * <li>JSON and Smile, if Jackson is present
+ * <li>XML, if JAXB2 is present
+ * <li>Server-Sent Events
+ * </ul>
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public interface ServerCodecConfigurer extends CodecConfigurer {
 
+	/**
+	 * {@inheritDoc}
+	 * <p>On the server side, built-in default also include customizations
+	 * related to the encoder for SSE.
+	 */
 	@Override
 	ServerDefaultCodecs defaultCodecs();
 
 
 	/**
-	 * Create a new instance of the {@code ServerCodecConfigurer}.
+	 * Static factory method for a {@code ServerCodecConfigurer}.
 	 */
 	static ServerCodecConfigurer create() {
 		return CodecConfigurerFactory.create(ServerCodecConfigurer.class);
@@ -47,7 +72,7 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 
 
 	/**
-	 * Extension of {@link CodecConfigurer.DefaultCodecs} with extra server options.
+	 * {@link CodecConfigurer.DefaultCodecs} extension with extra client-side options.
 	 */
 	interface ServerDefaultCodecs extends DefaultCodecs {
 

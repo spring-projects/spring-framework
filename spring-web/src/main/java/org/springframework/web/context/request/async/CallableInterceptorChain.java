@@ -72,13 +72,15 @@ class CallableInterceptorChain {
 			try {
 				this.interceptors.get(i).postProcess(request, task, concurrentResult);
 			}
-			catch (Throwable t) {
+			catch (Throwable ex) {
 				// Save the first exception but invoke all interceptors
 				if (exceptionResult != null) {
-					logger.error("postProcess error", t);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Ignoring failure in postProcess method", ex);
+					}
 				}
 				else {
-					exceptionResult = t;
+					exceptionResult = ex;
 				}
 			}
 		}
@@ -140,8 +142,10 @@ class CallableInterceptorChain {
 			try {
 				this.interceptors.get(i).afterCompletion(request, task);
 			}
-			catch (Throwable t) {
-				logger.error("afterCompletion error", t);
+			catch (Throwable ex) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Ignoring failure in afterCompletion method", ex);
+				}
 			}
 		}
 	}

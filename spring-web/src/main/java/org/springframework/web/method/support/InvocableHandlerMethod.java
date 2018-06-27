@@ -19,6 +19,8 @@ package org.springframework.web.method.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -26,6 +28,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -130,15 +133,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
-					"' with arguments " + Arrays.toString(args));
+			logger.trace("Arguments: " + Arrays.toString(args));
 		}
-		Object returnValue = doInvoke(args);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Method [" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
-					"] returned [" + returnValue + "]");
-		}
-		return returnValue;
+		return doInvoke(args);
 	}
 
 	/**
@@ -163,24 +160,26 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					continue;
 				}
 				catch (Exception ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(getArgumentResolutionErrorMessage("Failed to resolve", i), ex);
+					// Leave stack trace for later, e.g. AbstractHandlerExceptionResolver
+					String message = ex.getMessage();
+					if (!message.contains(parameter.getExecutable().toGenericString())) {
+						if (logger.isDebugEnabled()) {
+							logger.debug(formatArgumentError(parameter, message));
+						}
 					}
 					throw ex;
 				}
 			}
 			if (args[i] == null) {
-				throw new IllegalStateException("Could not resolve method parameter at index " +
-						parameter.getParameterIndex() + " in " + parameter.getExecutable().toGenericString() +
-						": " + getArgumentResolutionErrorMessage("No suitable resolver for", i));
+				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
 			}
 		}
 		return args;
 	}
 
-	private String getArgumentResolutionErrorMessage(String text, int index) {
-		Class<?> paramType = getMethodParameters()[index].getParameterType();
-		return text + " argument " + index + " of type '" + paramType.getName() + "'";
+	private static String formatArgumentError(MethodParameter param, String message) {
+		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
+				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
 	}
 
 	/**
@@ -211,7 +210,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(getBridgedMethod(), getBean(), args);
 			String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
-			throw new IllegalStateException(getInvocationErrorMessage(text, args), ex);
+			throw new IllegalStateException(formatInvokeError(text, args), ex);
 		}
 		catch (InvocationTargetException ex) {
 			// Unwrap for HandlerExceptionResolvers ...
@@ -226,8 +225,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				throw (Exception) targetException;
 			}
 			else {
-				String text = getInvocationErrorMessage("Failed to invoke handler method", args);
-				throw new IllegalStateException(text, targetException);
+				throw new IllegalStateException(formatInvokeError("Invocation failure", args), targetException);
 			}
 		}
 	}
@@ -247,36 +245,22 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					"' is not an instance of the actual controller bean class '" +
 					targetBeanClass.getName() + "'. If the controller requires proxying " +
 					"(e.g. due to @Transactional), please use class-based proxying.";
-			throw new IllegalStateException(getInvocationErrorMessage(text, args));
+			throw new IllegalStateException(formatInvokeError(text, args));
 		}
 	}
 
-	private String getInvocationErrorMessage(String text, Object[] resolvedArgs) {
-		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(text));
-		sb.append("Resolved arguments: \n");
-		for (int i = 0; i < resolvedArgs.length; i++) {
-			sb.append("[").append(i).append("] ");
-			if (resolvedArgs[i] == null) {
-				sb.append("[null] \n");
-			}
-			else {
-				sb.append("[type=").append(resolvedArgs[i].getClass().getName()).append("] ");
-				sb.append("[value=").append(resolvedArgs[i]).append("]\n");
-			}
-		}
-		return sb.toString();
-	}
+	private String formatInvokeError(String text, Object[] args) {
 
-	/**
-	 * Adds HandlerMethod details such as the bean type and method signature to the message.
-	 * @param text error message to append the HandlerMethod details to
-	 */
-	protected String getDetailedErrorMessage(String text) {
-		StringBuilder sb = new StringBuilder(text).append("\n");
-		sb.append("HandlerMethod details: \n");
-		sb.append("Controller [").append(getBeanType().getName()).append("]\n");
-		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
-		return sb.toString();
+		String formattedArgs = IntStream.range(0, args.length)
+				.mapToObj(i -> (args[i] != null ?
+						"[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
+						"[" + i + "] [null]"))
+				.collect(Collectors.joining(",\n", " ", " "));
+
+		return text + "\n" +
+				"Controller [" + getBeanType().getName() + "]\n" +
+				"Method [" + getBridgedMethod().toGenericString() + "] " +
+				"with argument values:\n" + formattedArgs;
 	}
 
 }

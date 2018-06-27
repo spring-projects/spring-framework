@@ -35,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 
@@ -160,13 +159,12 @@ public interface ClientResponse {
 	 * @return the created builder
 	 */
 	static Builder from(ClientResponse other) {
-		Assert.notNull(other, "'other' must not be null");
 		return new DefaultClientResponseBuilder(other);
 	}
 
 	/**
-	 * Create a response builder with the given status code and using default strategies for reading
-	 * the body.
+	 * Create a response builder with the given status code and using default strategies for
+	 * reading the body.
 	 * @param statusCode the status code
 	 * @return the created builder
 	 */
@@ -181,10 +179,7 @@ public interface ClientResponse {
 	 * @return the created builder
 	 */
 	static Builder create(HttpStatus statusCode, ExchangeStrategies strategies) {
-		Assert.notNull(statusCode, "'statusCode' must not be null");
-		Assert.notNull(strategies, "'strategies' must not be null");
-		return new DefaultClientResponseBuilder(strategies)
-				.statusCode(statusCode);
+		return new DefaultClientResponseBuilder(strategies).statusCode(statusCode);
 	}
 
 	/**
@@ -194,23 +189,19 @@ public interface ClientResponse {
 	 * @return the created builder
 	 */
 	static Builder create(HttpStatus statusCode, List<HttpMessageReader<?>> messageReaders) {
-		Assert.notNull(statusCode, "'statusCode' must not be null");
-		Assert.notNull(messageReaders, "'messageReaders' must not be null");
-
 		return create(statusCode, new ExchangeStrategies() {
 			@Override
 			public List<HttpMessageReader<?>> messageReaders() {
 				return messageReaders;
 			}
-
 			@Override
 			public List<HttpMessageWriter<?>> messageWriters() {
 				// not used in the response
 				return Collections.emptyList();
 			}
 		});
-
 	}
+
 
 	/**
 	 * Represents the headers of the HTTP response.
@@ -242,6 +233,7 @@ public interface ClientResponse {
 		 */
 		HttpHeaders asHttpHeaders();
 	}
+
 
 	/**
 	 * Defines a builder for a response.
@@ -295,7 +287,7 @@ public interface ClientResponse {
 		Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer);
 
 		/**
-		 * Sets the body of the response. Calling this methods will
+		 * Set the body of the response. Calling this methods will
 		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
 		 * the existing body of the builder.
 		 * @param body the new body.
@@ -304,7 +296,7 @@ public interface ClientResponse {
 		Builder body(Flux<DataBuffer> body);
 
 		/**
-		 * Sets the body of the response to the UTF-8 encoded bytes of the given string.
+		 * Set the body of the response to the UTF-8 encoded bytes of the given string.
 		 * Calling this methods will
 		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
 		 * the existing body of the builder.
@@ -314,9 +306,9 @@ public interface ClientResponse {
 		Builder body(String body);
 
 		/**
-		 * Builds the response.
-		 * @return the response
+		 * Build the response.
 		 */
 		ClientResponse build();
 	}
+
 }

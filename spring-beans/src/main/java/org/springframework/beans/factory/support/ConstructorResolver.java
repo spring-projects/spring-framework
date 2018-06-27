@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -78,6 +80,8 @@ class ConstructorResolver {
 
 	private final AbstractAutowireCapableBeanFactory beanFactory;
 
+	private final Log logger;
+
 
 	/**
 	 * Create a new ConstructorResolver for the given factory and instantiation strategy.
@@ -85,6 +89,7 @@ class ConstructorResolver {
 	 */
 	public ConstructorResolver(AbstractAutowireCapableBeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		this.logger = beanFactory.getLogger();
 	}
 
 
@@ -193,9 +198,8 @@ class ConstructorResolver {
 								getUserDeclaredConstructor(candidate), autowiring);
 					}
 					catch (UnsatisfiedDependencyException ex) {
-						if (this.beanFactory.logger.isTraceEnabled()) {
-							this.beanFactory.logger.trace(
-									"Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
 						}
 						// Swallow and try next constructor.
 						if (causes == null) {
@@ -471,9 +475,8 @@ class ConstructorResolver {
 									beanName, mbd, resolvedValues, bw, paramTypes, paramNames, candidate, autowiring);
 						}
 						catch (UnsatisfiedDependencyException ex) {
-							if (this.beanFactory.logger.isTraceEnabled()) {
-								this.beanFactory.logger.trace("Ignoring factory method [" + candidate +
-										"] of bean '" + beanName + "': " + ex);
+							if (logger.isTraceEnabled()) {
+								logger.trace("Ignoring factory method [" + candidate + "] of bean '" + beanName + "': " + ex);
 							}
 							// Swallow and try next overloaded factory method.
 							if (causes == null) {
@@ -733,8 +736,8 @@ class ConstructorResolver {
 
 		for (String autowiredBeanName : autowiredBeanNames) {
 			this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
-			if (this.beanFactory.logger.isDebugEnabled()) {
-				this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Autowiring by type from bean name '" + beanName +
 						"' via " + (executable instanceof Constructor ? "constructor" : "factory method") +
 						" to bean named '" + autowiredBeanName + "'");
 			}

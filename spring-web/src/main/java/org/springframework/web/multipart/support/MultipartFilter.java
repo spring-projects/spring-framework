@@ -106,16 +106,15 @@ public class MultipartFilter extends OncePerRequestFilter {
 
 		HttpServletRequest processedRequest = request;
 		if (multipartResolver.isMultipart(processedRequest)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Resolving multipart request [" + processedRequest.getRequestURI() +
-						"] with MultipartFilter");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Resolving multipart request");
 			}
 			processedRequest = multipartResolver.resolveMultipart(processedRequest);
 		}
 		else {
 			// A regular request...
-			if (logger.isDebugEnabled()) {
-				logger.debug("Request [" + processedRequest.getRequestURI() + "] is not a multipart request");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Not a multipart request");
 			}
 		}
 

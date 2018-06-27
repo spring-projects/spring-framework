@@ -27,6 +27,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.server.PathContainer;
+import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.pattern.PathPattern;
@@ -48,6 +49,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 
 
 	public PathResourceLookupFunction(String pattern, Resource location) {
+		Assert.hasLength(pattern, "'pattern' must not be empty");
+		Assert.notNull(location, "'location' must not be null");
 		this.pattern = PATTERN_PARSER.parse(pattern);
 		this.location = location;
 	}

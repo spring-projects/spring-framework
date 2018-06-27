@@ -1121,7 +1121,22 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Test
 	public void produces() throws Exception {
-		initServletWithControllers(ProducesController.class);
+		initServlet(wac -> {
+			List<HttpMessageConverter<?>> converters = new ArrayList<>();
+			converters.add(new MappingJackson2HttpMessageConverter());
+			converters.add(new Jaxb2RootElementHttpMessageConverter());
+
+			RootBeanDefinition beanDef;
+
+			beanDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+			beanDef.getPropertyValues().add("messageConverters", converters);
+			wac.registerBeanDefinition("handlerAdapter", beanDef);
+
+			beanDef = new RootBeanDefinition(ExceptionHandlerExceptionResolver.class);
+			beanDef.getPropertyValues().add("messageConverters", converters);
+			wac.registerBeanDefinition("requestMappingResolver", beanDef);
+
+		}, ProducesController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
 		request.addHeader("Accept", "text/html");
@@ -1152,6 +1167,15 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals(406, response.getStatus());
+
+		// SPR-16318
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "text/csv,application/problem+json");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(500, response.getStatus());
+		assertEquals("application/problem+json;charset=UTF-8", response.getContentType());
+		assertEquals("{\"reason\":\"error\"}", response.getContentAsString());
 	}
 
 	@Test
@@ -1776,7 +1800,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertEquals(200, response.getStatus());
-		assertEquals("GET,HEAD", response.getHeader("Allow"));
+		assertEquals("GET,HEAD,OPTIONS", response.getHeader("Allow"));
 		assertTrue(response.getContentAsByteArray().length == 0);
 	}
 
@@ -3000,14 +3024,24 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	public static class ProducesController {
 
-		@RequestMapping(value = "/something", produces = "text/html")
+		@GetMapping(path = "/something", produces = "text/html")
 		public void handleHtml(Writer writer) throws IOException {
 			writer.write("html");
 		}
 
-		@RequestMapping(value = "/something", produces = "application/xml")
+		@GetMapping(path = "/something", produces = "application/xml")
 		public void handleXml(Writer writer) throws IOException {
 			writer.write("xml");
+		}
+
+		@GetMapping(path = "/something", produces = "text/csv")
+		public String handleCsv() {
+			throw new IllegalArgumentException();
+		}
+
+		@ExceptionHandler
+		public ResponseEntity<Map<String, String>> handle(IllegalArgumentException ex) {
+			return ResponseEntity.status(500).body(Collections.singletonMap("reason", "error"));
 		}
 	}
 

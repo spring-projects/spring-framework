@@ -23,8 +23,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.server.HttpServerRequest;
-import reactor.ipc.netty.http.server.HttpServerResponse;
+import reactor.netty.http.server.HttpServerRequest;
+import reactor.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpMethod;
@@ -61,8 +61,8 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 			adaptedResponse = new ReactorServerHttpResponse(response, bufferFactory);
 		}
 		catch (URISyntaxException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Invalid URL for incoming request: " + ex.getMessage());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to get request URI: " + ex.getMessage());
 			}
 			response.status(HttpResponseStatus.BAD_REQUEST);
 			return Mono.empty();
@@ -73,8 +73,8 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 		}
 
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse)
-				.doOnError(ex -> logger.error("Handling completed with error", ex))
-				.doOnSuccess(aVoid -> logger.debug("Handling completed with success"));
+				.doOnError(ex -> logger.trace("Failed to complete: " + ex.getMessage()))
+				.doOnSuccess(aVoid -> logger.trace("Handling completed"));
 	}
 
 }

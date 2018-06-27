@@ -22,6 +22,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -65,6 +66,10 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		Charset charset = getCharset(mimeType);
 
 		return Flux.from(inputStream).map(charSequence -> {
+			Log logger = getLogger(hints);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Writing '" + charSequence + "'");
+			}
 			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
 			ByteBuffer byteBuffer = charset.encode(charBuffer);
 			return bufferFactory.wrap(byteBuffer);
@@ -80,11 +85,6 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 			 charset = DEFAULT_CHARSET;
 		}
 		return charset;
-	}
-
-	@Override
-	public Long getContentLength(CharSequence data, @Nullable MimeType mimeType) {
-		return (long) data.toString().getBytes(getCharset(mimeType)).length;
 	}
 
 	/**

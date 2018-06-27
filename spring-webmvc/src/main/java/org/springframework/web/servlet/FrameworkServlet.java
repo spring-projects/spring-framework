@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +44,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -565,9 +567,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// Publish the context as a servlet context attribute.
 			String attrName = getServletContextAttributeName();
 			getServletContext().setAttribute(attrName, wac);
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Published WebApplicationContext of servlet '" + getServletName() +
-						"' as ServletContext attribute with name [" + attrName + "]");
+			if (this.logger.isTraceEnabled()) {
+				this.logger.trace("Published WebApplicationContext of servlet '" + getServletName() +
+						"' as ServletContext attribute [" + attrName + "]");
 			}
 		}
 
@@ -615,10 +617,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	protected WebApplicationContext createWebApplicationContext(@Nullable ApplicationContext parent) {
 		Class<?> contextClass = getContextClass();
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Servlet with name '" + getServletName() +
-					"' will try to create custom WebApplicationContext context of class '" +
-					contextClass.getName() + "'" + ", using parent context [" + parent + "]");
+		if (this.logger.isTraceEnabled()) {
+			this.logger.trace("Servlet '" + getServletName() +
+					"' will create custom WebApplicationContext context of class '" +
+					contextClass.getName() + "'" + ", parent context [" + parent + "]");
 		}
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException(
@@ -989,15 +991,32 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 
 			if (logger.isDebugEnabled()) {
+				boolean isRequestDispatch = request.getDispatcherType().equals(DispatcherType.REQUEST);
+				String dispatchType = request.getDispatcherType().name();
 				if (failureCause != null) {
-					this.logger.debug("Could not complete request", failureCause);
+					if (!isRequestDispatch) {
+						logger.debug("Unresolved failure from \"" + dispatchType + "\" dispatch: " + failureCause);
+					}
+					else if (logger.isTraceEnabled()) {
+						logger.trace("Failed to complete request", failureCause);
+					}
+					else {
+						logger.debug("Failed to complete request: " + failureCause);
+					}
 				}
 				else {
 					if (asyncManager.isConcurrentHandlingStarted()) {
-						logger.debug("Leaving response open for concurrent processing");
+						logger.debug("Exiting but response remains open for further handling");
 					}
 					else {
-						this.logger.debug("Successfully completed request");
+						int status = response.getStatus();
+						if (!isRequestDispatch) {
+							logger.debug("Exiting from \"" + dispatchType + "\" dispatch (status " + status + ")");
+						}
+						else {
+							HttpStatus httpStatus = HttpStatus.resolve(status);
+							logger.debug("Completed " + (httpStatus != null ? httpStatus : status));
+						}
 					}
 				}
 			}

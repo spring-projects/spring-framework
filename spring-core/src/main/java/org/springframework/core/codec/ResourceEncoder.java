@@ -16,13 +16,12 @@
 
 package org.springframework.core.codec;
 
-import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -67,20 +66,12 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.read(resource, dataBufferFactory, this.bufferSize);
-	}
-
-	@Override
-	public Long getContentLength(Resource resource, @Nullable MimeType mimeType) {
-		// Don't consume InputStream...
-		if (InputStreamResource.class != resource.getClass()) {
-			try {
-				return resource.contentLength();
-			}
-			catch (IOException ignored) {
-			}
+		Log logger = getLogger(hints);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Writing [" + resource + "]");
 		}
-		return null;
+
+		return DataBufferUtils.read(resource, dataBufferFactory, this.bufferSize);
 	}
 
 }

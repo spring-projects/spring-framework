@@ -38,7 +38,7 @@ it helps us to make a decision.
 Reporting an issue or making a feature request is a great way to contribute. Your feedback
 and the conversations that result from it provide a continuous flow of ideas. 
 
-Before you create a ticket, please take the time to [research first](#Discuss). 
+Before you create a ticket, please take the time to [research first](#discuss).
 
 If creating a ticket after a discussion on StackOverflow, please provide a self-sufficient description in the ticket, independent of the details on StackOverview. We understand this is extra work but the issue tracker is an important place of record for design discussions and decisions that can often be referenced long after the fix version, for example to revisit decisions, to understand the origin of a feature, and so on.
 
@@ -64,7 +64,7 @@ You can contribute a source code change by submitting a pull request.
 [Contributor License Agreement](https://cla.pivotal.io/sign/spring). You will also be reminded
 automatically when you submit a pull request.
 
-1. For all but the most trivial of contributions, please [create a ticket](#Create-a-Ticket).
+1. For all but the most trivial of contributions, please [create a ticket](#create-a-ticket).
 The purpose of the ticket is to understand and discuss the underlying issue or feature.
 We use the JIRA issue tracker as the preferred place of record for conversations and
 conclusions. In that sense discussions directly under a PR are more implementation detail

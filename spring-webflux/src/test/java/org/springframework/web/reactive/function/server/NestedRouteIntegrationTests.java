@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function.server;
 
 import org.junit.Test;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
@@ -42,11 +41,13 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	protected RouterFunction<?> routerFunction() {
 		NestedHandler nestedHandler = new NestedHandler();
 		return nest(path("/foo/"),
-				route(GET("/bar"), nestedHandler::bar)
-						.andRoute(GET("/baz"), nestedHandler::baz))
-				.andNest(GET("/{foo}"),
-						nest(GET("/{bar}"),
-								route(GET("/{baz}"), nestedHandler::variables)));
+					route(GET("/bar"), nestedHandler::bar)
+					.andRoute(GET("/baz"), nestedHandler::baz))
+			   .andNest(GET("/{foo}"),
+					route(GET("/bar"), nestedHandler::variables).and(
+					nest(GET("/{bar}"),
+								route(GET("/{baz}"), nestedHandler::variables))))
+				.andRoute(GET("/{qux}/quux"), nestedHandler::variables);
 	}
 
 
@@ -74,7 +75,29 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 				restTemplate.getForEntity("http://localhost:" + port + "/1/2/3", String.class);
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("1-2-3", result.getBody());
+		assertEquals("{foo=1, bar=2, baz=3}", result.getBody());
+	}
+
+	// SPR-16868
+	@Test
+	public void parentVariables() throws Exception {
+		ResponseEntity<String> result =
+				restTemplate.getForEntity("http://localhost:" + port + "/1/bar", String.class);
+
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals("{foo=1}", result.getBody());
+
+	}
+
+	// SPR 16692
+	@Test
+	public void removeFailedPathVariables() throws Exception {
+		ResponseEntity<String> result =
+				restTemplate.getForEntity("http://localhost:" + port + "/qux/quux", String.class);
+
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals("{qux=qux}", result.getBody());
+
 	}
 
 
@@ -89,11 +112,13 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		}
 
 		public Mono<ServerResponse> variables(ServerRequest request) {
-			Flux<String> responseBody =
-					Flux.just(request.pathVariable("foo"), "-", request.pathVariable("bar"), "-",
-							request.pathVariable("baz"));
+			assertEquals(request.pathVariables(),
+					request.attributes().get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE));
+
+			Mono<String> responseBody = Mono.just(request.pathVariables().toString());
 			return ServerResponse.ok().body(responseBody, String.class);
 		}
+
 	}
 
 }

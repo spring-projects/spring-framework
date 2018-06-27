@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,9 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -56,6 +59,8 @@ import org.springframework.web.context.request.async.CallableProcessingIntercept
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -70,6 +75,7 @@ import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
@@ -86,6 +92,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_ATOM_XML;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_XML;
@@ -114,6 +121,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		this.context = new StaticWebApplicationContext();
 		this.context.setServletContext(new MockServletContext(new FileSystemResourceLoader()));
 		this.context.registerSingleton("controller", TestController.class);
+		this.context.registerSingleton("userController", UserController.class);
 
 		this.config = new TestWebMvcConfigurationSupport();
 		this.config.setApplicationContext(this.context);
@@ -134,6 +142,15 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[0].getClass());
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
 		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[2].getClass());
+
+		Map<RequestMappingInfo, HandlerMethod> map = rmHandlerMapping.getHandlerMethods();
+		assertEquals(2, map.size());
+		RequestMappingInfo info = map.entrySet().stream()
+				.filter(entry -> entry.getValue().getBeanType().equals(UserController.class))
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("UserController bean not found"))
+				.getKey();
+		assertEquals(Collections.singleton("/api/user/{id}"), info.getPatternsCondition().getPatterns());
 
 		AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) this.config.viewControllerHandlerMapping();
 		handlerMapping.setApplicationContext(this.context);
@@ -402,6 +419,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer.setPathMatcher(new TestPathMatcher());
 			configurer.setUrlPathHelper(new TestPathHelper());
+			configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
 		@Override
@@ -453,4 +471,16 @@ public class WebMvcConfigurationSupportExtensionTests {
 	private class TestPathHelper extends UrlPathHelper {}
 
 	private class TestPathMatcher extends AntPathMatcher {}
+
+
+	@RestController
+	@RequestMapping("/user")
+	static class UserController {
+
+		@GetMapping("/{id}")
+		public Principal getUser() {
+			return mock(Principal.class);
+		}
+	}
+
 }

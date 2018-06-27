@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -52,20 +53,24 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 	 * {@code ControllerAdviceBean} or {@code RequestBodyAdvice}.
 	 */
 	public RequestResponseBodyAdviceChain(@Nullable List<Object> requestResponseBodyAdvice) {
+		this.requestBodyAdvice.addAll(getAdviceByType(requestResponseBodyAdvice, RequestBodyAdvice.class));
+		this.responseBodyAdvice.addAll(getAdviceByType(requestResponseBodyAdvice, ResponseBodyAdvice.class));
+	}
+
+	@SuppressWarnings("unchecked")
+	static <T> List<T> getAdviceByType(@Nullable List<Object> requestResponseBodyAdvice, Class<T> adviceType) {
 		if (requestResponseBodyAdvice != null) {
+			List<T> result = new ArrayList<>();
 			for (Object advice : requestResponseBodyAdvice) {
 				Class<?> beanType = (advice instanceof ControllerAdviceBean ?
 						((ControllerAdviceBean) advice).getBeanType() : advice.getClass());
-				if (beanType != null) {
-					if (RequestBodyAdvice.class.isAssignableFrom(beanType)) {
-						this.requestBodyAdvice.add(advice);
-					}
-					else if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
-						this.responseBodyAdvice.add(advice);
-					}
+				if (beanType != null && adviceType.isAssignableFrom(beanType)) {
+					result.add((T) advice);
 				}
 			}
+			return result;
 		}
+		return Collections.emptyList();
 	}
 
 

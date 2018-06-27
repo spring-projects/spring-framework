@@ -61,6 +61,7 @@ class DefaultClientResponse implements ClientResponse {
 		this.headers = new DefaultHeaders();
 	}
 
+
 	@Override
 	public ExchangeStrategies strategies() {
 		return this.strategies;
@@ -88,12 +89,10 @@ class DefaultClientResponse implements ClientResponse {
 			public List<HttpMessageReader<?>> messageReaders() {
 				return strategies.messageReaders();
 			}
-
 			@Override
 			public Optional<ServerHttpResponse> serverResponse() {
 				return Optional.empty();
 			}
-
 			@Override
 			public Map<String, Object> hints() {
 				return Collections.emptyMap();
@@ -187,8 +186,7 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<List<T>>> toEntityList(
-			ParameterizedTypeReference<T> typeReference) {
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference) {
 		return toEntityListInternal(bodyToFlux(typeReference));
 	}
 
@@ -220,7 +218,7 @@ class DefaultClientResponse implements ClientResponse {
 		@Override
 		public List<String> header(String headerName) {
 			List<String> headerValues = delegate().get(headerName);
-			return headerValues != null ? headerValues : Collections.emptyList();
+			return (headerValues != null ? headerValues : Collections.emptyList());
 		}
 
 		@Override
@@ -229,12 +227,13 @@ class DefaultClientResponse implements ClientResponse {
 		}
 
 		private OptionalLong toOptionalLong(long value) {
-			return value != -1 ? OptionalLong.of(value) : OptionalLong.empty();
+			return (value != -1 ? OptionalLong.of(value) : OptionalLong.empty());
 		}
-
 	}
+
 
 	@SuppressWarnings("serial")
-	private class ReadCancellationException extends RuntimeException {
+	private static class ReadCancellationException extends RuntimeException {
 	}
+
 }

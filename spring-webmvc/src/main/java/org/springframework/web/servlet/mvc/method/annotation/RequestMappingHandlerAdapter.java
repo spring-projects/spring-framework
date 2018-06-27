@@ -570,9 +570,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		if (getApplicationContext() == null) {
 			return;
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Looking for @ControllerAdvice: " + getApplicationContext());
-		}
 
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		AnnotationAwareOrderComparator.sort(adviceBeans);
@@ -587,34 +584,45 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			Set<Method> attrMethods = MethodIntrospector.selectMethods(beanType, MODEL_ATTRIBUTE_METHODS);
 			if (!attrMethods.isEmpty()) {
 				this.modelAttributeAdviceCache.put(adviceBean, attrMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ModelAttribute methods in " + adviceBean);
-				}
 			}
 			Set<Method> binderMethods = MethodIntrospector.selectMethods(beanType, INIT_BINDER_METHODS);
 			if (!binderMethods.isEmpty()) {
 				this.initBinderAdviceCache.put(adviceBean, binderMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @InitBinder methods in " + adviceBean);
-				}
 			}
 			if (RequestBodyAdvice.class.isAssignableFrom(beanType)) {
 				requestResponseBodyAdviceBeans.add(adviceBean);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected RequestBodyAdvice bean in " + adviceBean);
-				}
 			}
 			if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
 				requestResponseBodyAdviceBeans.add(adviceBean);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected ResponseBodyAdvice bean in " + adviceBean);
-				}
 			}
 		}
 
 		if (!requestResponseBodyAdviceBeans.isEmpty()) {
 			this.requestResponseBodyAdvice.addAll(0, requestResponseBodyAdviceBeans);
 		}
+
+		if (logger.isDebugEnabled()) {
+			int modelSize = this.modelAttributeAdviceCache.size();
+			int binderSize = this.initBinderAdviceCache.size();
+			int reqCount = getBodyAdviceCount(RequestBodyAdvice.class);
+			int resCount = getBodyAdviceCount(ResponseBodyAdvice.class);
+			if (modelSize == 0 && binderSize == 0 && reqCount == 0 && resCount == 0) {
+				logger.debug("ControllerAdvice beans: none");
+			}
+			else {
+				logger.debug("ControllerAdvice beans: " + modelSize + " @ModelAttribute, " + binderSize +
+						" @InitBinder, " + reqCount + " RequestBodyAdvice, " + resCount + ", ResponseBodyAdvice");
+			}
+		}
+	}
+
+	// Count all advice, including explicit registrations..
+
+	private int getBodyAdviceCount(Class<?> adviceType) {
+		List<Object> advice = this.requestResponseBodyAdvice;
+		return RequestBodyAdvice.class.isAssignableFrom(adviceType) ?
+				RequestResponseBodyAdviceChain.getAdviceByType(advice, RequestBodyAdvice.class).size() :
+				RequestResponseBodyAdviceChain.getAdviceByType(advice, ResponseBodyAdvice.class).size();
 	}
 
 	/**
@@ -869,7 +877,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
 				asyncManager.clearConcurrentResult();
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found concurrent result value [" + result + "]");
+					logger.debug("Resume with async result [" +
+							(result instanceof CharSequence ? "\"" + result + "\"" :  result) + "]");
 				}
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}

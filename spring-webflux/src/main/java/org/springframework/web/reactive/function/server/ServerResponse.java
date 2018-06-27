@@ -38,7 +38,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -56,8 +55,6 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public interface ServerResponse {
-
-	// Instance methods
 
 	/**
 	 * Return the status code of this response.
@@ -83,7 +80,7 @@ public interface ServerResponse {
 	Mono<Void> writeTo(ServerWebExchange exchange, Context context);
 
 
-	// Static builder methods
+	// Static methods
 
 	/**
 	 * Create a builder with the status code and headers of the given response.
@@ -91,7 +88,6 @@ public interface ServerResponse {
 	 * @return the created builder
 	 */
 	static BodyBuilder from(ServerResponse other) {
-		Assert.notNull(other, "Other ServerResponse must not be null");
 		return new DefaultServerResponseBuilder(other);
 	}
 
@@ -101,7 +97,6 @@ public interface ServerResponse {
 	 * @return the created builder
 	 */
 	static BodyBuilder status(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus must not be null");
 		return new DefaultServerResponseBuilder(status);
 	}
 
@@ -193,7 +188,6 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with a {@linkplain HttpStatus#NOT_FOUND 404 Not Found} status.
-	 *
 	 * @return the created builder
 	 */
 	static HeadersBuilder<?> notFound() {
@@ -322,7 +316,6 @@ public interface ServerResponse {
 
 		/**
 		 * Build the response entity with no body.
-		 * @return the built response
 		 */
 		Mono<ServerResponse> build();
 
@@ -330,14 +323,12 @@ public interface ServerResponse {
 		 * Build the response entity with no body.
 		 * The response will be committed when the given {@code voidPublisher} completes.
 		 * @param voidPublisher publisher publisher to indicate when the response should be committed
-		 * @return the built response
 		 */
 		Mono<ServerResponse> build(Publisher<Void> voidPublisher);
 
 		/**
 		 * Build the response entity with a custom writer function.
 		 * @param writeFunction the function used to write to the {@link ServerWebExchange}
-		 * @return the built response
 		 */
 		Mono<ServerResponse> build(BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction);
 	}

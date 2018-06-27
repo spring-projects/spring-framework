@@ -9,8 +9,10 @@ existing libraries written in Java.
 The Spring Framework provides first-class support for Kotlin that allows developers to write
 Kotlin applications almost as if the Spring Framework was a native Kotlin framework.
 
-Feel free to join the #spring channel of http://slack.kotlinlang.org/[Kotlin Slack] or ask
-a question with `spring` and `kotlin` tags on
+The easiest way to learn about Spring + Kotlin is to follow
+https://spring.io/guides/tutorials/spring-boot-kotlin/[this comprehensive tutorial]. Feel
+free to join the #spring channel of http://slack.kotlinlang.org/[Kotlin Slack] or ask a
+question with `spring` and `kotlin` tags on
 https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you need support.
 
 
@@ -713,6 +715,13 @@ MVC and its annotation-based programming model is a perfectly valid and fully su
 
 
 
+=== Tutorials
+
+* https://spring.io/guides/tutorials/spring-boot-kotlin/[Building web applications with Spring Boot and Kotlin]
+* https://kotlinlang.org/docs/tutorials/spring-boot-restful.html[Creating a RESTful Web Service with Spring Boot]
+
+
+
 === Blog posts
 
 * https://spring.io/blog/2016/02/15/developing-spring-boot-applications-with-kotlin[Developing Spring Boot applications with Kotlin]
@@ -730,12 +739,6 @@ MVC and its annotation-based programming model is a perfectly valid and fully su
 * https://github.com/sdeleuze/spring-kotlin-fullstack[spring-kotlin-fullstack]: WebFlux Kotlin fullstack example with Kotlin2js for frontend instead of JavaScript or TypeScript
 * https://github.com/spring-petclinic/spring-petclinic-kotlin[spring-petclinic-kotlin]: Kotlin version of the Spring PetClinic Sample Application
 * https://github.com/sdeleuze/spring-kotlin-deepdive[spring-kotlin-deepdive]: a step by step migration for Boot 1.0 + Java to Boot 2.0 + Kotlin
-
-
-
-=== Tutorials
-
-* https://kotlinlang.org/docs/tutorials/spring-boot-restful.html[Creating a RESTful Web Service with Spring Boot]
 
 
 
@@ -766,7 +769,6 @@ Here is a list of pending issues related to Spring + Kotlin support.
 * https://youtrack.jetbrains.com/issue/KT-5464[Kotlin requires type inference where Java doesn't]
 * https://github.com/Kotlin/KEEP/issues/79[Better generics null-safety support]
 * https://youtrack.jetbrains.com/issue/KT-20283[Smart cast regression with open classes]
-* https://youtrack.jetbrains.com/issue/KT-18833[JSR-223 application classpath not available when using Java 9]
 * https://youtrack.jetbrains.com/issue/KT-14984[Impossible to pass not all SAM argument as function]
 * https://youtrack.jetbrains.com/issue/KT-19592[Apply JSR 305 meta-annotations to generic type parameters]
 * https://youtrack.jetbrains.com/issue/KT-18398[Provide a way for libraries to avoid mixing Kotlin 1.0 and 1.1 dependencies]

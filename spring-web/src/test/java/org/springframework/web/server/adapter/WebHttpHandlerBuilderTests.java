@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,8 @@ import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 
-import static java.time.Duration.ofMillis;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static java.time.Duration.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link WebHttpHandlerBuilder}.
@@ -48,13 +46,12 @@ import static org.junit.Assert.assertTrue;
 public class WebHttpHandlerBuilderTests {
 
 	@Test  // SPR-15074
-	public void orderedWebFilterBeans() throws Exception {
+	public void orderedWebFilterBeans() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(OrderedWebFilterBeanConfig.class);
 		context.refresh();
 
 		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
-
 		assertTrue(httpHandler instanceof HttpWebHandlerAdapter);
 		assertSame(context, ((HttpWebHandlerAdapter) httpHandler).getApplicationContext());
 
@@ -66,13 +63,12 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Test  // SPR-15074
-	public void orderedWebExceptionHandlerBeans() throws Exception {
+	public void orderedWebExceptionHandlerBeans() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(OrderedExceptionHandlerBeanConfig.class);
 		context.refresh();
 
 		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
-
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		httpHandler.handle(request, response).block(ofMillis(5000));
@@ -81,18 +77,28 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Test
-	public void configWithoutFilters() throws Exception {
+	public void configWithoutFilters() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(NoFilterConfig.class);
 		context.refresh();
 
 		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
-
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		httpHandler.handle(request, response).block(ofMillis(5000));
 
 		assertEquals("handled", response.getBodyAsString().block(ofMillis(5000)));
+	}
+
+	@Test  // SPR-16972
+	public void cloneWithApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(NoFilterConfig.class);
+		context.refresh();
+
+		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
+		assertSame(context, ((HttpWebHandlerAdapter) builder.build()).getApplicationContext());
+		assertSame(context, ((HttpWebHandlerAdapter) builder.clone().build()).getApplicationContext());
 	}
 
 

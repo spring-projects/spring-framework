@@ -80,7 +80,8 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		public String encodeURL(String url) {
 			ResourceUrlProvider resourceUrlProvider = getResourceUrlProvider();
 			if (resourceUrlProvider == null) {
-				logger.debug("Request attribute exposing ResourceUrlProvider not found");
+				logger.trace("ResourceUrlProvider not available via " +
+						"request attribute ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR");
 				return super.encodeURL(url);
 			}
 

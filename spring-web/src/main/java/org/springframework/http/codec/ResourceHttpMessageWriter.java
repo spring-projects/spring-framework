@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,6 +33,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.ResourceEncoder;
 import org.springframework.core.codec.ResourceRegionEncoder;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -70,6 +73,8 @@ import static java.util.Collections.*;
 public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 	private static final ResolvableType REGION_TYPE = ResolvableType.forClass(ResourceRegion.class);
+
+	private static final Log logger = LogFactory.getLog(ResourceHttpMessageWriter.class);
 
 
 	private final ResourceEncoder encoder;
@@ -119,9 +124,9 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		headers.setContentType(resourceMediaType);
 
 		if (headers.getContentLength() < 0) {
-			Long contentLength = this.encoder.getContentLength(resource, mediaType);
-			if (contentLength != null) {
-				headers.setContentLength(contentLength);
+			long length = lengthOf(resource);
+			if (length != -1) {
+				headers.setContentLength(length);
 			}
 		}
 
@@ -138,7 +143,23 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		if (mediaType != null && mediaType.isConcrete() && !mediaType.equals(MediaType.APPLICATION_OCTET_STREAM)) {
 			return mediaType;
 		}
-		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+		mediaType = MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resource associated with '" + mediaType + "'");
+		}
+		return mediaType;
+	}
+
+	private static long lengthOf(Resource resource) {
+		// Don't consume InputStream...
+		if (InputStreamResource.class != resource.getClass()) {
+			try {
+				return resource.contentLength();
+			}
+			catch (IOException ignored) {
+			}
+		}
+		return -1;
 	}
 
 	private static Optional<Mono<Void>> zeroCopy(Resource resource, @Nullable ResourceRegion region,
@@ -149,6 +170,10 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				File file = resource.getFile();
 				long pos = region != null ? region.getPosition() : 0;
 				long count = region != null ? region.getCount() : file.length();
+				if (logger.isDebugEnabled()) {
+					String formatted = region != null ? "region " + pos + "-" + (count) + " of " : "";
+					logger.debug("Zero-copy " + formatted + "[" + resource + "]");
+				}
 				return Optional.of(((ZeroCopyHttpOutputMessage) message).writeWith(file, pos, count));
 			}
 			catch (IOException ex) {
@@ -192,8 +217,8 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			if (regions.size() == 1){
 				ResourceRegion region = regions.get(0);
 				headers.setContentType(resourceMediaType);
-				Long contentLength = this.encoder.getContentLength(resource, mediaType);
-				if (contentLength != null) {
+				long contentLength = lengthOf(resource);
+				if (contentLength != -1) {
 					long start = region.getPosition();
 					long end = start + region.getCount() - 1;
 					end = Math.min(end, contentLength - 1);

@@ -431,9 +431,10 @@ public abstract class DataBufferUtils {
 				skipUntil(dataBuffer -> {
 					int delta = -dataBuffer.readableByteCount();
 					long currentCount = byteCountDown.addAndGet(delta);
-					if(currentCount < 0) {
+					if (currentCount < 0) {
 						return true;
-					} else {
+					}
+					else {
 						DataBufferUtils.release(dataBuffer);
 						return false;
 					}

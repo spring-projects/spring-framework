@@ -227,6 +227,16 @@ public class MockHttpServletResponseTests {
 		assertEquals(1, response.getContentAsByteArray().length);
 	}
 
+	@Test // SPR-16683
+	public void servletWriterCommittedOnWriterClose() throws IOException {
+		assertFalse(response.isCommitted());
+		response.getWriter().write("X");
+		assertFalse(response.isCommitted());
+		response.getWriter().close();
+		assertTrue(response.isCommitted());
+		assertEquals(1, response.getContentAsByteArray().length);
+	}
+
 	@Test
 	public void servletWriterAutoFlushedForString() throws IOException {
 		response.getWriter().write("X");

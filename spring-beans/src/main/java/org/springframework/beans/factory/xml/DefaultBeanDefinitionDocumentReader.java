@@ -119,6 +119,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	/**
 	 * Register each bean definition within the given root {@code <beans/>} element.
 	 */
+	@SuppressWarnings("deprecation")  // for Environment.acceptsProfiles(String...)
 	protected void doRegisterBeanDefinitions(Element root) {
 		// Any nested <beans> elements will cause recursion in this method. In
 		// order to propagate and preserve <beans> default-* attributes correctly,
@@ -134,6 +135,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			if (StringUtils.hasText(profileSpec)) {
 				String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
 						profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+				// We cannot use Profiles.of(...) since profile expressions are not supported
+				// in XML config. See SPR-12458 for details.
 				if (!getReaderContext().getEnvironment().acceptsProfiles(specifiedProfiles)) {
 					if (logger.isInfoEnabled()) {
 						logger.info("Skipped XML bean definition file due to specified profiles [" + profileSpec +

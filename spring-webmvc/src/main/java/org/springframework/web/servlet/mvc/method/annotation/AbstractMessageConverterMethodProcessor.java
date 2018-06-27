@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpEntity;
@@ -176,18 +177,18 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
-		Object outputValue;
+		Object body;
 		Class<?> valueType;
 		Type declaredType;
 
 		if (value instanceof CharSequence) {
-			outputValue = value.toString();
+			body = value.toString();
 			valueType = String.class;
 			declaredType = String.class;
 		}
 		else {
-			outputValue = value;
-			valueType = getReturnValueType(outputValue, returnType);
+			body = value;
+			valueType = getReturnValueType(body, returnType);
 			declaredType = getGenericType(returnType);
 		}
 
@@ -198,8 +199,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				try {
 					List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
 					outputMessage.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
-					outputValue = HttpRange.toResourceRegions(httpRanges, resource);
-					valueType = outputValue.getClass();
+					body = HttpRange.toResourceRegions(httpRanges, resource);
+					valueType = body.getClass();
 					declaredType = RESOURCE_REGION_LIST_TYPE;
 				}
 				catch (IllegalArgumentException ex) {
@@ -214,6 +215,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		if (contentType != null && contentType.isConcrete()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found 'Content-Type:" + contentType + "' in response");
+			}
 			mediaTypesToUse = Collections.singletonList(contentType);
 		}
 		else {
@@ -221,7 +225,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(request);
 			List<MediaType> producibleMediaTypes = getProducibleMediaTypes(request, valueType, declaredType);
 
-			if (outputValue != null && producibleMediaTypes.isEmpty()) {
+			if (body != null && producibleMediaTypes.isEmpty()) {
 				throw new HttpMessageNotWritableException(
 						"No converter found for return value of type: " + valueType);
 			}
@@ -233,8 +237,11 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 					}
 				}
 			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("No match for " + requestedMediaTypes + ", supported: " + producibleMediaTypes);
+			}
 			if (mediaTypesToUse.isEmpty()) {
-				if (outputValue != null) {
+				if (body != null) {
 					throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
 				}
 				return;
@@ -254,6 +261,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Using '" + selectedMediaType + "' given " + mediaTypesToUse);
+		}
+
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
@@ -262,20 +273,25 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				if (genericConverter != null ?
 						((GenericHttpMessageConverter) converter).canWrite(declaredType, valueType, selectedMediaType) :
 						converter.canWrite(valueType, selectedMediaType)) {
-					outputValue = getAdvice().beforeBodyWrite(outputValue, returnType, selectedMediaType,
+					body = getAdvice().beforeBodyWrite(body, returnType, selectedMediaType,
 							(Class<? extends HttpMessageConverter<?>>) converter.getClass(),
 							inputMessage, outputMessage);
-					if (outputValue != null) {
+					if (body != null) {
+						if (logger.isDebugEnabled()) {
+							Object formatted = body instanceof CharSequence ? "\"" + body + "\"" : body;
+							logger.debug("Writing [" + formatted + "]");
+						}
 						addContentDispositionHeader(inputMessage, outputMessage);
 						if (genericConverter != null) {
-							genericConverter.write(outputValue, declaredType, selectedMediaType, outputMessage);
+							genericConverter.write(body, declaredType, selectedMediaType, outputMessage);
 						}
 						else {
-							((HttpMessageConverter) converter).write(outputValue, selectedMediaType, outputMessage);
+							((HttpMessageConverter) converter).write(body, selectedMediaType, outputMessage);
 						}
+					}
+					else {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Written [" + outputValue + "] as \"" + selectedMediaType +
-									"\" using [" + converter + "]");
+							logger.debug("Nothing to write: null body");
 						}
 					}
 					return;
@@ -283,7 +299,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
-		if (outputValue != null) {
+		if (body != null) {
 			throw new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes);
 		}
 	}
@@ -302,7 +318,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * Return whether the returned value or the declared return type extend {@link Resource}
 	 */
 	protected boolean isResourceType(@Nullable Object value, MethodParameter returnType) {
-		return Resource.class.isAssignableFrom(value != null ? value.getClass() : returnType.getParameterType());
+		Class<?> clazz = getReturnValueType(value, returnType);
+		return clazz != InputStreamResource.class && Resource.class.isAssignableFrom(clazz);
 	}
 
 	/**

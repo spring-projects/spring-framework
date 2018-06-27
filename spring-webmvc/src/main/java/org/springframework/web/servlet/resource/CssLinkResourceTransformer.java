@@ -62,6 +62,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain)
 			throws IOException {
@@ -70,12 +71,9 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		String filename = resource.getFilename();
 		if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
+				resource instanceof EncodedResourceResolver.EncodedResource ||
 				resource instanceof GzipResourceResolver.GzippedResource) {
 			return resource;
-		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Transforming resource: " + resource);
 		}
 
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
@@ -87,9 +85,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		if (links.isEmpty()) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No links found.");
-			}
 			return resource;
 		}
 
@@ -102,14 +97,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			if (!hasScheme(link)) {
 				String absolutePath = toAbsolutePath(link, request);
 				newLink = resolveUrlPath(absolutePath, request, resource, transformerChain);
-			}
-			if (logger.isTraceEnabled()) {
-				if (newLink != null && !newLink.equals(link)) {
-					logger.trace("Link modified: " + newLink + " (original: " + link + ")");
-				}
-				else {
-					logger.trace("Link not modified: " + link);
-				}
 			}
 			writer.write(newLink != null ? newLink : link);
 			index = linkContentChunkInfo.getEnd();
@@ -195,8 +182,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			if (content.substring(index, index + 4).equals("url(")) {
 				// Ignore, UrlLinkParser will take care
 			}
-			else if (logger.isErrorEnabled()) {
-				logger.error("Unexpected syntax for @import link at index " + index);
+			else if (logger.isTraceEnabled()) {
+				logger.trace("Unexpected syntax for @import link at index " + index);
 			}
 			return index;
 		}

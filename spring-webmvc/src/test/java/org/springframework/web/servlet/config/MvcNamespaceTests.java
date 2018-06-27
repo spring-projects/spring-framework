@@ -112,8 +112,8 @@ import org.springframework.web.servlet.resource.CachingResourceTransformer;
 import org.springframework.web.servlet.resource.ContentVersionStrategy;
 import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
+import org.springframework.web.servlet.resource.EncodedResourceResolver;
 import org.springframework.web.servlet.resource.FixedVersionStrategy;
-import org.springframework.web.servlet.resource.GzipResourceResolver;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
@@ -140,16 +140,8 @@ import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests loading actual MVC namespace configuration.
@@ -474,7 +466,7 @@ public class MvcNamespaceTests {
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers, Matchers.hasSize(3));
 		assertThat(resolvers.get(0), Matchers.instanceOf(VersionResourceResolver.class));
-		assertThat(resolvers.get(1), Matchers.instanceOf(GzipResourceResolver.class));
+		assertThat(resolvers.get(1), Matchers.instanceOf(EncodedResourceResolver.class));
 		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
 
 		VersionResourceResolver versionResolver = (VersionResourceResolver) resolvers.get(0);

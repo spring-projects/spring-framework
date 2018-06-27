@@ -34,7 +34,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * The central class for managing asynchronous request processing, mainly intended
@@ -63,8 +62,6 @@ public final class WebAsyncManager {
 	private static final Object RESULT_NONE = new Object();
 
 	private static final Log logger = LogFactory.getLog(WebAsyncManager.class);
-
-	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private static final CallableProcessingInterceptor timeoutCallableInterceptor =
 			new TimeoutCallableProcessingInterceptor();
@@ -290,7 +287,7 @@ public final class WebAsyncManager {
 		final CallableInterceptorChain interceptorChain = new CallableInterceptorChain(interceptors);
 
 		this.asyncWebRequest.addTimeoutHandler(() -> {
-			logger.debug("Processing timeout");
+			logger.debug("Async request timeout for " + formatRequestUri());
 			Object result = interceptorChain.triggerAfterTimeout(this.asyncWebRequest, callable);
 			if (result != CallableProcessingInterceptor.RESULT_NONE) {
 				setConcurrentResultAndDispatch(result);
@@ -298,7 +295,7 @@ public final class WebAsyncManager {
 		});
 
 		this.asyncWebRequest.addErrorHandler(ex -> {
-			logger.debug("Processing error");
+			logger.debug("Async request error for " + formatRequestUri() + ": " + ex);
 			Object result = interceptorChain.triggerAfterError(this.asyncWebRequest, callable, ex);
 			result = (result != CallableProcessingInterceptor.RESULT_NONE ? result : ex);
 			setConcurrentResultAndDispatch(result);
@@ -333,6 +330,11 @@ public final class WebAsyncManager {
 		}
 	}
 
+	private String formatRequestUri() {
+		HttpServletRequest request = this.asyncWebRequest.getNativeRequest(HttpServletRequest.class);
+		return request != null ? request.getRequestURI() : "servlet container";
+	}
+
 	private void setConcurrentResultAndDispatch(Object result) {
 		synchronized (WebAsyncManager.this) {
 			if (this.concurrentResult != RESULT_NONE) {
@@ -342,13 +344,15 @@ public final class WebAsyncManager {
 		}
 
 		if (this.asyncWebRequest.isAsyncComplete()) {
-			logger.error("Could not complete async processing due to timeout or network error");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Async result set but request already complete: " + formatRequestUri());
+			}
 			return;
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Concurrent result value [" + this.concurrentResult +
-					"] - dispatching request to resume processing");
+			boolean isError = result instanceof Throwable;
+			logger.debug("Async " + (isError ? "error" : "result set") + ", dispatch to " + formatRequestUri());
 		}
 		this.asyncWebRequest.dispatch();
 	}
@@ -432,11 +436,7 @@ public final class WebAsyncManager {
 		this.asyncWebRequest.startAsync();
 
 		if (logger.isDebugEnabled()) {
-			HttpServletRequest request = this.asyncWebRequest.getNativeRequest(HttpServletRequest.class);
-			if (request != null) {
-				String requestUri = urlPathHelper.getRequestUri(request);
-				logger.debug("Concurrent handling starting for " + request.getMethod() + " [" + requestUri + "]");
-			}
+			logger.debug("Started async request");
 		}
 	}
 

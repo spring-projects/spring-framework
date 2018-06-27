@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,14 +43,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link RequestMappingHandlerMapping}.
@@ -138,6 +138,19 @@ public class RequestMappingHandlerMappingTests {
 		String[] result = this.handlerMapping.resolveEmbeddedValuesInPatterns(patterns);
 
 		assertArrayEquals(new String[] { "/foo", "/foo/bar" }, result);
+	}
+
+	@Test
+	public void pathPrefix() throws NoSuchMethodException {
+		this.handlerMapping.setEmbeddedValueResolver(value -> "/${prefix}".equals(value) ? "/api" : value);
+		this.handlerMapping.setPathPrefixes(Collections.singletonMap(
+				"/${prefix}", HandlerTypePredicate.forAnnotation(RestController.class)));
+
+		Method method = UserController.class.getMethod("getUser");
+		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, UserController.class);
+
+		assertNotNull(info);
+		assertEquals(Collections.singleton("/api/user/{id}"), info.getPatternsCondition().getPatterns());
 	}
 
 	@Test
@@ -245,6 +258,7 @@ public class RequestMappingHandlerMappingTests {
 
 	}
 
+
 	@RequestMapping(method = RequestMethod.POST,
 			produces = MediaType.APPLICATION_JSON_VALUE,
 			consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -254,6 +268,17 @@ public class RequestMappingHandlerMappingTests {
 
 		@AliasFor(annotation = RequestMapping.class, attribute = "path")
 		String[] value() default {};
+	}
+
+
+	@RestController
+	@RequestMapping("/user")
+	static class UserController {
+
+		@GetMapping("/{id}")
+		public Principal getUser() {
+			return mock(Principal.class);
+		}
 	}
 
 }

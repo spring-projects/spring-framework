@@ -109,29 +109,29 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	protected Mono<Resource> getResource(String resourcePath, Resource location) {
 		try {
 			Resource resource = location.createRelative(resourcePath);
-			if (resource.exists() && resource.isReadable()) {
+			if (resource.isReadable()) {
 				if (checkResource(resource, location)) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Found match: " + resource);
-					}
 					return Mono.just(resource);
 				}
-				else if (logger.isTraceEnabled()) {
+				else if (logger.isWarnEnabled()) {
 					Resource[] allowedLocations = getAllowedLocations();
-					logger.trace("Resource path \"" + resourcePath + "\" was successfully resolved " +
+					logger.warn("Resource path \"" + resourcePath + "\" was successfully resolved " +
 							"but resource \"" + resource.getURL() + "\" is neither under the " +
 							"current location \"" + location.getURL() + "\" nor under any of the " +
 							"allowed locations " + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
 				}
 			}
-			else if (logger.isTraceEnabled()) {
-				logger.trace("No match for location: " + location);
-			}
 			return Mono.empty();
 		}
 		catch (IOException ex) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Failure checking for relative resource under location + " + location, ex);
+			if (logger.isDebugEnabled()) {
+				String error = "Skip location [" + location + "] due to error";
+				if (logger.isTraceEnabled()) {
+					logger.trace(error, ex);
+				}
+				else {
+					logger.debug(error + ": " + ex.getMessage());
+				}
 			}
 			return Mono.error(ex);
 		}
@@ -194,9 +194,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			try {
 				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
 				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
-					}
+					logger.warn("Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath);
 					return true;
 				}
 			}

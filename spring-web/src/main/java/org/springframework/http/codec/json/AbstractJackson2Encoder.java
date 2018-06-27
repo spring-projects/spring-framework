@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -139,6 +140,11 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
 			ResolvableType elementType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
+
+		Log logger = getLogger(hints);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Encoding [" + value + "]");
+		}
 
 		JavaType javaType = getJavaType(elementType.getType(), null);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);

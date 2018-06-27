@@ -742,6 +742,13 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			super.flush();
 			setCommitted(true);
 		}
+
+		@Override
+		public void close() {
+			super.flush();
+			super.close();
+			setCommitted(true);
+		}
 	}
 
 }

@@ -31,7 +31,6 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.AbstractExpressionTests;
 import org.springframework.expression.spel.SpelUtilities;
-import org.springframework.expression.spel.ast.FormatHelper;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind;
 
@@ -43,16 +42,6 @@ import static org.junit.Assert.*;
  * @author Andy Clement
  */
 public class ReflectionHelperTests extends AbstractExpressionTests {
-
-	@Test
-	public void testFormatHelperForClassName() {
-		assertEquals("java.lang.String", FormatHelper.formatClassNameForMessage(String.class));
-		assertEquals("java.lang.String[]", FormatHelper.formatClassNameForMessage(String[].class));
-		assertEquals("java.lang.String[][]", FormatHelper.formatClassNameForMessage(String[][].class));
-		assertEquals("int[]", FormatHelper.formatClassNameForMessage(int[].class));
-		assertEquals("int[][]", FormatHelper.formatClassNameForMessage(int[][].class));
-		assertEquals("null", FormatHelper.formatClassNameForMessage(null));
-	}
 
 	@Test
 	public void testUtilities() throws ParseException {
@@ -414,60 +403,6 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 	}
 
 
-	// test classes
-	static class Tester {
-		String property;
-		public int field = 3;
-		public int field2;
-		public int field3 = 0;
-		String property2;
-		String property3 = "doodoo";
-		boolean property4 = false;
-		String iD = "iD";
-		String id = "id";
-		String ID = "ID";
-		String pEBS = "pEBS";
-		String xY = "xY";
-		String xyZ = "xyZ";
-
-		public String getProperty() { return property; }
-		public void setProperty(String value) { property = value; }
-
-		public void setProperty2(String value) { property2 = value; }
-
-		public String getProperty3() { return property3; }
-
-		public boolean isProperty4() { return property4; }
-
-		public String getiD() { return iD; }
-
-		public String getId() { return id; }
-
-		public String getID() { return ID; }
-
-		public String getXY() { return xY; }
-
-		public String getXyZ() { return xyZ; }
-
-		public String getpEBS() {
-			return pEBS;
-		}
-
-		public void setpEBS(String pEBS) {
-			this.pEBS = pEBS;
-		}
-	}
-
-	static class Super {
-	}
-
-	static class Sub extends Super {
-	}
-
-	static class Unconvertable {}
-
-	// ---
-
 	/**
 	 * Used to validate the match returned from a compareArguments call.
 	 */
@@ -539,6 +474,60 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		void oneArg(String arg1);
 
 		void twoArg(String arg1, String... arg2);
+	}
+
+
+	static class Super {
+	}
+
+
+	static class Sub extends Super {
+	}
+
+
+	static class Unconvertable {
+	}
+
+
+	static class Tester {
+
+		String property;
+		public int field = 3;
+		public int field2;
+		public int field3 = 0;
+		String property2;
+		String property3 = "doodoo";
+		boolean property4 = false;
+		String iD = "iD";
+		String id = "id";
+		String ID = "ID";
+		String pEBS = "pEBS";
+		String xY = "xY";
+		String xyZ = "xyZ";
+
+		public String getProperty() { return property; }
+
+		public void setProperty(String value) { property = value; }
+
+		public void setProperty2(String value) { property2 = value; }
+
+		public String getProperty3() { return property3; }
+
+		public boolean isProperty4() { return property4; }
+
+		public String getiD() { return iD; }
+
+		public String getId() { return id; }
+
+		public String getID() { return ID; }
+
+		public String getXY() { return xY; }
+
+		public String getXyZ() { return xyZ; }
+
+		public String getpEBS() { return pEBS; }
+
+		public void setpEBS(String pEBS) { this.pEBS = pEBS; }
 	}
 
 }

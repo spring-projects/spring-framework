@@ -28,7 +28,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 
@@ -86,7 +85,6 @@ public interface ClientRequest {
 		}
 	}
 
-
 	/**
 	 * Return the attributes of this request.
 	 */
@@ -110,14 +108,13 @@ public interface ClientRequest {
 	 * @return the created builder
 	 */
 	static Builder from(ClientRequest other) {
-		Assert.notNull(other, "'other' must not be null");
 		return new DefaultClientRequestBuilder(other);
 	}
 
 	/**
 	 * Create a builder with the given method and url.
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param url the URL
+	 * @param url the url (as a URI instance)
 	 * @return the created builder
 	 * @deprecated in favor of {@link #create(HttpMethod, URI)}
 	 */
@@ -129,7 +126,7 @@ public interface ClientRequest {
 	/**
 	 * Create a request builder with the given method and url.
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param url the URL
+	 * @param url the url (as a URI instance)
 	 * @return the created builder
 	 */
 	static Builder create(HttpMethod method, URI url) {
@@ -222,8 +219,7 @@ public interface ClientRequest {
 		 * @param <P> the type of the {@code Publisher}
 		 * @return the built request
 		 */
-		<S, P extends Publisher<S>> Builder body(P publisher,
-				ParameterizedTypeReference<S> typeReference);
+		<S, P extends Publisher<S>> Builder body(P publisher, ParameterizedTypeReference<S> typeReference);
 
 		/**
 		 * Set the attribute with the given name to the given value.
@@ -243,8 +239,7 @@ public interface ClientRequest {
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Builds the request.
-		 * @return the request
+		 * Build the request.
 		 */
 		ClientRequest build();
 	}

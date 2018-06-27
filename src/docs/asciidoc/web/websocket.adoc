@@ -401,8 +401,8 @@ The 3 possible behaviors are:
    transport is disabled since it does not allow to check the origin of a request.
    As a consequence, IE6 and IE7 are not supported when this mode is enabled.
  * Allow a specified list of origins: each provided _allowed origin_ must start with `http://`
-   or `https://`. In this mode, when SockJS is enabled, both IFrame and JSONP based
-   transports are disabled. As a consequence, IE6 through IE9 are not supported when this
+   or `https://`. In this mode, when SockJS is enabled, IFrame transport is disabled.
+   As a consequence, IE6 through IE9 are not supported when this
    mode is enabled.
  * Allow all origins: to enable this mode, you should provide `{asterisk}` as the allowed origin
    value. In this mode, all transports are available.
@@ -1214,22 +1214,17 @@ methods as described next.
 [[websocket-stomp-message-mapping]]
 ==== `@MessageMapping`
 
-The `@MessageMapping` annotation can be used on methods to route messages based on their
+`@MessageMapping` can be used to annotate methods to route messages based on their
 destination. It is supported at the method level as well as at the type level. At type
 level `@MessageMapping` is used to express shared mappings across all methods in a
 controller.
 
-By default destination mappings are expected to be Ant-style, path patterns, e.g. "/foo*",
-"/foo/**". The patterns include support for template variables, e.g. "/foo/{id}", that can
-be referenced with `@DestinationVariable` method arguments.
+The mapping values are Ant-style path patterns by default, e.g. "/foo*", "/foo/**"
+including support for template variables, e.g. "/foo/{id}", that can be referenced via
+`@DestinationVariable` method arguments. Applications can also switch to a dot-separated
+destination convention for mappings, as explained in <<websocket-stomp-destination-separator>>.
 
-[TIP]
-====
-Applications can choose to switch to a dot-separated destination convention.
-See <<websocket-stomp-destination-separator>>.
-====
-
-`@MessageMapping` methods can have flexible signatures with the following arguments:
+*Supported Method Arguments*
 
 [cols="1,2", options="header"]
 |===
@@ -1271,47 +1266,48 @@ Values will be converted to the declared method argument type as necessary.
 
 |===
 
-When an `@MessageMapping` method returns a value, by default the value is serialized to
-a payload through a configured `MessageConverter`, and then sent as a `Message` to the
-`"brokerChannel"` from where it is broadcast to subscribers. The destination of the
-outbound message is the same as that of the inbound message but prefixed with `"/topic"`.
+*Return Values*
 
-You can use the `@SendTo` method annotation to customize the destination to send
-the payload to. `@SendTo` can also be used at the class level to share a default target
-destination to send messages to. `@SendToUser` is an variant for sending messages only to
-the user associated with a message. See <<websocket-stomp-user-destination>> for details.
+By default, the return value from an `@MessageMapping` method is serialized to a payload
+through a matching `MessageConverter`, and sent as a `Message` to the `"brokerChannel"`
+from where it is broadcast to subscribers. The destination of the outbound message is the
+same as that of the inbound message but prefixed with `"/topic"`.
 
-The return value from an `@MessageMapping` method may be wrapped with `ListenableFuture`,
-`CompletableFuture`, or `CompletionStage` in order to produce the payload asynchronously.
+The `@SendTo` and `@SendToUser` annotations can be used to customize the destination of
+the output message. `@SendTo` is used to simply customize target destination, or to
+specify multiple destinations. `@SendToUser` is used to direct the output message only
+to the user associated with the input message, see <<websocket-stomp-user-destination>>.
 
-As an alternative to returning a payload from an `@MessageMapping` method you can also
-send messages using the `SimpMessagingTemplate`, which is also how return values are
-handled under the covers. See <<websocket-stomp-handle-send>>.
+`@SendTo` and `@SendToUser` may both be used at the same time on the same method, and both
+are supported at the class level in which case they act as a default for methods in the
+class. However keep in mind that _any_ method-level `@SendTo` or `@SendToUser` annotations
+override _any_ such annotations at the class level.
+
+Messages may be handled asynchronously and a `@MessageMapping` method may return
+`ListenableFuture`, `CompletableFuture`, or `CompletionStage`.
+
+Note that `@SendTo` and `@SendToUser` are merely a convenience that amounts to using the
+`SimpMessagingTemplate` to send messages. If necessary, for more advanced scenarios,
+`@MessageMapping` methods can fall back on using the `SimpMessagingTemplate` directly.
+This can be done instead of, or possibly in addition to returning a value.
+See <<websocket-stomp-handle-send>>.
 
 
 [[websocket-stomp-subscribe-mapping]]
 ==== `@SubscribeMapping`
 
-The `@SubscribeMapping` annotation is used in combination with `@MessageMapping` in order
-to narrow the mapping to subscription messages. In such scenarios, the `@MessageMapping`
-annotation specifies the destination while `@SubscribeMapping` indicates interest in
-subscription messages only.
+`@SubscribeMapping` is similar to `@MessageMapping` but also narrows the mapping to
+subscription messages only. Methods with `@SubscribeMapping` support the same
+<<websocket-stomp-message-mapping,method arguments>> as `@MessageMapping` methods do.
+The main difference is that for the return value, in the absence of `@SendTo` and
+`@SendToUser`, a message is sent directly as a reply to the subscription, via the
+"clientOutboundChannel" channel. Effectively in this case the subscription is used as
+a one-time, request-reply message exchange with the subscription never stored.
+This is useful for loading data on startup and for initializing a front-end UI.
 
-An `@SubscribeMapping` method is generally no different from any `@MessageMapping`
-method with respect to mapping and input arguments. For example you can combine it with a
-type-level `@MessageMapping` to express a shared destination prefix, and you can use the
-same <<websocket-stomp-message-mapping,method arguments>> as any @MessageMapping` method.
-
-The key difference with `@SubscribeMapping` is that the return value of the method is
-serialized as a payload and sent, not to the "brokerChannel" but to the
-"clientOutboundChannel", effectively replying directly to the client rather than
-broadcasting through the broker. This is useful for implementing one-off, request-reply
-message exchanges, and never holding on to the subscription. A common scenario for this
-pattern is application initialization when data must be loaded and presented.
-
-A `@SubscribeMapping` method can also be annotated with `@SendTo` in which case the
-return value is sent to the `"brokerChannel"` with the explicitly specified target
-destination.
+If an `@SubscribeMapping` method is annotated with `@SendTo` and `@SendToUser` the return
+value is sent to the `"brokerChannel"` as usual, sending a message subscribers of the
+specified destination(s).
 
 
 [[websocket-stomp-exception-handler]]
@@ -1397,6 +1393,37 @@ Applications can also use dot-separated destinations (vs slash).
 See <<websocket-stomp-destination-separator>>.
 ====
 
+If configured with a task scheduler, the simple broker supports
+https://stomp.github.io/stomp-specification-1.2.html#Heart-beating[STOMP heartbeats].
+For that you can declare your own scheduler, or use the one that's automatically
+declared and used internally:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+	private TaskScheduler messageBrokerTaskScheduler;
+
+	@Autowired
+	public void setMessageBrokerTaskScheduler(TaskScheduler taskScheduler) {
+		this.messageBrokerTaskScheduler = taskScheduler;
+	}
+
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry registry) {
+
+		registry.enableSimpleBroker("/queue/", "/topic/")
+				.setHeartbeatValue(new long[] {10000, 20000})
+				.setTaskScheduler(this.messageBrokerTaskScheduler);
+
+		// ...
+	}
+}
+----
+
 
 
 [[websocket-stomp-handle-broker-relay]]
@@ -1470,7 +1497,7 @@ it acts as a "relay" that forwards messages in both directions.
 
 [NOTE]
 ====
-Please add `org.projectreactor:reactor-net` and `io.netty:netty-all`
+Please add `io.projectreactor.netty:reactor-netty` and `io.netty:netty-all`
 dependencies to your project for TCP connection management.
 ====
 
@@ -1929,9 +1956,10 @@ will typically notice the broker is not responding within 10 seconds. Clients ne
 implement their own reconnect logic.
 ====
 
-Furthermore, an application can directly intercept every incoming and outgoing message by
-registering a `ChannelInterceptor` on the respective message channel. For example
-to intercept inbound messages:
+The above events reflect points in the lifecycle of a STOMP connection. They're not meant
+to provide notification for every message sent from the client. Instead an application
+can register a `ChannelInterceptor` to intercept every incoming and outgoing STOMP message.
+For example to intercept inbound messages:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1947,8 +1975,7 @@ to intercept inbound messages:
 	}
 ----
 
-A custom `ChannelInterceptor` can extend the empty method base class
-`ChannelInterceptorAdapter` and use `StompHeaderAccessor` or `SimpMessageHeaderAccessor`
+A custom `ChannelInterceptor` can use `StompHeaderAccessor` or `SimpMessageHeaderAccessor`
 to access information about the message.
 
 [source,java,indent=0]
@@ -1965,6 +1992,12 @@ to access information about the message.
 		}
 	}
 ----
+
+Note that just like with the `SesionDisconnectEvent` above, a DISCONNECT message
+may have been sent from the client, or it may also be automatically generated when
+the WebSocket session is closed. In some cases an interceptor may intercept this
+message more than once per session. Components should be idempotent with regard to
+multiple disconnect events.
 
 
 

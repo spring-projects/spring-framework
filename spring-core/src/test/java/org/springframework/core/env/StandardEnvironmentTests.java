@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import static org.springframework.core.env.AbstractEnvironment.*;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 public class StandardEnvironmentTests {
 
 	private static final String ALLOWED_PROPERTY_NAME = "theanswer";
@@ -283,7 +284,6 @@ public class StandardEnvironmentTests {
 		environment.acceptsProfiles("");
 	}
 
-
 	@Test
 	public void acceptsProfiles_activeProfileSetProgrammatically() {
 		assertThat(environment.acceptsProfiles("p1", "p2"), is(false));
@@ -324,6 +324,15 @@ public class StandardEnvironmentTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withInvalidNotOperator() {
 		environment.acceptsProfiles("p1", "!");
+	}
+
+	@Test
+	public void acceptsProfiles_withProfileExpression() {
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
+		environment.addActiveProfile("p1");
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
+		environment.addActiveProfile("p2");
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(true));
 	}
 
 	@Test

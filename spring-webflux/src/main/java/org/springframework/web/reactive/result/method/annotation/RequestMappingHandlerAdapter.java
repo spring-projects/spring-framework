@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerAdapter;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
@@ -169,7 +170,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		}
 
 		this.methodResolver = new ControllerMethodResolver(this.argumentResolverConfigurer,
-				this.messageReaders, this.reactiveAdapterRegistry, this.applicationContext);
+				this.reactiveAdapterRegistry, this.applicationContext, this.messageReaders);
 
 		this.modelInitializer = new ModelInitializer(this.methodResolver, this.reactiveAdapterRegistry);
 	}
@@ -206,11 +207,14 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 		Assert.state(this.methodResolver != null, "Not initialized");
 
+		// Success and error responses may use different content types
+		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+
 		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(exception, handlerMethod);
 		if (invocable != null) {
 			try {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
+					logger.debug("Using @ExceptionHandler " + invocable);
 				}
 				bindingContext.getModel().asMap().clear();
 				Throwable cause = exception.getCause();
@@ -223,7 +227,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 			}
 			catch (Throwable invocationEx) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Failed to invoke: " + invocable.getMethod(), invocationEx);
+					logger.warn("Failure in @ExceptionHandler " + invocable, invocationEx);
 				}
 			}
 		}

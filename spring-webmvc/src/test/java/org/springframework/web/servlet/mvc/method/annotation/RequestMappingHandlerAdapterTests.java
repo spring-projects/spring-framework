@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,25 +255,6 @@ public class RequestMappingHandlerAdapterTests {
 		assertEquals("{\"status\":400,\"message\":\"body\"}", this.response.getContentAsString());
 	}
 
-	@Test
-	public void jsonpResponseBodyAdvice() throws Exception {
-
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new MappingJackson2HttpMessageConverter());
-		this.handlerAdapter.setMessageConverters(converters);
-
-		this.webAppContext.registerSingleton("jsonpAdvice", JsonpAdvice.class);
-		this.webAppContext.refresh();
-
-		testJsonp("callback", true);
-		testJsonp("_callback", true);
-		testJsonp("_Call.bAcK", true);
-		testJsonp("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.", true);
-
-		testJsonp("<script>", false);
-		testJsonp("!foo!bar", false);
-	}
-
 	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
 		return new InvocableHandlerMethod(handler, method);
@@ -396,14 +377,6 @@ public class RequestMappingHandlerAdapterTests {
 			map.put("status", status);
 			map.put("message", bodyContainer.getValue());
 			bodyContainer.setValue(map);
-		}
-	}
-
-	@ControllerAdvice
-	private static class JsonpAdvice extends AbstractJsonpResponseBodyAdvice {
-
-		public JsonpAdvice() {
-			super("c");
 		}
 	}
 

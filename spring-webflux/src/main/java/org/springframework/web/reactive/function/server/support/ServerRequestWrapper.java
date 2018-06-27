@@ -35,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -42,6 +43,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriBuilder;
 
@@ -119,6 +121,11 @@ public class ServerRequestWrapper implements ServerRequest {
 	@Override
 	public Optional<InetSocketAddress> remoteAddress() {
 		return this.delegate.remoteAddress();
+	}
+
+	@Override
+	public List<HttpMessageReader<?>> messageReaders() {
+		return this.delegate.messageReaders();
 	}
 
 	@Override
@@ -201,6 +208,11 @@ public class ServerRequestWrapper implements ServerRequest {
 		return this.delegate.multipartData();
 	}
 
+	@Override
+	public ServerWebExchange exchange() {
+		return this.delegate.exchange();
+	}
+
 	/**
 	 * Implementation of the {@code Headers} interface that can be subclassed
 	 * to adapt the headers in a
@@ -211,16 +223,14 @@ public class ServerRequestWrapper implements ServerRequest {
 
 		private final Headers headers;
 
-
 		/**
 		 * Create a new {@code HeadersWrapper} that wraps the given request.
 		 * @param headers the headers to wrap
 		 */
 		public HeadersWrapper(Headers headers) {
-			Assert.notNull(headers, "'headers' must not be null");
+			Assert.notNull(headers, "Headers must not be null");
 			this.headers = headers;
 		}
-
 
 		@Override
 		public List<MediaType> accept() {

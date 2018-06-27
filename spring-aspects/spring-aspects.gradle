@@ -80,9 +80,9 @@ compileTestJava {
 
 dependencies {
 	aspects(project(":spring-orm"))
-	ajc("org.aspectj:aspectjtools:1.9.0")  // for JDK 9+ build compatibility
-	rt("org.aspectj:aspectjrt:1.9.0")  // for JDK 9+ build compatibility
-	compile("org.aspectj:aspectjweaver:${aspectjVersion}")  // for Maven POM exposure
+	ajc("org.aspectj:aspectjtools:${aspectjVersion}")
+	rt("org.aspectj:aspectjrt:${aspectjVersion}")
+	compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional(project(":spring-aop"))  // for @Async support
 	optional(project(":spring-beans"))  // for @Configurable support
 	optional(project(":spring-context"))  // for @Enable* support

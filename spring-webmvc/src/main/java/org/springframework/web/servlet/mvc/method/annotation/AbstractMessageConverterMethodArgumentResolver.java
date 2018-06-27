@@ -197,9 +197,6 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 						(converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
 				if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) :
 						(targetClass != null && converter.canRead(targetClass, contentType))) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
-					}
 					if (message.hasBody()) {
 						HttpInputMessage msgToUse =
 								getAdvice().beforeBodyRead(message, parameter, targetType, converterType);
@@ -224,6 +221,11 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 				return null;
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Read \"" + contentType + "\" to " +
+					"[" + (body instanceof String ? "\"" + body + "\"" : body) + "]");
 		}
 
 		return body;

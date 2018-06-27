@@ -58,6 +58,17 @@ import org.springframework.util.ClassUtils;
  * Note that the JDK's standard ResourceBundle treats dots as package separators:
  * This means that "test.theme" is effectively equivalent to "test/theme".
  *
+ * <p>On the classpath, bundle resources will be read with the locally configured
+ * {@link #setDefaultEncoding encoding}: by default, ISO-8859-1; consider switching
+ * this to UTF-8, or to {@code null} for the platform default encoding. On the JDK 9+
+ * module path where locally provided {@link ResourceBundle.Control} handles are not
+ * supported, this MessageSource always falls back to {@link ResourceBundle#getBundle}
+ * retrieval with the platform default encoding: UTF-8 with a ISO-8859-1 fallback on
+ * JDK 9+ (configurable through the "java.util.PropertyResourceBundle.encoding" system
+ * property). Note that {@link #loadBundle(Reader)}/{@link #loadBundle(InputStream)}
+ * won't be called in this case either, effectively ignoring overrides in subclasses.
+ * Consider implementing a JDK 9 {@code java.util.spi.ResourceBundleProvider} instead.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setBasenames
@@ -80,7 +91,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * This allows for very efficient hash lookups, significantly faster
 	 * than the ResourceBundle class's own cache.
 	 */
-	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles = new ConcurrentHashMap<>();
+	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles =
+			new ConcurrentHashMap<>();
 
 	/**
 	 * Cache to hold already generated MessageFormats.
@@ -90,7 +102,16 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * very efficient hash lookups without concatenated keys.
 	 * @see #getMessageFormat
 	 */
-	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats = new ConcurrentHashMap<>();
+	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
+			new ConcurrentHashMap<>();
+
+	@Nullable
+	private volatile MessageSourceControl control = new MessageSourceControl();
+
+
+	public ResourceBundleMessageSource() {
+		setDefaultEncoding("ISO-8859-1");
+	}
 
 
 	/**
@@ -220,20 +241,69 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
 		ClassLoader classLoader = getBundleClassLoader();
 		Assert.state(classLoader != null, "No bundle ClassLoader set");
-		return ResourceBundle.getBundle(basename, locale, classLoader, new MessageSourceControl());
+
+		MessageSourceControl control = this.control;
+		if (control != null) {
+			try {
+				return ResourceBundle.getBundle(basename, locale, classLoader, control);
+			}
+			catch (UnsupportedOperationException ex) {
+				// Probably in a Jigsaw environment on JDK 9+
+				this.control = null;
+				String encoding = getDefaultEncoding();
+				if (encoding != null && logger.isInfoEnabled()) {
+					logger.info("ResourceBundleMessageSource is configured to read resources with encoding '" +
+							encoding + "' but ResourceBundle.Control not supported in current system environment: " +
+							ex.getMessage() + " - falling back to plain ResourceBundle.getBundle retrieval with the " +
+							"platform default encoding. Consider setting the 'defaultEncoding' property to 'null' " +
+							"for participating in the platform default and therefore avoiding this log message.");
+				}
+			}
+		}
+
+		// Fallback: plain getBundle lookup without Control handle
+		return ResourceBundle.getBundle(basename, locale, classLoader);
 	}
 
 	/**
 	 * Load a property-based resource bundle from the given reader.
+	 * <p>This will be called in case of a {@link #setDefaultEncoding "defaultEncoding"},
+	 * including {@link ResourceBundleMessageSource}'s default ISO-8859-1 encoding.
+	 * Note that this method can only be called with a {@link ResourceBundle.Control}:
+	 * When running on the JDK 9+ module path where such control handles are not
+	 * supported, any overrides in custom subclasses will effectively get ignored.
 	 * <p>The default implementation returns a {@link PropertyResourceBundle}.
 	 * @param reader the reader for the target resource
 	 * @return the fully loaded bundle
 	 * @throws IOException in case of I/O failure
 	 * @since 4.2
+	 * @see #loadBundle(InputStream)
 	 * @see PropertyResourceBundle#PropertyResourceBundle(Reader)
 	 */
 	protected ResourceBundle loadBundle(Reader reader) throws IOException {
 		return new PropertyResourceBundle(reader);
+	}
+
+	/**
+	 * Load a property-based resource bundle from the given input stream,
+	 * picking up the default properties encoding on JDK 9+.
+	 * <p>This will only be called with {@link #setDefaultEncoding "defaultEncoding"}
+	 * set to {@code null}, explicitly enforcing the platform default encoding
+	 * (which is UTF-8 with a ISO-8859-1 fallback on JDK 9+ but configurable
+	 * through the "java.util.PropertyResourceBundle.encoding" system property).
+	 * Note that this method can only be called with a {@link ResourceBundle.Control}:
+	 * When running on the JDK 9+ module path where such control handles are not
+	 * supported, any overrides in custom subclasses will effectively get ignored.
+	 * <p>The default implementation returns a {@link PropertyResourceBundle}.
+	 * @param inputStream the input stream for the target resource
+	 * @return the fully loaded bundle
+	 * @throws IOException in case of I/O failure
+	 * @since 5.1
+	 * @see #loadBundle(Reader)
+	 * @see PropertyResourceBundle#PropertyResourceBundle(InputStream)
+	 */
+	protected ResourceBundle loadBundle(InputStream inputStream) throws IOException {
+		return new PropertyResourceBundle(inputStream);
 	}
 
 	/**
@@ -266,7 +336,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		if (msg != null) {
 			if (codeMap == null) {
 				codeMap = new ConcurrentHashMap<>();
-				Map<String, Map<Locale, MessageFormat>> existing = this.cachedBundleMessageFormats.putIfAbsent(bundle, codeMap);
+				Map<String, Map<Locale, MessageFormat>> existing =
+						this.cachedBundleMessageFormats.putIfAbsent(bundle, codeMap);
 				if (existing != null) {
 					codeMap = existing;
 				}
@@ -341,9 +412,9 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				final String resourceName = toResourceName(bundleName, "properties");
 				final ClassLoader classLoader = loader;
 				final boolean reloadFlag = reload;
-				InputStream stream;
+				InputStream inputStream;
 				try {
-					stream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
+					inputStream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
 						InputStream is = null;
 						if (reloadFlag) {
 							URL url = classLoader.getResource(resourceName);
@@ -364,13 +435,17 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				catch (PrivilegedActionException ex) {
 					throw (IOException) ex.getException();
 				}
-				if (stream != null) {
+				if (inputStream != null) {
 					String encoding = getDefaultEncoding();
-					if (encoding == null) {
-						encoding = "ISO-8859-1";
+					if (encoding != null) {
+						try (InputStreamReader bundleReader = new InputStreamReader(inputStream, encoding)) {
+							return loadBundle(bundleReader);
+						}
 					}
-					try (InputStreamReader bundleReader = new InputStreamReader(stream, encoding)) {
-						return loadBundle(bundleReader);
+					else {
+						try (InputStream bundleStream = inputStream) {
+							return loadBundle(bundleStream);
+						}
 					}
 				}
 				else {

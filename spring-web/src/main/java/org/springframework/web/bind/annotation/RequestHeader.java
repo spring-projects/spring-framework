@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.core.annotation.AliasFor;
 /**
  * Annotation which indicates that a method parameter should be bound to a web request header.
  *
- * <p>Supported for annotated handler methods in Servlet and Portlet environments.
+ * <p>Supported for annotated handler methods in Spring MVC and Spring WebFlux.
  *
  * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;},
  * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;},

@@ -43,14 +43,14 @@ public class WebSocketClientSupport {
 
 	protected List<String> beforeHandshake(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing handshake to " + url);
+			logger.debug("Connecting to " + url);
 		}
 		return handler.getSubProtocols();
 	}
 
 	protected HandshakeInfo afterHandshake(URI url, HttpHeaders responseHeaders) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Handshake response: " + url + ", " + responseHeaders);
+			logger.debug("Connected to " + url + ", " + responseHeaders);
 		}
 		String protocol = responseHeaders.getFirst(SEC_WEBSOCKET_PROTOCOL);
 		return new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);

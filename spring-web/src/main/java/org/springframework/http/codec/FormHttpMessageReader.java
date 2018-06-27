@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -46,12 +48,14 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<String, String>> {
+public class FormHttpMessageReader extends LoggingCodecSupport
+		implements HttpMessageReader<MultiValueMap<String, String>> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final ResolvableType MULTIVALUE_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
 
 	private Charset defaultCharset = DEFAULT_CHARSET;
 
@@ -101,7 +105,11 @@ public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<St
 					CharBuffer charBuffer = charset.decode(buffer.asByteBuffer());
 					String body = charBuffer.toString();
 					DataBufferUtils.release(buffer);
-					return parseFormData(charset, body);
+					MultiValueMap<String, String> formData = parseFormData(charset, body);
+					if (shouldLogRequestDetails()) {
+						logger.debug("Decoded " + formData);
+					}
+					return formData;
 				});
 	}
 

@@ -1,16 +1,10 @@
 description = "Spring WebSocket"
 
-apply plugin: "io.spring.dependency-management"
-
 dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
-	resolutionStrategy {
-		cacheChangingModulesFor 0, 'seconds'
-	}
-	applyMavenExclusions = false
 }
 
 dependencies {
@@ -19,7 +13,7 @@ dependencies {
 	compile(project(":spring-web"))
 	optional(project(":spring-messaging"))
 	optional(project(":spring-webmvc"))
-	optional("javax.servlet:javax.servlet-api:3.1.0")
+	optional("javax.servlet:javax.servlet-api:4.0.1")
 	optional("javax.websocket:javax.websocket-api:1.1")
 	optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
 		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
@@ -44,5 +38,5 @@ dependencies {
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-	testCompile("io.projectreactor.ipc:reactor-netty")
+	testCompile("io.projectreactor.netty:reactor-netty")
 }

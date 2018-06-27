@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -31,6 +32,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -65,6 +67,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	// CONNECT
 
 	public static final String HOST = "host";
+
+	public static final String ACCEPT_VERSION = "accept-version";
 
 	public static final String LOGIN = "login";
 
@@ -192,6 +196,32 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	@Nullable
 	public String getHost() {
 		return getFirst(HOST);
+	}
+
+	/**
+	 * Set the accept-version header. Must be one of "1.1", "1.2", or both.
+	 * Applies to the CONNECT frame.
+	 * @since 5.0.7
+	 */
+	public void setAcceptVersion(@Nullable String... acceptVersions) {
+		if (ObjectUtils.isEmpty(acceptVersions)) {
+			set(ACCEPT_VERSION, null);
+			return;
+		}
+		Arrays.stream(acceptVersions).forEach(version ->
+				Assert.isTrue(version != null && (version.equals("1.1") || version.equals("1.2")),
+						"Invalid version: " + version));
+		set(ACCEPT_VERSION, StringUtils.arrayToCommaDelimitedString(acceptVersions));
+	}
+
+	/**
+	 * Get the accept-version header.
+	 * @since 5.0.7
+	 */
+	@Nullable
+	public String[] getAcceptVersion() {
+		String value = getFirst(ACCEPT_VERSION);
+		return value != null ? StringUtils.commaDelimitedListToStringArray(value) : null;
 	}
 
 	/**

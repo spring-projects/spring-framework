@@ -207,7 +207,7 @@ Maven or Gradle dependencies. Spring Boot defaults to Netty because it is more w
 used in the async, non-blocking space, and provides a client and a server share resources.
 
 Tomcat and Jetty can be used with both Spring MVC and WebFlux. Keep in mind however that
-the way they're used is very differently. Spring MVC relies on Servlet blocking I/O and
+the way they're used is very different. Spring MVC relies on Servlet blocking I/O and
 allows applications to use the Servlet API directly if they need to. Spring WebFlux
 relies on Servlet 3.1 non-blocking I/O and uses the Servlet API behind a low-level
 adapter and not exposed for direct use.
@@ -366,7 +366,7 @@ and code snippets for each server:
 |Server name|Group id|Artifact name
 
 |Reactor Netty
-|io.projectreactor.ipc
+|io.projectreactor.netty
 |reactor-netty
 
 |Undertow
@@ -1306,6 +1306,41 @@ logic. This is a more advanced option that requires sub-classing
 you can check the custom attribute and return your own `RequestCondition`.
 
 
+[[webflux-ann-requestmapping-registration]]
+==== Explicit Registrations
+[.small]#<<web.adoc#mvc-ann-requestmapping-registration,Same in Spring MVC>>#
+
+Handler methods can be registered programmatically which can be used for dynamic
+registrations, or for advanced cases such as different instances of the same handler
+under different URLs. Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class MyConfig {
+
+	@Autowired
+	public void setHandlerMapping(RequestMappingHandlerMapping mapping, UserHandler handler) <1>
+			throws NoSuchMethodException {
+
+		RequestMappingInfo info = RequestMappingInfo
+				.paths("/user/{id}").methods(RequestMethod.GET).build(); <2>
+
+		Method method = UserHandler.class.getMethod("getUser", Long.class); <3>
+
+		mapping.registerMapping(info, handler, method); <4>
+	}
+
+}
+----
+
+<1> Inject target handler(s) and the handler mapping for controllers.
+<2> Prepare the request mapping meta data.
+<3> Get the handler method.
+<4> Add the registration.
+
+
 
 [[webflux-ann-methods]]
 === Handler methods
@@ -1417,10 +1452,8 @@ etc, and is equivalent to `required=false`.
   See <<webflux-ann-sessionattributes>> for more details.
 
 | `UriComponentsBuilder`
-| For preparing a URL relative to the current request's host, port, scheme, context path, and
-  the literal  part of the servlet mapping also taking into account `Forwarded` and
-  `X-Forwarded-*` headers.
-  // TODO: See <<webflux-uri-building>>.
+| For preparing a URL relative to the current request's host, port, scheme, and path.
+  See <<webflux-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute; in contrast to model attributes stored in the session
@@ -2406,31 +2439,29 @@ controller-specific ``Formatter``'s:
 		public ResponseEntity<String> handle(IOException ex) {
 			// ...
 		}
-
 	}
 ----
 
-The annotation can list the exception types to match. Or simply declare the target
-exception as a method argument as shown above. When multiple exception methods match,
-a root exception match is generally preferred to a cause exception match. More formally
-the `ExceptionDepthComparator` is used to sort exceptions based on their depth from the
-thrown exception type.
+The exception may match against a top-level exception being propagated (i.e. a direct
+`IOException` thrown), or against the immediate cause within a top-level wrapper exception
+(e.g. an `IOException` wrapped inside an `IllegalStateException`).
 
-In a multi-`@ControllerAdvice` arrangement, please declare your primary root exception
-mappings on a `@ControllerAdvice` prioritized with a corresponding order. While a root
-exception match is preferred to a cause, this is mainly among the methods of a given
-controller or `@ControllerAdvice`. That means a cause match on a higher-priority
-`@ControllerAdvice` is preferred to any match (e.g. root) on a lower-priority
-`@ControllerAdvice`.
+For matching exception types, preferably declare the target exception as a method argument
+as shown above. Alternatively, the annotation declaration may narrow the exception types to
+match. We generally recommend to be as specific as possible in the argument signature and to
+declare your primary root exception mappings on a `@ControllerAdvice` prioritized with a
+corresponding order. See <<web.adoc#mvc-ann-exceptionhandler,the MVC section>> for details.
+
+[NOTE]
+====
+An `@ExceptionHandler` method in WebFlux supports the same method arguments and
+return values as an `@RequestMapping` method, with the exception of request body
+and `@ModelAttribute` related method arguments.
+====
 
 Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
 `HandlerAdapter` for `@RequestMapping` methods. See <<webflux-dispatcher-exceptions>>
 under the `DispatcherHandler` section for more details.
-
-
-An `@ExceptionHandler` method in WebFlux supports the same method arguments and return
-values as an `@RequestMapping` method does with the exception of request body and
-`@ModelAttribute` related method arguments.
 
 
 [[webflux-ann-rest-exceptions]]
@@ -2448,8 +2479,8 @@ in `@ControllerAdvice` classes to apply them globally.
 ====
 Note that Spring WebFlux does not have an equivalent for the Spring MVC
 `ResponseEntityExceptionHandler` because WebFlux only raises `ResponseStatusException`
-(or sub-classes of), which and those do not need to be translated translation to an HTTP
-status code.
+(or subclasses thereof), which and those do not need to be translated translation to
+an HTTP status code.
 ====
 
 
@@ -2501,7 +2532,7 @@ Javadoc for more details.
 
 
 
-[[mvc-uri-building]]
+[[webflux-uri-building]]
 == URI Links
 [.small]#<<web.adoc#mvc-uri-building,Same in Spring MVC>>#
 
@@ -2540,6 +2571,124 @@ reference documentation including:
 
 
 include::webflux-view.adoc[leveloffset=+1]
+
+
+
+
+[[webflux-caching]]
+== HTTP Caching
+[.small]#<<web.adoc#mvc-caching,Same in Spring MVC>>#
+
+HTTP caching can significantly improve the performance of a web application. HTTP caching
+revolves around the "Cache-Control" response header and subsequently conditional request
+headers such as "Last-Modified" and "ETag". "Cache-Control" advises private (e.g. browser)
+and public (e.g. proxy) caches how to cache and re-use responses. An "ETag" header is used
+to make a conditional request that may result in a 304 (NOT_MODIFIED) without a body,
+if the content has not changed. "ETag" can be seen as a more sophisticated successor to
+the `Last-Modified` header.
+
+This section describes HTTP caching related options available in Spring Web MVC.
+
+
+
+[[webflux-caching-cachecontrol]]
+=== `CacheControl`
+[.small]#<<web.adoc#mvc-caching-cachecontrol,Same in Spring MVC>>#
+
+{api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
+configuring settings related to the "Cache-Control" header and is accepted as an argument
+in a number of places:
+
+* <<webflux-caching-etag-lastmodified>>
+* <<webflux-caching-static-resources>>
+
+While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all possible
+directives for the "Cache-Control" response header, the `CacheControl` type takes a
+use case oriented approach focusing on the common scenarios:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// Cache for an hour - "Cache-Control: max-age=3600"
+	CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
+
+	// Prevent caching - "Cache-Control: no-store"
+	CacheControl ccNoStore = CacheControl.noStore();
+
+	// Cache for ten days in public and private caches,
+	// public caches should not transform the response
+	// "Cache-Control: max-age=864000, public, no-transform"
+	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
+----
+
+
+
+[[webflux-caching-etag-lastmodified]]
+=== Controllers
+[.small]#<<web.adoc#mvc-caching-etag-lastmodified,Same in Spring MVC>>#
+
+Controllers can add explicit support for HTTP caching. This is recommended since the
+lastModified or ETag value for a resource needs to be calculated before it can be compared
+against conditional request headers. A controller can add an ETag and "Cache-Control"
+settings to a `ResponseEntity`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/book/{id}")
+	public ResponseEntity<Book> showBook(@PathVariable Long id) {
+
+		Book book = findBook(id);
+		String version = book.getVersion();
+
+		return ResponseEntity
+				.ok()
+				.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+				.eTag(version) // lastModified is also available
+				.body(book);
+	}
+----
+
+This will send an 304 (NOT_MODIFIED) response with an empty body, if the comparison
+to the conditional request headers indicates the content has not changed. Otherwise the
+"ETag" and "Cache-Control" headers will be added to the response.
+
+The check against conditional request headers can also be made in the controller:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping
+	public String myHandleMethod(ServerWebExchange exchange, Model model) {
+
+		long eTag = ... <1>
+
+		if (exchange.checkNotModified(eTag)) {
+			return null; <2>
+		}
+
+		model.addAttribute(...); <3>
+		return "myViewName";
+	}
+----
+
+<1> Application-specific calculation.
+<2> Response has been set to 304 (NOT_MODIFIED), no further processing.
+<3> Continue with request processing.
+
+There are 3 variants for checking conditional requests against eTag values, lastModified
+values, or both. For conditional "GET" and "HEAD" requests, the response may be set to
+304 (NOT_MODIFIED). For conditional "POST", "PUT", and "DELETE", the response would be set
+to 409 (PRECONDITION_FAILED) instead to prevent concurrent modification.
+
+
+
+[[webflux-caching-static-resources]]
+=== Static resources
+[.small]#<<web.adoc#mvc-caching-static-resources,Same in Spring MVC>>#
+
+Static resources should be served with a "Cache-Control" and conditional response headers
+for optimal performance. See section on configuring <<webflux-config-static-resources>>.
 
 
 
@@ -2870,7 +3019,7 @@ evaluated and if present a `304` status code is returned.
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("/public", "classpath:/static/")
-				.setCachePeriod(31556926);
+				.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
 		}
 
 	}
@@ -2914,9 +3063,12 @@ so it can be injected into others.
 
 Unlike Spring MVC at present in WebFlux there is no way to transparently rewrite static
 resource URLs since there are no view technologies that can make use of a non-blocking chain
-of resolvers and transformers (e.g. resources on Amazon S3). When serving only local
-resources the workaround is to use `ResourceUrlProvider` directly (e.g. through a custom
-tag) and block for 0 seconds.
+of resolvers and transformers. When serving only local resources the workaround is to use
+`ResourceUrlProvider` directly (e.g. through a custom tag) and block.
+
+Note that when using both `EncodedResourceResolver` (e.g. Gzip, Brotli encoded) and
+`VersionedResourceResolver`, they must be registered in that order to ensure content
+based versions are always computed reliably based on the unencoded file.
 
 http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
 and automatically registered when `"org.webjars:webjars-locator"` is present on the
@@ -2930,16 +3082,8 @@ match to incoming URLs without versions -- e.g. `"/jquery/jquery.min.js"` to
 === Path Matching
 [.small]#<<web.adoc#mvc-config-path-matching,Same in Spring MVC>>#
 
-Spring WebFlux uses parsed representation of path patterns -- i.e. `PathPattern`, and also
-the incoming  request path -- i.e. `RequestPath`, which eliminates the need to indicate
-whether to decode the request path, or remove semicolon content, since `PathPattern`
-can now access decoded path segment values and match safely.
-
-Spring WebFlux also does not support suffix pattern matching so effectively there are only two
-minor options to customize related to path matching -- whether to match trailing slashes
-(`true` by default) and whether the match is case-sensitive (`false`).
-
-To customize those options:
+Customize options related to path matching. For details on the individual options, see the
+{api-spring-framework}/web/reactive/config/PathMatchConfigurer.html[PathMatchConfigurer] Javadoc.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2950,11 +3094,28 @@ To customize those options:
 
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
-			// ...
+			configurer
+				.setUseCaseSensitiveMatch(true)
+				.setUseTrailingSlashMatch(false)
+				.addPathPrefix("/api",
+						HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
 	}
 ----
+
+[TIP]
+====
+Spring WebFlux relies on a parsed representation of the request path called
+`RequestPath` for access to decoded path segment values, with semicolon content removed
+(i.e. path/matrix variables). That means, unlike Spring MVC, there is no need to indicate
+neither whether to decode the request path, nor whether to remove semicolon content for
+path matching purposes.
+
+Spring WebFlux also does not support suffix pattern matching, unlike Spring MVC, where we
+also <<web.adoc#mvc-ann-requestmapping-suffix-pattern-match,recommend>> moving away from
+reliance on it.
+====
 
 
 

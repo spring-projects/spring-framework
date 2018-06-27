@@ -10,7 +10,7 @@
 							  path-helper="urlPathHelper">
 
 		<!-- message-size=128*1024, send-buffer-size=1024*1024 -->
-		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576">
+		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576" time-to-first-message="30000">
 			<websocket:decorator-factories>
 				<bean class="org.springframework.web.socket.config.TestWebSocketHandlerDecoratorFactory" />
 			</websocket:decorator-factories>

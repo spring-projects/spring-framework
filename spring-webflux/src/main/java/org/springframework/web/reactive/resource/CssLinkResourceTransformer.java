@@ -70,6 +70,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Mono<Resource> transform(ServerWebExchange exchange, Resource inputResource,
 			ResourceTransformerChain transformerChain) {
@@ -78,12 +79,9 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 				.flatMap(ouptputResource -> {
 					String filename = ouptputResource.getFilename();
 					if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
+							inputResource instanceof EncodedResourceResolver.EncodedResource ||
 							inputResource instanceof GzipResourceResolver.GzippedResource) {
 						return Mono.just(ouptputResource);
-					}
-
-					if (logger.isTraceEnabled()) {
-						logger.trace("Transforming resource: " + ouptputResource);
 					}
 
 					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
@@ -104,9 +102,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		List<ContentChunkInfo> contentChunkInfos = parseContent(cssContent);
 		if (contentChunkInfos.isEmpty()) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No links found.");
-			}
 			return Mono.just(resource);
 		}
 
@@ -226,8 +221,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			if (content.substring(position, position + 4).equals("url(")) {
 				// Ignore, UrlFunctionContentParser will take care
 			}
-			else if (logger.isErrorEnabled()) {
-				logger.error("Unexpected syntax for @import link at index " + position);
+			else if (logger.isTraceEnabled()) {
+				logger.trace("Unexpected syntax for @import link at index " + position);
 			}
 			return position;
 		}

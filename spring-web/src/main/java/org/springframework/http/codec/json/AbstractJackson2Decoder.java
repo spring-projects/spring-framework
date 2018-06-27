@@ -110,7 +110,11 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 		return tokens.map(tokenBuffer -> {
 			try {
-				return reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+				if (logger.isDebugEnabled()) {
+					logger.debug("Decoded [" + value + "]");
+				}
+				return value;
 			}
 			catch (InvalidDefinitionException ex) {
 				throw new CodecException("Type definition error: " + ex.getType(), ex);

@@ -195,8 +195,8 @@ public class CookieGenerator {
 			cookie.setHttpOnly(true);
 		}
 		response.addCookie(cookie);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Added cookie with name [" + getCookieName() + "] and value [" + cookieValue + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Added cookie [" + getCookieName() + "=" + cookieValue + "]");
 		}
 	}
 
@@ -220,8 +220,8 @@ public class CookieGenerator {
 			cookie.setHttpOnly(true);
 		}
 		response.addCookie(cookie);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Removed cookie with name [" + getCookieName() + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Removed cookie '" + getCookieName() + "'");
 		}
 	}
 

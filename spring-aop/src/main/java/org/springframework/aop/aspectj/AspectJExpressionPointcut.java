@@ -19,6 +19,7 @@ package org.springframework.aop.aspectj;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,13 +50,13 @@ import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AbstractExpressionPointcut;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.core.BridgeMethodResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -426,19 +427,18 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	private ShadowMatch getTargetShadowMatch(Method method, @Nullable Class<?> targetClass) {
-		Method targetMethod = method;
-		if (targetClass != null) {
-			targetMethod = ClassUtils.getMostSpecificMethod(method, ClassUtils.getUserClass(targetClass));
-			if (targetMethod.getDeclaringClass().isInterface()) {
-				Set<Class<?>> ifcs = ClassUtils.getAllInterfacesForClassAsSet(targetClass);
-				if (ifcs.size() > 1) {
-					Class<?> compositeInterface = ClassUtils.createCompositeInterface(
-							ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
-					targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
-				}
+		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+		if (targetClass != null && targetMethod.getDeclaringClass().isInterface()) {
+			// Try to build the most specific interface possible for inherited methods to be
+			// considered for sub-interface matches as well, in particular for proxy classes.
+			// Note: AspectJ is only going to take Method.getDeclaringClass() into account.
+			Set<Class<?>> ifcs = ClassUtils.getAllInterfacesForClassAsSet(targetClass);
+			if (ifcs.size() > 1) {
+				Class<?> compositeInterface = ClassUtils.createCompositeInterface(
+						ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
+				targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
 			}
 		}
-		targetMethod = BridgeMethodResolver.findBridgedMethod(targetMethod);
 		return getShadowMatch(targetMethod, method);
 	}
 
@@ -469,7 +469,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 								fallbackExpression = null;
 							}
 						}
-						if (shadowMatch == null && targetMethod != originalMethod) {
+						if (targetMethod != originalMethod && (shadowMatch == null ||
+								(shadowMatch.neverMatches() && Proxy.isProxyClass(targetMethod.getDeclaringClass())))) {
+							// Fall back to the plain original method in case of no resolvable match or a
+							// negative match on a proxy class (which doesn't carry any annotations on its
+							// redeclared methods).
 							methodToMatch = originalMethod;
 							try {
 								shadowMatch = obtainPointcutExpression().matchesMethodExecution(methodToMatch);

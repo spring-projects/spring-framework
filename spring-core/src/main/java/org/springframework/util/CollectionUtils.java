@@ -122,7 +122,7 @@ public abstract class CollectionUtils {
 	 * Check whether the given Iterator contains the given element.
 	 * @param iterator the Iterator to check
 	 * @param element the element to look for
-	 * @return {@code true} if found, {@code false} else
+	 * @return {@code true} if found, {@code false} otherwise
 	 */
 	public static boolean contains(@Nullable Iterator<?> iterator, Object element) {
 		if (iterator != null) {
@@ -140,7 +140,7 @@ public abstract class CollectionUtils {
 	 * Check whether the given Enumeration contains the given element.
 	 * @param enumeration the Enumeration to check
 	 * @param element the element to look for
-	 * @return {@code true} if found, {@code false} else
+	 * @return {@code true} if found, {@code false} otherwise
 	 */
 	public static boolean contains(@Nullable Enumeration<?> enumeration, Object element) {
 		if (enumeration != null) {
@@ -160,7 +160,7 @@ public abstract class CollectionUtils {
 	 * {@code true} for an equal element as well.
 	 * @param collection the Collection to check
 	 * @param element the element to look for
-	 * @return {@code true} if found, {@code false} else
+	 * @return {@code true} if found, {@code false} otherwise
 	 */
 	public static boolean containsInstance(@Nullable Collection<?> collection, Object element) {
 		if (collection != null) {
@@ -268,7 +268,7 @@ public abstract class CollectionUtils {
 	 * Determine whether the given Collection only contains a single unique object.
 	 * @param collection the Collection to check
 	 * @return {@code true} if the collection contains a single reference or
-	 * multiple references to the same instance, {@code false} else
+	 * multiple references to the same instance, {@code false} otherwise
 	 */
 	public static boolean hasUniqueObject(Collection<?> collection) {
 		if (isEmpty(collection)) {

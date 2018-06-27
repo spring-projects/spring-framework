@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -141,23 +142,25 @@ public class WebUtilsTests {
 	}
 
 	@Test  // SPR-16262
-	public void isSameOriginWithXForwardedHeaders() {
-		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", -1, "https", null, -1, "https://mydomain1.com"));
-		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", 123, "https", null, -1, "https://mydomain1.com"));
-		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", -1, "https", "mydomain2.com", -1, "https://mydomain2.com"));
-		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", 123, "https", "mydomain2.com", -1, "https://mydomain2.com"));
-		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", -1, "https", "mydomain2.com", 456, "https://mydomain2.com:456"));
-		assertTrue(checkSameOriginWithXForwardedHeaders("mydomain1.com", 123, "https", "mydomain2.com", 456, "https://mydomain2.com:456"));
+	public void isSameOriginWithXForwardedHeaders() throws Exception {
+		String server = "mydomain1.com";
+		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.com");
+		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.com");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", -1, "https://mydomain2.com");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", -1, "https://mydomain2.com");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
 	}
 
 	@Test  // SPR-16262
-	public void isSameOriginWithForwardedHeader() {
-		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", -1, "proto=https", "https://mydomain1.com"));
-		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", 123, "proto=https", "https://mydomain1.com"));
-		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", -1, "proto=https; host=mydomain2.com", "https://mydomain2.com"));
-		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", 123, "proto=https; host=mydomain2.com", "https://mydomain2.com"));
-		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", -1, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456"));
-		assertTrue(checkSameOriginWithForwardedHeader("mydomain1.com", 123, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456"));
+	public void isSameOriginWithForwardedHeader() throws Exception {
+		String server = "mydomain1.com";
+		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.com");
+		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.com");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com", "https://mydomain2.com");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com", "https://mydomain2.com");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
 	}
 
 
@@ -183,36 +186,53 @@ public class WebUtilsTests {
 		return WebUtils.isSameOrigin(request);
 	}
 
-	private boolean checkSameOriginWithXForwardedHeaders(String serverName, int port, String forwardedProto, String forwardedHost, int forwardedPort, String originHeader) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
-		servletRequest.setServerName(serverName);
+	private void testWithXForwardedHeaders(String serverName, int port, String forwardedProto,
+			String forwardedHost, int forwardedPort, String originHeader) throws Exception {
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setServerName(serverName);
 		if (port != -1) {
-			servletRequest.setServerPort(port);
+			request.setServerPort(port);
 		}
 		if (forwardedProto != null) {
-			servletRequest.addHeader("X-Forwarded-Proto", forwardedProto);
+			request.addHeader("X-Forwarded-Proto", forwardedProto);
 		}
 		if (forwardedHost != null) {
-			servletRequest.addHeader("X-Forwarded-Host", forwardedHost);
+			request.addHeader("X-Forwarded-Host", forwardedHost);
 		}
 		if (forwardedPort != -1) {
-			servletRequest.addHeader("X-Forwarded-Port", String.valueOf(forwardedPort));
+			request.addHeader("X-Forwarded-Port", String.valueOf(forwardedPort));
 		}
-		servletRequest.addHeader(HttpHeaders.ORIGIN, originHeader);
-		return WebUtils.isSameOrigin(request);
+		request.addHeader(HttpHeaders.ORIGIN, originHeader);
+
+		HttpServletRequest requestToUse = adaptFromForwardedHeaders(request);
+		ServerHttpRequest httpRequest = new ServletServerHttpRequest(requestToUse);
+
+		assertTrue(WebUtils.isSameOrigin(httpRequest));
 	}
 
-	private boolean checkSameOriginWithForwardedHeader(String serverName, int port, String forwardedHeader, String originHeader) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
-		servletRequest.setServerName(serverName);
+	private void testWithForwardedHeader(String serverName, int port, String forwardedHeader,
+			String originHeader) throws Exception {
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setServerName(serverName);
 		if (port != -1) {
-			servletRequest.setServerPort(port);
+			request.setServerPort(port);
 		}
-		servletRequest.addHeader("Forwarded", forwardedHeader);
-		servletRequest.addHeader(HttpHeaders.ORIGIN, originHeader);
-		return WebUtils.isSameOrigin(request);
+		request.addHeader("Forwarded", forwardedHeader);
+		request.addHeader(HttpHeaders.ORIGIN, originHeader);
+
+		HttpServletRequest requestToUse = adaptFromForwardedHeaders(request);
+		ServerHttpRequest httpRequest = new ServletServerHttpRequest(requestToUse);
+
+		assertTrue(WebUtils.isSameOrigin(httpRequest));
+	}
+
+	// SPR-16668
+	private HttpServletRequest adaptFromForwardedHeaders(HttpServletRequest request) throws Exception {
+		MockFilterChain chain = new MockFilterChain();
+		new ForwardedHeaderFilter().doFilter(request, new MockHttpServletResponse(), chain);
+		return (HttpServletRequest) chain.getRequest();
 	}
 
 }

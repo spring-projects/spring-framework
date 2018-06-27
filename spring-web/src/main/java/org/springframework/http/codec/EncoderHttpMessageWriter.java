@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -37,7 +38,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@code HttpMessageWriter} that wraps and delegates to a {@link Encoder}.
+ * {@code HttpMessageWriter} that wraps and delegates to an {@link Encoder}.
  *
  * <p>Also a {@code HttpMessageWriter} that pre-resolves encoding hints
  * from the extra information available on the server side such as the request
@@ -98,22 +99,20 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			@Nullable MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		MediaType contentType = updateContentType(message, mediaType);
-		HttpHeaders headers = message.getHeaders();
-
-		if (headers.getContentLength() < 0 && !headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
-			if (inputStream instanceof Mono) {
-				// This works because we don't actually commit until after the first signal...
-				inputStream = ((Mono<T>) inputStream).doOnNext(data -> {
-					Long contentLength = this.encoder.getContentLength(data, contentType);
-					if (contentLength != null) {
-						headers.setContentLength(contentLength);
-					}
-				});
-			}
-		}
 
 		Flux<DataBuffer> body = this.encoder.encode(
 				inputStream, message.bufferFactory(), elementType, contentType, hints);
+
+		if (inputStream instanceof Mono) {
+			HttpHeaders headers = message.getHeaders();
+			if (headers.getContentLength() < 0 && !headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
+				return Mono.from(body)
+						.flatMap(dataBuffer -> {
+							headers.setContentLength(dataBuffer.readableByteCount());
+							return message.writeWith(Mono.just(dataBuffer));
+						});
+			}
+		}
 
 		return (isStreamingMediaType(contentType) ?
 				message.writeAndFlushWith(body.map(Flux::just)) : message.writeWith(body));

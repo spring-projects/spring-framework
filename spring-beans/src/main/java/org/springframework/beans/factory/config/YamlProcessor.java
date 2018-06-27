@@ -18,7 +18,6 @@ package org.springframework.beans.factory.config;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,14 +25,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.reader.UnicodeReader;
 
 import org.springframework.core.CollectionFactory;
@@ -44,6 +40,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Base class for YAML factories.
+ *
+ * <p>Requires SnakeYAML 1.18 or higher, as of Spring Framework 5.0.6.
  *
  * @author Dave Syer
  * @author Juergen Hoeller
@@ -77,15 +75,16 @@ public abstract class YamlProcessor {
 	 * name: My Cool App
 	 * </pre>
 	 * when mapped with
-	 * <code>documentMatchers = YamlProcessor.mapMatcher({"environment": "prod"})</code>
+	 * <pre class="code">
+	 * setDocumentMatchers(properties ->
+	 *     ("prod".equals(properties.getProperty("environment")) ? MatchStatus.FOUND : MatchStatus.NOT_FOUND));
+	 * </pre>
 	 * would end up as
 	 * <pre class="code">
 	 * environment=prod
 	 * url=http://foo.bar.com
 	 * name=My Cool App
-	 * url=http://dev.bar.com
 	 * </pre>
-	 * @param matchers a map of keys to value patterns (regular expressions)
 	 */
 	public void setDocumentMatchers(DocumentMatcher... matchers) {
 		this.documentMatchers = Arrays.asList(matchers);
@@ -94,8 +93,7 @@ public abstract class YamlProcessor {
 	/**
 	 * Flag indicating that a document for which all the
 	 * {@link #setDocumentMatchers(DocumentMatcher...) document matchers} abstain will
-	 * nevertheless match.
-	 * @param matchDefault the flag to set (default true)
+	 * nevertheless match. Default is {@code true}.
 	 */
 	public void setMatchDefault(boolean matchDefault) {
 		this.matchDefault = matchDefault;
@@ -104,9 +102,7 @@ public abstract class YamlProcessor {
 	/**
 	 * Method to use for resolving resources. Each resource will be converted to a Map,
 	 * so this property is used to decide which map entries to keep in the final output
-	 * from this factory.
-	 * @param resolutionMethod the resolution method to set (defaults to
-	 * {@link ResolutionMethod#OVERRIDE}).
+	 * from this factory. Default is {@link ResolutionMethod#OVERRIDE}.
 	 */
 	public void setResolutionMethod(ResolutionMethod resolutionMethod) {
 		Assert.notNull(resolutionMethod, "ResolutionMethod must not be null");
@@ -144,9 +140,14 @@ public abstract class YamlProcessor {
 
 	/**
 	 * Create the {@link Yaml} instance to use.
+	 * <p>The default implementation sets the "allowDuplicateKeys" flag to {@code false},
+	 * enabling built-in duplicate key handling in SnakeYAML 1.18+.
+	 * @see LoaderOptions#setAllowDuplicateKeys(boolean)
 	 */
 	protected Yaml createYaml() {
-		return new Yaml(new StrictMapAppenderConstructor());
+		LoaderOptions options = new LoaderOptions();
+		options.setAllowDuplicateKeys(false);
+		return new Yaml(options);
 	}
 
 	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
@@ -293,10 +294,15 @@ public abstract class YamlProcessor {
 				// Need a compound key
 				@SuppressWarnings("unchecked")
 				Collection<Object> collection = (Collection<Object>) value;
-				int count = 0;
-				for (Object object : collection) {
-					buildFlattenedMap(result,
-							Collections.singletonMap("[" + (count++) + "]", object), key);
+				if (collection.isEmpty()) {
+					result.put(key, "");
+				}
+				else {
+					int count = 0;
+					for (Object object : collection) {
+						buildFlattenedMap(result, Collections.singletonMap(
+								"[" + (count++) + "]", object), key);
+					}
 				}
 			}
 			else {
@@ -384,47 +390,6 @@ public abstract class YamlProcessor {
 		 * Take the first resource in the list that exists and use just that.
 		 */
 		FIRST_FOUND
-	}
-
-
-	/**
-	 * A specialized {@link Constructor} that checks for duplicate keys.
-	 */
-	protected static class StrictMapAppenderConstructor extends Constructor {
-
-		// Declared as public for use in subclasses
-		public StrictMapAppenderConstructor() {
-			super();
-		}
-
-		@Override
-		protected Map<Object, Object> constructMapping(MappingNode node) {
-			try {
-				return super.constructMapping(node);
-			}
-			catch (IllegalStateException ex) {
-				throw new ParserException("while parsing MappingNode",
-						node.getStartMark(), ex.getMessage(), node.getEndMark());
-			}
-		}
-
-		@Override
-		protected Map<Object, Object> createDefaultMap() {
-			final Map<Object, Object> delegate = super.createDefaultMap();
-			return new AbstractMap<Object, Object>() {
-				@Override
-				public Object put(Object key, Object value) {
-					if (delegate.containsKey(key)) {
-						throw new IllegalStateException("Duplicate key: " + key);
-					}
-					return delegate.put(key, value);
-				}
-				@Override
-				public Set<Entry<Object, Object>> entrySet() {
-					return delegate.entrySet();
-				}
-			};
-		}
 	}
 
 }

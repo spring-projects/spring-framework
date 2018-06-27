@@ -89,4 +89,8 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 		this.tcpClient.shutdown();
 	}
 
+	@Override
+	public String toString() {
+		return "ReactorNettyTcpStompClient[" + this.tcpClient + "]";
+	}
 }

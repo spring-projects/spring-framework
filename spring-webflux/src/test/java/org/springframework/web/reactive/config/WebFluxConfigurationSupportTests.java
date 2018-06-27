@@ -18,8 +18,10 @@ package org.springframework.web.reactive.config;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Test;
@@ -47,11 +49,17 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Validator;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
@@ -67,6 +75,7 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
@@ -110,7 +119,7 @@ public class WebFluxConfigurationSupportTests {
 	}
 
 	@Test
-	public void customPathMatchConfig() throws Exception {
+	public void customPathMatchConfig() {
 		ApplicationContext context = loadConfig(CustomPatchMatchConfig.class);
 		final Field field = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSeparator");
 		ReflectionUtils.makeAccessible(field);
@@ -123,6 +132,11 @@ public class WebFluxConfigurationSupportTests {
 		assertNotNull(patternParser);
 		boolean matchOptionalTrailingSlash = (boolean) ReflectionUtils.getField(field, patternParser);
 		assertFalse(matchOptionalTrailingSlash);
+
+		Map<RequestMappingInfo, HandlerMethod> map = mapping.getHandlerMethods();
+		assertEquals(1, map.size());
+		assertEquals(Collections.singleton(new PathPatternParser().parse("/api/user/{id}")),
+				map.keySet().iterator().next().getPatternsCondition().getPatterns());
 	}
 
 	@Test
@@ -295,6 +309,23 @@ public class WebFluxConfigurationSupportTests {
 		@Override
 		public void configurePathMatching(PathMatchConfigurer configurer) {
 			configurer.setUseTrailingSlashMatch(false);
+			configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
+		}
+
+		@Bean
+		UserController userController() {
+			return new UserController();
+		}
+	}
+
+
+	@RestController
+	@RequestMapping("/user")
+	static class UserController {
+
+		@GetMapping("/{id}")
+		public Principal getUser() {
+			return mock(Principal.class);
 		}
 	}
 

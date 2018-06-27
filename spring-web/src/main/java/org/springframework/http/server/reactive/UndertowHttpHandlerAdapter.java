@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import io.undertow.server.HttpServerExchange;
 import org.apache.commons.logging.Log;
@@ -64,8 +65,18 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 
 	@Override
-	public void handleRequest(HttpServerExchange exchange) throws Exception {
-		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, getDataBufferFactory());
+	public void handleRequest(HttpServerExchange exchange) {
+		ServerHttpRequest request = null;
+		try {
+			request = new UndertowServerHttpRequest(exchange, getDataBufferFactory());
+		}
+		catch (URISyntaxException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.debug("Failed to get request URI: " + ex.getMessage());
+			}
+			exchange.setStatusCode(400);
+			return;
+		}
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, getDataBufferFactory());
 
 		if (request.getMethod() == HttpMethod.HEAD) {
@@ -97,7 +108,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Handling completed with error", ex);
+			logger.trace("Failed to complete: " + ex.getMessage());
 			if (this.exchange.isResponseStarted()) {
 				try {
 					logger.debug("Closing connection");
@@ -108,7 +119,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 				}
 			}
 			else {
-				logger.debug("Setting response status code to 500");
+				logger.debug("Setting HttpServerExchange status to 500 Server Error");
 				this.exchange.setStatusCode(500);
 				this.exchange.endExchange();
 			}
@@ -116,7 +127,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onComplete() {
-			logger.debug("Handling completed with success");
+			logger.trace("Handling completed");
 			this.exchange.endExchange();
 		}
 	}

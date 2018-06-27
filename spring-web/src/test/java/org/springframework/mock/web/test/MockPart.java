@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class MockPart implements Part {
 	 * @see #getHeaders()
 	 */
 	public MockPart(String name, String filename, byte[] content) {
-		Assert.hasLength(name, "Name must not be null");
+		Assert.hasLength(name, "'name' must not be empty");
 		this.name = name;
 		this.filename = filename;
 		this.content = (content != null ? content : new byte[0]);

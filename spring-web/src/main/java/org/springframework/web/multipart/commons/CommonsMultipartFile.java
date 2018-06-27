@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -27,6 +29,7 @@ import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -167,9 +170,14 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 				if (!this.fileItem.isInMemory()) {
 					action = (isAvailable() ? "copied" : "moved");
 				}
-				logger.debug("Multipart file '" + getName() + "' with original filename [" +
-						getOriginalFilename() + "], stored " + getStorageDescription() + ": " +
-						action + " to [" + dest.getAbsolutePath() + "]");
+				String message = "Part '" + getName() + "',  filename '" + getOriginalFilename() + "'";
+				if (logger.isTraceEnabled()) {
+					logger.trace(message + ", stored " + getStorageDescription() + ": " + action +
+							" to [" + dest.getAbsolutePath() + "]");
+				}
+				else {
+					logger.debug(message + ": " + action + " to [" + dest.getAbsolutePath() + "]");
+				}
 			}
 		}
 		catch (FileUploadException ex) {
@@ -183,6 +191,15 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		catch (Exception ex) {
 			throw new IOException("File transfer failed", ex);
 		}
+	}
+
+	@Override
+	public void transferTo(Path dest) throws IOException, IllegalStateException {
+		if (!isAvailable()) {
+			throw new IllegalStateException("File has already been moved - cannot be transferred again");
+		}
+
+		FileCopyUtils.copy(this.fileItem.getInputStream(), Files.newOutputStream(dest));
 	}
 
 	/**

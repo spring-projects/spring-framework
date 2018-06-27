@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.OptionalLong;
 
+import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -81,7 +82,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 
 		if (inputStream instanceof Mono) {
 			return ((Mono<? extends ResourceRegion>) inputStream)
-					.flatMapMany(region -> writeResourceRegion(region, bufferFactory));
+					.flatMapMany(region -> writeResourceRegion(region, bufferFactory, hints));
 		}
 		else {
 			Assert.notNull(hints, "'hints' must not be null");
@@ -96,7 +97,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 					concatMap(region ->
 							Flux.concat(
 									getRegionPrefix(bufferFactory, startBoundary, contentType, region),
-									writeResourceRegion(region, bufferFactory)
+									writeResourceRegion(region, bufferFactory, hints)
 							));
 			return Flux.concat(regions, getRegionSuffix(bufferFactory, boundaryString));
 		}
@@ -112,11 +113,20 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		);
 	}
 
-	private Flux<DataBuffer> writeResourceRegion(ResourceRegion region, DataBufferFactory bufferFactory) {
+	private Flux<DataBuffer> writeResourceRegion(
+			ResourceRegion region, DataBufferFactory bufferFactory, @Nullable Map<String, Object> hints) {
+
 		Resource resource = region.getResource();
 		long position = region.getPosition();
+		long count = region.getCount();
+
+		Log logger = getLogger(hints);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Writing region " + position + "-" + (position + count) + " of [" + resource + "]");
+		}
+
 		Flux<DataBuffer> in = DataBufferUtils.read(resource, position, bufferFactory, this.bufferSize);
-		return DataBufferUtils.takeUntilByteCount(in, region.getCount());
+		return DataBufferUtils.takeUntilByteCount(in, count);
 	}
 
 	private Flux<DataBuffer> getRegionSuffix(DataBufferFactory bufferFactory, String boundaryString) {

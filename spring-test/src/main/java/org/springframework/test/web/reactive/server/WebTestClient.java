@@ -443,8 +443,8 @@ public interface WebTestClient {
 		Builder responseTimeout(Duration timeout);
 
 		/**
-		 * Shortcut for pre-packaged customizations to WebTestClient builder.
-		 * @param configurer the configurer to apply
+		 * Apply the given {@code Consumer} to this builder instance.
+		 * <p>This can be useful for applying pre-packaged customizations.
 		 */
 		Builder apply(WebTestClientConfigurer configurer);
 

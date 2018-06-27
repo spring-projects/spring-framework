@@ -62,6 +62,9 @@ public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 	protected DataBuffer decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Read " + buffer.readableByteCount() + " bytes");
+		}
 		return buffer;
 	}
 

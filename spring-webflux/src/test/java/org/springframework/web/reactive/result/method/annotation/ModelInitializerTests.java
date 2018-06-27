@@ -79,7 +79,7 @@ public class ModelInitializerTests {
 		resolverConfigurer.addCustomResolver(new ModelArgumentResolver(adapterRegistry));
 
 		ControllerMethodResolver methodResolver = new ControllerMethodResolver(
-				resolverConfigurer, Collections.emptyList(), adapterRegistry, new StaticApplicationContext());
+				resolverConfigurer, adapterRegistry, new StaticApplicationContext(), Collections.emptyList());
 
 		this.modelInitializer = new ModelInitializer(methodResolver, adapterRegistry);
 	}

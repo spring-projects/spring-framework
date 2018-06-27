@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,13 @@ import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests with server-side {@link WebSocketHandler}s.
- *
  * @author Rossen Stoyanchev
  */
 public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 	private static final Log logger = LogFactory.getLog(WebSocketIntegrationTests.class);
+
+	private static final Duration TIMEOUT = Duration.ofMillis(5000);
 
 
 	@Override
@@ -71,14 +72,12 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 							.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
 							.subscribeWith(output)
 							.doOnNext(s -> logger.debug("inbound " + s))
-							.then()
-							.doOnSuccessOrError((aVoid, ex) ->
-									logger.debug("Done with " + (ex != null ? ex.getMessage() : "success")));
+							.then();
 				})
-				.block(Duration.ofMillis(5000));
+				.doOnSuccessOrError((aVoid, ex) -> logger.debug("Done: " + (ex != null ? ex.getMessage() : "success")))
+				.block(TIMEOUT);
 
-		assertEquals(input.collectList().block(Duration.ofMillis(5000)),
-				output.collectList().block(Duration.ofMillis(5000)));
+		assertEquals(input.collectList().block(TIMEOUT), output.collectList().block(TIMEOUT));
 	}
 
 	@Test
@@ -102,13 +101,13 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 								.then();
 					}
 				})
-				.block(Duration.ofMillis(5000));
+				.block(TIMEOUT);
 
 		HandshakeInfo info = infoRef.get();
 		assertThat(info.getHeaders().getFirst("Upgrade"), Matchers.equalToIgnoringCase("websocket"));
 		assertEquals(protocol, info.getHeaders().getFirst("Sec-WebSocket-Protocol"));
 		assertEquals("Wrong protocol accepted", protocol, info.getSubProtocol());
-		assertEquals("Wrong protocol detected on the server side", protocol, output.block(Duration.ofMillis(5000)));
+		assertEquals("Wrong protocol detected on the server side", protocol, output.block(TIMEOUT));
 	}
 
 	@Test
@@ -122,9 +121,24 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 						.map(WebSocketMessage::getPayloadAsText)
 						.subscribeWith(output)
 						.then())
-				.block(Duration.ofMillis(5000));
+				.block(TIMEOUT);
 
-		assertEquals("my-header:my-value", output.block(Duration.ofMillis(5000)));
+		assertEquals("my-header:my-value", output.block(TIMEOUT));
+	}
+
+	@Test
+	public void sessionClosing() throws Exception {
+		this.client.execute(getUrl("/close"),
+				session -> {
+					logger.debug("Starting..");
+					return session.receive()
+							.doOnNext(s -> logger.debug("inbound " + s))
+							.then()
+							.doFinally(signalType -> {
+								logger.debug("Completed with: " + signalType);
+							});
+				})
+				.block(TIMEOUT);
 	}
 
 
@@ -137,6 +151,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			map.put("/echo", new EchoWebSocketHandler());
 			map.put("/sub-protocol", new SubProtocolWebSocketHandler());
 			map.put("/custom-header", new CustomHeaderHandler());
+			map.put("/close", new SessionClosingHandler());
 
 			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
 			mapping.setUrlMap(map);
@@ -180,6 +195,14 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			String payload = "my-header:" + headers.getFirst("my-header");
 			WebSocketMessage message = session.textMessage(payload);
 			return session.send(Mono.just(message));
+		}
+	}
+
+	private static class SessionClosingHandler implements WebSocketHandler {
+
+		@Override
+		public Mono<Void> handle(WebSocketSession session) {
+			return Flux.never().mergeWith(session.close(CloseStatus.GOING_AWAY)).then();
 		}
 	}
 

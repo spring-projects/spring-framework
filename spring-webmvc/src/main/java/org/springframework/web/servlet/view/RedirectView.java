@@ -329,7 +329,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 		if (this.contextRelative && getUrl().startsWith("/")) {
 			// Do not apply context path to relative URLs.
-			targetUrl.append(request.getContextPath());
+			targetUrl.append(getContextPath(request));
 		}
 		targetUrl.append(getUrl());
 
@@ -353,6 +353,14 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		}
 
 		return targetUrl.toString();
+	}
+
+	private String getContextPath(HttpServletRequest request) {
+		String contextPath = request.getContextPath();
+		while (contextPath.startsWith("//")) {
+			contextPath = contextPath.substring(1);
+		}
+		return contextPath;
 	}
 
 	/**

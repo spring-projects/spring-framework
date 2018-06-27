@@ -72,6 +72,10 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 		Class<?> clazz = elementType.getRawClass();
 		Assert.state(clazz != null, "No resource class");
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Read " + bytes.length + " bytes");
+		}
+
 		if (InputStreamResource.class == clazz) {
 			return new InputStreamResource(new ByteArrayInputStream(bytes));
 		}

@@ -41,10 +41,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -160,8 +157,8 @@ public class InvocableHandlerMethodTests {
 			fail("Expected IllegalStateException");
 		}
 		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), is("No suitable resolver for argument 0 of type 'java.lang.String' " +
-					"on " + method.toGenericString()));
+			assertThat(ex.getMessage(), is("Could not resolve parameter [0] in " +
+					method.toGenericString() + ": No suitable resolver"));
 		}
 	}
 
@@ -176,12 +173,12 @@ public class InvocableHandlerMethodTests {
 			fail("Expected UnsupportedMediaTypeStatusException");
 		}
 		catch (UnsupportedMediaTypeStatusException ex) {
-			assertThat(ex.getMessage(), is("Response status 415 with reason \"boo\""));
+			assertThat(ex.getMessage(), is("415 UNSUPPORTED_MEDIA_TYPE \"boo\""));
 		}
 	}
 
 	@Test
-	public void illegalArgumentExceptionIsWrappedWithInvocationDetails() throws Exception {
+	public void illegalArgumentException() throws Exception {
 		Mono<Object> resolvedValue = Mono.just(1);
 		Method method = on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method, resolverFor(resolvedValue));
@@ -191,9 +188,12 @@ public class InvocableHandlerMethodTests {
 			fail("Expected IllegalStateException");
 		}
 		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), is("Failed to invoke handler method with resolved arguments: " +
-					"[0][type=java.lang.Integer][value=1] " +
-					"on " + method.toGenericString()));
+			assertNotNull("Exception not wrapped", ex.getCause());
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+			assertTrue(ex.getMessage().contains("Controller ["));
+			assertTrue(ex.getMessage().contains("Method ["));
+			assertTrue(ex.getMessage().contains("with argument values:"));
+			assertTrue(ex.getMessage().contains("[0] [type=java.lang.Integer] [value=1]"));
 		}
 	}
 

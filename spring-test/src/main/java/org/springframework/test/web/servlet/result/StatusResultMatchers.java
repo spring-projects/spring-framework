@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code with the given Hamcrest {@link Matcher}.
+	 * Use the {@code StatusResultMatchers.isEqualTo} extension in Kotlin.
 	 */
 	public ResultMatcher is(final Matcher<Integer> matcher) {
 		return result -> assertThat("Response status", result.getResponse().getStatus(), matcher);
@@ -56,6 +57,7 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code is equal to an integer value.
+	 * Use the {@code StatusResultMatchers.isEqualTo} extension in Kotlin.
 	 */
 	public ResultMatcher is(final int status) {
 		return result -> assertEquals("Response status", status, result.getResponse().getStatus());

@@ -88,8 +88,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 
 	@Override
 	public String getMessage() {
-		String msg = "Response status " + this.status +
-				(this.reason != null ? " with reason \"" + reason + "\"" : "");
+		String msg = this.status + (this.reason != null ? " \"" + reason + "\"" : "");
 		return NestedExceptionUtils.buildMessage(msg, getCause());
 	}
 

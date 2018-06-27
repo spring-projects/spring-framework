@@ -16,18 +16,21 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.net.URI;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.util.Assert;
 
 /**
- * Exposes request-response exchange functionality, such as to
- * {@linkplain #create(ClientHttpConnector) create} an {@code ExchangeFunction} given a
- * {@code ClientHttpConnector}.
+ * Static factory methods to create an {@link ExchangeFunction}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -39,24 +42,25 @@ public abstract class ExchangeFunctions {
 
 
 	/**
-	 * Create a new {@link ExchangeFunction} with the given connector. This method uses
-	 * {@linkplain ExchangeStrategies#withDefaults() default strategies}.
-	 * @param connector the connector to create connections
-	 * @return the created function
+	 * Create an {@code ExchangeFunction} with the given {@code ClientHttpConnector}.
+	 * This is the same as calling
+	 * {@link #create(ClientHttpConnector, ExchangeStrategies)} and passing
+	 * {@link ExchangeStrategies#withDefaults()}.
+	 * @param connector the connector to use for connecting to servers
+	 * @return the created {@code ExchangeFunction}
 	 */
 	public static ExchangeFunction create(ClientHttpConnector connector) {
 		return create(connector, ExchangeStrategies.withDefaults());
 	}
 
 	/**
-	 * Create a new {@link ExchangeFunction} with the given connector and strategies.
-	 * @param connector the connector to create connections
-	 * @param strategies the strategies to use
-	 * @return the created function
+	 * Create an {@code ExchangeFunction} with the given
+	 * {@code ClientHttpConnector} and {@code ExchangeStrategies}.
+	 * @param connector the connector to use for connecting to servers
+	 * @param strategies the {@code ExchangeStrategies} to use
+	 * @return the created {@code ExchangeFunction}
 	 */
 	public static ExchangeFunction create(ClientHttpConnector connector, ExchangeStrategies strategies) {
-		Assert.notNull(connector, "'connector' must not be null");
-		Assert.notNull(strategies, "'strategies' must not be null");
 		return new DefaultExchangeFunction(connector, strategies);
 	}
 
@@ -67,27 +71,66 @@ public abstract class ExchangeFunctions {
 
 		private final ExchangeStrategies strategies;
 
+		private boolean disableLoggingRequestDetails;
+
+
 		public DefaultExchangeFunction(ClientHttpConnector connector, ExchangeStrategies strategies) {
+			Assert.notNull(connector, "ClientHttpConnector must not be null");
+			Assert.notNull(strategies, "ExchangeStrategies must not be null");
 			this.connector = connector;
 			this.strategies = strategies;
+
+			strategies.messageWriters().stream()
+					.filter(LoggingCodecSupport.class::isInstance)
+					.forEach(reader -> {
+						if (((LoggingCodecSupport) reader).isDisableLoggingRequestDetails()) {
+							this.disableLoggingRequestDetails = true;
+						}
+					});
 		}
+
 
 		@Override
 		public Mono<ClientResponse> exchange(ClientRequest request) {
-			Assert.notNull(request, "'request' must not be null");
+			Assert.notNull(request, "ClientRequest must not be null");
+
+			HttpMethod httpMethod = request.method();
+			URI url = request.url();
+
 			return this.connector
-					.connect(request.method(), request.url(),
-							clientHttpRequest -> request.writeTo(clientHttpRequest, this.strategies))
-					.doOnSubscribe(subscription -> logger.debug("Subscriber present"))
-					.doOnRequest(n -> logger.debug("Demand signaled"))
-					.doOnCancel(() -> logger.debug("Cancelling request"))
+					.connect(httpMethod, url, httpRequest -> request.writeTo(httpRequest, this.strategies))
+					.doOnRequest(n -> logRequest(request))
+					.doOnCancel(() -> logger.debug("Cancel signal (to close connection)"))
 					.map(response -> {
-						HttpStatus status = response.getStatusCode();
-						if (logger.isDebugEnabled()) {
-							logger.debug("Response received, status: " + status + " " + status.getReasonPhrase());
-						}
+						logResponse(response);
 						return new DefaultClientResponse(response, this.strategies);
 					});
+		}
+
+		private void logRequest(ClientRequest request) {
+			if (logger.isDebugEnabled()) {
+				String formatted = request.url().toString();
+				if (this.disableLoggingRequestDetails) {
+					int index = formatted.indexOf("?");
+					formatted = index != -1 ? formatted.substring(0, index) : formatted;
+				}
+				logger.debug("HTTP " + request.method() + " " + formatted);
+			}
+		}
+
+		private void logResponse(ClientHttpResponse response) {
+			if (logger.isDebugEnabled()) {
+				int code = response.getRawStatusCode();
+				HttpStatus status = HttpStatus.resolve(code);
+				String message = "Response " + (status != null ? status : code);
+				if (logger.isTraceEnabled()) {
+					String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + response.getHeaders();
+					logger.trace(message + headers);
+				}
+				else {
+					logger.debug(message);
+				}
+			}
 		}
 	}
 

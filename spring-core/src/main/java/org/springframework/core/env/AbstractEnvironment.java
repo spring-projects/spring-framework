@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -323,6 +323,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
+	@Deprecated
 	public boolean acceptsProfiles(String... profiles) {
 		Assert.notEmpty(profiles, "Must specify at least one profile");
 		for (String profile : profiles) {
@@ -336,6 +337,12 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean acceptsProfiles(Profiles profiles) {
+		Assert.notNull(profiles, "Profiles must not be null");
+		return profiles.matches(this::isProfileActive);
 	}
 
 	/**

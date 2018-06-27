@@ -40,7 +40,9 @@ import org.springframework.lang.Nullable;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @since 4.1
+ * @deprecated as of 5.1 in favor of using {@link EncodedResourceResolver}.
  */
+@Deprecated
 public class GzipResourceResolver extends AbstractResourceResolver {
 
 	@Override
@@ -59,7 +61,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 			}
 		}
 		catch (IOException ex) {
-			logger.trace("No gzipped resource for [" + resource.getFilename() + "]", ex);
+			logger.trace("No gzip resource for [" + resource.getFilename() + "]", ex);
 		}
 
 		return resource;
@@ -165,6 +167,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 				headers = new HttpHeaders();
 			}
 			headers.add(HttpHeaders.CONTENT_ENCODING, "gzip");
+			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT_ENCODING);
 			return headers;
 		}
 	}
