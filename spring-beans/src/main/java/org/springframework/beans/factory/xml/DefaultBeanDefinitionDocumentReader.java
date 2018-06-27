@@ -44,6 +44,9 @@ import org.springframework.util.StringUtils;
  * reads bean definitions according to the "spring-beans" DTD and XSD format
  * (Spring's default XML bean definition format).
  *
+ *
+ * ******* BeanDefinitionDocumentReader 接口的默认实现 *********
+ *
  * <p>The structure, elements, and attribute names of the required XML document
  * are hard-coded in this class. (Of course a transform could be run if necessary
  * to produce this format). {@code <beans>} does not need to be the root
@@ -95,6 +98,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		this.readerContext = readerContext;
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
+
 		//------------------------关键方法-------------------------
 		doRegisterBeanDefinitions(root);
 	}
@@ -127,6 +131,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// the new (child) delegate with a reference to the parent for fallback purposes,
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
+
+		/**创建委托干嘛？？？*/
 		BeanDefinitionParserDelegate parent = this.delegate;
 		this.delegate = createDelegate(getReaderContext(), root, parent);
 
@@ -148,8 +154,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 		//解析前处理，空实现，留给子类实现
 		preProcessXml(root);
+
+
 		//--------------------------解析并注册BeanDefintion-------------------------
 		parseBeanDefinitions(root, this.delegate);
+
+
 		//解析后处理，空实现，留给子类实现
 		postProcessXml(root);
 

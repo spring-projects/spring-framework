@@ -38,6 +38,9 @@ import org.springframework.lang.Nullable;
  * specific to use with an {@link XmlBeanDefinitionReader}. Provides access to the
  * {@link NamespaceHandlerResolver} configured in the {@link XmlBeanDefinitionReader}.
  *
+ *
+ * ReaderContext 是 ReaderContext 的扩展，为啥又这样抽象一个？？？？？
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0

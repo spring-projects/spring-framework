@@ -117,6 +117,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private boolean namespaceAware = false;
 
+	/**默认的DefaultBeanDefinitionDocumentReader ？？？？*/
 	private Class<?> documentReaderClass = DefaultBeanDefinitionDocumentReader.class;
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
@@ -582,11 +583,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
 
 		//在实例化BeanDefinitionDocumentReader时候会将BeanDefinitionRegistry传入
-		//记录加载前BeanDefinition的个数
+		//记录加载前 BeanDefinition 的个数  BeanDefinition是放在一个Map中的
+		// Map<String, BeanDefinition>
 		int countBefore = getRegistry().getBeanDefinitionCount();
 
 
 		//-------------------------------关键方法--------------------加载及注册bean
+		/** createReaderContext(resource) 创建的 XmlReaderContext干嘛的？？？？   */
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
 
 
