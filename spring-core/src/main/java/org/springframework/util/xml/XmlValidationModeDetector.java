@@ -37,23 +37,23 @@ public class XmlValidationModeDetector {
 	/**
 	 * Indicates that the validation should be disabled.
 	 */
-	public static final int VALIDATION_NONE = 0;
+	public static final int VALIDATION_NONE = 0; // 无验证
 
 	/**
 	 * Indicates that the validation mode should be auto-guessed, since we cannot find
 	 * a clear indication (probably choked on some special characters, or the like).
 	 */
-	public static final int VALIDATION_AUTO = 1;
+	public static final int VALIDATION_AUTO = 1;  // 自动验证
 
 	/**
 	 * Indicates that DTD validation should be used (we found a "DOCTYPE" declaration).
 	 */
-	public static final int VALIDATION_DTD = 2;
+	public static final int VALIDATION_DTD = 2; // DTD 验证
 
 	/**
 	 * Indicates that XSD validation should be used (found no "DOCTYPE" declaration).
 	 */
-	public static final int VALIDATION_XSD = 3;
+	public static final int VALIDATION_XSD = 3;// XSD 验证
 
 
 	/**
@@ -75,6 +75,7 @@ public class XmlValidationModeDetector {
 
 	/**
 	 * Indicates whether or not the current parse position is inside an XML comment.
+	 * 表明当前的parse位置是否在XML注释中
 	 */
 	private boolean inComment;
 
@@ -89,6 +90,8 @@ public class XmlValidationModeDetector {
 	 */
 	public int detectValidationMode(InputStream inputStream) throws IOException {
 		// Peek into the file to look for DOCTYPE.
+
+        /***获取验证模式,主要是通过解析 XML的文件头文件来判断验证模式 */
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		try {
 			boolean isDtdValidated = false;
@@ -98,11 +101,14 @@ public class XmlValidationModeDetector {
 				if (this.inComment || !StringUtils.hasText(content)) {
 					continue;
 				}
+
 				//是否有doctype，有就是DTD
 				if (hasDoctype(content)) {
 					isDtdValidated = true;
 					break;
 				}
+
+				//判断标签是否结束，结束了就结束循环
 				if (hasOpeningTag(content)) {
 					// End of meaningful data...
 					break;

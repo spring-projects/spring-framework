@@ -52,6 +52,8 @@ public class ClassRelativeResourceLoader extends DefaultResourceLoader {
 	/**
 	 * ClassPathResource that explicitly expresses a context-relative path
 	 * through implementing the ContextResource interface.
+	 *
+	 * ClassPathResource通过实现 ContextResource 接口显式地表达上下文相关路径
 	 */
 	private static class ClassRelativeContextResource extends ClassPathResource implements ContextResource {
 
