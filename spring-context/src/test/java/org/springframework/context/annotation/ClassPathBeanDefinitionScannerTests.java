@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(13, beanCount);
+		assertEquals(12, beanCount);
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
@@ -65,7 +65,6 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("thoreau"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_FACTORY_BEAN_NAME));
@@ -105,7 +104,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(13, beanCount);
+		assertEquals(12, beanCount);
 		scanner.scan(BASE_PACKAGE);
 
 		assertTrue(context.containsBean("serviceInvocationCounter"));
@@ -230,10 +229,9 @@ public class ClassPathBeanDefinitionScannerTests {
 		scanner.addIncludeFilter(new AnnotationTypeFilter(CustomComponent.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
 
-		assertEquals(7, beanCount);
+		assertEquals(6, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_FACTORY_BEAN_NAME));
@@ -246,7 +244,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		scanner.addIncludeFilter(new AnnotationTypeFilter(CustomComponent.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
 
-		assertEquals(7, beanCount);
+		assertEquals(6, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertFalse(context.containsBean("serviceInvocationCounter"));
 		assertFalse(context.containsBean("fooServiceImpl"));
@@ -254,7 +252,6 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertFalse(context.containsBean("myNamedComponent"));
 		assertFalse(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_FACTORY_BEAN_NAME));
@@ -267,7 +264,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		scanner.addIncludeFilter(new AnnotationTypeFilter(CustomComponent.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
 
-		assertEquals(14, beanCount);
+		assertEquals(13, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("fooServiceImpl"));
@@ -275,7 +272,6 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_FACTORY_BEAN_NAME));
@@ -288,14 +284,13 @@ public class ClassPathBeanDefinitionScannerTests {
 		scanner.addExcludeFilter(new AnnotationTypeFilter(Aspect.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
 
-		assertEquals(12, beanCount);
+		assertEquals(11, beanCount);
 		assertFalse(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 	}
@@ -307,14 +302,13 @@ public class ClassPathBeanDefinitionScannerTests {
 		scanner.addExcludeFilter(new AssignableTypeFilter(FooService.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
 
-		assertEquals(12, beanCount);
+		assertEquals(11, beanCount);
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_FACTORY_BEAN_NAME));
@@ -335,7 +329,6 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertFalse(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertFalse(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertFalse(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
@@ -347,14 +340,13 @@ public class ClassPathBeanDefinitionScannerTests {
 		scanner.addExcludeFilter(new AnnotationTypeFilter(Aspect.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
 
-		assertEquals(11, beanCount);
+		assertEquals(10, beanCount);
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertFalse(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_FACTORY_BEAN_NAME));
@@ -367,7 +359,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		scanner.setBeanNameGenerator(new TestBeanNameGenerator());
 		int beanCount = scanner.scan(BASE_PACKAGE);
 
-		assertEquals(13, beanCount);
+		assertEquals(12, beanCount);
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("fooService"));
 		assertTrue(context.containsBean("serviceInvocationCounter"));
@@ -375,7 +367,6 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertTrue(context.containsBean("myNamedComponent"));
 		assertTrue(context.containsBean("myNamedDao"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.EVENT_LISTENER_FACTORY_BEAN_NAME));
@@ -388,7 +379,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		GenericApplicationContext multiPackageContext = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner multiPackageScanner = new ClassPathBeanDefinitionScanner(multiPackageContext);
 		int singlePackageBeanCount = singlePackageScanner.scan(BASE_PACKAGE);
-		assertEquals(13, singlePackageBeanCount);
+		assertEquals(12, singlePackageBeanCount);
 		multiPackageScanner.scan(BASE_PACKAGE, "org.springframework.dao.annotation");
 		// assertTrue(multiPackageBeanCount > singlePackageBeanCount);
 	}
@@ -399,7 +390,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		int initialBeanCount = context.getBeanDefinitionCount();
 		int scannedBeanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(13, scannedBeanCount);
+		assertEquals(12, scannedBeanCount);
 		assertEquals(scannedBeanCount, context.getBeanDefinitionCount() - initialBeanCount);
 		int addedBeanCount = scanner.scan("org.springframework.aop.aspectj.annotation");
 		assertEquals(initialBeanCount + scannedBeanCount + addedBeanCount, context.getBeanDefinitionCount());
@@ -412,7 +403,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setBeanNameGenerator(new TestBeanNameGenerator());
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(13, beanCount);
+		assertEquals(12, beanCount);
 		context.refresh();
 
 		FooServiceImpl fooService = context.getBean("fooService", FooServiceImpl.class);
