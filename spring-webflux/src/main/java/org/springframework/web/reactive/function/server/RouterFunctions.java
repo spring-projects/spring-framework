@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
@@ -555,7 +556,7 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.builder()
 		 *     .routeGet("/user", this::listUsers)
-		 *     .before(request -> {
+		 *     .filterBefore(request -> {
 		 *       log(request);
 		 *       return Mono.just(request);
 		 *     })
@@ -564,7 +565,7 @@ public abstract class RouterFunctions {
 		 * @param requestProcessor a function that transforms the request
 		 * @return this builder
 		 */
-		Builder before(Function<ServerRequest, Mono<ServerRequest>> requestProcessor);
+		Builder filterBefore(Function<ServerRequest, Mono<ServerRequest>> requestProcessor);
 
 		/**
 		 * Filters the response for all routes created by this builder with the given response
@@ -576,7 +577,7 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.builder()
 		 *     .routeGet("/user", this::listUsers)
-		 *     .after((request, response) -> {
+		 *     .filterAfter((request, response) -> {
 		 *       log(response);
 		 *       return Mono.just(response);
 		 *     })
@@ -585,10 +586,47 @@ public abstract class RouterFunctions {
 		 * @param responseProcessor a function that transforms the response
 		 * @return this builder
 		 */
-		Builder after(BiFunction<ServerRequest, ServerResponse, Mono<ServerResponse>> responseProcessor);
+		Builder filterAfter(BiFunction<ServerRequest, ServerResponse, Mono<ServerResponse>> responseProcessor);
 
-		<T extends Throwable> Builder exception(Class<T> exceptionType,
-				BiFunction<T, ServerRequest, Mono<ServerResponse>> fallback);
+		/**
+		 * Filters all exceptions that match the predicate by applying the given response provider
+		 * function.
+		 * <p>For instance, the following example creates a filter that returns a 500 response
+		 * status when an {@code IllegalStateException} occurs.
+		 * <pre class="code">
+		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
+		 *   RouterFunctions.builder()
+		 *     .routeGet("/user", this::listUsers)
+		 *     .filterException(e -> e instanceof IllegalStateException,
+		 *       (e, request) -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+		 *     .build();
+		 * </pre>
+		 * @param predicate the type of exception to filter
+		 * @param responseProvider a function that creates a response
+		 * @return this builder
+		 */
+		Builder filterException(Predicate<? super Throwable> predicate,
+				BiFunction<? super  Throwable, ServerRequest, Mono<ServerResponse>> responseProvider);
+
+		/**
+		 * Filters all exceptions of the given type by applying the given response provider
+		 * function.
+		 * <p>For instance, the following example creates a filter that returns a 500 response
+		 * status when an {@code IllegalStateException} occurs.
+		 * <pre class="code">
+		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
+		 *   RouterFunctions.builder()
+		 *     .routeGet("/user", this::listUsers)
+		 *     .filterException(IllegalStateException.class,
+		 *       (e, request) -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+		 *     .build();
+		 * </pre>
+		 * @param exceptionType the type of exception to filter
+		 * @param responseProvider a function that creates a response
+		 * @return this builder
+		 */
+		<T extends Throwable> Builder filterException(Class<T> exceptionType,
+				BiFunction<? super T, ServerRequest, Mono<ServerResponse>> responseProvider);
 
 		/**
 		 * Builds the {@code RouterFunction}. All created routes are

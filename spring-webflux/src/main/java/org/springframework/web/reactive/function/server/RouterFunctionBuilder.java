@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import reactor.core.publisher.Mono;
@@ -164,7 +165,7 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	}
 
 	@Override
-	public RouterFunctions.Builder before(
+	public RouterFunctions.Builder filterBefore(
 			Function<ServerRequest, Mono<ServerRequest>> requestProcessor) {
 
 		Assert.notNull(requestProcessor, "Function must not be null");
@@ -172,21 +173,32 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	}
 
 	@Override
-	public RouterFunctions.Builder after(
+	public RouterFunctions.Builder filterAfter(
 			BiFunction<ServerRequest, ServerResponse, Mono<ServerResponse>> responseProcessor) {
 		return filter((request, next) -> next.handle(request)
 				.flatMap(serverResponse -> responseProcessor.apply(request, serverResponse)));
 	}
 
 	@Override
-	public <T extends Throwable> RouterFunctions.Builder exception(
-			Class<T> exceptionType,
-			BiFunction<T, ServerRequest, Mono<ServerResponse>> fallback) {
-		Assert.notNull(exceptionType, "'exceptionType' must not be null");
-		Assert.notNull(fallback, "'fallback' must not be null");
+	public RouterFunctions.Builder filterException(Predicate<? super Throwable> predicate,
+			BiFunction<? super Throwable, ServerRequest, Mono<ServerResponse>> responseProvider) {
+
+		Assert.notNull(predicate, "'exceptionType' must not be null");
+		Assert.notNull(responseProvider, "'fallback' must not be null");
 
 		return filter((request, next) -> next.handle(request)
-				.onErrorResume(exceptionType, t -> fallback.apply(t, request)));
+				.onErrorResume(predicate, t -> responseProvider.apply(t, request)));
+	}
+
+	@Override
+	public <T extends Throwable> RouterFunctions.Builder filterException(
+			Class<T> exceptionType,
+			BiFunction<? super T, ServerRequest, Mono<ServerResponse>> responseProvider) {
+		Assert.notNull(exceptionType, "'exceptionType' must not be null");
+		Assert.notNull(responseProvider, "'fallback' must not be null");
+
+		return filter((request, next) -> next.handle(request)
+				.onErrorResume(exceptionType, t -> responseProvider.apply(t, request)));
 	}
 
 	@Override

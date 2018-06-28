@@ -102,12 +102,12 @@ public class RouterFunctionBuilderTests {
 		RouterFunction<?> route = RouterFunctions.builder()
 				.routeGet("/foo", request -> ServerResponse.ok().build())
 				.routeGet("/bar", request -> Mono.error(new IllegalStateException()))
-				.before(request -> {
+				.filterBefore(request -> {
 					int count = filterCount.getAndIncrement();
 					assertEquals(0, count);
 					return Mono.just(request);
 				})
-				.after((request, response) -> {
+				.filterAfter((request, response) -> {
 					int count = filterCount.getAndIncrement();
 					assertEquals(3, count);
 					return Mono.just(response);
@@ -120,7 +120,7 @@ public class RouterFunctionBuilderTests {
 					assertEquals(2, count);
 					return responseMono;
 				})
-				.exception(IllegalStateException.class, (e, request) -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+				.filterException(IllegalStateException.class, (e, request) -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
 				.build();
 
 		MockServerRequest fooRequest = MockServerRequest.builder().
