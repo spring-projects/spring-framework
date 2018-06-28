@@ -33,11 +33,9 @@ import static org.junit.Assert.*;
  */
 public class RouterFunctionBuilderTests {
 
-	private RouterFunctionBuilder builder = new RouterFunctionBuilder();
-
 	@Test
 	public void route() {
-		RouterFunction<ServerResponse> route = this.builder
+		RouterFunction<ServerResponse> route = RouterFunctions.builder()
 				.routeGet("/foo", request -> ServerResponse.ok().build())
 				.routePost(request -> ServerResponse.noContent().build())
 				.build();
@@ -74,13 +72,12 @@ public class RouterFunctionBuilderTests {
 
 	@Test
 	public void nest() {
-		RouterFunction<?> route = this.builder
-				.nestPath("/foo", builder -> {
-					builder.nestPath("/bar",
-							() -> RouterFunctions.builder()
-									.routeGet("/baz", request -> ServerResponse.ok().build())
-									.build());
-				})
+		RouterFunction<?> route = RouterFunctions.builder()
+				.nestPath("/foo", builder ->
+						builder.nestPath("/bar",
+								() -> RouterFunctions.builder()
+										.routeGet("/baz", request -> ServerResponse.ok().build())
+										.build()))
 				.build();
 
 		MockServerRequest fooRequest = MockServerRequest.builder().
@@ -102,7 +99,7 @@ public class RouterFunctionBuilderTests {
 	public void filters() {
 		AtomicInteger filterCount = new AtomicInteger();
 
-		RouterFunction<?> route = this.builder
+		RouterFunction<?> route = RouterFunctions.builder()
 				.routeGet("/foo", request -> ServerResponse.ok().build())
 				.routeGet("/bar", request -> Mono.error(new IllegalStateException()))
 				.before(request -> {
