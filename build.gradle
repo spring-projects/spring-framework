@@ -157,10 +157,10 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:4.12") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
-		testCompile("org.mockito:mockito-core:2.18.0") {
+		testCompile("org.mockito:mockito-core:2.19.0") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
-		testCompile("com.nhaarman:mockito-kotlin:1.5.0") {
+		testCompile("com.nhaarman:mockito-kotlin:1.6.0") {
 			exclude module:'kotlin-stdlib'
 			exclude module:'kotlin-reflect'
 			exclude module:'mockito-core'
