@@ -181,8 +181,9 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			return;
 		}
 
+		// Do not log warning for serializer not found (note: different message wording on Jackson 2.9)
 		boolean debugLevel = (cause instanceof JsonMappingException &&
-				cause.getMessage().startsWith("Can not find"));
+				(cause.getMessage().startsWith("Can not find") || cause.getMessage().startsWith("Cannot find")));
 
 		if (debugLevel ? logger.isDebugEnabled() : logger.isWarnEnabled()) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
