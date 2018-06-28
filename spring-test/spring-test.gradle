@@ -42,7 +42,7 @@ dependencies {
 	optional("org.seleniumhq.selenium:htmlunit-driver:2.31.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:selenium-java:3.12.0") {
+	optional("org.seleniumhq.selenium:selenium-java:3.13.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
