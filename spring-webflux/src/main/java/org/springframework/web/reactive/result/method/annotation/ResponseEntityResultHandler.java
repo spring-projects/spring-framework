@@ -153,14 +153,13 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 			HttpHeaders entityHeaders = httpEntity.getHeaders();
 			HttpHeaders responseHeaders = exchange.getResponse().getHeaders();
-
 			if (!entityHeaders.isEmpty()) {
 				entityHeaders.entrySet().stream()
 						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
 
-			if(httpEntity.getBody() == null || returnValue instanceof HttpHeaders) {
+			if (httpEntity.getBody() == null || returnValue instanceof HttpHeaders) {
 				return exchange.getResponse().setComplete();
 			}
 

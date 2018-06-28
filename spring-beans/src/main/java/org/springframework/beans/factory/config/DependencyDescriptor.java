@@ -353,7 +353,6 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 						Type[] args = ((ParameterizedType) type).getActualTypeArguments();
 						type = args[args.length - 1];
 					}
-					// TODO: Object.class if unresolvable
 				}
 				if (type instanceof Class) {
 					return (Class<?>) type;
@@ -374,6 +373,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 			return obtainMethodParameter().getNestedParameterType();
 		}
 	}
+
 
 	@Override
 	public boolean equals(Object other) {

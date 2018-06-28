@@ -40,7 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
- * @deprecated as of 5.1 in favor of using {@link EncodedResourceResolver}.
+ * @deprecated as of 5.1, in favor of using {@link EncodedResourceResolver}
  */
 @Deprecated
 public class GzipResourceResolver extends AbstractResourceResolver {
@@ -161,13 +161,8 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 
 		@Override
 		public HttpHeaders getResponseHeaders() {
-			HttpHeaders headers;
-			if(this.original instanceof HttpResource) {
-				headers = ((HttpResource) this.original).getResponseHeaders();
-			}
-			else {
-				headers = new HttpHeaders();
-			}
+			HttpHeaders headers = (this.original instanceof HttpResource ?
+					((HttpResource) this.original).getResponseHeaders() : new HttpHeaders());
 			headers.add(HttpHeaders.CONTENT_ENCODING, "gzip");
 			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT_ENCODING);
 			return headers;

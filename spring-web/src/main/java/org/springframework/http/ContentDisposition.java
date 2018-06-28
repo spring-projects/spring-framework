@@ -199,7 +199,7 @@ public final class ContentDisposition {
 			sb.append(this.name).append('\"');
 		}
 		if (this.filename != null) {
-			if(this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
+			if (this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
 				sb.append("; filename=\"");
 				sb.append(this.filename).append('\"');
 			}

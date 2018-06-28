@@ -209,10 +209,8 @@ public abstract class MethodMatchers {
 
 		@Override
 		public int hashCode() {
-			int hashCode = super.hashCode();
-			hashCode = 37 * hashCode + this.cf1.hashCode();
-			hashCode = 37 * hashCode + this.cf2.hashCode();
-			return hashCode;
+			// Allow for matching with regular UnionMethodMatcher by providing same hash...
+			return super.hashCode();
 		}
 	}
 
