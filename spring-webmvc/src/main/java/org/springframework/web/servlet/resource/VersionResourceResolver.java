@@ -316,23 +316,18 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 		@Override
 		public String getDescription() {
-			return original.getDescription();
+			return this.original.getDescription();
 		}
 
 		@Override
 		public InputStream getInputStream() throws IOException {
-			return original.getInputStream();
+			return this.original.getInputStream();
 		}
 
 		@Override
 		public HttpHeaders getResponseHeaders() {
-			HttpHeaders headers;
-			if (this.original instanceof HttpResource) {
-				headers = ((HttpResource) this.original).getResponseHeaders();
-			}
-			else {
-				headers = new HttpHeaders();
-			}
+			HttpHeaders headers = (this.original instanceof HttpResource ?
+					((HttpResource) this.original).getResponseHeaders() : new HttpHeaders());
 			headers.setETag("\"" + this.version + "\"");
 			return headers;
 		}
