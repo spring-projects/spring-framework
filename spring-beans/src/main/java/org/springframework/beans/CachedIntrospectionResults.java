@@ -306,19 +306,10 @@ public class CachedIntrospectionResults {
 			// Explicitly check implemented interfaces for setter/getter methods as well,
 			// in particular for Java 8 default methods...
 			Class<?> clazz = beanClass;
-			while (clazz != null) {
-				Class<?>[] ifcs = clazz.getInterfaces();
-				for (Class<?> ifc : ifcs) {
-					BeanInfo ifcInfo = Introspector.getBeanInfo(ifc, Introspector.IGNORE_ALL_BEANINFO);
-					PropertyDescriptor[] ifcPds = ifcInfo.getPropertyDescriptors();
-					for (PropertyDescriptor pd : ifcPds) {
-						if (!this.propertyDescriptorCache.containsKey(pd.getName())) {
-							pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-							this.propertyDescriptorCache.put(pd.getName(), pd);
-						}
-					}
-				}
-				clazz = clazz.getSuperclass();
+			Class<?> currClass = beanClass;
+			while (currClass != null && currClass != Object.class) {
+				introspectInterfaces(beanClass, currClass);
+				currClass = currClass.getSuperclass();
 			}
 
 			this.typeDescriptorCache = new ConcurrentReferenceHashMap<PropertyDescriptor, TypeDescriptor>();
@@ -326,6 +317,24 @@ public class CachedIntrospectionResults {
 		catch (IntrospectionException ex) {
 			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);
 		}
+	}
+
+    private void introspectInterfaces(Class<?> beanClass, Class<?> currClass) throws IntrospectionException {
+        for (Class<?> ifc : currClass.getInterfaces()) {
+			BeanInfo ifcInfo = Introspector.getBeanInfo(ifc, Introspector.IGNORE_ALL_BEANINFO);
+			PropertyDescriptor[] ifcPds = ifcInfo.getPropertyDescriptors();
+			for (PropertyDescriptor pd : ifcPds) {
+				PropertyDescriptor existingPd = this.propertyDescriptorCache.get(pd.getName());
+				if (existingPd == null ||
+						(existingPd.getReadMethod() == null && pd.getReadMethod() != null)) {
+					// GenericTypeAwarePropertyDescriptor leniently resolves a set* write method
+					// against a declared read method, so we prefer read method descriptors here.
+					pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
+					this.propertyDescriptorCache.put(pd.getName(), pd);
+				}
+			}
+			introspectInterfaces(ifc, ifc);
+	}
 	}
 
 	BeanInfo getBeanInfo() {
