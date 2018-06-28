@@ -144,14 +144,14 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
+		public boolean equals(Object other) {
+			if (this == other) {
 				return true;
 			}
-			if (!(obj instanceof UnionMethodMatcher)) {
+			if (!(other instanceof UnionMethodMatcher)) {
 				return false;
 			}
-			UnionMethodMatcher that = (UnionMethodMatcher) obj;
+			UnionMethodMatcher that = (UnionMethodMatcher) other;
 			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
 		}
 
@@ -239,18 +239,18 @@ public abstract class MethodMatchers {
 
 		@Override
 		public boolean matches(Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
-			return MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions) &&
-					MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions);
+			return (MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions) &&
+					MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions));
 		}
 
 		@Override
 		public boolean matches(Method method, @Nullable Class<?> targetClass) {
-			return this.mm1.matches(method, targetClass) && this.mm2.matches(method, targetClass);
+			return (this.mm1.matches(method, targetClass) && this.mm2.matches(method, targetClass));
 		}
 
 		@Override
 		public boolean isRuntime() {
-			return this.mm1.isRuntime() || this.mm2.isRuntime();
+			return (this.mm1.isRuntime() || this.mm2.isRuntime());
 		}
 
 		@Override
@@ -258,10 +258,10 @@ public abstract class MethodMatchers {
 			// Because a dynamic intersection may be composed of a static and dynamic part,
 			// we must avoid calling the 3-arg matches method on a dynamic matcher, as
 			// it will probably be an unsupported operation.
-			boolean aMatches = this.mm1.isRuntime() ?
-					this.mm1.matches(method, targetClass, args) : this.mm1.matches(method, targetClass);
-			boolean bMatches = this.mm2.isRuntime() ?
-					this.mm2.matches(method, targetClass, args) : this.mm2.matches(method, targetClass);
+			boolean aMatches = (this.mm1.isRuntime() ?
+					this.mm1.matches(method, targetClass, args) : this.mm1.matches(method, targetClass));
+			boolean bMatches = (this.mm2.isRuntime() ?
+					this.mm2.matches(method, targetClass, args) : this.mm2.matches(method, targetClass));
 			return aMatches && bMatches;
 		}
 

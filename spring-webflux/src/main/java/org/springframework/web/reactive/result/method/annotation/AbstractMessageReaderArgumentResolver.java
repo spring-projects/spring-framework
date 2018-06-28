@@ -89,8 +89,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 * @param messageReaders readers to convert from the request body
 	 * @param adapterRegistry for adapting to other reactive types from Flux and Mono
 	 */
-	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders,
-			ReactiveAdapterRegistry adapterRegistry) {
+	protected AbstractMessageReaderArgumentResolver(
+			List<HttpMessageReader<?>> messageReaders, ReactiveAdapterRegistry adapterRegistry) {
 
 		super(adapterRegistry);
 		Assert.notEmpty(messageReaders, "At least one HttpMessageReader is required");
@@ -121,6 +121,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 */
 	protected Mono<Object> readBody(MethodParameter bodyParameter, boolean isBodyRequired,
 			BindingContext bindingContext, ServerWebExchange exchange) {
+
 		return this.readBody(bodyParameter, null, isBodyRequired, bindingContext, exchange);
 	}
 
@@ -139,7 +140,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			boolean isBodyRequired, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParam);
-		ResolvableType actualType = actualParam == null ? bodyType : ResolvableType.forMethodParameter(actualParam);
+		ResolvableType actualType = (actualParam != null ? ResolvableType.forMethodParameter(actualParam) : bodyType);
 		Class<?> resolvedType = bodyType.resolve();
 		ReactiveAdapter adapter = (resolvedType != null ? getAdapterRegistry().getAdapter(resolvedType) : null);
 		ResolvableType elementType = (adapter != null ? bodyType.getGeneric() : bodyType);
@@ -190,7 +191,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 						mono = mono.doOnNext(target ->
 								validate(target, hints, bodyParam, bindingContext, exchange));
 					}
-					return adapter != null ? Mono.just(adapter.fromPublisher(mono)) : Mono.from(mono);
+					return (adapter != null ? Mono.just(adapter.fromPublisher(mono)) : Mono.from(mono));
 				}
 			}
 		}

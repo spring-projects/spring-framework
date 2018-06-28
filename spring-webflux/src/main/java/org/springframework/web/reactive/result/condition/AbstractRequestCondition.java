@@ -19,6 +19,8 @@ package org.springframework.web.reactive.result.condition;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A base class for {@link RequestCondition} types providing implementations of
  * {@link #equals(Object)}, {@link #hashCode()}, and {@link #toString()}.
@@ -28,19 +30,17 @@ import java.util.Iterator;
  * @param <T> the type of objects that this RequestCondition can be combined
  * with and compared to
  */
-public abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>>
-		implements RequestCondition<T> {
+public abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>> implements RequestCondition<T> {
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && getClass() == obj.getClass()) {
-			AbstractRequestCondition<?> other = (AbstractRequestCondition<?>) obj;
-			return getContent().equals(other.getContent());
+		if (other == null || getClass() != other.getClass()) {
+			return false;
 		}
-		return false;
+		return getContent().equals(((AbstractRequestCondition<?>) other).getContent());
 	}
 
 	@Override

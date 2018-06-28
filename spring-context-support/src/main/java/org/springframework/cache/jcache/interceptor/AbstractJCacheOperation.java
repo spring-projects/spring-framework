@@ -19,6 +19,7 @@ package org.springframework.cache.jcache.interceptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,8 +32,6 @@ import javax.cache.annotation.CacheValue;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ExceptionTypeFilter;
-
-import static java.util.Arrays.asList;
 
 /**
  * A base {@link JCacheOperation} implementation.
@@ -56,8 +55,8 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	 * @param cacheResolver the cache resolver to resolve regular caches
 	 */
 	protected AbstractJCacheOperation(CacheMethodDetails<A> methodDetails, CacheResolver cacheResolver) {
-		Assert.notNull(methodDetails, "method details must not be null.");
-		Assert.notNull(cacheResolver, "cache resolver must not be null.");
+		Assert.notNull(methodDetails, "CacheMethodDetails must not be null");
+		Assert.notNull(cacheResolver, "CacheResolver must not be null");
 		this.methodDetails = methodDetails;
 		this.cacheResolver = cacheResolver;
 		this.allParameterDetails = initializeAllParameterDetails(methodDetails.getMethod());
@@ -117,7 +116,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	protected ExceptionTypeFilter createExceptionTypeFilter(
 			Class<? extends Throwable>[] includes, Class<? extends Throwable>[] excludes) {
 
-		return new ExceptionTypeFilter(asList(includes), asList(excludes), true);
+		return new ExceptionTypeFilter(Arrays.asList(includes), Arrays.asList(excludes), true);
 	}
 
 	@Override

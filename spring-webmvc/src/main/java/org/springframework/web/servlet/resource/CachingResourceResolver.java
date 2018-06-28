@@ -82,18 +82,15 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	/**
 	 * Configure the supported content codings from the
 	 * {@literal "Accept-Encoding"} header for which to cache resource variations.
-	 *
 	 * <p>The codings configured here are generally expected to match those
 	 * configured on {@link EncodedResourceResolver#setContentCodings(List)}.
-	 *
 	 * <p>By default this property is set to {@literal ["br", "gzip"]} based on
 	 * the value of {@link EncodedResourceResolver#DEFAULT_CODINGS}.
-	 *
 	 * @param codings one or more supported content codings
 	 * @since 5.1
 	 */
 	public void setContentCodings(List<String> codings) {
-		Assert.notEmpty(codings, "At least one content coding expected.");
+		Assert.notEmpty(codings, "At least one content coding expected");
 		this.contentCodings.clear();
 		this.contentCodings.addAll(codings);
 	}

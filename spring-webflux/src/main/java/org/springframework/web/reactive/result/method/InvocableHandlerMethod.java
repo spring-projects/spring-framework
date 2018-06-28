@@ -130,8 +130,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param providedArgs optional list of argument values to match by type
 	 * @return a Mono with a {@link HandlerResult}.
 	 */
-	public Mono<HandlerResult> invoke(ServerWebExchange exchange, BindingContext bindingContext,
-			Object... providedArgs) {
+	public Mono<HandlerResult> invoke(
+			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		return resolveArguments(exchange, bindingContext, providedArgs).flatMap(args -> {
 			Object value;
@@ -161,7 +161,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(returnType.getParameterType());
 			boolean asyncVoid = isAsyncVoidReturnType(returnType, adapter);
 			if ((value == null || asyncVoid) && isResponseHandled(args, exchange)) {
-				return asyncVoid ? Mono.from(adapter.toPublisher(value)) : Mono.empty();
+				return (asyncVoid ? Mono.from(adapter.toPublisher(value)) : Mono.empty());
 			}
 
 			HandlerResult result = new HandlerResult(this, value, returnType, bindingContext);
@@ -169,8 +169,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		});
 	}
 
-	private Mono<Object[]> resolveArguments(ServerWebExchange exchange, BindingContext bindingContext,
-			Object... providedArgs) {
+	private Mono<Object[]> resolveArguments(
+			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
 			return EMPTY_ARGS;

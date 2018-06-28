@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -45,9 +43,6 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class HttpMessageWriterView implements View {
 
-	private static final Log logger = LogFactory.getLog(HttpMessageWriter.class);
-
-
 	private final HttpMessageWriter<?> writer;
 
 	private final Set<String> modelKeys = new HashSet<>(4);
@@ -66,7 +61,7 @@ public class HttpMessageWriterView implements View {
 	 * Constructor with a fully initialized {@link HttpMessageWriter}.
 	 */
 	public HttpMessageWriterView(HttpMessageWriter<?> writer) {
-		Assert.notNull(writer, "'writer' is required.");
+		Assert.notNull(writer, "HttpMessageWriter is required");
 		this.writer = writer;
 		this.canWriteMap = writer.canWrite(ResolvableType.forClass(Map.class), null);
 	}
@@ -118,12 +113,11 @@ public class HttpMessageWriterView implements View {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType,
-			ServerWebExchange exchange) {
+	public Mono<Void> render(
+			@Nullable Map<String, ?> model, @Nullable MediaType contentType, ServerWebExchange exchange) {
 
 		Object value = getObjectToRender(model);
-		return (value != null) ?
-				write(value, contentType, exchange) : exchange.getResponse().setComplete();
+		return (value != null ? write(value, contentType, exchange) : exchange.getResponse().setComplete());
 	}
 
 	@Nullable

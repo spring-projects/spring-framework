@@ -233,7 +233,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 						value = UriUtils.decode(value, StandardCharsets.UTF_8);
 					}
 					else {
-						value = StringUtils.hasLength(eq) ? "" : null;
+						value = (StringUtils.hasLength(eq) ? "" : null);
 					}
 					queryParams.add(name, value);
 				}

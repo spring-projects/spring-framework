@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +50,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeTypeUtils;
-
-import static java.util.Collections.emptyMap;
 
 /**
  * {@code HttpMessageWriter} that can write a {@link Resource}.
@@ -244,7 +243,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				.orElseGet(() -> {
 					Publisher<? extends ResourceRegion> input = Mono.just(region);
 					MediaType mediaType = message.getHeaders().getContentType();
-					return encodeAndWriteRegions(input, mediaType, message, emptyMap());
+					return encodeAndWriteRegions(input, mediaType, message, Collections.emptyMap());
 				});
 	}
 

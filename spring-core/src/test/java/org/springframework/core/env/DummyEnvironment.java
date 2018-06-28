@@ -73,6 +73,7 @@ public class DummyEnvironment implements Environment {
 		return null;
 	}
 
+	@Deprecated
 	@Override
 	public boolean acceptsProfiles(String... profiles) {
 		return false;

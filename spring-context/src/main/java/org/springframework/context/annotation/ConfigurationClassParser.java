@@ -553,7 +553,7 @@ class ConfigurationClassParser {
 		for (DeferredImportSelectorHolder deferredImport : deferredImports) {
 			Class<? extends Group> group = deferredImport.getImportSelector().getImportGroup();
 			DeferredImportSelectorGrouping grouping = groupings.computeIfAbsent(
-					(group == null ? deferredImport : group),
+					(group != null ? group : deferredImport),
 					key -> new DeferredImportSelectorGrouping(createGroup(group)));
 			grouping.add(deferredImport);
 			configurationClasses.put(deferredImport.getConfigurationClass().getMetadata(),
@@ -561,8 +561,7 @@ class ConfigurationClassParser {
 		}
 		for (DeferredImportSelectorGrouping grouping : groupings.values()) {
 			grouping.getImports().forEach(entry -> {
-				ConfigurationClass configurationClass = configurationClasses.get(
-						entry.getMetadata());
+				ConfigurationClass configurationClass = configurationClasses.get(entry.getMetadata());
 				try {
 					processImports(configurationClass, asSourceClass(configurationClass),
 							asSourceClasses(entry.getImportClassName()), false);
@@ -573,15 +572,14 @@ class ConfigurationClassParser {
 				catch (Throwable ex) {
 					throw new BeanDefinitionStoreException(
 							"Failed to process import candidates for configuration class [" +
-									configurationClass.getMetadata().getClassName() + "]", ex);
+							configurationClass.getMetadata().getClassName() + "]", ex);
 				}
 			});
 		}
 	}
 
 	private Group createGroup(@Nullable Class<? extends Group> type) {
-		Class<? extends Group> effectiveType = (type != null ? type
-				: DefaultDeferredImportSelectorGroup.class);
+		Class<? extends Group> effectiveType = (type != null ? type : DefaultDeferredImportSelectorGroup.class);
 		Group group = BeanUtils.instantiateClass(effectiveType);
 		ParserStrategyUtils.invokeAwareMethods(group,
 				ConfigurationClassParser.this.environment,

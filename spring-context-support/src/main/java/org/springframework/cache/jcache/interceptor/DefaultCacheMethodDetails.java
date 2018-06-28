@@ -18,12 +18,11 @@ package org.springframework.cache.jcache.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.cache.annotation.CacheMethodDetails;
-
-import static java.util.Arrays.asList;
 
 /**
  * The default {@link CacheMethodDetails} implementation.
@@ -46,7 +45,7 @@ class DefaultCacheMethodDetails<A extends Annotation> implements CacheMethodDeta
 	public DefaultCacheMethodDetails(Method method, A cacheAnnotation, String cacheName) {
 		this.method = method;
 		this.annotations = Collections.unmodifiableSet(
-				new LinkedHashSet<>(asList(method.getAnnotations())));
+				new LinkedHashSet<>(Arrays.asList(method.getAnnotations())));
 		this.cacheAnnotation = cacheAnnotation;
 		this.cacheName = cacheName;
 	}

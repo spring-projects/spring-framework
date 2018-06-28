@@ -32,7 +32,6 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	@Nullable
 	private final String resourceDescription;
 
-	@Nullable
 	private final String beanName;
 
 	@Nullable
@@ -47,8 +46,8 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	 * @param beanClassName the name of the bean class
 	 * @param cause the root cause
 	 */
-	public CannotLoadBeanClassException(
-			@Nullable String resourceDescription, String beanName, @Nullable String beanClassName, ClassNotFoundException cause) {
+	public CannotLoadBeanClassException(@Nullable String resourceDescription, String beanName,
+			@Nullable String beanClassName, ClassNotFoundException cause) {
 
 		super("Cannot find class [" + beanClassName + "] for bean with name '" + beanName + "'" +
 				(resourceDescription != null ? " defined in " + resourceDescription : ""), cause);
@@ -65,8 +64,8 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	 * @param beanClassName the name of the bean class
 	 * @param cause the root cause
 	 */
-	public CannotLoadBeanClassException(
-			@Nullable String resourceDescription, String beanName, @Nullable String beanClassName, LinkageError cause) {
+	public CannotLoadBeanClassException(@Nullable String resourceDescription, String beanName,
+			@Nullable String beanClassName, LinkageError cause) {
 
 		super("Error loading class [" + beanClassName + "] for bean with name '" + beanName + "'" +
 				(resourceDescription != null ? " defined in " + resourceDescription : "") +
@@ -89,7 +88,6 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	/**
 	 * Return the name of the bean requested.
 	 */
-	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}

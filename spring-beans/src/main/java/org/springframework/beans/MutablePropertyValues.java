@@ -348,14 +348,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	@Override
 	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof MutablePropertyValues)) {
-			return false;
-		}
-		MutablePropertyValues that = (MutablePropertyValues) other;
-		return this.propertyValueList.equals(that.propertyValueList);
+		return (this == other || (other instanceof MutablePropertyValues &&
+				this.propertyValueList.equals(((MutablePropertyValues) other).propertyValueList)));
 	}
 
 	@Override

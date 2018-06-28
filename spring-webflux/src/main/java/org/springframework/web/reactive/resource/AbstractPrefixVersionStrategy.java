@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,14 @@ public abstract class AbstractPrefixVersionStrategy implements VersionStrategy {
 
 
 	protected AbstractPrefixVersionStrategy(String version) {
-		Assert.hasText(version, "'version' must not be empty");
+		Assert.hasText(version, "Version must not be empty");
 		this.prefix = version;
 	}
 
 
 	@Override
 	public String extractVersion(String requestPath) {
-		return requestPath.startsWith(this.prefix) ? this.prefix : null;
+		return (requestPath.startsWith(this.prefix) ? this.prefix : null);
 	}
 
 	@Override

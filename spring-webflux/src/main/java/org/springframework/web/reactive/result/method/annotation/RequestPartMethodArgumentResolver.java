@@ -51,7 +51,6 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
-
 	public RequestPartMethodArgumentResolver(List<HttpMessageReader<?>> readers,
 			ReactiveAdapterRegistry registry) {
 
@@ -78,9 +77,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 				.flatMapMany(map -> {
 					List<Part> list = map.get(name);
 					if (CollectionUtils.isEmpty(list)) {
-						return isRequired ?
-								Flux.error(getMissingPartException(name, parameter)) :
-								Flux.empty();
+						return (isRequired ? Flux.error(getMissingPartException(name, parameter)) : Flux.empty());
 					}
 					return Flux.fromIterable(list);
 				});
@@ -105,7 +102,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 			// Mono<Part> or Flux<Part>
 			MethodParameter elementType = parameter.nested();
 			if (Part.class.isAssignableFrom(elementType.getNestedParameterType())) {
-				parts = adapter.isMultiValue() ? parts : parts.take(1);
+				parts = (adapter.isMultiValue() ? parts : parts.take(1));
 				return Mono.just(adapter.fromPublisher(parts));
 			}
 			// We have to decode the content for each part, one at a time

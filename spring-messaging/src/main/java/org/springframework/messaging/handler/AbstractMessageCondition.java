@@ -31,33 +31,17 @@ import org.springframework.lang.Nullable;
  * @since 4.0
  * @param <T> the kind of condition that this condition can be combined with or compared to
  */
-public abstract class AbstractMessageCondition<T extends AbstractMessageCondition<T>>
-		implements MessageCondition<T> {
-
-
-	/**
-	 * Return the collection of objects the message condition is composed of
-	 * (e.g. destination patterns), never {@code null}.
-	 */
-	protected abstract Collection<?> getContent();
-
-	/**
-	 * The notation to use when printing discrete items of content.
-	 * For example " || " for URL patterns or " && " for param expressions.
-	 */
-	protected abstract String getToStringInfix();
-
+public abstract class AbstractMessageCondition<T extends AbstractMessageCondition<T>> implements MessageCondition<T> {
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && getClass() == obj.getClass()) {
-			AbstractMessageCondition<?> other = (AbstractMessageCondition<?>) obj;
-			return getContent().equals(other.getContent());
+		if (other == null || getClass() != other.getClass()) {
+			return false;
 		}
-		return false;
+		return getContent().equals(((AbstractMessageCondition<?>) other).getContent());
 	}
 
 	@Override
@@ -78,5 +62,18 @@ public abstract class AbstractMessageCondition<T extends AbstractMessageConditio
 		builder.append("]");
 		return builder.toString();
 	}
+
+
+	/**
+	 * Return the collection of objects the message condition is composed of
+	 * (e.g. destination patterns), never {@code null}.
+	 */
+	protected abstract Collection<?> getContent();
+
+	/**
+	 * The notation to use when printing discrete items of content.
+	 * For example " || " for URL patterns or " && " for param expressions.
+	 */
+	protected abstract String getToStringInfix();
 
 }

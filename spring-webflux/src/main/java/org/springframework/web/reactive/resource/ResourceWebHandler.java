@@ -388,8 +388,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			return Mono.empty();
 		}
 
-		Assert.notNull(this.resolverChain, "ResourceResolverChain not initialized.");
-		Assert.notNull(this.transformerChain, "ResourceTransformerChain not initialized.");
+		Assert.state(this.resolverChain != null, "ResourceResolverChain not initialized");
+		Assert.state(this.transformerChain != null, "ResourceTransformerChain not initialized");
 
 		return this.resolverChain.resolveResource(exchange, path, getLocations())
 				.flatMap(resource -> this.transformerChain.transform(exchange, resource));
@@ -419,7 +419,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		for (int i = 0; i < path.length(); i++) {
 			char curr = path.charAt(i);
 			try {
-				if ((curr == '/') && (prev == '/')) {
+				if (curr == '/' && prev == '/') {
 					if (sb == null) {
 						sb = new StringBuilder(path.substring(0, i));
 					}
@@ -433,7 +433,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 				prev = curr;
 			}
 		}
-		return sb != null ? sb.toString() : path;
+		return (sb != null ? sb.toString() : path);
 	}
 
 	private String cleanLeadingSlash(String path) {
@@ -446,7 +446,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 				if (i == 0 || (i == 1 && slash)) {
 					return path;
 				}
-				return slash ? "/" + path.substring(i) : path.substring(i);
+				return (slash ? "/" + path.substring(i) : path.substring(i));
 			}
 		}
 		return (slash ? "/" : "");

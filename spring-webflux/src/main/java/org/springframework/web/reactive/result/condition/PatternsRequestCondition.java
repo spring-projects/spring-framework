@@ -56,14 +56,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * Creates a new instance with the given {@code Stream} of URL patterns.
 	 */
 	public PatternsRequestCondition(List<PathPattern> patterns) {
-		this(toSortedSet(patterns));
+		this(new TreeSet<>(patterns));
 	}
 
-	private static SortedSet<PathPattern> toSortedSet(Collection<PathPattern> patterns) {
-		TreeSet<PathPattern> sorted = new TreeSet<>();
-		sorted.addAll(patterns);
-		return sorted;
-	}
 
 	private PatternsRequestCondition(SortedSet<PathPattern> patterns) {
 		this.patterns = patterns;
@@ -127,8 +122,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			return this;
 		}
 		SortedSet<PathPattern> matches = getMatchingPatterns(exchange);
-		return matches.isEmpty() ? null :
-				new PatternsRequestCondition(matches);
+		return (!matches.isEmpty() ? new PatternsRequestCondition(matches) : null);
 	}
 
 	/**

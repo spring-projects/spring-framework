@@ -80,8 +80,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	 * @param handshakeInfo the handshake info
 	 * @param bufferFactory the DataBuffer factor for the current connection
 	 */
-	public AbstractListenerWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
-			DataBufferFactory bufferFactory) {
+	public AbstractListenerWebSocketSession(
+			T delegate, String id, HandshakeInfo handshakeInfo, DataBufferFactory bufferFactory) {
 
 		this(delegate, id, handshakeInfo, bufferFactory, null);
 	}
@@ -106,9 +106,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	@Override
 	public Flux<WebSocketMessage> receive() {
-		return canSuspendReceiving() ?
-				Flux.from(this.receivePublisher) :
-				Flux.from(this.receivePublisher).onBackpressureBuffer(RECEIVE_BUFFER_SIZE);
+		return (canSuspendReceiving() ? Flux.from(this.receivePublisher) :
+				Flux.from(this.receivePublisher).onBackpressureBuffer(RECEIVE_BUFFER_SIZE));
 	}
 
 	@Override

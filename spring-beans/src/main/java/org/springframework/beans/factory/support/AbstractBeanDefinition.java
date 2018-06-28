@@ -1114,39 +1114,38 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public abstract AbstractBeanDefinition cloneBeanDefinition();
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof AbstractBeanDefinition)) {
+		if (!(other instanceof AbstractBeanDefinition)) {
 			return false;
 		}
-		AbstractBeanDefinition other = (AbstractBeanDefinition) obj;
-		boolean rtn = true;
-		rtn = rtn &= ObjectUtils.nullSafeEquals(getBeanClassName(), other.getBeanClassName());
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.scope, other.scope);
-		rtn = rtn &= this.abstractFlag == other.abstractFlag;
-		rtn = rtn &= this.lazyInit == other.lazyInit;
-		rtn = rtn &= this.autowireMode == other.autowireMode;
-		rtn = rtn &= this.dependencyCheck == other.dependencyCheck;
-		rtn = rtn &= Arrays.equals(this.dependsOn, other.dependsOn);
-		rtn = rtn &= this.autowireCandidate == other.autowireCandidate;
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.qualifiers, other.qualifiers);
-		rtn = rtn &= this.primary == other.primary;
-		rtn = rtn &= this.nonPublicAccessAllowed == other.nonPublicAccessAllowed;
-		rtn = rtn &= this.lenientConstructorResolution == other.lenientConstructorResolution;
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.constructorArgumentValues, other.constructorArgumentValues);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.propertyValues, other.propertyValues);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.methodOverrides, other.methodOverrides);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.factoryBeanName, other.factoryBeanName);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.factoryMethodName, other.factoryMethodName);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.initMethodName, other.initMethodName);
-		rtn = rtn &= this.enforceInitMethod == other.enforceInitMethod;
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.destroyMethodName, other.destroyMethodName);
-		rtn = rtn &= this.enforceDestroyMethod == other.enforceDestroyMethod;
-		rtn = rtn &= this.synthetic == other.synthetic;
-		rtn = rtn &= this.role == other.role;
-		return rtn && super.equals(obj);
+		AbstractBeanDefinition that = (AbstractBeanDefinition) other;
+		boolean rtn = ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName());
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.scope, that.scope);
+		rtn = rtn &= this.abstractFlag == that.abstractFlag;
+		rtn = rtn &= this.lazyInit == that.lazyInit;
+		rtn = rtn &= this.autowireMode == that.autowireMode;
+		rtn = rtn &= this.dependencyCheck == that.dependencyCheck;
+		rtn = rtn &= Arrays.equals(this.dependsOn, that.dependsOn);
+		rtn = rtn &= this.autowireCandidate == that.autowireCandidate;
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.qualifiers, that.qualifiers);
+		rtn = rtn &= this.primary == that.primary;
+		rtn = rtn &= this.nonPublicAccessAllowed == that.nonPublicAccessAllowed;
+		rtn = rtn &= this.lenientConstructorResolution == that.lenientConstructorResolution;
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.factoryBeanName, that.factoryBeanName);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.factoryMethodName, that.factoryMethodName);
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.initMethodName, that.initMethodName);
+		rtn = rtn &= this.enforceInitMethod == that.enforceInitMethod;
+		rtn = rtn &= ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName);
+		rtn = rtn &= this.enforceDestroyMethod == that.enforceDestroyMethod;
+		rtn = rtn &= this.synthetic == that.synthetic;
+		rtn = rtn &= this.role == that.role;
+		return rtn && super.equals(other);
 	}
 
 	@Override

@@ -103,8 +103,8 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	 * Write a given body to the response with {@link HttpMessageWriter}.
 	 * @param body the object to write
 	 * @param bodyParameter the {@link MethodParameter} of the body to write
-	 * @param actualParameter the actual return type of the method that returned the
-	 * value; could be different from {@code bodyParameter} when processing {@code HttpEntity}
+	 * @param actualParam the actual return type of the method that returned the value;
+	 * could be different from {@code bodyParameter} when processing {@code HttpEntity}
 	 * for example
 	 * @param exchange the current exchange
 	 * @return indicates completion or error
@@ -112,11 +112,10 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Mono<Void> writeBody(@Nullable Object body, MethodParameter bodyParameter,
-			@Nullable MethodParameter actualParameter, ServerWebExchange exchange) {
+			@Nullable MethodParameter actualParam, ServerWebExchange exchange) {
 
 		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
-		ResolvableType actualType = (actualParameter == null ?
-				bodyType : ResolvableType.forMethodParameter(actualParameter));
+		ResolvableType actualType = (actualParam != null ? ResolvableType.forMethodParameter(actualParam) : bodyType);
 		Class<?> bodyClass = bodyType.resolve();
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(bodyClass, body);
 

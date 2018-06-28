@@ -244,17 +244,17 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * This implementation compares the underlying class path locations.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj instanceof ClassPathResource) {
-			ClassPathResource otherRes = (ClassPathResource) obj;
-			return (this.path.equals(otherRes.path) &&
-					ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
-					ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
+		if (!(other instanceof ClassPathResource)) {
+			return false;
 		}
-		return false;
+		ClassPathResource otherRes = (ClassPathResource) other;
+		return (this.path.equals(otherRes.path) &&
+				ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
+				ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
 	}
 
 	/**
