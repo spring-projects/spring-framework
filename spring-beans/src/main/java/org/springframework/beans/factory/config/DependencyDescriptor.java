@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -390,12 +390,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = ObjectUtils.nullSafeHashCode(this.containingClass);
-		result = prime * result + Boolean.hashCode(this.eager);
-		result = prime * result + this.nestingLevel;
-		result = prime * result + Boolean.hashCode(this.required);
-		return result;
+		return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.containingClass);
 	}
 
 

@@ -582,12 +582,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		@Override
 		public int hashCode() {
-			int prime = 31;
-			int result = ObjectUtils.nullSafeHashCode(this.selector);
-			result = prime * result + ObjectUtils.nullSafeHashCode(this.noLocal);
-			result = prime * result + ObjectUtils.nullSafeHashCode(this.subscription);
-			result = prime * result + Boolean.hashCode(this.durable);
-			return result;
+			return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector);
 		}
 
 		@Override

@@ -123,6 +123,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		String lookupPath = uriString.substring(0, queryIndex);
 		String query = uriString.substring(queryIndex);
 		PathContainer parsedLookupPath = PathContainer.parsePath(lookupPath);
+
 		return resolveResourceUrl(parsedLookupPath).map(resolvedPath ->
 				request.getPath().contextPath().value() + resolvedPath + query);
 	}
@@ -154,8 +155,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 					List<ResourceResolver> resolvers = handler.getResourceResolvers();
 					ResourceResolverChain chain = new DefaultResourceResolverChain(resolvers);
 					return chain.resolveUrlPath(path.value(), handler.getLocations())
-							.map(resolvedPath ->  mapping.value() + resolvedPath);
-
+							.map(resolvedPath -> mapping.value() + resolvedPath);
 				})
 				.orElseGet(() ->{
 					if (logger.isTraceEnabled()) {

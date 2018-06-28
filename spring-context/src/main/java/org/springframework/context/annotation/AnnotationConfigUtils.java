@@ -58,7 +58,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * @see org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
  */
-public final class AnnotationConfigUtils {
+public abstract class AnnotationConfigUtils {
 
 	/**
 	 * The bean name of the internally managed Configuration annotation processor.
@@ -124,10 +124,6 @@ public final class AnnotationConfigUtils {
 	private static final boolean jpaPresent =
 			ClassUtils.isPresent("javax.persistence.EntityManagerFactory", AnnotationConfigUtils.class.getClassLoader()) &&
 			ClassUtils.isPresent(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, AnnotationConfigUtils.class.getClassLoader());
-
-
-	private AnnotationConfigUtils() {
-	}
 
 
 	/**

@@ -157,10 +157,7 @@ public abstract class MethodMatchers {
 
 		@Override
 		public int hashCode() {
-			int hashCode = 17;
-			hashCode = 37 * hashCode + this.mm1.hashCode();
-			hashCode = 37 * hashCode + this.mm2.hashCode();
-			return hashCode;
+			return 37 * this.mm1.hashCode() + this.mm2.hashCode();
 		}
 	}
 
@@ -193,14 +190,6 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public int hashCode() {
-			int hashCode = 17;
-			hashCode = 37 * hashCode + this.cf1.hashCode();
-			hashCode = 37 * hashCode + this.cf2.hashCode();
-			return hashCode;
-		}
-
-		@Override
 		public boolean equals(Object other) {
 			if (this == other) {
 				return true;
@@ -216,6 +205,14 @@ public abstract class MethodMatchers {
 				otherCf2 = cfa.cf2;
 			}
 			return (this.cf1.equals(otherCf1) && this.cf2.equals(otherCf2));
+		}
+
+		@Override
+		public int hashCode() {
+			int hashCode = super.hashCode();
+			hashCode = 37 * hashCode + this.cf1.hashCode();
+			hashCode = 37 * hashCode + this.cf2.hashCode();
+			return hashCode;
 		}
 	}
 
@@ -279,10 +276,7 @@ public abstract class MethodMatchers {
 
 		@Override
 		public int hashCode() {
-			int hashCode = 17;
-			hashCode = 37 * hashCode + this.mm1.hashCode();
-			hashCode = 37 * hashCode + this.mm2.hashCode();
-			return hashCode;
+			return 37 * this.mm1.hashCode() + this.mm2.hashCode();
 		}
 	}
 

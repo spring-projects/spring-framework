@@ -962,7 +962,7 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * Returns if the supplied array type has a core component reference type.
+	 * Return if the supplied array type has a core component reference type.
 	 */
 	public static boolean isReferenceTypeArray(String arraytype) {
 		int length = arraytype.length();
@@ -1060,6 +1060,5 @@ public class CodeFlow implements Opcodes {
 
 		void generateCode(MethodVisitor mv, CodeFlow codeflow);
 	}
-
 
 }
