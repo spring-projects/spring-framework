@@ -43,13 +43,12 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * <pre class="code">
  * public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
- *	// ...
- *	&#064;Override
- *	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
- *
- *		// Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
- *		registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
- *	}
+ *	 // ...
+ *	 &#064;Override
+ *	 protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+ *     // Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
+ *     registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
+ *   }
  * }
  * </pre>
  *
@@ -84,8 +83,7 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 		if (!"post".equalsIgnoreCase(request.getMethod())) {
 			return false;
 		}
-		String contentType = request.getContentType();
-		return StringUtils.startsWithIgnoreCase(contentType, "multipart/");
+		return StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/");
 	}
 
 	@Override

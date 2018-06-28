@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -96,8 +95,7 @@ public class SpringClassRule implements TestRule {
 	/**
 	 * Cache of {@code TestContextManagers} keyed by test class.
 	 */
-	private static final Map<Class<?>, TestContextManager> testContextManagerCache =
-			new ConcurrentHashMap<>(64);
+	private static final Map<Class<?>, TestContextManager> testContextManagerCache = new ConcurrentHashMap<>(64);
 
 	static {
 		Assert.state(ClassUtils.isPresent("org.junit.internal.Throwables", SpringClassRule.class.getClassLoader()),
@@ -186,12 +184,12 @@ public class SpringClassRule implements TestRule {
 	private static void validateSpringMethodRuleConfiguration(Class<?> testClass) {
 		Field ruleField = findSpringMethodRuleField(testClass).orElseThrow(() ->
 				new IllegalStateException(String.format(
-					"Failed to find 'public SpringMethodRule' field in test class [%s]. " +
-					"Consult the javadoc for SpringClassRule for details.", testClass.getName())));
+						"Failed to find 'public SpringMethodRule' field in test class [%s]. " +
+						"Consult the javadoc for SpringClassRule for details.", testClass.getName())));
 
 		Assert.state(ruleField.isAnnotationPresent(Rule.class), () -> String.format(
-					"SpringMethodRule field [%s] must be annotated with JUnit's @Rule annotation. " +
-					"Consult the javadoc for SpringClassRule for details.", ruleField));
+				"SpringMethodRule field [%s] must be annotated with JUnit's @Rule annotation. " +
+				"Consult the javadoc for SpringClassRule for details.", ruleField));
 	}
 
 	private static Optional<Field> findSpringMethodRuleField(Class<?> testClass) {
@@ -207,7 +205,7 @@ public class SpringClassRule implements TestRule {
 	 * @param testClass the test class to be managed; never {@code null}
 	 */
 	static TestContextManager getTestContextManager(Class<?> testClass) {
-		Assert.notNull(testClass, "testClass must not be null");
+		Assert.notNull(testClass, "Test Class must not be null");
 		return testContextManagerCache.computeIfAbsent(testClass, TestContextManager::new);
 	}
 
@@ -218,7 +216,6 @@ public class SpringClassRule implements TestRule {
 
 		private final Class<?> testClass;
 
-
 		TestContextManagerCacheEvictor(Statement next, Class<?> testClass) {
 			this.next = next;
 			this.testClass = testClass;
@@ -227,10 +224,10 @@ public class SpringClassRule implements TestRule {
 		@Override
 		public void evaluate() throws Throwable {
 			try {
-				next.evaluate();
+				this.next.evaluate();
 			}
 			finally {
-				testContextManagerCache.remove(testClass);
+				testContextManagerCache.remove(this.testClass);
 			}
 		}
 	}

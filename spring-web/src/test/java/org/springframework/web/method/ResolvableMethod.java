@@ -209,17 +209,17 @@ public class ResolvableMethod {
 	}
 
 	private String formatMethod() {
-		return this.method().getName() +
+		return (this.method().getName() +
 				Arrays.stream(this.method.getParameters())
 						.map(this::formatParameter)
-						.collect(joining(",\n\t", "(\n\t", "\n)"));
+						.collect(joining(",\n\t", "(\n\t", "\n)")));
 	}
 
 	private String formatParameter(Parameter param) {
-		Annotation[] annot = param.getAnnotations();
-		return annot.length > 0 ?
-				Arrays.stream(annot).map(this::formatAnnotation).collect(joining(",", "[", "]")) + " " + param :
-				param.toString();
+		Annotation[] anns = param.getAnnotations();
+		return (anns.length > 0 ?
+				Arrays.stream(anns).map(this::formatAnnotation).collect(joining(",", "[", "]")) + " " + param :
+				param.toString());
 	}
 
 	private String formatAnnotation(Annotation annotation) {
@@ -536,9 +536,9 @@ public class ResolvableMethod {
 		@SafeVarargs
 		public final ArgResolver annotNotPresent(Class<? extends Annotation>... annotationTypes) {
 			this.filters.add(param ->
-					(annotationTypes.length != 0) ?
+					(annotationTypes.length > 0 ?
 							Arrays.stream(annotationTypes).noneMatch(param::hasParameterAnnotation) :
-							param.getParameterAnnotations().length == 0);
+							param.getParameterAnnotations().length == 0));
 			return this;
 		}
 

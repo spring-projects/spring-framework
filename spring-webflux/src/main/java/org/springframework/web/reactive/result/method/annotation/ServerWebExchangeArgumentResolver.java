@@ -102,12 +102,12 @@ public class ServerWebExchangeArgumentResolver extends HandlerMethodArgumentReso
 		else if (TimeZone.class == paramType) {
 			LocaleContext localeContext = exchange.getLocaleContext();
 			TimeZone timeZone = getTimeZone(localeContext);
-			return timeZone != null ? timeZone : TimeZone.getDefault();
+			return (timeZone != null ? timeZone : TimeZone.getDefault());
 		}
 		else if (ZoneId.class == paramType) {
 			LocaleContext localeContext = exchange.getLocaleContext();
 			TimeZone timeZone = getTimeZone(localeContext);
-			return timeZone != null ? timeZone.toZoneId() : ZoneId.systemDefault();
+			return (timeZone != null ? timeZone.toZoneId() : ZoneId.systemDefault());
 		}
 		else if (UriBuilder.class == paramType || UriComponentsBuilder.class == paramType) {
 			URI uri = exchange.getRequest().getURI();

@@ -91,19 +91,16 @@ abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> 
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof AbstractNameValueExpression) {
-			AbstractNameValueExpression<?> other = (AbstractNameValueExpression<?>) obj;
-			String thisName = isCaseSensitiveName() ? this.name : this.name.toLowerCase();
-			String otherName = isCaseSensitiveName() ? other.name : other.name.toLowerCase();
-			return ((thisName.equalsIgnoreCase(otherName)) &&
-					(this.value != null ? this.value.equals(other.value) : other.value == null) &&
-					this.isNegated == other.isNegated);
+		if (other == null || getClass() != other.getClass()) {
+			return false;
 		}
-		return false;
+		AbstractNameValueExpression<?> that = (AbstractNameValueExpression<?>) other;
+		return ((isCaseSensitiveName() ? this.name.equals(that.name) : this.name.equalsIgnoreCase(that.name)) &&
+				ObjectUtils.nullSafeEquals(this.value, that.value) && this.isNegated == that.isNegated);
 	}
 
 	@Override
@@ -133,4 +130,5 @@ abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> 
 		}
 		return builder.toString();
 	}
+
 }

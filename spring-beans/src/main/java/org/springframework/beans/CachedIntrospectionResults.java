@@ -299,8 +299,7 @@ public class CachedIntrospectionResults {
 			// in particular for Java 8 default methods...
 			Class<?> clazz = beanClass;
 			while (clazz != null && clazz != Object.class) {
-				Class<?>[] ifcs = clazz.getInterfaces();
-				for (Class<?> ifc : ifcs) {
+				for (Class<?> ifc : clazz.getInterfaces()) {
 					if (!ClassUtils.isJavaLanguageInterface(ifc)) {
 						for (PropertyDescriptor pd : getBeanInfo(ifc).getPropertyDescriptors()) {
 							if (!this.propertyDescriptorCache.containsKey(pd.getName())) {

@@ -243,10 +243,10 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		return (obj instanceof SpringContextResourceAdapter &&
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof SpringContextResourceAdapter &&
 				ObjectUtils.nullSafeEquals(getContextConfigLocation(),
-						((SpringContextResourceAdapter) obj).getContextConfigLocation()));
+						((SpringContextResourceAdapter) other).getContextConfigLocation())));
 	}
 
 	@Override

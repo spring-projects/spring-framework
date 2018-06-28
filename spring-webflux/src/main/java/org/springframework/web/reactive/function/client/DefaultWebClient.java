@@ -163,7 +163,6 @@ class DefaultWebClient implements WebClient {
 
 		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
-
 		DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
 		}
@@ -318,7 +317,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
-			URI uri = this.uri != null ? this.uri : uriBuilderFactory.expand("");
+			URI uri = (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
 			return ClientRequest.create(this.httpMethod, uri)
 					.headers(headers -> headers.addAll(initHeaders()))
 					.cookies(cookies -> cookies.addAll(initCookies()))

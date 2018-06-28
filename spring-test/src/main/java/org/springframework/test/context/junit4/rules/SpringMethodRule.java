@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,8 +182,8 @@ public class SpringMethodRule implements MethodRule {
 	 * Wrap the supplied {@link Statement} with a {@code RunPrepareTestInstanceCallbacks} statement.
 	 * @see RunPrepareTestInstanceCallbacks
 	 */
-	private Statement withTestInstancePreparation(Statement next, Object testInstance,
-			TestContextManager testContextManager) {
+	private Statement withTestInstancePreparation(
+			Statement next, Object testInstance, TestContextManager testContextManager) {
 
 		return new RunPrepareTestInstanceCallbacks(next, testInstance, testContextManager);
 	}
@@ -225,8 +225,8 @@ public class SpringMethodRule implements MethodRule {
 	private static SpringClassRule validateSpringClassRuleConfiguration(Class<?> testClass) {
 		Field ruleField = findSpringClassRuleField(testClass).orElseThrow(() ->
 				new IllegalStateException(String.format(
-					"Failed to find 'public static final SpringClassRule' field in test class [%s]. " +
-					"Consult the javadoc for SpringClassRule for details.", testClass.getName())));
+						"Failed to find 'public static final SpringClassRule' field in test class [%s]. " +
+						"Consult the javadoc for SpringClassRule for details.", testClass.getName())));
 
 		Assert.state(ruleField.isAnnotationPresent(ClassRule.class), () -> String.format(
 				"SpringClassRule field [%s] must be annotated with JUnit's @ClassRule annotation. " +

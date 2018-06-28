@@ -250,9 +250,9 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * This implementation compares the underlying File references.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof FileSystemResource && this.path.equals(((FileSystemResource) obj).path)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof FileSystemResource &&
+				this.path.equals(((FileSystemResource) other).path)));
 	}
 
 	/**

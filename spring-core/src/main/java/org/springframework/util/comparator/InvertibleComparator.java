@@ -107,15 +107,15 @@ public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof InvertibleComparator)) {
+		if (!(other instanceof InvertibleComparator)) {
 			return false;
 		}
-		InvertibleComparator<T> other = (InvertibleComparator<T>) obj;
-		return (this.comparator.equals(other.comparator) && this.ascending == other.ascending);
+		InvertibleComparator<T> otherComp = (InvertibleComparator<T>) other;
+		return (this.comparator.equals(otherComp.comparator) && this.ascending == otherComp.ascending);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,7 @@ import javax.lang.model.element.TypeElement;
 public class CandidateComponentsIndexer implements Processor {
 
 	private static final Set<ElementKind> TYPE_KINDS =
-			Collections.unmodifiableSet(EnumSet.of(ElementKind.CLASS,
-					ElementKind.INTERFACE));
+			Collections.unmodifiableSet(EnumSet.of(ElementKind.CLASS, ElementKind.INTERFACE));
 
 	private MetadataStore metadataStore;
 
@@ -135,10 +134,10 @@ public class CandidateComponentsIndexer implements Processor {
 
 	private static List<TypeElement> staticTypesIn(Iterable<? extends Element> elements) {
 		List<TypeElement> list = new ArrayList<>();
-		for (Element e : elements) {
-			if (TYPE_KINDS.contains(e.getKind())
-					&& e.getModifiers().contains(Modifier.STATIC))
-				list.add(TypeElement.class.cast(e));
+		for (Element element : elements) {
+			if (TYPE_KINDS.contains(element.getKind()) && element.getModifiers().contains(Modifier.STATIC)) {
+				list.add(TypeElement.class.cast(element));
+			}
 		}
 		return list;
 	}

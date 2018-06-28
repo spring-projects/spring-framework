@@ -92,10 +92,8 @@ public abstract class ExchangeFilterFunctions {
 	}
 
 	private static void checkIllegalCharacters(String username, String password) {
-
 		// Basic authentication only supports ISO 8859-1, see
 		// https://stackoverflow.com/questions/702629/utf-8-characters-mangled-in-http-basic-auth-username#703341
-
 		CharsetEncoder encoder = StandardCharsets.ISO_8859_1.newEncoder();
 		if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
 			throw new IllegalArgumentException(
@@ -113,7 +111,6 @@ public abstract class ExchangeFilterFunctions {
 		}).build();
 	}
 
-
 	/**
 	 * Return a filter that generates an error signal when the given
 	 * {@link HttpStatus} predicate matches.
@@ -128,10 +125,8 @@ public abstract class ExchangeFilterFunctions {
 		Assert.notNull(exceptionFunction, "Function must not be null");
 
 		return ExchangeFilterFunction.ofResponseProcessor(
-				response -> statusPredicate.test(response.statusCode()) ?
-						Mono.error(exceptionFunction.apply(response)) :
-						Mono.just(response)
-		);
+				response -> (statusPredicate.test(response.statusCode()) ?
+						Mono.error(exceptionFunction.apply(response)) : Mono.just(response)));
 	}
 
 
@@ -146,7 +141,6 @@ public abstract class ExchangeFilterFunctions {
 
 		private final String password;
 
-
 		/**
 		 * Create a new {@code Credentials} instance with the given username and password.
 		 * @param username the username
@@ -158,7 +152,6 @@ public abstract class ExchangeFilterFunctions {
 			this.username = username;
 			this.password = password;
 		}
-
 
 		/**
 		 * Return a {@literal Consumer} that stores the given user and password
@@ -174,21 +167,19 @@ public abstract class ExchangeFilterFunctions {
 		public static Consumer<Map<String, Object>> basicAuthenticationCredentials(String user, String password) {
 			Credentials credentials = new Credentials(user, password);
 			checkIllegalCharacters(user, password);
-			return map -> map.put(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE, credentials);
+			return (map -> map.put(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE, credentials));
 		}
 
-
 		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
+		public boolean equals(Object other) {
+			if (this == other) {
 				return true;
 			}
-			if (o instanceof Credentials) {
-				Credentials other = (Credentials) o;
-				return this.username.equals(other.username) &&
-						this.password.equals(other.password);
+			if (!(other instanceof Credentials)) {
+				return false;
 			}
-			return false;
+			Credentials otherCred = (Credentials) other;
+			return (this.username.equals(otherCred.username) && this.password.equals(otherCred.password));
 		}
 
 		@Override

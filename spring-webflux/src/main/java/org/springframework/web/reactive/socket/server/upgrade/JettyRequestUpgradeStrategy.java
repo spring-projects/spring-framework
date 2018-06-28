@@ -42,7 +42,6 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
-
 /**
  * A {@link RequestUpgradeStrategy} for use with Jetty.
  * 
@@ -95,9 +94,9 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			if (!isRunning() && servletContext != null) {
 				this.running = true;
 				try {
-					this.factory = this.webSocketPolicy != null ?
+					this.factory = (this.webSocketPolicy != null ?
 							new WebSocketServerFactory(servletContext, this.webSocketPolicy) :
-							new WebSocketServerFactory(servletContext);
+							new WebSocketServerFactory(servletContext));
 					this.factory.setCreator((request, response) -> {
 						WebSocketHandlerContainer container = adapterHolder.get();
 						String protocol = container.getProtocol();

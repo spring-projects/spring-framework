@@ -23,11 +23,7 @@ import org.junit.Test;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link HeadersRequestCondition}.
@@ -40,7 +36,7 @@ public class HeadersRequestConditionTests {
 	public void headerEquals() {
 		assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("foo"));
 		assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("FOO"));
-		assertFalse(new HeadersRequestCondition("foo").equals(new HeadersRequestCondition("bar")));
+		assertNotEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("bar"));
 		assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("foo=bar"));
 		assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("FOO=bar"));
 	}

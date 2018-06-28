@@ -202,7 +202,7 @@ public class FieldRetrievingFactoryBean
 		}
 
 		// Try to get the exact method first.
-		Class<?> targetClass = (this.targetObject != null) ? this.targetObject.getClass() : this.targetClass;
+		Class<?> targetClass = (this.targetObject != null ? this.targetObject.getClass() : this.targetClass);
 		this.fieldObject = targetClass.getField(this.targetField);
 	}
 

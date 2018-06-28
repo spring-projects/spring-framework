@@ -93,14 +93,8 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 
 	@Override
 	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof AttributeAccessorSupport)) {
-			return false;
-		}
-		AttributeAccessorSupport that = (AttributeAccessorSupport) other;
-		return this.attributes.equals(that.attributes);
+		return (this == other || (other instanceof AttributeAccessorSupport &&
+				this.attributes.equals(((AttributeAccessorSupport) other).attributes)));
 	}
 
 	@Override

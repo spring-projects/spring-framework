@@ -101,9 +101,9 @@ public final class MultipartBodyBuilder {
 		HttpHeaders partHeaders = new HttpHeaders();
 
 		if (part instanceof HttpEntity) {
-			HttpEntity<?> other = (HttpEntity<?>) part;
-			partBody = other.getBody();
-			partHeaders.addAll(other.getHeaders());
+			HttpEntity<?> httpEntity = (HttpEntity<?>) part;
+			partBody = httpEntity.getBody();
+			partHeaders.addAll(httpEntity.getHeaders());
 		}
 		else {
 			partBody = part;

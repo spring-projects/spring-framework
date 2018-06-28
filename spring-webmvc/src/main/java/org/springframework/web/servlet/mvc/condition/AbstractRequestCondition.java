@@ -55,15 +55,14 @@ public abstract class AbstractRequestCondition<T extends AbstractRequestConditio
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && getClass() == obj.getClass()) {
-			AbstractRequestCondition<?> other = (AbstractRequestCondition<?>) obj;
-			return getContent().equals(other.getContent());
+		if (other == null || getClass() != other.getClass()) {
+			return false;
 		}
-		return false;
+		return getContent().equals(((AbstractRequestCondition<?>) other).getContent());
 	}
 
 	@Override

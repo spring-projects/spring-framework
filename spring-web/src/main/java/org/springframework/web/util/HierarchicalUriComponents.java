@@ -54,6 +54,51 @@ final class HierarchicalUriComponents extends UriComponents {
 	private static final String PATH_DELIMITER_STRING = "/";
 
 
+	/**
+	 * Represents an empty path.
+	 */
+	static final PathComponent NULL_PATH_COMPONENT = new PathComponent() {
+
+		@Override
+		public String getPath() {
+			return "";
+		}
+
+		@Override
+		public List<String> getPathSegments() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public PathComponent encode(Charset charset) {
+			return this;
+		}
+
+		@Override
+		public void verify() {
+		}
+
+		@Override
+		public PathComponent expand(UriTemplateVariables uriVariables) {
+			return this;
+		}
+
+		@Override
+		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			return (this == other);
+		}
+
+		@Override
+		public int hashCode() {
+			return getClass().hashCode();
+		}
+	};
+
+
 	@Nullable
 	private final String userInfo;
 
@@ -462,21 +507,21 @@ final class HierarchicalUriComponents extends UriComponents {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof HierarchicalUriComponents)) {
+		if (!(other instanceof HierarchicalUriComponents)) {
 			return false;
 		}
-		HierarchicalUriComponents other = (HierarchicalUriComponents) obj;
-		return ObjectUtils.nullSafeEquals(getScheme(), other.getScheme()) &&
-				ObjectUtils.nullSafeEquals(getUserInfo(), other.getUserInfo()) &&
-				ObjectUtils.nullSafeEquals(getHost(), other.getHost()) &&
-				getPort() == other.getPort() &&
-				this.path.equals(other.path) &&
-				this.queryParams.equals(other.queryParams) &&
-				ObjectUtils.nullSafeEquals(getFragment(), other.getFragment());
+		HierarchicalUriComponents otherComp = (HierarchicalUriComponents) other;
+		return (ObjectUtils.nullSafeEquals(getScheme(), otherComp.getScheme()) &&
+				ObjectUtils.nullSafeEquals(getUserInfo(), otherComp.getUserInfo()) &&
+				ObjectUtils.nullSafeEquals(getHost(), otherComp.getHost()) &&
+				getPort() == otherComp.getPort() &&
+				this.path.equals(otherComp.path) &&
+				this.queryParams.equals(otherComp.queryParams) &&
+				ObjectUtils.nullSafeEquals(getFragment(), otherComp.getFragment()));
 	}
 
 	@Override
@@ -708,9 +753,9 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			return (this == obj || (obj instanceof FullPathComponent &&
-					getPath().equals(((FullPathComponent) obj).getPath())));
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof FullPathComponent &&
+					getPath().equals(((FullPathComponent) other).getPath())));
 		}
 
 		@Override
@@ -786,9 +831,9 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			return (this == obj || (obj instanceof PathSegmentComponent &&
-					getPathSegments().equals(((PathSegmentComponent) obj).getPathSegments())));
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof PathSegmentComponent &&
+					getPathSegments().equals(((PathSegmentComponent) other).getPathSegments())));
 		}
 
 		@Override
@@ -860,43 +905,6 @@ final class HierarchicalUriComponents extends UriComponents {
 			}
 		}
 	}
-
-
-	/**
-	 * Represents an empty path.
-	 */
-	static final PathComponent NULL_PATH_COMPONENT = new PathComponent() {
-		@Override
-		public String getPath() {
-			return "";
-		}
-		@Override
-		public List<String> getPathSegments() {
-			return Collections.emptyList();
-		}
-		@Override
-		public PathComponent encode(Charset charset) {
-			return this;
-		}
-		@Override
-		public void verify() {
-		}
-		@Override
-		public PathComponent expand(UriTemplateVariables uriVariables) {
-			return this;
-		}
-		@Override
-		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
-		}
-		@Override
-		public boolean equals(Object obj) {
-			return (this == obj);
-		}
-		@Override
-		public int hashCode() {
-			return getClass().hashCode();
-		}
-	};
 
 
 	private static class QueryUriTemplateVariables implements UriTemplateVariables {

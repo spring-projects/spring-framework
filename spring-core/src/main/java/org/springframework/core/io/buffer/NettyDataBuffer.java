@@ -37,9 +37,9 @@ import org.springframework.util.Assert;
  */
 public class NettyDataBuffer implements PooledDataBuffer {
 
-	private final NettyDataBufferFactory dataBufferFactory;
-
 	private final ByteBuf byteBuf;
+
+	private final NettyDataBufferFactory dataBufferFactory;
 
 
 	/**
@@ -47,9 +47,8 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	 * @param byteBuf the buffer to base this buffer on
 	 */
 	NettyDataBuffer(ByteBuf byteBuf, NettyDataBufferFactory dataBufferFactory) {
-		Assert.notNull(byteBuf, "'byteBuf' must not be null");
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
-
+		Assert.notNull(byteBuf, "ByteBuf must not be null");
+		Assert.notNull(dataBufferFactory, "NettyDataBufferFactory must not be null");
 		this.byteBuf = byteBuf;
 		this.dataBufferFactory = dataBufferFactory;
 	}
@@ -272,15 +271,9 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof NettyDataBuffer)) {
-			return false;
-		}
-		NettyDataBuffer other = (NettyDataBuffer) obj;
-		return this.byteBuf.equals(other.byteBuf);
+	public boolean equals(Object other) {
+		return  (this == other || (other instanceof NettyDataBuffer &&
+				this.byteBuf.equals(((NettyDataBuffer) other).byteBuf)));
 	}
 
 	@Override

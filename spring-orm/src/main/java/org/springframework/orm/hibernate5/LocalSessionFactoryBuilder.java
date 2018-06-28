@@ -136,7 +136,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @param metadataSources the Hibernate MetadataSources service to use (e.g. reusing an existing one)
 	 * @since 4.3
 	 */
-	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
+	public LocalSessionFactoryBuilder(
+			@Nullable DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
+
 		super(metadataSources);
 
 		getProperties().put(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());

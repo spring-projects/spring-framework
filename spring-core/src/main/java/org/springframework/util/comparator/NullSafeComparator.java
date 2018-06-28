@@ -107,15 +107,15 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof NullSafeComparator)) {
+		if (!(other instanceof NullSafeComparator)) {
 			return false;
 		}
-		NullSafeComparator<T> other = (NullSafeComparator<T>) obj;
-		return (this.nonNullComparator.equals(other.nonNullComparator) && this.nullsLow == other.nullsLow);
+		NullSafeComparator<T> otherComp = (NullSafeComparator<T>) other;
+		return (this.nonNullComparator.equals(otherComp.nonNullComparator) && this.nullsLow == otherComp.nullsLow);
 	}
 
 	@Override

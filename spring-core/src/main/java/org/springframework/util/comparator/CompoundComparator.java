@@ -186,15 +186,9 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof CompoundComparator)) {
-			return false;
-		}
-		CompoundComparator<T> other = (CompoundComparator<T>) obj;
-		return this.comparators.equals(other.comparators);
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof CompoundComparator &&
+				this.comparators.equals(((CompoundComparator<T>) other).comparators)));
 	}
 
 	@Override

@@ -27,14 +27,13 @@ import java.util.function.IntPredicate;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
-
 /**
  * Default implementation of the {@link DataBuffer} interface that uses a
  * {@link ByteBuffer} internally. with separate read and write positions.
  * Constructed using the {@link DefaultDataBufferFactory}.
  *
- * <p>Inspired by Netty's {@code ByteBuf}. Introduced so that non-Netty runtimes (i.e. Servlet)
- * do not require Netty on the classpath.
+ * <p>Inspired by Netty's {@code ByteBuf}. Introduced so that non-Netty runtimes
+ * (i.e. Servlet) do not require Netty on the classpath.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -52,32 +51,29 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	private ByteBuffer byteBuffer;
 
+	private int capacity;
+
 	private int readPosition;
 
 	private int writePosition;
 
-	private int capacity;
 
 	private DefaultDataBuffer(DefaultDataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
-		Assert.notNull(byteBuffer, "'byteBuffer' must not be null");
-
+		Assert.notNull(dataBufferFactory, "DefaultDataBufferFactory must not be null");
+		Assert.notNull(byteBuffer, "ByteBuffer must not be null");
 		this.dataBufferFactory = dataBufferFactory;
 		ByteBuffer slice = byteBuffer.slice();
 		this.byteBuffer = slice;
 		this.capacity = slice.remaining();
 	}
 
-	static DefaultDataBuffer fromFilledByteBuffer(DefaultDataBufferFactory dataBufferFactory,
-			ByteBuffer byteBuffer) {
-
+	static DefaultDataBuffer fromFilledByteBuffer(DefaultDataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {
 		DefaultDataBuffer dataBuffer = new DefaultDataBuffer(dataBufferFactory, byteBuffer);
 		dataBuffer.writePosition(byteBuffer.remaining());
 		return dataBuffer;
 	}
 
-	static DefaultDataBuffer fromEmptyByteBuffer(DefaultDataBufferFactory dataBufferFactory,
-			ByteBuffer byteBuffer) {
+	static DefaultDataBuffer fromEmptyByteBuffer(DefaultDataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {
 		return new DefaultDataBuffer(dataBufferFactory, byteBuffer);
 	}
 
@@ -94,6 +90,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		this.byteBuffer = byteBuffer;
 		this.capacity = byteBuffer.remaining();
 	}
+
 
 	@Override
 	public DefaultDataBufferFactory factory() {
@@ -413,17 +410,17 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof DefaultDataBuffer)) {
+		if (!(other instanceof DefaultDataBuffer)) {
 			return false;
 		}
-		DefaultDataBuffer other = (DefaultDataBuffer) obj;
-		return (this.readPosition == other.readPosition &&
-				this.writePosition == other.writePosition &&
-				this.byteBuffer.equals(other.byteBuffer));
+		DefaultDataBuffer otherBuffer = (DefaultDataBuffer) other;
+		return (this.readPosition == otherBuffer.readPosition &&
+				this.writePosition == otherBuffer.writePosition &&
+				this.byteBuffer.equals(otherBuffer.byteBuffer));
 	}
 
 	@Override
@@ -433,9 +430,10 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public String toString() {
-		return String.format("DefaultDataBuffer (r: %d, w %d, c %d)", this.readPosition,
-				this.writePosition, this.capacity);
+		return String.format("DefaultDataBuffer (r: %d, w %d, c %d)",
+				this.readPosition, this.writePosition, this.capacity);
 	}
+
 
 	private void checkIndex(int index, int length) {
 		assertIndex(index >= 0, "index %d must be >= 0", index);
@@ -450,6 +448,7 @@ public class DefaultDataBuffer implements DataBuffer {
 			throw new IndexOutOfBoundsException(message);
 		}
 	}
+
 
 	private class DefaultDataBufferInputStream extends InputStream {
 
@@ -478,7 +477,6 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 
-
 	private class DefaultDataBufferOutputStream extends OutputStream {
 
 		@Override
@@ -495,16 +493,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	private static class SlicedDefaultDataBuffer extends DefaultDataBuffer {
 
-		SlicedDefaultDataBuffer(ByteBuffer byteBuffer, DefaultDataBufferFactory dataBufferFactory,
-				int length) {
+		SlicedDefaultDataBuffer(ByteBuffer byteBuffer, DefaultDataBufferFactory dataBufferFactory, int length) {
 			super(dataBufferFactory, byteBuffer);
 			writePosition(length);
 		}
 
 		@Override
 		public DefaultDataBuffer capacity(int newCapacity) {
-			throw new UnsupportedOperationException(
-					"Changing the capacity of a sliced buffer is not supported");
+			throw new UnsupportedOperationException("Changing the capacity of a sliced buffer is not supported");
 		}
 	}
 

@@ -1521,8 +1521,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					isAutowireCandidate(beanName, mbd, descriptor, getAutowireCandidateResolver())) {
 				// Probably a proxy interfering with target type match -> throw meaningful exception.
 				Object beanInstance = getSingleton(beanName, false);
-				Class<?> beanType = (beanInstance != null && beanInstance.getClass() != NullBean.class) ?
-						beanInstance.getClass() : predictBeanType(beanName, mbd);
+				Class<?> beanType = (beanInstance != null && beanInstance.getClass() != NullBean.class ?
+						beanInstance.getClass() : predictBeanType(beanName, mbd));
 				if (beanType != null && !type.isAssignableFrom(beanType)) {
 					throw new BeanNotOfRequiredTypeException(beanName, type, beanType);
 				}

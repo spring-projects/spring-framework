@@ -51,24 +51,20 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
-
-	public RequestPartMethodArgumentResolver(List<HttpMessageReader<?>> readers,
-			ReactiveAdapterRegistry registry) {
-
+	public RequestPartMethodArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
 		super(readers, registry);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(RequestPart.class) ||
-				checkParameterType(parameter, Part.class::isAssignableFrom);
+		return (parameter.hasParameterAnnotation(RequestPart.class) ||
+				checkParameterType(parameter, Part.class::isAssignableFrom));
 	}
 
-
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
 		boolean isRequired = (requestPart == null || requestPart.required());
@@ -78,9 +74,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 				.flatMapMany(map -> {
 					List<Part> parts = map.get(name);
 					if (CollectionUtils.isEmpty(parts)) {
-						return isRequired ?
-								Flux.error(getMissingPartException(name, parameter)) :
-								Flux.empty();
+						return (isRequired ? Flux.error(getMissingPartException(name, parameter)) : Flux.empty());
 					}
 					return Flux.fromIterable(parts);
 				});

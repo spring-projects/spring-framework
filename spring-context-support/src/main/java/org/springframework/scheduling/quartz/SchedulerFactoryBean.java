@@ -753,7 +753,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	@Override
 	public Class<? extends Scheduler> getObjectType() {
-		return (this.scheduler != null) ? this.scheduler.getClass() : Scheduler.class;
+		return (this.scheduler != null ? this.scheduler.getClass() : Scheduler.class);
 	}
 
 	@Override

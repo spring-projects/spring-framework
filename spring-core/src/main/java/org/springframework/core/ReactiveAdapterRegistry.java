@@ -164,12 +164,10 @@ public class ReactiveAdapterRegistry {
 	/**
 	 * Return a shared default {@code ReactiveAdapterRegistry} instance, lazily
 	 * building it once needed.
-	 *
 	 * <p><b>NOTE:</b> We highly recommend passing a long-lived, pre-configured
 	 * {@code ReactiveAdapterRegistry} instance for customization purposes.
 	 * This accessor is only meant as a fallback for code paths that want to
 	 * fall back on a default instance if one isn't provided.
-	 *
 	 * @return the shared {@code ReactiveAdapterRegistry} instance (never {@code null})
 	 * @since 5.0.2
 	 */
@@ -191,7 +189,6 @@ public class ReactiveAdapterRegistry {
 	private static class ReactorRegistrar {
 
 		void registerAdapters(ReactiveAdapterRegistry registry) {
-
 			// Register Flux and Mono before Publisher...
 
 			registry.registerReactiveType(
@@ -280,7 +277,6 @@ public class ReactiveAdapterRegistry {
 	private static class ReactorJdkFlowAdapterRegistrar {
 
 		void registerAdapter(ReactiveAdapterRegistry registry) throws Exception {
-
 			// TODO: remove reflection when build requires JDK 9+
 
 			String publisherName = "java.util.concurrent.Flow.Publisher";

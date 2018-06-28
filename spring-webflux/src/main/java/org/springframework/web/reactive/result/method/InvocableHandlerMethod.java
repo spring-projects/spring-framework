@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,10 +128,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param exchange the current exchange
 	 * @param bindingContext the binding context to use
 	 * @param providedArgs optional list of argument values to match by type
-	 * @return Mono with a {@link HandlerResult}.
+	 * @return a Mono with a {@link HandlerResult}.
 	 */
-	public Mono<HandlerResult> invoke(ServerWebExchange exchange, BindingContext bindingContext,
-			Object... providedArgs) {
+	public Mono<HandlerResult> invoke(
+			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		return resolveArguments(exchange, bindingContext, providedArgs).flatMap(args -> {
 			try {
@@ -162,8 +162,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		});
 	}
 
-	private Mono<Object[]> resolveArguments(ServerWebExchange exchange, BindingContext bindingContext,
-			Object... providedArgs) {
+	private Mono<Object[]> resolveArguments(
+			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
 			return EMPTY_ARGS;

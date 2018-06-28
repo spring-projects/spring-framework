@@ -237,15 +237,15 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 * This implementation compares the underlying ServletContext resource locations.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj instanceof ServletContextResource) {
-			ServletContextResource otherRes = (ServletContextResource) obj;
-			return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
+		if (!(other instanceof ServletContextResource)) {
+			return false;
 		}
-		return false;
+		ServletContextResource otherRes = (ServletContextResource) other;
+		return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
 	}
 
 	/**

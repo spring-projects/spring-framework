@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,19 +157,17 @@ final class OpaqueUriComponents extends UriComponents {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof OpaqueUriComponents)) {
+		if (!(other instanceof OpaqueUriComponents)) {
 			return false;
 		}
-
-		OpaqueUriComponents other = (OpaqueUriComponents) obj;
-		return ObjectUtils.nullSafeEquals(getScheme(), other.getScheme()) &&
-				ObjectUtils.nullSafeEquals(this.ssp, other.ssp) &&
-				ObjectUtils.nullSafeEquals(getFragment(), other.getFragment());
-
+		OpaqueUriComponents otherComp = (OpaqueUriComponents) other;
+		return (ObjectUtils.nullSafeEquals(getScheme(), otherComp.getScheme()) &&
+				ObjectUtils.nullSafeEquals(this.ssp, otherComp.ssp) &&
+				ObjectUtils.nullSafeEquals(getFragment(), otherComp.getFragment()));
 	}
 
 	@Override
