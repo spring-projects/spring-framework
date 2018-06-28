@@ -646,7 +646,7 @@ public abstract class StringUtils {
 		String prefix = "";
 		if (prefixIndex != -1) {
 			prefix = pathToUse.substring(0, prefixIndex + 1);
-			if (prefix.contains("/")) {
+			if (prefix.contains(FOLDER_SEPARATOR)) {
 				prefix = "";
 			}
 			else {
@@ -659,7 +659,7 @@ public abstract class StringUtils {
 		}
 
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
-		List<String> pathElements = new LinkedList<>();
+		LinkedList<String> pathElements = new LinkedList<>();
 		int tops = 0;
 
 		for (int i = pathArray.length - 1; i >= 0; i--) {
@@ -686,6 +686,10 @@ public abstract class StringUtils {
 		// Remaining top paths need to be retained.
 		for (int i = 0; i < tops; i++) {
 			pathElements.add(0, TOP_PATH);
+		}
+		// If nothing else left, at least explicitly point to current path.
+		if (pathElements.size() == 1 && "".equals(pathElements.getLast()) && !prefix.endsWith(FOLDER_SEPARATOR)) {
+			pathElements.add(0, CURRENT_PATH);
 		}
 
 		return prefix + collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
