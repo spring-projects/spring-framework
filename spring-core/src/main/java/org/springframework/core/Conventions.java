@@ -41,8 +41,6 @@ public abstract class Conventions {
 	 */
 	private static final String PLURAL_SUFFIX = "List";
 
-	private static final ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
-
 
 	/**
 	 * Determine the conventional variable name for the supplied {@code Object}
@@ -116,7 +114,7 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = parameter.getParameterType();
-
+			ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 			if (reactiveAdapterRegistry.hasAdapters()) {
 				ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
 				if (adapter != null && !adapter.getDescriptor().isNoValue()) {
@@ -205,6 +203,7 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = resolvedType;
+			ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 			if (reactiveAdapterRegistry.hasAdapters()) {
 				ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
 				if (adapter != null && !adapter.getDescriptor().isNoValue()) {
