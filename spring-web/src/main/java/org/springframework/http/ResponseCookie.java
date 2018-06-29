@@ -115,6 +115,7 @@ public final class ResponseCookie extends HttpCookie {
 	 * <p>This limits the scope of the cookie such that it will only be attached to
 	 * same site requests if {@code "Strict"} or cross-site requests if {@code "Lax"}.
 	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
+	 * @since 5.1
 	 */
 	@Nullable
 	public String getSameSite() {
@@ -235,7 +236,7 @@ public final class ResponseCookie extends HttpCookie {
 			}
 
 			@Override
-			public ResponseCookieBuilder sameSite(String sameSite) {
+			public ResponseCookieBuilder sameSite(@Nullable String sameSite) {
 				this.sameSite = sameSite;
 				return this;
 			}
@@ -295,9 +296,11 @@ public final class ResponseCookie extends HttpCookie {
 		 * <p>This limits the scope of the cookie such that it will only be
 		 * attached to same site requests if {@code "Strict"} or cross-site
 		 * requests if {@code "Lax"}.
+		 * <p>By default set to {@code "Strict"}.
 		 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
+		 * @since 5.1
 		 */
-		ResponseCookieBuilder sameSite(String sameSite);
+		ResponseCookieBuilder sameSite(@Nullable String sameSite);
 
 		/**
 		 * Create the HttpCookie.
