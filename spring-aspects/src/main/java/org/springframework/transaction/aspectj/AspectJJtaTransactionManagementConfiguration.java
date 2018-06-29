@@ -20,30 +20,28 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
-import org.springframework.transaction.annotation.AbstractTransactionManagementConfiguration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.TransactionManagementConfigurationSelector;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 
 /**
  * {@code @Configuration} class that registers the Spring infrastructure beans necessary
- * to enable AspectJ-based annotation-driven transaction management for Spring's own
+ * to enable AspectJ-based annotation-driven transaction management for the JTA 1.2
+ * {@link javax.transaction.Transactional} annotation in addition to Spring's own
  * {@link org.springframework.transaction.annotation.Transactional} annotation.
  *
- * @author Chris Beams
  * @author Juergen Hoeller
- * @since 3.1
+ * @since 5.1
  * @see EnableTransactionManagement
  * @see TransactionManagementConfigurationSelector
- * @see AspectJJtaTransactionManagementConfiguration
  */
 @Configuration
-public class AspectJTransactionManagementConfiguration extends AbstractTransactionManagementConfiguration {
+public class AspectJJtaTransactionManagementConfiguration extends AspectJTransactionManagementConfiguration {
 
-	@Bean(name = TransactionManagementConfigUtils.TRANSACTION_ASPECT_BEAN_NAME)
+	@Bean(name = TransactionManagementConfigUtils.JTA_TRANSACTION_ASPECT_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-	public AnnotationTransactionAspect transactionAspect() {
-		AnnotationTransactionAspect txAspect = AnnotationTransactionAspect.aspectOf();
+	public JtaAnnotationTransactionAspect jtaTransactionAspect() {
+		JtaAnnotationTransactionAspect txAspect = JtaAnnotationTransactionAspect.aspectOf();
 		if (this.txManager != null) {
 			txAspect.setTransactionManager(this.txManager);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,27 @@ public abstract class TransactionManagementConfigUtils {
 	 */
 	public static final String TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME =
 			"org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration";
+
+	/**
+	 * The bean name of the internally managed JTA transaction aspect (used when mode == ASPECTJ).
+	 * @since 5.1
+	 */
+	public static final String JTA_TRANSACTION_ASPECT_BEAN_NAME =
+			"org.springframework.transaction.config.internalJtaTransactionAspect";
+
+	/**
+	 * The class name of the AspectJ transaction management aspect.
+	 * @since 5.1
+	 */
+	public static final String JTA_TRANSACTION_ASPECT_CLASS_NAME =
+			"org.springframework.transaction.aspectj.JtaAnnotationTransactionAspect";
+
+	/**
+	 * The name of the AspectJ transaction management @{@code Configuration} class for JTA.
+	 * @since 5.1
+	 */
+	public static final String JTA_TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME =
+			"org.springframework.transaction.aspectj.AspectJJtaTransactionManagementConfiguration";
 
 	/**
 	 * The bean name of the internally managed TransactionalEventListenerFactory.
