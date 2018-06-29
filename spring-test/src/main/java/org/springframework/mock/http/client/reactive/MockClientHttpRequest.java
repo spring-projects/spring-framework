@@ -17,7 +17,10 @@
 package org.springframework.mock.http.client.reactive;
 
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -26,12 +29,14 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.AbstractClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -97,10 +102,37 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	/**
+	 * Aggregate response data and convert to a String using the "Content-Type"
+	 * charset or "UTF-8" by default.
+	 */
+	public Mono<String> getBodyAsString() {
+
+		Charset charset = Optional.ofNullable(getHeaders().getContentType()).map(MimeType::getCharset)
+				.orElse(StandardCharsets.UTF_8);
+
+		return getBody()
+				.reduce(bufferFactory().allocateBuffer(), (previous, current) -> {
+					previous.write(current);
+					DataBufferUtils.release(current);
+					return previous;
+				})
+				.map(buffer -> bufferToString(buffer, charset));
+	}
+
+	private static String bufferToString(DataBuffer buffer, Charset charset) {
+		Assert.notNull(charset, "'charset' must not be null");
+		byte[] bytes = new byte[buffer.readableByteCount()];
+		buffer.read(bytes);
+		return new String(bytes, charset);
+	}
+
+	/**
 	 * Configure a custom handler for writing the request body.
+	 *
 	 * <p>The default write handler consumes and caches the request body so it
 	 * may be accessed subsequently, e.g. in test assertions. Use this property
 	 * when the request body is an infinite stream.
+	 *
 	 * @param writeHandler the write handler to use returning {@code Mono<Void>}
 	 * when the body has been "written" (i.e. consumed).
 	 */
