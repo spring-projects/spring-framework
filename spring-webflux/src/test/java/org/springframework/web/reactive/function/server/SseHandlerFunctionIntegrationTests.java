@@ -117,7 +117,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 	private static class SseHandler {
 
-		private static final Flux<Long> INTERVAL = interval(Duration.ofMillis(100), 2);
+		private static final Flux<Long> INTERVAL = testInterval(Duration.ofMillis(100), 2);
 
 		Mono<ServerResponse> string(ServerRequest request) {
 			return ServerResponse.ok()

@@ -177,7 +177,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@RequestMapping("/sse")
 	static class SseController {
 
-		private static final Flux<Long> INTERVAL = interval(Duration.ofMillis(100), 50);
+		private static final Flux<Long> INTERVAL = testInterval(Duration.ofMillis(100), 50);
 
 		private MonoProcessor<Void> cancellation = MonoProcessor.create();
 

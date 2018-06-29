@@ -207,7 +207,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		DataBufferUtils.release(dataBuffer);
 		String value = charBuffer.toString();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Decoded '" + "'");
+			logger.debug("Decoded '" + value + "'");
 		}
 		return value;
 	}
