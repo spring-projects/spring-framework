@@ -319,7 +319,6 @@ class ReactiveTypeHandler {
 				this.subscription.cancel();
 			}
 		}
-
 	}
 
 
@@ -402,15 +401,11 @@ class ReactiveTypeHandler {
 
 		private final CollectedValuesList values;
 
-
-		DeferredResultSubscriber(DeferredResult<Object> result, ReactiveAdapter adapter,
-				ResolvableType elementType) {
-
+		DeferredResultSubscriber(DeferredResult<Object> result, ReactiveAdapter adapter, ResolvableType elementType) {
 			this.result = result;
 			this.multiValueSource = adapter.isMultiValue();
 			this.values = new CollectedValuesList(elementType);
 		}
-
 
 		public void connect(ReactiveAdapter adapter, Object returnValue) {
 			Publisher<Object> publisher = adapter.toPublisher(returnValue);
@@ -446,6 +441,7 @@ class ReactiveTypeHandler {
 			}
 		}
 	}
+
 
 	/**
 	 * List of collect values where all elements are a specified type.
