@@ -353,7 +353,7 @@ public class CodeFlow implements Opcodes {
 					// nop
 				}
 				else {
-					throw new IllegalStateException("cannot get from "+stackTop+" to "+targetDescriptor);
+					throw new IllegalStateException("Cannot get from " + stackTop + " to " + targetDescriptor);
 				}
 			}
 			else if (stackTop == 'J') {
@@ -370,7 +370,7 @@ public class CodeFlow implements Opcodes {
 					mv.visitInsn(L2I);
 				}
 				else {
-					throw new IllegalStateException("cannot get from "+stackTop+" to "+targetDescriptor);
+					throw new IllegalStateException("Cannot get from " + stackTop + " to " + targetDescriptor);
 				}
 			}
 			else if (stackTop == 'F') {
@@ -387,7 +387,7 @@ public class CodeFlow implements Opcodes {
 					mv.visitInsn(F2I);
 				}
 				else {
-					throw new IllegalStateException("cannot get from "+stackTop+" to "+targetDescriptor);
+					throw new IllegalStateException("Cannot get from " + stackTop + " to " + targetDescriptor);
 				}
 			}
 			else if (stackTop == 'D') {
@@ -404,7 +404,7 @@ public class CodeFlow implements Opcodes {
 					mv.visitInsn(D2I);
 				}
 				else {
-					throw new IllegalStateException("cannot get from "+stackDescriptor+" to "+targetDescriptor);
+					throw new IllegalStateException("Cannot get from " + stackDescriptor + " to " + targetDescriptor);
 				}
 			}
 		}
@@ -653,6 +653,7 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
+	 * Convert a type descriptor to the single character primitive descriptor.
 	 * @param descriptor a descriptor for a type that should have a primitive representation
 	 * @return the single character descriptor for a primitive input descriptor
 	 */
@@ -768,9 +769,8 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * Deduce the descriptor for a type. Descriptors are like JVM type names but missing
-	 * the trailing ';' so for Object the descriptor is "Ljava/lang/Object" for int it is
-	 * "I".
+	 * Deduce the descriptor for a type. Descriptors are like JVM type names but missing the
+	 * trailing ';' so for Object the descriptor is "Ljava/lang/Object" for int it is "I".
 	 * @param type the type (may be primitive) for which to determine the descriptor
 	 * @return the descriptor
 	 */
@@ -944,7 +944,7 @@ public class CodeFlow implements Opcodes {
 			case 'S': return T_SHORT;
 			case 'Z': return T_BOOLEAN;
 			default:
-				throw new IllegalArgumentException("Unexpected arraytype "+arraytype.charAt(0));
+				throw new IllegalArgumentException("Unexpected arraytype " + arraytype.charAt(0));
 		}
 	}
 
@@ -978,10 +978,10 @@ public class CodeFlow implements Opcodes {
 		}
 		else {
 			if (arraytype.charAt(0) == '[') {
-				// Handling the nested array case here. If vararg
-				// is [[I then we want [I and not [I;
+				// Handling the nested array case here.
+				// If vararg is [[I then we want [I and not [I;
 				if (CodeFlow.isReferenceTypeArray(arraytype)) {
-					mv.visitTypeInsn(ANEWARRAY, arraytype+";");
+					mv.visitTypeInsn(ANEWARRAY, arraytype + ";");
 				}
 				else {
 					mv.visitTypeInsn(ANEWARRAY, arraytype);
@@ -1024,7 +1024,7 @@ public class CodeFlow implements Opcodes {
 			case 'S': return "Ljava/lang/Short";
 			case 'Z': return "Ljava/lang/Boolean";
 			default:
-				throw new IllegalArgumentException("Unexpected non primitive descriptor "+primitiveDescriptor);
+				throw new IllegalArgumentException("Unexpected non primitive descriptor " + primitiveDescriptor);
 		}
 	}
 
