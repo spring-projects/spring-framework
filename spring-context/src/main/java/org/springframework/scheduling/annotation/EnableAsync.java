@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,11 @@ import org.springframework.core.Ordered;
  * method.</li>
  * </ul>
  *
+ * <p><b>NOTE: {@link AsyncConfigurer} configuration classes get initialized early
+ * in the application context bootstrap. If you need any dependencies on other beans
+ * there, make sure to declare them 'lazy' as far as possible in order to let them
+ * go through other post-processors as well.</b>
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableAsync
@@ -84,9 +89,9 @@ import org.springframework.core.Ordered;
  *     &#064;Override
  *     public Executor getAsyncExecutor() {
  *         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
- *         executor.setCorePoolSize(7);
- *         executor.setMaxPoolSize(42);
- *         executor.setQueueCapacity(11);
+ *         executor.setCorePoolSize(5);
+ *         executor.setMaxPoolSize(10);
+ *         executor.setQueueCapacity(25);
  *         executor.setThreadNamePrefix("MyExecutor-");
  *         executor.initialize();
  *         return executor;
@@ -117,7 +122,7 @@ import org.springframework.core.Ordered;
  *
  *     <task:annotation-driven executor="myExecutor" exception-handler="exceptionHandler"/>
  *
- *     <task:executor id="myExecutor" pool-size="7-42" queue-capacity="11"/>
+ *     <task:executor id="myExecutor" pool-size="5-10" queue-capacity="25"/>
  *
  *     <bean id="asyncBean" class="com.foo.MyAsyncBean"/>
  *

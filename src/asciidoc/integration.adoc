@@ -478,7 +478,7 @@ shown in this example:
 				<entry key="/remoting/AccountService" value-ref="accountExporter"/>
 			</util:map>
 		</property>
-		<property name="port" value="8080" />
+		<property name="port" value="8080"/>
 	</bean>
 ----
 
@@ -2265,13 +2265,13 @@ containers that ships with Spring (in this case the `DefaultMessageListenerConta
 [subs="verbatim,quotes"]
 ----
 	<!-- this is the Message Driven POJO (MDP) -->
-	<bean id="messageListener" class="jmsexample.ExampleListener" />
+	<bean id="messageListener" class="jmsexample.ExampleListener"/>
 
 	<!-- and this is the message listener container -->
 	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="connectionFactory" ref="connectionFactory"/>
 		<property name="destination" ref="destination"/>
-		**<property name="messageListener" ref="messageListener" />**
+		**<property name="messageListener" ref="messageListener"/>**
 	</bean>
 ----
 
@@ -2367,7 +2367,7 @@ POJO that we will make into an MDP via the following configuration.
 	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="connectionFactory" ref="connectionFactory"/>
 		<property name="destination" ref="destination"/>
-		**<property name="messageListener" ref="messageListener" />**
+		**<property name="messageListener" ref="messageListener"/>**
 	</bean>
 ----
 
@@ -2919,7 +2919,7 @@ describes all available attributes:
 .Attributes of the JMS <listener> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | id
 | A bean name for the hosting listener container. If not specified, a bean name will be
@@ -2990,7 +2990,7 @@ choices and message redelivery scenarios.
 .Attributes of the JMS <listener-container> element
 [cols="1,6"]
 |===
-| Attribute| Description
+| Attribute | Description
 
 | container-type
 | The type of this listener container. Available options are: `default`, `simple`,
@@ -3443,7 +3443,7 @@ these registration behaviors are summarized on the following table:
 .Registration Behaviors
 [cols="1,4"]
 |===
-| Registration behavior| Explanation
+| Registration behavior | Explanation
 
 | `REGISTRATION_FAIL_ON_EXISTING`
 | This is the default registration behavior. If an `MBean` instance has already been
@@ -3699,7 +3699,7 @@ metadata types:
 .Source-level metadata parameters
 [cols="1,3,1"]
 |===
-| Parameter| Description| Applies to
+| Parameter | Description | Applies to
 
 | `ObjectName`
 | Used by `MetadataNamingStrategy` to determine the `ObjectName` of a managed resource
@@ -5085,7 +5085,7 @@ corresponding methods called on the CCI `Interaction` interface:
 .Usage of Interaction execute methods
 [cols="3,1,3"]
 |===
-| CciTemplate method signature| CciTemplate outputRecordCreator property| execute method called on the CCI Interaction
+| CciTemplate method signature | CciTemplate outputRecordCreator property | execute method called on the CCI Interaction
 
 | Record execute(InteractionSpec, Record)
 | not set
@@ -5452,7 +5452,7 @@ The operation object approach uses records in the same manner as the `CciTemplat
 .Usage of Interaction execute methods
 [cols="3,1,3"]
 |===
-| MappingRecordOperation method signature| MappingRecordOperation outputRecordCreator property| execute method called on the CCI Interaction
+| MappingRecordOperation method signature | MappingRecordOperation outputRecordCreator property | execute method called on the CCI Interaction
 
 | Object execute(Object)
 | not set
@@ -6225,49 +6225,37 @@ behavior, it is possible to use this abstraction for your own needs.
 ==== TaskExecutor types
 
 There are a number of pre-built implementations of `TaskExecutor` included with the
-Spring distribution. In all likelihood, you shouldn't ever need to implement your own.
+Spring distribution. In all likelihood, you should never need to implement your own.
+The common out-of-the-box variants are:
 
+* `SyncTaskExecutor`
+  This implementation does not execute invocations asynchronously. Instead, each
+  invocation takes place in the calling thread. It is primarily used in situations
+  where multi-threading is not necessary such as in simple test cases.
 * `SimpleAsyncTaskExecutor`
   This implementation does not reuse any threads, rather it starts up a new thread
   for each invocation. However, it does support a concurrency limit which will block
   any invocations that are over the limit until a slot has been freed up. If you
-  are looking for true pooling, see the discussions of `SimpleThreadPoolTaskExecutor`
-  and `ThreadPoolTaskExecutor` below.
-* `SyncTaskExecutor`
-  This implementation doesn't execute invocations asynchronously. Instead, each
-  invocation takes place in the calling thread. It is primarily used in situations
-  where multi-threading isn't necessary such as simple test cases.
+  are looking for true pooling, see `ThreadPoolTaskExecutor` below.
 * `ConcurrentTaskExecutor`
-  This implementation is an adapter for a `java.util.concurrent.Executor` object.
+  This implementation is an adapter for a `java.util.concurrent.Executor` instance.
   There is an alternative, `ThreadPoolTaskExecutor`, that exposes the `Executor`
-  configuration parameters as bean properties. It is rare to need to use the
-  `ConcurrentTaskExecutor`, but if the `ThreadPoolTaskExecutor` isn't flexible
-  enough for your needs, the `ConcurrentTaskExecutor` is an alternative.
-* `SimpleThreadPoolTaskExecutor`
-  This implementation is actually a subclass of Quartz's `SimpleThreadPool` which
-  listens to Spring's lifecycle callbacks. This is typically used when you have a
-  thread pool that may need to be shared by both Quartz and non-Quartz components.
+  configuration parameters as bean properties. There is rarely a need to use
+  `ConcurrentTaskExecutor` directly, but if the `ThreadPoolTaskExecutor` is not
+  flexible enough for your needs, then `ConcurrentTaskExecutor` is an alternative.
 * `ThreadPoolTaskExecutor`
   This implementation is the most commonly used one. It exposes bean properties for
   configuring a `java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
   If you need to adapt to a different kind of `java.util.concurrent.Executor`, it is
   recommended that you use a `ConcurrentTaskExecutor` instead.
 * `WorkManagerTaskExecutor`
-
-+
-
-****
-CommonJ is a set of specifications jointly developed between BEA and IBM. These
-specifications are not Java EE standards, but are standard across BEA's and IBM's
-Application Server implementations.
-****
-
-+
-
-This implementation uses the CommonJ `WorkManager` as its backing implementation and is
-the central convenience class for setting up a CommonJ `WorkManager` reference in a Spring
-context. Similar to the `SimpleThreadPoolTaskExecutor`, this class implements the
-`WorkManager` interface and therefore can be used directly as a `WorkManager` as well.
+  This implementation uses a CommonJ `WorkManager` as its backing service provider
+  and is the central convenience class for setting up CommonJ-based thread pool
+  integration on WebLogic/WebSphere within a Spring application context.
+* `DefaultManagedTaskExecutor`
+  This implementation uses a JNDI-obtained `ManagedExecutorService` in a JSR-236
+  compatible runtime environment such as a Java EE 7+ application server,
+  replacing a CommonJ WorkManager for that purpose.
 
 
 [[scheduling-task-executor-usage]]
@@ -6295,7 +6283,6 @@ out a set of messages.
 			public void run() {
 				System.out.println(message);
 			}
-
 		}
 
 		private TaskExecutor taskExecutor;
@@ -6309,7 +6296,6 @@ out a set of messages.
 				taskExecutor.execute(new MessagePrinterTask("Message" + i));
 			}
 		}
-
 	}
 ----
 
@@ -6324,13 +6310,13 @@ been exposed.
 [subs="verbatim,quotes"]
 ----
 	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-		<property name="corePoolSize" value="5" />
-		<property name="maxPoolSize" value="10" />
-		<property name="queueCapacity" value="25" />
+		<property name="corePoolSize" value="5"/>
+		<property name="maxPoolSize" value="10"/>
+		<property name="queueCapacity" value="25"/>
 	</bean>
 
 	<bean id="taskExecutorExample" class="TaskExecutorExample">
-		<constructor-arg ref="taskExecutor" />
+		<constructor-arg ref="taskExecutor"/>
 	</bean>
 ----
 
@@ -6358,7 +6344,6 @@ with a variety of methods for scheduling tasks to run at some point in the futur
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay);
 
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay);
-
 	}
 ----
 
@@ -6372,8 +6357,8 @@ much more flexible.
 [[scheduling-trigger-interface]]
 ==== Trigger interface
 
-The `Trigger` interface is essentially inspired by JSR-236, which, as of Spring 3.0, has
-not yet been officially implemented. The basic idea of the `Trigger` is that execution
+The `Trigger` interface is essentially inspired by JSR-236 which, as of Spring 3.0,
+was not yet officially implemented. The basic idea of the `Trigger` is that execution
 times may be determined based on past execution outcomes or even arbitrary conditions.
 If these determinations do take into account the outcome of the preceding execution,
 that information is available within a `TriggerContext`. The `Trigger` interface itself
@@ -6385,7 +6370,6 @@ is quite simple:
 	public interface Trigger {
 
 		Date nextExecutionTime(TriggerContext triggerContext);
-
 	}
 ----
 
@@ -6404,7 +6388,6 @@ default). Here you can see what methods are available for `Trigger` implementati
 		Date lastActualExecutionTime();
 
 		Date lastCompletionTime();
-
 	}
 ----
 
@@ -6439,19 +6422,21 @@ could be configured externally and therefore easily modified or extended.
 ==== TaskScheduler implementations
 
 As with Spring's `TaskExecutor` abstraction, the primary benefit of the `TaskScheduler`
-is that code relying on scheduling behavior need not be coupled to a particular
-scheduler implementation. The flexibility this provides is particularly relevant when
-running within Application Server environments where threads should not be created
-directly by the application itself. For such cases, Spring provides a
-`TimerManagerTaskScheduler` that delegates to a CommonJ TimerManager instance, typically
-configured with a JNDI-lookup.
+arrangement is that an application's scheduling needs are decoupled from the deployment
+environment. This abstraction level is particularly relevant when deploying to an
+application server environment where threads should not be created directly by the
+application itself. For such scenarios, Spring provides a `TimerManagerTaskScheduler`
+delegating to a CommonJ TimerManager on WebLogic/WebSphere as well as a more recent
+`DefaultManagedTaskScheduler` delegating to a JSR-236 `ManagedScheduledExecutorService`
+in a Java EE 7+ environment, both typically configured with a JNDI lookup.
 
-A simpler alternative, the `ThreadPoolTaskScheduler`, can be used whenever external
-thread management is not a requirement. Internally, it delegates to a
-`ScheduledExecutorService` instance. `ThreadPoolTaskScheduler` actually implements
-Spring's `TaskExecutor` interface as well, so that a single instance can be used for
-asynchronous execution __as soon as possible__ as well as scheduled, and potentially
-recurring, executions.
+Whenever external thread management is not a requirement, a simpler alternative is
+a local `ScheduledExecutorService` setup within the application which can be adapted
+through Spring's `ConcurrentTaskScheduler`. As a convenience, Spring also provides a
+`ThreadPoolTaskScheduler` which internally delegates to a `ScheduledExecutorService`,
+providing common bean-style configuration along the lines of `ThreadPoolTaskExecutor`.
+These variants work perfectly fine for locally embedded thread pool setups in lenient
+application server environments as well, in particular on Tomcat and Jetty.
 
 
 
@@ -7217,12 +7202,12 @@ For more information on schema-based configuration, see <<xsd-configuration>>.
 
 		<!-- this is the bean definition for the Groovy-backed Messenger implementation -->
 		<lang:groovy id="messenger" script-source="classpath:Messenger.groovy">
-			<lang:property name="message" value="I Can Do The Frug" />
+			<lang:property name="message" value="I Can Do The Frug"/>
 		</lang:groovy>
 
 		<!-- an otherwise normal bean that will be injected by the Groovy-backed Messenger -->
 		<bean id="bookingService" class="x.y.DefaultBookingService">
-			<property name="messenger" ref="messenger" />
+			<property name="messenger" ref="messenger"/>
 		</bean>
 
 	</beans>
@@ -7336,11 +7321,11 @@ refreshable beans:
 		<lang:groovy id="messenger"
 				refresh-check-delay="5000" <!-- switches refreshing on with 5 seconds between checks -->
 				script-source="classpath:Messenger.groovy">
-			<lang:property name="message" value="I Can Do The Frug" />
+			<lang:property name="message" value="I Can Do The Frug"/>
 		</lang:groovy>
 
 		<bean id="bookingService" class="x.y.DefaultBookingService">
-			<property name="messenger" ref="messenger" />
+			<property name="messenger" ref="messenger"/>
 		</bean>
 
 	</beans>
@@ -7451,7 +7436,7 @@ feature crystal clear:
 	}
 
 		</lang:inline-script>
-		<lang:property name="message" value="I Can Do The Frug" />
+		<lang:property name="message" value="I Can Do The Frug"/>
 	</lang:groovy>
 ----
 
@@ -7490,7 +7475,7 @@ a `<![CDATA[]]>` region might be better.)
 	end
 
 			</lang:inline-script>
-		<lang:property name="message" value="Hello World!" />
+		<lang:property name="message" value="Hello World!"/>
 	</lang:jruby>
 ----
 
@@ -7535,10 +7520,10 @@ will __not__ work.
 		script-source="classpath:Messenger.groovy">
 		<!-- this next constructor argument will *not* be injected into the GroovyMessenger -->
 		<!-- in fact, this isn't even allowed according to the schema -->
-		<constructor-arg value="This will *not* work" />
+		<constructor-arg value="This will *not* work"/>
 
 		<!-- only property values are injected into the dynamic-language-backed object -->
-		<lang:property name="anotherMessage" value="Passed straight through to the dynamic-language-backed object" />
+		<lang:property name="anotherMessage" value="Passed straight through to the dynamic-language-backed object"/>
 
 	</lang>
 ----
@@ -7622,7 +7607,7 @@ And here is the Spring XML that defines an instance of the `RubyMessenger` JRuby
 			script-interfaces="org.springframework.scripting.Messenger"
 			script-source="classpath:RubyMessenger.rb">
 
-		<lang:property name="message" value="Hello World!" />
+		<lang:property name="message" value="Hello World!"/>
 
 	</lang:jruby>
 ----
@@ -7923,7 +7908,7 @@ term is used very loosely here).
 	<lang:bsh id="messageService" script-source="classpath:BshMessenger.bsh"
 		script-interfaces="org.springframework.scripting.Messenger">
 
-		<lang:property name="message" value="Hello World!" />
+		<lang:property name="message" value="Hello World!"/>
 	</lang:bsh>
 ----
 
@@ -8102,11 +8087,11 @@ a <<beans-factory-scopes-prototype,prototype>>.
 			http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
 
 		<lang:groovy id="messenger" script-source="classpath:Messenger.groovy" scope="prototype">
-			<lang:property name="message" value="I Can Do The RoboCop" />
+			<lang:property name="message" value="I Can Do The RoboCop"/>
 		</lang:groovy>
 
 		<bean id="bookingService" class="x.y.DefaultBookingService">
-			<property name="messenger" ref="messenger" />
+			<property name="messenger" ref="messenger"/>
 		</bean>
 
 	</beans>
@@ -8715,8 +8700,7 @@ Alternatively for XML configuration use the `cache:annotation-driven` element:
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-			<cache:annotation-driven />
-
+			<cache:annotation-driven/>
 	</beans>
 ----
 
@@ -8744,7 +8728,7 @@ javadoc for more details].
 .Cache annotation settings
 [cols="1,1,1,3"]
 |===
-| XML Attribute| Annotation Attribute| Default| Description
+| XML Attribute | Annotation Attribute | Default | Description
 
 | `cache-manager`
 | N/A (See `CachingConfigurer` javadocs)
@@ -8927,7 +8911,7 @@ counterpart:
 .Spring vs. JSR-107 caching annotations
 [cols="1,1,3"]
 |===
-| Spring| JSR-107| Remark
+| Spring | JSR-107 | Remark
 
 | `@Cacheable`
 | `@CacheResult`
@@ -9011,7 +8995,7 @@ the method again.
 [subs="verbatim,quotes"]
 ----
 	@CacheResult(cacheName="books", **exceptionCacheName="failures"**
-	             **cachedExceptions = InvalidIsbnNotFoundException.class**)
+				**cachedExceptions = InvalidIsbnNotFoundException.class**)
 	public Book findBook(ISBN isbn)
 ----
 
@@ -9140,11 +9124,11 @@ Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 [subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
-	      class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
+			class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
 
 	<!-- EhCache library setup -->
 	<bean id="ehcache"
-	      class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>
+			class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>
 ----
 
 This setup bootstraps the ehcache library inside Spring IoC (through the `ehcache` bean) which
@@ -9165,7 +9149,7 @@ Configuring a `CacheManager` that creates the cache on demand is straightforward
 [subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
-	      class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
+			class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
 ----
 
 It is also possible to provide the caches to use explicitly. In that case, only those
