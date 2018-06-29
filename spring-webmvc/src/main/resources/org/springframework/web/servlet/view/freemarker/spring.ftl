@@ -109,9 +109,9 @@
  *   spring.status : a BindStatus instance holding the command object name,
  *   expression, value, and error messages and codes for the path supplied
  *
- * @param path : the path (string value) of the value required to bind to.
- *   Spring defaults to a command name of "command" but this can be overridden
- *   by user config.
+ * @param path the path (string value) of the value required to bind to.
+ *     Spring defaults to a command name of "command" but this can be
+ *     overridden by user configuration.
  -->
 <#macro bind path>
     <#if htmlEscape?exists>
@@ -152,8 +152,8 @@
  * of a command or bean.
  *
  * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ * @param attributes any additional attributes for the element
+ *    (such as class or CSS styles or size)
  -->
 <#macro formInput path attributes="" fieldType="text">
     <@bind path/>
@@ -169,8 +169,8 @@
  * of 'password'.
  *
  * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ * @param attributes any additional attributes for the element
+ *    (such as class or CSS styles or size)
  -->
 <#macro formPasswordInput path attributes="">
     <@formInput path, attributes, "password"/>
@@ -184,8 +184,8 @@
  * the formInput macro with a 'type' parameter of 'hidden'.
  *
  * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ * @param attributes any additional attributes for the element
+ *    (such as class or CSS styles or size)
  -->
 <#macro formHiddenInput path attributes="">
     <@formInput path, attributes, "hidden"/>
@@ -197,8 +197,8 @@
  * Display a text area and bind it to an attribute of a command or bean.
  *
  * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ * @param attributes any additional attributes for the element
+ *    (such as class or CSS styles or size)
  -->
 <#macro formTextarea path attributes="">
     <@bind path/>
@@ -214,8 +214,8 @@ ${stringStatusValue}</textarea>
  *
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ * @param attributes any additional attributes for the element
+ *    (such as class or CSS styles or size)
 -->
 <#macro formSingleSelect path options attributes="">
     <@bind path/>
@@ -240,8 +240,8 @@ ${stringStatusValue}</textarea>
  *
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ * @param attributes any additional attributes for the element
+ *    (such as class or CSS styles or size)
 -->
 <#macro formMultiSelect path options attributes="">
     <@bind path/>
@@ -260,10 +260,10 @@ ${stringStatusValue}</textarea>
  *
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
- * @param separator the html tag or other character list that should be used to
- *    separate each option. Typically '&nbsp;' or '<br>'
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ * @param separator the HTML tag or other character list that should be used to
+ *    separate each option (typically '&nbsp;' or '<br>')
+ * @param attributes any additional attributes for the element
+ *    (such as class or CSS styles or size)
 -->
 <#macro formRadioButtons path options separator attributes="">
     <@bind path/>
@@ -281,10 +281,10 @@ ${stringStatusValue}</textarea>
  *
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
- * @param separator the html tag or other character list that should be used to
- *    separate each option. Typically '&nbsp;' or '<br>'
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ * @param separator the HTML tag or other character list that should be used to
+ *    separate each option (typically '&nbsp;' or '<br>')
+ * @param attributes any additional attributes for the element
+ *    (such as class or CSS styles or size)
 -->
 <#macro formCheckboxes path options separator attributes="">
     <@bind path/>
@@ -303,8 +303,8 @@ ${stringStatusValue}</textarea>
  * Show a single checkbox.
  *
  * @param path the name of the field to bind to
- * @param attributes any additional attributes for the element (such as class
- *    or CSS styles or size
+ * @param attributes any additional attributes for the element
+ *    (such as class or CSS styles or size)
 -->
 <#macro formCheckbox path attributes="">
 	<@bind path />
@@ -320,12 +320,12 @@ ${stringStatusValue}</textarea>
  * Show validation errors for the currently bound field, with
  * optional style attributes.
  *
- * @param separator the html tag or other character list that should be used to
- *    separate each option. Typically '<br>'.
+ * @param separator the HTML tag or other character list that should be used to
+ *    separate each option (typically '&nbsp;' or '<br>')
  * @param classOrStyle either the name of a CSS class element (which is defined in
- *    the template or an external CSS file) or an inline style. If the value passed in here
- *    contains a colon (:) then a 'style=' attribute will be used, else a 'class=' attribute
- *    will be used.
+ *    the template or an external CSS file) or an inline style. If the value passed
+ *    in here contains a colon (:) then a 'style=' attribute will be used,
+ *    otherwise a 'class=' attribute will be used.
 -->
 <#macro showErrors separator classOrStyle="">
     <#list status.errorMessages as error>
