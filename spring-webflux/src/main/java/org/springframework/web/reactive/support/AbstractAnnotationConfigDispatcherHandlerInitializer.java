@@ -35,7 +35,6 @@ import org.springframework.util.ObjectUtils;
 public abstract class AbstractAnnotationConfigDispatcherHandlerInitializer
 		extends AbstractDispatcherHandlerInitializer {
 
-
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation creates an {@link AnnotationConfigApplicationContext},

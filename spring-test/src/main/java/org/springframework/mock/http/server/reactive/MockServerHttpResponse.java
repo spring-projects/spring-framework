@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,10 +125,8 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 	 * charset or "UTF-8" by default.
 	 */
 	public Mono<String> getBodyAsString() {
-
 		Charset charset = Optional.ofNullable(getHeaders().getContentType()).map(MimeType::getCharset)
 				.orElse(StandardCharsets.UTF_8);
-
 		return getBody()
 				.reduce(bufferFactory().allocateBuffer(), (previous, current) -> {
 					previous.write(current);
@@ -139,7 +137,6 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	private static String bufferToString(DataBuffer buffer, Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
 		byte[] bytes = new byte[buffer.readableByteCount()];
 		buffer.read(bytes);
 		return new String(bytes, charset);

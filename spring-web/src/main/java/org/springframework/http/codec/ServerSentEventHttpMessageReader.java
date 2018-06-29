@@ -103,7 +103,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 			Map<String, Object> hints) {
 
 		boolean shouldWrap = isServerSentEvent(elementType);
-		ResolvableType valueType = (shouldWrap ? elementType.getGeneric(0) : elementType);
+		ResolvableType valueType = (shouldWrap ? elementType.getGeneric() : elementType);
 
 		return stringDecoder.decode(message.getBody(), STRING_TYPE, null, Collections.emptyMap())
 				.bufferUntil(line -> line.equals(""))
