@@ -62,6 +62,7 @@ public class WebClientIntegrationTests {
 
 	private WebClient webClient;
 
+
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
@@ -69,12 +70,13 @@ public class WebClientIntegrationTests {
 	}
 
 	@After
-	public void shutdown() throws Exception {
+	public void shutdown() throws IOException {
 		this.server.shutdown();
 	}
 
+
 	@Test
-	public void shouldReceiveResponseHeaders() throws Exception {
+	public void shouldReceiveResponseHeaders() {
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "text/plain")
 				.setBody("Hello Spring!"));
@@ -100,7 +102,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceivePlainText() throws Exception {
+	public void shouldReceivePlainText() {
 		prepareResponse(response -> response.setBody("Hello Spring!"));
 
 		Mono<String> result = this.webClient.get()
@@ -122,7 +124,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveJsonAsString() throws Exception {
+	public void shouldReceiveJsonAsString() {
 		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json").setBody(content));
@@ -143,8 +145,8 @@ public class WebClientIntegrationTests {
 		});
 	}
 
-	@Test // SPR-16715
-	public void shouldReceiveJsonAsTypeReferenceString() throws Exception {
+	@Test  // SPR-16715
+	public void shouldReceiveJsonAsTypeReferenceString() {
 		String content = "{\"containerValue\":{\"fooValue\":\"bar\"}}";
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json").setBody(content));
@@ -170,7 +172,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveJsonAsResponseEntityString() throws Exception {
+	public void shouldReceiveJsonAsResponseEntityString() {
 		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json").setBody(content));
@@ -197,7 +199,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveJsonAsResponseEntityList() throws Exception {
+	public void shouldReceiveJsonAsResponseEntityList() {
 		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json").setBody(content));
@@ -226,7 +228,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveJsonAsFluxString() throws Exception {
+	public void shouldReceiveJsonAsFluxString() {
 		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json").setBody(content));
@@ -248,7 +250,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveJsonAsPojo() throws Exception {
+	public void shouldReceiveJsonAsPojo() {
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"));
@@ -272,7 +274,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveJsonAsFluxPojo() throws Exception {
+	public void shouldReceiveJsonAsFluxPojo() {
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json")
 				.setBody("[{\"bar\":\"bar1\",\"foo\":\"foo1\"},{\"bar\":\"bar2\",\"foo\":\"foo2\"}]"));
@@ -297,7 +299,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldSendPojoAsJson() throws Exception {
+	public void shouldSendPojoAsJson() {
 		prepareResponse(response -> response.setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}"));
 
@@ -325,7 +327,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldSendCookies() throws Exception {
+	public void shouldSendCookies() {
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "text/plain").setBody("test"));
 
@@ -347,8 +349,8 @@ public class WebClientIntegrationTests {
 		});
 	}
 
-	@Test // SPR-16246
-	public void shouldSendLargeTextFile() throws Exception {
+	@Test  // SPR-16246
+	public void shouldSendLargeTextFile() throws IOException {
 		prepareResponse(response -> {});
 
 		Resource resource = new ClassPathResource("largeTextFile.txt", getClass());
@@ -382,7 +384,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceive404Response() throws Exception {
+	public void shouldReceive404Response() {
 		prepareResponse(response -> response.setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
@@ -401,7 +403,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldGetErrorSignalOn404() throws Exception {
+	public void shouldGetErrorSignalOn404() {
 		prepareResponse(response -> response.setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
@@ -421,8 +423,8 @@ public class WebClientIntegrationTests {
 		});
 	}
 
-	@Test // SPR-15946
-	public void shouldGetErrorSignalOnEmptyErrorResponse() throws Exception {
+	@Test  // SPR-15946
+	public void shouldGetErrorSignalOnEmptyErrorResponse() {
 		prepareResponse(response -> response.setResponseCode(404)
 				.setHeader("Content-Type", "text/plain"));
 
@@ -442,7 +444,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldGetInternalServerErrorSignal() throws Exception {
+	public void shouldGetInternalServerErrorSignal() {
 		String errorMessage = "Internal Server error";
 		prepareResponse(response -> response.setResponseCode(500)
 				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
@@ -470,7 +472,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldApplyCustomStatusHandler() throws Exception {
+	public void shouldApplyCustomStatusHandler() {
 		prepareResponse(response -> response.setResponseCode(500)
 				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
 
@@ -492,7 +494,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldApplyCustomStatusHandlerParameterizedTypeReference() throws Exception {
+	public void shouldApplyCustomStatusHandlerParameterizedTypeReference() {
 		prepareResponse(response -> response.setResponseCode(500)
 				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
 
@@ -514,7 +516,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveNotFoundEntity() throws Exception {
+	public void shouldReceiveNotFoundEntity() {
 		prepareResponse(response -> response.setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
@@ -536,7 +538,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldApplyExchangeFilter() throws Exception {
+	public void shouldApplyExchangeFilter() {
 		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
 				.setBody("Hello Spring!"));
 
@@ -563,7 +565,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldApplyErrorHandlingFilter() throws Exception {
+	public void shouldApplyErrorHandlingFilter() {
 
 		ExchangeFilterFunction filter = ExchangeFilterFunction.ofResponseProcessor(
 				clientResponse -> {
@@ -606,7 +608,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveEmptyResponse() throws Exception {
+	public void shouldReceiveEmptyResponse() {
 		prepareResponse(response -> response.setHeader("Content-Length", "0").setBody(""));
 
 		Mono<ResponseEntity<Void>> result = this.webClient.get()
@@ -619,8 +621,8 @@ public class WebClientIntegrationTests {
 		}).verifyComplete();
 	}
 
-	@Test // SPR-15782
-	public void shouldFailWithRelativeUrls() throws Exception {
+	@Test  // SPR-15782
+	public void shouldFailWithRelativeUrls() {
 		String uri = "/api/v4/groups/1";
 		Mono<ClientResponse> responseMono = WebClient.builder().build().get().uri(uri).exchange();
 
@@ -629,14 +631,20 @@ public class WebClientIntegrationTests {
 				.verify(Duration.ofSeconds(5));
 	}
 
+
 	private void prepareResponse(Consumer<MockResponse> consumer) {
 		MockResponse response = new MockResponse();
 		consumer.accept(response);
 		this.server.enqueue(response);
 	}
 
-	private void expectRequest(Consumer<RecordedRequest> consumer) throws InterruptedException {
-		consumer.accept(this.server.takeRequest());
+	private void expectRequest(Consumer<RecordedRequest> consumer) {
+		try {
+			consumer.accept(this.server.takeRequest());
+		}
+		catch (InterruptedException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 	private void expectRequestCount(int count) {
@@ -667,10 +675,10 @@ public class WebClientIntegrationTests {
 		}
 	}
 
+
 	static class Foo {
 
 		private String fooValue;
-
 
 		public String getFooValue() {
 			return fooValue;

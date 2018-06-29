@@ -123,7 +123,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		ResolvableType elementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(body);
-			ResolvableType genericType = bodyType.getGeneric(0);
+			ResolvableType genericType = bodyType.getGeneric();
 			elementType = getElementType(adapter, genericType);
 		}
 		else {

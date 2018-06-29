@@ -86,9 +86,7 @@ class ReactiveTypeHandler {
 		this(ReactiveAdapterRegistry.getSharedInstance(), new SyncTaskExecutor(), new ContentNegotiationManager());
 	}
 
-	ReactiveTypeHandler(ReactiveAdapterRegistry registry, TaskExecutor executor,
-			ContentNegotiationManager manager) {
-
+	ReactiveTypeHandler(ReactiveAdapterRegistry registry, TaskExecutor executor, ContentNegotiationManager manager) {
 		Assert.notNull(registry, "ReactiveAdapterRegistry is required");
 		Assert.notNull(executor, "TaskExecutor is required");
 		Assert.notNull(manager, "ContentNegotiationManager is required");
@@ -120,7 +118,7 @@ class ReactiveTypeHandler {
 		ReactiveAdapter adapter = this.reactiveRegistry.getAdapter(returnValue.getClass());
 		Assert.state(adapter != null, "Unexpected return value: " + returnValue);
 
-		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric(0);
+		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
 		Class<?> elementClass = elementType.resolve(Object.class);
 
 		Collection<MediaType> mediaTypes = getMediaTypes(request);

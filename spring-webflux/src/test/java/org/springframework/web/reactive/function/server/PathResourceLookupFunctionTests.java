@@ -98,12 +98,11 @@ public class PathResourceLookupFunctionTests {
 
 	@Test
 	public void composeResourceLookupFunction() throws Exception {
+		ClassPathResource defaultResource = new ClassPathResource("response.txt", getClass());
 
 		Function<ServerRequest, Mono<Resource>> lookupFunction =
 				new PathResourceLookupFunction("/resources/**",
 						new ClassPathResource("org/springframework/web/reactive/function/server/"));
-
-		ClassPathResource defaultResource = new ClassPathResource("response.txt", getClass());
 
 		Function<ServerRequest, Mono<Resource>> customLookupFunction =
 				lookupFunction.andThen(resourceMono -> resourceMono
@@ -125,8 +124,6 @@ public class PathResourceLookupFunctionTests {
 				})
 				.expectComplete()
 				.verify();
-
 	}
-
 
 }

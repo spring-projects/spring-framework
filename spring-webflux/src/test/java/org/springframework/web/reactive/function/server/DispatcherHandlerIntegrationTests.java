@@ -40,8 +40,8 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * Tests the use of {@link HandlerFunction} and {@link RouterFunction} in a
@@ -70,7 +70,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 
 	@Test
-	public void mono() throws Exception {
+	public void mono() {
 		ResponseEntity<Person> result =
 				this.restTemplate.getForEntity("http://localhost:" + this.port + "/mono", Person.class);
 
@@ -79,7 +79,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 	}
 
 	@Test
-	public void flux() throws Exception {
+	public void flux() {
 		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<List<Person>>() {};
 		ResponseEntity<List<Person>> result =
 				this.restTemplate
@@ -93,7 +93,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 	}
 
 	@Test
-	public void controller() throws Exception {
+	public void controller() {
 		ResponseEntity<Person> result =
 				this.restTemplate.getForEntity("http://localhost:" + this.port + "/controller", Person.class);
 

@@ -27,8 +27,8 @@ import org.springframework.http.HttpStatus;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.Credentials.basicAuthenticationCredentials;
+import static org.springframework.http.HttpMethod.*;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.Credentials.*;
 
 /**
  * @author Arjen Poutsma

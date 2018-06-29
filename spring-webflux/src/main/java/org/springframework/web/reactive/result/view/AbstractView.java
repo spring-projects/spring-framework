@@ -57,9 +57,9 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 	private static final Object NO_VALUE = new Object();
 
 
-	private final List<MediaType> mediaTypes = new ArrayList<>(4);
+	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
-	private final ReactiveAdapterRegistry adapterRegistry;
+	private final List<MediaType> mediaTypes = new ArrayList<>(4);
 
 	private Charset defaultCharset = StandardCharsets.UTF_8;
 
@@ -77,9 +77,9 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 		this(ReactiveAdapterRegistry.getSharedInstance());
 	}
 
-	public AbstractView(ReactiveAdapterRegistry registry) {
+	public AbstractView(ReactiveAdapterRegistry reactiveAdapterRegistry) {
+		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
 		this.mediaTypes.add(ViewResolverSupport.DEFAULT_CONTENT_TYPE);
-		this.adapterRegistry = registry;
 	}
 
 
@@ -232,7 +232,6 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 	 * @return {@code Mono} for the completion of async attributes resolution
 	 */
 	protected Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
-
 		List<String> names = new ArrayList<>();
 		List<Mono<?>> valueMonos = new ArrayList<>();
 
@@ -241,7 +240,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 			if (value == null) {
 				continue;
 			}
-			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(null, value);
+			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(null, value);
 			if (adapter != null) {
 				names.add(entry.getKey());
 				if (adapter.isMultiValue()) {

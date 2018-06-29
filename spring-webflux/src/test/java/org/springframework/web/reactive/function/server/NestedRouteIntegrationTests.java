@@ -24,10 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.path;
-import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma
@@ -52,7 +50,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 
 
 	@Test
-	public void bar() throws Exception {
+	public void bar() {
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/bar", String.class);
 
@@ -61,7 +59,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	}
 
 	@Test
-	public void baz() throws Exception {
+	public void baz() {
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/baz", String.class);
 
@@ -70,7 +68,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	}
 
 	@Test
-	public void variables() throws Exception {
+	public void variables() {
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/1/2/3", String.class);
 
@@ -80,7 +78,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 
 	// SPR-16868
 	@Test
-	public void parentVariables() throws Exception {
+	public void parentVariables() {
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/1/bar", String.class);
 
@@ -91,7 +89,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 
 	// SPR 16692
 	@Test
-	public void removeFailedPathVariables() throws Exception {
+	public void removeFailedPathVariables() {
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/qux/quux", String.class);
 

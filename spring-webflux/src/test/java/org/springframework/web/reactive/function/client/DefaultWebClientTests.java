@@ -47,7 +47,7 @@ public class DefaultWebClientTests {
 
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.exchangeFunction = mock(ExchangeFunction.class);
 		when(this.exchangeFunction.exchange(captor.capture())).thenReturn(Mono.empty());
@@ -55,7 +55,7 @@ public class DefaultWebClientTests {
 
 
 	@Test
-	public void basic() throws Exception {
+	public void basic() {
 		WebClient client = builder().build();
 		client.get().uri("/path").exchange();
 
@@ -66,7 +66,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void uriBuilder() throws Exception {
+	public void uriBuilder() {
 		WebClient client = builder().build();
 		client.get().uri(builder -> builder.path("/path").queryParam("q", "12").build()).exchange();
 
@@ -76,7 +76,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void uriBuilderWithPathOverride() throws Exception {
+	public void uriBuilderWithPathOverride() {
 		WebClient client = builder().build();
 		client.get().uri(builder -> builder.replacePath("/path").build()).exchange();
 
@@ -86,7 +86,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void requestHeaderAndCookie() throws Exception {
+	public void requestHeaderAndCookie() {
 		WebClient client = builder().build();
 		client.get().uri("/path").accept(MediaType.APPLICATION_JSON)
 				.cookies(cookies -> cookies.add("id", "123"))	// SPR-16178
@@ -99,7 +99,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void defaultHeaderAndCookie() throws Exception {
+	public void defaultHeaderAndCookie() {
 		WebClient client = builder().defaultHeader("Accept", "application/json").defaultCookie("id", "123").build();
 		client.get().uri("/path").exchange();
 
@@ -110,7 +110,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void defaultHeaderAndCookieOverrides() throws Exception {
+	public void defaultHeaderAndCookieOverrides() {
 		WebClient client = builder().defaultHeader("Accept", "application/json").defaultCookie("id", "123").build();
 		client.get().uri("/path").header("Accept", "application/xml").cookie("id", "456").exchange();
 
@@ -121,7 +121,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void bodyObjectPublisher() throws Exception {
+	public void bodyObjectPublisher() {
 		Mono<Void> mono = Mono.empty();
 		WebClient client = builder().build();
 
@@ -129,7 +129,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void mutateDoesCopy() throws Exception {
+	public void mutateDoesCopy() {
 
 		WebClient.Builder builder = WebClient.builder();
 		builder.filter((request, next) -> next.exchange(request));
@@ -188,7 +188,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void switchToErrorOnEmptyClientResponseMono() throws Exception {
+	public void switchToErrorOnEmptyClientResponseMono() {
 		StepVerifier.create(builder().build().get().uri("/path").exchange())
 				.expectErrorMessage("The underlying HTTP client completed without emitting a response.")
 				.verify(Duration.ofSeconds(5));

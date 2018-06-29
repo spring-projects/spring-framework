@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,10 +56,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
+import static org.junit.Assert.*;
+import static org.springframework.http.codec.json.Jackson2CodecSupport.*;
 
 /**
  * @author Arjen Poutsma
@@ -171,7 +169,7 @@ public class BodyExtractorsTests {
 				.verify();
 	}
 
-	@Test // SPR-15758
+	@Test  // SPR-15758
 	public void toMonoWithEmptyBodyAndNoContentType() {
 		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
 				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});

@@ -48,11 +48,9 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.web.reactive.function.BodyExtractors.*;
 
 /**
  * @author Arjen Poutsma
@@ -75,7 +73,7 @@ public class DefaultClientResponseTests {
 
 
 	@Test
-	public void statusCode() throws Exception {
+	public void statusCode() {
 		HttpStatus status = HttpStatus.CONTINUE;
 		when(mockResponse.getStatusCode()).thenReturn(status);
 
@@ -83,7 +81,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void header() throws Exception {
+	public void header() {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		long contentLength = 42L;
 		httpHeaders.setContentLength(contentLength);
@@ -103,7 +101,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void cookies() throws Exception {
+	public void cookies() {
 		ResponseCookie cookie = ResponseCookie.from("foo", "bar").build();
 		MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 		cookies.add("foo", cookie);
@@ -115,7 +113,7 @@ public class DefaultClientResponseTests {
 
 
 	@Test
-	public void body() throws Exception {
+	public void body() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
@@ -135,7 +133,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void bodyToMono() throws Exception {
+	public void bodyToMono() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
@@ -156,7 +154,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void bodyToMonoTypeReference() throws Exception {
+	public void bodyToMonoTypeReference() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
@@ -179,7 +177,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void bodyToFlux() throws Exception {
+	public void bodyToFlux() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
@@ -201,7 +199,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void bodyToFluxTypeReference() throws Exception {
+	public void bodyToFluxTypeReference() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
@@ -225,7 +223,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntity() throws Exception {
+	public void toEntity() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
@@ -248,7 +246,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntityTypeReference() throws Exception {
+	public void toEntityTypeReference() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
@@ -273,7 +271,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntityList() throws Exception {
+	public void toEntityList() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
@@ -296,7 +294,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toEntityListTypeReference() throws Exception {
+	public void toEntityListTypeReference() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
@@ -321,7 +319,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toMonoVoid() throws Exception {
+	public void toMonoVoid() {
 		TestPublisher<DataBuffer> body = TestPublisher.create();
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -343,7 +341,7 @@ public class DefaultClientResponseTests {
 	}
 
 	@Test
-	public void toMonoVoidNonEmptyBody() throws Exception {
+	public void toMonoVoidNonEmptyBody() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));

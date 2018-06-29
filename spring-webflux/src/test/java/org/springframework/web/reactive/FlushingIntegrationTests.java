@@ -77,13 +77,14 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 		try {
 			StepVerifier.create(result)
-					.consumeNextWith(value -> assertTrue(value.length() == 20000 * "0123456789".length()))
+					.consumeNextWith(value -> assertTrue(value.length() >= 20000 * "0123456789".length()))
 					.expectComplete()
 					.verify(Duration.ofSeconds(10L));
 		}
 		catch (AssertionError err) {
 			String os = System.getProperty("os.name").toLowerCase();
-			if (os.contains("windows") && err.getMessage().startsWith("VerifySubscriber timed out")) {
+			if (os.contains("windows") && err.getMessage() != null &&
+					err.getMessage().startsWith("VerifySubscriber timed out")) {
 				// TODO: Reactor usually times out on Windows ...
 				err.printStackTrace();
 				return;
