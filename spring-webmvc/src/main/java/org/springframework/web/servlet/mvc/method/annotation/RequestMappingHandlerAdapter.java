@@ -423,17 +423,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	/**
 	 * Configure the registry for reactive library types to be supported as
 	 * return values from controller methods.
-	 * @since 5.0
-	 * @deprecated as of 5.0.5, in favor of {@link #setReactiveAdapterRegistry}
-	 */
-	@Deprecated
-	public void setReactiveRegistry(ReactiveAdapterRegistry reactiveRegistry) {
-		this.reactiveAdapterRegistry = reactiveRegistry;
-	}
-
-	/**
-	 * Configure the registry for reactive library types to be supported as
-	 * return values from controller methods.
 	 * @since 5.0.5
 	 */
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry reactiveAdapterRegistry) {
