@@ -19,6 +19,7 @@ package org.springframework.web.server.session;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpCookie;
@@ -42,6 +43,9 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	private Duration cookieMaxAge = Duration.ofSeconds(-1);
 
 	private String sameSite = "Strict";
+
+	@Nullable
+	private Consumer<ResponseCookie.ResponseCookieBuilder> cookieInitializer = null;
 
 
 	/**
@@ -98,6 +102,19 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 		return this.sameSite;
 	}
 
+	/**
+	 * Add {@link Consumer} for a {@link ResponseCookie.ResponseCookieBuilder
+	 * ResponseCookieBuilder} that will be invoked for each cookie being built,
+	 * just before the call to
+	 * {@link ResponseCookie.ResponseCookieBuilder#build() build()}.
+	 * @param initializer consumer for a cookie builder
+	 * @since 5.1
+	 */
+	public void addCookieInitializer(Consumer<ResponseCookie.ResponseCookieBuilder> initializer) {
+		this.cookieInitializer = this.cookieInitializer != null ?
+				this.cookieInitializer.andThen(initializer) : initializer;
+	}
+
 
 	@Override
 	public List<String> resolveSessionIds(ServerWebExchange exchange) {
@@ -125,13 +142,18 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	private ResponseCookie initSessionCookie(
 			ServerWebExchange exchange, String id, Duration maxAge, @Nullable String sameSite) {
 
-		return ResponseCookie.from(this.cookieName, id)
+		ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from(this.cookieName, id)
 				.path(exchange.getRequest().getPath().contextPath().value() + "/")
 				.maxAge(maxAge)
 				.httpOnly(true)
 				.secure("https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme()))
-				.sameSite(sameSite)
-				.build();
+				.sameSite(sameSite);
+
+		if (this.cookieInitializer != null) {
+			this.cookieInitializer.accept(cookieBuilder);
+		}
+
+		return cookieBuilder.build();
 	}
 
 }
