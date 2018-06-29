@@ -76,6 +76,11 @@ import org.springframework.core.Ordered;
  * method.</li>
  * </ul>
  *
+ * <p><b>NOTE: {@link AsyncConfigurer} configuration classes get initialized early
+ * in the application context bootstrap. If you need any dependencies on other beans
+ * there, make sure to declare them 'lazy' as far as possible in order to let them
+ * go through other post-processors as well.</b>
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableAsync
