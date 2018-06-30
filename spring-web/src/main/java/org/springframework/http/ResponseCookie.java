@@ -297,8 +297,8 @@ public final class ResponseCookie extends HttpCookie {
 		 * attached to same site requests if {@code "Strict"} or cross-site
 		 * requests if {@code "Lax"}.
 		 * <p>By default set to {@code "Strict"}.
-		 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
 		 * @since 5.1
+		 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
 		 */
 		ResponseCookieBuilder sameSite(@Nullable String sameSite);
 
