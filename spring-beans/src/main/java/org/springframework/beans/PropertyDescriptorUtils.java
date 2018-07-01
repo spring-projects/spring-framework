@@ -30,19 +30,12 @@ import org.springframework.util.ObjectUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-final class PropertyDescriptorUtils {
-
-
-	private PropertyDescriptorUtils() {
-	}
-
+abstract class PropertyDescriptorUtils {
 
 	/**
 	 * See {@link java.beans.FeatureDescriptor}.
 	 */
-	public static void copyNonMethodProperties(PropertyDescriptor source, PropertyDescriptor target)
-			throws IntrospectionException {
-
+	public static void copyNonMethodProperties(PropertyDescriptor source, PropertyDescriptor target) {
 		target.setExpert(source.isExpert());
 		target.setHidden(source.isHidden());
 		target.setPreferred(source.isPreferred());

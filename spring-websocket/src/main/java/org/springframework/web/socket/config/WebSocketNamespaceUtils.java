@@ -44,12 +44,7 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-final class WebSocketNamespaceUtils {
-
-
-	private WebSocketNamespaceUtils() {
-	}
-
+abstract class WebSocketNamespaceUtils {
 
 	public static RuntimeBeanReference registerHandshakeHandler(
 			Element element, ParserContext context, @Nullable Object source) {

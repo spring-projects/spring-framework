@@ -30,7 +30,6 @@ import javax.management.ObjectName;
  */
 public final class ObjectNameManager {
 
-
 	private ObjectNameManager() {
 	}
 

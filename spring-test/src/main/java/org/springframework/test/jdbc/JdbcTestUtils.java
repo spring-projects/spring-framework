@@ -38,13 +38,9 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
  * @see org.springframework.jdbc.datasource.init.DatabasePopulatorUtils
  */
-public final class JdbcTestUtils {
+public abstract class JdbcTestUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcTestUtils.class);
-
-
-	private JdbcTestUtils() {
-	}
 
 
 	/**

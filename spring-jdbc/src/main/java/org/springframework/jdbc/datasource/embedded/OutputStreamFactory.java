@@ -28,7 +28,6 @@ import java.io.OutputStream;
  */
 public final class OutputStreamFactory {
 
-
 	private OutputStreamFactory() {
 	}
 

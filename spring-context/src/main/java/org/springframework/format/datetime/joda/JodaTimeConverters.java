@@ -46,7 +46,6 @@ import org.springframework.format.datetime.DateFormatterRegistrar;
  */
 final class JodaTimeConverters {
 
-
 	private JodaTimeConverters() {
 	}
 

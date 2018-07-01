@@ -29,7 +29,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
  */
 final class BeanAnnotationHelper {
 
-
 	private BeanAnnotationHelper() {
 	}
 

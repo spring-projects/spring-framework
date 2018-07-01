@@ -30,7 +30,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  */
 final class ScopedProxyCreator {
 
-
 	private ScopedProxyCreator() {
 	}
 

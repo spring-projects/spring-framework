@@ -29,7 +29,6 @@ import org.springframework.util.Assert;
  */
 final class EmbeddedDatabaseConfigurerFactory {
 
-
 	private EmbeddedDatabaseConfigurerFactory() {
 	}
 

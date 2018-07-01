@@ -35,7 +35,6 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public final class MockMvcBuilders {
 
-
 	private MockMvcBuilders() {
 	}
 

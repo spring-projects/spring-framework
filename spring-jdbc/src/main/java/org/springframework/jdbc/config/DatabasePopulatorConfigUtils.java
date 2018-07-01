@@ -38,12 +38,7 @@ import org.springframework.util.xml.DomUtils;
  * @author Stephane Nicoll
  * @since 3.1
  */
-final class DatabasePopulatorConfigUtils {
-
-
-	private DatabasePopulatorConfigUtils() {
-	}
-
+abstract class DatabasePopulatorConfigUtils {
 
 	public static void setDatabasePopulator(Element element, BeanDefinitionBuilder builder) {
 		List<Element> scripts = DomUtils.getChildElementsByTagName(element, "script");
