@@ -75,7 +75,7 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	 * @return the {@code Unmarshaller}
 	 * @throws HttpMessageConversionException in case of JAXB errors
 	 */
-	protected final Unmarshaller createUnmarshaller(Class<?> clazz) throws JAXBException {
+	protected final Unmarshaller createUnmarshaller(Class<?> clazz) {
 		try {
 			JAXBContext jaxbContext = getJaxbContext(clazz);
 			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -105,7 +105,7 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 	 * @throws HttpMessageConversionException in case of JAXB errors
 	 */
 	protected final JAXBContext getJaxbContext(Class<?> clazz) {
-		Assert.notNull(clazz, "'clazz' must not be null");
+		Assert.notNull(clazz, "Class must not be null");
 		JAXBContext jaxbContext = this.jaxbContexts.get(clazz);
 		if (jaxbContext == null) {
 			try {

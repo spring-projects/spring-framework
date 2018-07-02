@@ -160,21 +160,21 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 				}
 				else {
 					// should not happen, since we check in canRead(Type)
-					throw new HttpMessageConversionException("Could not unmarshal to [" + elementClass + "]");
+					throw new HttpMessageNotReadableException("Cannot unmarshal to [" + elementClass + "]");
 				}
 				event = moveToNextElement(streamReader);
 			}
 			return result;
+		}
+		catch (XMLStreamException ex) {
+			throw new HttpMessageNotReadableException("Failed to read XML stream: " + ex.getMessage(), ex);
 		}
 		catch (UnmarshalException ex) {
 			throw new HttpMessageNotReadableException(
 					"Could not unmarshal to [" + elementClass + "]: " + ex.getMessage(), ex);
 		}
 		catch (JAXBException ex) {
-			throw new HttpMessageConversionException("Could not instantiate JAXBContext: " + ex.getMessage(), ex);
-		}
-		catch (XMLStreamException ex) {
-			throw new HttpMessageConversionException(ex.getMessage(), ex);
+			throw new HttpMessageConversionException("Invalid JAXB setup: " + ex.getMessage(), ex);
 		}
 	}
 
