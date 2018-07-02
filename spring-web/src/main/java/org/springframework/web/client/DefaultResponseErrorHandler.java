@@ -90,13 +90,77 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	protected void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
 		switch (statusCode.series()) {
 			case CLIENT_ERROR:
-				throw new HttpClientErrorException(statusCode, response.getStatusText(),
-						response.getHeaders(), getResponseBody(response), getCharset(response));
+				handleClientError(response, statusCode);
+				return;
 			case SERVER_ERROR:
-				throw new HttpServerErrorException(statusCode, response.getStatusText(),
-						response.getHeaders(), getResponseBody(response), getCharset(response));
+				handleServerError(response, statusCode);
+				return;
 			default:
 				throw new UnknownHttpStatusCodeException(statusCode.value(), response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+		}
+	}
+
+	private void handleClientError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
+		switch (statusCode) {
+			case BAD_REQUEST:
+				throw new HttpClientErrorException.BadRequest(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case UNAUTHORIZED:
+				throw new HttpClientErrorException.Unauthorized(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case FORBIDDEN:
+				throw new HttpClientErrorException.Forbidden(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case NOT_FOUND:
+				throw new HttpClientErrorException.NotFound(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case METHOD_NOT_ALLOWED:
+				throw new HttpClientErrorException.MethodNotAllowed(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case NOT_ACCEPTABLE:
+				throw new HttpClientErrorException.NotAcceptable(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case CONFLICT:
+				throw new HttpClientErrorException.Conflict(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case GONE:
+				throw new HttpClientErrorException.Gone(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case UNSUPPORTED_MEDIA_TYPE:
+				throw new HttpClientErrorException.UnsupportedMediaType(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case TOO_MANY_REQUESTS:
+				throw new HttpClientErrorException.TooManyRequests(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case UNPROCESSABLE_ENTITY:
+				throw new HttpClientErrorException.UnprocessableEntity(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			default:
+				throw new HttpClientErrorException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+		}
+	}
+
+	private void handleServerError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
+		switch (statusCode) {
+			case INTERNAL_SERVER_ERROR:
+				throw new HttpServerErrorException.InternalServerError(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case NOT_IMPLEMENTED:
+				throw new HttpServerErrorException.NotImplemented(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case BAD_GATEWAY:
+				throw new HttpServerErrorException.BadGateway(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case SERVICE_UNAVAILABLE:
+				throw new HttpServerErrorException.ServiceUnavailable(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case GATEWAY_TIMEOUT:
+				throw new HttpServerErrorException.GatewayTimeout(response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			default:
+				throw new HttpServerErrorException(statusCode, response.getStatusText(),
 						response.getHeaders(), getResponseBody(response), getCharset(response));
 		}
 	}
