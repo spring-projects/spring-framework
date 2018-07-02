@@ -26,6 +26,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -33,12 +34,13 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static java.time.format.DateTimeFormatter.*;
-import static org.hamcrest.Matchers.*;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 /**
@@ -529,4 +531,23 @@ public class HttpHeadersTests {
 		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
 	}
 
+	@Test
+	public void basicAuthenticationConsumer() throws Exception {
+
+		String username = "foo";
+		String password = "bar";
+
+		Consumer<HttpHeaders> consumer =
+				HttpHeaders.basicAuthenticationConsumer(username, password);
+
+		HttpHeaders headers = new HttpHeaders();
+		assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
+		consumer.accept(headers);
+		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
+		assertNotNull(authorization);
+		assertTrue(authorization.startsWith("Basic "));
+		byte[] result = Base64.getDecoder().decode(authorization.substring(6).getBytes(StandardCharsets.ISO_8859_1));
+		assertEquals("foo:bar", new String(result, StandardCharsets.ISO_8859_1));
+
+	}
 }
