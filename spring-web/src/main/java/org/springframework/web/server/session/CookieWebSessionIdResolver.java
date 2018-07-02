@@ -42,8 +42,6 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 	private Duration cookieMaxAge = Duration.ofSeconds(-1);
 
-	private String sameSite = "Strict";
-
 	@Nullable
 	private Consumer<ResponseCookie.ResponseCookieBuilder> cookieInitializer = null;
 
@@ -83,26 +81,6 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	}
 
 	/**
-	 * Set the value for the "SameSite" attribute of the cookie that holds the
-	 * session id. For its meaning and possible values, see
-	 * {@link ResponseCookie#getSameSite()}.
-	 * <p>By default set to {@code "Strict"}.
-	 * @param sameSite the SameSite value
-	 * @since 5.1
-	 */
-	public void setSameSite(String sameSite) {
-		this.sameSite = sameSite;
-	}
-
-	/**
-	 * Return the configured "SameSite" attribute value for the session cookie.
-	 * @since 5.1
-	 */
-	public String getSameSite() {
-		return this.sameSite;
-	}
-
-	/**
 	 * Add {@link Consumer} for a {@link ResponseCookie.ResponseCookieBuilder
 	 * ResponseCookieBuilder} that will be invoked for each cookie being built,
 	 * just before the call to
@@ -129,25 +107,25 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	@Override
 	public void setSessionId(ServerWebExchange exchange, String id) {
 		Assert.notNull(id, "'id' is required");
-		ResponseCookie cookie = initSessionCookie(exchange, id, getCookieMaxAge(), getSameSite());
+		ResponseCookie cookie = initSessionCookie(exchange, id, getCookieMaxAge());
 		exchange.getResponse().getCookies().set(this.cookieName, cookie);
 	}
 
 	@Override
 	public void expireSession(ServerWebExchange exchange) {
-		ResponseCookie cookie = initSessionCookie(exchange, "", Duration.ZERO, null);
+		ResponseCookie cookie = initSessionCookie(exchange, "", Duration.ZERO);
 		exchange.getResponse().getCookies().set(this.cookieName, cookie);
 	}
 
 	private ResponseCookie initSessionCookie(
-			ServerWebExchange exchange, String id, Duration maxAge, @Nullable String sameSite) {
+			ServerWebExchange exchange, String id, Duration maxAge) {
 
 		ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from(this.cookieName, id)
 				.path(exchange.getRequest().getPath().contextPath().value() + "/")
 				.maxAge(maxAge)
 				.httpOnly(true)
 				.secure("https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme()))
-				.sameSite(sameSite);
+				.sameSite("Strict");
 
 		if (this.cookieInitializer != null) {
 			this.cookieInitializer.accept(cookieBuilder);
