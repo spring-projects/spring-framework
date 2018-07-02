@@ -46,7 +46,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.jdbc.core.StatementCreatorUtils#IGNORE_GETPARAMETERTYPE_PROPERTY_NAME
  * @see org.springframework.test.context.cache.ContextCache#MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME
  */
-public abstract class SpringProperties {
+public final class SpringProperties {
 
 	private static final String PROPERTIES_RESOURCE_LOCATION = "spring.properties";
 
@@ -76,6 +76,10 @@ public abstract class SpringProperties {
 				logger.info("Could not load 'spring.properties' file from local classpath: " + ex);
 			}
 		}
+	}
+
+
+	private SpringProperties() {
 	}
 
 

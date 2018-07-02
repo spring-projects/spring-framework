@@ -34,12 +34,16 @@ import org.springframework.util.ClassUtils;
  * @author Rossen Stoyanchev
  * @since 2.0
  */
-public abstract class Conventions {
+public final class Conventions {
 
 	/**
 	 * Suffix added to names when using arrays.
 	 */
 	private static final String PLURAL_SUFFIX = "List";
+
+
+	private Conventions() {
+	}
 
 
 	/**

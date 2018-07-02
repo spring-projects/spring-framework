@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 13.03.2003
  */
-public abstract class AopContext {
+public final class AopContext {
 
 	/**
 	 * ThreadLocal holder for AOP proxy associated with this thread.
@@ -48,6 +48,10 @@ public abstract class AopContext {
 	 * @see ProxyConfig#setExposeProxy
 	 */
 	private static final ThreadLocal<Object> currentProxy = new NamedThreadLocal<>("Current AOP proxy");
+
+
+	private AopContext() {
+	}
 
 
 	/**

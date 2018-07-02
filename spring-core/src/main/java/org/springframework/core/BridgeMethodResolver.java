@@ -45,7 +45,11 @@ import org.springframework.util.ReflectionUtils;
  * @author Phillip Webb
  * @since 2.0
  */
-public abstract class BridgeMethodResolver {
+public final class BridgeMethodResolver {
+
+	private BridgeMethodResolver() {
+	}
+
 
 	/**
 	 * Find the original method for the supplied {@link Method bridge Method}.

@@ -60,7 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 3.2
  */
-public abstract class SpringFactoriesLoader {
+public final class SpringFactoriesLoader {
 
 	/**
 	 * The location to look for factories.
@@ -72,6 +72,10 @@ public abstract class SpringFactoriesLoader {
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
 	private static final Map<ClassLoader, MultiValueMap<String, String>> cache = new ConcurrentReferenceHashMap<>();
+
+
+	private SpringFactoriesLoader() {
+	}
 
 
 	/**
