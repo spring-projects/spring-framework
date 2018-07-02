@@ -1286,7 +1286,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * {@link IllegalArgumentException} ({@code true}) or rather return {@code null}
 	 * in that case ({@code false})
 	 * @return the parsed date header, or {@code null} if none (or invalid)
- 	 */
+	 */
 	@Nullable
 	private ZonedDateTime getFirstZonedDateTime(String headerName, boolean rejectInvalid) {
 		String headerValue = getFirst(headerName);
@@ -1570,57 +1570,52 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns a {@code HttpHeaders} consumer that adds Basic Authentication.
+	 * Return a {@code HttpHeaders} consumer that adds Basic Authentication.
 	 * More specifically: a consumer that adds an {@linkplain #AUTHORIZATION
-	 * Authorization} header based on the given username and password. Meant
-	 * to be used in combination with
+	 * Authorization} header based on the given username and password.
+	 * Meant to be used in combination with
 	 * {@link org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec#headers(java.util.function.Consumer)}.
 	 * <p>Note that Basic Authentication only supports characters in the
 	 * {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1} character set.
-	 *
 	 * @param username the username
 	 * @param password the password
 	 * @return a consumer that adds a Basic Authentication header
+	 * @since 5.1
 	 */
-	public static Consumer<HttpHeaders> basicAuthenticationConsumer(String username,String password) {
+	public static Consumer<HttpHeaders> basicAuthenticationConsumer(String username, String password) {
 		return basicAuthenticationConsumer(() -> username, () -> password);
 
 	}
 
 	/**
-	 * Returns a {@code HttpHeaders} consumer that adds Basic Authentication.
+	 * Return a {@code HttpHeaders} consumer that adds Basic Authentication.
 	 * More specifically: a consumer that adds an {@linkplain #AUTHORIZATION
 	 * Authorization} header based on the given username and password
 	 * suppliers. Meant to be used in combination with
 	 * {@link org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec#headers(java.util.function.Consumer)}.
 	 * <p>Note that Basic Authentication only supports characters in the
 	 * {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1} character set.
-	 *
 	 * @param usernameSupplier supplier for the username
 	 * @param passwordSupplier supplier for the password
 	 * @return a consumer that adds a Basic Authentication header
+	 * @since 5.1
 	 */
-	public static Consumer<HttpHeaders> basicAuthenticationConsumer(Supplier<String> usernameSupplier,
-			Supplier<String> passwordSupplier) {
+	public static Consumer<HttpHeaders> basicAuthenticationConsumer(
+			Supplier<String> usernameSupplier, Supplier<String> passwordSupplier) {
 
 		Assert.notNull(usernameSupplier, "Username Supplier must not be null");
 		Assert.notNull(passwordSupplier, "Password Supplier must not be null");
-
 		return new BasicAuthenticationConsumer(usernameSupplier, passwordSupplier);
 	}
 
 
-	/**
-	 * @see #basicAuthenticationConsumer
-	 */
 	private static class BasicAuthenticationConsumer implements Consumer<HttpHeaders> {
 
 		private final Supplier<String> usernameSupplier;
 
 		private final Supplier<String> passwordSupplier;
 
-		public BasicAuthenticationConsumer(Supplier<String> usernameSupplier,
-				Supplier<String> passwordSupplier) {
+		public BasicAuthenticationConsumer(Supplier<String> usernameSupplier, Supplier<String> passwordSupplier) {
 			this.usernameSupplier = usernameSupplier;
 			this.passwordSupplier = passwordSupplier;
 		}
@@ -1629,17 +1624,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		public void accept(HttpHeaders httpHeaders) {
 			String username = this.usernameSupplier.get();
 			String password = this.passwordSupplier.get();
-
 			Assert.state(username != null, "Supplied username is null");
 			Assert.state(password != null, "Supplied password is null");
-
 			checkIllegalCharacters(username, password);
 
 			String credentialsString = username + ":" + password;
 			byte[] credentialBytes = credentialsString.getBytes(StandardCharsets.ISO_8859_1);
 			byte[] encodedBytes = Base64.getEncoder().encode(credentialBytes);
 			String encodedCredentials = new String(encodedBytes, StandardCharsets.ISO_8859_1);
-
 			httpHeaders.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
 		}
 
@@ -1651,6 +1643,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 						"Username or password contains characters that cannot be encoded to ISO-8859-1");
 			}
 		}
-
 	}
+
 }
