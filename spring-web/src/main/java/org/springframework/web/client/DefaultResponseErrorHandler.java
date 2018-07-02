@@ -16,15 +16,30 @@
 
 package org.springframework.web.client;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.client.response.HttpBadGatewayException;
+import org.springframework.web.client.response.HttpBadRequestException;
+import org.springframework.web.client.response.HttpConflictException;
+import org.springframework.web.client.response.HttpForbiddenException;
+import org.springframework.web.client.response.HttpGatewayTimeoutException;
+import org.springframework.web.client.response.HttpInternalServerErrorException;
+import org.springframework.web.client.response.HttpMethodNotAllowedException;
+import org.springframework.web.client.response.HttpNotAcceptableException;
+import org.springframework.web.client.response.HttpNotFoundException;
+import org.springframework.web.client.response.HttpNotImplementedException;
+import org.springframework.web.client.response.HttpServiceUnavailableException;
+import org.springframework.web.client.response.HttpTooManyRequestsException;
+import org.springframework.web.client.response.HttpUnauthorizedException;
+import org.springframework.web.client.response.HttpUnprocessableEntityException;
+import org.springframework.web.client.response.HttpUnsupportedMediaTypeException;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
 
 /**
  * Spring's default implementation of the {@link ResponseErrorHandler} interface.
@@ -38,8 +53,8 @@ import org.springframework.util.FileCopyUtils;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
- * @since 3.0
  * @see RestTemplate#setErrorHandler
+ * @since 3.0
  */
 public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
@@ -58,6 +73,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
 	 * {@link HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
 	 * Can be overridden in subclasses.
+	 *
 	 * @param statusCode the HTTP status code
 	 * @return {@code true} if the response has an error; {@code false} otherwise
 	 */
@@ -85,18 +101,80 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * is {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}, a {@link HttpServerErrorException}
 	 * if it is {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR},
 	 * and a {@link RestClientException} in other cases.
+	 *
 	 * @since 5.0
 	 */
 	protected void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
 		switch (statusCode.series()) {
 			case CLIENT_ERROR:
-				throw new HttpClientErrorException(statusCode, response.getStatusText(),
-						response.getHeaders(), getResponseBody(response), getCharset(response));
+				handleClientError(response, statusCode);
+				return;
 			case SERVER_ERROR:
-				throw new HttpServerErrorException(statusCode, response.getStatusText(),
-						response.getHeaders(), getResponseBody(response), getCharset(response));
+				handleServerError(response, statusCode);
+				return;
 			default:
 				throw new UnknownHttpStatusCodeException(statusCode.value(), response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+		}
+	}
+
+	private void handleClientError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
+		switch (statusCode) {
+			case BAD_REQUEST:
+				throw new HttpBadRequestException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case UNAUTHORIZED:
+				throw new HttpUnauthorizedException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case FORBIDDEN:
+				throw new HttpForbiddenException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case NOT_FOUND:
+				throw new HttpNotFoundException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case METHOD_NOT_ALLOWED:
+				throw new HttpMethodNotAllowedException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case NOT_ACCEPTABLE:
+				throw new HttpNotAcceptableException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case CONFLICT:
+				throw new HttpConflictException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case UNSUPPORTED_MEDIA_TYPE:
+				throw new HttpUnsupportedMediaTypeException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case TOO_MANY_REQUESTS:
+				throw new HttpTooManyRequestsException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case UNPROCESSABLE_ENTITY:
+				throw new HttpUnprocessableEntityException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			default:
+				throw new HttpClientErrorException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+		}
+	}
+
+	private void handleServerError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
+		switch (statusCode) {
+			case INTERNAL_SERVER_ERROR:
+				throw new HttpInternalServerErrorException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case NOT_IMPLEMENTED:
+				throw new HttpNotImplementedException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case BAD_GATEWAY:
+				throw new HttpBadGatewayException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case SERVICE_UNAVAILABLE:
+				throw new HttpServiceUnavailableException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case GATEWAY_TIMEOUT:
+				throw new HttpGatewayTimeoutException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			default:
+				throw new HttpServerErrorException(statusCode, response.getStatusText(),
 						response.getHeaders(), getResponseBody(response), getCharset(response));
 		}
 	}
@@ -104,11 +182,12 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	/**
 	 * Determine the HTTP status of the given response.
+	 *
 	 * @param response the response to inspect
 	 * @return the associated HTTP status
-	 * @throws IOException in case of I/O errors
+	 * @throws IOException                    in case of I/O errors
 	 * @throws UnknownHttpStatusCodeException in case of an unknown status code
-	 * that cannot be represented with the {@link HttpStatus} enum
+	 *                                        that cannot be represented with the {@link HttpStatus} enum
 	 * @since 4.3.8
 	 * @deprecated as of 5.0, in favor of {@link #handleError(ClientHttpResponse, HttpStatus)}
 	 */
@@ -124,6 +203,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	/**
 	 * Read the body of the given response (for inclusion in a status exception).
+	 *
 	 * @param response the response to inspect
 	 * @return the response body as a byte array,
 	 * or an empty byte array if the body could not be read
@@ -132,8 +212,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	protected byte[] getResponseBody(ClientHttpResponse response) {
 		try {
 			return FileCopyUtils.copyToByteArray(response.getBody());
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			// ignore
 		}
 		return new byte[0];
@@ -141,6 +220,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	/**
 	 * Determine the charset of the response (for inclusion in a status exception).
+	 *
 	 * @param response the response to inspect
 	 * @return the associated charset, or {@code null} if none
 	 * @since 4.3.8
