@@ -56,12 +56,24 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @since 4.0
  */
-abstract class SerializableTypeWrapper {
+final class SerializableTypeWrapper {
 
 	private static final Class<?>[] SUPPORTED_SERIALIZABLE_TYPES = {
 			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
 
+	/**
+	 * Let's test whether java.lang.Class itself is serializable...
+	 * Otherwise we can skip our serializable type wrapping to begin with.
+	 * This will be {@code true} on regular JVMs but {@code false} on GraalVM.
+	 * @since 5.1
+	 */
+	private static final boolean javaLangClassSerializable = Serializable.class.isAssignableFrom(Class.class);
+
 	static final ConcurrentReferenceHashMap<Type, Type> cache = new ConcurrentReferenceHashMap<>(256);
+
+
+	private SerializableTypeWrapper() {
+	}
 
 
 	/**
@@ -133,15 +145,17 @@ abstract class SerializableTypeWrapper {
 
 	/**
 	 * Return a {@link Serializable} {@link Type} backed by a {@link TypeProvider} .
+	 * <p>If type artifacts are generally not serializable in the current runtime
+	 * environment, this delegate will simply return the original {@code Type} as-is.
 	 */
 	@Nullable
 	static Type forTypeProvider(final TypeProvider provider) {
-		Assert.notNull(provider, "Provider must not be null");
+		Assert.notNull(provider, "TypeProvider must not be null");
 		Type providedType = provider.getType();
 		if (providedType == null) {
 			return null;
 		}
-		if (providedType instanceof Serializable) {
+		if (!javaLangClassSerializable || providedType instanceof Serializable) {
 			return providedType;
 		}
 		Type cached = cache.get(providedType);
