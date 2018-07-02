@@ -31,7 +31,6 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -61,14 +60,6 @@ final class SerializableTypeWrapper {
 	private static final Class<?>[] SUPPORTED_SERIALIZABLE_TYPES = {
 			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
 
-	/**
-	 * Let's test whether java.lang.Class itself is serializable...
-	 * Otherwise we can skip our serializable type wrapping to begin with.
-	 * This will be {@code true} on regular JVMs but {@code false} on GraalVM.
-	 * @since 5.1
-	 */
-	private static final boolean javaLangClassSerializable = Serializable.class.isAssignableFrom(Class.class);
-
 	static final ConcurrentReferenceHashMap<Type, Type> cache = new ConcurrentReferenceHashMap<>(256);
 
 
@@ -81,7 +72,6 @@ final class SerializableTypeWrapper {
 	 */
 	@Nullable
 	public static Type forField(Field field) {
-		Assert.notNull(field, "Field must not be null");
 		return forTypeProvider(new FieldTypeProvider(field));
 	}
 
@@ -149,21 +139,25 @@ final class SerializableTypeWrapper {
 	 * environment, this delegate will simply return the original {@code Type} as-is.
 	 */
 	@Nullable
-	static Type forTypeProvider(final TypeProvider provider) {
-		Assert.notNull(provider, "TypeProvider must not be null");
+	static Type forTypeProvider(TypeProvider provider) {
 		Type providedType = provider.getType();
-		if (providedType == null) {
-			return null;
-		}
-		if (!javaLangClassSerializable || providedType instanceof Serializable) {
+		if (providedType == null || providedType instanceof Serializable) {
+			// No serializable type wrapping necessary (e.g. for java.lang.Class)
 			return providedType;
 		}
+		if (!Serializable.class.isAssignableFrom(Class.class)) {
+			// Let's skip any wrapping attempts if types are generally not serializable in
+			// the current runtime environment (even java.lang.Class itself, e.g. on Graal)
+			return providedType;
+		}
+
+		// Obtain a serializable type proxy for the given provider...
 		Type cached = cache.get(providedType);
 		if (cached != null) {
 			return cached;
 		}
 		for (Class<?> type : SUPPORTED_SERIALIZABLE_TYPES) {
-			if (type.isAssignableFrom(providedType.getClass())) {
+			if (type.isInstance(providedType)) {
 				ClassLoader classLoader = provider.getClass().getClassLoader();
 				Class<?>[] interfaces = new Class<?>[] {type, SerializableTypeProxy.class, Serializable.class};
 				InvocationHandler handler = new TypeProxyInvocationHandler(provider);
