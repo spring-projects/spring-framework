@@ -79,17 +79,21 @@ class DefaultWebClient implements WebClient {
 	@Nullable
 	private final MultiValueMap<String, String> defaultCookies;
 
+	@Nullable
+	private final Consumer<RequestHeadersSpec<?>> defaultRequest;
+
 	private final DefaultWebClientBuilder builder;
 
 
 	DefaultWebClient(ExchangeFunction exchangeFunction, @Nullable UriBuilderFactory factory,
 			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies,
-			DefaultWebClientBuilder builder) {
+			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest, DefaultWebClientBuilder builder) {
 
 		this.exchangeFunction = exchangeFunction;
 		this.uriBuilderFactory = (factory != null ? factory : new DefaultUriBuilderFactory());
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
+		this.defaultRequest = defaultRequest;
 		this.builder = builder;
 	}
 
@@ -317,6 +321,9 @@ class DefaultWebClient implements WebClient {
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
+			if (defaultRequest != null) {
+				defaultRequest.accept(this);
+			}
 			URI uri = (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
 			return ClientRequest.create(this.httpMethod, uri)
 					.headers(headers -> headers.addAll(initHeaders()))

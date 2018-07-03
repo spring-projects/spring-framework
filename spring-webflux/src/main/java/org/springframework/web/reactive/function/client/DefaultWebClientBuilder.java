@@ -58,6 +58,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	private MultiValueMap<String, String> defaultCookies;
 
 	@Nullable
+	private Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest;
+
+	@Nullable
 	private List<ExchangeFilterFunction> filters;
 
 	@Nullable
@@ -89,6 +92,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		}
 		this.defaultCookies =
 				other.defaultCookies != null ? new LinkedMultiValueMap<>(other.defaultCookies) : null;
+		this.defaultRequest = other.defaultRequest;
 		this.filters = other.filters != null ? new ArrayList<>(other.filters) : null;
 		this.connector = other.connector;
 		this.exchangeFunction = other.exchangeFunction;
@@ -153,6 +157,13 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder defaultRequest(Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest) {
+		this.defaultRequest = this.defaultRequest != null ?
+				this.defaultRequest.andThen(defaultRequest) : defaultRequest;
+		return this;
+	}
+
+	@Override
 	public WebClient.Builder clientConnector(ClientHttpConnector connector) {
 		this.connector = connector;
 		return this;
@@ -201,7 +212,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return new DefaultWebClient(filteredExchange, initUriBuilderFactory(),
 				this.defaultHeaders != null ? unmodifiableCopy(this.defaultHeaders) : null,
 				this.defaultCookies != null ? unmodifiableCopy(this.defaultCookies) : null,
-				new DefaultWebClientBuilder(this));
+				this.defaultRequest, new DefaultWebClientBuilder(this));
 	}
 
 	private ExchangeFunction initExchangeFunction() {

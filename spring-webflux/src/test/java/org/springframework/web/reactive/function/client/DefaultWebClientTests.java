@@ -30,6 +30,8 @@ import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.NamedInheritableThreadLocal;
+import org.springframework.core.NamedThreadLocal;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -136,6 +138,33 @@ public class DefaultWebClientTests {
 		assertEquals("application/xml", request.headers().getFirst("Accept"));
 		assertEquals("456", request.cookies().getFirst("id"));
 		verifyNoMoreInteractions(this.exchangeFunction);
+	}
+
+	@Test
+	public void defaultRequest() {
+
+		ThreadLocal<String> context = new NamedThreadLocal<>("foo");
+
+		Map<String, Object> actual = new HashMap<>();
+		ExchangeFilterFunction filter = (request, next) -> {
+			actual.putAll(request.attributes());
+			return next.exchange(request);
+		};
+
+		WebClient client = this.builder
+				.defaultRequest(spec -> spec.attribute("foo", context.get()))
+				.filter(filter)
+				.build();
+
+		try {
+			context.set("bar");
+			client.get().uri("/path").attribute("foo", "bar").exchange();
+		}
+		finally {
+			context.remove();
+		}
+
+		assertEquals("bar", actual.get("foo"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

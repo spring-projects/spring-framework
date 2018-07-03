@@ -226,7 +226,7 @@ public interface WebClient {
 		Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
 		/**
-		 * A global option to specify a header to be added to every request,
+		 * Global option to specify a header to be added to every request,
 		 * if the request does not already contain such a header.
 		 * @param header the header name
 		 * @param values the header values
@@ -241,7 +241,7 @@ public interface WebClient {
 		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * A global option to specify a cookie to be added to every request,
+		 * Global option to specify a cookie to be added to every request,
 		 * if the request does not already contain such a cookie.
 		 * @param cookie the cookie name
 		 * @param values the cookie values
@@ -254,6 +254,14 @@ public interface WebClient {
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 */
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		/**
+		 * Provide a consumer to modify every request being built just before the
+		 * call to {@link RequestHeadersSpec#exchange() exchange()}.
+		 * @param defaultRequest the consumer to use for modifying requests
+		 * @since 5.1
+		 */
+		Builder defaultRequest(Consumer<RequestHeadersSpec<?>> defaultRequest);
 
 		/**
 		 * Add the given filter to the filter chain.
