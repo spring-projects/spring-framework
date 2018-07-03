@@ -69,7 +69,7 @@ public class CachingResourceTransformer implements ResourceTransformer {
 
 		Resource cachedResource = this.cache.get(resource, Resource.class);
 		if (cachedResource != null) {
-			logger.trace("Resource resolved from cache");
+			logger.trace(exchange.getLogPrefix() + "Resource resolved from cache");
 			return Mono.just(cachedResource);
 		}
 

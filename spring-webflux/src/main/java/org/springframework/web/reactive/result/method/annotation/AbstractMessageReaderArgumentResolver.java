@@ -34,6 +34,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -153,8 +154,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(contentType != null ? "Content-Type:" + contentType :
-					"No Content-Type, using " + MediaType.APPLICATION_OCTET_STREAM);
+			logger.debug(exchange.getLogPrefix() + (contentType != null ?
+					"Content-Type:" + contentType :
+					"No Content-Type, using " + MediaType.APPLICATION_OCTET_STREAM));
 		}
 
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
@@ -162,7 +164,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 				Map<String, Object> readHints = Collections.emptyMap();
 				if (adapter != null && adapter.isMultiValue()) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("0..N [" + elementType + "]");
+						logger.debug(exchange.getLogPrefix() + "0..N [" + elementType + "]");
 					}
 					Flux<?> flux = reader.read(actualType, elementType, request, response, readHints);
 					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParam, ex)));
@@ -179,7 +181,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 				else {
 					// Single-value (with or without reactive type wrapper)
 					if (logger.isDebugEnabled()) {
-						logger.debug("0..1 [" + elementType + "]");
+						logger.debug(exchange.getLogPrefix() + "0..1 [" + elementType + "]");
 					}
 					Mono<?> mono = reader.readMono(actualType, elementType, request, response, readHints);
 					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParam, ex)));

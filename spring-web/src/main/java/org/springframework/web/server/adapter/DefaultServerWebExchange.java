@@ -98,6 +98,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private Function<String, String> urlTransformer = url -> url;
 
+	@Nullable
+	private Object logId;
+
+	private String logPrefix = "";
+
 
 	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
 			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
@@ -353,6 +358,16 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	public void addUrlTransformer(Function<String, String> transformer) {
 		Assert.notNull(transformer, "'encoder' must not be null");
 		this.urlTransformer = this.urlTransformer.andThen(transformer);
+	}
+
+	@Override
+	public String getLogPrefix() {
+		Object value = getAttribute(LOG_ID_ATTRIBUTE);
+		if (this.logId != value) {
+			this.logId = value;
+			this.logPrefix = value != null ? "[" + value + "] " : "";
+		}
+		return this.logPrefix;
 	}
 
 }

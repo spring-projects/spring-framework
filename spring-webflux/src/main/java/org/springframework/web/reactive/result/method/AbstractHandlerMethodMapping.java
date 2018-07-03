@@ -305,7 +305,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
 				if (logger.isTraceEnabled()) {
-					logger.trace(matches.size() + " matching mappings: " + matches);
+					logger.trace(exchange.getLogPrefix() + matches.size() + " matching mappings: " + matches);
 				}
 				if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 					return PREFLIGHT_AMBIGUOUS_MATCH;

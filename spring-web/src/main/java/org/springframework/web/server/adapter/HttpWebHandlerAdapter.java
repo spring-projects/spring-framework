@@ -34,6 +34,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
@@ -214,11 +215,15 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 
 		ServerWebExchange exchange = createExchange(request, response);
+
+		String logId = ObjectUtils.getIdentityHexString(request);
+		exchange.getAttributes().put(ServerWebExchange.LOG_ID_ATTRIBUTE, logId);
+
 		logExchange(exchange);
 
 		return getDelegate().handle(exchange)
-				.doOnSuccess(aVoid -> logResponse(response))
-				.onErrorResume(ex -> handleUnresolvedError(request, response, ex))
+				.doOnSuccess(aVoid -> logResponse(exchange))
+				.onErrorResume(ex -> handleUnresolvedError(exchange, ex))
 				.then(Mono.defer(response::setComplete));
 	}
 
@@ -229,13 +234,14 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private void logExchange(ServerWebExchange exchange) {
 		if (logger.isDebugEnabled()) {
+			String logPrefix = exchange.getLogPrefix();
 			ServerHttpRequest request = exchange.getRequest();
 			if (logger.isTraceEnabled()) {
 				String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + request.getHeaders();
-				logger.trace(formatRequest(request) + headers);
+				logger.trace(logPrefix + formatRequest(request) + headers);
 			}
 			else {
-				logger.debug(formatRequest(request));
+				logger.debug(logPrefix + formatRequest(request));
 			}
 		}
 	}
@@ -249,40 +255,45 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		return "HTTP " + request.getMethod() + " \"" + request.getPath() + query + "\"";
 	}
 
-	private void logResponse(ServerHttpResponse response) {
+	private void logResponse(ServerWebExchange exchange) {
 		if (logger.isDebugEnabled()) {
+			String logPrefix = exchange.getLogPrefix();
+			ServerHttpResponse response = exchange.getResponse();
 			HttpStatus status = response.getStatusCode();
 			String message = "Completed " + (status != null ? status : "200 OK");
-
 			if (logger.isTraceEnabled()) {
 				String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + response.getHeaders();
-				logger.trace(message + headers);
+				logger.trace(logPrefix + message + headers);
 			}
 			else {
-				logger.debug(message);
+				logger.debug(logPrefix + message);
 			}
 		}
 	}
 
-	private Mono<Void> handleUnresolvedError(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
+	private Mono<Void> handleUnresolvedError(ServerWebExchange exchange, Throwable ex) {
+
+		ServerHttpRequest request = exchange.getRequest();
+		ServerHttpResponse response = exchange.getResponse();
+		String logPrefix = exchange.getLogPrefix();
 
 		if (isDisconnectedClientError(ex)) {
 			if (lostClientLogger.isTraceEnabled()) {
-				lostClientLogger.trace("Client went away", ex);
+				lostClientLogger.trace(logPrefix + "Client went away", ex);
 			}
 			else if (lostClientLogger.isDebugEnabled()) {
-				lostClientLogger.debug("Client went away: " + ex +
+				lostClientLogger.debug(logPrefix + "Client went away: " + ex +
 						" (stacktrace at TRACE level for '" + DISCONNECTED_CLIENT_LOG_CATEGORY + "')");
 			}
 			return Mono.empty();
 		}
 		else if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
-			logger.error("500 Server Error for " + formatRequest(request), ex);
+			logger.error(logPrefix + "500 Server Error for " + formatRequest(request), ex);
 			return Mono.empty();
 		}
 		else {
 			// After the response is committed, propagate errors to the server..
-			logger.error("Error [" + ex + "] for " + formatRequest(request) +
+			logger.error(logPrefix + "Error [" + ex + "] for " + formatRequest(request) +
 					", but ServerHttpResponse already committed (" + response.getStatusCode() + ")");
 			return Mono.error(ex);
 		}

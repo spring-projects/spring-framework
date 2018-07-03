@@ -189,7 +189,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 			ServerWebExchange exchange) {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("View " + formatViewName() +
+			logger.debug(exchange.getLogPrefix() + "View " + formatViewName() +
 					", model " + (model != null ? model : Collections.emptyMap()));
 		}
 

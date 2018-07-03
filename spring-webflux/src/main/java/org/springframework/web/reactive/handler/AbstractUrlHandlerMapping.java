@@ -119,7 +119,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (matches.size() > 1) {
 			matches.sort(PathPattern.SPECIFICITY_COMPARATOR);
 			if (logger.isTraceEnabled()) {
-				logger.debug("Matching patterns " + matches);
+				logger.debug(exchange.getLogPrefix() + "Matching patterns " + matches);
 			}
 		}
 

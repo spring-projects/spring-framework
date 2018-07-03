@@ -44,6 +44,16 @@ import org.springframework.util.MultiValueMap;
 public interface ServerWebExchange {
 
 	/**
+	 * Name of {@link #getAttributes() attribute} whose value correlates log
+	 * messages for the exchange. Use {@link #getLogPrefix()} to obtain a
+	 * consistently formatted prefix based on this attribute.
+	 * @since 5.1
+	 * @see #getLogPrefix()
+	 */
+	String LOG_ID_ATTRIBUTE = ServerWebExchange.class.getName() + ".LOG_ID";
+
+
+	/**
 	 * Return the current HTTP request.
 	 */
 	ServerHttpRequest getRequest();
@@ -207,6 +217,16 @@ public interface ServerWebExchange {
 	 * @param transformer a URL transformation function to add
 	 */
 	void addUrlTransformer(Function<String, String> transformer);
+
+	/**
+	 * Return a common prefix to use for log messages related to the exchange.
+	 * The prefix is based on the value of the {@link #LOG_ID_ATTRIBUTE}
+	 * attribute along with some extra formatting.
+	 * @return the log message prefix or an empty String if the
+	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * @since 5.1
+	 */
+	String getLogPrefix();
 
 	/**
 	 * Return a builder to mutate properties of this exchange by wrapping it

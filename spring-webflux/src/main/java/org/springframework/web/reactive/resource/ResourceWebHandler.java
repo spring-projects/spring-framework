@@ -23,8 +23,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +36,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
@@ -322,7 +326,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	public Mono<Void> handle(ServerWebExchange exchange) {
 		return getResource(exchange)
 				.switchIfEmpty(Mono.defer(() -> {
-					logger.debug("Resource not found");
+					logger.debug(exchange.getLogPrefix() + "Resource not found");
 					return Mono.error(NOT_FOUND_EXCEPTION);
 				}))
 				.flatMap(resource -> {
@@ -341,7 +345,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 						// Header phase
 						if (exchange.checkNotModified(Instant.ofEpochMilli(resource.lastModified()))) {
-							logger.trace("Resource not modified");
+							logger.trace(exchange.getLogPrefix() + "Resource not modified");
 							return Mono.empty();
 						}
 

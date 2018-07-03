@@ -112,7 +112,8 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 		Resource cachedResource = this.cache.get(key, Resource.class);
 
 		if (cachedResource != null) {
-			logger.trace("Resource resolved from cache");
+			String logPrefix = exchange != null ? exchange.getLogPrefix() : "";
+			logger.trace(logPrefix + "Resource resolved from cache");
 			return Mono.just(cachedResource);
 		}
 

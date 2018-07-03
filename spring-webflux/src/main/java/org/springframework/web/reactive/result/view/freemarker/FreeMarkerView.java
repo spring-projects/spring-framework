@@ -188,7 +188,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		SimpleHash freeMarkerModel = getTemplateModel(renderAttributes, exchange);
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Rendering [" + getUrl() + "]");
+			logger.debug(exchange.getLogPrefix() + "Rendering [" + getUrl() + "]");
 		}
 
 		Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());

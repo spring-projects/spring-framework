@@ -185,8 +185,9 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 							}
 							else {
 								if (logger.isTraceEnabled()) {
-									logger.trace("Found resource for \"" + requestPath + "\", but version [" +
-											candidate + "] does not match");
+									String logPrefix = exchange != null ? exchange.getLogPrefix() : "";
+									logger.trace(logPrefix + "Found resource for \"" + requestPath +
+											"\", but version [" + candidate + "] does not match");
 								}
 								return false;
 							}

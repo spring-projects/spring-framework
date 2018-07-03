@@ -59,7 +59,8 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 							}
 						}
 						catch (IOException ex) {
-							logger.trace("No gzip resource for [" + resource.getFilename() + "]", ex);
+							String logPrefix = exchange != null ? exchange.getLogPrefix() : "";
+							logger.trace(logPrefix + "No gzip resource for [" + resource.getFilename() + "]", ex);
 						}
 					}
 					return resource;

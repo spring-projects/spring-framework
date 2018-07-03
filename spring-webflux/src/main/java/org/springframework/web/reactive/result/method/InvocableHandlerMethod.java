@@ -182,7 +182,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						return findProvidedArgument(param, providedArgs)
 								.map(Mono::just)
 								.orElseGet(() -> {
-									HandlerMethodArgumentResolver resolver = findResolver(param);
+									HandlerMethodArgumentResolver resolver = findResolver(exchange, param);
 									return resolveArg(resolver, param, bindingContext, exchange);
 								});
 
@@ -207,7 +207,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				.findFirst();
 	}
 
-	private HandlerMethodArgumentResolver findResolver(MethodParameter param) {
+	private HandlerMethodArgumentResolver findResolver(ServerWebExchange exchange, MethodParameter param) {
 		return this.resolvers.stream()
 				.filter(r -> r.supportsParameter(param))
 				.findFirst().orElseThrow(() ->
@@ -220,20 +220,22 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		try {
 			return resolver.resolveArgument(parameter, bindingContext, exchange)
 					.defaultIfEmpty(NO_ARG_VALUE)
-					.doOnError(cause -> logArgumentErrorIfNecessary(parameter, cause));
+					.doOnError(cause -> logArgumentErrorIfNecessary(exchange, parameter, cause));
 		}
 		catch (Exception ex) {
-			logArgumentErrorIfNecessary(parameter, ex);
+			logArgumentErrorIfNecessary(exchange, parameter, ex);
 			return Mono.error(ex);
 		}
 	}
 
-	private void logArgumentErrorIfNecessary(MethodParameter parameter, Throwable cause) {
+	private void logArgumentErrorIfNecessary(
+			ServerWebExchange exchange, MethodParameter parameter, Throwable cause) {
+
 		// Leave stack trace for later, if error is not handled..
 		String message = cause.getMessage();
 		if (!message.contains(parameter.getExecutable().toGenericString())) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(formatArgumentError(parameter, message));
+				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, message));
 			}
 		}
 	}

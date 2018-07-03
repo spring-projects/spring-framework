@@ -153,7 +153,8 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 						}
 					}
 					catch (IOException ex) {
-						logger.trace("No " + coding + " resource for [" + resource.getFilename() + "]", ex);
+						logger.trace(exchange.getLogPrefix() +
+								"No " + coding + " resource for [" + resource.getFilename() + "]", ex);
 					}
 				}
 			}

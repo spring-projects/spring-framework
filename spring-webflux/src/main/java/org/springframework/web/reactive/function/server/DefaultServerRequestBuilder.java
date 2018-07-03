@@ -429,5 +429,10 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		public void addUrlTransformer(Function<String, String> transformer) {
 			this.delegate.addUrlTransformer(transformer);
 		}
+
+		@Override
+		public String getLogPrefix() {
+			return this.delegate.getLogPrefix();
+		}
 	}
 }

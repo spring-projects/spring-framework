@@ -127,7 +127,8 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		if (!content.startsWith(MANIFEST_HEADER)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Skipping " + resource + ": Manifest does not start with 'CACHE MANIFEST'");
+				logger.trace(exchange.getLogPrefix() +
+						"Skipping " + resource + ": Manifest does not start with 'CACHE MANIFEST'");
 			}
 			return Mono.just(resource);
 		}

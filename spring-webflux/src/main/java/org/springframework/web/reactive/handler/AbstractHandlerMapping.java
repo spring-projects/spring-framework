@@ -160,7 +160,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
 		return getHandlerInternal(exchange).map(handler -> {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Mapped to " + handler);
+				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
 			}
 			if (CorsUtils.isCorsRequest(exchange.getRequest())) {
 				CorsConfiguration configA = this.globalCorsConfigSource.getCorsConfiguration(exchange);

@@ -70,11 +70,12 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 
 		// Mirrors AbstractHandlerExceptionResolver in spring-webmvc..
 
+		String logPrefix = exchange.getLogPrefix();
 		if (this.warnLogger != null && this.warnLogger.isWarnEnabled()) {
-			this.warnLogger.warn(formatError(ex, exchange.getRequest()), ex);
+			this.warnLogger.warn(logPrefix + formatError(ex, exchange.getRequest()), ex);
 		}
 		else if (logger.isDebugEnabled()) {
-			logger.debug(formatError(ex, exchange.getRequest()));
+			logger.debug(logPrefix + formatError(ex, exchange.getRequest()));
 		}
 
 		return exchange.getResponse().setComplete();
