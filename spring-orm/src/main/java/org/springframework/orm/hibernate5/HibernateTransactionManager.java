@@ -495,6 +495,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (definition.isReadOnly() && txObject.isNewSession()) {
 				// Just set to MANUAL in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.MANUAL);
+				// As of 5.1, we're also setting Hibernate's read-only entity mode by default.
+				session.setDefaultReadOnly(true);
 			}
 
 			if (!definition.isReadOnly() && !txObject.isNewSession()) {
