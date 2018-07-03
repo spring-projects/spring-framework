@@ -80,7 +80,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the
+ * Spring's default implementation of the
  * {@link org.springframework.beans.factory.ListableBeanFactory} and
  * {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
  * based on bean definition objects.
@@ -444,9 +444,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					if (allowEagerInit) {
 						throw ex;
 					}
-					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (this.logger.isDebugEnabled()) {
-						this.logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
+					// Probably a class name with a placeholder: let's ignore it for type matching purposes.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -454,9 +454,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					if (allowEagerInit) {
 						throw ex;
 					}
-					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (this.logger.isDebugEnabled()) {
-						this.logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
+					// Probably some metadata with a placeholder: let's ignore it for type matching purposes.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -523,8 +523,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (rootCause instanceof BeanCurrentlyInCreationException) {
 					BeanCreationException bce = (BeanCreationException) rootCause;
 					if (isCurrentlyInCreation(bce.getBeanName())) {
-						if (this.logger.isDebugEnabled()) {
-							this.logger.debug("Ignoring match to currently created bean '" + beanName + "': " +
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring match to currently created bean '" + beanName + "': " +
 									ex.getMessage());
 						}
 						onSuppressedException(ex);
@@ -681,8 +681,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		BeanDefinition bd = this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
-			if (this.logger.isTraceEnabled()) {
-				this.logger.trace("No bean named '" + beanName + "' found in " + this);
+			if (logger.isTraceEnabled()) {
+				logger.trace("No bean named '" + beanName + "' found in " + this);
 			}
 			throw new NoSuchBeanDefinitionException(beanName);
 		}
@@ -726,8 +726,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void preInstantiateSingletons() throws BeansException {
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Pre-instantiating singletons in " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Pre-instantiating singletons in " + this);
 		}
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
@@ -817,22 +817,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else if (oldBeanDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
-				if (this.logger.isWarnEnabled()) {
-					this.logger.warn("Overriding user-defined bean definition for bean '" + beanName +
+				if (logger.isWarnEnabled()) {
+					logger.warn("Overriding user-defined bean definition for bean '" + beanName +
 							"' with a framework-generated bean definition: replacing [" +
 							oldBeanDefinition + "] with [" + beanDefinition + "]");
 				}
 			}
 			else if (!beanDefinition.equals(oldBeanDefinition)) {
-				if (this.logger.isInfoEnabled()) {
-					this.logger.info("Overriding bean definition for bean '" + beanName +
+				if (logger.isInfoEnabled()) {
+					logger.info("Overriding bean definition for bean '" + beanName +
 							"' with a different definition: replacing [" + oldBeanDefinition +
 							"] with [" + beanDefinition + "]");
 				}
 			}
 			else {
-				if (this.logger.isDebugEnabled()) {
-					this.logger.debug("Overriding bean definition for bean '" + beanName +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Overriding bean definition for bean '" + beanName +
 							"' with an equivalent definition: replacing [" + oldBeanDefinition +
 							"] with [" + beanDefinition + "]");
 				}
@@ -875,8 +875,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		BeanDefinition bd = this.beanDefinitionMap.remove(beanName);
 		if (bd == null) {
-			if (this.logger.isTraceEnabled()) {
-				this.logger.trace("No bean named '" + beanName + "' found in " + this);
+			if (logger.isTraceEnabled()) {
+				logger.trace("No bean named '" + beanName + "' found in " + this);
 			}
 			throw new NoSuchBeanDefinitionException(beanName);
 		}
@@ -1637,7 +1637,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return new OptionalDependencyFactory().createOptionalDependency(this.descriptor, this.beanName, args);
 			}
 			else {
-				DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+				DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
 					@Override
 					public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory) {
 						return ((AbstractBeanFactory) beanFactory).getBean(beanName, requiredType, args);
@@ -1653,7 +1653,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return new OptionalDependencyFactory().createOptionalDependency(this.descriptor, this.beanName);
 			}
 			else {
-				DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+				DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
 					@Override
 					public boolean isRequired() {
 						return false;
@@ -1665,7 +1665,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		@Override
 		public Object getIfUnique() throws BeansException {
-			DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+			DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
 				@Override
 				public boolean isRequired() {
 					return false;

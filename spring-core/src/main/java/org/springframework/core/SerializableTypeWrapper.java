@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 
-import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 
@@ -66,7 +65,6 @@ abstract class SerializableTypeWrapper {
 	 * Return a {@link Serializable} variant of {@link Field#getGenericType()}.
 	 */
 	public static Type forField(Field field) {
-		Assert.notNull(field, "Field must not be null");
 		return forTypeProvider(new FieldTypeProvider(field));
 	}
 
@@ -144,26 +142,29 @@ abstract class SerializableTypeWrapper {
 	/**
 	 * Return a {@link Serializable} {@link Type} backed by a {@link TypeProvider} .
 	 */
-	static Type forTypeProvider(final TypeProvider provider) {
-		Assert.notNull(provider, "Provider must not be null");
-		if (provider.getType() instanceof Serializable || provider.getType() == null) {
-			return provider.getType();
+	static Type forTypeProvider(TypeProvider provider) {
+		Type providedType = provider.getType();
+		if (providedType == null || providedType instanceof Serializable) {
+			// No serializable type wrapping necessary (e.g. for java.lang.Class)
+			return providedType;
 		}
-		Type cached = cache.get(provider.getType());
+
+		// Obtain a serializable type proxy for the given provider...
+		Type cached = cache.get(providedType);
 		if (cached != null) {
 			return cached;
 		}
 		for (Class<?> type : SUPPORTED_SERIALIZABLE_TYPES) {
-			if (type.isAssignableFrom(provider.getType().getClass())) {
+			if (type.isInstance(providedType)) {
 				ClassLoader classLoader = provider.getClass().getClassLoader();
 				Class<?>[] interfaces = new Class<?>[] {type, SerializableTypeProxy.class, Serializable.class};
 				InvocationHandler handler = new TypeProxyInvocationHandler(provider);
 				cached = (Type) Proxy.newProxyInstance(classLoader, interfaces, handler);
-				cache.put(provider.getType(), cached);
+				cache.put(providedType, cached);
 				return cached;
 			}
 		}
-		throw new IllegalArgumentException("Unsupported Type class: " + provider.getType().getClass().getName());
+		throw new IllegalArgumentException("Unsupported Type class: " + providedType.getClass().getName());
 	}
 
 
