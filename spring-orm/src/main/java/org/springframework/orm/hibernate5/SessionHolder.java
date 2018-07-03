@@ -46,6 +46,7 @@ public class SessionHolder extends ResourceHolderSupport {
 	@Nullable
 	private FlushMode previousFlushMode;
 
+	private boolean previousReadOnly;
 
 	public SessionHolder(Session session) {
 		Assert.notNull(session, "Session must not be null");
@@ -75,12 +76,20 @@ public class SessionHolder extends ResourceHolderSupport {
 		return this.previousFlushMode;
 	}
 
+	public boolean isPreviousReadOnly() {
+		return previousReadOnly;
+	}
+
+	public void setPreviousReadOnly(boolean previousReadOnly) {
+		this.previousReadOnly = previousReadOnly;
+	}
 
 	@Override
 	public void clear() {
 		super.clear();
 		this.transaction = null;
 		this.previousFlushMode = null;
+		this.previousReadOnly = false;
 	}
 
 }

@@ -495,6 +495,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (definition.isReadOnly() && txObject.isNewSession()) {
 				// Just set to MANUAL in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.MANUAL);
+				txObject.getSessionHolder().setPreviousReadOnly( session.isDefaultReadOnly() );
+				session.setDefaultReadOnly(true);
 			}
 
 			if (!definition.isReadOnly() && !txObject.isNewSession()) {
@@ -717,6 +719,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
+				session.setDefaultReadOnly(txObject.getSessionHolder().isPreviousReadOnly());
 			}
 			if (!this.allowResultAccessAfterCompletion && !this.hibernateManagedSession) {
 				disconnectOnCompletion(session);
