@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.index;
+package org.springframework.context.index.processor;
 
 import java.util.ArrayList;
 import java.util.HashSet;
