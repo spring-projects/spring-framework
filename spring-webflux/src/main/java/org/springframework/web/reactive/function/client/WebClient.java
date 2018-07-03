@@ -226,31 +226,31 @@ public interface WebClient {
 		Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
 		/**
-		 * Add the given header to all requests that have not added it.
-		 * @param headerName the header name
-		 * @param headerValues the header values
+		 * A global option to specify a header to be added to every request,
+		 * if the request does not already contain such a header.
+		 * @param header the header name
+		 * @param values the header values
 		 */
-		Builder defaultHeader(String headerName, String... headerValues);
+		Builder defaultHeader(String header, String... values);
 
 		/**
-		 * Manipulate the default headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer
-		 * can be used to overwrite or remove existing values.
-		 * @param headersConsumer the headers consumer
+		 * Provides access to every {@link #defaultHeader(String, String...)}
+		 * declared so far with the possibility to add, replace, or remove.
+		 * @param headersConsumer the consumer
 		 */
 		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Add the given header to all requests that haven't added it.
-		 * @param cookieName the cookie name
-		 * @param cookieValues the cookie values
+		 * A global option to specify a cookie to be added to every request,
+		 * if the request does not already contain such a cookie.
+		 * @param cookie the cookie name
+		 * @param values the cookie values
 		 */
-		Builder defaultCookie(String cookieName, String... cookieValues);
+		Builder defaultCookie(String cookie, String... values);
 
 		/**
-		 * Manipulate the default cookies with the given consumer. The
-		 * cookies provided to the consumer are "live", so that the consumer
-		 * can be used to overwrite or remove existing values.
+		 * Provides access to every {@link #defaultCookie(String, String...)}
+		 * declared so far with the possibility to add, replace, or remove.
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 */
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
@@ -383,10 +383,9 @@ public interface WebClient {
 		S cookie(String name, String value);
 
 		/**
-		 * Manipulate the default cookies with the given consumer. The
-		 * cookies provided to the consumer are "live", so that the consumer
-		 * can be used to overwrite or remove existing values.
-		 * @param cookiesConsumer a function that consumes the cookies map
+		 * Provides access to every cookie declared so far with the possibility
+		 * to add, replace, or remove values.
+		 * @param cookiesConsumer the consumer to provide access to
 		 * @return this builder
 		 */
 		S cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
@@ -416,10 +415,9 @@ public interface WebClient {
 		S header(String headerName, String... headerValues);
 
 		/**
-		 * Manipulate the default headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer
-		 * can be used to overwrite or remove existing values.
-		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * Provides access to every header declared so far with the possibility
+		 * to add, replace, or remove values.
+		 * @param headersConsumer the consumer to provide access to
 		 * @return this builder
 		 */
 		S headers(Consumer<HttpHeaders> headersConsumer);
@@ -433,10 +431,9 @@ public interface WebClient {
 		S attribute(String name, Object value);
 
 		/**
-		 * Manipulate the request attributes with the given consumer. The attributes provided to
-		 * the consumer are "live", so that the consumer can be used to inspect attributes,
-		 * remove attributes, or use any of the other map-provided methods.
-		 * @param attributesConsumer a function that consumes the attributes
+		 * Provides access to every attribute declared so far with the
+		 * possibility to add, replace, or remove values.
+		 * @param attributesConsumer the consumer to provide access to
 		 * @return this builder
 		 */
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);

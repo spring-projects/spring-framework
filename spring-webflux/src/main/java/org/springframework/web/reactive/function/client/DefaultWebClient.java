@@ -333,12 +333,8 @@ class DefaultWebClient implements WebClient {
 			}
 			else {
 				HttpHeaders result = new HttpHeaders();
+				result.putAll(defaultHeaders);
 				result.putAll(this.headers);
-				defaultHeaders.forEach((name, values) -> {
-					if (!this.headers.containsKey(name)) {
-						values.forEach(value -> result.add(name, value));
-					}
-				});
 				return result;
 			}
 		}
@@ -352,8 +348,8 @@ class DefaultWebClient implements WebClient {
 			}
 			else {
 				MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
+				result.putAll(defaultCookies);
 				result.putAll(this.cookies);
-				defaultCookies.forEach(result::putIfAbsent);
 				return result;
 			}
 		}
