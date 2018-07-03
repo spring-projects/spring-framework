@@ -79,7 +79,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the
+ * Spring's default implementation of the
  * {@link org.springframework.beans.factory.ListableBeanFactory} and
  * {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
  * based on bean definition objects.
@@ -439,9 +439,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					if (allowEagerInit) {
 						throw ex;
 					}
-					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (this.logger.isDebugEnabled()) {
-						this.logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
+					// Probably a class name with a placeholder: let's ignore it for type matching purposes.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -449,9 +449,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					if (allowEagerInit) {
 						throw ex;
 					}
-					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (this.logger.isDebugEnabled()) {
-						this.logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
+					// Probably some metadata with a placeholder: let's ignore it for type matching purposes.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -521,8 +521,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					BeanCreationException bce = (BeanCreationException) rootCause;
 					String exBeanName = bce.getBeanName();
 					if (exBeanName != null && isCurrentlyInCreation(exBeanName)) {
-						if (this.logger.isDebugEnabled()) {
-							this.logger.debug("Ignoring match to currently created bean '" + exBeanName + "': " +
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring match to currently created bean '" + exBeanName + "': " +
 									ex.getMessage());
 						}
 						onSuppressedException(ex);
@@ -680,8 +680,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		BeanDefinition bd = this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
-			if (this.logger.isTraceEnabled()) {
-				this.logger.trace("No bean named '" + beanName + "' found in " + this);
+			if (logger.isTraceEnabled()) {
+				logger.trace("No bean named '" + beanName + "' found in " + this);
 			}
 			throw new NoSuchBeanDefinitionException(beanName);
 		}
@@ -725,8 +725,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void preInstantiateSingletons() throws BeansException {
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Pre-instantiating singletons in " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Pre-instantiating singletons in " + this);
 		}
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
