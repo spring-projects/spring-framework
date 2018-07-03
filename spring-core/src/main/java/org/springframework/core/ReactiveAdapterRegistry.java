@@ -63,41 +63,32 @@ public class ReactiveAdapterRegistry {
 	 */
 	public ReactiveAdapterRegistry() {
 
+		ClassLoader classLoader = ReactiveAdapterRegistry.class.getClassLoader();
+
 		// Reactor
 		boolean reactorRegistered = false;
-		try {
+		if (ClassUtils.isPresent("reactor.core.publisher.Flux", classLoader)) {
 			new ReactorRegistrar().registerAdapters(this);
 			reactorRegistered = true;
-		}
-		catch (Throwable ex) {
-			// Ignore
 		}
 		this.reactorPresent = reactorRegistered;
 
 		// RxJava1
-		try {
+		if (ClassUtils.isPresent("rx.Observable", classLoader)) {
 			new RxJava1Registrar().registerAdapters(this);
-		}
-		catch (Throwable ex) {
-			// Ignore
 		}
 
 		// RxJava2
-		try {
+		if (ClassUtils.isPresent("io.reactivex.Flowable", classLoader)) {
 			new RxJava2Registrar().registerAdapters(this);
-		}
-		catch (Throwable ex) {
-			// Ignore
 		}
 
 		// Java 9+ Flow.Publisher
-		try {
+		if (ClassUtils.isPresent("java.util.concurrent.Flow.Publisher", classLoader)) {
 			new ReactorJdkFlowAdapterRegistrar().registerAdapter(this);
 		}
-		catch (Throwable ex) {
-			// Ignore for the time being...
-			// We can fall back on "reactive-streams-flow-bridge" (once released)
-		}
+		// If not present, do nothing for the time being...
+		// We can fall back on "reactive-streams-flow-bridge" (once released)
 	}
 
 
@@ -276,24 +267,29 @@ public class ReactiveAdapterRegistry {
 
 	private static class ReactorJdkFlowAdapterRegistrar {
 
-		void registerAdapter(ReactiveAdapterRegistry registry) throws Exception {
+		void registerAdapter(ReactiveAdapterRegistry registry) {
 			// TODO: remove reflection when build requires JDK 9+
 
-			String publisherName = "java.util.concurrent.Flow.Publisher";
-			Class<?> publisherClass = ClassUtils.forName(publisherName, getClass().getClassLoader());
+			try {
+				String publisherName = "java.util.concurrent.Flow.Publisher";
+				Class<?> publisherClass = ClassUtils.forName(publisherName, getClass().getClassLoader());
 
-			String adapterName = "reactor.adapter.JdkFlowAdapter";
-			Class<?> flowAdapterClass = ClassUtils.forName(adapterName,  getClass().getClassLoader());
+				String adapterName = "reactor.adapter.JdkFlowAdapter";
+				Class<?> flowAdapterClass = ClassUtils.forName(adapterName,  getClass().getClassLoader());
 
-			Method toFluxMethod = flowAdapterClass.getMethod("flowPublisherToFlux", publisherClass);
-			Method toFlowMethod = flowAdapterClass.getMethod("publisherToFlowPublisher", Publisher.class);
-			Object emptyFlow = ReflectionUtils.invokeMethod(toFlowMethod, null, Flux.empty());
+				Method toFluxMethod = flowAdapterClass.getMethod("flowPublisherToFlux", publisherClass);
+				Method toFlowMethod = flowAdapterClass.getMethod("publisherToFlowPublisher", Publisher.class);
+				Object emptyFlow = ReflectionUtils.invokeMethod(toFlowMethod, null, Flux.empty());
 
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(publisherClass, () -> emptyFlow),
-					source -> (Publisher<?>) ReflectionUtils.invokeMethod(toFluxMethod, null, source),
-					publisher -> ReflectionUtils.invokeMethod(toFlowMethod, null, publisher)
-			);
+				registry.registerReactiveType(
+						ReactiveTypeDescriptor.multiValue(publisherClass, () -> emptyFlow),
+						source -> (Publisher<?>) ReflectionUtils.invokeMethod(toFluxMethod, null, source),
+						publisher -> ReflectionUtils.invokeMethod(toFlowMethod, null, publisher)
+				);
+			}
+			catch (Throwable ex) {
+				// Ignore
+			}
 		}
 	}
 
