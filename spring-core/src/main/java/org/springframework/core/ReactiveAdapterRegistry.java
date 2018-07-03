@@ -74,7 +74,8 @@ public class ReactiveAdapterRegistry {
 		this.reactorPresent = reactorRegistered;
 
 		// RxJava1
-		if (ClassUtils.isPresent("rx.Observable", classLoader)) {
+		if (ClassUtils.isPresent("rx.Observable", classLoader) &&
+				ClassUtils.isPresent("rx.RxReactiveStreams", classLoader)) {
 			new RxJava1Registrar().registerAdapters(this);
 		}
 
