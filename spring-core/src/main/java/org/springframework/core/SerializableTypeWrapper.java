@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -69,7 +68,6 @@ abstract class SerializableTypeWrapper {
 	 */
 	@Nullable
 	public static Type forField(Field field) {
-		Assert.notNull(field, "Field must not be null");
 		return forTypeProvider(new FieldTypeProvider(field));
 	}
 
@@ -135,21 +133,20 @@ abstract class SerializableTypeWrapper {
 	 * Return a {@link Serializable} {@link Type} backed by a {@link TypeProvider} .
 	 */
 	@Nullable
-	static Type forTypeProvider(final TypeProvider provider) {
-		Assert.notNull(provider, "Provider must not be null");
+	static Type forTypeProvider(TypeProvider provider) {
 		Type providedType = provider.getType();
-		if (providedType == null) {
-			return null;
-		}
-		if (providedType instanceof Serializable) {
+		if (providedType == null || providedType instanceof Serializable) {
+			// No serializable type wrapping necessary (e.g. for java.lang.Class)
 			return providedType;
 		}
+
+		// Obtain a serializable type proxy for the given provider...
 		Type cached = cache.get(providedType);
 		if (cached != null) {
 			return cached;
 		}
 		for (Class<?> type : SUPPORTED_SERIALIZABLE_TYPES) {
-			if (type.isAssignableFrom(providedType.getClass())) {
+			if (type.isInstance(providedType)) {
 				ClassLoader classLoader = provider.getClass().getClassLoader();
 				Class<?>[] interfaces = new Class<?>[] {type, SerializableTypeProxy.class, Serializable.class};
 				InvocationHandler handler = new TypeProxyInvocationHandler(provider);
