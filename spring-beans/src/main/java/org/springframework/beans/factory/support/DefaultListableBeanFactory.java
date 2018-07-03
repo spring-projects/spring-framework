@@ -79,7 +79,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the
+ * Spring's default implementation of the
  * {@link org.springframework.beans.factory.ListableBeanFactory} and
  * {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
  * based on bean definition objects.
@@ -439,7 +439,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					if (allowEagerInit) {
 						throw ex;
 					}
-					// Probably contains a placeholder: let's ignore it for type matching purposes.
+					// Probably a class name with a placeholder: let's ignore it for type matching purposes.
 					if (logger.isDebugEnabled()) {
 						logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
 					}
@@ -449,7 +449,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					if (allowEagerInit) {
 						throw ex;
 					}
-					// Probably contains a placeholder: let's ignore it for type matching purposes.
+					// Probably some metadata with a placeholder: let's ignore it for type matching purposes.
 					if (logger.isDebugEnabled()) {
 						logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
 					}
