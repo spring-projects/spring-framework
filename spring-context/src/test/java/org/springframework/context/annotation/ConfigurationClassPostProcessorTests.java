@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.junit.Before;
@@ -810,6 +811,15 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void testMapInjectionFromSameConfigurationClass() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MapInjectionConfiguration.class);
+		MapInjectionConfiguration bean = ctx.getBean(MapInjectionConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(1, bean.testBeans.size());
+		assertSame(ctx.getBean(Runnable.class), bean.testBeans.get("testBean"));
+	}
+
+	@Test
 	public void testBeanLookupFromSameConfigurationClass() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanLookupConfiguration.class);
 		BeanLookupConfiguration bean = ctx.getBean(BeanLookupConfiguration.class);
@@ -1563,6 +1573,23 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public TestBean thing() {
 			return new TestBean();
+		}
+	}
+
+	@Configuration
+	public static class MapInjectionConfiguration {
+
+		@Autowired
+		private Map<String, Runnable> testBeans;
+
+		@Bean
+		Runnable testBean() {
+			return () -> {};
+		}
+
+		// Unrelated, not to be considered as a factory method
+		private boolean testBean(boolean param) {
+			return param;
 		}
 	}
 
