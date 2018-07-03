@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.ExtensionRegistry;
@@ -44,6 +44,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import static org.springframework.http.MediaType.*;
 
@@ -87,7 +88,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	public static final String X_PROTOBUF_MESSAGE_HEADER = "X-Protobuf-Message";
 
 
-	private static final ConcurrentHashMap<Class<?>, Method> methodCache = new ConcurrentHashMap<>();
+	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
 	private final ExtensionRegistry extensionRegistry = ExtensionRegistry.newInstance();
 
@@ -127,8 +128,8 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 			this.protobufFormatSupport = null;
 		}
 
-		setSupportedMediaTypes(Arrays.asList((this.protobufFormatSupport != null ?
-				this.protobufFormatSupport.supportedMediaTypes() : new MediaType[] {PROTOBUF, TEXT_PLAIN})));
+		setSupportedMediaTypes(Arrays.asList(this.protobufFormatSupport != null ?
+				this.protobufFormatSupport.supportedMediaTypes() : new MediaType[] {PROTOBUF, TEXT_PLAIN}));
 
 		if (registryInitializer != null) {
 			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
@@ -179,6 +180,20 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 	}
 
+	/**
+	 * Create a new {@code Message.Builder} instance for the given class.
+	 * <p>This method uses a ConcurrentReferenceHashMap for caching method lookups.
+	 */
+	private Message.Builder getMessageBuilder(Class<? extends Message> clazz) throws Exception {
+		Method method = methodCache.get(clazz);
+		if (method == null) {
+			method = clazz.getMethod("newBuilder");
+			methodCache.put(clazz, method);
+		}
+		return (Message.Builder) method.invoke(clazz);
+	}
+
+
 	@Override
 	protected boolean canWrite(@Nullable MediaType mediaType) {
 		return (super.canWrite(mediaType) ||
@@ -226,20 +241,6 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	private void setProtoHeader(HttpOutputMessage response, Message message) {
 		response.getHeaders().set(X_PROTOBUF_SCHEMA_HEADER, message.getDescriptorForType().getFile().getName());
 		response.getHeaders().set(X_PROTOBUF_MESSAGE_HEADER, message.getDescriptorForType().getFullName());
-	}
-
-
-	/**
-	 * Create a new {@code Message.Builder} instance for the given class.
-	 * <p>This method uses a ConcurrentHashMap for caching method lookups.
-	 */
-	private static Message.Builder getMessageBuilder(Class<? extends Message> clazz) throws Exception {
-		Method method = methodCache.get(clazz);
-		if (method == null) {
-			method = clazz.getMethod("newBuilder");
-			methodCache.put(clazz, method);
-		}
-		return (Message.Builder) method.invoke(clazz);
 	}
 
 
@@ -293,7 +294,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				this.xmlFormatter.merge(input, charset, extensionRegistry, builder);
 			}
 			else {
-				throw new IOException("com.google.protobuf.util does not support " + contentType + " format");
+				throw new IOException("protobuf-java-format does not support " + contentType + " format");
 			}
 		}
 

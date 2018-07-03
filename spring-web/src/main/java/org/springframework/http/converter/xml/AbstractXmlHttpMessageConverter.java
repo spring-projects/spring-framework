@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 
 /**
  * Abstract base class for {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverters}
@@ -57,12 +58,16 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 
 
 	@Override
-	public final T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage) throws IOException {
+	public final T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
 		return readFromSource(clazz, inputMessage.getHeaders(), new StreamSource(inputMessage.getBody()));
 	}
 
 	@Override
-	protected final void writeInternal(T t, HttpOutputMessage outputMessage) throws IOException {
+	protected final void writeInternal(T t, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException {
+
 		writeToResult(t, outputMessage.getHeaders(), new StreamResult(outputMessage.getBody()));
 	}
 
@@ -84,10 +89,10 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 	 * @param source the HTTP input body
 	 * @return the converted object
 	 * @throws IOException in case of I/O errors
-	 * @throws org.springframework.http.converter.HttpMessageConversionException in case of conversion errors
+	 * @throws HttpMessageNotReadableException in case of conversion errors
 	 */
 	protected abstract T readFromSource(Class<? extends T> clazz, HttpHeaders headers, Source source)
-			throws IOException;
+			throws IOException, HttpMessageNotReadableException;
 
 	/**
 	 * Abstract template method called from {@link #writeInternal(Object, HttpOutputMessage)}.
@@ -95,9 +100,9 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 	 * @param headers the HTTP output headers
 	 * @param result the HTTP output body
 	 * @throws IOException in case of I/O errors
-	 * @throws HttpMessageConversionException in case of conversion errors
+	 * @throws HttpMessageNotWritableException in case of conversion errors
 	 */
 	protected abstract void writeToResult(T t, HttpHeaders headers, Result result)
-			throws IOException;
+			throws IOException, HttpMessageNotWritableException;
 
 }
