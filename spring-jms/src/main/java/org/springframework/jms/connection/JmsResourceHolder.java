@@ -38,9 +38,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * JMS resource holder, wrapping a JMS Connection and a JMS Session.
- * JmsTransactionManager binds instances of this class to the thread,
- * for a given JMS ConnectionFactory.
+ * Resource holder wrapping a JMS {@link Connection} and a JMS {@link Session}.
+ * {@link JmsTransactionManager} binds instances of this class to the thread,
+ * for a given JMS {@link ConnectionFactory}.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *

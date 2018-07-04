@@ -25,9 +25,9 @@ import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
 /**
- * Connection holder, wrapping a JDBC Connection.
+ * Resource holder wrapping a JDBC {@link Connection}.
  * {@link DataSourceTransactionManager} binds instances of this class
- * to the thread, for a specific DataSource.
+ * to the thread, for a specific {@link javax.sql.DataSource}.
  *
  * <p>Inherits rollback-only support for nested JDBC transactions
  * and reference count functionality from the base class.

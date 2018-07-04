@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDisc
 
 	private static final boolean kotlinPresent =
 			ClassUtils.isPresent("kotlin.Unit", DefaultParameterNameDiscoverer.class.getClassLoader());
+
 
 	public DefaultParameterNameDiscoverer() {
 		if (kotlinPresent) {
