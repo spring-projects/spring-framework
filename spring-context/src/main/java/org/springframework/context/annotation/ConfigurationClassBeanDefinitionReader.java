@@ -232,6 +232,11 @@ class ConfigurationClassBeanDefinitionReader {
 			beanDef.setAutowireMode(autowire.value());
 		}
 
+		boolean autowireCandidate = bean.getBoolean("autowireCandidate");
+		if (!autowireCandidate) {
+			beanDef.setAutowireCandidate(false);
+		}
+
 		String initMethodName = bean.getString("initMethod");
 		if (StringUtils.hasText(initMethodName)) {
 			beanDef.setInitMethodName(initMethodName);
