@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,8 @@ public class HibernateEntityManagerFactoryIntegrationTests extends AbstractConta
 
 	@Override
 	protected String[] getConfigLocations() {
-		return HIBERNATE_CONFIG_LOCATIONS;
+		return new String[] {"/org/springframework/orm/jpa/hibernate/hibernate-manager.xml",
+				"/org/springframework/orm/jpa/memdb.xml", "/org/springframework/orm/jpa/inject.xml"};
 	}
 
 

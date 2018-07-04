@@ -5649,6 +5649,12 @@ application uses to refer to them, for example, in `@PersistenceUnit` and
 Use this option for full JPA capabilities in a Spring-based application environment.
 This includes web containers such as Tomcat as well as stand-alone applications and
 integration tests with sophisticated persistence requirements.
+
+If you'd like to specifically configure a Hibernate setup, an immediate alternative is
+to go with Hibernate 5.2/5.3 and set up a native Hibernate `LocalSessionFactoryBean`
+instead of a plain JPA `LocalContainerEntityManagerFactoryBean`, letting it interact
+with JPA access code as well as native Hibernate access code.
+See <<orm-jpa-hibernate,Native Hibernate setup for JPA interaction>> for details.
 ====
 
 The `LocalContainerEntityManagerFactoryBean` gives full control over
@@ -5979,6 +5985,15 @@ to JDBC access code that accesses the same `DataSource`, provided that the regis
 Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
 See the next section for details on the `JpaDialect` mechanism.
 
+[NOTE]
+====
+As an immediate alternative, Spring's native `HibernateTransactionManager` is capable
+of interacting with JPA access code as of Spring Framework 5.1 and Hibernate 5.2/5.3,
+adapting to several Hibernate specifics and providing JDBC interaction out of the box.
+This makes particular sense in combination with `LocalSessionFactoryBean` setup.
+See <<orm-jpa-hibernate,Native Hibernate setup for JPA interaction>> for details.
+====
+
 
 [[orm-jpa-dialect]]
 ==== JpaDialect and JpaVendorAdapter
@@ -6046,6 +6061,31 @@ server itself, i.e. via a JNDI lookup instead of a locally declared
 `LocalContainerEntityManagerFactoryBean`. A server-provided `EntityManagerFactory`
 might require special definitions in your server configuration, making the deployment
 less portable, but will be set up for the server's JTA environment out of the box.
+
+
+[[orm-jpa-hibernate]]
+==== Native Hibernate setup and native Hibernate transactions for JPA interaction
+
+As of Spring Framework 5.1 and Hibernate 5.2/5.3, a native `LocalSessionFactoryBean`
+setup in combination with `HibernateTransactionManager` allows for interaction with
+`@PersistenceContext` and other JPA access code out of the box. A Hibernate
+`SessionFactory` natively implements JPA's `EntityManagerFactory` interface now,
+and a Hibernate `Session` handle natively is a JPA `EntityManager` as well.
+Spring's JPA support facilities automatically detect native Hibernate Sessions.
+
+Such native Hibernate setup can therefore serve as a replacement for a standard JPA
+`LocalContainerEntityManagerFactoryBean` and `JpaTransactionManager` combination
+in many scenarios, allowing for interaction with `SessionFactory.getCurrentSession()`
+(and also `HibernateTemplate`) next to `@PersistenceContext EntityManager` within
+the same local transaction. Such a setup also provides stronger Hibernate integration
+and more configuration flexibility, not being constrained by JPA bootstrap contracts.
+
+There is no need for `HibernateJpaVendorAdapter` configuration in such a scenario
+since Spring's native Hibernate setup provides even more features out of the box:
+e.g. custom Hibernate Integrator setup, Hibernate 5.3 bean container integration,
+as well as stronger optimizations for read-only transactions. Last but not least,
+native Hibernate setup can also be expressed through `LocalSessionFactoryBuilder`,
+seamlessly integrating with `@Bean` style configuration (no `FactoryBean` involved).
 
 
 

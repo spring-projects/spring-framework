@@ -48,12 +48,8 @@ import static org.junit.Assert.*;
 public abstract class AbstractEntityManagerFactoryIntegrationTests {
 
 	protected static final String[] ECLIPSELINK_CONFIG_LOCATIONS = new String[] {
-			"/org/springframework/orm/jpa/eclipselink/eclipselink-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
-			"/org/springframework/orm/jpa/inject.xml"};
-
-	protected static final String[] HIBERNATE_CONFIG_LOCATIONS = new String[] {
-			"/org/springframework/orm/jpa/hibernate/hibernate-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
-			"/org/springframework/orm/jpa/inject.xml"};
+			"/org/springframework/orm/jpa/eclipselink/eclipselink-manager.xml",
+			"/org/springframework/orm/jpa/memdb.xml", "/org/springframework/orm/jpa/inject.xml"};
 
 
 	private static ConfigurableApplicationContext applicationContext;
