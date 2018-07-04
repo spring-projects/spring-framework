@@ -68,6 +68,7 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedList;
@@ -841,14 +842,17 @@ public class DefaultListableBeanFactoryTests {
 	public void testBeanDefinitionOverridingNotAllowed() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.setAllowBeanDefinitionOverriding(false);
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		BeanDefinition oldDef = new RootBeanDefinition(TestBean.class);
+		BeanDefinition newDef = new RootBeanDefinition(NestedTestBean.class);
+		lbf.registerBeanDefinition("test", oldDef);
 		try {
-			lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
-			fail("Should have thrown BeanDefinitionStoreException");
+			lbf.registerBeanDefinition("test", newDef);
+			fail("Should have thrown BeanDefinitionOverrideException");
 		}
-		catch (BeanDefinitionStoreException ex) {
+		catch (BeanDefinitionOverrideException ex) {
 			assertEquals("test", ex.getBeanName());
-			// expected
+			assertSame(newDef, ex.getBeanDefinition());
+			assertSame(oldDef, ex.getExistingDefinition());
 		}
 	}
 

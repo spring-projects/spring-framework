@@ -802,34 +802,30 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		BeanDefinition oldBeanDefinition;
-
-		oldBeanDefinition = this.beanDefinitionMap.get(beanName);
-		if (oldBeanDefinition != null) {
+		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+		if (existingDefinition != null) {
 			if (!isAllowBeanDefinitionOverriding()) {
-				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
-						"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
-						"': There is already [" + oldBeanDefinition + "] bound.");
+				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
-			else if (oldBeanDefinition.getRole() < beanDefinition.getRole()) {
+			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
 				if (logger.isWarnEnabled()) {
 					logger.warn("Overriding user-defined bean definition for bean '" + beanName +
 							"' with a framework-generated bean definition: replacing [" +
-							oldBeanDefinition + "] with [" + beanDefinition + "]");
+							existingDefinition + "] with [" + beanDefinition + "]");
 				}
 			}
-			else if (!beanDefinition.equals(oldBeanDefinition)) {
+			else if (!beanDefinition.equals(existingDefinition)) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Overriding bean definition for bean '" + beanName +
-							"' with a different definition: replacing [" + oldBeanDefinition +
+							"' with a different definition: replacing [" + existingDefinition +
 							"] with [" + beanDefinition + "]");
 				}
 			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Overriding bean definition for bean '" + beanName +
-							"' with an equivalent definition: replacing [" + oldBeanDefinition +
+							"' with an equivalent definition: replacing [" + existingDefinition +
 							"] with [" + beanDefinition + "]");
 				}
 			}
@@ -860,7 +856,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.frozenBeanDefinitionNames = null;
 		}
 
-		if (oldBeanDefinition != null || containsSingleton(beanName)) {
+		if (existingDefinition != null || containsSingleton(beanName)) {
 			resetBeanDefinition(beanName);
 		}
 	}
