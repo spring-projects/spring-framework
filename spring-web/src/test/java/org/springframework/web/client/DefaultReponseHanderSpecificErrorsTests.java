@@ -8,42 +8,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.web.client.response.HttpBadGatewayException;
-import org.springframework.web.client.response.HttpBadRequestException;
-import org.springframework.web.client.response.HttpConflictException;
-import org.springframework.web.client.response.HttpForbiddenException;
-import org.springframework.web.client.response.HttpGatewayTimeoutException;
-import org.springframework.web.client.response.HttpInternalServerErrorException;
-import org.springframework.web.client.response.HttpMethodNotAllowedException;
-import org.springframework.web.client.response.HttpNotAcceptableException;
-import org.springframework.web.client.response.HttpNotFoundException;
-import org.springframework.web.client.response.HttpNotImplementedException;
-import org.springframework.web.client.response.HttpServiceUnavailableException;
-import org.springframework.web.client.response.HttpTooManyRequestsException;
-import org.springframework.web.client.response.HttpUnauthorizedException;
-import org.springframework.web.client.response.HttpUnprocessableEntityException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.mock;
-import static org.springframework.http.HttpStatus.BAD_GATEWAY;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.GATEWAY_TIMEOUT;
-import static org.springframework.http.HttpStatus.HTTP_VERSION_NOT_SUPPORTED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
-import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
-import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
-import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
-import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static org.springframework.http.HttpStatus.*;
 
 @RunWith(Parameterized.class)
 public class DefaultReponseHanderSpecificErrorsTests {
@@ -52,22 +21,22 @@ public class DefaultReponseHanderSpecificErrorsTests {
 	public static Object[][] errorCodes() {
 		return new Object[][]{
 				// 4xx
-				{BAD_REQUEST, HttpBadRequestException.class},
-				{UNAUTHORIZED, HttpUnauthorizedException.class},
-				{FORBIDDEN, HttpForbiddenException.class},
-				{NOT_FOUND, HttpNotFoundException.class},
-				{METHOD_NOT_ALLOWED, HttpMethodNotAllowedException.class},
-				{NOT_ACCEPTABLE, HttpNotAcceptableException.class},
-				{CONFLICT, HttpConflictException.class},
-				{TOO_MANY_REQUESTS, HttpTooManyRequestsException.class},
-				{UNPROCESSABLE_ENTITY, HttpUnprocessableEntityException.class},
+				{BAD_REQUEST, HttpClientErrorException.BadRequest.class},
+				{UNAUTHORIZED, HttpClientErrorException.Unauthorized.class},
+				{FORBIDDEN, HttpClientErrorException.Forbidden.class},
+				{NOT_FOUND, HttpClientErrorException.NotFound.class},
+				{METHOD_NOT_ALLOWED, HttpClientErrorException.MethodNotAllowed.class},
+				{NOT_ACCEPTABLE, HttpClientErrorException.NotAcceptable.class},
+				{CONFLICT, HttpClientErrorException.Conflict.class},
+				{TOO_MANY_REQUESTS, HttpClientErrorException.TooManyRequests.class},
+				{UNPROCESSABLE_ENTITY, HttpClientErrorException.UnprocessableEntity.class},
 				{I_AM_A_TEAPOT, HttpClientErrorException.class},
 				// 5xx
-				{INTERNAL_SERVER_ERROR, HttpInternalServerErrorException.class},
-				{NOT_IMPLEMENTED, HttpNotImplementedException.class},
-				{BAD_GATEWAY, HttpBadGatewayException.class},
-				{SERVICE_UNAVAILABLE, HttpServiceUnavailableException.class},
-				{GATEWAY_TIMEOUT, HttpGatewayTimeoutException.class},
+				{INTERNAL_SERVER_ERROR, HttpServerErrorException.InternalServerError.class},
+				{NOT_IMPLEMENTED, HttpServerErrorException.NotImplemented.class},
+				{BAD_GATEWAY, HttpServerErrorException.BadGateway.class},
+				{SERVICE_UNAVAILABLE, HttpServerErrorException.ServiceUnavailable.class},
+				{GATEWAY_TIMEOUT, HttpServerErrorException.GatewayTimeout.class},
 				{HTTP_VERSION_NOT_SUPPORTED, HttpServerErrorException.class}
 		};
 	}
@@ -93,7 +62,8 @@ public class DefaultReponseHanderSpecificErrorsTests {
 		try {
 			handler.handleError(response);
 			fail("expected " + expectedExceptionClass.getSimpleName());
-		} catch (HttpStatusCodeException ex) {
+		}
+		catch (HttpStatusCodeException ex) {
 			assertEquals("Expected " + expectedExceptionClass.getSimpleName(), expectedExceptionClass, ex.getClass());
 		}
 	}
