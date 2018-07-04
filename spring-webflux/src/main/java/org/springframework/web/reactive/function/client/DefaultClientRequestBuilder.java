@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -181,6 +182,9 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 		private final Map<String, Object> attributes;
 
+		private final String logPrefix;
+
+
 		public BodyInserterRequest(HttpMethod method, URI url, HttpHeaders headers,
 				MultiValueMap<String, String> cookies, BodyInserter<?, ? super ClientHttpRequest> body,
 				Map<String, Object> attributes) {
@@ -191,7 +195,11 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
 			this.body = body;
 			this.attributes = Collections.unmodifiableMap(attributes);
+
+			Object id = attributes.computeIfAbsent(LOG_ID_ATTRIBUTE, name -> ObjectUtils.getIdentityHexString(this));
+			this.logPrefix = "[" + id + "] ";
 		}
+
 
 		@Override
 		public HttpMethod method() {
@@ -224,6 +232,11 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		}
 
 		@Override
+		public String logPrefix() {
+			return this.logPrefix;
+		}
+
+		@Override
 		public Mono<Void> writeTo(ClientHttpRequest request, ExchangeStrategies strategies) {
 			HttpHeaders requestHeaders = request.getHeaders();
 			if (!this.headers.isEmpty()) {
@@ -252,7 +265,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 				}
 				@Override
 				public Map<String, Object> hints() {
-					return Hints.none();
+					return Hints.from(Hints.LOG_PREFIX_HINT, logPrefix());
 				}
 			});
 		}

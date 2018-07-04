@@ -55,11 +55,14 @@ class DefaultClientResponse implements ClientResponse {
 
 	private final ExchangeStrategies strategies;
 
+	private final String logPrefix;
 
-	public DefaultClientResponse(ClientHttpResponse response, ExchangeStrategies strategies) {
+
+	public DefaultClientResponse(ClientHttpResponse response, ExchangeStrategies strategies, String logPrefix) {
 		this.response = response;
 		this.strategies = strategies;
 		this.headers = new DefaultHeaders();
+		this.logPrefix = logPrefix;
 	}
 
 
@@ -96,7 +99,7 @@ class DefaultClientResponse implements ClientResponse {
 			}
 			@Override
 			public Map<String, Object> hints() {
-				return Hints.none();
+				return Hints.from(Hints.LOG_PREFIX_HINT, logPrefix);
 			}
 		});
 	}

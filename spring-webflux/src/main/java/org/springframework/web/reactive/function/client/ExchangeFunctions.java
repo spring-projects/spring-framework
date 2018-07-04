@@ -91,18 +91,19 @@ public abstract class ExchangeFunctions {
 
 
 		@Override
-		public Mono<ClientResponse> exchange(ClientRequest request) {
-			Assert.notNull(request, "ClientRequest must not be null");
-			HttpMethod httpMethod = request.method();
-			URI url = request.url();
+		public Mono<ClientResponse> exchange(ClientRequest clientRequest) {
+			Assert.notNull(clientRequest, "ClientRequest must not be null");
+			HttpMethod httpMethod = clientRequest.method();
+			URI url = clientRequest.url();
+			String logPrefix = clientRequest.logPrefix();
 
 			return this.connector
-					.connect(httpMethod, url, httpRequest -> request.writeTo(httpRequest, this.strategies))
-					.doOnRequest(n -> logRequest(request))
-					.doOnCancel(() -> logger.debug("Cancel signal (to close connection)"))
-					.map(response -> {
-						logResponse(response);
-						return new DefaultClientResponse(response, this.strategies);
+					.connect(httpMethod, url, httpRequest -> clientRequest.writeTo(httpRequest, this.strategies))
+					.doOnRequest(n -> logRequest(clientRequest))
+					.doOnCancel(() -> logger.debug(logPrefix + "Cancel signal (to close connection)"))
+					.map(httpResponse -> {
+						logResponse(httpResponse, logPrefix);
+						return new DefaultClientResponse(httpResponse, this.strategies, logPrefix);
 					});
 		}
 
@@ -113,21 +114,21 @@ public abstract class ExchangeFunctions {
 					int index = formatted.indexOf("?");
 					formatted = (index != -1 ? formatted.substring(0, index) : formatted);
 				}
-				logger.debug("HTTP " + request.method() + " " + formatted);
+				logger.debug(request.logPrefix() + "HTTP " + request.method() + " " + formatted);
 			}
 		}
 
-		private void logResponse(ClientHttpResponse response) {
+		private void logResponse(ClientHttpResponse response, String logPrefix) {
 			if (logger.isDebugEnabled()) {
 				int code = response.getRawStatusCode();
 				HttpStatus status = HttpStatus.resolve(code);
 				String message = "Response " + (status != null ? status : code);
 				if (logger.isTraceEnabled()) {
 					String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + response.getHeaders();
-					logger.trace(message + headers);
+					logger.trace(logPrefix + message + headers);
 				}
 				else {
-					logger.debug(message);
+					logger.debug(logPrefix + message);
 				}
 			}
 		}

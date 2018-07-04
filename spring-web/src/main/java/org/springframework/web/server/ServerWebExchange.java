@@ -222,7 +222,7 @@ public interface ServerWebExchange {
 	 * Return a log message prefix to use to correlate messages for this exchange.
 	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
 	 * along with some extra formatting so that the prefix can be conveniently
-	 * prepended with no further formatting no separatorns required.
+	 * prepended with no further formatting no separators required.
 	 * @return the log message prefix or an empty String if the
 	 * {@link #LOG_ID_ATTRIBUTE} is not set.
 	 * @since 5.1

@@ -46,6 +46,16 @@ import org.springframework.web.reactive.function.BodyInserter;
 public interface ClientRequest {
 
 	/**
+	 * Name of {@link #attributes() attribute} whose value can be used to
+	 * correlate log messages for this request. Use {@link #logPrefix()} to
+	 * obtain a consistently formatted prefix based on this attribute.
+	 * @since 5.1
+	 * @see #logPrefix()
+	 */
+	String LOG_ID_ATTRIBUTE = ClientRequest.class.getName() + ".LOG_ID";
+
+
+	/**
 	 * Return the HTTP method.
 	 */
 	HttpMethod method();
@@ -89,6 +99,17 @@ public interface ClientRequest {
 	 * Return the attributes of this request.
 	 */
 	Map<String, Object> attributes();
+
+	/**
+	 * Return a log message prefix to use to correlate messages for this request.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
+	 * along with some extra formatting so that the prefix can be conveniently
+	 * prepended with no further formatting no separators required.
+	 * @return the log message prefix or an empty String if the
+	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * @since 5.1
+	 */
+	String logPrefix();
 
 	/**
 	 * Writes this request to the given {@link ClientHttpRequest}.
