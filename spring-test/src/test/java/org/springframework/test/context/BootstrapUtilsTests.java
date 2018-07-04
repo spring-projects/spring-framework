@@ -49,13 +49,13 @@ public class BootstrapUtilsTests {
 	@Test
 	public void resolveTestContextBootstrapperWithEmptyBootstrapWithAnnotation() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(EmptyBootstrapWithAnnotationClass.class, delegate);
-		
+
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage("Specify @BootstrapWith's 'value' attribute");
-		
+
 		resolveTestContextBootstrapper(bootstrapContext);
 	}
-	
+
 	@Test
 	public void resolveTestContextBootstrapperWithDoubleMetaBootstrapWithAnnotations() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(
@@ -98,7 +98,7 @@ public class BootstrapUtilsTests {
 	public void resolveTestContextBootstrapperWithDuplicatingMetaBootstrapWithAnnotations() {
 		assertBootstrapper(DuplicateMetaAnnotatedBootstrapWithAnnotationClass.class, FooBootstrapper.class);
 	}
-	
+
 	private void assertBootstrapper(Class<?> testClass, Class<?> expectedBootstrapper) {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(testClass, delegate);
 		TestContextBootstrapper bootstrapper = resolveTestContextBootstrapper(bootstrapContext);
@@ -114,25 +114,25 @@ public class BootstrapUtilsTests {
 
 	@BootstrapWith(FooBootstrapper.class)
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface BootWithFoo {}
+	@interface BootWithFoo {}
 
 	@BootstrapWith(FooBootstrapper.class)
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface BootWithFooAgain {}
+	@interface BootWithFooAgain {}
 
 	@BootstrapWith(BarBootstrapper.class)
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface BootWithBar {}
+	@interface BootWithBar {}
 
 	// Invalid
 	@BootstrapWith
 	static class EmptyBootstrapWithAnnotationClass {}
-	
+
 	// Invalid
 	@BootWithBar
 	@BootWithFoo
 	static class DoubleMetaAnnotatedBootstrapWithAnnotationClass {}
-	
+
 	static class NonAnnotatedClass {}
 
 	@BootstrapWith(FooBootstrapper.class)
@@ -146,7 +146,7 @@ public class BootstrapUtilsTests {
 	@BootWithFoo
 	@BootWithFooAgain
 	static class DuplicateMetaAnnotatedBootstrapWithAnnotationClass {}
-	
+
 	@WebAppConfiguration
 	static class WebAppConfigurationAnnotatedClass {}
 
