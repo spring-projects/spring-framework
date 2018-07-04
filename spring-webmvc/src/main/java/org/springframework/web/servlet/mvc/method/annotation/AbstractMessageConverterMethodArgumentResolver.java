@@ -212,7 +212,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			}
 		}
 		catch (IOException ex) {
-			throw new HttpMessageNotReadableException("I/O error while reading input message", ex);
+			throw new HttpMessageNotReadableException("I/O error while reading input message", ex, inputMessage);
 		}
 
 		if (body == NO_VALUE) {

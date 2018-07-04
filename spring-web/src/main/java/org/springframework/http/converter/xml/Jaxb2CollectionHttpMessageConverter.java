@@ -132,7 +132,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	}
 
 	@Override
-	protected T readFromSource(Class<? extends T> clazz, HttpHeaders headers, Source source) throws IOException {
+	protected T readFromSource(Class<? extends T> clazz, HttpHeaders headers, Source source) throws Exception {
 		// should not be called, since we return false for canRead(Class)
 		throw new UnsupportedOperationException();
 	}
@@ -160,18 +160,20 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 				}
 				else {
 					// should not happen, since we check in canRead(Type)
-					throw new HttpMessageNotReadableException("Cannot unmarshal to [" + elementClass + "]");
+					throw new HttpMessageNotReadableException(
+							"Cannot unmarshal to [" + elementClass + "]", inputMessage);
 				}
 				event = moveToNextElement(streamReader);
 			}
 			return result;
 		}
 		catch (XMLStreamException ex) {
-			throw new HttpMessageNotReadableException("Failed to read XML stream: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException(
+					"Failed to read XML stream: " + ex.getMessage(), ex, inputMessage);
 		}
 		catch (UnmarshalException ex) {
 			throw new HttpMessageNotReadableException(
-					"Could not unmarshal to [" + elementClass + "]: " + ex.getMessage(), ex);
+					"Could not unmarshal to [" + elementClass + "]: " + ex.getMessage(), ex, inputMessage);
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException("Invalid JAXB setup: " + ex.getMessage(), ex);
@@ -237,7 +239,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	}
 
 	@Override
-	protected void writeToResult(T t, HttpHeaders headers, Result result) throws IOException {
+	protected void writeToResult(T t, HttpHeaders headers, Result result) throws Exception {
 		throw new UnsupportedOperationException();
 	}
 

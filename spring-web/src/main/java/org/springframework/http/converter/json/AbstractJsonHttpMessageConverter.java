@@ -109,7 +109,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 			return readInternal(resolvedType, reader);
 		}
 		catch (Exception ex) {
-			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex, inputMessage);
 		}
 	}
 

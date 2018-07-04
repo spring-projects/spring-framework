@@ -29,6 +29,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 
@@ -41,6 +42,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
  * supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  * @param <T> the converted object type
  */
@@ -62,14 +64,31 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 	public final T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		return readFromSource(clazz, inputMessage.getHeaders(), new StreamSource(inputMessage.getBody()));
+		try {
+			return readFromSource(clazz, inputMessage.getHeaders(), new StreamSource(inputMessage.getBody()));
+		}
+		catch (IOException | HttpMessageConversionException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new HttpMessageNotReadableException("Could not unmarshal to [" + clazz + "]: " + ex.getMessage(),
+					ex, inputMessage);
+		}
 	}
 
 	@Override
 	protected final void writeInternal(T t, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		writeToResult(t, outputMessage.getHeaders(), new StreamResult(outputMessage.getBody()));
+		try {
+			writeToResult(t, outputMessage.getHeaders(), new StreamResult(outputMessage.getBody()));
+		}
+		catch (IOException | HttpMessageConversionException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new HttpMessageNotWritableException("Could not marshal [" + t + "]: " + ex.getMessage(), ex);
+		}
 	}
 
 	/**
@@ -89,21 +108,17 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 	 * @param headers the HTTP input headers
 	 * @param source the HTTP input body
 	 * @return the converted object
-	 * @throws IOException in case of I/O errors
-	 * @throws HttpMessageNotReadableException in case of conversion errors
+	 * @throws Exception in case of I/O or conversion errors
 	 */
-	protected abstract T readFromSource(Class<? extends T> clazz, HttpHeaders headers, Source source)
-			throws IOException, HttpMessageNotReadableException;
+	protected abstract T readFromSource(Class<? extends T> clazz, HttpHeaders headers, Source source) throws Exception;
 
 	/**
 	 * Abstract template method called from {@link #writeInternal(Object, HttpOutputMessage)}.
 	 * @param t the object to write to the output message
 	 * @param headers the HTTP output headers
 	 * @param result the HTTP output body
-	 * @throws IOException in case of I/O errors
-	 * @throws HttpMessageNotWritableException in case of conversion errors
+	 * @throws Exception in case of I/O or conversion errors
 	 */
-	protected abstract void writeToResult(T t, HttpHeaders headers, Result result)
-			throws IOException, HttpMessageNotWritableException;
+	protected abstract void writeToResult(T t, HttpHeaders headers, Result result) throws Exception;
 
 }

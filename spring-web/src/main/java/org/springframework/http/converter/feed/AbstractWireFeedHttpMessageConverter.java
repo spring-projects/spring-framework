@@ -78,7 +78,7 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 			return (T) feedInput.build(reader);
 		}
 		catch (FeedException ex) {
-			throw new HttpMessageNotReadableException("Could not read WireFeed: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("Could not read WireFeed: " + ex.getMessage(), ex, inputMessage);
 		}
 	}
 

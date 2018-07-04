@@ -113,7 +113,8 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 		Object result = this.conversionService.convert(value, clazz);
 		if (result == null) {
 			throw new HttpMessageNotReadableException(
-					"Unexpected null conversion result for '" + value + "' to " + clazz);
+					"Unexpected null conversion result for '" + value + "' to " + clazz,
+					inputMessage);
 		}
 		return result;
 	}

@@ -242,7 +242,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
 		}
 		catch (JsonProcessingException ex) {
-			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex);
+			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex, inputMessage);
 		}
 	}
 

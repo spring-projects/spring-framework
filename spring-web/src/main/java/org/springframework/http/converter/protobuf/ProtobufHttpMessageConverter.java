@@ -273,11 +273,12 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 		void merge(InputStream input, Charset charset, MediaType contentType,
 				ExtensionRegistry extensionRegistry, Message.Builder builder)
-				throws IOException, HttpMessageNotReadableException;
+				throws IOException, HttpMessageConversionException;
 
 		void print(Message message, OutputStream output, MediaType contentType, Charset charset)
-				throws IOException, HttpMessageNotWritableException;
+				throws IOException, HttpMessageConversionException;
 	}
+
 
 	/**
 	 * {@link ProtobufFormatSupport} implementation used when
@@ -311,7 +312,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		@Override
 		public void merge(InputStream input, Charset charset, MediaType contentType,
 				ExtensionRegistry extensionRegistry, Message.Builder builder)
-				throws IOException, HttpMessageNotReadableException {
+				throws IOException, HttpMessageConversionException {
 
 			if (contentType.isCompatibleWith(APPLICATION_JSON)) {
 				this.jsonFormatter.merge(input, charset, extensionRegistry, builder);
@@ -320,14 +321,14 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				this.xmlFormatter.merge(input, charset, extensionRegistry, builder);
 			}
 			else {
-				throw new HttpMessageNotReadableException(
+				throw new HttpMessageConversionException(
 						"protobuf-java-format does not support parsing " + contentType);
 			}
 		}
 
 		@Override
 		public void print(Message message, OutputStream output, MediaType contentType, Charset charset)
-				throws IOException, HttpMessageNotWritableException {
+				throws IOException, HttpMessageConversionException {
 
 			if (contentType.isCompatibleWith(APPLICATION_JSON)) {
 				this.jsonFormatter.print(message, output, charset);
@@ -339,7 +340,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				this.htmlFormatter.print(message, output, charset);
 			}
 			else {
-				throw new HttpMessageNotWritableException(
+				throw new HttpMessageConversionException(
 						"protobuf-java-format does not support printing " + contentType);
 			}
 		}
@@ -374,21 +375,21 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		@Override
 		public void merge(InputStream input, Charset charset, MediaType contentType,
 				ExtensionRegistry extensionRegistry, Message.Builder builder)
-				throws IOException, HttpMessageNotReadableException {
+				throws IOException, HttpMessageConversionException {
 
 			if (contentType.isCompatibleWith(APPLICATION_JSON)) {
 				InputStreamReader reader = new InputStreamReader(input, charset);
 				this.parser.merge(reader, builder);
 			}
 			else {
-				throw new HttpMessageNotReadableException(
+				throw new HttpMessageConversionException(
 						"protobuf-java-util does not support parsing " + contentType);
 			}
 		}
 
 		@Override
 		public void print(Message message, OutputStream output, MediaType contentType, Charset charset)
-				throws IOException, HttpMessageNotWritableException {
+				throws IOException, HttpMessageConversionException {
 
 			if (contentType.isCompatibleWith(APPLICATION_JSON)) {
 				OutputStreamWriter writer = new OutputStreamWriter(output, charset);
@@ -396,7 +397,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				writer.flush();
 			}
 			else {
-				throw new HttpMessageNotWritableException(
+				throw new HttpMessageConversionException(
 						"protobuf-java-util does not support printing " + contentType);
 			}
 		}
