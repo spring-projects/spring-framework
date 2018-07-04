@@ -91,10 +91,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 					.flatMapMany(region -> writeResourceRegion(region, bufferFactory, hints));
 		}
 		else {
-			Assert.notNull(hints, "'hints' must not be null");
-			Assert.isTrue(hints.containsKey(BOUNDARY_STRING_HINT), "'hints' must contain boundaryString hint");
-			final String boundaryString = (String) hints.get(BOUNDARY_STRING_HINT);
-
+			final String boundaryString = Hints.getRequiredHint(hints, BOUNDARY_STRING_HINT);
 			byte[] startBoundary = getAsciiBytes("\r\n--" + boundaryString + "\r\n");
 			byte[] contentType =
 					(mimeType != null ? getAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0]);
@@ -126,9 +123,10 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		long position = region.getPosition();
 		long count = region.getCount();
 
-		Log logger = getLogger(hints);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Writing region " + position + "-" + (position + count) + " of [" + resource + "]");
+		Log theLogger = Hints.getLoggerOrDefault(hints, logger);
+		if (theLogger.isDebugEnabled()) {
+			theLogger.debug(Hints.getLogPrefix(hints) +
+					"Writing region " + position + "-" + (position + count) + " of [" + resource + "]");
 		}
 
 		Flux<DataBuffer> in = DataBufferUtils.read(resource, position, bufferFactory, this.bufferSize);
@@ -149,7 +147,8 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		long end = start + region.getCount() - 1;
 		OptionalLong contentLength = contentLength(region.getResource());
 		if (contentLength.isPresent()) {
-			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + '/' + contentLength.getAsLong() + "\r\n\r\n");
+			long length = contentLength.getAsLong();
+			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + '/' + length + "\r\n\r\n");
 		}
 		else {
 			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + "\r\n\r\n");

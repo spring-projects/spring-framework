@@ -32,6 +32,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractSingleValueEncoder;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.EncodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
@@ -74,9 +75,9 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		try {
-			Log logger = getLogger(hints);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Encoding [" + value + "]");
+			Log theLogger = Hints.getLoggerOrDefault(hints, logger);
+			if (theLogger.isDebugEnabled()) {
+				theLogger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
 			}
 			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
 			OutputStream outputStream = buffer.asOutputStream();

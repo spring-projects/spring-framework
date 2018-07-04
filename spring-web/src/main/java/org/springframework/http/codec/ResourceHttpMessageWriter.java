@@ -18,8 +18,6 @@ package org.springframework.http.codec;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +29,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.ResourceEncoder;
 import org.springframework.core.codec.ResourceRegionEncoder;
@@ -119,7 +118,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		HttpHeaders headers = message.getHeaders();
-		MediaType resourceMediaType = getResourceMediaType(mediaType, resource);
+		MediaType resourceMediaType = getResourceMediaType(mediaType, resource, hints);
 		headers.setContentType(resourceMediaType);
 
 		if (headers.getContentLength() < 0) {
@@ -129,7 +128,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			}
 		}
 
-		return zeroCopy(resource, null, message)
+		return zeroCopy(resource, null, message, hints)
 				.orElseGet(() -> {
 					Mono<Resource> input = Mono.just(resource);
 					DataBufferFactory factory = message.bufferFactory();
@@ -138,13 +137,15 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				});
 	}
 
-	private static MediaType getResourceMediaType(@Nullable MediaType mediaType, Resource resource) {
+	private static MediaType getResourceMediaType(
+			@Nullable MediaType mediaType, Resource resource, Map<String, Object> hints) {
+
 		if (mediaType != null && mediaType.isConcrete() && !mediaType.equals(MediaType.APPLICATION_OCTET_STREAM)) {
 			return mediaType;
 		}
 		mediaType = MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Resource associated with '" + mediaType + "'");
+			logger.debug(Hints.getLogPrefix(hints) + "Resource associated with '" + mediaType + "'");
 		}
 		return mediaType;
 	}
@@ -162,7 +163,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 	}
 
 	private static Optional<Mono<Void>> zeroCopy(Resource resource, @Nullable ResourceRegion region,
-			ReactiveHttpOutputMessage message) {
+			ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		if (message instanceof ZeroCopyHttpOutputMessage && resource.isFile()) {
 			try {
@@ -171,7 +172,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				long count = region != null ? region.getCount() : file.length();
 				if (logger.isDebugEnabled()) {
 					String formatted = region != null ? "region " + pos + "-" + (count) + " of " : "";
-					logger.debug("Zero-copy " + formatted + "[" + resource + "]");
+					logger.debug(Hints.getLogPrefix(hints) + "Zero-copy " + formatted + "[" + resource + "]");
 				}
 				return Optional.of(((ZeroCopyHttpOutputMessage) message).writeWith(file, pos, count));
 			}
@@ -211,7 +212,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 			response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
 			List<ResourceRegion> regions = HttpRange.toResourceRegions(ranges, resource);
-			MediaType resourceMediaType = getResourceMediaType(mediaType, resource);
+			MediaType resourceMediaType = getResourceMediaType(mediaType, resource, hints);
 
 			if (regions.size() == 1){
 				ResourceRegion region = regions.get(0);
@@ -224,26 +225,26 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 					headers.add("Content-Range", "bytes " + start + '-' + end + '/' + contentLength);
 					headers.setContentLength(end - start + 1);
 				}
-				return writeSingleRegion(region, response);
+				return writeSingleRegion(region, response, hints);
 			}
 			else {
 				String boundary = MimeTypeUtils.generateMultipartBoundaryString();
 				MediaType multipartType = MediaType.parseMediaType("multipart/byteranges;boundary=" + boundary);
 				headers.setContentType(multipartType);
-				Map<String, Object> theHints = new HashMap<>(hints);
-				theHints.put(ResourceRegionEncoder.BOUNDARY_STRING_HINT, boundary);
-				return encodeAndWriteRegions(Flux.fromIterable(regions), resourceMediaType, response, theHints);
+				Map<String, Object> allHints = Hints.merge(hints, ResourceRegionEncoder.BOUNDARY_STRING_HINT, boundary);
+				return encodeAndWriteRegions(Flux.fromIterable(regions), resourceMediaType, response, allHints);
 			}
 		});
 	}
 
-	private Mono<Void> writeSingleRegion(ResourceRegion region, ReactiveHttpOutputMessage message) {
+	private Mono<Void> writeSingleRegion(ResourceRegion region, ReactiveHttpOutputMessage message,
+			Map<String, Object> hints) {
 
-		return zeroCopy(region.getResource(), region, message)
+		return zeroCopy(region.getResource(), region, message, hints)
 				.orElseGet(() -> {
 					Publisher<? extends ResourceRegion> input = Mono.just(region);
 					MediaType mediaType = message.getHeaders().getContentType();
-					return encodeAndWriteRegions(input, mediaType, message, Collections.emptyMap());
+					return encodeAndWriteRegions(input, mediaType, message, hints);
 				});
 	}
 

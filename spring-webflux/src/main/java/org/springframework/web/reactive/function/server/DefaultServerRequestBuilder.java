@@ -20,7 +20,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -320,7 +320,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 							.filter(reader -> reader.canRead(FORM_DATA_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
 							.findFirst()
 							.orElseThrow(() -> new IllegalStateException("No form data HttpMessageReader.")))
-							.readMono(FORM_DATA_TYPE, request, Collections.emptyMap())
+							.readMono(FORM_DATA_TYPE, request, Hints.none())
 							.switchIfEmpty(EMPTY_FORM_DATA)
 							.cache();
 				}
@@ -342,7 +342,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 							.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
 							.findFirst()
 							.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
-							.readMono(MULTIPART_DATA_TYPE, request, Collections.emptyMap())
+							.readMono(MULTIPART_DATA_TYPE, request, Hints.none())
 							.switchIfEmpty(EMPTY_MULTIPART_DATA)
 							.cache();
 				}

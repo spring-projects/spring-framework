@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.NoOpLog;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -38,6 +37,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.CodecException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -87,8 +87,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	/** Suppress logging from individual part writers (full map logged at this level). */
-	private static final Map<String, Object> DEFAULT_HINTS =
-			Collections.singletonMap(Log.class.getName(), new NoOpLog());
+	private static final Map<String, Object> DEFAULT_HINTS = Hints.from(Hints.LOGGER_HINT, new NoOpLog());
 
 
 	private final List<HttpMessageWriter<?>> partWriters;
@@ -191,7 +190,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 
 		return Mono.from(inputStream).flatMap(map -> {
 			if (this.formWriter == null || isMultipart(map, mediaType)) {
-				return writeMultipart(map, outputMessage);
+				return writeMultipart(map, outputMessage, hints);
 			}
 			else {
 				@SuppressWarnings("unchecked")
@@ -216,7 +215,9 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		return false;
 	}
 
-	private Mono<Void> writeMultipart(MultiValueMap<String, ?> map, ReactiveHttpOutputMessage outputMessage) {
+	private Mono<Void> writeMultipart(
+			MultiValueMap<String, ?> map, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+
 		byte[] boundary = generateMultipartBoundary();
 
 		Map<String, String> params = new HashMap<>(2);
@@ -226,7 +227,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		outputMessage.getHeaders().setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params));
 
 		if (shouldLogRequestDetails()) {
-			logger.debug("Encoding " + map);
+			logger.debug(Hints.getLogPrefix(hints) + "Encoding " + map);
 		}
 
 		Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())

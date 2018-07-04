@@ -55,9 +55,11 @@ public class DataBufferEncoder extends AbstractEncoder<DataBuffer> {
 
 		Flux<DataBuffer> flux = Flux.from(inputStream);
 
-		Log logger = getLogger(hints);
-		if (logger.isDebugEnabled()) {
-			flux = flux.doOnNext(buffer -> logger.debug("Writing " + buffer.readableByteCount() + " bytes"));
+		Log theLogger = Hints.getLoggerOrDefault(hints, logger);
+		if (theLogger.isDebugEnabled()) {
+			flux = flux.doOnNext(buffer ->
+					theLogger.debug(Hints.getLogPrefix(hints) +
+							"Writing " + buffer.readableByteCount() + " bytes"));
 		}
 
 		return flux;

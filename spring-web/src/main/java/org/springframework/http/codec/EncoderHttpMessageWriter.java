@@ -16,8 +16,6 @@
 
 package org.springframework.http.codec;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +25,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -159,9 +158,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 
-		Map<String, Object> allHints = new HashMap<>();
-		allHints.putAll(getWriteHints(actualType, elementType, mediaType, request, response));
-		allHints.putAll(hints);
+		Map<String, Object> allHints = Hints.merge(hints,
+				getWriteHints(actualType, elementType, mediaType, request, response));
 
 		return write(inputStream, elementType, mediaType, response, allHints);
 	}
@@ -175,10 +173,10 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (this.encoder instanceof HttpMessageEncoder) {
-			HttpMessageEncoder<?> httpEncoder = (HttpMessageEncoder<?>) this.encoder;
-			return httpEncoder.getEncodeHints(streamType, elementType, mediaType, request, response);
+			HttpMessageEncoder<?> encoder = (HttpMessageEncoder<?>) this.encoder;
+			return encoder.getEncodeHints(streamType, elementType, mediaType, request, response);
 		}
-		return Collections.emptyMap();
+		return Hints.none();
 	}
 
 }

@@ -23,11 +23,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -36,7 +33,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
@@ -372,7 +369,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						Assert.state(writer != null, "No ResourceHttpMessageWriter");
 						return writer.write(Mono.just(resource),
 								null, ResolvableType.forClass(Resource.class), mediaType,
-								exchange.getRequest(), exchange.getResponse(), Collections.emptyMap());
+								exchange.getRequest(), exchange.getResponse(),
+								Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
 					}
 					catch (IOException ex) {
 						return Mono.error(ex);

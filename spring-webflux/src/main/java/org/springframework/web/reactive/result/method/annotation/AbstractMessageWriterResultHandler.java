@@ -16,9 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
@@ -28,7 +26,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.Hints;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -149,8 +147,8 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			}
 			for (HttpMessageWriter<?> writer : getMessageWriters()) {
 				if (writer.canWrite(elementType, bestMediaType)) {
-					return writer.write((Publisher) publisher, actualType, elementType,
-							bestMediaType, request, response, Collections.emptyMap());
+					return writer.write((Publisher) publisher, actualType, elementType, bestMediaType,
+							request, response, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix));
 				}
 			}
 		}

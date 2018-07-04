@@ -54,7 +54,7 @@ public class ByteArrayDecoder extends AbstractDataBufferDecoder<byte[]> {
 		dataBuffer.read(result);
 		DataBufferUtils.release(dataBuffer);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Read " + result.length + " bytes");
+			logger.debug(Hints.getLogPrefix(hints) + "Read " + result.length + " bytes");
 		}
 		return result;
 	}

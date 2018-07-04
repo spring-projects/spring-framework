@@ -42,6 +42,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.EncodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
@@ -141,9 +142,9 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
 			ResolvableType elementType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
 
-		Log logger = getLogger(hints);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Encoding [" + value + "]");
+		Log theLogger = Hints.getLoggerOrDefault(hints, logger);
+		if (theLogger.isDebugEnabled()) {
+			theLogger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
 		}
 
 		JavaType javaType = getJavaType(elementType.getType(), null);
@@ -218,7 +219,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	public Map<String, Object> getEncodeHints(@Nullable ResolvableType actualType, ResolvableType elementType,
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		return (actualType != null ? getHints(actualType) : Collections.emptyMap());
+		return (actualType != null ? getHints(actualType) : Hints.none());
 	}
 
 	// Jackson2CodecSupport ...

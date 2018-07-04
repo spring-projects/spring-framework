@@ -29,6 +29,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -108,7 +109,7 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 					DataBufferUtils.release(buffer);
 					MultiValueMap<String, String> formData = parseFormData(charset, body);
 					if (shouldLogRequestDetails()) {
-						logger.debug("Decoded " + formData);
+						logger.debug(Hints.getLogPrefix(hints) + "Decoded " + formData);
 					}
 					return formData;
 				});

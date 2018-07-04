@@ -29,6 +29,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -131,7 +132,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 
 		return Mono.from(inputStream).flatMap(form -> {
 			if (shouldLogRequestDetails()) {
-				logger.debug("Encoding " + form);
+				logger.debug(Hints.getLogPrefix(hints) + "Encoding " + form);
 			}
 			String value = serializeForm(form, charset);
 			ByteBuffer byteBuffer = charset.encode(value);

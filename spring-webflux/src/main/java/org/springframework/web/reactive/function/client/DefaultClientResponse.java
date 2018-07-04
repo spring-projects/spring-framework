@@ -26,6 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -95,7 +96,7 @@ class DefaultClientResponse implements ClientResponse {
 			}
 			@Override
 			public Map<String, Object> hints() {
-				return Collections.emptyMap();
+				return Hints.none();
 			}
 		});
 	}

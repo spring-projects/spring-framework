@@ -458,8 +458,7 @@ public abstract class BodyInserters {
 					findWriter(context, MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA);
 			MultiValueMap<String, HttpEntity<?>> body = this.builder.build();
 			return messageWriter.write(Mono.just(body), MULTIPART_DATA_TYPE,
-					MediaType.MULTIPART_FORM_DATA,
-					outputMessage, context.hints());
+					MediaType.MULTIPART_FORM_DATA, outputMessage, context.hints());
 		}
 	}
 

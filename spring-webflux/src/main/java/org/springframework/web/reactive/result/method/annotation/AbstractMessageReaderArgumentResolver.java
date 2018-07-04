@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.DecodingException;
-import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -161,7 +160,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
 			if (reader.canRead(elementType, mediaType)) {
-				Map<String, Object> readHints = Collections.emptyMap();
+				Map<String, Object> readHints = Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix());
 				if (adapter != null && adapter.isMultiValue()) {
 					if (logger.isDebugEnabled()) {
 						logger.debug(exchange.getLogPrefix() + "0..N [" + elementType + "]");

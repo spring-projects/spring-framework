@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -98,19 +99,6 @@ public abstract class Jackson2CodecSupport {
 		return (mimeType == null || this.mimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
 	}
 
-	/**
-	 * Helper method to obtain the logger to use from the Map of hints, or fall
-	 * back on the default logger. This may be used for example to override
-	 * logging, e.g. for a multipart request where the full map of part values
-	 * has already been logged.
-	 * @param hints the hints passed to the encode method
-	 * @return the logger to use
-	 * @since 5.1
-	 */
-	protected Log getLogger(@Nullable Map<String, Object> hints) {
-		return hints != null ? ((Log) hints.getOrDefault(Log.class.getName(), logger)) : logger;
-	}
-
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
 		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
 		return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
@@ -123,10 +111,10 @@ public abstract class Jackson2CodecSupport {
 			if (annotation != null) {
 				Class<?>[] classes = annotation.value();
 				Assert.isTrue(classes.length == 1, JSON_VIEW_HINT_ERROR + param);
-				return Collections.singletonMap(JSON_VIEW_HINT, classes[0]);
+				return Hints.from(JSON_VIEW_HINT, classes[0]);
 			}
 		}
-		return Collections.emptyMap();
+		return Hints.none();
 	}
 
 	@Nullable

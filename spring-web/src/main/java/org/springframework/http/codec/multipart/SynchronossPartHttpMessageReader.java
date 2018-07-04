@@ -45,6 +45,7 @@ import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -95,7 +96,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 		return Flux.create(new SynchronossPartGenerator(message, this.bufferFactory, this.streamStorageFactory))
 				.doOnNext(part -> {
 					if (shouldLogRequestDetails()) {
-						logger.debug("Decoded [" + part + "]");
+						logger.debug(Hints.getLogPrefix(hints) + "Decoded [" + part + "]");
 					}
 				});
 	}

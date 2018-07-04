@@ -28,6 +28,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -251,7 +252,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 				}
 				@Override
 				public Map<String, Object> hints() {
-					return Collections.emptyMap();
+					return Hints.none();
 				}
 			});
 		}
