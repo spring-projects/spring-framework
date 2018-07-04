@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public abstract class AbstractContainerEntityManagerFactoryIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
+public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
+		extends AbstractEntityManagerFactoryIntegrationTests {
 
 	@Test
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
@@ -78,7 +79,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 	}
 
 	@Test
-	@SuppressWarnings({ "unused", "unchecked" })
+	@SuppressWarnings("unchecked")
 	public void testEntityManagerProxyIsProxy() {
 		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
@@ -107,9 +108,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		try {
 			Person notThere = sharedEntityManager.getReference(Person.class, 666);
 
-			// We may get here (as with Hibernate).
-			// Either behaviour is valid: throw exception on first access
-			// or on getReference itself.
+			// We may get here (as with Hibernate). Either behaviour is valid:
+			// throw exception on first access or on getReference itself.
 			notThere.getFirstName();
 			fail("Should have thrown an EntityNotFoundException");
 		}
@@ -209,6 +209,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testQueryNoPersonsNotTransactional() {
+		endTransaction();
+
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
@@ -223,12 +225,12 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 	}
 
 	@Test
-	@SuppressWarnings({ "unused", "unchecked" })
+	@SuppressWarnings("unchecked")
 	public void testQueryNoPersonsShared() {
-		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
-		Query q = em.createQuery("select p from Person as p");
+		Query q = this.sharedEntityManager.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
+		assertEquals(0, people.size());
 		try {
 			assertNull(q.getSingleResult());
 			fail("Should have thrown NoResultException");
@@ -243,7 +245,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 	public void testQueryNoPersonsSharedNotTransactional() {
 		endTransaction();
 
-		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
+		EntityManager em = this.sharedEntityManager;
 		Query q = em.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
