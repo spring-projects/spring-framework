@@ -11,7 +11,7 @@ buildscript {
 // 3rd party plugin repositories can be configured in settings.gradle
 plugins {
 	id "io.spring.dependency-management" version "1.0.5.RELEASE" apply false
-	id "org.jetbrains.kotlin.jvm" version "1.2.50" apply false
+	id "org.jetbrains.kotlin.jvm" version "1.2.51" apply false
 	id "org.jetbrains.dokka" version "0.9.17"
 	id "org.asciidoctor.convert" version "1.5.7"
 }
@@ -37,7 +37,7 @@ ext {
 	junitPlatformVersion = "1.2.0"
 	junitJupiterVersion  = "5.2.0"
 	junitVintageVersion  = "5.2.0"
-	kotlinVersion        = "1.2.50"
+	kotlinVersion        = "1.2.51"
 	log4jVersion         = "2.11.0"
 	nettyVersion         = "4.1.25.Final"
 	reactorVersion       = "Californium-BUILD-SNAPSHOT"
