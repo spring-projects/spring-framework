@@ -46,6 +46,7 @@ import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.InfrastructureProxy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -225,6 +226,19 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			}
 		}
 
+		return this;
+	}
+
+	/**
+	 * Set a Hibernate {@link org.hibernate.resource.beans.container.spi.BeanContainer}
+	 * for the given Spring {@link ConfigurableListableBeanFactory}.
+	 * <p>Note: Bean container integration requires Hibernate 5.3 or higher.
+	 * It enables autowiring of Hibernate attribute converters and entity listeners.
+	 * @since 5.1
+	 * @see AvailableSettings#BEAN_CONTAINER
+	 */
+	public LocalSessionFactoryBuilder setBeanContainer(ConfigurableListableBeanFactory beanFactory) {
+		getProperties().put(AvailableSettings.BEAN_CONTAINER, new SpringBeanContainer(beanFactory));
 		return this;
 	}
 

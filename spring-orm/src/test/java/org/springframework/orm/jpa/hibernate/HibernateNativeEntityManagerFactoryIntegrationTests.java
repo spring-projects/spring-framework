@@ -23,6 +23,7 @@ import org.hibernate.query.Query;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.domain.Person;
@@ -40,6 +41,9 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 	@Autowired
 	private SessionFactory sessionFactory;
 
+	@Autowired
+	private ApplicationContext applicationContext;
+
 
 	@Override
 	protected String[] getConfigLocations() {
@@ -55,16 +59,27 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 
 	@Test
 	@SuppressWarnings("unchecked")
+	public void testEntityListener() {
+		String firstName = "Tony";
+		insertPerson(firstName);
+
+		List<Person> people = sharedEntityManager.createQuery("select p from Person as p").getResultList();
+		assertEquals(1, people.size());
+		assertEquals(firstName, people.get(0).getFirstName());
+		assertSame(applicationContext, people.get(0).postLoaded);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
 	public void testCurrentSession() {
-		// Add with JDBC
 		String firstName = "Tony";
 		insertPerson(firstName);
 
 		Query q = sessionFactory.getCurrentSession().createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-
 		assertEquals(1, people.size());
 		assertEquals(firstName, people.get(0).getFirstName());
+		assertSame(applicationContext, people.get(0).postLoaded);
 	}
 
 }

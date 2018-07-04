@@ -33,9 +33,12 @@ import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.service.ServiceRegistry;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -46,6 +49,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link FactoryBean} that creates a Hibernate {@link SessionFactory}. This is the usual
@@ -61,7 +65,7 @@ import org.springframework.lang.Nullable;
  * @see LocalSessionFactoryBuilder
  */
 public class LocalSessionFactoryBean extends HibernateExceptionTranslator
-		implements FactoryBean<SessionFactory>, ResourceLoaderAware, InitializingBean, DisposableBean {
+		implements FactoryBean<SessionFactory>, ResourceLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
 
 	@Nullable
 	private DataSource dataSource;
@@ -130,6 +134,9 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	@Nullable
 	private ResourcePatternResolver resourcePatternResolver;
+
+	@Nullable
+	private ConfigurableListableBeanFactory beanFactory;
 
 	@Nullable
 	private Configuration configuration;
@@ -433,6 +440,23 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		return this.resourcePatternResolver;
 	}
 
+	/**
+	 * Accept the containing {@link BeanFactory}, registering corresponding Hibernate
+	 * {@link org.hibernate.resource.beans.container.spi.BeanContainer} integration for
+	 * it if possible. This requires a Spring {@link ConfigurableListableBeanFactory}
+	 * and Hibernate 5.3 or higher on the classpath.
+	 * @since 5.1
+	 * @see LocalSessionFactoryBuilder#setBeanContainer
+	 */
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableListableBeanFactory &&
+				ClassUtils.isPresent("org.hibernate.resource.beans.container.spi.BeanContainer",
+						getClass().getClassLoader())) {
+			this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+		}
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws IOException {
@@ -506,6 +530,10 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 		if (this.jtaTransactionManager != null) {
 			sfb.setJtaTransactionManager(this.jtaTransactionManager);
+		}
+
+		if (this.beanFactory != null) {
+			sfb.setBeanContainer(this.beanFactory);
 		}
 
 		if (this.multiTenantConnectionProvider != null) {
