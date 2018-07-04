@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
 public class ConnectionHolder extends ResourceHolderSupport {
 
 	/**
-	 * Prefix of savpoint names.
+	 * Prefix for savepoint names.
 	 */
 	public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
 
