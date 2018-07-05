@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
 
 /**
- * Default implementation of the {@link PropertySources} interface.
+ * The default implementation of the {@link PropertySources} interface.
  * Allows manipulation of contained property sources and provides a constructor
  * for copying an existing {@code PropertySources} instance.
  *
@@ -74,6 +74,11 @@ public class MutablePropertySources implements PropertySources {
 
 
 	@Override
+	public Iterator<PropertySource<?>> iterator() {
+		return this.propertySourceList.iterator();
+	}
+
+	@Override
 	public boolean contains(String name) {
 		return this.propertySourceList.contains(PropertySource.named(name));
 	}
@@ -85,10 +90,6 @@ public class MutablePropertySources implements PropertySources {
 		return (index != -1 ? this.propertySourceList.get(index) : null);
 	}
 
-	@Override
-	public Iterator<PropertySource<?>> iterator() {
-		return this.propertySourceList.iterator();
-	}
 
 	/**
 	 * Add the given property source object with highest precedence.

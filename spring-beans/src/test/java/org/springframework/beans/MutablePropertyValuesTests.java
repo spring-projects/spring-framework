@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 
 	@Test
-	public void testValid() throws Exception {
+	public void testValid() {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
 		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
@@ -44,7 +44,7 @@ public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 	}
 
 	@Test
-	public void testAddOrOverride() throws Exception {
+	public void testAddOrOverride() {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
 		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
@@ -59,7 +59,7 @@ public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 	}
 
 	@Test
-	public void testChangesOnEquals() throws Exception {
+	public void testChangesOnEquals() {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
 		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
@@ -70,7 +70,7 @@ public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 	}
 
 	@Test
-	public void testChangeOfOneField() throws Exception {
+	public void testChangeOfOneField() {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
 		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
