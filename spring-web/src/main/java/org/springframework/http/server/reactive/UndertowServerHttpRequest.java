@@ -44,6 +44,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -59,6 +60,8 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final RequestBodyPublisher body;
 
+	private final String connectionId;
+
 
 	public UndertowServerHttpRequest(HttpServerExchange exchange, DataBufferFactory bufferFactory)
 			throws URISyntaxException {
@@ -67,6 +70,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		this.exchange = exchange;
 		this.body = new RequestBodyPublisher(exchange, bufferFactory);
 		this.body.registerListeners(exchange);
+		this.connectionId = ObjectUtils.getIdentityHexString(this.exchange.getConnection());
 	}
 
 	private static URI initUri(HttpServerExchange exchange) throws URISyntaxException {
@@ -125,6 +129,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public <T> T getNativeRequest() {
 		return (T) this.exchange;
+	}
+
+	@Override
+	public String getConnectionId() {
+		return this.connectionId;
 	}
 
 

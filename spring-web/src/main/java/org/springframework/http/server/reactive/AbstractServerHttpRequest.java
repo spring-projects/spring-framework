@@ -179,4 +179,13 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 */
 	public abstract <T> T getNativeRequest();
 
+	/**
+	 * Return an id for the underlying connection, if available.
+	 * @since 5.1
+	 */
+	@Nullable
+	public String getConnectionId() {
+		return null;
+	}
+
 }
