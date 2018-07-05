@@ -30,7 +30,7 @@ public abstract class AbstractPropertyValuesTests {
 	/**
 	 * Must contain: forname=Tony surname=Blair age=50
 	 */
-	protected void doTestTony(PropertyValues pvs) throws Exception {
+	protected void doTestTony(PropertyValues pvs) {
 		assertTrue("Contains 3", pvs.getPropertyValues().length == 3);
 		assertTrue("Contains forname", pvs.contains("forname"));
 		assertTrue("Contains surname", pvs.contains("surname"));

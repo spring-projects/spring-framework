@@ -18,16 +18,21 @@ package org.springframework.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the {@link PropertyValues} interface.
+ * The default implementation of the {@link PropertyValues} interface.
  * Allows simple manipulation of properties, and provides constructors
  * to support deep copy and construction from a Map.
  *
@@ -243,6 +248,21 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		this.propertyValueList.remove(getPropertyValue(propertyName));
 	}
 
+
+	@Override
+	public Iterator<PropertyValue> iterator() {
+		return Collections.unmodifiableList(this.propertyValueList).iterator();
+	}
+
+	@Override
+	public Spliterator<PropertyValue> spliterator() {
+		return Spliterators.spliterator(this.propertyValueList, 0);
+	}
+
+	@Override
+	public Stream<PropertyValue> stream() {
+		return this.propertyValueList.stream();
+	}
 
 	@Override
 	public PropertyValue[] getPropertyValues() {

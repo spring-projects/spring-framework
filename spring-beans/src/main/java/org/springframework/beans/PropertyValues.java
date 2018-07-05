@@ -16,6 +16,13 @@
 
 package org.springframework.beans;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -27,7 +34,33 @@ import org.springframework.lang.Nullable;
  * @since 13 May 2001
  * @see PropertyValue
  */
-public interface PropertyValues {
+public interface PropertyValues extends Iterable<PropertyValue> {
+
+	/**
+	 * Return an {@link Iterator} over the property values.
+	 * @since 5.1
+	 */
+	@Override
+	default Iterator<PropertyValue> iterator() {
+		return Arrays.asList(getPropertyValues()).iterator();
+	}
+
+	/**
+	 * Return a {@link Spliterator} over the property values.
+	 * @since 5.1
+	 */
+	@Override
+	default Spliterator<PropertyValue> spliterator() {
+		return Spliterators.spliterator(getPropertyValues(), 0);
+	}
+
+	/**
+	 * Return a sequential {@link Stream} containing the property values.
+	 * @since 5.1
+	 */
+	default Stream<PropertyValue> stream() {
+		return StreamSupport.stream(spliterator(), false);
+	}
 
 	/**
 	 * Return an array of the PropertyValue objects held in this object.

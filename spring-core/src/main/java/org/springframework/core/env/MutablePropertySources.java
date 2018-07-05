@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package org.springframework.core.env;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
 
 /**
- * Default implementation of the {@link PropertySources} interface.
+ * The default implementation of the {@link PropertySources} interface.
  * Allows manipulation of contained property sources and provides a constructor
  * for copying an existing {@code PropertySources} instance.
  *
@@ -74,6 +77,21 @@ public class MutablePropertySources implements PropertySources {
 
 
 	@Override
+	public Iterator<PropertySource<?>> iterator() {
+		return this.propertySourceList.iterator();
+	}
+
+	@Override
+	public Spliterator<PropertySource<?>> spliterator() {
+		return Spliterators.spliterator(this.propertySourceList, 0);
+	}
+
+	@Override
+	public Stream<PropertySource<?>> stream() {
+		return this.propertySourceList.stream();
+	}
+
+	@Override
 	public boolean contains(String name) {
 		return this.propertySourceList.contains(PropertySource.named(name));
 	}
@@ -85,10 +103,6 @@ public class MutablePropertySources implements PropertySources {
 		return (index != -1 ? this.propertySourceList.get(index) : null);
 	}
 
-	@Override
-	public Iterator<PropertySource<?>> iterator() {
-		return this.propertySourceList.iterator();
-	}
 
 	/**
 	 * Add the given property source object with highest precedence.
