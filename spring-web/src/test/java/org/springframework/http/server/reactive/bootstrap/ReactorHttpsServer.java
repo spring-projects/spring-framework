@@ -16,17 +16,14 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
-import java.security.cert.CertificateException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import reactor.core.Exceptions;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 import reactor.netty.DisposableServer;
 import reactor.netty.tcp.SslProvider.DefaultConfigurationType;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
-
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 /**
  * @author Stephane Maldini
@@ -41,22 +38,16 @@ public class ReactorHttpsServer extends AbstractHttpServer {
 
 
 	@Override
-	protected void initServer() {
+	protected void initServer() throws Exception {
+
+		SelfSignedCertificate cert = new SelfSignedCertificate();
+		SslContextBuilder builder = SslContextBuilder.forServer(cert.certificate(), cert.privateKey());
+
 		this.reactorHandler = createHttpHandlerAdapter();
-		SelfSignedCertificate cert = null;
-		try {
-			cert = new SelfSignedCertificate();
-		}
-		catch (CertificateException e) {
-			throw Exceptions.propagate(e);
-		}
-		SslContextBuilder sslContextBuilder =
-				SslContextBuilder.forServer(cert.certificate(), cert.privateKey());
 		this.reactorServer = reactor.netty.http.server.HttpServer.create()
 			.host(getHost())
 			.port(getPort())
-			.secure(sslContextSpec -> sslContextSpec.sslContext(sslContextBuilder)
-					.defaultConfiguration(DefaultConfigurationType.TCP));
+			.secure(spec -> spec.sslContext(builder).defaultConfiguration(DefaultConfigurationType.TCP));
 	}
 
 	private ReactorHttpHandlerAdapter createHttpHandlerAdapter() {
