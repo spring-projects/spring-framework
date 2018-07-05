@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 /**
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Christoph Dreis
  */
 public class MutablePropertySourcesTests {
 
@@ -151,6 +152,25 @@ public class MutablePropertySourcesTests {
 	public void getNonExistentPropertySourceReturnsNull() {
 		MutablePropertySources sources = new MutablePropertySources();
 		assertThat(sources.get("bogus"), nullValue());
+	}
+
+	@Test
+	public void streamContainsPropertySource() {
+		MutablePropertySources sources = new MutablePropertySources();
+		sources.addLast(new MockPropertySource("test"));
+		assertThat(sources.stream(), notNullValue());
+		assertThat(sources.stream().count(), is(1L));
+		assertThat(sources.stream().anyMatch(source ->
+				source.getName().equals("test")), is(true));
+		assertThat(sources.stream().anyMatch(source ->
+				source.getName().equals("bogus")), is(false));
+	}
+
+	@Test
+	public void streamIsNotNullForEmptySources() {
+		MutablePropertySources sources = new MutablePropertySources();
+		assertThat(sources.stream(), notNullValue());
+		assertThat(sources.stream().count(), is(0L));
 	}
 
 }

@@ -16,12 +16,16 @@
 
 package org.springframework.core.env;
 
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.springframework.lang.Nullable;
 
 /**
  * Holder containing one or more {@link PropertySource} objects.
  *
  * @author Chris Beams
+ * @author Christoph Dreis
  * @since 3.1
  */
 public interface PropertySources extends Iterable<PropertySource<?>> {
@@ -38,5 +42,13 @@ public interface PropertySources extends Iterable<PropertySource<?>> {
 	 */
 	@Nullable
 	PropertySource<?> get(String name);
+
+	/**
+	 * Returns a sequential {@code Stream} for the {@link PropertySource objects}
+	 * contained in this instance.
+	 */
+	default Stream<PropertySource<?>> stream() {
+		return StreamSupport.stream(spliterator(), false);
+	}
 
 }
