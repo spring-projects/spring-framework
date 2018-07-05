@@ -67,16 +67,30 @@ import org.springframework.util.ClassUtils;
 /**
  * A Spring-provided extension of the standard Hibernate {@link Configuration} class,
  * adding {@link SpringSessionContext} as a default and providing convenient ways
- * to specify a DataSource and an application class loader.
+ * to specify a JDBC {@link DataSource} and an application class loader.
  *
- * <p>This is designed for programmatic use, e.g. in {@code @Bean} factory methods.
- * Consider using {@link LocalSessionFactoryBean} for XML bean definition files.
+ * <p>This is designed for programmatic use, e.g. in {@code @Bean} factory methods;
+ * consider using {@link LocalSessionFactoryBean} for XML bean definition files.
+ * Typically combined with {@link HibernateTransactionManager} for declarative
+ * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
  * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2/5.3, as of Spring 5.1.
+ * Set up with Hibernate 5.2/5.3, this builder is also a convenient way to set up
+ * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
+ * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
+ *
+ * <p>This builder supports Hibernate 5.3 {@code BeanContainer} integration,
+ * {@link MetadataSources} from custom {@link BootstrapServiceRegistryBuilder}
+ * setup, as well as other advanced Hibernate configuration options beyond the
+ * standard JPA bootstrap contract.
  *
  * @author Juergen Hoeller
  * @since 4.2
+ * @see HibernateTransactionManager
  * @see LocalSessionFactoryBean
+ * @see #setBeanContainer
+ * @see #LocalSessionFactoryBuilder(DataSource, ResourceLoader, MetadataSources)
+ * @see BootstrapServiceRegistryBuilder
  */
 @SuppressWarnings("serial")
 public class LocalSessionFactoryBuilder extends Configuration {
@@ -235,6 +249,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * <p>Note: Bean container integration requires Hibernate 5.3 or higher.
 	 * It enables autowiring of Hibernate attribute converters and entity listeners.
 	 * @since 5.1
+	 * @see SpringBeanContainer
 	 * @see AvailableSettings#BEAN_CONTAINER
 	 */
 	public LocalSessionFactoryBuilder setBeanContainer(ConfigurableListableBeanFactory beanFactory) {
