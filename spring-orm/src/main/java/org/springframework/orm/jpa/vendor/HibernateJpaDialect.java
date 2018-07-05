@@ -67,6 +67,7 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.support.ResourceTransactionDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -165,6 +166,15 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		// Adapt flush mode and store previous isolation level, if any.
 		FlushMode previousFlushMode = prepareFlushMode(session, definition.isReadOnly());
+		if (definition instanceof ResourceTransactionDefinition &&
+				((ResourceTransactionDefinition) definition).isLocalResource()) {
+			// As of 5.1, we explicitly optimize for a transaction-local EntityManager,
+			// aligned with native HibernateTransactionManager behavior.
+			previousFlushMode = null;
+			if (definition.isReadOnly()) {
+				session.setDefaultReadOnly(true);
+			}
+		}
 		return new SessionTransactionData(session, previousFlushMode, preparedCon, previousIsolationLevel);
 	}
 

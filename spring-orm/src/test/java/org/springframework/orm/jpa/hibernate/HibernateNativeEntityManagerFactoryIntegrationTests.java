@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.hibernate;
 
 import java.util.List;
 
+import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.junit.Test;
@@ -80,6 +81,18 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 		assertEquals(1, people.size());
 		assertEquals(firstName, people.get(0).getFirstName());
 		assertSame(applicationContext, people.get(0).postLoaded);
+	}
+
+	@Test  // SPR-16956
+	public void testReadOnly() {
+		assertSame(FlushMode.AUTO, sessionFactory.getCurrentSession().getHibernateFlushMode());
+		assertFalse(sessionFactory.getCurrentSession().isDefaultReadOnly());
+		endTransaction();
+
+		this.transactionDefinition.setReadOnly(true);
+		startNewTransaction();
+		assertSame(FlushMode.MANUAL, sessionFactory.getCurrentSession().getHibernateFlushMode());
+		assertTrue(sessionFactory.getCurrentSession().isDefaultReadOnly());
 	}
 
 }

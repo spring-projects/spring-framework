@@ -48,6 +48,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.DelegatingTransactionDefinition;
+import org.springframework.transaction.support.ResourceTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -398,12 +399,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			// Delegate to JpaDialect for actual transaction begin.
 			final int timeoutToUse = determineTimeout(definition);
 			Object transactionData = getJpaDialect().beginTransaction(em,
-					new DelegatingTransactionDefinition(definition) {
-						@Override
-						public int getTimeout() {
-							return timeoutToUse;
-						}
-					});
+					new JpaTransactionDefinition(definition, timeoutToUse, txObject.isNewEntityManagerHolder()));
 			txObject.setTransactionData(transactionData);
 
 			// Register transaction timeout.
@@ -737,6 +733,35 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 						"JpaDialect does not support savepoints - check your JPA provider's capabilities");
 			}
 			return savepointManager;
+		}
+	}
+
+
+	/**
+	 * JPA-specific transaction definition to be passed to {@link JpaDialect#beginTransaction}.
+	 * @since 5.1
+	 */
+	private static class JpaTransactionDefinition extends DelegatingTransactionDefinition
+			implements ResourceTransactionDefinition {
+
+		private final int timeout;
+
+		private final boolean localResource;
+
+		public JpaTransactionDefinition(TransactionDefinition targetDefinition, int timeout, boolean localResource) {
+			super(targetDefinition);
+			this.timeout = timeout;
+			this.localResource = localResource;
+		}
+
+		@Override
+		public int getTimeout() {
+			return this.timeout;
+		}
+
+		@Override
+		public boolean isLocalResource() {
+			return this.localResource;
 		}
 	}
 

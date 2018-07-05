@@ -60,7 +60,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 
 	protected PlatformTransactionManager transactionManager;
 
-	protected TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
+	protected DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 	protected TransactionStatus transactionStatus;
 
