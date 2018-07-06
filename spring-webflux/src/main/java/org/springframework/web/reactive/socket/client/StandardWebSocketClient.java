@@ -27,6 +27,8 @@ import javax.websocket.HandshakeResponse;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Schedulers;
@@ -47,7 +49,10 @@ import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
  * @since 5.0
  * @see <a href="https://www.jcp.org/en/jsr/detail?id=356">https://www.jcp.org/en/jsr/detail?id=356</a>
  */
-public class StandardWebSocketClient extends WebSocketClientSupport implements WebSocketClient {
+public class StandardWebSocketClient implements WebSocketClient {
+
+	private static final Log logger = LogFactory.getLog(StandardWebSocketClient.class);
+
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
@@ -94,7 +99,10 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 		MonoProcessor<Void> completionMono = MonoProcessor.create();
 		return Mono.fromCallable(
 				() -> {
-					List<String> protocols = beforeHandshake(url, requestHeaders, handler);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Connecting to " + url);
+					}
+					List<String> protocols = handler.getSubProtocols();
 					DefaultConfigurator configurator = new DefaultConfigurator(requestHeaders);
 					Endpoint endpoint = createEndpoint(url, handler, completionMono, configurator);
 					ClientEndpointConfig config = createEndpointConfig(configurator, protocols);
@@ -108,8 +116,12 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 			MonoProcessor<Void> completion, DefaultConfigurator configurator) {
 
 		return new StandardWebSocketHandlerAdapter(handler, session -> {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connected to " + url);
+			}
 			HttpHeaders responseHeaders = configurator.getResponseHeaders();
-			HandshakeInfo info = afterHandshake(url, responseHeaders);
+			String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
+			HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 			return createWebSocketSession(session, info, completion);
 		});
 	}

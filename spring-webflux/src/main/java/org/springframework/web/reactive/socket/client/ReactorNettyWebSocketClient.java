@@ -16,8 +16,9 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
-import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
@@ -36,7 +37,10 @@ import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSess
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ReactorNettyWebSocketClient extends WebSocketClientSupport implements WebSocketClient {
+public class ReactorNettyWebSocketClient implements WebSocketClient {
+
+	private static final Log logger = LogFactory.getLog(ReactorNettyWebSocketClient.class);
+
 
 	private final HttpClient httpClient;
 
@@ -71,15 +75,21 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	}
 
 	@Override
-	public Mono<Void> execute(URI url, HttpHeaders httpHeaders, WebSocketHandler handler) {
-		List<String> protocols = beforeHandshake(url, httpHeaders, handler);
-
+	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Connecting to " + url);
+		}
 		return getHttpClient()
-				.headers(nettyHeaders -> setNettyHeaders(httpHeaders, nettyHeaders))
-				.websocket(StringUtils.collectionToCommaDelimitedString(protocols))
+				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
+				.websocket(StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols()))
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
-					HandshakeInfo info = afterHandshake(url, toHttpHeaders(inbound));
+					if (logger.isDebugEnabled()) {
+						logger.debug("Connected to " + url);
+					}
+					HttpHeaders responseHeaders = toHttpHeaders(inbound);
+					String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
+					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(outbound.alloc());
 					WebSocketSession session = new ReactorNettyWebSocketSession(inbound, outbound, info, factory);
 					return handler.handle(session);
