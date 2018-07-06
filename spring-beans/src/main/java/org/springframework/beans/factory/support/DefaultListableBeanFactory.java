@@ -1052,7 +1052,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return new DependencyObjectProvider(descriptor, requestingBeanName);
 		}
 		else if (javaxInjectProviderClass == descriptor.getDependencyType()) {
-			return new Jsr330ProviderFactory().createDependencyProvider(descriptor, requestingBeanName);
+			return new Jsr330Factory().createDependencyProvider(descriptor, requestingBeanName);
 		}
 		else {
 			Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
@@ -1247,7 +1247,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
-	private FactoryAwareOrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, Object> beans) {
+	private OrderComparator.OrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, Object> beans) {
 		IdentityHashMap<Object, String> instancesToBeanNames = new IdentityHashMap<>();
 		beans.forEach((beanName, instance) -> instancesToBeanNames.put(instance, beanName));
 		return new FactoryAwareOrderSourceProvider(instancesToBeanNames);
@@ -1615,6 +1615,29 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
+	 * A dependency descriptor marker for nested elements.
+	 */
+	private static class NestedDependencyDescriptor extends DependencyDescriptor {
+
+		public NestedDependencyDescriptor(DependencyDescriptor original) {
+			super(original);
+			increaseNestingLevel();
+		}
+	}
+
+
+	/**
+	 * A dependency descriptor marker for multiple elements.
+	 */
+	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
+
+		public MultiElementDescriptor(DependencyDescriptor original) {
+			super(original);
+		}
+	}
+
+
+	/**
 	 * Serializable ObjectFactory/ObjectProvider for lazy resolution of a dependency.
 	 */
 	private class DependencyObjectProvider implements ObjectProvider<Object>, Serializable {
@@ -1718,29 +1741,27 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
-	 * Serializable ObjectFactory for lazy resolution of a dependency.
-	 */
-	private class Jsr330DependencyProvider extends DependencyObjectProvider implements Provider<Object> {
-
-		public Jsr330DependencyProvider(DependencyDescriptor descriptor, @Nullable String beanName) {
-			super(descriptor, beanName);
-		}
-
-		@Override
-		@Nullable
-		public Object get() throws BeansException {
-			return getValue();
-		}
-	}
-
-
-	/**
 	 * Separate inner class for avoiding a hard dependency on the {@code javax.inject} API.
+	 * Actual {@code javax.inject.Provider} implementation is nested here in order to make it
+	 * invisible for Graal's introspection of DefaultListableBeanFactory's nested classes.
 	 */
-	private class Jsr330ProviderFactory {
+	private class Jsr330Factory implements Serializable {
 
 		public Object createDependencyProvider(DependencyDescriptor descriptor, @Nullable String beanName) {
-			return new Jsr330DependencyProvider(descriptor, beanName);
+			return new Jsr330Provider(descriptor, beanName);
+		}
+
+		private class Jsr330Provider extends DependencyObjectProvider implements Provider<Object> {
+
+			public Jsr330Provider(DependencyDescriptor descriptor, @Nullable String beanName) {
+				super(descriptor, beanName);
+			}
+
+			@Override
+			@Nullable
+			public Object get() throws BeansException {
+				return getValue();
+			}
 		}
 	}
 
@@ -1788,23 +1809,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			return null;
-		}
-	}
-
-
-	private static class NestedDependencyDescriptor extends DependencyDescriptor {
-
-		public NestedDependencyDescriptor(DependencyDescriptor original) {
-			super(original);
-			increaseNestingLevel();
-		}
-	}
-
-
-	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
-
-		public MultiElementDescriptor(DependencyDescriptor original) {
-			super(original);
 		}
 	}
 
