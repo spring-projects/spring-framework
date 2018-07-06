@@ -41,6 +41,7 @@ import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpLog;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -57,7 +58,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class ServletHttpHandlerAdapter implements Servlet {
 
-	private static final Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
+	private static final Log logger = HttpLog.create(LogFactory.getLog(ServletHttpHandlerAdapter.class));
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 

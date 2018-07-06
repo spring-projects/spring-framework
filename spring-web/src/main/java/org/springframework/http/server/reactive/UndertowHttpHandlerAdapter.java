@@ -27,6 +27,7 @@ import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpLog;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
@@ -40,7 +41,7 @@ import org.springframework.util.Assert;
  */
 public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandler {
 
-	private static final Log logger = LogFactory.getLog(UndertowHttpHandlerAdapter.class);
+	private static final Log logger = HttpLog.create(LogFactory.getLog(UndertowHttpHandlerAdapter.class));
 
 
 	private final HttpHandler httpHandler;

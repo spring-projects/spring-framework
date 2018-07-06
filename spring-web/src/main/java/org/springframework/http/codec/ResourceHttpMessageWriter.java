@@ -39,6 +39,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpLog;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -72,7 +73,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 	private static final ResolvableType REGION_TYPE = ResolvableType.forClass(ResourceRegion.class);
 
-	private static final Log logger = LogFactory.getLog(ResourceHttpMessageWriter.class);
+	private static final Log logger = HttpLog.create(LogFactory.getLog(ResourceHttpMessageWriter.class));
 
 
 	private final ResourceEncoder encoder;

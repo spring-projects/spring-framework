@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpLog;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
@@ -57,7 +58,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 */
 	private enum State {NEW, COMMITTING, COMMITTED}
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = HttpLog.create(LogFactory.getLog(getClass()));
 
 
 	private final DataBufferFactory dataBufferFactory;

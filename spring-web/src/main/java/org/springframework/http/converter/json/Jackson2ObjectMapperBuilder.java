@@ -60,6 +60,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.KotlinDetector;
+import org.springframework.http.HttpLog;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -103,7 +104,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	private static volatile boolean kotlinWarningLogged = false;
 
-	private final Log logger = LogFactory.getLog(getClass());
+	private final Log logger = HttpLog.create(LogFactory.getLog(getClass()));
 
 	private final Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 

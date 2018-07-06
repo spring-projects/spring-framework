@@ -27,6 +27,7 @@ import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpLog;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
@@ -39,7 +40,7 @@ import org.springframework.util.Assert;
  */
 public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, HttpServerResponse, Mono<Void>> {
 
-	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
+	private static final Log logger = HttpLog.create(LogFactory.getLog(ReactorHttpHandlerAdapter.class));
 
 
 	private final HttpHandler httpHandler;

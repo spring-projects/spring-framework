@@ -19,12 +19,15 @@ package org.springframework.http.codec;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Hints;
+import org.springframework.http.HttpLog;
 import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -60,6 +63,16 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 		Assert.notNull(decoder, "Decoder is required");
 		this.decoder = decoder;
 		this.mediaTypes = MediaType.asMediaTypes(decoder.getDecodableMimeTypes());
+		initLogger(decoder);
+	}
+
+	private void initLogger(Decoder<T> decoder) {
+		if (decoder instanceof AbstractDecoder &&
+				decoder.getClass().getPackage().getName().startsWith("org.springframework.core.codec")) {
+
+			Log logger = HttpLog.create(((AbstractDecoder) decoder).getLogger());
+			((AbstractDecoder) decoder).setLogger(logger);
+		}
 	}
 
 

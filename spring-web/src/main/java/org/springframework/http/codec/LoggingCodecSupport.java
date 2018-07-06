@@ -18,6 +18,8 @@ package org.springframework.http.codec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpLog;
+
 /**
  * Base class for {@link org.springframework.core.codec.Encoder},
  * {@link org.springframework.core.codec.Decoder}, {@link HttpMessageReader}, or
@@ -29,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class LoggingCodecSupport {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = HttpLog.create(LogFactory.getLog(getClass()));
 
 	/** Do not log potentially sensitive information (params at DEBUG and headers at TRACE). */
 	private boolean disableLoggingRequestDetails = false;

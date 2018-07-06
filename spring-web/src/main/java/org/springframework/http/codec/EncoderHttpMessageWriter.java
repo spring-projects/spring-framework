@@ -19,15 +19,18 @@ package org.springframework.http.codec;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpLog;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -66,6 +69,16 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		this.encoder = encoder;
 		this.mediaTypes = MediaType.asMediaTypes(encoder.getEncodableMimeTypes());
 		this.defaultMediaType = initDefaultMediaType(this.mediaTypes);
+		initLogger(encoder);
+	}
+
+	private void initLogger(Encoder<T> encoder) {
+		if (encoder instanceof AbstractEncoder &&
+				encoder.getClass().getPackage().getName().startsWith("org.springframework.core.codec")) {
+
+			Log logger = HttpLog.create(((AbstractEncoder) encoder).getLogger());
+			((AbstractEncoder) encoder).setLogger(logger);
+		}
 	}
 
 	@Nullable
