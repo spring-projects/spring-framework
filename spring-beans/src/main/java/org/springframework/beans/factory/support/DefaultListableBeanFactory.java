@@ -79,19 +79,17 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Spring's default implementation of the
- * {@link org.springframework.beans.factory.ListableBeanFactory} and
- * {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
- * based on bean definition objects.
+ * Spring's default implementation of the {@link ConfigurableListableBeanFactory}
+ * and {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
+ * based on bean definition metadata, extensible through post-processors.
  *
  * <p>Typical usage is registering all bean definitions first (possibly read
- * from a bean definition file), before accessing beans. Bean definition lookup
+ * from a bean definition file), before accessing beans. Bean lookup by name
  * is therefore an inexpensive operation in a local bean definition table,
- * operating on pre-built bean definition metadata objects.
+ * operating on pre-resolved bean definition metadata objects.
  *
- * <p>Can be used as a standalone bean factory, or as a superclass for custom
- * bean factories. Note that readers for specific bean definition formats are
- * typically implemented separately rather than as bean factory subclasses:
+ * <p>Note that readers for specific bean definition formats are typically
+ * implemented separately rather than as bean factory subclasses:
  * see for example {@link PropertiesBeanDefinitionReader} and
  * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
  *
@@ -108,9 +106,10 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @since 16 April 2001
- * @see StaticListableBeanFactory
- * @see PropertiesBeanDefinitionReader
- * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+ * @see #registerBeanDefinition
+ * @see #addBeanPostProcessor
+ * @see #getBean
+ * @see #resolveDependency
  */
 @SuppressWarnings("serial")
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
@@ -1249,7 +1248,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
-	private FactoryAwareOrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, Object> beans) {
+	private OrderComparator.OrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, Object> beans) {
 		IdentityHashMap<Object, String> instancesToBeanNames = new IdentityHashMap<>();
 		beans.forEach((beanName, instance) -> instancesToBeanNames.put(instance, beanName));
 		return new FactoryAwareOrderSourceProvider(instancesToBeanNames);
@@ -1617,6 +1616,29 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
+	 * A dependency descriptor marker for nested elements.
+	 */
+	private static class NestedDependencyDescriptor extends DependencyDescriptor {
+
+		public NestedDependencyDescriptor(DependencyDescriptor original) {
+			super(original);
+			increaseNestingLevel();
+		}
+	}
+
+
+	/**
+	 * A dependency descriptor marker for multiple elements.
+	 */
+	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
+
+		public MultiElementDescriptor(DependencyDescriptor original) {
+			super(original);
+		}
+	}
+
+
+	/**
 	 * Serializable ObjectFactory/ObjectProvider for lazy resolution of a dependency.
 	 */
 	private class DependencyObjectProvider implements ObjectProvider<Object>, Serializable {
@@ -1720,7 +1742,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
-	 * Serializable ObjectFactory for lazy resolution of a dependency.
+	 * A {@code javax.inject.Provider} implementation for lazy resolution of a dependency.
 	 */
 	private class Jsr330DependencyProvider extends DependencyObjectProvider implements Provider<Object> {
 
@@ -1790,23 +1812,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			return null;
-		}
-	}
-
-
-	private static class NestedDependencyDescriptor extends DependencyDescriptor {
-
-		public NestedDependencyDescriptor(DependencyDescriptor original) {
-			super(original);
-			increaseNestingLevel();
-		}
-	}
-
-
-	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
-
-		public MultiElementDescriptor(DependencyDescriptor original) {
-			super(original);
 		}
 	}
 
