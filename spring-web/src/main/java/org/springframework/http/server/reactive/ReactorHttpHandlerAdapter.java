@@ -52,31 +52,29 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 
 
 	@Override
-	public Mono<Void> apply(HttpServerRequest request, HttpServerResponse response) {
-		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.alloc());
-		ServerHttpRequest adaptedRequest;
-		ServerHttpResponse adaptedResponse;
+	public Mono<Void> apply(HttpServerRequest reactorRequest, HttpServerResponse reactorResponse) {
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
 		try {
-			adaptedRequest = new ReactorServerHttpRequest(request, bufferFactory);
-			adaptedResponse = new ReactorServerHttpResponse(response, bufferFactory);
+			ServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
+			ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
+
+			if (request.getMethod() == HttpMethod.HEAD) {
+				response = new HttpHeadResponseDecorator(response);
+			}
+
+			String logPrefix = ((ReactorServerHttpRequest) request).getLogPrefix();
+
+			return this.httpHandler.handle(request, response)
+					.doOnError(ex -> logger.trace(logPrefix + "Failed to complete: " + ex.getMessage()))
+					.doOnSuccess(aVoid -> logger.trace(logPrefix + "Handling completed"));
 		}
 		catch (URISyntaxException ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Failed to get request URI: " + ex.getMessage());
 			}
-			response.status(HttpResponseStatus.BAD_REQUEST);
+			reactorResponse.status(HttpResponseStatus.BAD_REQUEST);
 			return Mono.empty();
 		}
-
-		String logPrefix = ((ReactorServerHttpRequest) adaptedRequest).getLogPrefix();
-
-		if (adaptedRequest.getMethod() == HttpMethod.HEAD) {
-			adaptedResponse = new HttpHeadResponseDecorator(adaptedResponse);
-		}
-
-		return this.httpHandler.handle(adaptedRequest, adaptedResponse)
-				.doOnError(ex -> logger.trace(logPrefix + "Failed to complete: " + ex.getMessage()))
-				.doOnSuccess(aVoid -> logger.trace(logPrefix + "Handling completed"));
 	}
 
 }
