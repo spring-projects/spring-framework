@@ -80,19 +80,17 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Spring's default implementation of the
- * {@link org.springframework.beans.factory.ListableBeanFactory} and
- * {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
- * based on bean definition objects.
+ * Spring's default implementation of the {@link ConfigurableListableBeanFactory}
+ * and {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
+ * based on bean definition metadata, extensible through post-processors.
  *
  * <p>Typical usage is registering all bean definitions first (possibly read
- * from a bean definition file), before accessing beans. Bean definition lookup
+ * from a bean definition file), before accessing beans. Bean lookup by name
  * is therefore an inexpensive operation in a local bean definition table,
- * operating on pre-built bean definition metadata objects.
+ * operating on pre-resolved bean definition metadata objects.
  *
- * <p>Can be used as a standalone bean factory, or as a superclass for custom
- * bean factories. Note that readers for specific bean definition formats are
- * typically implemented separately rather than as bean factory subclasses:
+ * <p>Note that readers for specific bean definition formats are typically
+ * implemented separately rather than as bean factory subclasses:
  * see for example {@link PropertiesBeanDefinitionReader} and
  * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
  *
@@ -109,9 +107,10 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @since 16 April 2001
- * @see StaticListableBeanFactory
- * @see PropertiesBeanDefinitionReader
- * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+ * @see #registerBeanDefinition
+ * @see #addBeanPostProcessor
+ * @see #getBean
+ * @see #resolveDependency
  */
 @SuppressWarnings("serial")
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
@@ -371,8 +370,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public String[] getBeanDefinitionNames() {
-		if (this.frozenBeanDefinitionNames != null) {
-			return this.frozenBeanDefinitionNames.clone();
+		String[] frozenNames = this.frozenBeanDefinitionNames;
+		if (frozenNames != null) {
+			return frozenNames.clone();
 		}
 		else {
 			return StringUtils.toStringArray(this.beanDefinitionNames);
@@ -806,34 +806,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		BeanDefinition oldBeanDefinition;
-
-		oldBeanDefinition = this.beanDefinitionMap.get(beanName);
-		if (oldBeanDefinition != null) {
+		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+		if (existingDefinition != null) {
 			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 						"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
-						"': There is already [" + oldBeanDefinition + "] bound.");
+						"': There is already [" + existingDefinition + "] bound.");
 			}
-			else if (oldBeanDefinition.getRole() < beanDefinition.getRole()) {
+			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
 				if (logger.isWarnEnabled()) {
 					logger.warn("Overriding user-defined bean definition for bean '" + beanName +
 							"' with a framework-generated bean definition: replacing [" +
-							oldBeanDefinition + "] with [" + beanDefinition + "]");
+							existingDefinition + "] with [" + beanDefinition + "]");
 				}
 			}
-			else if (!beanDefinition.equals(oldBeanDefinition)) {
+			else if (!beanDefinition.equals(existingDefinition)) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Overriding bean definition for bean '" + beanName +
-							"' with a different definition: replacing [" + oldBeanDefinition +
+							"' with a different definition: replacing [" + existingDefinition +
 							"] with [" + beanDefinition + "]");
 				}
 			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Overriding bean definition for bean '" + beanName +
-							"' with an equivalent definition: replacing [" + oldBeanDefinition +
+							"' with an equivalent definition: replacing [" + existingDefinition +
 							"] with [" + beanDefinition + "]");
 				}
 			}
@@ -864,7 +862,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.frozenBeanDefinitionNames = null;
 		}
 
-		if (oldBeanDefinition != null || containsSingleton(beanName)) {
+		if (existingDefinition != null || containsSingleton(beanName)) {
 			resetBeanDefinition(beanName);
 		}
 	}
@@ -1240,7 +1238,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
-	private FactoryAwareOrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, Object> beans) {
+	private OrderComparator.OrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, Object> beans) {
 		IdentityHashMap<Object, String> instancesToBeanNames = new IdentityHashMap<Object, String>();
 		for (Map.Entry<String, Object> entry : beans.entrySet()) {
 			instancesToBeanNames.put(entry.getValue(), entry.getKey());
@@ -1582,6 +1580,29 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
+	 * A dependency descriptor marker for nested elements.
+	 */
+	private static class NestedDependencyDescriptor extends DependencyDescriptor {
+
+		public NestedDependencyDescriptor(DependencyDescriptor original) {
+			super(original);
+			increaseNestingLevel();
+		}
+	}
+
+
+	/**
+	 * A dependency descriptor marker for multiple elements.
+	 */
+	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
+
+		public MultiElementDescriptor(DependencyDescriptor original) {
+			super(original);
+		}
+	}
+
+
+	/**
 	 * Separate inner class for avoiding a hard dependency on the {@code javax.inject} API.
 	 */
 	@UsesJava8
@@ -1686,7 +1707,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
-	 * Serializable ObjectFactory for lazy resolution of a dependency.
+	 * A {@code javax.inject.Provider} implementation for lazy resolution of a dependency.
 	 */
 	private class Jsr330DependencyProvider extends DependencyObjectProvider implements Provider<Object> {
 
@@ -1753,23 +1774,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			return null;
-		}
-	}
-
-
-	private static class NestedDependencyDescriptor extends DependencyDescriptor {
-
-		public NestedDependencyDescriptor(DependencyDescriptor original) {
-			super(original);
-			increaseNestingLevel();
-		}
-	}
-
-
-	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
-
-		public MultiElementDescriptor(DependencyDescriptor original) {
-			super(original);
 		}
 	}
 
