@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -61,6 +62,12 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	@Nullable
 	private SslInfo sslInfo;
+
+	@Nullable
+	private String connectionId;
+
+	@Nullable
+	private String logPrefix;
 
 
 	/**
@@ -129,7 +136,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		}
 		catch (UnsupportedEncodingException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Could not decode query param [" + value + "] as 'UTF-8'. " +
+				logger.warn(getLogPrefix() + "Could not decode query param [" + value + "] as 'UTF-8'. " +
 						"Falling back on default encoding; exception message: " + ex.getMessage());
 			}
 			return URLDecoder.decode(value);
@@ -180,12 +187,38 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	public abstract <T> T getNativeRequest();
 
 	/**
-	 * Return an id for the underlying connection, if available.
+	 * Return an id representing the underlying connection, if available, or
+	 * otherwise the identify of the request object.
+	 * @since 5.1
+	 */
+	public String getConnectionId() {
+		if (this.connectionId == null) {
+			this.connectionId = initConnectionId();
+			if (this.connectionId == null) {
+				this.connectionId = ObjectUtils.getIdentityHexString(this);
+			}
+		}
+		return this.connectionId;
+	}
+
+	/**
+	 * Obtain the connection id, if available.
 	 * @since 5.1
 	 */
 	@Nullable
-	public String getConnectionId() {
+	protected String initConnectionId() {
 		return null;
+	}
+
+	/**
+	 * For internal use in logging at the HTTP adapter layer.
+	 * @since 5.1
+	 */
+	String getLogPrefix() {
+		if (this.logPrefix == null) {
+			this.logPrefix = "[" + getConnectionId() + "] ";
+		}
+		return this.logPrefix;
 	}
 
 }

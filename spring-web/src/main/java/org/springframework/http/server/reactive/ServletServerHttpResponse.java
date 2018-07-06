@@ -60,9 +60,11 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	private volatile boolean flushOnNext;
 
+	private final ServletServerHttpRequest request;
+
 
 	public ServletServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
-			DataBufferFactory bufferFactory, int bufferSize) throws IOException {
+			DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request) throws IOException {
 
 		super(bufferFactory);
 
@@ -73,6 +75,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		this.response = response;
 		this.outputStream = response.getOutputStream();
 		this.bufferSize = bufferSize;
+		this.request = request;
 
 		asyncContext.addListener(new ResponseAsyncListener());
 
@@ -265,6 +268,10 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	private class ResponseBodyFlushProcessor extends AbstractListenerWriteFlushProcessor<DataBuffer> {
 
+		public ResponseBodyFlushProcessor() {
+			super(request.getLogPrefix());
+		}
+
 		@Override
 		protected Processor<? super DataBuffer, Void> createWriteProcessor() {
 			ResponseBodyProcessor processor = new ResponseBodyProcessor();
@@ -275,7 +282,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		@Override
 		protected void flush() throws IOException {
 			if (logger.isTraceEnabled()) {
-				logger.trace("flush");
+				logger.trace(getLogPrefix() + "flush");
 			}
 			ServletServerHttpResponse.this.flush();
 		}
@@ -294,6 +301,11 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
+
+		public ResponseBodyProcessor() {
+			super(request.getLogPrefix());
+		}
+
 		@Override
 		protected boolean isWritePossible() {
 			return ServletServerHttpResponse.this.isWritePossible();
@@ -308,23 +320,23 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		protected boolean write(DataBuffer dataBuffer) throws IOException {
 			if (ServletServerHttpResponse.this.flushOnNext) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("flush");
+					logger.trace(getLogPrefix() + "flush");
 				}
 				flush();
 			}
 			boolean ready = ServletServerHttpResponse.this.isWritePossible();
 			if (logger.isTraceEnabled()) {
-				logger.trace("write: " + dataBuffer + " ready: " + ready);
+				logger.trace(getLogPrefix() + "write: " + dataBuffer + " ready: " + ready);
 			}
 			int remaining = dataBuffer.readableByteCount();
 			if (ready && remaining > 0) {
 				int written = writeToOutputStream(dataBuffer);
 				if (logger.isTraceEnabled()) {
-					logger.trace("written: " + written + " total: " + remaining);
+					logger.trace(getLogPrefix() + "written: " + written + " total: " + remaining);
 				}
 				if (written == remaining) {
 					if (logger.isTraceEnabled()) {
-						logger.trace("releaseData: " + dataBuffer);
+						logger.trace(getLogPrefix() + "releaseData: " + dataBuffer);
 					}
 					DataBufferUtils.release(dataBuffer);
 					return true;

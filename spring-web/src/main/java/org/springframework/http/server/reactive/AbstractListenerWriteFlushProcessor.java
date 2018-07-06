@@ -51,7 +51,32 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	private volatile boolean subscriberCompleted;
 
-	private final WriteResultPublisher resultPublisher = new WriteResultPublisher();
+	private final WriteResultPublisher resultPublisher;
+
+	private final String logPrefix;
+
+
+	public AbstractListenerWriteFlushProcessor() {
+		this("");
+	}
+
+	/**
+	 * Create an instance with the given log prefix.
+	 * @since 5.1
+	 */
+	public AbstractListenerWriteFlushProcessor(String logPrefix) {
+		this.logPrefix = logPrefix;
+		this.resultPublisher = new WriteResultPublisher(logPrefix);
+	}
+
+
+	/**
+	 * Create an instance with the given log prefix.
+	 * @since 5.1
+	 */
+	public String getLogPrefix() {
+		return this.logPrefix;
+	}
 
 
 	// Subscriber methods and async I/O notification methods...
@@ -63,7 +88,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	@Override
 	public final void onNext(Publisher<? extends T> publisher) {
-		logger.trace("Received onNext publisher");
+		if (logger.isTraceEnabled()) {
+			logger.trace(getLogPrefix() + "Received onNext publisher");
+		}
 		this.state.get().onNext(this, publisher);
 	}
 
@@ -74,7 +101,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	@Override
 	public final void onError(Throwable ex) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Received onError: " + ex);
+			logger.trace(getLogPrefix() + "Received onError: " + ex);
 		}
 		this.state.get().onError(this, ex);
 	}
@@ -85,7 +112,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	 */
 	@Override
 	public final void onComplete() {
-		logger.trace("Received onComplete");
+		if (logger.isTraceEnabled()) {
+			logger.trace(getLogPrefix() + "Received onComplete");
+		}
 		this.state.get().onComplete(this);
 	}
 
@@ -103,7 +132,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	 * container to cancel the upstream subscription.
 	 */
 	protected void cancel() {
-		logger.trace("Received request to cancel");
+		if (logger.isTraceEnabled()) {
+			logger.trace(getLogPrefix() + "Received request to cancel");
+		}
 		if (this.subscription != null) {
 			this.subscription.cancel();
 		}
@@ -160,7 +191,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	private boolean changeState(State oldState, State newState) {
 		boolean result = this.state.compareAndSet(oldState, newState);
 		if (result && logger.isTraceEnabled()) {
-			logger.trace(oldState + " -> " + newState);
+			logger.trace(getLogPrefix() + oldState + " -> " + newState);
 		}
 		return result;
 	}
@@ -168,7 +199,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	private void flushIfPossible() {
 		boolean result = isWritePossible();
 		if (logger.isTraceEnabled()) {
-			logger.trace("isWritePossible[" + result + "]");
+			logger.trace(getLogPrefix() + "isWritePossible[" + result + "]");
 		}
 		if (result) {
 			onFlushPossible();
@@ -369,10 +400,12 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 			@Override
 			public void onComplete() {
-				if (this.processor.logger.isTraceEnabled()) {
-					this.processor.logger.trace(this.processor.state + " writeComplete");
+				Log logger = this.processor.logger;
+				AtomicReference<State> state = this.processor.state;
+				if (logger.isTraceEnabled()) {
+					logger.trace(this.processor.getLogPrefix() + state + " writeComplete");
 				}
-				this.processor.state.get().writeComplete(this.processor);
+				state.get().writeComplete(this.processor);
 			}
 		}
 	}

@@ -196,12 +196,7 @@ public class UndertowWebSocketClient implements WebSocketClient {
 	private void handleChannel(URI url, WebSocketHandler handler, MonoProcessor<Void> completion,
 			DefaultNegotiation negotiation, WebSocketChannel channel) {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Connected to " + url);
-		}
-		HttpHeaders responseHeaders = negotiation.getResponseHeaders();
-		String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
-		HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
+		HandshakeInfo info = createHandshakeInfo(url, negotiation);
 		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, this.bufferFactory, completion);
 		UndertowWebSocketHandlerAdapter adapter = new UndertowWebSocketHandlerAdapter(session);
 
@@ -209,6 +204,12 @@ public class UndertowWebSocketClient implements WebSocketClient {
 		channel.resumeReceives();
 
 		handler.handle(session).subscribe(session);
+	}
+
+	private HandshakeInfo createHandshakeInfo(URI url, DefaultNegotiation negotiation) {
+		HttpHeaders responseHeaders = negotiation.getResponseHeaders();
+		String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
+		return new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 	}
 
 

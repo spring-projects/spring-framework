@@ -231,14 +231,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	private String initLogId(ServerHttpRequest request) {
-		String logId = null;
-		if (request instanceof AbstractServerHttpRequest) {
-			logId = ((AbstractServerHttpRequest) request).getConnectionId();
-		}
-		if (logId == null) {
-			logId = ObjectUtils.getIdentityHexString(request);
-		}
-		return logId;
+		return request instanceof AbstractServerHttpRequest ?
+				((AbstractServerHttpRequest) request).getConnectionId() : ObjectUtils.getIdentityHexString(request);
 	}
 
 	private void logExchange(ServerWebExchange exchange) {

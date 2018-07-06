@@ -48,6 +48,9 @@ public class HandshakeInfo {
 
 	private final Map<String, Object> attributes;
 
+	@Nullable
+	private final String logPrefix;
+
 
 	/**
 	 * Constructor with information about the handshake.
@@ -57,7 +60,7 @@ public class HandshakeInfo {
 	 * @param protocol the negotiated sub-protocol (may be {@code null})
 	 */
 	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, @Nullable String protocol) {
-		this(uri, headers, principal, protocol, Collections.emptyMap());
+		this(uri, headers, principal, protocol, Collections.emptyMap(), null);
 	}
 
 	/**
@@ -67,10 +70,12 @@ public class HandshakeInfo {
 	 * @param principal the principal for the session
 	 * @param protocol the negotiated sub-protocol (may be {@code null})
 	 * @param attributes initial attributes to use for the WebSocket session
+	 * @param logPrefix log prefix used during the handshake for correlating log
+	 * messages, if any.
 	 * @since 5.1
 	 */
 	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal,
-			@Nullable String protocol, Map<String, Object> attributes) {
+			@Nullable String protocol, Map<String, Object> attributes, @Nullable String logPrefix) {
 
 		Assert.notNull(uri, "URI is required");
 		Assert.notNull(headers, "HttpHeaders are required");
@@ -82,6 +87,7 @@ public class HandshakeInfo {
 		this.principalMono = principal;
 		this.protocol = protocol;
 		this.attributes = attributes;
+		this.logPrefix = logPrefix;
 	}
 
 
@@ -124,6 +130,16 @@ public class HandshakeInfo {
 	 */
 	public Map<String, Object> getAttributes() {
 		return this.attributes;
+	}
+
+	/**
+	 * A log prefix used in the handshake to correlate log messages, if any.
+	 * @return a log prefix, or {@code null}
+	 * @since 5.1
+	 */
+	@Nullable
+	public String getLogPrefix() {
+		return this.logPrefix;
 	}
 
 

@@ -66,7 +66,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) {
-		ServerHttpRequest request = null;
+		UndertowServerHttpRequest request = null;
 		try {
 			request = new UndertowServerHttpRequest(exchange, getDataBufferFactory());
 		}
@@ -77,13 +77,13 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 			exchange.setStatusCode(400);
 			return;
 		}
-		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, getDataBufferFactory());
+		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, getDataBufferFactory(), request);
 
 		if (request.getMethod() == HttpMethod.HEAD) {
 			response = new HttpHeadResponseDecorator(response);
 		}
 
-		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(exchange);
+		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(exchange, request);
 		this.httpHandler.handle(request, response).subscribe(resultSubscriber);
 	}
 
@@ -92,8 +92,12 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		private final HttpServerExchange exchange;
 
-		public HandlerResultSubscriber(HttpServerExchange exchange) {
+		private final String logPrefix;
+
+
+		public HandlerResultSubscriber(HttpServerExchange exchange, UndertowServerHttpRequest request) {
 			this.exchange = exchange;
+			this.logPrefix = request.getLogPrefix();
 		}
 
 		@Override
@@ -108,10 +112,10 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.trace("Failed to complete: " + ex.getMessage());
+			logger.trace(this.logPrefix + "Failed to complete: " + ex.getMessage());
 			if (this.exchange.isResponseStarted()) {
 				try {
-					logger.debug("Closing connection");
+					logger.debug(this.logPrefix + "Closing connection");
 					this.exchange.getConnection().close();
 				}
 				catch (IOException ex2) {
@@ -119,7 +123,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 				}
 			}
 			else {
-				logger.debug("Setting HttpServerExchange status to 500 Server Error");
+				logger.debug(this.logPrefix + "Setting HttpServerExchange status to 500 Server Error");
 				this.exchange.setStatusCode(500);
 				this.exchange.endExchange();
 			}
@@ -127,7 +131,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		public void onComplete() {
-			logger.trace("Handling completed");
+			logger.trace(this.logPrefix + "Handling completed");
 			this.exchange.endExchange();
 		}
 	}

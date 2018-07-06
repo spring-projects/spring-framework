@@ -20,6 +20,7 @@ import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -154,17 +155,17 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	}
 
 	private Object createHandler(URI url, WebSocketHandler handler, MonoProcessor<Void> completion) {
-		return new JettyWebSocketHandlerAdapter(handler,
-				session -> {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Connected to " + url);
-					}
-					HttpHeaders responseHeaders = new HttpHeaders();
-					session.getUpgradeResponse().getHeaders().forEach(responseHeaders::put);
-					String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
-					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
-					return new JettyWebSocketSession(session, info, this.bufferFactory, completion);
-				});
+		return new JettyWebSocketHandlerAdapter(handler, session -> {
+			HandshakeInfo info = createHandshakeInfo(url, session);
+			return new JettyWebSocketSession(session, info, this.bufferFactory, completion);
+		});
+	}
+
+	private HandshakeInfo createHandshakeInfo(URI url, Session jettySession) {
+		HttpHeaders headers = new HttpHeaders();
+		jettySession.getUpgradeResponse().getHeaders().forEach(headers::put);
+		String protocol = headers.getFirst("Sec-WebSocket-Protocol");
+		return new HandshakeInfo(url, headers, Mono.empty(), protocol);
 	}
 
 

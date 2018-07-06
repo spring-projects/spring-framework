@@ -68,13 +68,15 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 			return Mono.empty();
 		}
 
+		String logPrefix = ((ReactorServerHttpRequest) adaptedRequest).getLogPrefix();
+
 		if (adaptedRequest.getMethod() == HttpMethod.HEAD) {
 			adaptedResponse = new HttpHeadResponseDecorator(adaptedResponse);
 		}
 
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse)
-				.doOnError(ex -> logger.trace("Failed to complete: " + ex.getMessage()))
-				.doOnSuccess(aVoid -> logger.trace("Handling completed"));
+				.doOnError(ex -> logger.trace(logPrefix + "Failed to complete: " + ex.getMessage()))
+				.doOnSuccess(aVoid -> logger.trace(logPrefix + "Handling completed"));
 	}
 
 }

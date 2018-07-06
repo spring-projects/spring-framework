@@ -65,7 +65,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	@Nullable
 	private final MonoProcessor<Void> completionMono;
 
-	private final WebSocketReceivePublisher receivePublisher = new WebSocketReceivePublisher();
+	private final WebSocketReceivePublisher receivePublisher;
 
 	@Nullable
 	private volatile WebSocketSendProcessor sendProcessor;
@@ -90,12 +90,18 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	 * Alternative constructor with completion {@code Mono&lt;Void&gt;} to propagate
 	 * the session completion (success or error) (for client-side use).
 	 */
-	public AbstractListenerWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
+	public AbstractListenerWebSocketSession(T delegate, String id, HandshakeInfo info,
 			DataBufferFactory bufferFactory, @Nullable MonoProcessor<Void> completionMono) {
 
-		super(delegate, id, handshakeInfo, bufferFactory);
+		super(delegate, id, info, bufferFactory);
+		this.receivePublisher = new WebSocketReceivePublisher(initLogPrefix(info, id));
 		this.completionMono = completionMono;
 	}
+
+	private static String initLogPrefix(HandshakeInfo info, String id) {
+		return info.getLogPrefix() != null ? info.getLogPrefix() : "[" + id + "] ";
+	}
+
 
 
 	protected WebSocketSendProcessor getSendProcessor() {
@@ -223,15 +229,23 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		private volatile Queue<Object> pendingMessages = Queues.unbounded(Queues.SMALL_BUFFER_SIZE).get();
 
 
+		WebSocketReceivePublisher(String logPrefix) {
+			super(logPrefix);
+			if (logger.isDebugEnabled()) {
+				logger.debug(getLogPrefix() + "Session id '" + getId() + "' for " + getHandshakeInfo().getUri());
+			}
+		}
+
+
 		@Override
 		protected void checkOnDataAvailable() {
 			resumeReceiving();
-			if (!this.pendingMessages.isEmpty()) {
-				logger.trace("checkOnDataAvailable, " + this.pendingMessages.size() + " pending messages");
-				onDataAvailable();
+			int size = this.pendingMessages.size();
+			if (logger.isTraceEnabled()) {
+				logger.trace(getLogPrefix() + "checkOnDataAvailable (" + size + " pending)");
 			}
-			else {
-				logger.trace("checkOnDataAvailable, 0 pending messages");
+			if (size > 0) {
+				onDataAvailable();
 			}
 		}
 
@@ -248,7 +262,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		void handleMessage(WebSocketMessage message) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Received " + message);
+				logger.trace(getLogPrefix() + "Received " + message);
 			}
 			if (!this.pendingMessages.offer(message)) {
 				throw new IllegalStateException(
@@ -266,10 +280,16 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		private volatile boolean isReady = true;
 
+
+		WebSocketSendProcessor() {
+			super(receivePublisher.getLogPrefix());
+		}
+
+
 		@Override
 		protected boolean write(WebSocketMessage message) throws IOException {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Sending " + message);
+				logger.trace(getLogPrefix() + "Sending " + message);
 			}
 			return sendMessage(message);
 		}
@@ -290,8 +310,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		 * async completion callback into simple flow control.
 		 */
 		public void setReadyToSend(boolean ready) {
-			if (ready) {
-				logger.trace("Ready to send again");
+			if (ready && logger.isTraceEnabled()) {
+				logger.trace(getLogPrefix() + "Ready to send");
 			}
 			this.isReady = ready;
 		}

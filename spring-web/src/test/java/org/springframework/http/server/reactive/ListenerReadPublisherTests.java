@@ -56,6 +56,10 @@ public class ListenerReadPublisherTests {
 
 		private int readCalls = 0;
 
+		public TestListenerReadPublisher() {
+			super("");
+		}
+
 		@Override
 		protected void checkOnDataAvailable() {
 			// no-op

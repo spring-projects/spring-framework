@@ -204,7 +204,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
 		if (logger.isTraceEnabled()) {
-			logger.trace("InputStream.read returned " + read + (read != -1 ? " bytes" : ""));
+			logger.trace(getLogPrefix() + "InputStream.read returned " + read + (read != -1 ? " bytes" : ""));
 		}
 
 		if (read > 0) {
@@ -256,6 +256,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		private final ServletInputStream inputStream;
 
 		public RequestBodyPublisher(ServletInputStream inputStream) {
+			super(ServletServerHttpRequest.this.getLogPrefix());
 			this.inputStream = inputStream;
 		}
 

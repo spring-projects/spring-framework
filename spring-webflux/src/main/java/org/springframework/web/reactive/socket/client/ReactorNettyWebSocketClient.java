@@ -76,23 +76,25 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Connecting to " + url);
-		}
 		return getHttpClient()
 				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
 				.websocket(StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols()))
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Connected to " + url);
-					}
 					HttpHeaders responseHeaders = toHttpHeaders(inbound);
 					String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
 					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(outbound.alloc());
 					WebSocketSession session = new ReactorNettyWebSocketSession(inbound, outbound, info, factory);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Started session '" + session.getId() + "' for " + url);
+					}
 					return handler.handle(session);
+				})
+				.doOnRequest(n -> {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Connecting to " + url);
+					}
 				})
 				.next();
 	}

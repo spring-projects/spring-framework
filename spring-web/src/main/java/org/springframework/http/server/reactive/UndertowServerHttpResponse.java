@@ -52,14 +52,19 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 
 	private final HttpServerExchange exchange;
 
+	private final UndertowServerHttpRequest request;
+
 	@Nullable
 	private StreamSinkChannel responseChannel;
 
 
-	public UndertowServerHttpResponse(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
+	public UndertowServerHttpResponse(
+			HttpServerExchange exchange, DataBufferFactory bufferFactory, UndertowServerHttpRequest request) {
+
 		super(bufferFactory);
 		Assert.notNull(exchange, "HttpServerExchange must not be null");
 		this.exchange = exchange;
+		this.request = request;
 	}
 
 
@@ -146,6 +151,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 
 
 		public ResponseBodyProcessor(StreamSinkChannel channel) {
+			super(request.getLogPrefix());
 			Assert.notNull(channel, "StreamSinkChannel must not be null");
 			this.channel = channel;
 			this.channel.getWriteSetter().set(c -> {
@@ -168,7 +174,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				return false;
 			}
 			if (logger.isTraceEnabled()) {
-				logger.trace("write: " + dataBuffer);
+				logger.trace(getLogPrefix() + "write (" + dataBuffer.readableByteCount() + " bytes)");
 			}
 
 			// Track write listener calls from here on..
@@ -178,7 +184,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			int written = writeByteBuffer(buffer);
 
 			if (logger.isTraceEnabled()) {
-				logger.trace("written: " + written + " total: " + total);
+				logger.trace(getLogPrefix() + "written " + written + ", " + total + " remaining");
 			}
 			if (written != total) {
 				return false;
@@ -188,7 +194,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			this.writePossible = true;
 
 			if (logger.isTraceEnabled()) {
-				logger.trace("releaseData: " + dataBuffer);
+				logger.trace(getLogPrefix() + "releaseData: " + dataBuffer);
 			}
 			DataBufferUtils.release(dataBuffer);
 			this.byteBuffer = null;
@@ -233,6 +239,10 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 
 	private class ResponseBodyFlushProcessor extends AbstractListenerWriteFlushProcessor<DataBuffer> {
 
+		public ResponseBodyFlushProcessor() {
+			super(request.getLogPrefix());
+		}
+
 		@Override
 		protected Processor<? super DataBuffer, Void> createWriteProcessor() {
 			return UndertowServerHttpResponse.this.createBodyProcessor();
@@ -243,7 +253,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			StreamSinkChannel channel = UndertowServerHttpResponse.this.responseChannel;
 			if (channel != null) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("flush");
+					logger.trace(getLogPrefix() + "flush");
 				}
 				channel.flush();
 			}

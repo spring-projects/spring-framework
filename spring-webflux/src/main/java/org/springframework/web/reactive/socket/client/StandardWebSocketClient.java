@@ -115,15 +115,14 @@ public class StandardWebSocketClient implements WebSocketClient {
 	private StandardWebSocketHandlerAdapter createEndpoint(URI url, WebSocketHandler handler,
 			MonoProcessor<Void> completion, DefaultConfigurator configurator) {
 
-		return new StandardWebSocketHandlerAdapter(handler, session -> {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Connected to " + url);
-			}
-			HttpHeaders responseHeaders = configurator.getResponseHeaders();
-			String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
-			HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
-			return createWebSocketSession(session, info, completion);
-		});
+		return new StandardWebSocketHandlerAdapter(handler, session ->
+				createWebSocketSession(session, createHandshakeInfo(url, configurator), completion));
+	}
+
+	private HandshakeInfo createHandshakeInfo(URI url, DefaultConfigurator configurator) {
+		HttpHeaders responseHeaders = configurator.getResponseHeaders();
+		String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
+		return new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 	}
 
 	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,

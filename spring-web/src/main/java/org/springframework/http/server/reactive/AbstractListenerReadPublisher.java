@@ -65,6 +65,30 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	@Nullable
 	private volatile Throwable errorBeforeDemand;
 
+	private final String logPrefix;
+
+
+	public AbstractListenerReadPublisher() {
+		this("");
+	}
+
+	/**
+	 * Create an instance with the given log prefix.
+	 * @since 5.1
+	 */
+	public AbstractListenerReadPublisher(String logPrefix) {
+		this.logPrefix = logPrefix;
+	}
+
+
+	/**
+	 * Return the configured log message prefix.
+	 * @since 5.1
+	 */
+	public String getLogPrefix() {
+		return this.logPrefix;
+	}
+
 
 	// Publisher implementation...
 
@@ -82,7 +106,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * container.
 	 */
 	public final void onDataAvailable() {
-		logger.trace("I/O event onDataAvailable");
+		logger.trace(getLogPrefix() + "onDataAvailable");
 		this.state.get().onDataAvailable(this);
 	}
 
@@ -91,7 +115,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * all data has been read.
 	 */
 	public void onAllDataRead() {
-		logger.trace("I/O event onAllDataRead");
+		logger.trace(getLogPrefix() + "onAllDataRead");
 		this.state.get().onAllDataRead(this);
 	}
 
@@ -100,7 +124,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 */
 	public final void onError(Throwable ex) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("I/O event onError: " + ex);
+			logger.trace(getLogPrefix() + "Connection error: " + ex);
 		}
 		this.state.get().onError(this, ex);
 	}
@@ -151,13 +175,13 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 				Subscriber<? super T> subscriber = this.subscriber;
 				Assert.state(subscriber != null, "No subscriber");
 				if (logger.isTraceEnabled()) {
-					logger.trace("Data item read, publishing..");
+					logger.trace(getLogPrefix() + "Publishing data read");
 				}
 				subscriber.onNext(data);
 			}
 			else {
 				if (logger.isTraceEnabled()) {
-					logger.trace("No more data to read");
+					logger.trace(getLogPrefix() + "No more data to read");
 				}
 				return true;
 			}
@@ -168,7 +192,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	private boolean changeState(State oldState, State newState) {
 		boolean result = this.state.compareAndSet(oldState, newState);
 		if (result && logger.isTraceEnabled()) {
-			logger.trace(oldState + " -> " + newState);
+			logger.trace(getLogPrefix() + oldState + " -> " + newState);
 		}
 		return result;
 	}
@@ -198,7 +222,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		@Override
 		public final void request(long n) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Signal request(" + n + ")");
+				logger.trace(getLogPrefix() + n + " requested");
 			}
 			state.get().request(AbstractListenerReadPublisher.this, n);
 		}
@@ -206,7 +230,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		@Override
 		public final void cancel() {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Signal cancel()");
+				logger.trace(getLogPrefix() + "Cancellation");
 			}
 			state.get().cancel(AbstractListenerReadPublisher.this);
 		}
@@ -244,14 +268,15 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 					subscriber.onSubscribe(subscription);
 					publisher.changeState(SUBSCRIBING, NO_DEMAND);
 					// Now safe to check "beforeDemand" flags, they won't change once in NO_DEMAND
+					String logPrefix = publisher.getLogPrefix();
 					if (publisher.completionBeforeDemand) {
-						publisher.logger.trace("Completed before demand");
+						publisher.logger.trace(logPrefix + "Completed before demand");
 						publisher.state.get().onAllDataRead(publisher);
 					}
 					Throwable ex = publisher.errorBeforeDemand;
 					if (ex != null) {
 						if (publisher.logger.isTraceEnabled()) {
-							publisher.logger.trace("Completed with error before demand: " + ex);
+							publisher.logger.trace(logPrefix + "Completed with error before demand: " + ex);
 						}
 						publisher.state.get().onError(publisher, ex);
 					}

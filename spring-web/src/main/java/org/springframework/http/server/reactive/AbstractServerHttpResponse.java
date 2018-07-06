@@ -22,8 +22,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -58,8 +56,6 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	private enum State {NEW, COMMITTING, COMMITTED}
 
 
-	private final Log logger = LogFactory.getLog(getClass());
-
 	private final DataBufferFactory dataBufferFactory;
 
 	@Nullable
@@ -90,9 +86,6 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public boolean setStatusCode(@Nullable HttpStatus status) {
 		if (this.state.get() == State.COMMITTED) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Ignoring status " + status + ": response already committed");
-			}
 			return false;
 		}
 		else {

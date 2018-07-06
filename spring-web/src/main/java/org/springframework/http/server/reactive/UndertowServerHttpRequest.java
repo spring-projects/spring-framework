@@ -60,17 +60,14 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final RequestBodyPublisher body;
 
-	private final String connectionId;
-
 
 	public UndertowServerHttpRequest(HttpServerExchange exchange, DataBufferFactory bufferFactory)
 			throws URISyntaxException {
 
 		super(initUri(exchange), "", initHeaders(exchange));
 		this.exchange = exchange;
-		this.body = new RequestBodyPublisher(exchange, bufferFactory);
+		this.body = new RequestBodyPublisher(exchange, bufferFactory, getLogPrefix());
 		this.body.registerListeners(exchange);
-		this.connectionId = ObjectUtils.getIdentityHexString(this.exchange.getConnection());
 	}
 
 	private static URI initUri(HttpServerExchange exchange) throws URISyntaxException {
@@ -132,8 +129,8 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public String getConnectionId() {
-		return this.connectionId;
+	protected String initConnectionId() {
+		return ObjectUtils.getIdentityHexString(this.exchange.getConnection());
 	}
 
 
@@ -145,7 +142,8 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 		private final ByteBufferPool byteBufferPool;
 
-		public RequestBodyPublisher(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
+		public RequestBodyPublisher(HttpServerExchange exchange, DataBufferFactory bufferFactory, String logPrefix) {
+			super(logPrefix);
 			this.channel = exchange.getRequestChannel();
 			this.bufferFactory = bufferFactory;
 			this.byteBufferPool = exchange.getConnection().getByteBufferPool();
@@ -183,7 +181,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 				int read = this.channel.read(byteBuffer);
 				if (logger.isTraceEnabled()) {
-					logger.trace("Channel.read returned " + read + (read != -1 ? " bytes" : ""));
+					logger.trace(getLogPrefix() + "Channel.read returned " + read + (read != -1 ? " bytes" : ""));
 				}
 
 				if (read > 0) {
