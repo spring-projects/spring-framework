@@ -55,18 +55,16 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 	public Mono<Void> apply(HttpServerRequest reactorRequest, HttpServerResponse reactorResponse) {
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
 		try {
-			ServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
-			ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
+			ReactorServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
+			ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory, request);
 
 			if (request.getMethod() == HttpMethod.HEAD) {
 				response = new HttpHeadResponseDecorator(response);
 			}
 
-			String logPrefix = ((ReactorServerHttpRequest) request).getLogPrefix();
-
 			return this.httpHandler.handle(request, response)
-					.doOnError(ex -> logger.trace(logPrefix + "Failed to complete: " + ex.getMessage()))
-					.doOnSuccess(aVoid -> logger.trace(logPrefix + "Handling completed"));
+					.doOnError(ex -> logger.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage()))
+					.doOnSuccess(aVoid -> logger.trace(request.getLogPrefix() + "Handling completed"));
 		}
 		catch (URISyntaxException ex) {
 			if (logger.isDebugEnabled()) {

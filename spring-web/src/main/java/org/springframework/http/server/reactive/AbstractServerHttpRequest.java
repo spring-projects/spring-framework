@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
-	private static final Log logger = LogFactory.getLog(ServerHttpRequest.class);
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
@@ -156,8 +156,8 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		}
 		catch (UnsupportedEncodingException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn(getLogPrefix() + "Could not decode query param [" + value + "] as 'UTF-8'. " +
-						"Falling back on default encoding; exception message: " + ex.getMessage());
+				logger.warn(getLogPrefix() + "Could not decode query value [" + value + "] as 'UTF-8'. " +
+						"Falling back on default encoding: " + ex.getMessage());
 			}
 			return URLDecoder.decode(value);
 		}

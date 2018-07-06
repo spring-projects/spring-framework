@@ -94,14 +94,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 			DataBufferFactory bufferFactory, @Nullable MonoProcessor<Void> completionMono) {
 
 		super(delegate, id, info, bufferFactory);
-		this.receivePublisher = new WebSocketReceivePublisher(initLogPrefix(info, id));
+		this.receivePublisher = new WebSocketReceivePublisher();
 		this.completionMono = completionMono;
 	}
-
-	private static String initLogPrefix(HandshakeInfo info, String id) {
-		return info.getLogPrefix() != null ? info.getLogPrefix() : "[" + id + "] ";
-	}
-
 
 
 	protected WebSocketSendProcessor getSendProcessor() {
@@ -229,11 +224,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		private volatile Queue<Object> pendingMessages = Queues.unbounded(Queues.SMALL_BUFFER_SIZE).get();
 
 
-		WebSocketReceivePublisher(String logPrefix) {
-			super(logPrefix);
-			if (logger.isDebugEnabled()) {
-				logger.debug(getLogPrefix() + "Session id '" + getId() + "' for " + getHandshakeInfo().getUri());
-			}
+		WebSocketReceivePublisher() {
+			super(AbstractListenerWebSocketSession.this.getLogPrefix());
 		}
 
 
@@ -241,8 +233,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		protected void checkOnDataAvailable() {
 			resumeReceiving();
 			int size = this.pendingMessages.size();
-			if (logger.isTraceEnabled()) {
-				logger.trace(getLogPrefix() + "checkOnDataAvailable (" + size + " pending)");
+			if (rsReadLogger.isTraceEnabled()) {
+				rsReadLogger.trace(getLogPrefix() + "checkOnDataAvailable (" + size + " pending)");
 			}
 			if (size > 0) {
 				onDataAvailable();
@@ -263,6 +255,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		void handleMessage(WebSocketMessage message) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(getLogPrefix() + "Received " + message);
+			}
+			else if (rsReadLogger.isTraceEnabled()) {
+				rsReadLogger.trace(getLogPrefix() + "Received " + message);
 			}
 			if (!this.pendingMessages.offer(message)) {
 				throw new IllegalStateException(
@@ -291,6 +286,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 			if (logger.isTraceEnabled()) {
 				logger.trace(getLogPrefix() + "Sending " + message);
 			}
+			else if (rsWriteLogger.isTraceEnabled()) {
+				rsWriteLogger.trace(getLogPrefix() + "Sending " + message);
+			}
 			return sendMessage(message);
 		}
 
@@ -310,8 +308,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		 * async completion callback into simple flow control.
 		 */
 		public void setReadyToSend(boolean ready) {
-			if (ready && logger.isTraceEnabled()) {
-				logger.trace(getLogPrefix() + "Ready to send");
+			if (ready && rsWriteLogger.isTraceEnabled()) {
+				rsWriteLogger.trace(getLogPrefix() + "Ready to send");
 			}
 			this.isReady = ready;
 		}

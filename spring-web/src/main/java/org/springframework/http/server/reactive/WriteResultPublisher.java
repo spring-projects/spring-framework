@@ -38,7 +38,15 @@ import org.springframework.util.Assert;
  */
 class WriteResultPublisher implements Publisher<Void> {
 
-	private static final Log logger = LogFactory.getLog(WriteResultPublisher.class);
+	/**
+	 * Special logger for tracing Reactive Streams signals.
+	 * <p>This logger is not exposed under "org.springframework" because it is
+	 * verbose. To enable this, and other related Reactive Streams loggers in
+	 * this package, set "spring-web.reactivestreams" to TRACE.
+	 */
+	private static final Log rsWriteResultLogger =
+			LogFactory.getLog("spring-web.reactivestreams.WriteResultPublisher");
+
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
@@ -60,8 +68,8 @@ class WriteResultPublisher implements Publisher<Void> {
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.logPrefix + this.state + " subscribe: " + subscriber);
+		if (rsWriteResultLogger.isTraceEnabled()) {
+			rsWriteResultLogger.trace(this.logPrefix + this.state + " subscribe: " + subscriber);
 		}
 		this.state.get().subscribe(this, subscriber);
 	}
@@ -70,8 +78,8 @@ class WriteResultPublisher implements Publisher<Void> {
 	 * Invoke this to delegate a completion signal to the subscriber.
 	 */
 	public void publishComplete() {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.logPrefix + this.state + " publishComplete");
+		if (rsWriteResultLogger.isTraceEnabled()) {
+			rsWriteResultLogger.trace(this.logPrefix + this.state + " publishComplete");
 		}
 		this.state.get().publishComplete(this);
 	}
@@ -80,8 +88,8 @@ class WriteResultPublisher implements Publisher<Void> {
 	 * Invoke this to delegate an error signal to the subscriber.
 	 */
 	public void publishError(Throwable t) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.logPrefix + this.state + " publishError: " + t);
+		if (rsWriteResultLogger.isTraceEnabled()) {
+			rsWriteResultLogger.trace(this.logPrefix + this.state + " publishError: " + t);
 		}
 		this.state.get().publishError(this, t);
 	}
@@ -105,16 +113,16 @@ class WriteResultPublisher implements Publisher<Void> {
 
 		@Override
 		public final void request(long n) {
-			if (logger.isTraceEnabled()) {
-				logger.trace(this.publisher.logPrefix + state() + " request: " + n);
+			if (rsWriteResultLogger.isTraceEnabled()) {
+				rsWriteResultLogger.trace(this.publisher.logPrefix + state() + " request: " + n);
 			}
 			state().request(this.publisher, n);
 		}
 
 		@Override
 		public final void cancel() {
-			if (logger.isTraceEnabled()) {
-				logger.trace(this.publisher.logPrefix + state() + " cancel");
+			if (rsWriteResultLogger.isTraceEnabled()) {
+				rsWriteResultLogger.trace(this.publisher.logPrefix + state() + " cancel");
 			}
 			state().cancel(this.publisher);
 		}

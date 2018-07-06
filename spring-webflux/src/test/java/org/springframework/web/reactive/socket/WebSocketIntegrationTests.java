@@ -64,17 +64,11 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
 		ReplayProcessor<Object> output = ReplayProcessor.create(count);
 
-		this.client.execute(getUrl("/echo"),
-				session -> {
-					logger.debug("Starting to send messages");
-					return session
-							.send(input.doOnNext(s -> logger.debug("outbound " + s)).map(session::textMessage))
-							.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
-							.subscribeWith(output)
-							.doOnNext(s -> logger.debug("inbound " + s))
-							.then();
-				})
-				.doOnSuccessOrError((aVoid, ex) -> logger.debug("Done: " + (ex != null ? ex.getMessage() : "success")))
+		this.client.execute(getUrl("/echo"), session -> session
+				.send(input.map(session::textMessage))
+				.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
+				.subscribeWith(output)
+				.then())
 				.block(TIMEOUT);
 
 		assertEquals(input.collectList().block(TIMEOUT), output.collectList().block(TIMEOUT));
@@ -181,7 +175,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		@Override
 		public Mono<Void> handle(WebSocketSession session) {
 			String protocol = session.getHandshakeInfo().getSubProtocol();
-			WebSocketMessage message = session.textMessage(protocol);
+			WebSocketMessage message = session.textMessage(protocol != null ? protocol : "none");
 			return session.send(Mono.just(message));
 		}
 	}

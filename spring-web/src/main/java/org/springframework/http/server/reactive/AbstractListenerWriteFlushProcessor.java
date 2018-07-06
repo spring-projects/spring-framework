@@ -42,7 +42,15 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractListenerWriteFlushProcessor<T> implements Processor<Publisher<? extends T>, Void> {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Special logger for tracing Reactive Streams signals.
+	 * <p>This logger is not exposed under "org.springframework" because it is
+	 * verbose. To enable this, and other related Reactive Streams loggers in
+	 * this package, set "spring-web.reactivestreams" to TRACE.
+	 */
+	protected static final Log rsWriteFlushLogger =
+			LogFactory.getLog("spring-web.reactivestreams.WriteFlushProcessor");
+
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
@@ -88,8 +96,8 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	@Override
 	public final void onNext(Publisher<? extends T> publisher) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "Received onNext publisher");
+		if (rsWriteFlushLogger.isTraceEnabled()) {
+			rsWriteFlushLogger.trace(getLogPrefix() + "Received onNext publisher");
 		}
 		this.state.get().onNext(this, publisher);
 	}
@@ -100,8 +108,8 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	 */
 	@Override
 	public final void onError(Throwable ex) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "Received onError: " + ex);
+		if (rsWriteFlushLogger.isTraceEnabled()) {
+			rsWriteFlushLogger.trace(getLogPrefix() + "Received onError: " + ex);
 		}
 		this.state.get().onError(this, ex);
 	}
@@ -112,8 +120,8 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	 */
 	@Override
 	public final void onComplete() {
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "Received onComplete");
+		if (rsWriteFlushLogger.isTraceEnabled()) {
+			rsWriteFlushLogger.trace(getLogPrefix() + "Received onComplete");
 		}
 		this.state.get().onComplete(this);
 	}
@@ -132,8 +140,8 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	 * container to cancel the upstream subscription.
 	 */
 	protected void cancel() {
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "Received request to cancel");
+		if (rsWriteFlushLogger.isTraceEnabled()) {
+			rsWriteFlushLogger.trace(getLogPrefix() + "Received request to cancel");
 		}
 		if (this.subscription != null) {
 			this.subscription.cancel();
@@ -190,16 +198,16 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	private boolean changeState(State oldState, State newState) {
 		boolean result = this.state.compareAndSet(oldState, newState);
-		if (result && logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + oldState + " -> " + newState);
+		if (result && rsWriteFlushLogger.isTraceEnabled()) {
+			rsWriteFlushLogger.trace(getLogPrefix() + oldState + " -> " + newState);
 		}
 		return result;
 	}
 
 	private void flushIfPossible() {
 		boolean result = isWritePossible();
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "isWritePossible[" + result + "]");
+		if (rsWriteFlushLogger.isTraceEnabled()) {
+			rsWriteFlushLogger.trace(getLogPrefix() + "isWritePossible[" + result + "]");
 		}
 		if (result) {
 			onFlushPossible();
@@ -400,12 +408,10 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 			@Override
 			public void onComplete() {
-				Log logger = this.processor.logger;
-				AtomicReference<State> state = this.processor.state;
-				if (logger.isTraceEnabled()) {
-					logger.trace(this.processor.getLogPrefix() + state + " writeComplete");
+				if (rsWriteFlushLogger.isTraceEnabled()) {
+					rsWriteFlushLogger.trace(this.processor.getLogPrefix() + this.processor.state + " writeComplete");
 				}
-				state.get().writeComplete(this.processor);
+				this.processor.state.get().writeComplete(this.processor);
 			}
 		}
 	}

@@ -173,9 +173,6 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			if (buffer == null) {
 				return false;
 			}
-			if (logger.isTraceEnabled()) {
-				logger.trace(getLogPrefix() + "write (" + dataBuffer.readableByteCount() + " bytes)");
-			}
 
 			// Track write listener calls from here on..
 			this.writePossible = false;
@@ -184,7 +181,10 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			int written = writeByteBuffer(buffer);
 
 			if (logger.isTraceEnabled()) {
-				logger.trace(getLogPrefix() + "written " + written + ", " + total + " remaining");
+				logger.trace(getLogPrefix() + "Wrote " + written + " of " + total + " bytes");
+			}
+			else if (rsWriteLogger.isTraceEnabled()) {
+				rsWriteLogger.trace(getLogPrefix() + "Wrote " + written + " of " + total + " bytes");
 			}
 			if (written != total) {
 				return false;
@@ -193,9 +193,6 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			// We wrote all, so can still write more..
 			this.writePossible = true;
 
-			if (logger.isTraceEnabled()) {
-				logger.trace(getLogPrefix() + "releaseData: " + dataBuffer);
-			}
 			DataBufferUtils.release(dataBuffer);
 			this.byteBuffer = null;
 			return true;
@@ -252,8 +249,8 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 		protected void flush() throws IOException {
 			StreamSinkChannel channel = UndertowServerHttpResponse.this.responseChannel;
 			if (channel != null) {
-				if (logger.isTraceEnabled()) {
-					logger.trace(getLogPrefix() + "flush");
+				if (rsWriteFlushLogger.isTraceEnabled()) {
+					rsWriteFlushLogger.trace(getLogPrefix() + "flush");
 				}
 				channel.flush();
 			}

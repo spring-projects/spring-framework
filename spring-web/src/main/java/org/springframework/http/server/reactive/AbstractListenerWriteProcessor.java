@@ -44,7 +44,14 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, Void> {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Special logger for tracing Reactive Streams signals.
+	 * <p>This logger is not exposed under "org.springframework" because it is
+	 * verbose. To enable this, and other related Reactive Streams loggers in
+	 * this package, set "spring-web.reactivestreams" to TRACE.
+	 */
+	protected static final Log rsWriteLogger = LogFactory.getLog("spring-web.reactivestreams.WriteProcessor");
+
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
@@ -93,8 +100,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	@Override
 	public final void onNext(T data) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "Item to write");
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "Item to write");
 		}
 		this.state.get().onNext(this, data);
 	}
@@ -105,8 +112,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	@Override
 	public final void onError(Throwable ex) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "Write source error: " + ex);
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "Write source error: " + ex);
 		}
 		this.state.get().onError(this, ex);
 	}
@@ -117,8 +124,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	@Override
 	public final void onComplete() {
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "No more items to write");
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "No more items to write");
 		}
 		this.state.get().onComplete(this);
 	}
@@ -129,8 +136,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * container.
 	 */
 	public final void onWritePossible() {
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "onWritePossible");
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "onWritePossible");
 		}
 		this.state.get().onWritePossible(this);
 	}
@@ -140,7 +147,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * container to cancel the upstream subscription.
 	 */
 	public void cancel() {
-		logger.trace(getLogPrefix() + "Cancellation");
+		rsWriteLogger.trace(getLogPrefix() + "Cancellation");
 		if (this.subscription != null) {
 			this.subscription.cancel();
 		}
@@ -223,8 +230,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	private boolean changeState(State oldState, State newState) {
 		boolean result = this.state.compareAndSet(oldState, newState);
-		if (result && logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + oldState + " -> " + newState);
+		if (result && rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + oldState + " -> " + newState);
 		}
 		return result;
 	}
@@ -247,8 +254,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	private void writeIfPossible() {
 		boolean result = isWritePossible();
-		if (!result && logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "Writing not possible");
+		if (!result && rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "isWritePossible: false");
 		}
 		if (result) {
 			onWritePossible();

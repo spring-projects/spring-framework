@@ -56,12 +56,23 @@ public class ReactorNettyWebSocketSession
 		return getDelegate().getInbound()
 				.aggregateFrames(DEFAULT_FRAME_MAX_SIZE)
 				.receiveFrames()
-				.map(super::toMessage);
+				.map(super::toMessage)
+				.doOnNext(message -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace(getLogPrefix() + "Received " + message);
+					}
+				});
 	}
 
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
-		Flux<WebSocketFrame> frames = Flux.from(messages).map(this::toFrame);
+		Flux<WebSocketFrame> frames = Flux.from(messages)
+				.doOnNext(message -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace(getLogPrefix() + "Sending " + message);
+					}
+				})
+				.map(this::toFrame);
 		return getDelegate().getOutbound()
 				.options(NettyPipeline.SendOptions::flushOnEach)
 				.sendObject(frames)

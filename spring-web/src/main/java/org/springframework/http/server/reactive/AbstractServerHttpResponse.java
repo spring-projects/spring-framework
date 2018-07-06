@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -54,6 +56,8 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * the response status and headers.
 	 */
 	private enum State {NEW, COMMITTING, COMMITTED}
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 
 	private final DataBufferFactory dataBufferFactory;
