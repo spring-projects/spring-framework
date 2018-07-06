@@ -129,7 +129,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected String initConnectionId() {
+	protected String initId() {
 		return ObjectUtils.getIdentityHexString(this.exchange.getConnection());
 	}
 

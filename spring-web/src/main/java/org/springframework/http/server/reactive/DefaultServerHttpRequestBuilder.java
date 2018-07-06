@@ -32,7 +32,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -192,8 +191,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		private final ServerHttpRequest originalRequest;
 
-		private final String requestId;
-
 
 		public MutatedServerHttpRequest(URI uri, @Nullable String contextPath,
 				HttpHeaders headers, String methodValue, MultiValueMap<String, HttpCookie> cookies,
@@ -206,9 +203,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			this.sslInfo = sslInfo != null ? sslInfo : originalRequest.getSslInfo();
 			this.body = body;
 			this.originalRequest = originalRequest;
-			this.requestId = originalRequest instanceof AbstractServerHttpRequest ?
-					((AbstractServerHttpRequest) originalRequest).getConnectionId() :
-					ObjectUtils.getIdentityHexString(originalRequest);
 		}
 
 		@Override
@@ -245,8 +239,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		}
 
 		@Override
-		public String getConnectionId() {
-			return this.requestId;
+		public String getId() {
+			return this.originalRequest.getId();
 		}
 	}
 

@@ -39,6 +39,14 @@ import org.springframework.util.MultiValueMap;
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
 
 	/**
+	 * Return an id that represents the underlying connection, if available, or
+	 * the request, for the purpose of correlating log messages.
+	 * @since 5.1
+	 * @see org.springframework.web.server.ServerWebExchange#getLogPrefix()
+	 */
+	String getId();
+
+	/**
 	 * Returns a structured representation of the request path including the
 	 * context path + path within application portions, path segments with
 	 * encoded and decoded values, and path parameters.

@@ -178,7 +178,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest build() {
-		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(
+		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(this.exchange.getRequest().getId(),
 				this.methodName, this.uri, this.headers, this.cookies, this.body);
 		ServerWebExchange exchange = new DelegatingServerWebExchange(
 				serverHttpRequest, this.exchange, this.messageReaders);
@@ -189,6 +189,8 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	private static class BuiltServerHttpRequest implements ServerHttpRequest {
 
 		private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
+
+		private final String id;
 
 		private final String method;
 
@@ -204,9 +206,10 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Flux<DataBuffer> body;
 
-		public BuiltServerHttpRequest(String method, URI uri, HttpHeaders headers,
+		public BuiltServerHttpRequest(String id, String method, URI uri, HttpHeaders headers,
 				MultiValueMap<String, HttpCookie> cookies, Flux<DataBuffer> body) {
 
+			this.id = id;
 			this.method = method;
 			this.uri = uri;
 			this.path = RequestPath.parse(uri, null);
@@ -239,6 +242,11 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 				}
 			}
 			return queryParams;
+		}
+
+		@Override
+		public String getId() {
+			return this.id;
 		}
 
 		@Override

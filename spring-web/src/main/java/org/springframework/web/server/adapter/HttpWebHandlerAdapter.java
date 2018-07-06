@@ -29,13 +29,11 @@ import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
@@ -216,7 +214,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 
 		ServerWebExchange exchange = createExchange(request, response);
-		exchange.getAttributes().put(ServerWebExchange.LOG_ID_ATTRIBUTE, initLogId(request));
+		exchange.getAttributes().put(ServerWebExchange.LOG_ID_ATTRIBUTE, request.getId());
 		logExchange(exchange);
 
 		return getDelegate().handle(exchange)
@@ -228,11 +226,6 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	protected ServerWebExchange createExchange(ServerHttpRequest request, ServerHttpResponse response) {
 		return new DefaultServerWebExchange(request, response, this.sessionManager,
 				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext);
-	}
-
-	private String initLogId(ServerHttpRequest request) {
-		return request instanceof AbstractServerHttpRequest ?
-				((AbstractServerHttpRequest) request).getConnectionId() : ObjectUtils.getIdentityHexString(request);
 	}
 
 	private void logExchange(ServerWebExchange exchange) {

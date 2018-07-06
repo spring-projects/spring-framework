@@ -64,7 +64,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	private SslInfo sslInfo;
 
 	@Nullable
-	private String connectionId;
+	private String id;
 
 	@Nullable
 	private String logPrefix;
@@ -82,6 +82,26 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
+
+	public String getId() {
+		if (this.id == null) {
+			this.id = initId();
+			if (this.id == null) {
+				this.id = ObjectUtils.getIdentityHexString(this);
+			}
+		}
+		return this.id;
+	}
+
+	/**
+	 * Obtain the request id to use, or {@code null} in which case the Object
+	 * identity of this request instance is used.
+	 * @since 5.1
+	 */
+	@Nullable
+	protected String initId() {
+		return null;
+	}
 
 	@Override
 	public URI getURI() {
@@ -187,36 +207,12 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	public abstract <T> T getNativeRequest();
 
 	/**
-	 * Return an id representing the underlying connection, if available, or
-	 * otherwise the identify of the request object.
-	 * @since 5.1
-	 */
-	public String getConnectionId() {
-		if (this.connectionId == null) {
-			this.connectionId = initConnectionId();
-			if (this.connectionId == null) {
-				this.connectionId = ObjectUtils.getIdentityHexString(this);
-			}
-		}
-		return this.connectionId;
-	}
-
-	/**
-	 * Obtain the connection id, if available.
-	 * @since 5.1
-	 */
-	@Nullable
-	protected String initConnectionId() {
-		return null;
-	}
-
-	/**
 	 * For internal use in logging at the HTTP adapter layer.
 	 * @since 5.1
 	 */
 	String getLogPrefix() {
 		if (this.logPrefix == null) {
-			this.logPrefix = "[" + getConnectionId() + "] ";
+			this.logPrefix = "[" + getId() + "] ";
 		}
 		return this.logPrefix;
 	}
