@@ -18,8 +18,10 @@ package org.springframework.web.reactive.function.server
 
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
+import java.net.URI
 
 /**
  * Allow to create easily a `RouterFunction<ServerResponse>` from a Kotlin router DSL based
@@ -420,6 +422,122 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	fun resources(lookupFunction: (ServerRequest) -> Mono<Resource>) {
 		routes += RouterFunctions.resources(lookupFunction)
 	}
+
+	/**
+	 * Create a builder with the status code and headers of the given response.
+	 * @param other the response to copy the status and headers from
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun from(other: ServerResponse): ServerResponse.BodyBuilder =
+			ServerResponse.from(other)
+
+	/**
+	 * Create a builder with the given HTTP status.
+	 * @param status the response status
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun status(status: HttpStatus): ServerResponse.BodyBuilder =
+			ServerResponse.status(status)
+
+	/**
+	 * Create a builder with the given HTTP status.
+	 * @param status the response status
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun status(status: Int): ServerResponse.BodyBuilder =
+			ServerResponse.status(status)
+
+	/**
+	 * Create a builder with the status set to [200 OK][HttpStatus.OK].
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun ok(): ServerResponse.BodyBuilder =
+			ServerResponse.ok()
+
+	/**
+	 * Create a new builder with a [201 Created][HttpStatus.CREATED] status
+	 * and a location header set to the given URI.
+	 * @param location the location URI
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun created(location: URI): ServerResponse.BodyBuilder =
+			ServerResponse.created(location)
+
+	/**
+	 * Create a builder with an [202 Accepted][HttpStatus.ACCEPTED] status.
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun accepted(): ServerResponse.BodyBuilder =
+			ServerResponse.accepted()
+
+	/**
+	 * Create a builder with a [204 No Content][HttpStatus.NO_CONTENT] status.
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun noContent(): ServerResponse.HeadersBuilder<*> =
+			ServerResponse.noContent()
+
+	/**
+	 * Create a builder with a [303 See Other][HttpStatus.SEE_OTHER]
+	 * status and a location header set to the given URI.
+	 * @param location the location URI
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun seeOther(location: URI): ServerResponse.BodyBuilder =
+			ServerResponse.seeOther(location)
+
+	/**
+	 * Create a builder with a [307 Temporary Redirect][HttpStatus.TEMPORARY_REDIRECT]
+	 * status and a location header set to the given URI.
+	 * @param location the location URI
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun temporaryRedirect(location: URI): ServerResponse.BodyBuilder =
+			ServerResponse.temporaryRedirect(location)
+
+	/**
+	 * Create a builder with a [308 Permanent Redirect][HttpStatus.PERMANENT_REDIRECT]
+	 * status and a location header set to the given URI.
+	 * @param location the location URI
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun permanentRedirect(location: URI): ServerResponse.BodyBuilder =
+			ServerResponse.permanentRedirect(location)
+
+	/**
+	 * Create a builder with a [400 Bad Request][HttpStatus.BAD_REQUEST] status.
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun badRequest(): ServerResponse.BodyBuilder =
+			ServerResponse.badRequest()
+
+	/**
+	 * Create a builder with a [404 Not Found][HttpStatus.NOT_FOUND] status.
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun notFound(): ServerResponse.HeadersBuilder<*> =
+			ServerResponse.notFound()
+
+	/**
+	 * Create a builder with an
+	 * [422 Unprocessable Entity][HttpStatus.UNPROCESSABLE_ENTITY] status.
+	 * @return the created builder
+	 * @since 5.1
+	 */
+	fun unprocessableEntity(): ServerResponse.BodyBuilder =
+			ServerResponse.unprocessableEntity()
 
 	/**
 	 * Return a composed routing function created from all the registered routes.

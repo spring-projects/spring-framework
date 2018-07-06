@@ -22,7 +22,6 @@ import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
 import org.springframework.http.MediaType.*
 import org.springframework.web.reactive.function.server.MockServerRequest.builder
-import org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.net.URI
@@ -114,17 +113,20 @@ class RouterFunctionDslTests {
 	}
 
 
-	fun sampleRouter() = router {
+	private fun sampleRouter() = router {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
 		"/api".nest {
 			POST("/foo/", ::handleFromClass)
 			PUT("/foo/", :: handleFromClass)
+			PATCH("/foo/") {
+				ok().build()
+			}
 			"/foo/"  { handleFromClass(it) }
 		}
 		accept(APPLICATION_ATOM_XML, ::handle)
 		contentType(APPLICATION_OCTET_STREAM, ::handle)
 		method(PATCH, ::handle)
-		headers({ it.accept().contains(APPLICATION_JSON) }).nest {
+		headers { it.accept().contains(APPLICATION_JSON) }.nest {
 			GET("/api/foo/", ::handle)
 		}
 		headers({ it.header("bar").isNotEmpty() }, ::handle)
@@ -143,7 +145,7 @@ class RouterFunctionDslTests {
 }
 
 @Suppress("UNUSED_PARAMETER")
-fun handleFromClass(req: ServerRequest) = ok().build()
+fun handleFromClass(req: ServerRequest) = ServerResponse.ok().build()
 
 @Suppress("UNUSED_PARAMETER")
-fun handle(req: ServerRequest) = ok().build()
+fun handle(req: ServerRequest) = ServerResponse.ok().build()
