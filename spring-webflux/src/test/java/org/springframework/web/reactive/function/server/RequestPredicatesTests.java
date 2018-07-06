@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,19 @@ public class RequestPredicatesTests {
 
 	@Test
 	public void methods() {
+		RequestPredicate predicate = RequestPredicates.methods(HttpMethod.GET, HttpMethod.HEAD);
+		MockServerRequest request = MockServerRequest.builder().method(HttpMethod.GET).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().method(HttpMethod.HEAD).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().method(HttpMethod.POST).build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void allMethods() {
 		URI uri = URI.create("http://localhost/path");
 
 		RequestPredicate predicate = RequestPredicates.GET("/p*");

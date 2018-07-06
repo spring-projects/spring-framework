@@ -22,6 +22,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -79,12 +80,24 @@ public abstract class RequestPredicates {
 
 
 	/**
-	 * Return a {@code RequestPredicate} that tests against the given HTTP method.
-	 * @param httpMethod the HTTP method to match to
+	 * Return a {@code RequestPredicate} that matches if the request's HTTP method is equal to the
+	 * given method
+	 * @param httpMethod the HTTP method to match against
 	 * @return a predicate that tests against the given HTTP method
 	 */
 	public static RequestPredicate method(HttpMethod httpMethod) {
 		return new HttpMethodPredicate(httpMethod);
+	}
+
+	/**
+	 * Return a {@code RequestPredicate} that matches if the request's HTTP method is equal to one
+	 * the of the given methods.
+	 * @param httpMethods the HTTP methods to match against
+	 * @return a predicate that tests against the given HTTP methods
+	 * @since 5.1
+	 */
+	public static RequestPredicate methods(HttpMethod... httpMethods) {
+		return new HttpMethodPredicate(httpMethods);
 	}
 
 	/**
@@ -336,23 +349,34 @@ public abstract class RequestPredicates {
 
 	private static class HttpMethodPredicate implements RequestPredicate {
 
-		private final HttpMethod httpMethod;
+		private final Set<HttpMethod> httpMethods;
 
 		public HttpMethodPredicate(HttpMethod httpMethod) {
 			Assert.notNull(httpMethod, "HttpMethod must not be null");
-			this.httpMethod = httpMethod;
+			this.httpMethods = EnumSet.of(httpMethod);
+		}
+
+		public HttpMethodPredicate(HttpMethod... httpMethods) {
+			Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
+
+			this.httpMethods = EnumSet.copyOf(Arrays.asList(httpMethods));
 		}
 
 		@Override
 		public boolean test(ServerRequest request) {
-			boolean match = this.httpMethod == request.method();
-			traceMatch("Method", this.httpMethod, request.method(), match);
+			boolean match = this.httpMethods.contains(request.method());
+			traceMatch("Method", this.httpMethods, request.method(), match);
 			return match;
 		}
 
 		@Override
 		public String toString() {
-			return this.httpMethod.toString();
+			if (this.httpMethods.size() == 1) {
+				return this.httpMethods.iterator().next().toString();
+			}
+			else {
+				return this.httpMethods.toString();
+			}
 		}
 	}
 
