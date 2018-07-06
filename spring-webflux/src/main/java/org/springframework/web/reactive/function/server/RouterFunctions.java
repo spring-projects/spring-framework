@@ -41,9 +41,8 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * <strong>Central entry point to Spring's functional web framework.</strong>
- * Exposes routing functionality, such as to
- * {@linkplain #route() create} a {@code RouterFunction} using a discoverable builder-style API,
- * to
+ * Exposes routing functionality, such as to {@linkplain #route() create} a
+ * {@code RouterFunction} using a discoverable builder-style API, to
  * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RouterFunction}
  * given a {@code RequestPredicate} and {@code HandlerFunction}, and to do further
  * {@linkplain #nest(RequestPredicate, RouterFunction) subrouting} on an existing routing
@@ -72,7 +71,9 @@ public abstract class RouterFunctions {
 	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE =
 			RouterFunctions.class.getName() + ".uriTemplateVariables";
 
-	private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER = request -> ServerResponse.notFound().build();
+	private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER =
+			request -> ServerResponse.notFound().build();
+
 
 	/**
 	 * Offers a discoverable way to create router functions through a builder-style interface.
@@ -116,9 +117,8 @@ public abstract class RouterFunctions {
 	 * RouterFunction&lt;ServerResponse&gt; userRoutes =
 	 *   RouterFunctions.route(RequestPredicates.method(HttpMethod.GET), this::listUsers)
 	 *     .andRoute(RequestPredicates.method(HttpMethod.POST), this::createUser);
-	 *
 	 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
-	 *   RouterFunctions.nest(RequestPredicates.path("/user"),userRoutes);
+	 *   RouterFunctions.nest(RequestPredicates.path("/user"), userRoutes);
 	 * </pre>
 	 * @param predicate the predicate to test
 	 * @param routerFunction the nested router function to delegate to if the predicate applies
@@ -158,7 +158,6 @@ public abstract class RouterFunctions {
 	 * Function&lt;ServerRequest, Mono&lt;Resource&gt;&gt; lookupFunction =
 	 *   RouterFunctions.resourceLookupFunction("/resources/**", new FileSystemResource("public-resources/"))
 	 *     .andThen(resourceMono -&gt; resourceMono.switchIfEmpty(defaultResource));
-	 *
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources(lookupFunction);
      * </pre>
 	 * @param pattern the pattern to match
@@ -259,6 +258,7 @@ public abstract class RouterFunctions {
 		};
 	}
 
+
 	private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {
 		try {
 			return supplier.get();
@@ -283,9 +283,10 @@ public abstract class RouterFunctions {
 		return (HandlerFunction<T>) handlerFunction;
 	}
 
+
 	/**
-	 * Represents a discoverable builder for router functions. Obtained via
-	 * {@link RouterFunctions#route()}.
+	 * Represents a discoverable builder for router functions.
+	 * Obtained via {@link RouterFunctions#route()}.
 	 * @since 5.1
 	 */
 	public interface Builder {
@@ -307,9 +308,8 @@ public abstract class RouterFunctions {
 		 * to the {@code listUsers} method in {@code userController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; route =
-		 *     RouterFunctions.route()
-		 *     .GET("/user", RequestPredicates.accept(MediaType.APPLICATION_JSON),
-		 *       userController::listUsers)
+		 *   RouterFunctions.route()
+		 *     .GET("/user", RequestPredicates.accept(MediaType.APPLICATION_JSON), userController::listUsers)
 		 *     .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
@@ -359,9 +359,8 @@ public abstract class RouterFunctions {
 		 * to the {@code addUser} method in {@code userController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; route =
-		 *     RouterFunctions.route()
-		 *     .POST("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON),
-		 *       userController::addUser)
+		 *   RouterFunctions.route()
+		 *     .POST("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::addUser)
 		 *     .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
@@ -389,9 +388,8 @@ public abstract class RouterFunctions {
 		 * to the {@code editUser} method in {@code userController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; route =
-		 *     RouterFunctions.route()
-		 *     .PUT("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON),
-		 *       userController::editUser)
+		 *   RouterFunctions.route()
+		 *     .PUT("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::editUser)
 		 *     .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
@@ -419,9 +417,8 @@ public abstract class RouterFunctions {
 		 * to the {@code editUser} method in {@code userController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; route =
-		 *     RouterFunctions.route()
-		 *     .PATCH("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON),
-		 *       userController::editUser)
+		 *   RouterFunctions.route()
+		 *     .PATCH("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::editUser)
 		 *     .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
@@ -483,11 +480,11 @@ public abstract class RouterFunctions {
 		 * {@code OrderController.routerFunction()}.
 		 * to the {@code changeUser} method in {@code userController}:
 		 * <pre class="code">
-		 * RouterFunction&lt;ServerResponse&gt; route =
+		 * RouterFunctionlt;ServerResponsegt; route =
 		 *   RouterFunctions.route()
-		 *   .GET("/users", userController::listUsers)
-		 *   .add(orderController.routerFunction());
-		 *   .build();
+		 *     .GET("/users", userController::listUsers)
+		 *     .add(orderController.routerFunction());
+		 *     .build();
 		 * </pre>
 		 * @param routerFunction the router function to be added
 		 * @return this builder
@@ -529,10 +526,9 @@ public abstract class RouterFunctions {
 		 *   RouterFunctions.route()
 		 *     .nest(RequestPredicates.path("/user"), () ->
 		 *       RouterFunctions.route()
-		 *       .GET(this::listUsers)
-		 *       .POST(this::createUser);
-		 *       .build();
-		 *     )
+		 *         .GET(this::listUsers)
+		 *         .POST(this::createUser)
+		 *         .build())
 		 *     .build();
 		 * </pre>
 		 * @param predicate the predicate to test
@@ -555,8 +551,7 @@ public abstract class RouterFunctions {
 		 *   RouterFunctions.route()
 		 *     .nest(RequestPredicates.path("/user"), builder ->
 		 *       builder.GET(this::listUsers)
-		 *              .POST(this::createUser);
-		 *     )
+		 *              .POST(this::createUser))
 		 *     .build();
 		 * </pre>
 		 * @param predicate the predicate to test
@@ -601,8 +596,7 @@ public abstract class RouterFunctions {
 		 *   RouterFunctions.route()
 		 *     .path("/user", builder ->
 		 *       builder.GET(this::listUsers)
-		 *              .POST(this::createUser);
-		 *     )
+		 *              .POST(this::createUser))
 		 *     .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
@@ -727,7 +721,6 @@ public abstract class RouterFunctions {
 		 * @return the built router function
 		 */
 		RouterFunction<ServerResponse> build();
-
 	}
 
 
@@ -784,11 +777,11 @@ public abstract class RouterFunctions {
 		}
 	}
 
+
 	/**
 	 * A composed routing function that first invokes one function, and then invokes the
 	 * another function (of the same response type {@code T}) if this route had
 	 * {@linkplain Mono#empty() no result}.
-	 *
 	 * @param <T> the server response type
 	 */
 	static final class SameComposedRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
@@ -814,6 +807,7 @@ public abstract class RouterFunctions {
 			this.second.accept(visitor);
 		}
 	}
+
 
 	/**
 	 * A composed routing function that first invokes one function, and then invokes
@@ -843,13 +837,12 @@ public abstract class RouterFunctions {
 			this.first.accept(visitor);
 			this.second.accept(visitor);
 		}
-
 	}
+
 
 	/**
 	 * Filter the specified {@linkplain HandlerFunction handler functions} with the given
 	 * {@linkplain HandlerFilterFunction filter function}.
-	 *
 	 * @param <T> the type of the {@linkplain HandlerFunction handler function} to filter
 	 * @param <S> the type of the response of the function
 	 */
@@ -883,8 +876,8 @@ public abstract class RouterFunctions {
 		}
 	}
 
-	private static final class DefaultRouterFunction<T extends ServerResponse>
-			extends AbstractRouterFunction<T> {
+
+	private static final class DefaultRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
 
 		private final RequestPredicate predicate;
 
@@ -915,11 +908,10 @@ public abstract class RouterFunctions {
 		public void accept(Visitor visitor) {
 			visitor.route(this.predicate, this.handlerFunction);
 		}
-
 	}
 
-	private static final class DefaultNestedRouterFunction<T extends ServerResponse>
-			extends AbstractRouterFunction<T> {
+
+	private static final class DefaultNestedRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
 
 		private final RequestPredicate predicate;
 
@@ -952,7 +944,8 @@ public abstract class RouterFunctions {
 		private void mergeTemplateVariables(ServerRequest request, Map<String, String> variables) {
 			if (!variables.isEmpty()) {
 				Map<String, Object> attributes = request.attributes();
-				Map<String, String> oldVariables = (Map<String, String>)request.attribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
+				Map<String, String> oldVariables =
+						(Map<String, String>) request.attribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
 						.orElseGet(LinkedHashMap::new);
 				Map<String, String> mergedVariables = new LinkedHashMap<>(oldVariables);
 				mergedVariables.putAll(variables);
@@ -967,8 +960,8 @@ public abstract class RouterFunctions {
 			this.routerFunction.accept(visitor);
 			visitor.endNested(this.predicate);
 		}
-
 	}
+
 
 	private static class ResourcesRouterFunction extends  AbstractRouterFunction<ServerResponse> {
 
@@ -989,6 +982,7 @@ public abstract class RouterFunctions {
 			visitor.resources(this.lookupFunction);
 		}
 	}
+
 
 	private static class HandlerStrategiesResponseContext implements ServerResponse.Context {
 

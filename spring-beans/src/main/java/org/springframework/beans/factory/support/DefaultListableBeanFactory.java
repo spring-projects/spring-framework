@@ -79,19 +79,17 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Spring's default implementation of the
- * {@link org.springframework.beans.factory.ListableBeanFactory} and
- * {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
- * based on bean definition objects.
+ * Spring's default implementation of the {@link ConfigurableListableBeanFactory}
+ * and {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
+ * based on bean definition metadata, extensible through post-processors.
  *
  * <p>Typical usage is registering all bean definitions first (possibly read
- * from a bean definition file), before accessing beans. Bean definition lookup
+ * from a bean definition file), before accessing beans. Bean lookup by name
  * is therefore an inexpensive operation in a local bean definition table,
- * operating on pre-built bean definition metadata objects.
+ * operating on pre-resolved bean definition metadata objects.
  *
- * <p>Can be used as a standalone bean factory, or as a superclass for custom
- * bean factories. Note that readers for specific bean definition formats are
- * typically implemented separately rather than as bean factory subclasses:
+ * <p>Note that readers for specific bean definition formats are typically
+ * implemented separately rather than as bean factory subclasses:
  * see for example {@link PropertiesBeanDefinitionReader} and
  * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
  *
@@ -108,9 +106,10 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @since 16 April 2001
- * @see StaticListableBeanFactory
- * @see PropertiesBeanDefinitionReader
- * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+ * @see #registerBeanDefinition
+ * @see #addBeanPostProcessor
+ * @see #getBean
+ * @see #resolveDependency
  */
 @SuppressWarnings("serial")
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
