@@ -81,7 +81,7 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's HTTP method is equal to the
-	 * given method
+	 * given method.
 	 * @param httpMethod the HTTP method to match against
 	 * @return a predicate that tests against the given HTTP method
 	 */
