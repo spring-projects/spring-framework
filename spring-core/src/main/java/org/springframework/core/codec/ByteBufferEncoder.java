@@ -19,7 +19,6 @@ package org.springframework.core.codec;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -56,10 +55,9 @@ public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 
 		return Flux.from(inputStream).map(byteBuffer -> {
 			DataBuffer dataBuffer = bufferFactory.wrap(byteBuffer);
-			Log theLogger = Hints.getLoggerOrDefault(hints, logger);
-			if (theLogger.isDebugEnabled()) {
-				theLogger.debug(Hints.getLogPrefix(hints) +
-						"Writing " + dataBuffer.readableByteCount() + " bytes");
+			if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+				String logPrefix = Hints.getLogPrefix(hints);
+				logger.debug(logPrefix + "Writing " + dataBuffer.readableByteCount() + " bytes");
 			}
 			return dataBuffer;
 		});

@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.impl.NoOpLog;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -87,7 +86,7 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	/** Suppress logging from individual part writers (full map logged at this level). */
-	private static final Map<String, Object> DEFAULT_HINTS = Hints.from(Hints.LOGGER_HINT, new NoOpLog());
+	private static final Map<String, Object> DEFAULT_HINTS = Hints.from(Hints.SUPPRESS_LOGGING_HINT, true);
 
 
 	private final List<HttpMessageWriter<?>> partWriters;

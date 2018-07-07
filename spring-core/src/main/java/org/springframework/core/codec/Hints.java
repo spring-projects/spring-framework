@@ -39,12 +39,12 @@ public abstract class Hints {
 	public static final String LOG_PREFIX_HINT = Log.class.getName() + ".PREFIX";
 
 	/**
-	 * Name of hint for a preferred {@link Log logger} to use. This can be used
-	 * by a composite encoder (e.g. multipart requests) to control or suppress
-	 * logging by individual part encoders.
+	 * Name of boolean hint whether to avoid logging data either because it's
+	 * potentially sensitive, or because it has been logged by a composite
+	 * encoder, e.g. for multipart requests.
 	 * @since 5.1
 	 */
-	public static final String LOGGER_HINT = Log.class.getName();
+	public static final String SUPPRESS_LOGGING_HINT = Log.class.getName() + ".SUPPRESS_LOGGING";
 
 
 	/**
@@ -95,13 +95,12 @@ public abstract class Hints {
 	}
 
 	/**
-	 * Obtain the hint {@link #LOGGER_HINT}, if present, or the given logger.
-	 * @param hints the hints passed to the encode method
-	 * @param defaultLogger the logger to return if a hint is not found
-	 * @return the logger to use
+	 * Whether to suppress logging based on the hint {@link #SUPPRESS_LOGGING_HINT}.
+	 * @param hints the hints map
+	 * @return whether logging of data is allowed
 	 */
-	public static Log getLoggerOrDefault(@Nullable Map<String, Object> hints, Log defaultLogger) {
-		return hints != null ? (Log) hints.getOrDefault(LOGGER_HINT, defaultLogger) : defaultLogger;
+	public static boolean suppressLogging(@Nullable Map<String, Object> hints) {
+		return hints != null && (boolean) hints.getOrDefault(SUPPRESS_LOGGING_HINT, false);
 	}
 
 	/**

@@ -18,7 +18,6 @@ package org.springframework.core.codec;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -55,10 +54,9 @@ public class ByteArrayEncoder extends AbstractEncoder<byte[]> {
 
 		return Flux.from(inputStream).map(bytes -> {
 			DataBuffer dataBuffer = bufferFactory.wrap(bytes);
-			Log theLogger = Hints.getLoggerOrDefault(hints, logger);
-			if (theLogger.isDebugEnabled()) {
-				theLogger.debug(Hints.getLogPrefix(hints) +
-						"Writing " + dataBuffer.readableByteCount() + " bytes");
+			if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+				String logPrefix = Hints.getLogPrefix(hints);
+				logger.debug(logPrefix + "Writing " + dataBuffer.readableByteCount() + " bytes");
 			}
 			return dataBuffer;
 		});
