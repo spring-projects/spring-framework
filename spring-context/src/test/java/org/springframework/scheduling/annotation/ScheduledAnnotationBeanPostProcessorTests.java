@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
 import org.junit.Test;
@@ -46,6 +47,7 @@ import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.config.StartupTask;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -62,6 +64,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Sam Brannen
  * @author Stevo Slavić
+ * @author Alex Panchenko
  */
 public class ScheduledAnnotationBeanPostProcessorTests {
 
@@ -219,6 +222,35 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals("fixedRate", targetMethod.getName());
 		assertEquals(2000L, task2.getInitialDelay());
 		assertEquals(4000L, task2.getInterval());
+	}
+
+	@Test
+	public void startupTask() throws InterruptedException {
+		Assume.group(TestGroup.LONG_RUNNING);
+		StartupTestBean.executionCount.set(0);
+
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(StartupTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		Object postProcessor = context.getBean("postProcessor");
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<StartupTask> startupTasks = (List<StartupTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("startupTasks");
+		assertEquals(1, startupTasks.size());
+		StartupTask task = startupTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertEquals(target, targetObject);
+		assertEquals("startup", targetMethod.getName());
+		Thread.sleep(10000);
+		assertEquals(1, StartupTestBean.executionCount.get());
 	}
 
 	@Test
@@ -694,6 +726,15 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	static class FixedRatesDefaultBean implements FixedRatesDefaultMethod {
 	}
 
+	@Validated
+	static class StartupTestBean {
+		static final AtomicInteger executionCount = new AtomicInteger();
+
+		@Scheduled(cron = "@start", initialDelay = 1_000)
+		private void startup() {
+			executionCount.incrementAndGet();
+		}
+	}
 
 	@Validated
 	static class CronTestBean {

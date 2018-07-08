@@ -67,6 +67,7 @@ import org.springframework.scheduling.config.FixedRateTask;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.config.StartupTask;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
@@ -91,6 +92,7 @@ import org.springframework.util.StringValueResolver;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Elizabeth Chatman
+ * @author Alex Panchenko
  * @since 3.0
  * @see Scheduled
  * @see EnableScheduling
@@ -403,16 +405,20 @@ public class ScheduledAnnotationBeanPostProcessor
 					zone = this.embeddedValueResolver.resolveStringValue(zone);
 				}
 				if (StringUtils.hasLength(cron)) {
-					Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
-					processedSchedule = true;
-					TimeZone timeZone;
-					if (StringUtils.hasText(zone)) {
-						timeZone = StringUtils.parseTimeZoneString(zone);
+					if ("@start".equals(cron)) {
+						processedSchedule = true;
+						tasks.add(this.registrar.scheduleStartupTask(new StartupTask(runnable, initialDelay)));
+					} else {
+						Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
+						processedSchedule = true;
+						TimeZone timeZone;
+						if (StringUtils.hasText(zone)) {
+							timeZone = StringUtils.parseTimeZoneString(zone);
+						} else {
+							timeZone = TimeZone.getDefault();
+						}
+						tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
 					}
-					else {
-						timeZone = TimeZone.getDefault();
-					}
-					tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
 				}
 			}
 

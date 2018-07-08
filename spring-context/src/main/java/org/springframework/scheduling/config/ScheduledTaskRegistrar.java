@@ -63,6 +63,9 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	private ScheduledExecutorService localExecutor;
 
 	@Nullable
+	private List<StartupTask> startupTasks;
+
+	@Nullable
 	private List<TriggerTask> triggerTasks;
 
 	@Nullable
@@ -115,6 +118,14 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 		return this.taskScheduler;
 	}
 
+	public void setStartupTaskList(List<StartupTask> startupTasks) {
+		this.startupTasks = startupTasks;
+	}
+
+	public List<StartupTask> getStartupTaskList() {
+		return startupTasks != null ? Collections.unmodifiableList(startupTasks) :
+				Collections.emptyList();
+	}
 
 	/**
 	 * Specify triggered tasks as a Map of Runnables (the tasks) and Trigger objects
@@ -232,6 +243,22 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 				Collections.emptyList());
 	}
 
+	/**
+	 * @since 5.x
+	 */
+	public void addStartupTask(Runnable task, long initialDelay) {
+		addStartupTask(new StartupTask(task, initialDelay));
+	}
+
+	/**
+	 * @since 5.x
+	 */
+	public void addStartupTask(StartupTask task) {
+		if (this.startupTasks == null) {
+			this.startupTasks = new ArrayList<>();
+		}
+		this.startupTasks.add(task);
+	}
 
 	/**
 	 * Add a Runnable task to be triggered per the given {@link Trigger}.
@@ -317,7 +344,8 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * @since 3.2
 	 */
 	public boolean hasTasks() {
-		return (!CollectionUtils.isEmpty(this.triggerTasks) ||
+		return (!CollectionUtils.isEmpty(this.startupTasks) ||
+				!CollectionUtils.isEmpty(this.triggerTasks) ||
 				!CollectionUtils.isEmpty(this.cronTasks) ||
 				!CollectionUtils.isEmpty(this.fixedRateTasks) ||
 				!CollectionUtils.isEmpty(this.fixedDelayTasks));
@@ -341,6 +369,11 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 		if (this.taskScheduler == null) {
 			this.localExecutor = Executors.newSingleThreadScheduledExecutor();
 			this.taskScheduler = new ConcurrentTaskScheduler(this.localExecutor);
+		}
+		if (this.startupTasks != null) {
+			for (StartupTask task : this.startupTasks) {
+				addScheduledTask(scheduleStartupTask(task));
+			}
 		}
 		if (this.triggerTasks != null) {
 			for (TriggerTask task : this.triggerTasks) {
@@ -370,6 +403,26 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 		}
 	}
 
+	/**
+	 * @since 5.x
+	 */
+	@Nullable
+	public ScheduledTask scheduleStartupTask(StartupTask task) {
+		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
+		boolean newTask = false;
+		if (scheduledTask == null) {
+			scheduledTask = new ScheduledTask(task);
+			newTask = true;
+		}
+		if (this.taskScheduler != null) {
+			scheduledTask.future = this.taskScheduler.schedule(task.getRunnable(),
+					new Date(System.currentTimeMillis() + task.getInitialDelay()));
+		} else {
+			addStartupTask(task);
+			this.unresolvedTasks.put(task, scheduledTask);
+		}
+		return (newTask ? scheduledTask : null);
+	}
 
 	/**
 	 * Schedule the specified trigger task, either right away if possible
