@@ -2943,7 +2943,7 @@ query methods, one for an `int` and one that queries for a `String`.
 
 In addition to the single result query methods, several methods return a list with an
 entry for each row that the query returned. The most generic method is `queryForList(..)`
-which returns a `List` where each entry is a `Map` containing one entry for each column,
+which returns a `List` where each element is a `Map` containing one entry for each column,
 using the column name as the key. If you add a method to the above example to retrieve a
 list of all the rows, it would look like this:
 
