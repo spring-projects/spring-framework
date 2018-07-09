@@ -121,12 +121,6 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 
 	@Override
 	@Nullable
-	public AnnotationAttributes getAnnotationAttributes(String annotationName) {
-		return getAnnotationAttributes(annotationName, false);
-	}
-
-	@Override
-	@Nullable
 	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
 				this.attributesMap, this.metaAnnotationMap, annotationName);
@@ -135,12 +129,6 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 		}
 		return AnnotationReadingVisitorUtils.convertClassValues(
 				"method '" + getMethodName() + "'", this.classLoader, raw, classValuesAsString);
-	}
-
-	@Override
-	@Nullable
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
-		return getAllAnnotationAttributes(annotationName, false);
 	}
 
 	@Override

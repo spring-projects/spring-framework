@@ -73,11 +73,6 @@ public class StandardClassMetadata implements ClassMetadata {
 	}
 
 	@Override
-	public boolean isConcrete() {
-		return !(isInterface() || isAbstract());
-	}
-
-	@Override
 	public boolean isFinal() {
 		return Modifier.isFinal(this.introspectedClass.getModifiers());
 	}
@@ -90,20 +85,10 @@ public class StandardClassMetadata implements ClassMetadata {
 	}
 
 	@Override
-	public boolean hasEnclosingClass() {
-		return (this.introspectedClass.getEnclosingClass() != null);
-	}
-
-	@Override
 	@Nullable
 	public String getEnclosingClassName() {
 		Class<?> enclosingClass = this.introspectedClass.getEnclosingClass();
 		return (enclosingClass != null ? enclosingClass.getName() : null);
-	}
-
-	@Override
-	public boolean hasSuperClass() {
-		return (this.introspectedClass.getSuperclass() != null);
 	}
 
 	@Override

@@ -117,21 +117,9 @@ public class StandardMethodMetadata implements MethodMetadata {
 
 	@Override
 	@Nullable
-	public Map<String, Object> getAnnotationAttributes(String annotationName) {
-		return getAnnotationAttributes(annotationName, false);
-	}
-
-	@Override
-	@Nullable
 	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getMergedAnnotationAttributes(this.introspectedMethod,
 				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
-	}
-
-	@Override
-	@Nullable
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
-		return getAllAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
