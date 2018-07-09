@@ -25,6 +25,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
+import org.hibernate.JDBCException;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectDeletedException;
@@ -58,6 +59,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.lang.Nullable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.ObjectRetrievalFailureException;
@@ -108,6 +110,9 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	boolean prepareConnection = true;
 
+	@Nullable
+	private SQLExceptionTranslator jdbcExceptionTranslator;
+
 
 	/**
 	 * Set whether to prepare the underlying JDBC Connection of a transactional
@@ -133,6 +138,21 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 */
 	public void setPrepareConnection(boolean prepareConnection) {
 		this.prepareConnection = prepareConnection;
+	}
+
+	/**
+	 * Set the JDBC exception translator for Hibernate exception translation purposes.
+	 * <p>Applied to any detected {@link java.sql.SQLException} root cause of a Hibernate
+	 * {@link JDBCException}, overriding Hibernate's own {@code SQLException} translation
+	 * (which is based on a Hibernate Dialect for a specific target database).
+	 * @since 5.1
+	 * @see java.sql.SQLException
+	 * @see org.hibernate.JDBCException
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 */
+	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
+		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
 	}
 
 
@@ -244,6 +264,15 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 * @return the corresponding DataAccessException instance
 	 */
 	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
+		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
+			JDBCException jdbcEx = (JDBCException) ex;
+			DataAccessException dae = this.jdbcExceptionTranslator.translate(
+					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
+			if (dae != null) {
+				throw dae;
+			}
+		}
+
 		if (ex instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
 		}
