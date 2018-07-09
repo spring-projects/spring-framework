@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.After;
 import org.junit.Test;
@@ -227,7 +228,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test
 	public void startupTask() throws InterruptedException {
 		Assume.group(TestGroup.LONG_RUNNING);
-		StartupTestBean.executionCount.set(0);
+		StartupTestBean.executions.clear();
 
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(StartupTestBean.class);
@@ -242,15 +243,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		@SuppressWarnings("unchecked")
 		List<StartupTask> startupTasks = (List<StartupTask>)
 				new DirectFieldAccessor(registrar).getPropertyValue("startupTasks");
-		assertEquals(1, startupTasks.size());
-		StartupTask task = startupTasks.get(0);
-		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
-		Object targetObject = runnable.getTarget();
-		Method targetMethod = runnable.getMethod();
-		assertEquals(target, targetObject);
-		assertEquals("startup", targetMethod.getName());
+		assertEquals(2, startupTasks.size());
 		Thread.sleep(10000);
-		assertEquals(1, StartupTestBean.executionCount.get());
+		assertEquals(Arrays.asList("start0", "start1"), StartupTestBean.executions);
 	}
 
 	@Test
@@ -726,15 +721,22 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	static class FixedRatesDefaultBean implements FixedRatesDefaultMethod {
 	}
 
-	@Validated
-	static class StartupTestBean {
-		static final AtomicInteger executionCount = new AtomicInteger();
 
-		@Scheduled(cron = "@start", initialDelay = 1_000)
-		private void startup() {
-			executionCount.incrementAndGet();
+	static class StartupTestBean {
+		static final CopyOnWriteArrayList<String> executions = new CopyOnWriteArrayList<>();
+
+		@Scheduled(cron = Scheduled.AT_START)
+		private void start0() {
+			executions.add("start0");
+		}
+
+
+		@Scheduled(cron = Scheduled.AT_START, initialDelay = 1_000)
+		private void start1() {
+			executions.add("start1");
 		}
 	}
+
 
 	@Validated
 	static class CronTestBean {

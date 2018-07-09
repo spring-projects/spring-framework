@@ -405,7 +405,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					zone = this.embeddedValueResolver.resolveStringValue(zone);
 				}
 				if (StringUtils.hasLength(cron)) {
-					if ("@start".equals(cron)) {
+					if (Scheduled.AT_START.equals(cron)) {
 						processedSchedule = true;
 						tasks.add(this.registrar.scheduleStartupTask(new StartupTask(runnable, initialDelay)));
 					} else {

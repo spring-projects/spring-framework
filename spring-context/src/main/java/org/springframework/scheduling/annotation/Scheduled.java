@@ -54,6 +54,8 @@ import java.lang.annotation.Target;
 @Repeatable(Schedules.class)
 public @interface Scheduled {
 
+	String AT_START = "@start";
+
 	/**
 	 * A cron-like expression, extending the usual UN*X definition to include
 	 * triggers on the second as well as minute, hour, day of month, month
