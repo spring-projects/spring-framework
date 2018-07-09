@@ -40,7 +40,8 @@ import org.springframework.lang.Nullable;
  * caching scenarios. For advanced local caching needs, consider
  * {@link org.springframework.cache.jcache.JCacheCacheManager},
  * {@link org.springframework.cache.ehcache.EhCacheCacheManager},
- * {@link org.springframework.cache.caffeine.CaffeineCacheManager}.
+ * {@link org.springframework.cache.caffeine.CaffeineCacheManager},
+ * {@link org.springframework.cache.caffeine.Cache2kCacheManager}.
  *
  * @author Juergen Hoeller
  * @since 3.1
