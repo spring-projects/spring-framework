@@ -34,7 +34,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.function.Consumer;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -532,22 +531,22 @@ public class HttpHeadersTests {
 	}
 
 	@Test
-	public void basicAuthenticationConsumer() throws Exception {
-
+	public void basicAuth() {
 		String username = "foo";
 		String password = "bar";
-
-		Consumer<HttpHeaders> consumer =
-				HttpHeaders.basicAuthenticationConsumer(username, password);
-
-		HttpHeaders headers = new HttpHeaders();
-		assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
-		consumer.accept(headers);
+		headers.setBasicAuth(username, password);
 		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
 		assertNotNull(authorization);
 		assertTrue(authorization.startsWith("Basic "));
 		byte[] result = Base64.getDecoder().decode(authorization.substring(6).getBytes(StandardCharsets.ISO_8859_1));
 		assertEquals("foo:bar", new String(result, StandardCharsets.ISO_8859_1));
-
 	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void basicAuthIllegalChar() {
+		String username = "foo";
+		String password = "\u03BB";
+		headers.setBasicAuth(username, password);
+	}
+
 }

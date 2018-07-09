@@ -41,8 +41,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -708,6 +706,48 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		else {
 			return EnumSet.noneOf(HttpMethod.class);
 		}
+	}
+
+	/**
+	 * Set the value of the {@linkplain #AUTHORIZATION Authorization} header to
+	 * Basic Authentication based on the given username and password.
+	 * @param username the username
+	 * @param password the password
+	 * @since 5.1
+	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
+	 */
+	public void setBasicAuth(String username, String password) {
+		setBasicAuth(username, password, null);
+	}
+
+	/**
+	 * Set the value of the {@linkplain #AUTHORIZATION Authorization} header to
+	 * Basic Authentication based on the given username and password.
+	 * @param username the username
+	 * @param password the password
+	 * @param charset the charset to use to convert the credentials into an octet sequence. Defaults
+	 * to {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1}
+	 * @since 5.1
+	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
+	 */
+	public void setBasicAuth(String username, String password, @Nullable Charset charset) {
+		Assert.notNull(username, "Username must not be null");
+		Assert.notNull(password, "Password must not be null");
+		if (charset == null) {
+			charset = StandardCharsets.ISO_8859_1;
+		}
+
+		CharsetEncoder encoder = charset.newEncoder();
+		if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
+			throw new IllegalArgumentException(
+					"Username or password contains characters that cannot be encoded to " +
+			charset.displayName());
+		}
+
+		String credentialsString = username + ":" + password;
+		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
+		String encodedCredentials = new String(encodedBytes, charset);
+		set(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
 	}
 
 	/**
@@ -1567,82 +1607,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
 		Assert.notNull(headers, "HttpHeaders must not be null");
 		return (headers.readOnly ? headers : new HttpHeaders(headers, true));
-	}
-
-	/**
-	 * Return a {@code HttpHeaders} consumer that adds Basic Authentication.
-	 * More specifically: a consumer that adds an {@linkplain #AUTHORIZATION
-	 * Authorization} header based on the given username and password.
-	 * Meant to be used in combination with
-	 * {@link org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec#headers(java.util.function.Consumer)}.
-	 * <p>Note that Basic Authentication only supports characters in the
-	 * {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1} character set.
-	 * @param username the username
-	 * @param password the password
-	 * @return a consumer that adds a Basic Authentication header
-	 * @since 5.1
-	 */
-	public static Consumer<HttpHeaders> basicAuthenticationConsumer(String username, String password) {
-		return basicAuthenticationConsumer(() -> username, () -> password);
-
-	}
-
-	/**
-	 * Return a {@code HttpHeaders} consumer that adds Basic Authentication.
-	 * More specifically: a consumer that adds an {@linkplain #AUTHORIZATION
-	 * Authorization} header based on the given username and password
-	 * suppliers. Meant to be used in combination with
-	 * {@link org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec#headers(java.util.function.Consumer)}.
-	 * <p>Note that Basic Authentication only supports characters in the
-	 * {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1} character set.
-	 * @param usernameSupplier supplier for the username
-	 * @param passwordSupplier supplier for the password
-	 * @return a consumer that adds a Basic Authentication header
-	 * @since 5.1
-	 */
-	public static Consumer<HttpHeaders> basicAuthenticationConsumer(
-			Supplier<String> usernameSupplier, Supplier<String> passwordSupplier) {
-
-		Assert.notNull(usernameSupplier, "Username Supplier must not be null");
-		Assert.notNull(passwordSupplier, "Password Supplier must not be null");
-		return new BasicAuthenticationConsumer(usernameSupplier, passwordSupplier);
-	}
-
-
-	private static class BasicAuthenticationConsumer implements Consumer<HttpHeaders> {
-
-		private final Supplier<String> usernameSupplier;
-
-		private final Supplier<String> passwordSupplier;
-
-		public BasicAuthenticationConsumer(Supplier<String> usernameSupplier, Supplier<String> passwordSupplier) {
-			this.usernameSupplier = usernameSupplier;
-			this.passwordSupplier = passwordSupplier;
-		}
-
-		@Override
-		public void accept(HttpHeaders httpHeaders) {
-			String username = this.usernameSupplier.get();
-			String password = this.passwordSupplier.get();
-			Assert.state(username != null, "Supplied username is null");
-			Assert.state(password != null, "Supplied password is null");
-			checkIllegalCharacters(username, password);
-
-			String credentialsString = username + ":" + password;
-			byte[] credentialBytes = credentialsString.getBytes(StandardCharsets.ISO_8859_1);
-			byte[] encodedBytes = Base64.getEncoder().encode(credentialBytes);
-			String encodedCredentials = new String(encodedBytes, StandardCharsets.ISO_8859_1);
-			httpHeaders.set(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
-		}
-
-		private static void checkIllegalCharacters(String username, String password) {
-			// Basic authentication only supports ISO 8859-1
-			CharsetEncoder encoder = StandardCharsets.ISO_8859_1.newEncoder();
-			if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
-				throw new IllegalArgumentException(
-						"Username or password contains characters that cannot be encoded to ISO-8859-1");
-			}
-		}
 	}
 
 }

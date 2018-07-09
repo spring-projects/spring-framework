@@ -27,12 +27,13 @@ import org.springframework.http.HttpStatus;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpMethod.*;
-import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.Credentials.*;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.Credentials.basicAuthenticationCredentials;
 
 /**
  * @author Arjen Poutsma
  */
+@SuppressWarnings("deprecation")
 public class ExchangeFilterFunctionsTests {
 
 	@Test

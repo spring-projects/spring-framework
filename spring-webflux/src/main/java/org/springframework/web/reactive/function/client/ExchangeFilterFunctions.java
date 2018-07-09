@@ -44,7 +44,9 @@ public abstract class ExchangeFilterFunctions {
 	/**
 	 * Name of the {@linkplain ClientRequest#attributes() request attribute} that
 	 * contains the {@link Credentials} used by {@link #basicAuthentication()}.
+	 * @deprecated in favor of {@link HttpHeaders#setBasicAuth(String, String)}
 	 */
+	@Deprecated
 	public static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
 			ExchangeFilterFunctions.class.getName() + ".basicAuthenticationCredentials";
 
@@ -59,7 +61,9 @@ public abstract class ExchangeFilterFunctions {
 	 * @return the filter for basic authentication
 	 * @throws IllegalArgumentException if either {@code user} or
 	 * {@code password} contain characters that cannot be encoded to ISO-8859-1.
+	 * @deprecated in favor of {@link HttpHeaders#setBasicAuth(String, String)}
 	 */
+	@Deprecated
 	public static ExchangeFilterFunction basicAuthentication(String user, String password) {
 		Assert.notNull(user, "'user' must not be null");
 		Assert.notNull(password, "'password' must not be null");
@@ -75,7 +79,9 @@ public abstract class ExchangeFilterFunctions {
 	 * @return the filter for basic authentication
 	 * @see #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE
 	 * @see Credentials#basicAuthenticationCredentials(String, String)
+	 * @deprecated as of Spring 5.1, with no direct replacement
 	 */
+	@Deprecated
 	public static ExchangeFilterFunction basicAuthentication() {
 		return basicAuthenticationInternal(request ->
 				request.attribute(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE)
@@ -134,7 +140,9 @@ public abstract class ExchangeFilterFunctions {
 	 * Stores user and password for HTTP basic authentication.
 	 * @see #basicAuthentication()
 	 * @see #basicAuthenticationCredentials(String, String)
+	 * @deprecated as of Spring 5.1, with no direct replacement
 	 */
+	@Deprecated
 	public static final class Credentials {
 
 		private final String username;
