@@ -1102,8 +1102,8 @@ should throw a ParseException or IllegalArgumentException if a parse attempt fai
 care to ensure your Formatter implementation is thread-safe.
 
 Several Formatter implementations are provided in `format` subpackages as a convenience.
-The `number` package provides a `NumberFormatter`, `CurrencyFormatter`, and
-`PercentFormatter` to format `java.lang.Number` objects using a `java.text.NumberFormat`.
+The `number` package provides a `NumberStyleFormatter`, `CurrencyStyleFormatter`, and
+`PercentStyleFormatter` to format `java.lang.Number` objects using a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
 a `java.text.DateFormat`. The `datetime.joda` package provides comprehensive datetime
 formatting support based on the http://joda-time.sourceforge.net[Joda-Time library].
@@ -1203,18 +1203,17 @@ specified:
 			return configureFormatterFrom(annotation, fieldType);
 		}
 
-		private Formatter<Number> configureFormatterFrom(NumberFormat annotation,
-				Class<?> fieldType) {
+		private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
 			if (!annotation.pattern().isEmpty()) {
-				return new NumberFormatter(annotation.pattern());
+				return new NumberStyleFormatter(annotation.pattern());
 			} else {
 				Style style = annotation.style();
 				if (style == Style.PERCENT) {
-					return new PercentFormatter();
+					return new PercentStyleFormatter();
 				} else if (style == Style.CURRENCY) {
-					return new CurrencyFormatter();
+					return new CurrencyStyleFormatter();
 				} else {
-					return new NumberFormatter();
+					return new NumberStyleFormatter();
 				}
 			}
 		}
