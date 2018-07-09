@@ -237,7 +237,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.refresh();
 
 		Object postProcessor = context.getBean("postProcessor");
-		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
 		@SuppressWarnings("unchecked")
