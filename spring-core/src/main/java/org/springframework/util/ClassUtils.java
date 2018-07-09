@@ -301,6 +301,10 @@ public abstract class ClassUtils {
 	 * @return a class instance for the supplied name
 	 * @throws IllegalArgumentException if the class name was not resolvable
 	 * (that is, the class could not be found or the class file could not be loaded)
+	 * @throws IllegalStateException if the corresponding class is resolvable but
+	 * there was a readability mismatch in the inheritance hierarchy of the class
+	 * (typically a missing dependency declaration in a Jigsaw module definition
+	 * for a superclass or interface implemented by the class to be loaded here)
 	 * @see #forName(String, ClassLoader)
 	 */
 	public static Class<?> resolveClassName(String className, @Nullable ClassLoader classLoader)
@@ -309,11 +313,15 @@ public abstract class ClassUtils {
 		try {
 			return forName(className, classLoader);
 		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalArgumentException("Could not find class [" + className + "]", ex);
+		catch (IllegalAccessError err) {
+			throw new IllegalStateException("Readability mismatch in inheritance hierarchy of class [" +
+					className + "]: " + err.getMessage(), err);
 		}
 		catch (LinkageError err) {
 			throw new IllegalArgumentException("Unresolvable class definition for class [" + className + "]", err);
+		}
+		catch (ClassNotFoundException ex) {
+			throw new IllegalArgumentException("Could not find class [" + className + "]", ex);
 		}
 	}
 
@@ -324,15 +332,24 @@ public abstract class ClassUtils {
 	 * @param className the name of the class to check
 	 * @param classLoader the class loader to use
 	 * (may be {@code null} which indicates the default class loader)
-	 * @return whether the specified class is present
+	 * @return whether the specified class is present (including all of its
+	 * superclasses and interfaces)
+	 * @throws IllegalStateException if the corresponding class is resolvable but
+	 * there was a readability mismatch in the inheritance hierarchy of the class
+	 * (typically a missing dependency declaration in a Jigsaw module definition
+	 * for a superclass or interface implemented by the class to be checked here)
 	 */
 	public static boolean isPresent(String className, @Nullable ClassLoader classLoader) {
 		try {
 			forName(className, classLoader);
 			return true;
 		}
+		catch (IllegalAccessError err) {
+			throw new IllegalStateException("Readability mismatch in inheritance hierarchy of class [" +
+					className + "]: " + err.getMessage(), err);
+		}
 		catch (Throwable ex) {
-			// Class or one of its dependencies is not present...
+			// Typically ClassNotFoundException or NoClassDefFoundError...
 			return false;
 		}
 	}
