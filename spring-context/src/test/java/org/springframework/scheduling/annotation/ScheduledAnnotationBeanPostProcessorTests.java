@@ -723,7 +723,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 
 	static class StartupTestBean {
-		static final CopyOnWriteArrayList<String> executions = new CopyOnWriteArrayList<>();
+		public static final CopyOnWriteArrayList<String> executions = new CopyOnWriteArrayList<>();
 
 		@Scheduled(cron = Scheduled.AT_START)
 		private void start0() {
