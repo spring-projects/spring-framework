@@ -306,32 +306,31 @@ libraries, refer to their respective documentation.
 
 
 [[webflux-reactive-spring-web]]
-== Reactive Spring Web
+== Reactive Core
 
-The `spring-web` module provides low level infrastructure and HTTP abstractions -- client
-and server, to build reactive web applications. All public APIs are built around Reactive
-Streams with Reactor as a backing implementation.
+The `spring-web` module contains abstractions and infrastructure to build reactive web
+applications. For server side processing this is organized in two distinct levels:
 
-Server support is organized in two layers:
+* <<webflux-httphandler,HttpHandler>> -- basic, common API for HTTP request handling with
+non-blocking I/O and (Reactive Streams) back pressure, along with adapters for each
+supported server.
+* <<webflux-web-handler-api>> -- slightly higher level, but still general purpose API for
+server request handling, which underlies higher level programming models such as annotated
+controllers and functional endpoints.
 
-* <<webflux-httphandler,HttpHandler>> and server adapters -- the most basic, common API
-for HTTP request handling with Reactive Streams back pressure.
-* <<webflux-web-handler-api>> -- slightly higher level but still general
-purpose server web API with filter chain style processing.
+The reactive core also includes <<webflux-codecs>> for client and server side use.
 
 
 
 [[webflux-httphandler]]
 === HttpHandler
 
-Every HTTP server has some API for HTTP request handling.
 {api-spring-framework}/http/server/reactive/HttpHandler.html[HttpHandler]
-is a simple contract with one method to handle a request and response.
-It is intentionally minimal. Its main purpose is to provide a common, Reactive Streams
-based API for HTTP request handling over different servers.
+is a simple contract with a single method to handle a request and response. It is
+intentionally minimal as its main purpose is to provide an abstraction over different
+server APIs for HTTP request handling.
 
-The `spring-web` module contains adapters for every supported server. The table below shows
-the server APIs are used and where Reactive Streams support comes from:
+Supported server APIs:
 
 [cols="1,2,2", options="header"]
 |===
@@ -358,9 +357,8 @@ the server APIs are used and where Reactive Streams support comes from:
 | spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
 |===
 
-Here are required dependencies,
-https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spring-Framework[supported versions],
-and code snippets for each server:
+Server dependencies (and
+https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spring-Framework[supported versions]):
 
 |===
 |Server name|Group id|Artifact name
@@ -382,7 +380,9 @@ and code snippets for each server:
 |jetty-server, jetty-servlet
 |===
 
-Reactor Netty:
+Code snippets to adapt `HttpHandler` to each server API:
+
+*Reactor Netty*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -391,7 +391,7 @@ ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
 HttpServer.create(host, port).newHandler(adapter).block();
 ----
 
-Undertow:
+*Undertow*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -401,7 +401,7 @@ Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adap
 server.start();
 ----
 
-Tomcat:
+*Tomcat*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -418,7 +418,7 @@ server.setPort(port);
 server.start();
 ----
 
-Jetty:
+*Jetty*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -437,13 +437,12 @@ server.addConnector(connector);
 server.start();
 ----
 
-[NOTE]
-====
-To deploy as a WAR to a Servlet 3.1+ container, wrap `HttpHandler` with
-`ServletHttpHandlerAdapter` and register that as a `Servlet`.
-This can be automated through the use of
-{api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[AbstractReactiveWebInitializer].
-====
+*Servlet 3.1+ Container*
+
+To deploy as a WAR to any Servlet 3.1+ container, simply extend and include
+{api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[AbstractReactiveWebInitializer]
+in the WAR, which wraps an `HttpHandler` with `ServletHttpHandlerAdapter` and registers
+that as a `Servlet`.
 
 
 
@@ -451,9 +450,9 @@ This can be automated through the use of
 === WebHandler API
 
 The WebHandler API is a general purpose, server, web API for processing requests through a
-chain of {api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler's],
-{api-spring-framework}/web/server/WebFilter.html[WebFilter's], and a target
-{api-spring-framework}/web/server/WebHandler.html[WebHandler]. The chain can be assembled
+chain of {api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler],
+{api-spring-framework}/web/server/WebFilter.html[WebFilter], and a target
+{api-spring-framework}/web/server/WebHandler.html[WebHandler] components. The chain can be assembled
 with `WebHttpHandlerBuilder` either by adding components to the builder or by having them
 detected from a Spring `ApplicationContext`. The builder returns an
 <<webflux-httphandler>> that can then be used to run on any of the supported servers.
@@ -555,84 +554,6 @@ content to `Flux<Part>` without collecting to a `MultiValueMap`.
 
 
 
-[[webflux-codecs]]
-=== Message Codecs
-[.small]#<<integration.adoc#rest-message-conversion,Same in Spring MVC>>#
-
-The `spring-web` module defines the
-{api-spring-framework}/http/codec/HttpMessageReader.html[HttpMessageReader] and
-{api-spring-framework}/http/codec/HttpMessageWriter.html[HttpMessageWriter] contracts
-for encoding and decoding the body of HTTP requests and responses via Rective Streams
-``Publisher``'s. These contacts are used on the client side, e.g. in the `WebClient`,
-and on the server side, e.g. in annotated controllers and functional endpoints.
-
-The `spring-core` module defines the
-{api-spring-framework}/core/codec/Encoder.html[Encoder] and
-{api-spring-framework}/core/codec/Decoder.html[Decoder] contracts that are independent of
-HTTP and rely on the {api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer]
-contract that abstracts different byte buffer representations such as the Netty `ByteBuf`
-and `java.nio.ByteBuffer` (see <<core#databuffers, Data Buffers and Codecs>>).
-An `Encoder` can be wrapped with `EncoderHttpMessageWriter` to be used as an
-`HttpMessageWriter` while a `Decoder` can be wrapped with `DecoderHttpMessageReader` to
-be used as an `HttpMessageReader`.
-
-The `spring-core` module contains basic `Encoder` and `Decoder` implementations for
-`byte[]`, `ByteBuffer`, `DataBuffer`, `Resource`, and `String`. The `spring-web` module
-adds ``Encoder``'s and ``Decoder``'s for Jackson JSON, Jackson Smile, and JAXB2.
-The `spring-web` module also contains some web-specific readers and writers for
-server-sent events, form data, and multipart requests.
-
-To configure or customize the readers and writers to use, applications will typically use
-`ClientCodecConfigurer` or `ServerCodecConfigurer`.
-
-
-[[webflux-codecs-jackson]]
-==== Jackson
-
-The decoder relies on Jackson's non-blocking, byte array parser to parse a stream of byte
-chunks into a `TokenBuffer` stream, which can then be turned into Objects with Jackson's
-`ObjectMapper`. JSON and https://github.com/FasterXML/smile-format-specification[Smile]
-(binary JSON) data formats are currently supported.
-
-The encoder processes a `Publisher<?>` as follows:
-
-* if the `Publisher` is a `Mono` (i.e. single value), the value is encoded when available.
-* if media type is `application/stream+json` for JSON or `application/stream+x-jackson-smile`
-  for Smile, each value produced by the `Publisher` is encoded individually (and followed
-  by a new line in JSON).
-* otherwise all items from the `Publisher` are gathered in with `Flux#collectToList()`
-and the resulting collection is encoded as an array.
-
-As a special case to the above rules the `ServerSentEventHttpMessageWriter` feeds items
-emitted from its input `Publisher` individually into the `Jackson2JsonEncoder` as a
-`Mono<?>`.
-
-Note that both the Jackson JSON encoder and decoder explicitly back out of rendering
-elements of type `String`. Instead ``String``'s are treated as low level content, (i.e.
-serialized JSON) and are rendered as-is by the `CharSequenceEncoder`. If you want a
-`Flux<String>` rendered as a JSON array, you'll have to use `Flux#collectToList()` and
-provide a `Mono<List<String>>` instead.
-
-
-[[webflux-codecs-streaming]]
-==== HTTP Streaming
-[.small]#<<web.adoc#mvc-ann-async-http-streaming,Same in Spring MVC>>#
-
-When a multi-value, reactive type such as `Flux` is used for response rendering, it may
-be collected to a `List` and rendered as a whole (e.g. JSON array), or it may be treated
-as an infinite stream with each item flushed immediately. The determination for which is
-which is made based on content negotiation and the selected media type which may imply a
-streaming format (e.g. "text/event-stream", "application/stream+json"), or not
-(e.g. "application/json").
-
-When streaming to the HTTP response, regardless of the media type (e.g. text/event-stream,
-application/stream+json), it is important to send data periodically, since the write would
-fail if the client has disconnected. The send could take the form of an empty
-(comment-only) SSE event, or any other data that the other side would have to interpret as
-a heartbeat and ignore.
-
-
-
 [[webflux-filters]]
 === Filters
 [.small]#<<web.adoc#filters,Same in Spring MVC>>#
@@ -714,6 +635,80 @@ Below are the available `WebExceptionHandler` implementations:
   This handler is declared in the <<webflux-config>>.
 
 |===
+
+
+
+[[webflux-codecs]]
+=== Codecs
+[.small]#<<integration.adoc#rest-message-conversion,Same in Spring MVC>>#
+
+{api-spring-framework}/http/codec/HttpMessageReader.html[HttpMessageReader] and
+{api-spring-framework}/http/codec/HttpMessageWriter.html[HttpMessageWriter] are contracts
+for encoding and decoding HTTP request and response content via non-blocking I/O with
+(Rective Streams) back pressure.
+
+{api-spring-framework}/core/codec/Encoder.html[Encoder] and
+{api-spring-framework}/core/codec/Decoder.html[Decoder] are contracts for encoding and
+decoding content, independent of HTTP. They can be wrapped with `EncoderHttpMessageWriter`
+or `DecoderHttpMessageReader` and used for web processing.
+
+All codecs are for client or server side use. All build on
+{api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer] which abstracts byte
+buffer representations such as the Netty `ByteBuf` or `java.nio.ByteBuffer` (see
+<<core#databuffers, Data Buffers and Codecs>> for more details). `ClientCodecConfigurer`
+and `ServerCodecConfigurer` are typically used to configure and customize the codecs to
+use in an application.
+
+The `spring-core` module has encoders and decoders for `byte[]`, `ByteBuffer`, `DataBuffer`,
+`Resource`, and `String`. The `spring-web` module adds encoders and decoders for Jackson
+JSON, Jackson Smile, JAXB2, along with other web-specific HTTP message readers and writers
+for form data, multipart requests, and server-sent events.
+
+
+[[webflux-codecs-jackson]]
+==== Jackson
+
+The decoder relies on Jackson's non-blocking, byte array parser to parse a stream of byte
+chunks into a `TokenBuffer` stream, which can then be turned into Objects with Jackson's
+`ObjectMapper`. JSON and https://github.com/FasterXML/smile-format-specification[Smile]
+(binary JSON) data formats are currently supported.
+
+The encoder processes a `Publisher<?>` as follows:
+
+* if the `Publisher` is a `Mono` (i.e. single value), the value is encoded when available.
+* if media type is `application/stream+json` for JSON or `application/stream+x-jackson-smile`
+  for Smile, each value produced by the `Publisher` is encoded individually (and followed
+  by a new line in JSON).
+* otherwise all items from the `Publisher` are gathered in with `Flux#collectToList()`
+and the resulting collection is encoded as an array.
+
+As a special case to the above rules the `ServerSentEventHttpMessageWriter` feeds items
+emitted from its input `Publisher` individually into the `Jackson2JsonEncoder` as a
+`Mono<?>`.
+
+Note that both the Jackson JSON encoder and decoder explicitly back out of rendering
+elements of type `String`. Instead ``String``'s are treated as low level content, (i.e.
+serialized JSON) and are rendered as-is by the `CharSequenceEncoder`. If you want a
+`Flux<String>` rendered as a JSON array, you'll have to use `Flux#collectToList()` and
+provide a `Mono<List<String>>` instead.
+
+
+[[webflux-codecs-streaming]]
+==== HTTP Streaming
+[.small]#<<web.adoc#mvc-ann-async-http-streaming,Same in Spring MVC>>#
+
+When a multi-value, reactive type such as `Flux` is used for response rendering, it may
+be collected to a `List` and rendered as a whole (e.g. JSON array), or it may be treated
+as an infinite stream with each item flushed immediately. The determination for which is
+which is made based on content negotiation and the selected media type which may imply a
+streaming format (e.g. "text/event-stream", "application/stream+json"), or not
+(e.g. "application/json").
+
+When streaming to the HTTP response, regardless of the media type (e.g. text/event-stream,
+application/stream+json), it is important to send data periodically, since the write would
+fail if the client has disconnected. The send could take the form of an empty
+(comment-only) SSE event, or any other data that the other side would have to interpret as
+a heartbeat and ignore.
 
 
 
@@ -2532,6 +2527,11 @@ Javadoc for more details.
 
 
 
+include::webflux-functional.adoc[leveloffset=+1]
+
+
+
+
 [[webflux-uri-building]]
 == URI Links
 [.small]#<<web.adoc#mvc-uri-building,Same in Spring MVC>>#
@@ -2540,11 +2540,6 @@ This section describes various options available in the Spring Framework to prep
 
 
 include::web-uris.adoc[leveloffset=+2]
-
-
-
-
-include::webflux-functional.adoc[leveloffset=+1]
 
 
 
