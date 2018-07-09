@@ -148,7 +148,7 @@
     interface is implemented by the
     <classname>MappingJacksonHttpMessageConverter</classname> and also by a
     new <classname>Jaxb2CollectionHttpMessageConverter</classname> that can
-    read read a generic <interfacename>Collection</interfacename> where the
+    read a generic <interfacename>Collection</interfacename> where the
     generic type is a JAXB type annotated with
     <interfacename>@XmlRootElement</interfacename> or
     <interfacename>@XmlType</interfacename>.</para>
