@@ -651,7 +651,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			return null;
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		private Reference<K, V>[] createReferenceArray(int size) {
 			return new Reference[size];
 		}
