@@ -60,7 +60,9 @@ public interface AnnotatedTypeMetadata {
 	 * {@code null} if no matching annotation is defined.
 	 */
 	@Nullable
-	Map<String, Object> getAnnotationAttributes(String annotationName);
+	default Map<String, Object> getAnnotationAttributes(String annotationName) {
+		return getAnnotationAttributes(annotationName, false);
+	}
 
 	/**
 	 * Retrieve the attributes of the annotation of the given type, if any (i.e. if
@@ -90,7 +92,9 @@ public interface AnnotatedTypeMetadata {
 	 * @see #getAllAnnotationAttributes(String, boolean)
 	 */
 	@Nullable
-	MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName);
+	default MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
+		return getAllAnnotationAttributes(annotationName, false);
+	}
 
 	/**
 	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if

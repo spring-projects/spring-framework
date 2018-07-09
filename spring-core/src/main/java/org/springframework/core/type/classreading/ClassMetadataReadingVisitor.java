@@ -166,11 +166,6 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
-	public boolean isConcrete() {
-		return !(this.isInterface || this.isAbstract);
-	}
-
-	@Override
 	public boolean isFinal() {
 		return this.isFinal;
 	}
@@ -189,11 +184,6 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	@Nullable
 	public String getEnclosingClassName() {
 		return this.enclosingClassName;
-	}
-
-	@Override
-	public boolean hasSuperClass() {
-		return (this.superClassName != null);
 	}
 
 	@Override

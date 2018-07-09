@@ -56,7 +56,9 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	 * type to look for
 	 * @return {@code true} if a matching annotation is present
 	 */
-	boolean hasAnnotation(String annotationName);
+	default boolean hasAnnotation(String annotationName) {
+		return getAnnotationTypes().contains(annotationName);
+	}
 
 	/**
 	 * Determine whether the underlying class has an annotation that is itself
