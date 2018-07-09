@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import org.springframework.util.Assert;
  * SAX {@code ContentHandler} that transforms callback calls to DOM {@code Node}s.
  *
  * @author Arjen Poutsma
- * @see org.w3c.dom.Node
  * @since 3.0
+ * @see org.w3c.dom.Node
  */
 class DomContentHandler implements ContentHandler {
 
@@ -55,27 +55,27 @@ class DomContentHandler implements ContentHandler {
 		Assert.notNull(node, "node must not be null");
 		this.node = node;
 		if (node instanceof Document) {
-			document = (Document) node;
+			this.document = (Document) node;
 		}
 		else {
-			document = node.getOwnerDocument();
+			this.document = node.getOwnerDocument();
 		}
-		Assert.notNull(document, "document must not be null");
+		Assert.notNull(this.document, "document must not be null");
 	}
 
 	private Node getParent() {
-		if (!elements.isEmpty()) {
-			return elements.get(elements.size() - 1);
+		if (!this.elements.isEmpty()) {
+			return this.elements.get(this.elements.size() - 1);
 		}
 		else {
-			return node;
+			return this.node;
 		}
 	}
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		Node parent = getParent();
-		Element element = document.createElementNS(uri, qName);
+		Element element = this.document.createElementNS(uri, qName);
 		for (int i = 0; i < attributes.getLength(); i++) {
 			String attrUri = attributes.getURI(i);
 			String attrQname = attributes.getQName(i);
@@ -85,16 +85,16 @@ class DomContentHandler implements ContentHandler {
 			}
 		}
 		element = (Element) parent.appendChild(element);
-		elements.add(element);
+		this.elements.add(element);
 	}
 
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
-		elements.remove(elements.size() - 1);
+		this.elements.remove(this.elements.size() - 1);
 	}
 
 	@Override
-	public void characters(char ch[], int start, int length) throws SAXException {
+	public void characters(char[] ch, int start, int length) throws SAXException {
 		String data = new String(ch, start, length);
 		Node parent = getParent();
 		Node lastChild = parent.getLastChild();
@@ -102,7 +102,7 @@ class DomContentHandler implements ContentHandler {
 			((Text) lastChild).appendData(data);
 		}
 		else {
-			Text text = document.createTextNode(data);
+			Text text = this.document.createTextNode(data);
 			parent.appendChild(text);
 		}
 	}
@@ -110,7 +110,7 @@ class DomContentHandler implements ContentHandler {
 	@Override
 	public void processingInstruction(String target, String data) throws SAXException {
 		Node parent = getParent();
-		ProcessingInstruction pi = document.createProcessingInstruction(target, data);
+		ProcessingInstruction pi = this.document.createProcessingInstruction(target, data);
 		parent.appendChild(pi);
 	}
 
@@ -139,7 +139,7 @@ class DomContentHandler implements ContentHandler {
 	}
 
 	@Override
-	public void ignorableWhitespace(char ch[], int start, int length) throws SAXException {
+	public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
 	}
 
 	@Override

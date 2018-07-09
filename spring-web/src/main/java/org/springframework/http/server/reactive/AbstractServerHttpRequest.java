@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,24 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpLog;
+import org.springframework.http.server.RequestPath;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,32 +44,74 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
+	protected final Log logger = HttpLog.create(LogFactory.getLog(getClass()));
+
 	private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
 
 	private final URI uri;
 
+	private final RequestPath path;
+
 	private final HttpHeaders headers;
 
+	@Nullable
 	private MultiValueMap<String, String> queryParams;
 
+	@Nullable
 	private MultiValueMap<String, HttpCookie> cookies;
+
+	@Nullable
+	private SslInfo sslInfo;
+
+	@Nullable
+	private String id;
+
+	@Nullable
+	private String logPrefix;
 
 
 	/**
 	 * Constructor with the URI and headers for the request.
 	 * @param uri the URI for the request
+	 * @param contextPath the context path for the request
 	 * @param headers the headers for the request
 	 */
-	public AbstractServerHttpRequest(URI uri, HttpHeaders headers) {
+	public AbstractServerHttpRequest(URI uri, @Nullable String contextPath, HttpHeaders headers) {
 		this.uri = uri;
+		this.path = RequestPath.parse(uri, contextPath);
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
 
+	public String getId() {
+		if (this.id == null) {
+			this.id = initId();
+			if (this.id == null) {
+				this.id = ObjectUtils.getIdentityHexString(this);
+			}
+		}
+		return this.id;
+	}
+
+	/**
+	 * Obtain the request id to use, or {@code null} in which case the Object
+	 * identity of this request instance is used.
+	 * @since 5.1
+	 */
+	@Nullable
+	protected String initId() {
+		return null;
+	}
+
 	@Override
 	public URI getURI() {
 		return this.uri;
+	}
+
+	@Override
+	public RequestPath getPath() {
+		return this.path;
 	}
 
 	@Override
@@ -79,7 +130,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	/**
 	 * A method for parsing of the query into name-value pairs. The return
 	 * value is turned into an immutable map and cached.
-	 *
 	 * <p>Note that this method is invoked lazily on first access to
 	 * {@link #getQueryParams()}. The invocation is not synchronized but the
 	 * parsing is thread-safe nevertheless.
@@ -90,14 +140,28 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		if (query != null) {
 			Matcher matcher = QUERY_PATTERN.matcher(query);
 			while (matcher.find()) {
-				String name = matcher.group(1);
+				String name = decodeQueryParam(matcher.group(1));
 				String eq = matcher.group(2);
 				String value = matcher.group(3);
-				value = (value != null ? value : (StringUtils.hasLength(eq) ? "" : null));
+				value = (value != null ? decodeQueryParam(value) : (StringUtils.hasLength(eq) ? "" : null));
 				queryParams.add(name, value);
 			}
 		}
 		return queryParams;
+	}
+
+	@SuppressWarnings("deprecation")
+	private String decodeQueryParam(String value) {
+		try {
+			return URLDecoder.decode(value, "UTF-8");
+		}
+		catch (UnsupportedEncodingException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn(getLogPrefix() + "Could not decode query value [" + value + "] as 'UTF-8'. " +
+						"Falling back on default encoding: " + ex.getMessage());
+			}
+			return URLDecoder.decode(value);
+		}
 	}
 
 	@Override
@@ -118,5 +182,40 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * thread-safe access to cookie data.
 	 */
 	protected abstract MultiValueMap<String, HttpCookie> initCookies();
+
+	@Nullable
+	@Override
+	public SslInfo getSslInfo() {
+		if (this.sslInfo == null) {
+			this.sslInfo = initSslInfo();
+		}
+		return this.sslInfo;
+	}
+
+	/**
+	 * Obtain SSL session information from the underlying "native" request.
+	 * @return the session information, or {@code null} if none available
+	 * @since 5.0.2
+	 */
+	@Nullable
+	protected abstract SslInfo initSslInfo();
+
+	/**
+	 * Return the underlying server response.
+	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
+	 * use such as WebSocket upgrades in the spring-webflux module.
+	 */
+	public abstract <T> T getNativeRequest();
+
+	/**
+	 * For internal use in logging at the HTTP adapter layer.
+	 * @since 5.1
+	 */
+	String getLogPrefix() {
+		if (this.logPrefix == null) {
+			this.logPrefix = "[" + getId() + "] ";
+		}
+		return this.logPrefix;
+	}
 
 }

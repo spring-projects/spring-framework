@@ -81,7 +81,7 @@ public class PathMatchingUrlHandlerMappingTests {
 		HandlerExecutionChain hec = getHandler(req);
 		assertTrue("Handler is null", hec != null);
 		assertTrue("Handler is correct bean", hec.getHandler() == bean);
-		assertEquals("pathmatchingTest.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+		assertEquals("/pathmatchingTest.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 
 		// no match, no forward slash included
 		req = new MockHttpServletRequest("GET", "welcome.html");
@@ -118,11 +118,6 @@ public class PathMatchingUrlHandlerMappingTests {
 
 		// this should match because of *.jsp
 		req = new MockHttpServletRequest("GET", "/bla.jsp");
-		hec = getHandler(req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-
-		// this as well, because there's a **/in there as well
-		req = new MockHttpServletRequest("GET", "/testing/bla.jsp");
 		hec = getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
@@ -242,7 +237,8 @@ public class PathMatchingUrlHandlerMappingTests {
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/show.html");
 		HandlerExecutionChain hec = getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-		assertEquals("Mapping not exposed", "show.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+		assertEquals("Mapping not exposed", "show.html",
+				req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 	}
 
 	private HandlerExecutionChain getHandler(MockHttpServletRequest req) throws Exception {

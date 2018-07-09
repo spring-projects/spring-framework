@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -26,6 +25,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+import static org.junit.Assert.*;
 
 public class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -36,9 +37,9 @@ public class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegr
 
 	@Test
 	public void checkUri() throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
-		RequestEntity<Void> request = RequestEntity.post(new URI("http://localhost:" + port + "/foo?param=bar")).build();
-		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
+		URI url = new URI("http://localhost:" + port + "/foo?param=bar");
+		RequestEntity<Void> request = RequestEntity.post(url).build();
+		ResponseEntity<Void> response = new RestTemplate().exchange(request, Void.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
@@ -48,10 +49,12 @@ public class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegr
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			URI uri = request.getURI();
-			assertNotNull("Request URI host must not be null", uri.getHost());
-			assertNotEquals("Request URI port must not be undefined", -1, uri.getPort());
-			assertEquals("Request URI path is not valid", "/foo", uri.getPath());
-			assertEquals("Request URI query is not valid", "param=bar", uri.getQuery());
+			assertEquals("http", uri.getScheme());
+			assertNotNull(uri.getHost());
+			assertNotEquals(-1, uri.getPort());
+			assertNotNull(request.getRemoteAddress());
+			assertEquals("/foo", uri.getPath());
+			assertEquals("param=bar", uri.getQuery());
 			return Mono.empty();
 		}
 	}

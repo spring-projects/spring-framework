@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
 
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -61,7 +61,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	private static final String AJC_MAGIC = "ajc$";
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final ParameterNameDiscoverer parameterNameDiscoverer = new AspectJAnnotationParameterNameDiscoverer();
@@ -122,53 +122,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 	/**
-	 * The pointcut and advice annotations both have an "argNames" member which contains a
-	 * comma-separated list of the argument names. We use this (if non-empty) to build the
-	 * formal parameters for the pointcut.
-	 */
-	protected AspectJExpressionPointcut createPointcutExpression(
-			Method annotatedMethod, Class<?> declarationScope, String[] pointcutParameterNames) {
-
-		Class<?> [] pointcutParameterTypes = new Class<?>[0];
-		if (pointcutParameterNames != null) {
-			pointcutParameterTypes = extractPointcutParameterTypes(pointcutParameterNames,annotatedMethod);
-		}
-
-		AspectJExpressionPointcut ajexp =
-				new AspectJExpressionPointcut(declarationScope,pointcutParameterNames,pointcutParameterTypes);
-		ajexp.setLocation(annotatedMethod.toString());
-		return ajexp;
-	}
-
-	/**
-	 * Create the pointcut parameters needed by aspectj based on the given argument names
-	 * and the argument types that are available from the adviceMethod. Needs to take into
-	 * account (ignore) any JoinPoint based arguments as these are not pointcut context but
-	 * rather part of the advice execution context (thisJoinPoint, thisJoinPointStaticPart)
-	 */
-	private Class<?>[] extractPointcutParameterTypes(String[] argNames, Method adviceMethod) {
-		Class<?>[] ret = new Class<?>[argNames.length];
-		Class<?>[] paramTypes = adviceMethod.getParameterTypes();
-		if (argNames.length > paramTypes.length) {
-			throw new IllegalStateException("Expecting at least " + argNames.length +
-					" arguments in the advice declaration, but only found " + paramTypes.length);
-		}
-
-		// Make the simplifying assumption for now that all of the JoinPoint based arguments
-		// come first in the advice declaration.
-		int typeOffset = paramTypes.length - argNames.length;
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = paramTypes[i + typeOffset];
-		}
-		return ret;
-	}
-
-
-	/**
 	 * Find and return the first AspectJ annotation on the given method
-	 * (there <i>should</i> only be one anyway...)
+	 * (there <i>should</i> only be one anyway...).
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
 		Class<?>[] classesToLookFor = new Class<?>[] {
 				Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class, Pointcut.class};
@@ -181,6 +139,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		return null;
 	}
 
+	@Nullable
 	private static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Method method, Class<A> toLookFor) {
 		A result = AnnotationUtils.findAnnotation(method, toLookFor);
 		if (result != null) {
@@ -192,6 +151,9 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 
+	/**
+	 * AspectJ annotation types.
+	 */
 	protected enum AspectJAnnotationType {
 
 		AtPointcut,
@@ -206,13 +168,13 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	/**
 	 * Class modelling an AspectJ annotation, exposing its type enumeration and
 	 * pointcut String.
+	 * @param <A> the annotation type
 	 */
 	protected static class AspectJAnnotation<A extends Annotation> {
 
 		private static final String[] EXPRESSION_PROPERTIES = new String[] {"value", "pointcut"};
 
-		private static Map<Class<?>, AspectJAnnotationType> annotationTypes =
-				new HashMap<>();
+		private static Map<Class<?>, AspectJAnnotationType> annotationTypes = new HashMap<>();
 
 		static {
 			annotationTypes.put(Pointcut.class,AspectJAnnotationType.AtPointcut);
@@ -255,7 +217,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		private String resolveExpression(A annotation) throws Exception {
-			String expression = null;
 			for (String methodName : EXPRESSION_PROPERTIES) {
 				Method method;
 				try {
@@ -267,11 +228,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 				if (method != null) {
 					String candidate = (String) method.invoke(annotation);
 					if (StringUtils.hasText(candidate)) {
-						expression = candidate;
+						return candidate;
 					}
 				}
 			}
-			return expression;
+			throw new IllegalStateException("Failed to resolve expression: " + annotation);
 		}
 
 		public AspectJAnnotationType getAnnotationType() {
@@ -304,6 +265,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	private static class AspectJAnnotationParameterNameDiscoverer implements ParameterNameDiscoverer {
 
 		@Override
+		@Nullable
 		public String[] getParameterNames(Method method) {
 			if (method.getParameterCount() == 0) {
 				return new String[0];
@@ -326,6 +288,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		@Override
+		@Nullable
 		public String[] getParameterNames(Constructor<?> ctor) {
 			throw new UnsupportedOperationException("Spring AOP cannot handle constructor advice");
 		}

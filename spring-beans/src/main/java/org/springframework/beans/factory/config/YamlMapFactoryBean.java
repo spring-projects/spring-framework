@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.beans.factory.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * Factory for a {@code Map} that reads from a YAML source, preserving the
@@ -64,6 +64,8 @@ import org.springframework.beans.factory.InitializingBean;
  * Note that the value of "foo" in the first document is not simply replaced
  * with the value in the second, but its nested values are merged.
  *
+ * <p>Requires SnakeYAML 1.18 or higher, as of Spring Framework 5.0.6.
+ *
  * @author Dave Syer
  * @author Juergen Hoeller
  * @since 4.1
@@ -72,6 +74,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 
 	private boolean singleton = true;
 
+	@Nullable
 	private Map<String, Object> map;
 
 
@@ -96,6 +99,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 	}
 
 	@Override
+	@Nullable
 	public Map<String, Object> getObject() {
 		return (this.map != null ? this.map : createMap());
 	}
@@ -123,9 +127,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void merge(Map<String, Object> output, Map<String, Object> map) {
-		for (Entry<String, Object> entry : map.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
+		map.forEach((key, value) -> {
 			Object existing = output.get(key);
 			if (value instanceof Map && existing instanceof Map) {
 				// Inner cast required by Eclipse IDE.
@@ -136,7 +138,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 			else {
 				output.put(key, value);
 			}
-		}
+		});
 	}
 
 }

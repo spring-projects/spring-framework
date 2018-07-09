@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.messaging.tcp.reactor;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A Mono-to-ListenableFuture adapter where the source and the target from
  * the Promise and the ListenableFuture respectively are of the same type.
@@ -25,17 +27,17 @@ import reactor.core.publisher.Mono;
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  * @since 5.0
+ * @param <T> the object type
  */
 class MonoToListenableFutureAdapter<T> extends AbstractMonoToListenableFutureAdapter<T, T> {
-
 
 	public MonoToListenableFutureAdapter(Mono<T> mono) {
 		super(mono);
 	}
 
-
 	@Override
-	protected T adapt(T result) {
+	@Nullable
+	protected T adapt(@Nullable T result) {
 		return result;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.LinkedList;
+
+import org.springframework.lang.Nullable;
 
 /**
  * A speedy alternative to {@link java.io.ByteArrayOutputStream}. Note that
@@ -105,10 +107,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 	@Override
 	public void write(byte[] data, int offset, int length) throws IOException {
-		if (data == null) {
-			throw new NullPointerException();
-		}
-		else if (offset < 0 || offset + length > data.length || length < 0) {
+		if (offset < 0 || offset + length > data.length || length < 0) {
 			throw new IndexOutOfBoundsException();
 		}
 		else if (this.closed) {
@@ -332,6 +331,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 		private final Iterator<byte[]> buffersIterator;
 
+		@Nullable
 		private byte[] currentBuffer;
 
 		private int currentBufferLength = 0;
@@ -353,7 +353,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 					this.currentBufferLength = fastByteArrayOutputStream.index;
 				}
 				else {
-					this.currentBufferLength = this.currentBuffer.length;
+					this.currentBufferLength = (this.currentBuffer != null ? this.currentBuffer.length : 0);
 				}
 			}
 		}
@@ -372,12 +372,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 				else {
 					if (this.buffersIterator.hasNext()) {
 						this.currentBuffer = this.buffersIterator.next();
-						if (this.currentBuffer == this.fastByteArrayOutputStream.buffers.getLast()) {
-							this.currentBufferLength = this.fastByteArrayOutputStream.index;
-						}
-						else {
-							this.currentBufferLength = this.currentBuffer.length;
-						}
+						updateCurrentBufferLength();
 						this.nextIndexInCurrentBuffer = 0;
 					}
 					else {
@@ -395,20 +390,11 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 		@Override
 		public int read(byte[] b, int off, int len) {
-			if (b == null) {
-				throw new NullPointerException();
-			}
-			else if (off < 0 || len < 0 || len > b.length - off) {
+			if (off < 0 || len < 0 || len > b.length - off) {
 				throw new IndexOutOfBoundsException();
 			}
 			else if (len == 0) {
 				return 0;
-			}
-			else if (len < 0) {
-				throw new IllegalArgumentException("len must be 0 or greater: " + len);
-			}
-			else if (off < 0) {
-				throw new IllegalArgumentException("off must be 0 or greater: " + off);
 			}
 			else {
 				if (this.currentBuffer == null) {
@@ -427,12 +413,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 					else {
 						if (this.buffersIterator.hasNext()) {
 							this.currentBuffer = this.buffersIterator.next();
-							if (this.currentBuffer == this.fastByteArrayOutputStream.buffers.getLast()) {
-								this.currentBufferLength = this.fastByteArrayOutputStream.index;
-							}
-							else {
-								this.currentBufferLength = this.currentBuffer.length;
-							}
+							updateCurrentBufferLength();
 							this.nextIndexInCurrentBuffer = 0;
 						}
 						else {
@@ -470,12 +451,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 				else {
 					if (this.buffersIterator.hasNext()) {
 						this.currentBuffer = this.buffersIterator.next();
-						if (this.currentBuffer == this.fastByteArrayOutputStream.buffers.getLast()) {
-							this.currentBufferLength = this.fastByteArrayOutputStream.index;
-						}
-						else {
-							this.currentBufferLength = this.currentBuffer.length;
-						}
+						updateCurrentBufferLength();
 						this.nextIndexInCurrentBuffer = 0;
 					}
 					else {
@@ -493,8 +469,9 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 		/**
 		 * Update the message digest with the remaining bytes in this stream.
-		 * @param messageDigest The message digest to update
+		 * @param messageDigest the message digest to update
 		 */
+		@Override
 		public void updateMessageDigest(MessageDigest messageDigest) {
 			updateMessageDigest(messageDigest, available());
 		}
@@ -502,9 +479,10 @@ public class FastByteArrayOutputStream extends OutputStream {
 		/**
 		 * Update the message digest with the next len bytes in this stream.
 		 * Avoids creating new byte arrays and use internal buffers for performance.
-		 * @param messageDigest The message digest to update
+		 * @param messageDigest the message digest to update
 		 * @param len how many bytes to read from this stream and use to update the message digest
 		 */
+		@Override
 		public void updateMessageDigest(MessageDigest messageDigest, int len) {
 			if (this.currentBuffer == null) {
 				// This stream doesn't have any data in it...
@@ -526,12 +504,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 				else {
 					if (this.buffersIterator.hasNext()) {
 						this.currentBuffer = this.buffersIterator.next();
-						if (this.currentBuffer == this.fastByteArrayOutputStream.buffers.getLast()) {
-							this.currentBufferLength = this.fastByteArrayOutputStream.index;
-						}
-						else {
-							this.currentBufferLength = this.currentBuffer.length;
-						}
+						updateCurrentBufferLength();
 						this.nextIndexInCurrentBuffer = 0;
 					}
 					else {
@@ -539,6 +512,15 @@ public class FastByteArrayOutputStream extends OutputStream {
 					}
 					updateMessageDigest(messageDigest, len);
 				}
+			}
+		}
+
+		private void updateCurrentBufferLength() {
+			if (this.currentBuffer == this.fastByteArrayOutputStream.buffers.getLast()) {
+				this.currentBufferLength = this.fastByteArrayOutputStream.index;
+			}
+			else {
+				this.currentBufferLength = (this.currentBuffer != null ? this.currentBuffer.length : 0);
 			}
 		}
 	}

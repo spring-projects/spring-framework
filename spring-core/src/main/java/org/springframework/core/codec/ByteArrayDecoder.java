@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,10 @@ package org.springframework.core.codec;
 
 import java.util.Map;
 
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -31,9 +29,11 @@ import org.springframework.util.MimeTypeUtils;
  * Decoder for {@code byte} arrays.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ByteArrayDecoder extends AbstractDecoder<byte[]> {
+public class ByteArrayDecoder extends AbstractDataBufferDecoder<byte[]> {
+
 
 	public ByteArrayDecoder() {
 		super(MimeTypeUtils.ALL);
@@ -41,22 +41,22 @@ public class ByteArrayDecoder extends AbstractDecoder<byte[]> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
 		return (super.canDecode(elementType, mimeType) && byte[].class == clazz);
 	}
 
 	@Override
-	public Flux<byte[]> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+	protected byte[] decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return Flux.from(inputStream).map((dataBuffer) -> {
-			byte[] result = new byte[dataBuffer.readableByteCount()];
-			dataBuffer.read(result);
-			DataBufferUtils.release(dataBuffer);
-			return result ;
-		});
+		byte[] result = new byte[dataBuffer.readableByteCount()];
+		dataBuffer.read(result);
+		DataBufferUtils.release(dataBuffer);
+		if (logger.isDebugEnabled()) {
+			logger.debug(Hints.getLogPrefix(hints) + "Read " + result.length + " bytes");
+		}
+		return result;
 	}
-
 
 }

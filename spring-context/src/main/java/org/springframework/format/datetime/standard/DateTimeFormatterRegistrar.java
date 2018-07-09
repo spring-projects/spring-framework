@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.MonthDay;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.Period;
+import java.time.Year;
 import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -80,9 +82,9 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 	 * properties are effectively ignored.
 	 */
 	public void setUseIsoFormat(boolean useIsoFormat) {
-		this.factories.get(Type.DATE).setIso(useIsoFormat ? ISO.DATE : null);
-		this.factories.get(Type.TIME).setIso(useIsoFormat ? ISO.TIME : null);
-		this.factories.get(Type.DATE_TIME).setIso(useIsoFormat ? ISO.DATE_TIME : null);
+		this.factories.get(Type.DATE).setIso(useIsoFormat ? ISO.DATE : ISO.NONE);
+		this.factories.get(Type.TIME).setIso(useIsoFormat ? ISO.TIME : ISO.NONE);
+		this.factories.get(Type.DATE_TIME).setIso(useIsoFormat ? ISO.DATE_TIME : ISO.NONE);
 	}
 
 	/**
@@ -190,6 +192,8 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 		registry.addFormatterForFieldType(Instant.class, new InstantFormatter());
 		registry.addFormatterForFieldType(Period.class, new PeriodFormatter());
 		registry.addFormatterForFieldType(Duration.class, new DurationFormatter());
+		registry.addFormatterForFieldType(Year.class, new YearFormatter());
+		registry.addFormatterForFieldType(Month.class, new MonthFormatter());
 		registry.addFormatterForFieldType(YearMonth.class, new YearMonthFormatter());
 		registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
 

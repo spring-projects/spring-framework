@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -37,7 +38,9 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @since 4.0
  * @see AsyncRestTemplate
  * @see RestOperations
+ * @deprecated as of Spring 5.0, in favor of {@link org.springframework.web.reactive.function.client.WebClient}
  */
+@Deprecated
 public interface AsyncRestOperations {
 
 	/**
@@ -126,7 +129,7 @@ public interface AsyncRestOperations {
 	 * @return the value for the {@code Location} header wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request, Object... uriVariables)
+	ListenableFuture<URI> postForLocation(String url, @Nullable HttpEntity<?> request, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -140,7 +143,7 @@ public interface AsyncRestOperations {
 	 * @return the value for the {@code Location} header wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
+	ListenableFuture<URI> postForLocation(String url, @Nullable HttpEntity<?> request, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
@@ -152,7 +155,7 @@ public interface AsyncRestOperations {
 	 * @return the value for the {@code Location} header wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	ListenableFuture<URI> postForLocation(URI url, HttpEntity<?> request) throws RestClientException;
+	ListenableFuture<URI> postForLocation(URI url, @Nullable HttpEntity<?> request) throws RestClientException;
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template,
@@ -164,7 +167,7 @@ public interface AsyncRestOperations {
 	 * @return the entity wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
+	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, @Nullable HttpEntity<?> request,
 			Class<T> responseType, Object... uriVariables) throws RestClientException;
 
 	/**
@@ -177,7 +180,7 @@ public interface AsyncRestOperations {
 	 * @return the entity wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
+	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, @Nullable HttpEntity<?> request,
 			Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -188,7 +191,7 @@ public interface AsyncRestOperations {
 	 * @return the entity wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	<T> ListenableFuture<ResponseEntity<T>> postForEntity(URI url, HttpEntity<?> request,
+	<T> ListenableFuture<ResponseEntity<T>> postForEntity(URI url, @Nullable HttpEntity<?> request,
 			Class<T> responseType) throws RestClientException;
 
 
@@ -203,7 +206,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
-	ListenableFuture<?> put(String url, HttpEntity<?> request, Object... uriVariables)
+	ListenableFuture<?> put(String url, @Nullable HttpEntity<?> request, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -215,7 +218,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
-	ListenableFuture<?> put(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
+	ListenableFuture<?> put(String url, @Nullable HttpEntity<?> request, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
@@ -225,7 +228,7 @@ public interface AsyncRestOperations {
 	 * @param request the Object to be PUT (may be {@code null})
 	 * @see HttpEntity
 	 */
-	ListenableFuture<?> put(URI url, HttpEntity<?> request) throws RestClientException;
+	ListenableFuture<?> put(URI url, @Nullable HttpEntity<?> request) throws RestClientException;
 
 
 	// DELETE
@@ -303,7 +306,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables)
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -320,7 +323,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, Class<T> responseType,
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -335,7 +338,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
-			HttpEntity<?> requestEntity, Class<T> responseType)
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType)
 			throws RestClientException;
 
 	/**
@@ -344,8 +347,11 @@ public interface AsyncRestOperations {
 	 * The given {@link ParameterizedTypeReference} is used to pass generic type
 	 * information:
 	 * <pre class="code">
-	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
-	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean =
+	 *     new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
+	 *
+	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response =
+	 *     template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -356,7 +362,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
+			@Nullable HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
 			Object... uriVariables) throws RestClientException;
 
 	/**
@@ -365,8 +371,11 @@ public interface AsyncRestOperations {
 	 * The given {@link ParameterizedTypeReference} is used to pass generic type
 	 * information:
 	 * <pre class="code">
-	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
-	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean =
+	 *     new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
+	 *
+	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response =
+	 *     template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -377,7 +386,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
+			@Nullable HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -386,8 +395,11 @@ public interface AsyncRestOperations {
 	 * The given {@link ParameterizedTypeReference} is used to pass generic type
 	 * information:
 	 * <pre class="code">
-	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
-	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean =
+	 *     new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
+	 *
+	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response =
+	 *     template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -397,7 +409,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
-			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
+			@Nullable HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
 			throws RestClientException;
 
 
@@ -416,7 +428,7 @@ public interface AsyncRestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	<T> ListenableFuture<T> execute(String url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor,
+			@Nullable AsyncRequestCallback requestCallback, @Nullable ResponseExtractor<T> responseExtractor,
 			Object... uriVariables) throws RestClientException;
 
 	/**
@@ -432,7 +444,7 @@ public interface AsyncRestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	<T> ListenableFuture<T> execute(String url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor,
+			@Nullable AsyncRequestCallback requestCallback, @Nullable ResponseExtractor<T> responseExtractor,
 			Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -446,7 +458,7 @@ public interface AsyncRestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	<T> ListenableFuture<T> execute(URI url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor)
+			@Nullable AsyncRequestCallback requestCallback, @Nullable ResponseExtractor<T> responseExtractor)
 			throws RestClientException;
 
 }

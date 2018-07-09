@@ -1,9 +1,0 @@
-
-@import url("bar.css");
-@import url('bar.css');
-@import url(bar.css);
-
-@import "foo.css";
-@import 'foo.css';
-
-body { background: url("images/image.png") }

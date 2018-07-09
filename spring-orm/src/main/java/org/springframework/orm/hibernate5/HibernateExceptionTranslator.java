@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.hibernate.HibernateException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
 /**
@@ -44,6 +45,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 public class HibernateExceptionTranslator implements PersistenceExceptionTranslator {
 
 	@Override
+	@Nullable
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException) {
 			return convertHibernateAccessException((HibernateException) ex);
@@ -60,7 +62,7 @@ public class HibernateExceptionTranslator implements PersistenceExceptionTransla
 	/**
 	 * Convert the given HibernateException to an appropriate exception from the
 	 * {@code org.springframework.dao} hierarchy.
-	 * @param ex HibernateException that occurred
+	 * @param ex the HibernateException that occurred
 	 * @return a corresponding DataAccessException
 	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 */

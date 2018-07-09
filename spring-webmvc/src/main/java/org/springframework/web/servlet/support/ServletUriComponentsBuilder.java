@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,36 @@
 
 package org.springframework.web.servlet.support;
 
-import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.HttpRequest;
-import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * A UriComponentsBuilder that extracts information from the HttpServletRequest.
+ * UriComponentsBuilder with additional static factory methods to create links
+ * based on the current HttpServletRequest.
+ *
+ * <p><strong>Note:</strong> This class uses values from "Forwarded"
+ * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+ * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
+ * if present, in order to reflect the client-originated protocol and address.
+ * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
+ * central place whether to extract and use, or to discard such headers.
+ * See the Spring Framework reference for more on this filter.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 
+	@Nullable
 	private String originalPath;
 
 
@@ -69,10 +76,15 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Prepare a builder from the host, port, scheme, and context path of the
 	 * given HttpServletRequest.
+	 *
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores
+	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
+	 * to extract and use, or to discard such headers.
 	 */
 	public static ServletUriComponentsBuilder fromContextPath(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = initFromRequest(request);
-		builder.replacePath(prependForwardedPrefix(request, request.getContextPath()));
+		builder.replacePath(request.getContextPath());
 		return builder;
 	}
 
@@ -83,6 +95,11 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * will end with "/main". If the servlet is mapped otherwise, e.g.
 	 * {@code "/"} or {@code "*.do"}, the result will be the same as
 	 * if calling {@link #fromContextPath(HttpServletRequest)}.
+	 *
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores
+	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
+	 * to extract and use, or to discard such headers.
 	 */
 	public static ServletUriComponentsBuilder fromServletMapping(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromContextPath(request);
@@ -95,20 +112,30 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Prepare a builder from the host, port, scheme, and path (but not the query)
 	 * of the HttpServletRequest.
+	 *
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores
+	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
+	 * to extract and use, or to discard such headers.
 	 */
 	public static ServletUriComponentsBuilder fromRequestUri(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = initFromRequest(request);
-		builder.initPath(prependForwardedPrefix(request, request.getRequestURI()));
+		builder.initPath(request.getRequestURI());
 		return builder;
 	}
 
 	/**
 	 * Prepare a builder by copying the scheme, host, port, path, and
 	 * query string of an HttpServletRequest.
+	 *
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores
+	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
+	 * to extract and use, or to discard such headers.
 	 */
 	public static ServletUriComponentsBuilder fromRequest(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = initFromRequest(request);
-		builder.initPath(prependForwardedPrefix(request, request.getRequestURI()));
+		builder.initPath(request.getRequestURI());
 		builder.query(request.getQueryString());
 		return builder;
 	}
@@ -117,11 +144,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * Initialize a builder with a scheme, host,and port (but not path and query).
 	 */
 	private static ServletUriComponentsBuilder initFromRequest(HttpServletRequest request) {
-		HttpRequest httpRequest = new ServletServerHttpRequest(request);
-		UriComponents uriComponents = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
-		String scheme = uriComponents.getScheme();
-		String host = uriComponents.getHost();
-		int port = uriComponents.getPort();
+		String scheme = request.getScheme();
+		String host = request.getServerName();
+		int port = request.getServerPort();
 
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(scheme);
@@ -132,27 +157,19 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		return builder;
 	}
 
-	private static String prependForwardedPrefix(HttpServletRequest request, String path) {
-		String prefix = null;
-		Enumeration<String> names = request.getHeaderNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
-			if ("X-Forwarded-Prefix".equalsIgnoreCase(name)) {
-				prefix = request.getHeader(name);
-			}
-		}
-		if (prefix != null) {
-			path = prefix + path;
-		}
-		return path;
-	}
-
 
 	// Alternative methods relying on RequestContextHolder to find the request
 
 	/**
 	 * Same as {@link #fromContextPath(HttpServletRequest)} except the
 	 * request is obtained through {@link RequestContextHolder}.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentContextPath() {
 		return fromContextPath(getCurrentRequest());
@@ -161,6 +178,13 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Same as {@link #fromServletMapping(HttpServletRequest)} except the
 	 * request is obtained through {@link RequestContextHolder}.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentServletMapping() {
 		return fromServletMapping(getCurrentRequest());
@@ -169,6 +193,13 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Same as {@link #fromRequestUri(HttpServletRequest)} except the
 	 * request is obtained through {@link RequestContextHolder}.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentRequestUri() {
 		return fromRequestUri(getCurrentRequest());
@@ -177,6 +208,13 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Same as {@link #fromRequest(HttpServletRequest)} except the
 	 * request is obtained through {@link RequestContextHolder}.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
+	 *
+	 * <p>As of 4.3.15, this method replaces the contextPath with the value
+	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
+	 * {@code ForwardedHeaderFiller}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentRequest() {
 		return fromRequest(getCurrentRequest());
@@ -186,12 +224,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * Obtain current request through {@link RequestContextHolder}.
 	 */
 	protected static HttpServletRequest getCurrentRequest() {
-		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		Assert.state(requestAttributes != null, "Could not find current request via RequestContextHolder");
-		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
-		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
-		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
-		return servletRequest;
+		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
+		Assert.state(attrs instanceof ServletRequestAttributes, "No current ServletRequestAttributes");
+		return ((ServletRequestAttributes) attrs).getRequest();
 	}
 
 
@@ -215,6 +250,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * @return the removed path extension for possible re-use, or {@code null}
 	 * @since 4.0
 	 */
+	@Nullable
 	public String removePathExtension() {
 		String extension = null;
 		if (this.originalPath != null) {

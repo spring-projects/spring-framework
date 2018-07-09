@@ -44,10 +44,9 @@ import static org.testng.Assert.*;
 /**
  * Integration tests that verify support for
  * {@link org.springframework.context.annotation.Configuration @Configuration} classes
- * with TestNG-based tests.
+ * with transactional TestNG-based tests.
  *
- * <p>
- * Configuration will be loaded from
+ * <p>Configuration will be loaded from
  * {@link AnnotationConfigTransactionalTestNGSpringContextTests.ContextConfiguration}.
  *
  * @author Sam Brannen

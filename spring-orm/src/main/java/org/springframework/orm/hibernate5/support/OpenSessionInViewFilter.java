@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.orm.hibernate5.SessionFactoryUtils;
 import org.springframework.orm.hibernate5.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -76,6 +77,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
+	/**
+	 * The default bean name used for the session factory.
+	 */
 	public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
 
 	private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;
@@ -212,10 +216,11 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 	private boolean applySessionBindingInterceptor(WebAsyncManager asyncManager, String key) {
-		if (asyncManager.getCallableInterceptor(key) == null) {
+		CallableProcessingInterceptor cpi = asyncManager.getCallableInterceptor(key);
+		if (cpi == null) {
 			return false;
 		}
-		((AsyncRequestInterceptor) asyncManager.getCallableInterceptor(key)).bindSession();
+		((AsyncRequestInterceptor) cpi).bindSession();
 		return true;
 	}
 

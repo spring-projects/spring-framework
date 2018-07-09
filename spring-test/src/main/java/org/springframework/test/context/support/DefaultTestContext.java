@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link TestContext} interface.
@@ -49,10 +51,13 @@ public class DefaultTestContext implements TestContext {
 
 	private final Class<?> testClass;
 
+	@Nullable
 	private volatile Object testInstance;
 
+	@Nullable
 	private volatile Method testMethod;
 
+	@Nullable
 	private volatile Throwable testException;
 
 
@@ -73,15 +78,16 @@ public class DefaultTestContext implements TestContext {
 
 	/**
 	 * Construct a new {@code DefaultTestContext} from the supplied arguments.
-	 * @param testClass the test class for this test context; never {@code null}
+	 * @param testClass the test class for this test context
 	 * @param mergedContextConfiguration the merged application context
-	 * configuration for this test context; never {@code null}
+	 * configuration for this test context
 	 * @param cacheAwareContextLoaderDelegate the delegate to use for loading
-	 * and closing the application context for this test context; never {@code null}
+	 * and closing the application context for this test context
 	 */
 	public DefaultTestContext(Class<?> testClass, MergedContextConfiguration mergedContextConfiguration,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
-		Assert.notNull(testClass, "testClass must not be null");
+
+		Assert.notNull(testClass, "Test Class must not be null");
 		Assert.notNull(mergedContextConfiguration, "MergedContextConfiguration must not be null");
 		Assert.notNull(cacheAwareContextLoaderDelegate, "CacheAwareContextLoaderDelegate must not be null");
 		this.testClass = testClass;
@@ -94,9 +100,9 @@ public class DefaultTestContext implements TestContext {
 	 * test context.
 	 * <p>The default implementation delegates to the {@link CacheAwareContextLoaderDelegate}
 	 * that was supplied when this {@code TestContext} was constructed.
-	 * @see CacheAwareContextLoaderDelegate#loadContext
 	 * @throws IllegalStateException if the context returned by the context
 	 * loader delegate is not <em>active</em> (i.e., has been closed).
+	 * @see CacheAwareContextLoaderDelegate#loadContext
 	 */
 	public ApplicationContext getApplicationContext() {
 		ApplicationContext context = this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
@@ -104,7 +110,7 @@ public class DefaultTestContext implements TestContext {
 			@SuppressWarnings("resource")
 			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
 			Assert.state(cac.isActive(), () ->
-					"The ApplicationContext loaded for [" + mergedContextConfiguration +
+					"The ApplicationContext loaded for [" + this.mergedContextConfiguration +
 					"] is not active. This may be due to one of the following reasons: " +
 					"1) the context was closed programmatically by user code; " +
 					"2) the context was closed during parallel test execution either " +
@@ -122,7 +128,7 @@ public class DefaultTestContext implements TestContext {
 	 * that was supplied when this {@code TestContext} was constructed.
 	 * @see CacheAwareContextLoaderDelegate#closeContext
 	 */
-	public void markApplicationContextDirty(HierarchyMode hierarchyMode) {
+	public void markApplicationContextDirty(@Nullable HierarchyMode hierarchyMode) {
 		this.cacheAwareContextLoaderDelegate.closeContext(this.mergedContextConfiguration, hierarchyMode);
 	}
 
@@ -131,25 +137,31 @@ public class DefaultTestContext implements TestContext {
 	}
 
 	public final Object getTestInstance() {
-		return this.testInstance;
+		Object testInstance = this.testInstance;
+		Assert.state(testInstance != null, "No test instance");
+		return testInstance;
 	}
 
 	public final Method getTestMethod() {
-		return this.testMethod;
+		Method testMethod = this.testMethod;
+		Assert.state(testMethod != null, "No test method");
+		return testMethod;
 	}
 
+	@Override
+	@Nullable
 	public final Throwable getTestException() {
 		return this.testException;
 	}
 
-	public void updateState(Object testInstance, Method testMethod, Throwable testException) {
+	public void updateState(@Nullable Object testInstance, @Nullable Method testMethod, @Nullable Throwable testException) {
 		this.testInstance = testInstance;
 		this.testMethod = testMethod;
 		this.testException = testException;
 	}
 
 	@Override
-	public void setAttribute(String name, Object value) {
+	public void setAttribute(String name, @Nullable Object value) {
 		Assert.notNull(name, "Name must not be null");
 		synchronized (this.attributes) {
 			if (value != null) {
@@ -162,12 +174,14 @@ public class DefaultTestContext implements TestContext {
 	}
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
 	}
 
 	@Override
+	@Nullable
 	public Object removeAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.remove(name);
@@ -182,7 +196,7 @@ public class DefaultTestContext implements TestContext {
 	@Override
 	public String[] attributeNames() {
 		synchronized (this.attributes) {
-			return this.attributes.keySet().stream().toArray(String[]::new);
+			return StringUtils.toStringArray(this.attributes.keySet());
 		}
 	}
 

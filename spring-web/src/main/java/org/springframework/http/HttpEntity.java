@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -49,6 +50,7 @@ import org.springframework.util.ObjectUtils;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0.2
+ * @param <T> the body type
  * @see org.springframework.web.client.RestTemplate
  * @see #getBody()
  * @see #getHeaders()
@@ -63,6 +65,7 @@ public class HttpEntity<T> {
 
 	private final HttpHeaders headers;
 
+	@Nullable
 	private final T body;
 
 
@@ -94,7 +97,7 @@ public class HttpEntity<T> {
 	 * @param body the entity body
 	 * @param headers the entity headers
 	 */
-	public HttpEntity(T body, MultiValueMap<String, String> headers) {
+	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
 		this.body = body;
 		HttpHeaders tempHeaders = new HttpHeaders();
 		if (headers != null) {
@@ -114,6 +117,7 @@ public class HttpEntity<T> {
 	/**
 	 * Returns the body of this entity.
 	 */
+	@Nullable
 	public T getBody() {
 		return this.body;
 	}
@@ -127,7 +131,7 @@ public class HttpEntity<T> {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -149,13 +153,9 @@ public class HttpEntity<T> {
 		StringBuilder builder = new StringBuilder("<");
 		if (this.body != null) {
 			builder.append(this.body);
-			if (this.headers != null) {
-				builder.append(',');
-			}
+			builder.append(',');
 		}
-		if (this.headers != null) {
-			builder.append(this.headers);
-		}
+		builder.append(this.headers);
 		builder.append('>');
 		return builder.toString();
 	}

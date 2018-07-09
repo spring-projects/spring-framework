@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.handler;
 
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
@@ -47,83 +49,85 @@ public class FilteringWebHandlerTests {
 	private static Log logger = LogFactory.getLog(FilteringWebHandlerTests.class);
 
 
-	private MockServerHttpRequest request;
-
-	private MockServerHttpResponse response;
-
-
-	@Before
-	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
-		this.response = new MockServerHttpResponse();
-	}
-
 	@Test
 	public void multipleFilters() throws Exception {
-		StubWebHandler webHandler = new StubWebHandler();
+
 		TestFilter filter1 = new TestFilter();
 		TestFilter filter2 = new TestFilter();
 		TestFilter filter3 = new TestFilter();
-		HttpHandler httpHandler = createHttpHandler(webHandler, filter1, filter2, filter3);
-		httpHandler.handle(this.request, this.response).block();
+		StubWebHandler targetHandler = new StubWebHandler();
+
+		new FilteringWebHandler(targetHandler, Arrays.asList(filter1, filter2, filter3))
+				.handle(MockServerWebExchange.from(MockServerHttpRequest.get("/")))
+				.block(Duration.ZERO);
 
 		assertTrue(filter1.invoked());
 		assertTrue(filter2.invoked());
 		assertTrue(filter3.invoked());
-		assertTrue(webHandler.invoked());
+		assertTrue(targetHandler.invoked());
 	}
 
 	@Test
 	public void zeroFilters() throws Exception {
-		StubWebHandler webHandler = new StubWebHandler();
-		HttpHandler httpHandler = createHttpHandler(webHandler);
-		httpHandler.handle(this.request, this.response).block();
 
-		assertTrue(webHandler.invoked());
+		StubWebHandler targetHandler = new StubWebHandler();
+
+		new FilteringWebHandler(targetHandler, Collections.emptyList())
+				.handle(MockServerWebExchange.from(MockServerHttpRequest.get("/")))
+				.block(Duration.ZERO);
+
+		assertTrue(targetHandler.invoked());
 	}
 
 	@Test
 	public void shortcircuitFilter() throws Exception {
-		StubWebHandler webHandler = new StubWebHandler();
+
 		TestFilter filter1 = new TestFilter();
 		ShortcircuitingFilter filter2 = new ShortcircuitingFilter();
 		TestFilter filter3 = new TestFilter();
-		HttpHandler httpHandler = createHttpHandler(webHandler, filter1, filter2, filter3);
-		httpHandler.handle(this.request, this.response).block();
+		StubWebHandler targetHandler = new StubWebHandler();
+
+		new FilteringWebHandler(targetHandler, Arrays.asList(filter1, filter2, filter3))
+				.handle(MockServerWebExchange.from(MockServerHttpRequest.get("/")))
+				.block(Duration.ZERO);
 
 		assertTrue(filter1.invoked());
 		assertTrue(filter2.invoked());
 		assertFalse(filter3.invoked());
-		assertFalse(webHandler.invoked());
+		assertFalse(targetHandler.invoked());
 	}
 
 	@Test
 	public void asyncFilter() throws Exception {
-		StubWebHandler webHandler = new StubWebHandler();
+
 		AsyncFilter filter = new AsyncFilter();
-		HttpHandler httpHandler = createHttpHandler(webHandler, filter);
-		httpHandler.handle(this.request, this.response).block();
+		StubWebHandler targetHandler = new StubWebHandler();
+
+		new FilteringWebHandler(targetHandler, Collections.singletonList(filter))
+				.handle(MockServerWebExchange.from(MockServerHttpRequest.get("/")))
+				.block(Duration.ofSeconds(5));
 
 		assertTrue(filter.invoked());
-		assertTrue(webHandler.invoked());
+		assertTrue(targetHandler.invoked());
 	}
 
 	@Test
 	public void handleErrorFromFilter() throws Exception {
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		MockServerHttpResponse response = new MockServerHttpResponse();
+
 		TestExceptionHandler exceptionHandler = new TestExceptionHandler();
-		HttpHandler handler = WebHttpHandlerBuilder.webHandler(new StubWebHandler())
-				.filters(new ExceptionFilter()).exceptionHandlers(exceptionHandler).build();
-		handler.handle(this.request, this.response).block();
 
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatusCode());
+		WebHttpHandlerBuilder.webHandler(new StubWebHandler())
+				.filter(new ExceptionFilter())
+				.exceptionHandler(exceptionHandler).build()
+				.handle(request, response)
+				.block();
 
-		Throwable savedException = exceptionHandler.ex;
-		assertNotNull(savedException);
-		assertEquals("boo", savedException.getMessage());
-	}
-
-	private HttpHandler createHttpHandler(StubWebHandler webHandler, WebFilter... filters) {
-		return WebHttpHandlerBuilder.webHandler(webHandler).filters(filters).build();
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+		assertNotNull(exceptionHandler.ex);
+		assertEquals("boo", exceptionHandler.ex.getMessage());
 	}
 
 
@@ -146,6 +150,7 @@ public class FilteringWebHandlerTests {
 		}
 	}
 
+
 	private static class ShortcircuitingFilter extends TestFilter {
 
 		@Override
@@ -154,20 +159,22 @@ public class FilteringWebHandlerTests {
 		}
 	}
 
+
 	private static class AsyncFilter extends TestFilter {
 
 		@Override
 		public Mono<Void> doFilter(ServerWebExchange exchange, WebFilterChain chain) {
-			return doAsyncWork().then(asyncResult -> {
+			return doAsyncWork().flatMap(asyncResult -> {
 				logger.debug("Async result: " + asyncResult);
 				return chain.filter(exchange);
 			});
 		}
 
 		private Mono<String> doAsyncWork() {
-			return Mono.just("123");
+			return Mono.delay(Duration.ofMillis(100L)).map(l -> "123");
 		}
 	}
+
 
 	private static class ExceptionFilter implements WebFilter {
 
@@ -176,6 +183,7 @@ public class FilteringWebHandlerTests {
 			return Mono.error(new IllegalStateException("boo"));
 		}
 	}
+
 
 	private static class TestExceptionHandler implements WebExceptionHandler {
 
@@ -187,6 +195,7 @@ public class FilteringWebHandlerTests {
 			return Mono.error(ex);
 		}
 	}
+
 
 	private static class StubWebHandler implements WebHandler {
 

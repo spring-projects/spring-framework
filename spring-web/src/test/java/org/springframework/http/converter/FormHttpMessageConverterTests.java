@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,17 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -81,7 +87,8 @@ public class FormHttpMessageConverterTests {
 	public void readForm() throws Exception {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
-		inputMessage.getHeaders().setContentType(new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
+		inputMessage.getHeaders().setContentType(
+				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
 		MultiValueMap<String, String> result = this.converter.read(null, inputMessage);
 
 		assertEquals("Invalid result", 3, result.size());
@@ -105,8 +112,8 @@ public class FormHttpMessageConverterTests {
 
 		assertEquals("Invalid result", "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
 				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
-		assertEquals("Invalid content-type", new MediaType("application", "x-www-form-urlencoded"),
-				outputMessage.getHeaders().getContentType());
+		assertEquals("Invalid content-type", "application/x-www-form-urlencoded;charset=UTF-8",
+				outputMessage.getHeaders().getContentType().toString());
 		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
 				outputMessage.getHeaders().getContentLength());
 	}
@@ -138,7 +145,6 @@ public class FormHttpMessageConverterTests {
 		parts.add("xml", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.setMultipartCharset(StandardCharsets.UTF_8);
 		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();

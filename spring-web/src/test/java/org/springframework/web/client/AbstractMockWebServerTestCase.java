@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,7 @@ public class AbstractMockWebServerTestCase {
 	private MockResponse postRequest(RecordedRequest request, String expectedRequestContent,
 			String location, String contentType, byte[] responseBody) {
 
+		assertEquals(1, request.getHeaders().values("Content-Length").size());
 		assertTrue("Invalid request content-length",
 				Integer.parseInt(request.getHeader("Content-Length")) > 0);
 		String requestContentType = request.getHeader("Content-Type");
@@ -120,9 +121,9 @@ public class AbstractMockWebServerTestCase {
 	}
 
 	private MockResponse multipartRequest(RecordedRequest request) {
-		String contentType = request.getHeader("Content-Type");
-		assertTrue(contentType.startsWith("multipart/form-data"));
-		String boundary = contentType.split("boundary=")[1];
+		MediaType mediaType = MediaType.parseMediaType(request.getHeader("Content-Type"));
+		assertTrue(mediaType.isCompatibleWith(MediaType.MULTIPART_FORM_DATA));
+		String boundary = mediaType.getParameter("boundary");
 		Buffer body = request.getBody();
 		try {
 			assertPart(body, "form-data", boundary, "name 1", "text/plain", "value 1");
@@ -164,7 +165,7 @@ public class AbstractMockWebServerTestCase {
 	}
 
 	private MockResponse formRequest(RecordedRequest request) {
-		assertEquals("application/x-www-form-urlencoded", request.getHeader("Content-Type"));
+		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", request.getHeader("Content-Type"));
 		String body = request.getBody().readUtf8();
 		assertThat(body, Matchers.containsString("name+1=value+1"));
 		assertThat(body, Matchers.containsString("name+2=value+2%2B1"));

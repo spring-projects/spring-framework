@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.FutureAdapter;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -49,7 +48,9 @@ import org.springframework.util.concurrent.SuccessCallback;
  * @author Arjen Poutsma
  * @since 4.0
  * @see HttpComponentsClientHttpRequestFactory#createRequest
+ * @deprecated as of Spring 5.0, with no direct replacement
  */
+@Deprecated
 final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
 
 	private final HttpAsyncClient httpClient;
@@ -67,8 +68,8 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.httpRequest.getMethod());
+	public String getMethodValue() {
+		return this.httpRequest.getMethod();
 	}
 
 	@Override
@@ -159,7 +160,9 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 		}
 
 		@Override
-		public void addCallback(SuccessCallback<? super ClientHttpResponse> successCallback, FailureCallback failureCallback) {
+		public void addCallback(SuccessCallback<? super ClientHttpResponse> successCallback,
+				FailureCallback failureCallback) {
+
 			this.callback.addSuccessCallback(successCallback);
 			this.callback.addFailureCallback(failureCallback);
 		}

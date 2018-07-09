@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.springframework.cache.interceptor.AbstractFallbackCacheOperationSource;
 import org.springframework.cache.interceptor.CacheOperation;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -105,36 +106,28 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 
 
 	@Override
+	@Nullable
 	protected Collection<CacheOperation> findCacheOperations(final Class<?> clazz) {
-		return determineCacheOperations(new CacheOperationProvider() {
-			@Override
-			public Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser) {
-				return parser.parseCacheAnnotations(clazz);
-			}
-		});
-
+		return determineCacheOperations(parser -> parser.parseCacheAnnotations(clazz));
 	}
 
 	@Override
+	@Nullable
 	protected Collection<CacheOperation> findCacheOperations(final Method method) {
-		return determineCacheOperations(new CacheOperationProvider() {
-			@Override
-			public Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser) {
-				return parser.parseCacheAnnotations(method);
-			}
-		});
+		return determineCacheOperations(parser -> parser.parseCacheAnnotations(method));
 	}
 
 	/**
 	 * Determine the cache operation(s) for the given {@link CacheOperationProvider}.
 	 * <p>This implementation delegates to configured
-	 * {@link CacheAnnotationParser}s for parsing known annotations into
+	 * {@link CacheAnnotationParser CacheAnnotationParsers} for parsing known annotations into
 	 * Spring's metadata attribute class.
 	 * <p>Can be overridden to support custom annotations that carry
 	 * caching metadata.
 	 * @param provider the cache operation provider to use
 	 * @return the configured caching operations, or {@code null} if none found
 	 */
+	@Nullable
 	protected Collection<CacheOperation> determineCacheOperations(CacheOperationProvider provider) {
 		Collection<CacheOperation> ops = null;
 		for (CacheAnnotationParser annotationParser : this.annotationParsers) {
@@ -189,6 +182,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 		 * @param parser the parser to use
 		 * @return the cache operations, or {@code null} if none found
 		 */
+		@Nullable
 		Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser);
 	}
 

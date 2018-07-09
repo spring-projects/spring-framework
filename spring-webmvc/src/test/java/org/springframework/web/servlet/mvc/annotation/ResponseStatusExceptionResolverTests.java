@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,23 +111,28 @@ public class ResponseStatusExceptionResolverTests {
 		Exception cause = new StatusCodeAndReasonMessageException();
 		TypeMismatchException ex = new TypeMismatchException("value", ITestBean.class, cause);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertResolved(mav, 410, null);
+		assertResolved(mav, 410, "gone.reason");
 	}
 
 	@Test
 	public void responseStatusException() throws Exception {
-		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "The reason");
+		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertResolved(mav, 400, null);
+	}
+
+	@Test  // SPR-15524
+	public void responseStatusExceptionWithReason() throws Exception {
+		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "The reason");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertResolved(mav, 400, "The reason");
 	}
 
 
 	private void assertResolved(ModelAndView mav, int status, String reason) {
 		assertTrue("No Empty ModelAndView returned", mav != null && mav.isEmpty());
 		assertEquals(status, response.getStatus());
-		if (reason != null) {
-			assertEquals(reason, response.getErrorMessage());
-		}
+		assertEquals(reason, response.getErrorMessage());
 		assertTrue(response.isCommitted());
 	}
 

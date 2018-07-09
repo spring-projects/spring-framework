@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.support.ConfigurableConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -105,7 +106,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	private final Set<String> defaultProfiles = new LinkedHashSet<>(getReservedDefaultProfiles());
 
-	private final MutablePropertySources propertySources = new MutablePropertySources(this.logger);
+	private final MutablePropertySources propertySources = new MutablePropertySources(logger);
 
 	private final ConfigurablePropertyResolver propertyResolver =
 			new PropertySourcesPropertyResolver(this.propertySources);
@@ -120,9 +121,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	public AbstractEnvironment() {
 		customizePropertySources(this.propertySources);
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug(String.format(
-					"Initialized %s with PropertySources %s", getClass().getSimpleName(), this.propertySources));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Initialized " + getClass().getSimpleName() + " with PropertySources " + this.propertySources);
 		}
 	}
 
@@ -261,8 +261,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	@Override
 	public void addActiveProfile(String profile) {
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug(String.format("Activating profile '%s'", profile));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Activating profile '" + profile + "'");
 		}
 		validateProfile(profile);
 		doGetActiveProfiles();
@@ -323,6 +323,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
+	@Deprecated
 	public boolean acceptsProfiles(String... profiles) {
 		Assert.notEmpty(profiles, "Must specify at least one profile");
 		for (String profile : profiles) {
@@ -336,6 +337,12 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean acceptsProfiles(Profiles profiles) {
+		Assert.notNull(profiles, "Profiles must not be null");
+		return profiles.matches(this::isProfileActive);
 	}
 
 	/**
@@ -386,15 +393,15 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		catch (AccessControlException ex) {
 			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
+				@Nullable
 				protected String getSystemAttribute(String attributeName) {
 					try {
 						return System.getenv(attributeName);
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(String.format("Caught AccessControlException when accessing system " +
-									"environment variable [%s]; its value will be returned [null]. Reason: %s",
-									attributeName, ex.getMessage()));
+							logger.info("Caught AccessControlException when accessing system environment variable '" +
+									attributeName + "'; its value will be returned [null]. Reason: " + ex.getMessage());
 						}
 						return null;
 					}
@@ -427,15 +434,15 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		catch (AccessControlException ex) {
 			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
+				@Nullable
 				protected String getSystemAttribute(String attributeName) {
 					try {
 						return System.getProperty(attributeName);
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(String.format("Caught AccessControlException when accessing system " +
-									"property [%s]; its value will be returned [null]. Reason: %s",
-									attributeName, ex.getMessage()));
+							logger.info("Caught AccessControlException when accessing system property '" +
+									attributeName + "'; its value will be returned [null]. Reason: " + ex.getMessage());
 						}
 						return null;
 					}
@@ -496,7 +503,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	public void setValueSeparator(String valueSeparator) {
+	public void setValueSeparator(@Nullable String valueSeparator) {
 		this.propertyResolver.setValueSeparator(valueSeparator);
 	}
 
@@ -526,6 +533,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
+	@Nullable
 	public String getProperty(String key) {
 		return this.propertyResolver.getProperty(key);
 	}
@@ -536,6 +544,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getProperty(String key, Class<T> targetType) {
 		return this.propertyResolver.getProperty(key, targetType);
 	}
@@ -568,9 +577,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	@Override
 	public String toString() {
-		return String.format("%s {activeProfiles=%s, defaultProfiles=%s, propertySources=%s}",
-				getClass().getSimpleName(), this.activeProfiles, this.defaultProfiles,
-				this.propertySources);
+		return getClass().getSimpleName() + " {activeProfiles=" + this.activeProfiles +
+				", defaultProfiles=" + this.defaultProfiles + ", propertySources=" + this.propertySources + "}";
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.naming.NamingException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
+import org.springframework.lang.Nullable;
 
 /**
  * JNDI-based variant of {@link ConcurrentTaskScheduler}, performing a default lookup for
@@ -40,6 +41,7 @@ public class DefaultManagedTaskScheduler extends ConcurrentTaskScheduler impleme
 
 	private JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate();
 
+	@Nullable
 	private String jndiName = "java:comp/DefaultManagedScheduledExecutorService";
 
 

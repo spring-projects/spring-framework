@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,7 @@ public @interface Scheduled {
 	 * Execute the annotated method with a fixed period in milliseconds between the
 	 * end of the last invocation and the start of the next.
 	 * @return the delay in milliseconds as a String value, e.g. a placeholder
+	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String fixedDelayString() default "";
@@ -101,6 +102,7 @@ public @interface Scheduled {
 	 * Execute the annotated method with a fixed period in milliseconds between
 	 * invocations.
 	 * @return the period in milliseconds as a String value, e.g. a placeholder
+	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String fixedRateString() default "";
@@ -117,6 +119,7 @@ public @interface Scheduled {
 	 * Number of milliseconds to delay before the first execution of a
 	 * {@link #fixedRate()} or {@link #fixedDelay()} task.
 	 * @return the initial delay in milliseconds as a String value, e.g. a placeholder
+	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
 	 */
 	String initialDelayString() default "";

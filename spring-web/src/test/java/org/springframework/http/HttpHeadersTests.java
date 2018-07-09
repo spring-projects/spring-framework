@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.DateTimeException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -30,11 +34,13 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 /**
@@ -43,6 +49,7 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel
+ * @author Juergen Hoeller
  */
 public class HttpHeadersTests {
 
@@ -160,6 +167,14 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Host header", "localhost", headers.getFirst("Host"));
 	}
 
+	@Test
+	public void ipv6Host() {
+		InetSocketAddress host = InetSocketAddress.createUnresolved("[::1]", 0);
+		headers.setHost(host);
+		assertEquals("Invalid Host header", host, headers.getHost());
+		assertEquals("Invalid Host header", "[::1]", headers.getFirst("Host"));
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void illegalETag() {
 		String eTag = "v2.6";
@@ -268,13 +283,26 @@ public class HttpHeadersTests {
 	}
 
 	@Test
-	public void expires() {
+	public void expiresLong() {
 		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
 		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 		long date = calendar.getTimeInMillis();
 		headers.setExpires(date);
 		assertEquals("Invalid Expires header", date, headers.getExpires());
 		assertEquals("Invalid Expires header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("expires"));
+	}
+
+	@Test
+	public void expiresZonedDateTime() {
+		ZonedDateTime zonedDateTime = ZonedDateTime.of(2008, 12, 18, 10, 20, 0, 0, ZoneId.of("GMT"));
+		headers.setExpires(zonedDateTime);
+		assertEquals("Invalid Expires header", zonedDateTime.toInstant().toEpochMilli(), headers.getExpires());
+		assertEquals("Invalid Expires header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("expires"));
+	}
+
+	@Test(expected = DateTimeException.class)  // SPR-16560
+	public void expiresLargeDate() {
+		headers.setExpires(Long.MAX_VALUE);
 	}
 
 	@Test  // SPR-10648 (example is from INT-3063)
@@ -316,9 +344,15 @@ public class HttpHeadersTests {
 
 	@Test
 	public void cacheControl() {
-		String cacheControl = "no-cache";
-		headers.setCacheControl(cacheControl);
-		assertEquals("Invalid Cache-Control header", cacheControl, headers.getCacheControl());
+		headers.setCacheControl("no-cache");
+		assertEquals("Invalid Cache-Control header", "no-cache", headers.getCacheControl());
+		assertEquals("Invalid Cache-Control header", "no-cache", headers.getFirst("cache-control"));
+	}
+
+	@Test
+	public void cacheControlBuilder() {
+		headers.setCacheControl(CacheControl.noCache());
+		assertEquals("Invalid Cache-Control header", "no-cache", headers.getCacheControl());
 		assertEquals("Invalid Cache-Control header", "no-cache", headers.getFirst("cache-control"));
 	}
 
@@ -436,8 +470,16 @@ public class HttpHeadersTests {
 				new Locale.LanguageRange("*", 0.5)
 		);
 		assertEquals(expectedRanges, headers.getAcceptLanguage());
+		assertEquals(Locale.forLanguageTag("fr-ch"), headers.getAcceptLanguageAsLocales().get(0));
 
-		assertEquals(Locale.forLanguageTag("fr-ch"), headers.getAcceptLanguageAsLocale());
+		headers.setAcceptLanguageAsLocales(Collections.singletonList(Locale.FRANCE));
+		assertEquals(Locale.FRANCE, headers.getAcceptLanguageAsLocales().get(0));
+	}
+
+	@Test // SPR-15603
+	public void acceptLanguageWithEmptyValue() throws Exception {
+		this.headers.set(HttpHeaders.ACCEPT_LANGUAGE, "");
+		assertEquals(Collections.emptyList(), this.headers.getAcceptLanguageAsLocales());
 	}
 
 	@Test
@@ -453,4 +495,59 @@ public class HttpHeadersTests {
 		assertEquals("Expected one (first) locale", Locale.GERMAN, headers.getContentLanguage());
 	}
 
+	@Test
+	public void firstDate() {
+		headers.setDate(HttpHeaders.DATE, 1229595600000L);
+		assertThat(headers.getFirstDate(HttpHeaders.DATE), is(1229595600000L));
+
+		headers.clear();
+
+		headers.add(HttpHeaders.DATE, "Thu, 18 Dec 2008 10:20:00 GMT");
+		headers.add(HttpHeaders.DATE, "Sat, 18 Dec 2010 10:20:00 GMT");
+		assertThat(headers.getFirstDate(HttpHeaders.DATE), is(1229595600000L));
+	}
+
+	@Test
+	public void firstZonedDateTime() {
+		ZonedDateTime date = ZonedDateTime.of(2017, 6, 22, 22, 22, 0, 0, ZoneId.of("GMT"));
+		headers.setZonedDateTime(HttpHeaders.DATE, date);
+		assertThat(headers.getFirst(HttpHeaders.DATE), is("Thu, 22 Jun 2017 22:22:00 GMT"));
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+
+		headers.clear();
+		ZonedDateTime otherDate = ZonedDateTime.of(2010, 12, 18, 10, 20, 0, 0, ZoneId.of("GMT"));
+		headers.add(HttpHeaders.DATE, RFC_1123_DATE_TIME.format(date));
+		headers.add(HttpHeaders.DATE, RFC_1123_DATE_TIME.format(otherDate));
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+
+		// obsolete RFC 850 format
+		headers.clear();
+		headers.set(HttpHeaders.DATE, "Thursday, 22-Jun-17 22:22:00 GMT");
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+
+		// ANSI C's asctime() format
+		headers.clear();
+		headers.set(HttpHeaders.DATE, "Thu Jun 22 22:22:00 2017");
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+	}
+
+	@Test
+	public void basicAuthenticationConsumer() throws Exception {
+
+		String username = "foo";
+		String password = "bar";
+
+		Consumer<HttpHeaders> consumer =
+				HttpHeaders.basicAuthenticationConsumer(username, password);
+
+		HttpHeaders headers = new HttpHeaders();
+		assertFalse(headers.containsKey(HttpHeaders.AUTHORIZATION));
+		consumer.accept(headers);
+		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
+		assertNotNull(authorization);
+		assertTrue(authorization.startsWith("Basic "));
+		byte[] result = Base64.getDecoder().decode(authorization.substring(6).getBytes(StandardCharsets.ISO_8859_1));
+		assertEquals("foo:bar", new String(result, StandardCharsets.ISO_8859_1));
+
+	}
 }

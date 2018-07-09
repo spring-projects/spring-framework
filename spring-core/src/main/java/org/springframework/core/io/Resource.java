@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Interface for a resource descriptor that abstracts from the actual
@@ -58,16 +60,18 @@ public interface Resource extends InputStreamSource {
 	boolean exists();
 
 	/**
-	 * Indicate whether the contents of this resource can be read via
+	 * Indicate whether non-empty contents of this resource can be read via
 	 * {@link #getInputStream()}.
-	 * <p>Will be {@code true} for typical resource descriptors;
-	 * note that actual content reading may still fail when attempted.
+	 * <p>Will be {@code true} for typical resource descriptors that exist
+	 * since it strictly implies {@link #exists()} semantics as of 5.1.
+	 * Note that actual content reading may still fail when attempted.
 	 * However, a value of {@code false} is a definitive indication
 	 * that the resource content cannot be read.
 	 * @see #getInputStream()
+	 * @see #exists()
 	 */
 	default boolean isReadable() {
-		return true;
+		return exists();
 	}
 
 	/**
@@ -109,19 +113,23 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Return a File handle for this resource.
-	 * @throws IOException if the resource cannot be resolved as absolute
-	 * file path, i.e. if the resource is not available in a file system
+	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
+	 * absolute file path, i.e. if the resource is not available in a file system
+	 * @throws IOException in case of general resolution/reading failures
+	 * @see #getInputStream()
 	 */
 	File getFile() throws IOException;
 
 	/**
 	 * Return a {@link ReadableByteChannel}.
 	 * <p>It is expected that each call creates a <i>fresh</i> channel.
-	 * <p>The default implementation returns {@link Channels#newChannel(InputStream)} with the
-	 * result of {@link #getInputStream()}.
+	 * <p>The default implementation returns {@link Channels#newChannel(InputStream)}
+	 * with the result of {@link #getInputStream()}.
 	 * @return the byte channel for the underlying resource (must not be {@code null})
-	 * @throws IOException if the channel could not be opened
+	 * @throws java.io.FileNotFoundException if the underlying resource doesn't exist
+	 * @throws IOException if the content channel could not be opened
 	 * @since 5.0
+	 * @see #getInputStream()
 	 */
 	default ReadableByteChannel readableChannel() throws IOException {
 		return Channels.newChannel(getInputStream());
@@ -155,6 +163,7 @@ public interface Resource extends InputStreamSource {
 	 * <p>Returns {@code null} if this type of resource does not
 	 * have a filename.
 	 */
+	@Nullable
 	String getFilename();
 
 	/**

@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.parsing;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple strategy allowing tools to control how source metadata is attached
@@ -44,6 +45,7 @@ public interface SourceExtractor {
 	 * (may be {@code null})
 	 * @return the source metadata object to store (may be {@code null})
 	 */
-	Object extractSource(Object sourceCandidate, Resource definingResource);
+	@Nullable
+	Object extractSource(Object sourceCandidate, @Nullable Resource definingResource);
 
 }

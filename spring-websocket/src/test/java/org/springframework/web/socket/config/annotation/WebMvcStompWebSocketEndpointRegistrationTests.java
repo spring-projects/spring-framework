@@ -84,24 +84,27 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 		assertEquals(1, mappings.size());
-		WebSocketHttpRequestHandler requestHandler = (WebSocketHttpRequestHandler)mappings.entrySet().iterator().next().getKey();
-		assertNotNull(requestHandler.getWebSocketHandler());
-		assertEquals(1, requestHandler.getHandshakeInterceptors().size());
-		assertEquals(OriginHandshakeInterceptor.class, requestHandler.getHandshakeInterceptors().get(0).getClass());
+		HttpRequestHandler handler = mappings.entrySet().iterator().next().getKey();
+		WebSocketHttpRequestHandler wsHandler = (WebSocketHttpRequestHandler) handler;
+		assertNotNull(wsHandler.getWebSocketHandler());
+		assertEquals(1, wsHandler.getHandshakeInterceptors().size());
+		assertEquals(OriginHandshakeInterceptor.class, wsHandler.getHandshakeInterceptors().get(0).getClass());
 	}
 
 	@Test
 	public void sameOrigin() {
-		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
+		WebMvcStompWebSocketEndpointRegistration registration = new WebMvcStompWebSocketEndpointRegistration(
+				new String[] {"/foo"}, this.handler, this.scheduler);
 
 		registration.setAllowedOrigins();
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 		assertEquals(1, mappings.size());
-		WebSocketHttpRequestHandler requestHandler = (WebSocketHttpRequestHandler)mappings.entrySet().iterator().next().getKey();
-		assertNotNull(requestHandler.getWebSocketHandler());
-		assertEquals(1, requestHandler.getHandshakeInterceptors().size());
-		assertEquals(OriginHandshakeInterceptor.class, requestHandler.getHandshakeInterceptors().get(0).getClass());
+		HttpRequestHandler handler = mappings.entrySet().iterator().next().getKey();
+		WebSocketHttpRequestHandler wsHandler = (WebSocketHttpRequestHandler) handler;
+		assertNotNull(wsHandler.getWebSocketHandler());
+		assertEquals(1, wsHandler.getHandshakeInterceptors().size());
+		assertEquals(OriginHandshakeInterceptor.class, wsHandler.getHandshakeInterceptors().get(0).getClass());
 	}
 
 	@Test
@@ -234,7 +237,8 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 		String origin = "http://mydomain.com";
 
-		registration.setHandshakeHandler(handshakeHandler).addInterceptors(interceptor).setAllowedOrigins(origin).withSockJS();
+		registration.setHandshakeHandler(handshakeHandler)
+				.addInterceptors(interceptor).setAllowedOrigins(origin).withSockJS();
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 		assertEquals(1, mappings.size());

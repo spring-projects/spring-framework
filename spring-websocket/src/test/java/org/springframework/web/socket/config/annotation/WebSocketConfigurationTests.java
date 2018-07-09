@@ -97,9 +97,9 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 			registry.addHandler(serverHandler(), "/ws")
-				.setHandshakeHandler(this.handshakeHandler);
+					.setHandshakeHandler(this.handshakeHandler);
 			registry.addHandler(serverHandler(), "/sockjs").withSockJS()
-				.setTransportHandlerOverrides(new WebSocketTransportHandler(this.handshakeHandler));
+					.setTransportHandlerOverrides(new WebSocketTransportHandler(this.handshakeHandler));
 		}
 
 		@Bean
@@ -107,6 +107,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 			return new TestHandler();
 		}
 	}
+
 
 	private static class TestHandler extends AbstractWebSocketHandler {
 

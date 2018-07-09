@@ -18,6 +18,7 @@ package org.springframework.transaction.support;
 
 import java.io.Serializable;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.util.Assert;
 
@@ -67,14 +68,15 @@ public abstract class DelegatingTransactionDefinition implements TransactionDefi
 	}
 
 	@Override
+	@Nullable
 	public String getName() {
 		return this.targetDefinition.getName();
 	}
 
 
 	@Override
-	public boolean equals(Object obj) {
-		return this.targetDefinition.equals(obj);
+	public boolean equals(Object other) {
+		return this.targetDefinition.equals(other);
 	}
 
 	@Override

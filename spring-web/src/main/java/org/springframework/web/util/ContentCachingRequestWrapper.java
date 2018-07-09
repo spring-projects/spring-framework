@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link javax.servlet.http.HttpServletRequest} wrapper that caches all content read from
@@ -53,8 +54,13 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 	private final ByteArrayOutputStream cachedContent;
 
+	@Nullable
+	private final Integer contentCacheLimit;
+
+	@Nullable
 	private ServletInputStream inputStream;
 
+	@Nullable
 	private BufferedReader reader;
 
 
@@ -66,6 +72,20 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		super(request);
 		int contentLength = request.getContentLength();
 		this.cachedContent = new ByteArrayOutputStream(contentLength >= 0 ? contentLength : 1024);
+		this.contentCacheLimit = null;
+	}
+
+	/**
+	 * Create a new ContentCachingRequestWrapper for the given servlet request.
+	 * @param request the original servlet request
+	 * @param contentCacheLimit the maximum number of bytes to cache per request
+	 * @since 4.3.6
+	 * @see #handleContentOverflow(int)
+	 */
+	public ContentCachingRequestWrapper(HttpServletRequest request, int contentCacheLimit) {
+		super(request);
+		this.cachedContent = new ByteArrayOutputStream(contentCacheLimit);
+		this.contentCacheLimit = contentCacheLimit;
 	}
 
 
@@ -162,15 +182,32 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 	/**
 	 * Return the cached request content as a byte array.
+	 * <p>The returned array will never be larger than the content cache limit.
+	 * @see #ContentCachingRequestWrapper(HttpServletRequest, int)
 	 */
 	public byte[] getContentAsByteArray() {
 		return this.cachedContent.toByteArray();
+	}
+
+	/**
+	 * Template method for handling a content overflow: specifically, a request
+	 * body being read that exceeds the specified content cache limit.
+	 * <p>The default implementation is empty. Subclasses may override this to
+	 * throw a payload-too-large exception or the like.
+	 * @param contentCacheLimit the maximum number of bytes to cache per request
+	 * which has just been exceeded
+	 * @since 4.3.6
+	 * @see #ContentCachingRequestWrapper(HttpServletRequest, int)
+	 */
+	protected void handleContentOverflow(int contentCacheLimit) {
 	}
 
 
 	private class ContentCachingInputStream extends ServletInputStream {
 
 		private final ServletInputStream is;
+
+		private boolean overflow = false;
 
 		public ContentCachingInputStream(ServletInputStream is) {
 			this.is = is;
@@ -179,8 +216,14 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		@Override
 		public int read() throws IOException {
 			int ch = this.is.read();
-			if (ch != -1) {
-				cachedContent.write(ch);
+			if (ch != -1 && !this.overflow) {
+				if (contentCacheLimit != null && cachedContent.size() == contentCacheLimit) {
+					this.overflow = true;
+					handleContentOverflow(contentCacheLimit);
+				}
+				else {
+					cachedContent.write(ch);
+				}
 			}
 			return ch;
 		}

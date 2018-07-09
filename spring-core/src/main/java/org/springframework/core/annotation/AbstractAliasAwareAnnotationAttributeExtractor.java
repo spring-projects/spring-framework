@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -40,6 +41,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 
 	private final Class<? extends Annotation> annotationType;
 
+	@Nullable
 	private final Object annotatedElement;
 
 	private final S source;
@@ -55,7 +57,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	 * @param source the underlying source of annotation attributes; never {@code null}
 	 */
 	AbstractAliasAwareAnnotationAttributeExtractor(
-			Class<? extends Annotation> annotationType, Object annotatedElement, S source) {
+			Class<? extends Annotation> annotationType, @Nullable Object annotatedElement, S source) {
 
 		Assert.notNull(annotationType, "annotationType must not be null");
 		Assert.notNull(source, "source must not be null");
@@ -72,6 +74,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	}
 
 	@Override
+	@Nullable
 	public final Object getAnnotatedElement() {
 		return this.annotatedElement;
 	}
@@ -82,6 +85,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	}
 
 	@Override
+	@Nullable
 	public final Object getAttributeValue(Method attributeMethod) {
 		String attributeName = attributeMethod.getName();
 		Object attributeValue = getRawAttributeValue(attributeMethod);
@@ -120,6 +124,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	 * {@linkplain #getSource source} that corresponds to the supplied
 	 * attribute method.
 	 */
+	@Nullable
 	protected abstract Object getRawAttributeValue(Method attributeMethod);
 
 	/**
@@ -127,6 +132,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	 * {@linkplain #getSource source} that corresponds to the supplied
 	 * attribute name.
 	 */
+	@Nullable
 	protected abstract Object getRawAttributeValue(String attributeName);
 
 }

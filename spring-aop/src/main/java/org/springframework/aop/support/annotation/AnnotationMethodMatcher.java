@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ package org.springframework.aop.support.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcher;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -36,25 +39,52 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 
 	private final Class<? extends Annotation> annotationType;
 
+	private final boolean checkInherited;
+
 
 	/**
 	 * Create a new AnnotationClassFilter for the given annotation type.
 	 * @param annotationType the annotation type to look for
 	 */
 	public AnnotationMethodMatcher(Class<? extends Annotation> annotationType) {
+		this(annotationType, false);
+	}
+
+	/**
+	 * Create a new AnnotationClassFilter for the given annotation type.
+	 * @param annotationType the annotation type to look for
+	 * @param checkInherited whether to also check the superclasses and
+	 * interfaces as well as meta-annotations for the annotation type
+	 * (i.e. whether to use {@link AnnotationUtils#findAnnotation(Method, Class)}
+	 * semantics instead of standard Java {@link Method#isAnnotationPresent})
+	 * @since 5.0
+	 */
+	public AnnotationMethodMatcher(Class<? extends Annotation> annotationType, boolean checkInherited) {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		this.annotationType = annotationType;
+		this.checkInherited = checkInherited;
 	}
 
 
+
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
-		if (method.isAnnotationPresent(this.annotationType)) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+		if (matchesMethod(method)) {
 			return true;
+		}
+		// Proxy classes never have annotations on their redeclared methods.
+		if (targetClass != null && Proxy.isProxyClass(targetClass)) {
+			return false;
 		}
 		// The method may be on an interface, so let's check on the target class as well.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-		return (specificMethod != method && specificMethod.isAnnotationPresent(this.annotationType));
+		return (specificMethod != method && matchesMethod(specificMethod));
+	}
+
+	private boolean matchesMethod(Method method) {
+		return (this.checkInherited ?
+				(AnnotationUtils.findAnnotation(method, this.annotationType) != null) :
+				method.isAnnotationPresent(this.annotationType));
 	}
 
 	@Override

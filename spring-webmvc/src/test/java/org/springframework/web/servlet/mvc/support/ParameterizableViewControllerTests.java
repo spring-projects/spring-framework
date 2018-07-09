@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.support;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpStatus;
@@ -38,19 +37,11 @@ import static org.junit.Assert.*;
  */
 public class ParameterizableViewControllerTests {
 
-	private ParameterizableViewController controller;
+	private final ParameterizableViewController controller = new ParameterizableViewController();
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 
-	private MockHttpServletResponse response;
-
-
-	@Before
-	public void setUp() throws Exception {
-		this.controller = new ParameterizableViewController();
-		this.request = new MockHttpServletRequest("GET", "/");
-		this.response = new MockHttpServletResponse();
-	}
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
 
 	@Test

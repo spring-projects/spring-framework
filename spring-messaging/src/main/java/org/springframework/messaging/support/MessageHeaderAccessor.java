@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -116,6 +114,9 @@ import org.springframework.util.StringUtils;
  */
 public class MessageHeaderAccessor {
 
+	/**
+	 * The default charset used for headers.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final MimeType[] READABLE_MIME_TYPES = new MimeType[] {
@@ -123,8 +124,6 @@ public class MessageHeaderAccessor {
 			new MimeType("text", "*"), new MimeType("application", "*+json"), new MimeType("application", "*+xml")
 	};
 
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final MutableMessageHeaders headers;
 
@@ -134,6 +133,7 @@ public class MessageHeaderAccessor {
 
 	private boolean enableTimestamp = false;
 
+	@Nullable
 	private IdGenerator idGenerator;
 
 
@@ -141,19 +141,15 @@ public class MessageHeaderAccessor {
 	 * A constructor to create new headers.
 	 */
 	public MessageHeaderAccessor() {
-		this.headers = new MutableMessageHeaders();
+		this(null);
 	}
 
 	/**
 	 * A constructor accepting the headers of an existing message to copy.
+	 * @param message a message to copy the headers from, or {@code null} if none
 	 */
-	public MessageHeaderAccessor(Message<?> message) {
-		if (message != null) {
-			this.headers = new MutableMessageHeaders(message.getHeaders());
-		}
-		else {
-			this.headers = new MutableMessageHeaders();
-		}
+	public MessageHeaderAccessor(@Nullable Message<?> message) {
+		this.headers = new MutableMessageHeaders(message != null ? message.getHeaders() : null);
 	}
 
 
@@ -198,7 +194,6 @@ public class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	public void setImmutable() {
-		this.headers.setIdAndTimestamp();
 		this.headers.setImmutable();
 	}
 
@@ -294,6 +289,7 @@ public class MessageHeaderAccessor {
 	 * @param headerName the name of the header
 	 * @return the associated value, or {@code null} if none found
 	 */
+	@Nullable
 	public Object getHeader(String headerName) {
 		return this.headers.get(headerName);
 	}
@@ -302,7 +298,7 @@ public class MessageHeaderAccessor {
 	 * Set the value for the given header name.
 	 * <p>If the provided value is {@code null}, the header will be removed.
 	 */
-	public void setHeader(String name, Object value) {
+	public void setHeader(String name, @Nullable Object value) {
 		if (isReadOnly(name)) {
 			throw new IllegalArgumentException("'" + name + "' header is read-only");
 		}
@@ -323,7 +319,7 @@ public class MessageHeaderAccessor {
 		}
 	}
 
-	protected void verifyType(String headerName, Object headerValue) {
+	protected void verifyType(@Nullable String headerName, @Nullable Object headerValue) {
 		if (headerName != null && headerValue != null) {
 			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) ||
 					MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
@@ -376,7 +372,7 @@ public class MessageHeaderAccessor {
 		}
 	}
 
-	private List<String> getMatchingHeaderNames(String pattern, Map<String, Object> headers) {
+	private List<String> getMatchingHeaderNames(String pattern, @Nullable Map<String, Object> headers) {
 		List<String> matchingHeaderNames = new ArrayList<>();
 		if (headers != null) {
 			for (String key : headers.keySet()) {
@@ -393,13 +389,13 @@ public class MessageHeaderAccessor {
 	 * <p>This operation will overwrite any existing values. Use
 	 * {@link #copyHeadersIfAbsent(Map)} to avoid overwriting values.
 	 */
-	public void copyHeaders(Map<String, ?> headersToCopy) {
+	public void copyHeaders(@Nullable Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
-			for (Map.Entry<String, ?> entry : headersToCopy.entrySet()) {
-				if (!isReadOnly(entry.getKey())) {
-					setHeader(entry.getKey(), entry.getValue());
+			headersToCopy.forEach((key, value) -> {
+				if (!isReadOnly(key)) {
+					setHeader(key, value);
 				}
-			}
+			});
 		}
 	}
 
@@ -407,13 +403,13 @@ public class MessageHeaderAccessor {
 	 * Copy the name-value pairs from the provided Map.
 	 * <p>This operation will <em>not</em> overwrite any existing values.
 	 */
-	public void copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
+	public void copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
-			for (Map.Entry<String, ?> entry : headersToCopy.entrySet()) {
-				if (!isReadOnly(entry.getKey())) {
-					setHeaderIfAbsent(entry.getKey(), entry.getValue());
+			headersToCopy.forEach((key, value) -> {
+				if (!isReadOnly(key)) {
+					setHeaderIfAbsent(key, value);
 				}
-			}
+			});
 		}
 	}
 
@@ -424,6 +420,7 @@ public class MessageHeaderAccessor {
 
 	// Specific header accessors
 
+	@Nullable
 	public UUID getId() {
 		Object value = getHeader(MessageHeaders.ID);
 		if (value == null) {
@@ -432,6 +429,7 @@ public class MessageHeaderAccessor {
 		return (value instanceof UUID ? (UUID) value : UUID.fromString(value.toString()));
 	}
 
+	@Nullable
 	public Long getTimestamp() {
 		Object value = getHeader(MessageHeaders.TIMESTAMP);
 		if (value == null) {
@@ -444,12 +442,19 @@ public class MessageHeaderAccessor {
 		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
 	}
 
+	@Nullable
 	public MimeType getContentType() {
 		Object value = getHeader(MessageHeaders.CONTENT_TYPE);
 		if (value == null) {
 			return null;
 		}
 		return (value instanceof MimeType ? (MimeType) value : MimeType.valueOf(value.toString()));
+	}
+
+	private Charset getCharset() {
+		MimeType contentType = getContentType();
+		Charset charset = (contentType != null ? contentType.getCharset() : null);
+		return (charset != null ? charset : DEFAULT_CHARSET);
 	}
 
 	public void setReplyChannelName(String replyChannelName) {
@@ -460,9 +465,10 @@ public class MessageHeaderAccessor {
 		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannel);
 	}
 
+	@Nullable
 	public Object getReplyChannel() {
-        return getHeader(MessageHeaders.REPLY_CHANNEL);
-    }
+		return getHeader(MessageHeaders.REPLY_CHANNEL);
+	}
 
 	public void setErrorChannelName(String errorChannelName) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
@@ -472,9 +478,10 @@ public class MessageHeaderAccessor {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannel);
 	}
 
-    public Object getErrorChannel() {
-        return getHeader(MessageHeaders.ERROR_CHANNEL);
-    }
+	@Nullable
+	public Object getErrorChannel() {
+		return getHeader(MessageHeaders.ERROR_CHANNEL);
+	}
 
 
 	// Log message stuff
@@ -493,7 +500,7 @@ public class MessageHeaderAccessor {
 	 * @param payload the payload that corresponds to the headers.
 	 * @return the message
 	 */
-	public String getDetailedLogMessage(Object payload) {
+	public String getDetailedLogMessage(@Nullable Object payload) {
 		return "headers=" + this.headers.toString() + getDetailedPayloadLogMessage(payload);
 	}
 
@@ -507,11 +514,9 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharset();
-				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return (bytes.length < 80) ?
-						" payload=" + new String(bytes, charset) :
-						" payload=" + new String(Arrays.copyOf(bytes, 80), charset) + "...(truncated)";
+						" payload=" + new String(bytes, getCharset()) :
+						" payload=" + new String(Arrays.copyOf(bytes, 80), getCharset()) + "...(truncated)";
 			}
 			else {
 				return " payload=byte[" + bytes.length + "]";
@@ -525,16 +530,14 @@ public class MessageHeaderAccessor {
 		}
 	}
 
-	protected String getDetailedPayloadLogMessage(Object payload) {
+	protected String getDetailedPayloadLogMessage(@Nullable Object payload) {
 		if (payload instanceof String) {
 			return " payload=" + payload;
 		}
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharset();
-				charset = (charset != null ? charset : DEFAULT_CHARSET);
-				return " payload=" + new String(bytes, charset);
+				return " payload=" + new String(bytes, getCharset());
 			}
 			else {
 				return " payload=byte[" + bytes.length + "]";
@@ -546,8 +549,9 @@ public class MessageHeaderAccessor {
 	}
 
 	protected boolean isReadableContentType() {
+		MimeType contentType = getContentType();
 		for (MimeType mimeType : READABLE_MIME_TYPES) {
-			if (mimeType.includes(getContentType())) {
+			if (mimeType.includes(contentType)) {
 				return true;
 			}
 		}
@@ -568,10 +572,13 @@ public class MessageHeaderAccessor {
 	 * its type does not match the required type.
 	 * <p>This is for cases where the existence of an accessor is strongly expected
 	 * (followed up with an assertion) or where an accessor will be created otherwise.
+	 * @param message the message to get an accessor for
+	 * @param requiredType the required accessor type (or {@code null} for any)
 	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */
-	public static <T extends MessageHeaderAccessor> T getAccessor(Message<?> message, Class<T> requiredType) {
+	@Nullable
+	public static <T extends MessageHeaderAccessor> T getAccessor(Message<?> message, @Nullable Class<T> requiredType) {
 		return getAccessor(message.getHeaders(), requiredType);
 	}
 
@@ -579,17 +586,20 @@ public class MessageHeaderAccessor {
 	 * A variation of {@link #getAccessor(org.springframework.messaging.Message, Class)}
 	 * with a {@code MessageHeaders} instance instead of a {@code Message}.
 	 * <p>This is for cases when a full message may not have been created yet.
+	 * @param messageHeaders the message headers to get an accessor for
+	 * @param requiredType the required accessor type (or {@code null} for any)
 	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static <T extends MessageHeaderAccessor> T getAccessor(
-			MessageHeaders messageHeaders, Class<T> requiredType) {
+			MessageHeaders messageHeaders, @Nullable Class<T> requiredType) {
 
 		if (messageHeaders instanceof MutableMessageHeaders) {
 			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
-			MessageHeaderAccessor headerAccessor = mutableHeaders.getMessageHeaderAccessor();
-			if (requiredType.isAssignableFrom(headerAccessor.getClass()))  {
+			MessageHeaderAccessor headerAccessor = mutableHeaders.getAccessor();
+			if (requiredType == null || requiredType.isInstance(headerAccessor))  {
 				return (T) headerAccessor;
 			}
 		}
@@ -608,10 +618,8 @@ public class MessageHeaderAccessor {
 	public static MessageHeaderAccessor getMutableAccessor(Message<?> message) {
 		if (message.getHeaders() instanceof MutableMessageHeaders) {
 			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) message.getHeaders();
-			MessageHeaderAccessor accessor = mutableHeaders.getMessageHeaderAccessor();
-			if (accessor != null) {
-				return (accessor.isMutable() ? accessor : accessor.createAccessor(message));
-			}
+			MessageHeaderAccessor accessor = mutableHeaders.getAccessor();
+			return (accessor.isMutable() ? accessor : accessor.createAccessor(message));
 		}
 		return new MessageHeaderAccessor(message);
 	}
@@ -620,51 +628,52 @@ public class MessageHeaderAccessor {
 	@SuppressWarnings("serial")
 	private class MutableMessageHeaders extends MessageHeaders {
 
-		private boolean immutable;
+		private boolean mutable = true;
 
-		public MutableMessageHeaders() {
-			this(null);
-		}
-
-		public MutableMessageHeaders(Map<String, Object> headers) {
+		public MutableMessageHeaders(@Nullable Map<String, Object> headers) {
 			super(headers, MessageHeaders.ID_VALUE_NONE, -1L);
-		}
-
-		public MessageHeaderAccessor getMessageHeaderAccessor() {
-			return MessageHeaderAccessor.this;
 		}
 
 		@Override
 		public Map<String, Object> getRawHeaders() {
-			Assert.state(!this.immutable, "Already immutable");
+			Assert.state(this.mutable, "Already immutable");
 			return super.getRawHeaders();
 		}
 
 		public void setImmutable() {
-			this.immutable = true;
-		}
-
-		public boolean isMutable() {
-			return !this.immutable;
-		}
-
-		public void setIdAndTimestamp() {
-			if (!isMutable()) {
+			if (!this.mutable) {
 				return;
 			}
+
 			if (getId() == null) {
 				IdGenerator idGenerator = (MessageHeaderAccessor.this.idGenerator != null ?
 						MessageHeaderAccessor.this.idGenerator : MessageHeaders.getIdGenerator());
 				UUID id = idGenerator.generateId();
-				if (id != null && id != MessageHeaders.ID_VALUE_NONE) {
+				if (id != MessageHeaders.ID_VALUE_NONE) {
 					getRawHeaders().put(ID, id);
 				}
 			}
+
 			if (getTimestamp() == null) {
 				if (MessageHeaderAccessor.this.enableTimestamp) {
 					getRawHeaders().put(TIMESTAMP, System.currentTimeMillis());
 				}
 			}
+
+			this.mutable = false;
+		}
+
+		public boolean isMutable() {
+			return this.mutable;
+		}
+
+		public MessageHeaderAccessor getAccessor() {
+			return MessageHeaderAccessor.this;
+		}
+
+		protected Object writeReplace() {
+			// Serialize as regular MessageHeaders (without MessageHeaderAccessor reference)
+			return new MessageHeaders(this);
 		}
 	}
 

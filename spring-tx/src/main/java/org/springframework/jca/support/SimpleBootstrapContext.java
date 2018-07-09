@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import javax.resource.spi.work.WorkContext;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 /**
  * Simple implementation of the JCA 1.7 {@link javax.resource.spi.BootstrapContext}
  * interface, used for bootstrapping a JCA ResourceAdapter in a local environment.
@@ -38,10 +41,13 @@ import javax.transaction.TransactionSynchronizationRegistry;
  */
 public class SimpleBootstrapContext implements BootstrapContext {
 
+	@Nullable
 	private WorkManager workManager;
 
+	@Nullable
 	private XATerminator xaTerminator;
 
+	@Nullable
 	private TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
 
@@ -50,7 +56,7 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	 * with no XATerminator available.
 	 * @param workManager the JCA WorkManager to use (may be {@code null})
 	 */
-	public SimpleBootstrapContext(WorkManager workManager) {
+	public SimpleBootstrapContext(@Nullable WorkManager workManager) {
 		this.workManager = workManager;
 	}
 
@@ -59,7 +65,7 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	 * @param workManager the JCA WorkManager to use (may be {@code null})
 	 * @param xaTerminator the JCA XATerminator to use (may be {@code null})
 	 */
-	public SimpleBootstrapContext(WorkManager workManager, XATerminator xaTerminator) {
+	public SimpleBootstrapContext(@Nullable WorkManager workManager, @Nullable XATerminator xaTerminator) {
 		this.workManager = workManager;
 		this.xaTerminator = xaTerminator;
 	}
@@ -73,8 +79,8 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	 * to use (may be {@code null})
 	 * @since 5.0
 	 */
-	public SimpleBootstrapContext(WorkManager workManager, XATerminator xaTerminator,
-			TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
+	public SimpleBootstrapContext(@Nullable WorkManager workManager, @Nullable XATerminator xaTerminator,
+			@Nullable TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
 
 		this.workManager = workManager;
 		this.xaTerminator = xaTerminator;
@@ -84,13 +90,12 @@ public class SimpleBootstrapContext implements BootstrapContext {
 
 	@Override
 	public WorkManager getWorkManager() {
-		if (this.workManager == null) {
-			throw new IllegalStateException("No WorkManager available");
-		}
+		Assert.state(this.workManager != null, "No WorkManager available");
 		return this.workManager;
 	}
 
 	@Override
+	@Nullable
 	public XATerminator getXATerminator() {
 		return this.xaTerminator;
 	}
@@ -106,6 +111,7 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	}
 
 	@Override
+	@Nullable
 	public TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
 		return this.transactionSynchronizationRegistry;
 	}

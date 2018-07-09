@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
 
 import java.net.URI;
@@ -24,7 +25,6 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.mock.http.client.MockAsyncClientHttpRequest;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -62,34 +62,35 @@ public class DefaultRequestExpectationTests {
 	}
 
 	@Test
-	public void hasRemainingCount() throws Exception {
+	public void hasRemainingCount() {
 		RequestExpectation expectation = new DefaultRequestExpectation(twice(), requestTo("/foo"));
 		expectation.andRespond(withSuccess());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertTrue(expectation.hasRemainingCount());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertFalse(expectation.hasRemainingCount());
 	}
 
 	@Test
-	public void isSatisfied() throws Exception {
+	public void isSatisfied() {
 		RequestExpectation expectation = new DefaultRequestExpectation(twice(), requestTo("/foo"));
 		expectation.andRespond(withSuccess());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertFalse(expectation.isSatisfied());
 
-		expectation.createResponse(createRequest(GET, "/foo"));
+		expectation.incrementAndValidate();
 		assertTrue(expectation.isSatisfied());
 	}
 
 
 
+	@SuppressWarnings("deprecation")
 	private ClientHttpRequest createRequest(HttpMethod method, String url) {
 		try {
-			return new MockAsyncClientHttpRequest(method,  new URI(url));
+			return new org.springframework.mock.http.client.MockAsyncClientHttpRequest(method,  new URI(url));
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException(ex);

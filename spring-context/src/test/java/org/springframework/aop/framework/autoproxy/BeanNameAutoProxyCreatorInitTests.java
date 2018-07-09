@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -34,13 +35,13 @@ import static org.junit.Assert.*;
 public class BeanNameAutoProxyCreatorInitTests {
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testIgnoreAdvisorThatIsCurrentlyCreation() {
+	public void testIgnoreAdvisorThatIsCurrentlyInCreation() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 		TestBean bean = (TestBean) ctx.getBean("bean");
 		bean.setName("foo");
 		assertEquals("foo", bean.getName());
-		bean.setName(null); // should throw
+		bean.setName(null);  // should throw
 	}
 
 }
@@ -49,7 +50,7 @@ public class BeanNameAutoProxyCreatorInitTests {
 class NullChecker implements MethodBeforeAdvice {
 
 	@Override
-	public void before(Method method, Object[] args, Object target) throws Throwable {
+	public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
 		check(args);
 	}
 

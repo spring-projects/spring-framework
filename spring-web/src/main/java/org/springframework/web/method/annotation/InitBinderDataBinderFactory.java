@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.web.method.annotation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
@@ -41,15 +43,15 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 
 
 	/**
-	 * Create a new instance.
-	 * @param binderMethods {@code @InitBinder} methods, or {@code null}
-	 * @param initializer for global data binder intialization
+	 * Create a new InitBinderDataBinderFactory instance.
+	 * @param binderMethods {@code @InitBinder} methods
+	 * @param initializer for global data binder initialization
 	 */
-	public InitBinderDataBinderFactory(List<InvocableHandlerMethod> binderMethods,
-			WebBindingInitializer initializer) {
+	public InitBinderDataBinderFactory(@Nullable List<InvocableHandlerMethod> binderMethods,
+			@Nullable WebBindingInitializer initializer) {
 
 		super(initializer);
-		this.binderMethods = (binderMethods != null) ? binderMethods : new ArrayList<>();
+		this.binderMethods = (binderMethods != null ? binderMethods : Collections.emptyList());
 	}
 
 	/**
@@ -77,9 +79,10 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 	 * names of the annotation, if present.
 	 */
 	protected boolean isBinderMethodApplicable(HandlerMethod binderMethod, WebDataBinder binder) {
-		InitBinder annot = binderMethod.getMethodAnnotation(InitBinder.class);
-		Collection<String> names = Arrays.asList(annot.value());
-		return (names.size() == 0 || names.contains(binder.getObjectName()));
+		InitBinder ann = binderMethod.getMethodAnnotation(InitBinder.class);
+		Assert.state(ann != null, "No InitBinder annotation");
+		Collection<String> names = Arrays.asList(ann.value());
+		return (names.isEmpty() || names.contains(binder.getObjectName()));
 	}
 
 }

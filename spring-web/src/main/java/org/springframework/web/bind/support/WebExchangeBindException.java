@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -97,22 +99,24 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
-	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 		this.bindingResult.reject(errorCode, errorArgs, defaultMessage);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode) {
+	public void rejectValue(@Nullable String field, String errorCode) {
 		this.bindingResult.rejectValue(field, errorCode);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, String defaultMessage) {
 		this.bindingResult.rejectValue(field, errorCode, defaultMessage);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void rejectValue(
+			@Nullable String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
+
 		this.bindingResult.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
 
@@ -153,6 +157,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		return this.bindingResult.getGlobalError();
 	}
@@ -173,6 +178,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		return this.bindingResult.getFieldError();
 	}
@@ -193,16 +199,19 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		return this.bindingResult.getFieldError(field);
 	}
 
 	@Override
+	@Nullable
 	public Object getFieldValue(String field) {
 		return this.bindingResult.getFieldValue(field);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		return this.bindingResult.getFieldType(field);
 	}
@@ -218,24 +227,22 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
+	@Nullable
 	public Object getRawFieldValue(String field) {
 		return this.bindingResult.getRawFieldValue(field);
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public PropertyEditor findEditor(String field, Class valueType) {
+	@Nullable
+	public PropertyEditor findEditor(@Nullable String field, @Nullable Class valueType) {
 		return this.bindingResult.findEditor(field, valueType);
 	}
 
 	@Override
+	@Nullable
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
 		return this.bindingResult.getPropertyEditorRegistry();
-	}
-
-	@Override
-	public void addError(ObjectError error) {
-		this.bindingResult.addError(error);
 	}
 
 	@Override
@@ -246,6 +253,16 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	@Override
 	public String[] resolveMessageCodes(String errorCode, String field) {
 		return this.bindingResult.resolveMessageCodes(errorCode, field);
+	}
+
+	@Override
+	public void addError(ObjectError error) {
+		this.bindingResult.addError(error);
+	}
+
+	@Override
+	public void recordFieldValue(String field, Class<?> type, Object value) {
+		this.bindingResult.recordFieldValue(field, type, value);
 	}
 
 	@Override
@@ -263,12 +280,12 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	 * Returns diagnostic information about the errors held in this object.
 	 */
 	@Override
-	@SuppressWarnings("OptionalGetWithoutIsPresent")
 	public String getMessage() {
-		MethodParameter parameter = getMethodParameter().get();
+		MethodParameter parameter = getMethodParameter();
+		Assert.state(parameter != null, "No MethodParameter");
 		StringBuilder sb = new StringBuilder("Validation failed for argument at index ")
 				.append(parameter.getParameterIndex()).append(" in method: ")
-				.append(parameter.getMethod().toGenericString())
+				.append(parameter.getExecutable().toGenericString())
 				.append(", with ").append(this.bindingResult.getErrorCount()).append(" error(s): ");
 		for (ObjectError error : this.bindingResult.getAllErrors()) {
 			sb.append("[").append(error).append("] ");

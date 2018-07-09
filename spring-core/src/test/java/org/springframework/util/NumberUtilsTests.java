@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +40,12 @@ public class NumberUtilsTests {
 		String aFloat = "" + Float.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
 
-		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class));
-		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class));
-		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class));
-		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
-		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class));
-		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+		assertEquals("Byte did not parse", Byte.valueOf(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class));
+		assertEquals("Short did not parse", Short.valueOf(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class));
+		assertEquals("Integer did not parse", Integer.valueOf(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class));
+		assertEquals("Long did not parse", Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+		assertEquals("Float did not parse", Float.valueOf(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class));
+		assertEquals("Double did not parse", Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
 	}
 
 	@Test
@@ -58,12 +58,12 @@ public class NumberUtilsTests {
 		String aFloat = "" + Float.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
 
-		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
-		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
-		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
-		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
-		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
-		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+		assertEquals("Byte did not parse", Byte.valueOf(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
+		assertEquals("Short did not parse", Short.valueOf(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
+		assertEquals("Integer did not parse", Integer.valueOf(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
+		assertEquals("Long did not parse", Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals("Float did not parse", Float.valueOf(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
+		assertEquals("Double did not parse", Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	@Test
@@ -75,12 +75,12 @@ public class NumberUtilsTests {
 		String aFloat = " " + Float.MAX_VALUE + " ";
 		String aDouble = " " + Double.MAX_VALUE + " ";
 
-		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class));
-		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class));
-		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class));
-		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
-		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class));
-		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+		assertEquals("Byte did not parse", Byte.valueOf(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class));
+		assertEquals("Short did not parse", Short.valueOf(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class));
+		assertEquals("Integer did not parse", Integer.valueOf(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class));
+		assertEquals("Long did not parse", Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+		assertEquals("Float did not parse", Float.valueOf(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class));
+		assertEquals("Double did not parse", Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
 	}
 
 	@Test
@@ -93,18 +93,18 @@ public class NumberUtilsTests {
 		String aFloat = " " + Float.MAX_VALUE + " ";
 		String aDouble = " " + Double.MAX_VALUE + " ";
 
-		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
-		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
-		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
-		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
-		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
-		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+		assertEquals("Byte did not parse", Byte.valueOf(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
+		assertEquals("Short did not parse", Short.valueOf(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
+		assertEquals("Integer did not parse", Integer.valueOf(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
+		assertEquals("Long did not parse", Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals("Float did not parse", Float.valueOf(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
+		assertEquals("Double did not parse", Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	@Test
 	public void parseNumberAsHex() {
-		String aByte = "0x" + Integer.toHexString(new Byte(Byte.MAX_VALUE).intValue());
-		String aShort = "0x" + Integer.toHexString(new Short(Short.MAX_VALUE).intValue());
+		String aByte = "0x" + Integer.toHexString(Byte.valueOf(Byte.MAX_VALUE).intValue());
+		String aShort = "0x" + Integer.toHexString(Short.valueOf(Short.MAX_VALUE).intValue());
 		String anInteger = "0x" + Integer.toHexString(Integer.MAX_VALUE);
 		String aLong = "0x" + Long.toHexString(Long.MAX_VALUE);
 		String aReallyBigInt = "FEBD4E677898DFEBFFEE44";
@@ -135,7 +135,7 @@ public class NumberUtilsTests {
 
 	@Test
 	public void convertDoubleToBigInteger() {
-		Double decimal = new Double(3.14d);
+		Double decimal = Double.valueOf(3.14d);
 		assertEquals(new BigInteger("3"), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
 	}
 
@@ -223,8 +223,8 @@ public class NumberUtilsTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		assertEquals(new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
-		assertEquals(new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+		assertEquals(Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+		assertEquals(Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
 	}
 
 	@Test
@@ -253,8 +253,8 @@ public class NumberUtilsTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		assertEquals(new Long(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class));
-		assertEquals(new Double(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+		assertEquals(Double.valueOf(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
 	}
 
 	@Test
@@ -284,8 +284,8 @@ public class NumberUtilsTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		assertEquals(new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
-		assertEquals(new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+		assertEquals(Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals(Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	@Test
@@ -315,8 +315,8 @@ public class NumberUtilsTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		assertEquals(new Long(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
-		assertEquals(new Double(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals(Double.valueOf(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	@Test

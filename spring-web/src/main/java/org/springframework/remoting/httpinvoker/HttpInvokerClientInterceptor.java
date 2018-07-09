@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteInvocationFailureException;
@@ -46,13 +47,18 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * a security context). Furthermore, it allows to customize request
  * execution via the {@link HttpInvokerRequestExecutor} strategy.
  *
- * <p>Can use the JDK's {@link java.rmi.server.RMIClassLoader} to load
- * classes from a given {@link #setCodebaseUrl codebase}, performing
- * on-demand dynamic code download from a remote location. The codebase
- * can consist of multiple URLs, separated by spaces. Note that
- * RMIClassLoader requires a SecurityManager to be set, analogous to
- * when using dynamic class download with standard RMI!
+ * <p>Can use the JDK's {@link java.rmi.server.RMIClassLoader} to load classes
+ * from a given {@link #setCodebaseUrl codebase}, performing on-demand dynamic
+ * code download from a remote location. The codebase can consist of multiple
+ * URLs, separated by spaces. Note that RMIClassLoader requires a SecurityManager
+ * to be set, analogous to when using dynamic class download with standard RMI!
  * (See the RMI documentation for details.)
+ *
+ * <p><b>WARNING: Be aware of vulnerabilities due to unsafe Java deserialization:
+ * Manipulated input streams could lead to unwanted code execution on the server
+ * during the deserialization step. As a consequence, do not expose HTTP invoker
+ * endpoints to untrusted clients but rather just between your own services.</b>
+ * In general, we strongly recommend any other message format (e.g. JSON) instead.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -67,8 +73,10 @@ import org.springframework.remoting.support.RemoteInvocationResult;
 public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		implements MethodInterceptor, HttpInvokerClientConfiguration {
 
+	@Nullable
 	private String codebaseUrl;
 
+	@Nullable
 	private HttpInvokerRequestExecutor httpInvokerRequestExecutor;
 
 
@@ -84,7 +92,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
 	 * @see java.rmi.server.RMIClassLoader
 	 */
-	public void setCodebaseUrl(String codebaseUrl) {
+	public void setCodebaseUrl(@Nullable String codebaseUrl) {
 		this.codebaseUrl = codebaseUrl;
 	}
 
@@ -92,6 +100,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	 * Return the codebase URL to download classes from if not found locally.
 	 */
 	@Override
+	@Nullable
 	public String getCodebaseUrl() {
 		return this.codebaseUrl;
 	}
@@ -204,6 +213,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @return the RemoteAccessException to throw, or {@code null} to have the
 	 * original exception propagated to the caller
 	 */
+	@Nullable
 	protected RemoteAccessException convertHttpInvokerAccessException(Throwable ex) {
 		if (ex instanceof ConnectException) {
 			return new RemoteConnectFailureException(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.springframework.util.ReflectionUtils.*;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class GenericTypeResolverTests {
 
 	@Test
@@ -77,7 +77,6 @@ public class GenericTypeResolverTests {
 	}
 
 	@Test
-	@Deprecated
 	public void testResolveType() {
 		Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
 		MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
@@ -103,7 +102,6 @@ public class GenericTypeResolverTests {
 	}
 
 	@Test
-	@Deprecated
 	public void testGetTypeVariableMap() throws Exception {
 		Map<TypeVariable, Type> map;
 
@@ -141,40 +139,35 @@ public class GenericTypeResolverTests {
 		assertThat(x, equalTo((Type) Long.class));
 	}
 
-	@Test
+	@Test  // SPR-11030
 	public void getGenericsCannotBeResolved() throws Exception {
-		// SPR-11030
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
 		assertNull(resolved);
 	}
 
-	@Test
+	@Test  // SPR-11052
 	public void getRawMapTypeCannotBeResolved() throws Exception {
-		// SPR-11052
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(Map.class, Map.class);
 		assertNull(resolved);
 	}
 
-	@Test
+	@Test  // SPR-11044
 	public void getGenericsOnArrayFromParamCannotBeResolved() throws Exception {
-		// SPR-11044
 		MethodParameter methodParameter = MethodParameter.forExecutable(
 				WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);
 		Class<?> resolved = GenericTypeResolver.resolveParameterType(methodParameter, WithArray.class);
 		assertThat(resolved, equalTo((Class<?>) Object[].class));
 	}
 
-	@Test
+	@Test  // SPR-11044
 	public void getGenericsOnArrayFromReturnCannotBeResolved() throws Exception {
-		// SPR-11044
 		Class<?> resolved = GenericTypeResolver.resolveReturnType(
 				WithArrayBase.class.getDeclaredMethod("array", Object[].class), WithArray.class);
 		assertThat(resolved, equalTo((Class<?>) Object[].class));
 	}
 
-	@Test
+	@Test  // SPR-11763
 	public void resolveIncompleteTypeVariables() {
-		// SPR-11763
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
 		assertNotNull(resolved);
 		assertEquals(2, resolved.length);

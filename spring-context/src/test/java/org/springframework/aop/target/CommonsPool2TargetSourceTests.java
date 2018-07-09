@@ -84,7 +84,7 @@ public class CommonsPool2TargetSourceTests {
 		// Just check that it works--we can't make assumptions
 		// about the count
 		pooled.doWork();
-		//assertEquals(INITIAL_COUNT + 1, apartment.getCount() );
+		//assertEquals(INITIAL_COUNT + 1, apartment.getCount());
 	}
 
 	@Test

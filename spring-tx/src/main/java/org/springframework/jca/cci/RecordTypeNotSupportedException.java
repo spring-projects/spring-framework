@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class RecordTypeNotSupportedException extends InvalidDataAccessResourceUs
 	/**
 	 * Constructor for RecordTypeNotSupportedException.
 	 * @param msg message
-	 * @param ex ResourceException root cause
+	 * @param ex the root ResourceException cause
 	 */
 	public RecordTypeNotSupportedException(String msg, ResourceException ex) {
 		super(msg, ex);

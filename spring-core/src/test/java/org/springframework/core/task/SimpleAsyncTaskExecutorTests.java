@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@ package org.springframework.core.task;
 
 import java.util.concurrent.ThreadFactory;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.util.ConcurrencyThrottleSupport;
 
 import static org.hamcrest.CoreMatchers.*;
-
 import static org.junit.Assert.*;
 
 /**
@@ -39,13 +38,11 @@ public class SimpleAsyncTaskExecutorTests {
 	public final ExpectedException exception = ExpectedException.none();
 
 
-	// TODO Determine why task is executed when concurrency is switched off.
-	@Ignore("Disabled because task is still executed when concurrency is switched off")
 	@Test
 	public void cannotExecuteWhenConcurrencyIsSwitchedOff() throws Exception {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
 		executor.setConcurrencyLimit(ConcurrencyThrottleSupport.NO_CONCURRENCY);
-		assertFalse(executor.isThrottleActive());
+		assertTrue(executor.isThrottleActive());
 		exception.expect(IllegalStateException.class);
 		executor.execute(new NoOpRunnable());
 	}

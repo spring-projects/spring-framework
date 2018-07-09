@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,46 +13,95 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.LinkedList;
+import java.util.function.Consumer;
 
+import reactor.core.publisher.Flux;
+
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
- * Package private default implementation of {@link ServerHttpRequest.Builder}.
+ * Package-private default implementation of {@link ServerHttpRequest.Builder}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
-	private final ServerHttpRequest delegate;
+	private URI uri;
 
-	private HttpMethod httpMethod;
+	private HttpHeaders httpHeaders;
 
-	private String path;
+	private String httpMethodValue;
 
+	private final MultiValueMap<String, HttpCookie> cookies;
+
+	@Nullable
+	private String uriPath;
+
+	@Nullable
 	private String contextPath;
 
+	@Nullable
+	private SslInfo sslInfo;
 
-	public DefaultServerHttpRequestBuilder(ServerHttpRequest delegate) {
-		Assert.notNull(delegate, "ServerHttpRequest delegate is required.");
-		this.delegate = delegate;
+	private Flux<DataBuffer> body;
+
+	private final ServerHttpRequest originalRequest;
+
+
+	public DefaultServerHttpRequestBuilder(ServerHttpRequest original) {
+		Assert.notNull(original, "ServerHttpRequest is required");
+
+		this.uri = original.getURI();
+		this.httpMethodValue = original.getMethodValue();
+		this.body = original.getBody();
+
+		this.httpHeaders = new HttpHeaders();
+		copyMultiValueMap(original.getHeaders(), this.httpHeaders);
+
+		this.cookies = new LinkedMultiValueMap<>(original.getCookies().size());
+		copyMultiValueMap(original.getCookies(), this.cookies);
+
+		this.originalRequest = original;
+	}
+
+	private static <K, V> void copyMultiValueMap(MultiValueMap<K,V> source, MultiValueMap<K,V> target) {
+		source.forEach((key, value) -> target.put(key, new LinkedList<>(value)));
 	}
 
 
 	@Override
 	public ServerHttpRequest.Builder method(HttpMethod httpMethod) {
-		this.httpMethod = httpMethod;
+		this.httpMethodValue = httpMethod.name();
+		return this;
+	}
+
+	@Override
+	public ServerHttpRequest.Builder uri(URI uri) {
+		this.uri = uri;
 		return this;
 	}
 
 	@Override
 	public ServerHttpRequest.Builder path(String path) {
-		this.path = path;
+		Assert.isTrue(path.startsWith("/"), "The path does not have a leading slash.");
+		this.uriPath = path;
 		return this;
 	}
 
@@ -63,53 +112,136 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
+	public ServerHttpRequest.Builder header(String key, String value) {
+		this.httpHeaders.add(key, value);
+		return this;
+	}
+
+	@Override
+	public ServerHttpRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+		headersConsumer.accept(this.httpHeaders);
+		return this;
+	}
+
+	@Override
+	public ServerHttpRequest.Builder sslInfo(SslInfo sslInfo) {
+		this.sslInfo = sslInfo;
+		return this;
+	}
+
+	@Override
 	public ServerHttpRequest build() {
-		URI uri = null;
-		if (this.path != null) {
-			uri = this.delegate.getURI();
-			uri = UriComponentsBuilder.fromUri(uri).replacePath(this.path).build(true).toUri();
+		return new MutatedServerHttpRequest(getUriToUse(), this.contextPath, this.httpHeaders,
+				this.httpMethodValue, this.cookies, this.sslInfo, this.body, this.originalRequest);
+	}
+
+	private URI getUriToUse() {
+		if (this.uriPath == null) {
+			return this.uri;
 		}
-		return new MutativeDecorator(this.delegate, this.httpMethod, uri, this.contextPath);
+
+		StringBuilder uriBuilder = new StringBuilder();
+		if (this.uri.getScheme() != null) {
+			uriBuilder.append(this.uri.getScheme()).append(':');
+		}
+		if (this.uri.getRawUserInfo() != null || this.uri.getHost() != null) {
+			uriBuilder.append("//");
+			if (this.uri.getRawUserInfo() != null) {
+				uriBuilder.append(this.uri.getRawUserInfo()).append('@');
+			}
+			if (this.uri.getHost() != null) {
+				uriBuilder.append(this.uri.getHost());
+			}
+			if (this.uri.getPort() != -1) {
+				uriBuilder.append(':').append(this.uri.getPort());
+			}
+		}
+		if (StringUtils.hasLength(this.uriPath)) {
+			uriBuilder.append(this.uriPath);
+		}
+		if (this.uri.getRawQuery() != null) {
+			uriBuilder.append('?').append(this.uri.getRawQuery());
+		}
+		if (this.uri.getRawFragment() != null) {
+			uriBuilder.append('#').append(this.uri.getRawFragment());
+		}
+		try {
+			return new URI(uriBuilder.toString());
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Invalid URI path: \"" + this.uriPath + "\"", ex);
+		}
 	}
 
 
-	/**
-	 * An immutable wrapper of a request returning property overrides -- given
-	 * to the constructor -- or original values otherwise.
-	 */
-	private static class MutativeDecorator extends ServerHttpRequestDecorator {
+	private static class MutatedServerHttpRequest extends AbstractServerHttpRequest {
 
-		private final HttpMethod httpMethod;
+		private final String methodValue;
 
-		private final URI uri;
+		private final MultiValueMap<String, HttpCookie> cookies;
 
-		private final String contextPath;
+		@Nullable
+		private final InetSocketAddress remoteAddress;
+
+		@Nullable
+		private final SslInfo sslInfo;
+
+		private final Flux<DataBuffer> body;
+
+		private final ServerHttpRequest originalRequest;
 
 
-		public MutativeDecorator(ServerHttpRequest delegate, HttpMethod httpMethod,
-				URI uri, String contextPath) {
+		public MutatedServerHttpRequest(URI uri, @Nullable String contextPath,
+				HttpHeaders headers, String methodValue, MultiValueMap<String, HttpCookie> cookies,
+				@Nullable SslInfo sslInfo, Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
 
-			super(delegate);
-			this.httpMethod = httpMethod;
-			this.uri = uri;
-			this.contextPath = contextPath;
+			super(uri, contextPath, headers);
+			this.methodValue = methodValue;
+			this.cookies = cookies;
+			this.remoteAddress = originalRequest.getRemoteAddress();
+			this.sslInfo = sslInfo != null ? sslInfo : originalRequest.getSslInfo();
+			this.body = body;
+			this.originalRequest = originalRequest;
 		}
 
 		@Override
-		public HttpMethod getMethod() {
-			return (this.httpMethod != null ? this.httpMethod : super.getMethod());
+		public String getMethodValue() {
+			return this.methodValue;
 		}
 
 		@Override
-		public URI getURI() {
-			return (this.uri != null ? this.uri : super.getURI());
+		protected MultiValueMap<String, HttpCookie> initCookies() {
+			return this.cookies;
+		}
+
+		@Nullable
+		@Override
+		public InetSocketAddress getRemoteAddress() {
+			return this.remoteAddress;
+		}
+
+		@Nullable
+		@Override
+		protected SslInfo initSslInfo() {
+			return this.sslInfo;
 		}
 
 		@Override
-		public String getContextPath() {
-			return (this.contextPath != null ? this.contextPath : super.getContextPath());
+		public Flux<DataBuffer> getBody() {
+			return this.body;
 		}
 
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T getNativeRequest() {
+			return (T) this.originalRequest;
+		}
+
+		@Override
+		public String getId() {
+			return this.originalRequest.getId();
+		}
 	}
 
 }

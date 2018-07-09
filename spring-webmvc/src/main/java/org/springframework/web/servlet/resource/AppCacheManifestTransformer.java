@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -55,7 +56,7 @@ import org.springframework.util.StringUtils;
  * <p>In order to serve manifest files with the proper {@code "text/manifest"} content type,
  * it is required to configure it with
  * {@code contentNegotiationConfigurer.mediaType("appcache", MediaType.valueOf("text/manifest")}
- * in a {@code WebMvcConfigurerAdapter}.
+ * in a {@code WebMvcConfigurer}.
  *
  * @author Brian Clozel
  * @since 4.1
@@ -108,15 +109,12 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		if (!content.startsWith(MANIFEST_HEADER)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Manifest should start with 'CACHE MANIFEST', skip: " + resource);
+				logger.trace("Skipping " + resource + ": Manifest does not start with 'CACHE MANIFEST'");
 			}
 			return resource;
 		}
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Transforming resource: " + resource);
-		}
-
+		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(content);
 		LineInfo previous = null;
 		LineAggregator aggregator = new LineAggregator(resource, content);
@@ -146,12 +144,11 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		Resource appCacheResource = transformerChain.getResolverChain()
 				.resolveResource(null, info.getLine(), Collections.singletonList(resource));
 
-		String path = resolveUrlPath(toAbsolutePath(info.getLine(), request), request, resource, transformerChain);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Link modified: " + path + " (original: " + info.getLine() + ")");
-		}
+		String path = info.getLine();
+		String absolutePath = toAbsolutePath(path, request);
+		String newPath = resolveUrlPath(absolutePath, request, resource, transformerChain);
 
-		return new LineOutput(path, appCacheResource);
+		return new LineOutput((newPath != null ? newPath : path), appCacheResource);
 	}
 
 
@@ -163,14 +160,13 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		private final boolean link;
 
-
-		public LineInfo(String line, LineInfo previous) {
+		public LineInfo(String line, @Nullable LineInfo previous) {
 			this.line = line;
 			this.cacheSection = initCacheSectionFlag(line, previous);
 			this.link = iniLinkFlag(line, this.cacheSection);
 		}
 
-		private static boolean initCacheSectionFlag(String line, LineInfo previousLine) {
+		private static boolean initCacheSectionFlag(String line, @Nullable LineInfo previousLine) {
 			if (MANIFEST_SECTION_HEADERS.contains(line.trim())) {
 				return line.trim().equals(CACHE_HEADER);
 			}
@@ -187,10 +183,9 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		}
 
 		private static boolean hasScheme(String line) {
-			int index = line.indexOf(":");
+			int index = line.indexOf(':');
 			return (line.startsWith("//") || (index > 0 && !line.substring(0, index).contains("/")));
 		}
-
 
 		public String getLine() {
 			return this.line;
@@ -205,14 +200,15 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		}
 	}
 
+
 	private static class LineOutput {
 
 		private final String line;
 
+		@Nullable
 		private final Resource resource;
 
-
-		public LineOutput(String line, Resource resource) {
+		public LineOutput(String line, @Nullable Resource resource) {
 			this.line = line;
 			this.resource = resource;
 		}
@@ -221,10 +217,12 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			return this.line;
 		}
 
+		@Nullable
 		public Resource getResource() {
 			return this.resource;
 		}
 	}
+
 
 	private static class LineAggregator {
 
@@ -233,7 +231,6 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		private final ByteArrayOutputStream baos;
 
 		private final Resource resource;
-
 
 		public LineAggregator(Resource resource, String content) {
 			this.resource = resource;
@@ -251,9 +248,6 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		public TransformedResource createResource() {
 			String hash = DigestUtils.md5DigestAsHex(this.baos.toByteArray());
 			this.writer.write("\n" + "# Hash: " + hash);
-			if (logger.isTraceEnabled()) {
-				logger.trace("AppCache file: [" + resource.getFilename()+ "] hash: [" + hash + "]");
-			}
 			byte[] bytes = this.writer.toString().getBytes(DEFAULT_CHARSET);
 			return new TransformedResource(this.resource, bytes);
 		}

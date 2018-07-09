@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.validation.Valid;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,10 +40,12 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
+import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
 
 import static org.junit.Assert.*;
 
@@ -53,13 +54,14 @@ import static org.junit.Assert.*;
  */
 public class DefaultMessageHandlerMethodFactoryTests {
 
+	private final SampleBean sample = new SampleBean();
+
 	@Rule
 	public final TestName name = new TestName();
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
-	private final SampleBean sample = new SampleBean();
 
 	@Test
 	public void customConversion() throws Exception {
@@ -146,7 +148,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 		InvocableHandlerMethod invocableHandlerMethod2 =
 				createInvocableHandlerMethod(instance, "simpleString", String.class);
 
-		thrown.expect(IllegalStateException.class);
+		thrown.expect(MethodArgumentResolutionException.class);
 		thrown.expectMessage("No suitable resolver for");
 		invocableHandlerMethod2.invoke(message);
 	}
@@ -217,7 +219,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 			invocations.put("simpleString", true);
 		}
 
-		public void payloadValidation(@Payload @Valid String value) {
+		public void payloadValidation(@Payload @Validated String value) {
 			invocations.put("payloadValidation", true);
 		}
 
@@ -240,4 +242,5 @@ public class DefaultMessageHandlerMethodFactoryTests {
 			return Locale.getDefault();
 		}
 	}
+
 }

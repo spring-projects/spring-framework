@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,18 @@
 
 package org.springframework.core;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Adapt a Reactive Streams {@link Publisher} to and from an async/reactive type
- * such as {@code CompletableFuture}, an RxJava {@code Observable}, etc.
+ * Adapter for a Reactive Streams {@link Publisher} to and from an async/reactive
+ * type such as {@code CompletableFuture}, RxJava {@code Observable}, and others.
  *
- * <p>Use the {@link ReactiveAdapterRegistry} to register reactive types and
- * obtain adapters from.
+ * <p>An adapter is typically obtained via {@link ReactiveAdapterRegistry}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -71,28 +70,28 @@ public class ReactiveAdapter {
 	}
 
 	/**
-	 * A shortcut for {@code getDescriptor().getReactiveType()}.
+	 * Shortcut for {@code getDescriptor().getReactiveType()}.
 	 */
 	public Class<?> getReactiveType() {
 		return getDescriptor().getReactiveType();
 	}
 
 	/**
-	 * A shortcut for {@code getDescriptor().isMultiValue()}.
+	 * Shortcut for {@code getDescriptor().isMultiValue()}.
 	 */
 	public boolean isMultiValue() {
 		return getDescriptor().isMultiValue();
 	}
 
 	/**
-	 * A shortcut for {@code getDescriptor().supportsEmpty()}.
+	 * Shortcut for {@code getDescriptor().supportsEmpty()}.
 	 */
 	public boolean supportsEmpty() {
 		return getDescriptor().supportsEmpty();
 	}
 
 	/**
-	 * A shortcut for {@code getDescriptor().isNoValue()}.
+	 * Shortcut for {@code getDescriptor().isNoValue()}.
 	 */
 	public boolean isNoValue() {
 		return getDescriptor().isNoValue();
@@ -100,13 +99,13 @@ public class ReactiveAdapter {
 
 
 	/**
-	 * Adapt the given instance to a Reactive Streams Publisher.
-	 * @param source the source object to adapt from
-	 * @return the Publisher repesenting the adaptation
+	 * Adapt the given instance to a Reactive Streams {@code Publisher}.
+	 * @param source the source object to adapt from; if the given object is
+	 * {@code null}, {@link ReactiveTypeDescriptor#getEmptyValue()} is used.
+	 * @return the Publisher representing the adaptation
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Publisher<T> toPublisher(Object source) {
-		source = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
+	public <T> Publisher<T> toPublisher(@Nullable Object source) {
 		if (source == null) {
 			source = getDescriptor().getEmptyValue();
 		}
@@ -119,7 +118,7 @@ public class ReactiveAdapter {
 	 * @return the reactive type instance representing the adapted publisher
 	 */
 	public Object fromPublisher(Publisher<?> publisher) {
-		return (publisher != null ? this.fromPublisherFunction.apply(publisher) : null);
+		return this.fromPublisherFunction.apply(publisher);
 	}
 
 }

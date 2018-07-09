@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import org.springframework.lang.Nullable;
 
 import static org.junit.Assert.*;
 
@@ -90,8 +91,9 @@ public class DelegatingNavigationHandlerTests {
 		private String lastOutcome;
 
 		@Override
-		public void handleNavigation(
-				FacesContext facesContext, String fromAction, String outcome, NavigationHandler originalNavigationHandler) {
+		public void handleNavigation(FacesContext facesContext, @Nullable String fromAction,
+				@Nullable String outcome, @Nullable NavigationHandler originalNavigationHandler) {
+
 			lastFromAction = fromAction;
 			lastOutcome = outcome;
 			if (originalNavigationHandler != null) {

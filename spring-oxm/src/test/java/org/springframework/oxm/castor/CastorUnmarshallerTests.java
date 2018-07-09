@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.MarshallingException;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -41,6 +40,7 @@ import static org.junit.Assert.*;
  * @author Jakub Narloch
  * @author Sam Brannen
  */
+@Deprecated
 public class CastorUnmarshallerTests extends AbstractUnmarshallerTests<CastorMarshaller> {
 
 	/**
@@ -87,7 +87,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests<CastorMar
 	@Test
 	public void unmarshalTargetClass() throws Exception {
 		CastorMarshaller unmarshaller = new CastorMarshaller();
-		unmarshaller.setTargetClasses(new Class[] {Flights.class});
+		unmarshaller.setTargetClasses(Flights.class);
 		unmarshaller.afterPropertiesSet();
 		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
 		Object flights = unmarshaller.unmarshal(source);
@@ -98,7 +98,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests<CastorMar
 	public void setBothTargetClassesAndMapping() throws IOException {
 		CastorMarshaller unmarshaller = new CastorMarshaller();
 		unmarshaller.setMappingLocation(new ClassPathResource("order-mapping.xml", CastorMarshaller.class));
-		unmarshaller.setTargetClasses(new Class[] {Order.class});
+		unmarshaller.setTargetClasses(Order.class);
 		unmarshaller.afterPropertiesSet();
 
 		String xml = "<order>" +
@@ -181,7 +181,6 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests<CastorMar
 	}
 
 	@Test
-	@Ignore("Fails on the build server for some reason")
 	public void clearCollectionsFalse() throws Exception {
 		Flights flights = new Flights();
 		flights.setFlight(new Flight[] {new Flight(), null});
@@ -190,8 +189,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests<CastorMar
 		Object result = unmarshalFlights();
 
 		assertSame("Result Flights is different object.", flights, result);
-		assertEquals("Result Flights has incorrect number of Flight.", 3, ((Flights) result).getFlightCount());
-		assertNull("Flight shouldn't have number.", flights.getFlight(0).getNumber());
+		assertEquals("Result Flights has incorrect number of Flights.", 3, ((Flights) result).getFlightCount());
 		assertNull("Null Flight was expected.", flights.getFlight()[1]);
 		testFlight(flights.getFlight()[2]);
 	}

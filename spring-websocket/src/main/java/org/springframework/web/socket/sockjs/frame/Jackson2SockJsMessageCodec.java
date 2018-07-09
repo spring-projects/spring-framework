@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -58,16 +59,19 @@ public class Jackson2SockJsMessageCodec extends AbstractSockJsMessageCodec {
 
 
 	@Override
+	@Nullable
 	public String[] decode(String content) throws IOException {
 		return this.objectMapper.readValue(content, String[].class);
 	}
 
 	@Override
+	@Nullable
 	public String[] decodeInputStream(InputStream content) throws IOException {
 		return this.objectMapper.readValue(content, String[].class);
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected char[] applyJsonQuoting(String content) {
 		return JsonStringEncoder.getInstance().quoteAsString(content);
 	}

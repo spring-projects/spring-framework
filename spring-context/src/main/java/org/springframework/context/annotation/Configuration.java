@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -68,11 +69,11 @@ import org.springframework.stereotype.Component;
  * {@code AnnotationConfigApplicationContext}, {@code @Configuration} classes may be
  * declared as normal {@code <bean>} definitions within Spring XML files:
  * <pre class="code">
- * {@code
- * <beans>
- *    <context:annotation-config/>
- *    <bean class="com.acme.AppConfig"/>
- * </beans>}</pre>
+ * &lt;beans&gt;
+ *    &lt;context:annotation-config/&gt;
+ *    &lt;bean class="com.acme.AppConfig"/&gt;
+ * &lt;/beans&gt;
+ * </pre>
  *
  * In the example above, {@code <context:annotation-config/>} is required in order to
  * enable {@link ConfigurationClassPostProcessor} and other annotation-related
@@ -119,7 +120,7 @@ import org.springframework.stereotype.Component;
  *
  * Externalized values may be looked up by injecting the Spring
  * {@link org.springframework.core.env.Environment} into a {@code @Configuration}
- * class the usual (e.g. using the {@code @Autowired} annotation):
+ * class as usual (e.g. using the {@code @Autowired} annotation):
  *
  * <pre class="code">
  * &#064;Configuration
@@ -137,8 +138,8 @@ import org.springframework.stereotype.Component;
  *
  * Properties resolved through the {@code Environment} reside in one or more "property
  * source" objects, and {@code @Configuration} classes may contribute property sources to
- * the {@code Environment} object using
- * the {@link org.springframework.core.env.PropertySources @PropertySources} annotation:
+ * the {@code Environment} object using the {@link PropertySource @PropertySource}
+ * annotation:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -231,7 +232,7 @@ import org.springframework.stereotype.Component;
  * indicate they should be processed only if a given profile or profiles are <em>active</em>:
  *
  * <pre class="code">
- * &#064;Profile("embedded")
+ * &#064;Profile("development")
  * &#064;Configuration
  * public class EmbeddedDatabaseConfig {
  *
@@ -249,6 +250,22 @@ import org.springframework.stereotype.Component;
  *     public DataSource dataSource() {
  *         // instantiate, configure and return production DataSource
  *     }
+ * }</pre>
+ *
+ * Alternatively, you may also declare profile conditions at the {@code @Bean} method level,
+ * e.g. for alternative bean variants within the same configuration class:
+ *
+ * <pre class="code">
+ * &#064;Configuration
+ * public class ProfileDatabaseConfig {
+ *
+ *     &#064;Bean("dataSource")
+ *     &#064;Profile("development")
+ *     public DataSource embeddedDatabase() { ... }
+ *
+ *     &#064;Bean("dataSource")
+ *     &#064;Profile("production")
+ *     public DataSource productionDatabase() { ... }
  * }</pre>
  *
  * See the {@link Profile @Profile} and {@link org.springframework.core.env.Environment}
@@ -357,9 +374,14 @@ import org.springframework.stereotype.Component;
  * <h2>Constraints when authoring {@code @Configuration} classes</h2>
  *
  * <ul>
- * <li>&#064;Configuration classes must be non-final
- * <li>&#064;Configuration classes must be non-local (may not be declared within a method)
- * <li>Any nested configuration classes must be {@code static}.
+ * <li>Configuration classes must be provided as classes (i.e. not as instances returned
+ * from factory methods), allowing for runtime enhancements through a generated subclass.
+ * <li>Configuration classes must be non-final.
+ * <li>Configuration classes must be non-local (i.e. may not be declared within a method).
+ * <li>Any nested configuration classes must be declared as {@code static}.
+ * <li>{@code @Bean} methods may not in turn create further configuration classes
+ * (any such instances will be treated as regular beans, with their configuration
+ * annotations remaining undetected).
  * </ul>
  *
  * @author Rod Johnson
@@ -385,15 +407,16 @@ public @interface Configuration {
 
 	/**
 	 * Explicitly specify the name of the Spring bean definition associated
-	 * with this Configuration class.  If left unspecified (the common case),
+	 * with this Configuration class. If left unspecified (the common case),
 	 * a bean name will be automatically generated.
 	 * <p>The custom name applies only if the Configuration class is picked up via
 	 * component scanning or supplied directly to a {@link AnnotationConfigApplicationContext}.
 	 * If the Configuration class is registered as a traditional XML bean definition,
 	 * the name/id of the bean element will take precedence.
-	 * @return the specified bean name, if any
+	 * @return the suggested component name, if any (or empty String otherwise)
 	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
 	 */
+	@AliasFor(annotation = Component.class)
 	String value() default "";
 
 }

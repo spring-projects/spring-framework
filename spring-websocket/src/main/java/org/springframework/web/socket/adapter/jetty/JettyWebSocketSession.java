@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,24 @@
 package org.springframework.web.socket.adapter.jetty;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.UpgradeRequest;
-import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
@@ -45,7 +45,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.AbstractWebSocketSession;
 
 /**
- * A {@link WebSocketSession} for use with the Jetty 9.3/9.4 WebSocket API.
+ * A {@link WebSocketSession} for use with the Jetty 9.4 WebSocket API.
  *
  * @author Phillip Webb
  * @author Rossen Stoyanchev
@@ -55,46 +55,22 @@ import org.springframework.web.socket.adapter.AbstractWebSocketSession;
  */
 public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
-	// As of Jetty 9.4, UpgradeRequest and UpgradeResponse are interfaces instead of classes
-	private static final boolean directInterfaceCalls;
-
-	private static Method getUpgradeRequest;
-	private static Method getUpgradeResponse;
-	private static Method getRequestURI;
-	private static Method getHeaders;
-	private static Method getUserPrincipal;
-	private static Method getAcceptedSubProtocol;
-	private static Method getExtensions;
-
-	static {
-		directInterfaceCalls = UpgradeRequest.class.isInterface();
-		if (!directInterfaceCalls) {
-			try {
-				getUpgradeRequest = Session.class.getMethod("getUpgradeRequest");
-				getUpgradeResponse = Session.class.getMethod("getUpgradeResponse");
-				getRequestURI = UpgradeRequest.class.getMethod("getRequestURI");
-				getHeaders = UpgradeRequest.class.getMethod("getHeaders");
-				getUserPrincipal = UpgradeRequest.class.getMethod("getUserPrincipal");
-				getAcceptedSubProtocol = UpgradeResponse.class.getMethod("getAcceptedSubProtocol");
-				getExtensions = UpgradeResponse.class.getMethod("getExtensions");
-			}
-			catch (NoSuchMethodException ex) {
-				throw new IllegalStateException("Incompatible Jetty API", ex);
-			}
-		}
-	}
-
-
+	@Nullable
 	private String id;
 
+	@Nullable
 	private URI uri;
 
+	@Nullable
 	private HttpHeaders headers;
 
+	@Nullable
 	private String acceptedProtocol;
 
+	@Nullable
 	private List<WebSocketExtension> extensions;
 
+	@Nullable
 	private Principal user;
 
 
@@ -113,7 +89,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	 * @param user the user associated with the session; if {@code null} we'll fallback on the
 	 * user available via {@link org.eclipse.jetty.websocket.api.Session#getUpgradeRequest()}
 	 */
-	public JettyWebSocketSession(Map<String, Object> attributes, Principal user) {
+	public JettyWebSocketSession(Map<String, Object> attributes, @Nullable Principal user) {
 		super(attributes);
 		this.user = user;
 	}
@@ -121,11 +97,12 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public String getId() {
-		checkNativeSessionInitialized();
+		Assert.state(this.id != null, "WebSocket session is not yet initialized");
 		return this.id;
 	}
 
 	@Override
+	@Nullable
 	public URI getUri() {
 		checkNativeSessionInitialized();
 		return this.uri;
@@ -133,7 +110,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public HttpHeaders getHandshakeHeaders() {
-		checkNativeSessionInitialized();
+		Assert.state(this.headers != null, "WebSocket session is not yet initialized");
 		return this.headers;
 	}
 
@@ -145,7 +122,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public List<WebSocketExtension> getExtensions() {
-		checkNativeSessionInitialized();
+		Assert.state(this.extensions != null, "WebSocket session is not yet initialized");
 		return this.extensions;
 	}
 
@@ -192,74 +169,37 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public boolean isOpen() {
-		return (getNativeSession() != null && getNativeSession().isOpen());
+		return getNativeSession().isOpen();
 	}
 
 
 	@Override
 	public void initializeNativeSession(Session session) {
 		super.initializeNativeSession(session);
-		if (directInterfaceCalls) {
-			initializeJettySessionDirectly(session);
-		}
-		else {
-			initializeJettySessionReflectively(session);
-		}
-	}
 
-	private void initializeJettySessionDirectly(Session session) {
 		this.id = ObjectUtils.getIdentityHexString(getNativeSession());
 		this.uri = session.getUpgradeRequest().getRequestURI();
 
-		this.headers = new HttpHeaders();
-		this.headers.putAll(session.getUpgradeRequest().getHeaders());
+		HttpHeaders headers = new HttpHeaders();
+		headers.putAll(session.getUpgradeRequest().getHeaders());
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 
 		this.acceptedProtocol = session.getUpgradeResponse().getAcceptedSubProtocol();
 
-		List<ExtensionConfig> source = session.getUpgradeResponse().getExtensions();
-		if (source != null) {
-			this.extensions = new ArrayList<>(source.size());
-			for (ExtensionConfig ec : source) {
-				this.extensions.add(new WebSocketExtension(ec.getName(), ec.getParameters()));
+		List<ExtensionConfig> jettyExtensions = session.getUpgradeResponse().getExtensions();
+		if (!CollectionUtils.isEmpty(jettyExtensions)) {
+			List<WebSocketExtension> extensions = new ArrayList<>(jettyExtensions.size());
+			for (ExtensionConfig jettyExtension : jettyExtensions) {
+				extensions.add(new WebSocketExtension(jettyExtension.getName(), jettyExtension.getParameters()));
 			}
+			this.extensions = Collections.unmodifiableList(extensions);
 		}
 		else {
-			this.extensions = new ArrayList<>(0);
+			this.extensions = Collections.emptyList();
 		}
 
 		if (this.user == null) {
 			this.user = session.getUpgradeRequest().getUserPrincipal();
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private void initializeJettySessionReflectively(Session session) {
-		Object request = ReflectionUtils.invokeMethod(getUpgradeRequest, session);
-		Object response = ReflectionUtils.invokeMethod(getUpgradeResponse, session);
-
-		this.id = ObjectUtils.getIdentityHexString(getNativeSession());
-		this.uri = (URI) ReflectionUtils.invokeMethod(getRequestURI, request);
-
-		this.headers = new HttpHeaders();
-		this.headers.putAll((Map<String, List<String>>) ReflectionUtils.invokeMethod(getHeaders, request));
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-
-		this.acceptedProtocol = (String) ReflectionUtils.invokeMethod(getAcceptedSubProtocol, response);
-
-		List<ExtensionConfig> source = (List<ExtensionConfig>) ReflectionUtils.invokeMethod(getExtensions, response);
-		if (source != null) {
-			this.extensions = new ArrayList<>(source.size());
-			for (ExtensionConfig ec : source) {
-				this.extensions.add(new WebSocketExtension(ec.getName(), ec.getParameters()));
-			}
-		}
-		else {
-			this.extensions = new ArrayList<>(0);
-		}
-
-		if (this.user == null) {
-			this.user = (Principal) ReflectionUtils.invokeMethod(getUserPrincipal, request);
 		}
 	}
 

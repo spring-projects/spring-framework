@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jndi;
 
 import javax.naming.NamingException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,7 +40,7 @@ import org.springframework.util.Assert;
  */
 public abstract class JndiLocatorSupport extends JndiAccessor {
 
-	/** JNDI prefix used in a Java EE container */
+	/** JNDI prefix used in a Java EE container. */
 	public static final String CONTAINER_PREFIX = "java:comp/env/";
 
 
@@ -87,7 +88,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * @throws NamingException if the JNDI lookup failed
 	 * @see #setResourceRef
 	 */
-	protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
+	protected <T> T lookup(String jndiName, @Nullable Class<T> requiredType) throws NamingException {
 		Assert.notNull(jndiName, "'jndiName' must not be null");
 		String convertedName = convertJndiName(jndiName);
 		T jndiObject;

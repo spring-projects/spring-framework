@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import bsh.EvalError;
 import bsh.Interpreter;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.ScriptSource;
@@ -37,6 +38,7 @@ import org.springframework.scripting.ScriptSource;
  */
 public class BshScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAware {
 
+	@Nullable
 	private ClassLoader classLoader;
 
 
@@ -62,12 +64,14 @@ public class BshScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAware
 
 
 	@Override
+	@Nullable
 	public Object evaluate(ScriptSource script) {
 		return evaluate(script, null);
 	}
 
 	@Override
-	public Object evaluate(ScriptSource script, Map<String, Object> arguments) {
+	@Nullable
+	public Object evaluate(ScriptSource script, @Nullable Map<String, Object> arguments) {
 		try {
 			Interpreter interpreter = new Interpreter();
 			interpreter.setClassLoader(this.classLoader);

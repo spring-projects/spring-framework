@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when a {@code BeanFactory} is asked for a bean instance for which it
@@ -34,9 +35,11 @@ import org.springframework.core.ResolvableType;
 @SuppressWarnings("serial")
 public class NoSuchBeanDefinitionException extends BeansException {
 
-	private String beanName;
+	@Nullable
+	private final String beanName;
 
-	private ResolvableType resolvableType;
+	@Nullable
+	private final ResolvableType resolvableType;
 
 
 	/**
@@ -46,6 +49,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	public NoSuchBeanDefinitionException(String name) {
 		super("No bean named '" + name + "' available");
 		this.beanName = name;
+		this.resolvableType = null;
 	}
 
 	/**
@@ -56,6 +60,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	public NoSuchBeanDefinitionException(String name, String message) {
 		super("No bean named '" + name + "' available: " + message);
 		this.beanName = name;
+		this.resolvableType = null;
 	}
 
 	/**
@@ -82,6 +87,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 */
 	public NoSuchBeanDefinitionException(ResolvableType type) {
 		super("No qualifying bean of type '" + type + "' available");
+		this.beanName = null;
 		this.resolvableType = type;
 	}
 
@@ -93,6 +99,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 */
 	public NoSuchBeanDefinitionException(ResolvableType type, String message) {
 		super("No qualifying bean of type '" + type + "' available: " + message);
+		this.beanName = null;
 		this.resolvableType = type;
 	}
 
@@ -100,6 +107,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	/**
 	 * Return the name of the missing bean, if it was a lookup <em>by name</em> that failed.
 	 */
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}
@@ -108,6 +116,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * Return the required type of the missing bean, if it was a lookup <em>by type</em>
 	 * that failed.
 	 */
+	@Nullable
 	public Class<?> getBeanType() {
 		return (this.resolvableType != null ? this.resolvableType.resolve() : null);
 	}
@@ -117,6 +126,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * <em>by type</em> that failed.
 	 * @since 4.3.4
 	 */
+	@Nullable
 	public ResolvableType getResolvableType() {
 		return this.resolvableType;
 	}

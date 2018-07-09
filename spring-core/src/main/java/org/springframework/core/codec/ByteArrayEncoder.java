@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -41,17 +42,24 @@ public class ByteArrayEncoder extends AbstractEncoder<byte[]> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		return (super.canEncode(elementType, mimeType) && byte[].class.isAssignableFrom(clazz));
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		Class<?> clazz = elementType.resolve(Object.class);
+		return super.canEncode(elementType, mimeType) && byte[].class.isAssignableFrom(clazz);
 	}
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends byte[]> inputStream,
-			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
-			Map<String, Object> hints) {
+			DataBufferFactory bufferFactory, ResolvableType elementType, @Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints) {
 
-		return Flux.from(inputStream).map(bufferFactory::wrap);
+		return Flux.from(inputStream).map(bytes -> {
+			DataBuffer dataBuffer = bufferFactory.wrap(bytes);
+			if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+				String logPrefix = Hints.getLogPrefix(hints);
+				logger.debug(logPrefix + "Writing " + dataBuffer.readableByteCount() + " bytes");
+			}
+			return dataBuffer;
+		});
 	}
 
 }

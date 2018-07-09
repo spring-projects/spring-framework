@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testXMLBasedConfig() {
-		 evaluate("(T(java.lang.Math).random() * 100.0 )>0",true,Boolean.class);
+		evaluate("(T(java.lang.Math).random() * 100.0 )>0",true,Boolean.class);
 	}
 
 	// Section 7.5
@@ -394,7 +394,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 		StandardEvaluationContext societyContext = new StandardEvaluationContext();
 		societyContext.setRootObject(new IEEE());
 		Inventor einstein =
-			   parser.parseExpression("new org.springframework.expression.spel.testresources.Inventor('Albert Einstein',new java.util.Date(), 'German')").getValue(Inventor.class);
+				parser.parseExpression("new org.springframework.expression.spel.testresources.Inventor('Albert Einstein',new java.util.Date(), 'German')").getValue(Inventor.class);
 		assertEquals("Albert Einstein", einstein.getName());
 		//create new inventor instance within add method of List
 		parser.parseExpression("Members2.add(new org.springframework.expression.spel.testresources.Inventor('Albert Einstein', 'German'))").getValue(societyContext);
@@ -438,9 +438,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 	public void testFunctions() throws Exception {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-
-		context.registerFunction("reverseString", StringUtils.class.getDeclaredMethod(
-				"reverseString", new Class[] { String.class }));
+		context.registerFunction("reverseString", StringUtils.class.getDeclaredMethod("reverseString", String.class));
 
 		String helloWorldReversed = parser.parseExpression("#reverseString('hello world')").getValue(context, String.class);
 		assertEquals("dlrow olleh",helloWorldReversed);
@@ -485,7 +483,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 	@Test
 	public void testTemplating() throws Exception {
 		String randomPhrase =
-			   parser.parseExpression("random number is ${T(java.lang.Math).random()}", new TemplatedParserContext()).getValue(String.class);
+				parser.parseExpression("random number is ${T(java.lang.Math).random()}", new TemplatedParserContext()).getValue(String.class);
 		assertTrue(randomPhrase.startsWith("random number"));
 	}
 

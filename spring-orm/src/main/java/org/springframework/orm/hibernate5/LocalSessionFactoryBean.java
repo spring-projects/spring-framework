@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,15 @@ import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
+import org.hibernate.integrator.spi.Integrator;
+import org.hibernate.service.ServiceRegistry;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -43,71 +48,109 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
- * {@link FactoryBean} that creates a Hibernate
- * {@link SessionFactory}. This is the usual way to set up a shared
- * Hibernate SessionFactory in a Spring application context; the SessionFactory can
- * then be passed to Hibernate-based data access objects via dependency injection.
+ * {@link FactoryBean} that creates a Hibernate {@link SessionFactory}. This is the usual
+ * way to set up a shared Hibernate SessionFactory in a Spring application context; the
+ * SessionFactory can then be passed to data access objects via dependency injection.
  *
- * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2, as of Spring 4.3.
+ * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2/5.3, as of Spring 5.1.
+ * Set up with Hibernate 5.3, {@code LocalSessionFactoryBean} is an immediate alternative
+ * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for common
+ * JPA purposes: In particular with Hibernate 5.3, the Hibernate {@code SessionFactory}
+ * will natively expose the JPA {@code EntityManagerFactory} interface as well, and
+ * Hibernate {@code BeanContainer} integration will be registered out of the box.
+ * In combination with {@link HibernateTransactionManager}, this naturally allows for
+ * mixing JPA access code with native Hibernate access code within the same transaction.
  *
  * @author Juergen Hoeller
  * @since 4.2
  * @see #setDataSource
  * @see #setPackagesToScan
+ * @see HibernateTransactionManager
  * @see LocalSessionFactoryBuilder
+ * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
  */
 public class LocalSessionFactoryBean extends HibernateExceptionTranslator
-		implements FactoryBean<SessionFactory>, ResourceLoaderAware, InitializingBean, DisposableBean {
+		implements FactoryBean<SessionFactory>, ResourceLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
 
+	@Nullable
 	private DataSource dataSource;
 
+	@Nullable
 	private Resource[] configLocations;
 
+	@Nullable
 	private String[] mappingResources;
 
+	@Nullable
 	private Resource[] mappingLocations;
 
+	@Nullable
 	private Resource[] cacheableMappingLocations;
 
+	@Nullable
 	private Resource[] mappingJarLocations;
 
+	@Nullable
 	private Resource[] mappingDirectoryLocations;
 
+	@Nullable
 	private Interceptor entityInterceptor;
 
+	@Nullable
 	private ImplicitNamingStrategy implicitNamingStrategy;
 
+	@Nullable
 	private PhysicalNamingStrategy physicalNamingStrategy;
 
+	@Nullable
 	private Object jtaTransactionManager;
 
+	@Nullable
 	private MultiTenantConnectionProvider multiTenantConnectionProvider;
 
+	@Nullable
 	private CurrentTenantIdentifierResolver currentTenantIdentifierResolver;
 
+	@Nullable
 	private TypeFilter[] entityTypeFilters;
 
+	@Nullable
 	private Properties hibernateProperties;
 
+	@Nullable
 	private Class<?>[] annotatedClasses;
 
+	@Nullable
 	private String[] annotatedPackages;
 
+	@Nullable
 	private String[] packagesToScan;
 
+	@Nullable
 	private AsyncTaskExecutor bootstrapExecutor;
+
+	@Nullable
+	private Integrator[] hibernateIntegrators;
 
 	private boolean metadataSourcesAccessed = false;
 
+	@Nullable
 	private MetadataSources metadataSources;
 
+	@Nullable
 	private ResourcePatternResolver resourcePatternResolver;
 
+	@Nullable
+	private ConfigurableListableBeanFactory beanFactory;
+
+	@Nullable
 	private Configuration configuration;
 
+	@Nullable
 	private SessionFactory sessionFactory;
 
 
@@ -327,11 +370,24 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * then block until Hibernate's bootstrapping completed, if not ready by then.
 	 * For maximum benefit, make sure to avoid early {@code SessionFactory} calls
 	 * in init methods of related beans, even for metadata introspection purposes.
-	 * @see LocalSessionFactoryBuilder#buildSessionFactory(AsyncTaskExecutor)
 	 * @since 4.3
+	 * @see LocalSessionFactoryBuilder#buildSessionFactory(AsyncTaskExecutor)
 	 */
 	public void setBootstrapExecutor(AsyncTaskExecutor bootstrapExecutor) {
 		this.bootstrapExecutor = bootstrapExecutor;
+	}
+
+	/**
+	 * Specify one or more Hibernate {@link Integrator} implementations to apply.
+	 * <p>This will only be applied for an internally built {@link MetadataSources}
+	 * instance. {@link #setMetadataSources} effectively overrides such settings,
+	 * with integrators to be applied to the externally built {@link MetadataSources}.
+	 * @since 5.1
+	 * @see #setMetadataSources
+	 * @see BootstrapServiceRegistryBuilder#applyIntegrator
+	 */
+	public void setHibernateIntegrators(Integrator... hibernateIntegrators) {
+		this.hibernateIntegrators = hibernateIntegrators;
 	}
 
 	/**
@@ -339,9 +395,10 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * existing one), potentially populated with a custom Hibernate bootstrap
 	 * {@link org.hibernate.service.ServiceRegistry} as well.
 	 * @since 4.3
+	 * @see MetadataSources#MetadataSources(ServiceRegistry)
+	 * @see BootstrapServiceRegistryBuilder#build()
 	 */
 	public void setMetadataSources(MetadataSources metadataSources) {
-		Assert.notNull(metadataSources, "MetadataSources must not be null");
 		this.metadataSourcesAccessed = true;
 		this.metadataSources = metadataSources;
 	}
@@ -360,6 +417,11 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			BootstrapServiceRegistryBuilder builder = new BootstrapServiceRegistryBuilder();
 			if (this.resourcePatternResolver != null) {
 				builder = builder.applyClassLoader(this.resourcePatternResolver.getClassLoader());
+			}
+			if (this.hibernateIntegrators != null) {
+				for (Integrator integrator : this.hibernateIntegrators) {
+					builder = builder.applyIntegrator(integrator);
+				}
 			}
 			this.metadataSources = new MetadataSources(builder.build());
 		}
@@ -387,6 +449,24 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		return this.resourcePatternResolver;
 	}
 
+	/**
+	 * Accept the containing {@link BeanFactory}, registering corresponding Hibernate
+	 * {@link org.hibernate.resource.beans.container.spi.BeanContainer} integration for
+	 * it if possible. This requires a Spring {@link ConfigurableListableBeanFactory}
+	 * and Hibernate 5.3 or higher on the classpath.
+	 * @since 5.1
+	 * @see SpringBeanContainer
+	 * @see LocalSessionFactoryBuilder#setBeanContainer
+	 */
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableListableBeanFactory &&
+				ClassUtils.isPresent("org.hibernate.resource.beans.container.spi.BeanContainer",
+						getClass().getClassLoader())) {
+			this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+		}
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws IOException {
@@ -408,7 +488,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		if (this.mappingResources != null) {
 			// Register given Hibernate mapping definitions, contained in resource files.
 			for (String mapping : this.mappingResources) {
-				Resource mr = new ClassPathResource(mapping.trim(), this.resourcePatternResolver.getClassLoader());
+				Resource mr = new ClassPathResource(mapping.trim(), getResourceLoader().getClassLoader());
 				sfb.addInputStream(mr.getInputStream());
 			}
 		}
@@ -462,6 +542,10 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			sfb.setJtaTransactionManager(this.jtaTransactionManager);
 		}
 
+		if (this.beanFactory != null) {
+			sfb.setBeanContainer(this.beanFactory);
+		}
+
 		if (this.multiTenantConnectionProvider != null) {
 			sfb.setMultiTenantConnectionProvider(this.multiTenantConnectionProvider);
 		}
@@ -502,7 +586,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * <p>The default implementation invokes LocalSessionFactoryBuilder's buildSessionFactory.
 	 * A custom implementation could prepare the instance in a specific way (e.g. applying
 	 * a custom ServiceRegistry) or use a custom SessionFactoryImpl subclass.
-	 * @param sfb LocalSessionFactoryBuilder prepared by this LocalSessionFactoryBean
+	 * @param sfb a LocalSessionFactoryBuilder prepared by this LocalSessionFactoryBean
 	 * @return the SessionFactory instance
 	 * @see LocalSessionFactoryBuilder#buildSessionFactory
 	 */
@@ -525,6 +609,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 
 	@Override
+	@Nullable
 	public SessionFactory getObject() {
 		return this.sessionFactory;
 	}
@@ -542,7 +627,9 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	@Override
 	public void destroy() {
-		this.sessionFactory.close();
+		if (this.sessionFactory != null) {
+			this.sessionFactory.close();
+		}
 	}
 
 }

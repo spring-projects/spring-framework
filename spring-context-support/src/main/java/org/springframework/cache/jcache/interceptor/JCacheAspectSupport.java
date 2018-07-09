@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 
 
 	public void setCacheOperationSource(JCacheOperationSource cacheOperationSource) {
-		Assert.notNull(cacheOperationSource);
+		Assert.notNull(cacheOperationSource, "JCacheOperationSource must not be null");
 		this.cacheOperationSource = cacheOperationSource;
 	}
 
@@ -80,7 +80,6 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	public void afterPropertiesSet() {
 		Assert.state(getCacheOperationSource() != null, "The 'cacheOperationSource' property is required: " +
 				"If there are no cacheable methods, then don't use a cache aspect.");
-		Assert.state(getErrorHandler() != null, "The 'errorHandler' is required");
 
 		this.cacheResultInterceptor = new CacheResultInterceptor(getErrorHandler());
 		this.cachePutInterceptor = new CachePutInterceptor(getErrorHandler());
@@ -94,7 +93,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
 		// Check whether aspect is enabled to cope with cases where the AJ is pulled in automatically
 		if (this.initialized) {
-			Class<?> targetClass = getTargetClass(target);
+			Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
 			JCacheOperation<?> operation = getCacheOperationSource().getCacheOperation(method, targetClass);
 			if (operation != null) {
 				CacheOperationInvocationContext<?> context =
@@ -114,37 +113,29 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 				(JCacheOperation<Annotation>) operation, target, args);
 	}
 
-	private Class<?> getTargetClass(Object target) {
-		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
-		if (targetClass == null && target != null) {
-			targetClass = target.getClass();
-		}
-		return targetClass;
-	}
-
 	@SuppressWarnings("unchecked")
 	private Object execute(CacheOperationInvocationContext<?> context, CacheOperationInvoker invoker) {
 		CacheOperationInvoker adapter = new CacheOperationInvokerAdapter(invoker);
 		BasicOperation operation = context.getOperation();
 
 		if (operation instanceof CacheResultOperation) {
-			return cacheResultInterceptor.invoke(
+			return this.cacheResultInterceptor.invoke(
 					(CacheOperationInvocationContext<CacheResultOperation>) context, adapter);
 		}
 		else if (operation instanceof CachePutOperation) {
-			return cachePutInterceptor.invoke(
+			return this.cachePutInterceptor.invoke(
 					(CacheOperationInvocationContext<CachePutOperation>) context, adapter);
 		}
 		else if (operation instanceof CacheRemoveOperation) {
-			return cacheRemoveEntryInterceptor.invoke(
+			return this.cacheRemoveEntryInterceptor.invoke(
 					(CacheOperationInvocationContext<CacheRemoveOperation>) context, adapter);
 		}
 		else if (operation instanceof CacheRemoveAllOperation) {
-			return cacheRemoveAllInterceptor.invoke(
+			return this.cacheRemoveAllInterceptor.invoke(
 					(CacheOperationInvocationContext<CacheRemoveAllOperation>) context, adapter);
 		}
 		else {
-			throw new IllegalArgumentException("Could not handle " + operation);
+			throw new IllegalArgumentException("Cannot handle " + operation);
 		}
 	}
 

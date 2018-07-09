@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import javax.xml.stream.events.XMLEvent;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@code XMLEventReader} based on a list of {@link XMLEvent}s.
+ * Implementation of {@code XMLEventReader} based on a list of {@link XMLEvent XMLEvents}.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -58,6 +59,7 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 	}
 
 	@Override
+	@Nullable
 	public XMLEvent peek() {
 		if (this.cursor < this.events.size()) {
 			return this.events.get(this.cursor);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import javax.servlet.ServletException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletConfig;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -48,11 +51,13 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
@@ -86,9 +91,9 @@ public class ResponseEntityExceptionHandlerTests {
 		this.defaultExceptionResolver = new DefaultHandlerExceptionResolver();
 	}
 
+
 	@Test
 	public void supportsAllDefaultHandlerExceptionResolverExceptionTypes() throws Exception {
-
 		Class<ResponseEntityExceptionHandler> clazz = ResponseEntityExceptionHandler.class;
 		Method handleExceptionMethod = clazz.getMethod("handleException", Exception.class, WebRequest.class);
 		ExceptionHandler annotation = handleExceptionMethod.getAnnotation(ExceptionHandler.class);
@@ -205,53 +210,124 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	public void controllerAdvice() throws Exception {
-		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
-		cxt.registerSingleton("exceptionHandler", ApplicationExceptionHandler.class);
-		cxt.refresh();
+		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
+		ctx.registerSingleton("exceptionHandler", ApplicationExceptionHandler.class);
+		ctx.refresh();
 
 		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
-		resolver.setApplicationContext(cxt);
+		resolver.setApplicationContext(ctx);
 		resolver.afterPropertiesSet();
 
 		ServletRequestBindingException ex = new ServletRequestBindingException("message");
-		resolver.resolveException(this.servletRequest, this.servletResponse, null, ex);
+		assertNotNull(resolver.resolveException(this.servletRequest, this.servletResponse, null, ex));
 
 		assertEquals(400, this.servletResponse.getStatus());
 		assertEquals("error content", this.servletResponse.getContentAsString());
 		assertEquals("someHeaderValue", this.servletResponse.getHeader("someHeader"));
 	}
 
+	@Test
+	public void controllerAdviceWithNestedException() {
+		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
+		ctx.registerSingleton("exceptionHandler", ApplicationExceptionHandler.class);
+		ctx.refresh();
+
+		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
+		resolver.setApplicationContext(ctx);
+		resolver.afterPropertiesSet();
+
+		IllegalStateException ex = new IllegalStateException(new ServletRequestBindingException("message"));
+		assertNull(resolver.resolveException(this.servletRequest, this.servletResponse, null, ex));
+	}
+
+	@Test
+	public void controllerAdviceWithinDispatcherServlet() throws Exception {
+		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
+		ctx.registerSingleton("controller", ExceptionThrowingController.class);
+		ctx.registerSingleton("exceptionHandler", ApplicationExceptionHandler.class);
+		ctx.refresh();
+
+		DispatcherServlet servlet = new DispatcherServlet(ctx);
+		servlet.init(new MockServletConfig());
+		servlet.service(this.servletRequest, this.servletResponse);
+
+		assertEquals(400, this.servletResponse.getStatus());
+		assertEquals("error content", this.servletResponse.getContentAsString());
+		assertEquals("someHeaderValue", this.servletResponse.getHeader("someHeader"));
+	}
+
+	@Test
+	public void controllerAdviceWithNestedExceptionWithinDispatcherServlet() throws Exception {
+		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
+		ctx.registerSingleton("controller", NestedExceptionThrowingController.class);
+		ctx.registerSingleton("exceptionHandler", ApplicationExceptionHandler.class);
+		ctx.refresh();
+
+		DispatcherServlet servlet = new DispatcherServlet(ctx);
+		servlet.init(new MockServletConfig());
+		try {
+			servlet.service(this.servletRequest, this.servletResponse);
+		}
+		catch (ServletException ex) {
+			assertTrue(ex.getCause() instanceof IllegalStateException);
+			assertTrue(ex.getCause().getCause() instanceof ServletRequestBindingException);
+		}
+	}
+
 
 	private ResponseEntity<Object> testException(Exception ex) {
-		ResponseEntity<Object> responseEntity = this.exceptionHandlerSupport.handleException(ex, this.request);
+		try {
+			ResponseEntity<Object> responseEntity = this.exceptionHandlerSupport.handleException(ex, this.request);
 
-		// SPR-9653
-		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(responseEntity.getStatusCode())) {
-			assertSame(ex, this.servletRequest.getAttribute("javax.servlet.error.exception"));
+			// SPR-9653
+			if (HttpStatus.INTERNAL_SERVER_ERROR.equals(responseEntity.getStatusCode())) {
+				assertSame(ex, this.servletRequest.getAttribute("javax.servlet.error.exception"));
+			}
+
+			this.defaultExceptionResolver.resolveException(this.servletRequest, this.servletResponse, null, ex);
+
+			assertEquals(this.servletResponse.getStatus(), responseEntity.getStatusCode().value());
+
+			return responseEntity;
 		}
-
-		this.defaultExceptionResolver.resolveException(this.servletRequest, this.servletResponse, null, ex);
-
-		assertEquals(this.servletResponse.getStatus(), responseEntity.getStatusCode().value());
-
-		return responseEntity;
+		catch (Exception ex2) {
+			throw new IllegalStateException("handleException threw exception", ex2);
+		}
 	}
 
 
-	private static class TestController {
+	@Controller
+	private static class ExceptionThrowingController {
+
+		@RequestMapping("/")
+		public void handleRequest() throws Exception {
+			throw new ServletRequestBindingException("message");
+		}
 	}
+
+
+	@Controller
+	private static class NestedExceptionThrowingController {
+
+		@RequestMapping("/")
+		public void handleRequest() throws Exception {
+			throw new IllegalStateException(new ServletRequestBindingException("message"));
+		}
+	}
+
 
 	@ControllerAdvice
 	private static class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
 
 		@Override
-		protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex,
-				HttpHeaders headers, HttpStatus status, WebRequest request) {
+		protected ResponseEntity<Object> handleServletRequestBindingException(
+				ServletRequestBindingException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 			headers.set("someHeader", "someHeaderValue");
 			return handleExceptionInternal(ex, "error content", headers, status, request);
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	void handle(String arg) {

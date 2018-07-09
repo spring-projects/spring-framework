@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.jndi;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Callback interface to be implemented by classes that need to perform an
  * operation (such as a lookup) in a JNDI context. This callback approach
@@ -30,6 +32,7 @@ import javax.naming.NamingException;
  * convenience methods.
  *
  * @author Rod Johnson
+ * @param <T> the resulting object type
  * @see JndiTemplate
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
@@ -44,6 +47,7 @@ public interface JndiCallback<T> {
 	 * @throws NamingException if thrown by JNDI methods
 	 * @return a result object, or {@code null}
 	 */
+	@Nullable
 	T doInContext(Context ctx) throws NamingException;
 
 }

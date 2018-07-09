@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.core;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -42,7 +42,7 @@ import org.springframework.util.ObjectUtils;
  * @since 07.04.2003
  * @see Ordered
  * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
- * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
+ * @see java.util.List#sort(java.util.Comparator)
  * @see java.util.Arrays#sort(Object[], java.util.Comparator)
  */
 public class OrderComparator implements Comparator<Object> {
@@ -60,20 +60,15 @@ public class OrderComparator implements Comparator<Object> {
 	 * @since 4.1
 	 */
 	public Comparator<Object> withSourceProvider(final OrderSourceProvider sourceProvider) {
-		return new Comparator<Object>() {
-			@Override
-			public int compare(Object o1, Object o2) {
-				return doCompare(o1, o2, sourceProvider);
-			}
-		};
+		return (o1, o2) -> doCompare(o1, o2, sourceProvider);
 	}
 
 	@Override
-	public int compare(Object o1, Object o2) {
+	public int compare(@Nullable Object o1, @Nullable Object o2) {
 		return doCompare(o1, o2, null);
 	}
 
-	private int doCompare(Object o1, Object o2, OrderSourceProvider sourceProvider) {
+	private int doCompare(@Nullable Object o1, @Nullable Object o2, @Nullable OrderSourceProvider sourceProvider) {
 		boolean p1 = (o1 instanceof PriorityOrdered);
 		boolean p2 = (o2 instanceof PriorityOrdered);
 		if (p1 && !p2) {
@@ -96,21 +91,23 @@ public class OrderComparator implements Comparator<Object> {
 	 * @param obj the object to check
 	 * @return the order value, or {@code Ordered.LOWEST_PRECEDENCE} as fallback
 	 */
-	private int getOrder(Object obj, OrderSourceProvider sourceProvider) {
+	private int getOrder(@Nullable Object obj, @Nullable OrderSourceProvider sourceProvider) {
 		Integer order = null;
-		if (sourceProvider != null) {
+		if (obj != null && sourceProvider != null) {
 			Object orderSource = sourceProvider.getOrderSource(obj);
-			if (orderSource != null && orderSource.getClass().isArray()) {
-				Object[] sources = ObjectUtils.toObjectArray(orderSource);
-				for (Object source : sources) {
-					order = findOrder(source);
-					if (order != null) {
-						break;
+			if (orderSource != null) {
+				if (orderSource.getClass().isArray()) {
+					Object[] sources = ObjectUtils.toObjectArray(orderSource);
+					for (Object source : sources) {
+						order = findOrder(source);
+						if (order != null) {
+							break;
+						}
 					}
 				}
-			}
-			else {
-				order = findOrder(orderSource);
+				else {
+					order = findOrder(orderSource);
+				}
 			}
 		}
 		return (order != null ? order : getOrder(obj));
@@ -123,9 +120,14 @@ public class OrderComparator implements Comparator<Object> {
 	 * @param obj the object to check
 	 * @return the order value, or {@code Ordered.LOWEST_PRECEDENCE} as fallback
 	 */
-	protected int getOrder(Object obj) {
-		Integer order = findOrder(obj);
-		return (order != null ? order : Ordered.LOWEST_PRECEDENCE);
+	protected int getOrder(@Nullable Object obj) {
+		if (obj != null) {
+			Integer order = findOrder(obj);
+			if (order != null) {
+				return order;
+			}
+		}
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 
 	/**
@@ -135,6 +137,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * @param obj the object to check
 	 * @return the order value, or {@code null} if none found
 	 */
+	@Nullable
 	protected Integer findOrder(Object obj) {
 		return (obj instanceof Ordered ? ((Ordered) obj).getOrder() : null);
 	}
@@ -150,6 +153,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * @return the priority value, or {@code null} if none
 	 * @since 4.1
 	 */
+	@Nullable
 	public Integer getPriority(Object obj) {
 		return null;
 	}
@@ -160,11 +164,11 @@ public class OrderComparator implements Comparator<Object> {
 	 * <p>Optimized to skip sorting for lists with size 0 or 1,
 	 * in order to avoid unnecessary array extraction.
 	 * @param list the List to sort
-	 * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
+	 * @see java.util.List#sort(java.util.Comparator)
 	 */
 	public static void sort(List<?> list) {
 		if (list.size() > 1) {
-			Collections.sort(list, INSTANCE);
+			list.sort(INSTANCE);
 		}
 	}
 
@@ -215,6 +219,7 @@ public class OrderComparator implements Comparator<Object> {
 		 * @param obj the object to find an order source for
 		 * @return the order source for that object, or {@code null} if none found
 		 */
+		@Nullable
 		Object getOrderSource(Object obj);
 	}
 

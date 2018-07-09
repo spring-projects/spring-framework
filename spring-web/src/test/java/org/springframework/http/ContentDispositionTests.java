@@ -19,6 +19,8 @@ package org.springframework.http;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -36,7 +38,8 @@ public class ContentDispositionTests {
 	public void parse() {
 		ContentDisposition disposition = ContentDisposition
 				.parse("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123");
-		assertEquals(ContentDisposition.builder("form-data").name("foo").filename("foo.txt").size(123L).build(), disposition);
+		assertEquals(ContentDisposition.builder("form-data")
+				.name("foo").filename("foo.txt").size(123L).build(), disposition);
 	}
 
 	@Test
@@ -50,6 +53,22 @@ public class ContentDispositionTests {
 		ContentDisposition disposition = ContentDisposition
 				.parse("form-data; filename=unquoted");
 		assertEquals(ContentDisposition.builder("form-data").filename("unquoted").build(), disposition);
+	}
+
+	@Test  // SPR-16091
+	public void parseFilenameWithSemicolon() {
+		ContentDisposition disposition = ContentDisposition
+				.parse("attachment; filename=\"filename with ; semicolon.txt\"");
+		assertEquals(ContentDisposition.builder("attachment")
+				.filename("filename with ; semicolon.txt").build(), disposition);
+	}
+
+	@Test
+	public void parseAndIgnoreEmptyParts() {
+		ContentDisposition disposition = ContentDisposition
+				.parse("form-data; name=\"foo\";; ; filename=\"foo.txt\"; size=123");
+		assertEquals(ContentDisposition.builder("form-data")
+				.name("foo").filename("foo.txt").size(123L).build(), disposition);
 	}
 
 	@Test
@@ -76,6 +95,29 @@ public class ContentDispositionTests {
 	}
 
 	@Test
+	public void parseDates() {
+		ContentDisposition disposition = ContentDisposition
+				.parse("attachment; creation-date=\"Mon, 12 Feb 2007 10:15:30 -0500\"; " +
+						"modification-date=\"Tue, 13 Feb 2007 10:15:30 -0500\"; " +
+						"read-date=\"Wed, 14 Feb 2007 10:15:30 -0500\"");
+		DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+		assertEquals(ContentDisposition.builder("attachment")
+				.creationDate(ZonedDateTime.parse("Mon, 12 Feb 2007 10:15:30 -0500", formatter))
+				.modificationDate(ZonedDateTime.parse("Tue, 13 Feb 2007 10:15:30 -0500", formatter))
+				.readDate(ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter)).build(), disposition);
+	}
+
+	@Test
+	public void parseInvalidDates() {
+		ContentDisposition disposition = ContentDisposition
+				.parse("attachment; creation-date=\"-1\"; modification-date=\"-1\"; " +
+						"read-date=\"Wed, 14 Feb 2007 10:15:30 -0500\"");
+		DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+		assertEquals(ContentDisposition.builder("attachment")
+				.readDate(ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter)).build(), disposition);
+	}
+
+	@Test
 	public void headerValue() {
 		ContentDisposition disposition = ContentDisposition.builder("form-data")
 				.name("foo").filename("foo.txt").size(123L).build();
@@ -86,7 +128,8 @@ public class ContentDispositionTests {
 	public void headerValueWithEncodedFilename() {
 		ContentDisposition disposition = ContentDisposition.builder("form-data")
 				.name("name").filename("中文.txt", StandardCharsets.UTF_8).build();
-		assertEquals("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt", disposition.toString());
+		assertEquals("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt",
+				disposition.toString());
 	}
 
 	@Test  // SPR-14547

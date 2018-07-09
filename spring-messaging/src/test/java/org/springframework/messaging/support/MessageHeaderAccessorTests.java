@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 package org.springframework.messaging.support;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
@@ -30,11 +28,18 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.util.IdGenerator;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.SerializationTestUtils;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for {@link MessageHeaderAccessor}.
@@ -166,7 +171,7 @@ public class MessageHeaderAccessorTests {
 		headers.copyHeadersIfAbsent(null);
 
 		assertEquals(1, headers.getMessageHeaders().size());
-		assertEquals(new HashSet<>(Arrays.asList("id")), headers.getMessageHeaders().keySet());
+		assertEquals(Collections.singleton("id"), headers.getMessageHeaders().keySet());
 	}
 
 	@Test
@@ -280,12 +285,7 @@ public class MessageHeaderAccessorTests {
 	public void idGeneratorCustom() {
 		final UUID id = new UUID(0L, 23L);
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
-		accessor.setIdGenerator(new IdGenerator() {
-			@Override
-			public UUID generateId() {
-				return id;
-			}
-		});
+		accessor.setIdGenerator(() -> id);
 		assertSame(id, accessor.getMessageHeaders().getId());
 	}
 
@@ -299,12 +299,7 @@ public class MessageHeaderAccessorTests {
 	@Test
 	public void idTimestampWithMutableHeaders() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
-		accessor.setIdGenerator(new IdGenerator() {
-			@Override
-			public UUID generateId() {
-				return MessageHeaders.ID_VALUE_NONE;
-			}
-		});
+		accessor.setIdGenerator(() -> MessageHeaders.ID_VALUE_NONE);
 		accessor.setEnableTimestamp(false);
 		accessor.setLeaveMutable(true);
 		MessageHeaders headers = accessor.getMessageHeaders();
@@ -313,12 +308,7 @@ public class MessageHeaderAccessorTests {
 		assertNull(headers.getTimestamp());
 
 		final UUID id = new UUID(0L, 23L);
-		accessor.setIdGenerator(new IdGenerator() {
-			@Override
-			public UUID generateId() {
-				return id;
-			}
-		});
+		accessor.setIdGenerator(() -> id);
 		accessor.setEnableTimestamp(true);
 		accessor.setImmutable();
 
@@ -331,9 +321,10 @@ public class MessageHeaderAccessorTests {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
 
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage("p"));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage("p".getBytes(StandardCharsets.UTF_8)));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage(new Object() {
+		String expected = "headers={contentType=text/plain} payload=p";
+		assertEquals(expected, accessor.getShortLogMessage("p"));
+		assertEquals(expected, accessor.getShortLogMessage("p".getBytes(StandardCharsets.UTF_8)));
+		assertEquals(expected, accessor.getShortLogMessage(new Object() {
 			@Override
 			public String toString() {
 				return "p";
@@ -366,9 +357,10 @@ public class MessageHeaderAccessorTests {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
 
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage("p"));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage("p".getBytes(StandardCharsets.UTF_8)));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage(new Object() {
+		String expected = "headers={contentType=text/plain} payload=p";
+		assertEquals(expected, accessor.getDetailedLogMessage("p"));
+		assertEquals(expected, accessor.getDetailedLogMessage("p".getBytes(StandardCharsets.UTF_8)));
+		assertEquals(expected, accessor.getDetailedLogMessage(new Object() {
 			@Override
 			public String toString() {
 				return "p";
@@ -396,10 +388,25 @@ public class MessageHeaderAccessorTests {
 		assertEquals("headers={contentType=text/plain} payload=" + sb + " > 80", actual);
 	}
 
+	@Test
+	public void serializeMutableHeaders() throws Exception {
+		Map<String, Object> headers = new HashMap<>();
+		headers.put("foo", "bar");
+		Message<String> message = new GenericMessage<>("test", headers);
+		MessageHeaderAccessor mutableAccessor = MessageHeaderAccessor.getMutableAccessor(message);
+		mutableAccessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
+
+		message = new GenericMessage<>(message.getPayload(), mutableAccessor.getMessageHeaders());
+		Message<?> output = (Message<?>) SerializationTestUtils.serializeAndDeserialize(message);
+		assertEquals("test", output.getPayload());
+		assertEquals("bar", output.getHeaders().get("foo"));
+		assertNotNull(output.getHeaders().get(MessageHeaders.CONTENT_TYPE));
+	}
+
 
 	public static class TestMessageHeaderAccessor extends MessageHeaderAccessor {
 
-		private TestMessageHeaderAccessor() {
+		public TestMessageHeaderAccessor() {
 		}
 
 		private TestMessageHeaderAccessor(Message<?> message) {

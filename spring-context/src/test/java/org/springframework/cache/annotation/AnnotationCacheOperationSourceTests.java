@@ -246,8 +246,7 @@ public class AnnotationCacheOperationSourceTests {
 
 	@Test
 	public void cacheConfigFromInterface() {
-		assertNull(getOps(InterfaceCacheConfig.class, "interfaceCacheConfig"));
-		Collection<CacheOperation> ops = getOps(CacheConfigIfc.class, "interfaceCacheConfig");
+		Collection<CacheOperation> ops = getOps(InterfaceCacheConfig.class, "interfaceCacheConfig");
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertSharedConfig(cacheOperation, "", "", "", "myCache");
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
 import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 
@@ -120,7 +121,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 	@Override
 	public boolean isMultipart(HttpServletRequest request) {
-		return (request != null && ServletFileUpload.isMultipartContent(request));
+		return ServletFileUpload.isMultipartContent(request);
 	}
 
 	@Override
@@ -188,7 +189,8 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 	@Override
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
-		if (request != null) {
+		if (!(request instanceof AbstractMultipartHttpServletRequest) ||
+				((AbstractMultipartHttpServletRequest) request).isResolved()) {
 			try {
 				cleanupFileItems(request.getMultiFileMap());
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,16 @@ package org.springframework.jdbc.support.incrementer;
 import javax.sql.DataSource;
 
 /**
- * {@link DataFieldMaxValueIncrementer} that retrieves the next value of a given PostgreSQL sequence.
- * Thanks to Tomislav Urban for the suggestion!
+ * {@link DataFieldMaxValueIncrementer} that retrieves the next value
+ * of a given PostgreSQL sequence.
+ *
+ * <p>Thanks to Tomislav Urban for the suggestion!
  *
  * @author Juergen Hoeller
+ * @deprecated in favor of the differently named {@link PostgresSequenceMaxValueIncrementer}
  */
-public class PostgreSQLSequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
+@Deprecated
+public class PostgreSQLSequenceMaxValueIncrementer extends PostgresSequenceMaxValueIncrementer {
 
 	/**
 	 * Default constructor for bean property style usage.
@@ -41,12 +45,6 @@ public class PostgreSQLSequenceMaxValueIncrementer extends AbstractSequenceMaxVa
 	 */
 	public PostgreSQLSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
 		super(dataSource, incrementerName);
-	}
-
-
-	@Override
-	protected String getSequenceQuery() {
-		return "select nextval('" + getIncrementerName() + "')";
 	}
 
 }

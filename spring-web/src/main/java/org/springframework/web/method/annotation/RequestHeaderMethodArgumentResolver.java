@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -44,11 +46,12 @@ import org.springframework.web.context.request.NativeWebRequest;
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
 	/**
+	 * Create a new {@link RequestHeaderMethodArgumentResolver} instance.
 	 * @param beanFactory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
 	 */
-	public RequestHeaderMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public RequestHeaderMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
 
@@ -61,11 +64,13 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestHeader annotation = parameter.getParameterAnnotation(RequestHeader.class);
-		return new RequestHeaderNamedValueInfo(annotation);
+		RequestHeader ann = parameter.getParameterAnnotation(RequestHeader.class);
+		Assert.state(ann != null, "No RequestHeader annotation");
+		return new RequestHeaderNamedValueInfo(ann);
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
 		String[] headerValues = request.getHeaderValues(name);
 		if (headerValues != null) {
@@ -83,7 +88,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	}
 
 
-	private static class RequestHeaderNamedValueInfo extends NamedValueInfo {
+	private static final class RequestHeaderNamedValueInfo extends NamedValueInfo {
 
 		private RequestHeaderNamedValueInfo(RequestHeader annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based
@@ -42,6 +44,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Object enabling us to create CallableStatementCreators
 	 * efficiently, based on this class's declared parameters.
 	 */
+	@Nullable
 	private CallableStatementCreatorFactory callableStatementFactory;
 
 	/**
@@ -62,6 +65,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * or {? = call get_invoice_count(?)} if isFunction is set to true
 	 * Updated after each parameter is added.
 	 */
+	@Nullable
 	private String callString;
 
 
@@ -79,8 +83,8 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Create a new SqlCall object with SQL, but without parameters.
 	 * Must add parameters or settle with none.
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
+	 * @param ds the DataSource to obtain connections from
+	 * @param sql the SQL to execute
 	 */
 	public SqlCall(DataSource ds, String sql) {
 		setDataSource(ds);
@@ -99,7 +103,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Return whether this call is for a function.
 	 */
 	public boolean isFunction() {
-		return function;
+		return this.function;
 	}
 
 	/**
@@ -113,7 +117,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Return whether the SQL can be used as is.
 	 */
 	public boolean isSqlReadyForUse() {
-		return sqlReadyForUse;
+		return this.sqlReadyForUse;
 	}
 
 
@@ -151,13 +155,12 @@ public abstract class SqlCall extends RdbmsOperation {
 			this.callString += ")}";
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Compiled stored procedure. Call string is [" + getCallString() + "]");
+			logger.debug("Compiled stored procedure. Call string is [" + this.callString + "]");
 		}
 
-		this.callableStatementFactory = new CallableStatementCreatorFactory(getCallString(), getDeclaredParameters());
+		this.callableStatementFactory = new CallableStatementCreatorFactory(this.callString, getDeclaredParameters());
 		this.callableStatementFactory.setResultSetType(getResultSetType());
 		this.callableStatementFactory.setUpdatableResults(isUpdatableResults());
-		this.callableStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
 
 		onCompileInternal();
 	}
@@ -172,6 +175,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Get the call string.
 	 */
+	@Nullable
 	public String getCallString() {
 		return this.callString;
 	}
@@ -181,7 +185,8 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * with this parameters.
 	 * @param inParams parameters. May be {@code null}.
 	 */
-	protected CallableStatementCreator newCallableStatementCreator(Map<String, ?> inParams) {
+	protected CallableStatementCreator newCallableStatementCreator(@Nullable Map<String, ?> inParams) {
+		Assert.state(this.callableStatementFactory != null, "No CallableStatementFactory available");
 		return this.callableStatementFactory.newCallableStatementCreator(inParams);
 	}
 
@@ -191,6 +196,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * @param inParamMapper parametermapper. May not be {@code null}.
 	 */
 	protected CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
+		Assert.state(this.callableStatementFactory != null, "No CallableStatementFactory available");
 		return this.callableStatementFactory.newCallableStatementCreator(inParamMapper);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.mock;
-
 import java.io.IOException;
 
 import org.junit.Test;
@@ -27,21 +23,25 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
 import org.springframework.core.io.buffer.DataBuffer;
 
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link AbstractListenerReadPublisher}
- * 
+ *
  * @author Violeta Georgieva
  * @since 5.0
  */
 public class ListenerReadPublisherTests {
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testReceiveTwoRequestCallsWhenOnSubscribe() {
-		@SuppressWarnings("unchecked")
 		Subscriber<DataBuffer> subscriber = mock(Subscriber.class);
 		doAnswer(new SubscriptionAnswer()).when(subscriber).onSubscribe(isA(Subscription.class));
 
@@ -56,6 +56,10 @@ public class ListenerReadPublisherTests {
 
 		private int readCalls = 0;
 
+		public TestListenerReadPublisher() {
+			super("");
+		}
+
 		@Override
 		protected void checkOnDataAvailable() {
 			// no-op
@@ -65,6 +69,11 @@ public class ListenerReadPublisherTests {
 		protected DataBuffer read() throws IOException {
 			readCalls++;
 			return mock(DataBuffer.class);
+		}
+
+		@Override
+		protected void readingPaused() {
+			// No-op
 		}
 
 		public int getReadCalls() {
@@ -84,4 +93,5 @@ public class ListenerReadPublisherTests {
 		}
 
 	}
+
 }

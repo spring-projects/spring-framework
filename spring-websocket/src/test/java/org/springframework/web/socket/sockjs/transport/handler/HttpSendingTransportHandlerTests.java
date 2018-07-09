@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,11 @@ import org.junit.Test;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
-import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
-import org.springframework.web.util.UriUtils;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -52,8 +49,8 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Override
 	@Before
-	public void setUp() {
-		super.setUp();
+	public void setup() {
+		super.setup();
 
 		this.webSocketHandler = mock(WebSocketHandler.class);
 		this.taskScheduler = mock(TaskScheduler.class);
@@ -89,50 +86,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 		assertFalse("Request should have been rejected", this.servletRequest.isAsyncStarted());
 		assertEquals("c[2010,\"Another connection still open\"]\n", this.servletResponse.getContentAsString());
-	}
-
-	@Test
-	public void jsonpTransport() throws Exception {
-		testJsonpTransport(null, false);
-		testJsonpTransport("_jp123xYz", true);
-		testJsonpTransport("A..B__3..4", true);
-		testJsonpTransport("!jp!abc", false);
-		testJsonpTransport("<script>", false);
-		testJsonpTransport("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.", true);
-	}
-
-	private void testJsonpTransport(String callbackValue, boolean expectSuccess) throws Exception {
-		JsonpPollingTransportHandler transportHandler = new JsonpPollingTransportHandler();
-		transportHandler.initialize(this.sockJsConfig);
-		PollingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
-
-		resetRequestAndResponse();
-		setRequest("POST", "/");
-
-		if (callbackValue != null) {
-			// need to encode the query parameter
-			this.servletRequest.setQueryString("c=" + UriUtils.encodeQueryParam(callbackValue, "UTF-8"));
-			this.servletRequest.addParameter("c", callbackValue);
-		}
-
-		try {
-			transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
-		}
-		catch (SockJsTransportFailureException ex) {
-			if (expectSuccess) {
-				throw new AssertionError("Unexpected transport failure", ex);
-			}
-		}
-
-		if (expectSuccess) {
-			assertEquals(200, this.servletResponse.getStatus());
-			assertEquals("application/javascript;charset=UTF-8", this.response.getHeaders().getContentType().toString());
-			verify(this.webSocketHandler).afterConnectionEstablished(session);
-		}
-		else {
-			assertEquals(500, this.servletResponse.getStatus());
-			verifyNoMoreInteractions(this.webSocketHandler);
-		}
 	}
 
 	@Test
@@ -205,10 +158,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		format = new EventSourceTransportHandler().getFrameFormat(this.request);
 		formatted = format.format(frame);
 		assertEquals("data: " + frame.getContent() + "\r\n\r\n", formatted);
-
-		format = new JsonpPollingTransportHandler().getFrameFormat(this.request);
-		formatted = format.format(frame);
-		assertEquals("/**/callback(\"" + frame.getContent() + "\");\r\n", formatted);
 	}
 
 }

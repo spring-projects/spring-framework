@@ -32,6 +32,7 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.support.MethodMatchers;
+import org.springframework.lang.Nullable;
 
 /**
  * A simple but definitive way of working out an advice chain for a Method,
@@ -48,7 +49,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 
 	@Override
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(
-			Advised config, Method method, Class<?> targetClass) {
+			Advised config, Method method, @Nullable Class<?> targetClass) {
 
 		// This is somewhat tricky... We have to process introductions first,
 		// but we need to preserve order in the ultimate list.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Set;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -57,18 +57,15 @@ abstract class AutowireUtils {
 	 * @param constructors the constructor array to sort
 	 */
 	public static void sortConstructors(Constructor<?>[] constructors) {
-		Arrays.sort(constructors, new Comparator<Constructor<?>>() {
-			@Override
-			public int compare(Constructor<?> c1, Constructor<?> c2) {
-				boolean p1 = Modifier.isPublic(c1.getModifiers());
-				boolean p2 = Modifier.isPublic(c2.getModifiers());
-				if (p1 != p2) {
-					return (p1 ? -1 : 1);
-				}
-				int c1pl = c1.getParameterCount();
-				int c2pl = c2.getParameterCount();
-				return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
+		Arrays.sort(constructors, (c1, c2) -> {
+			boolean p1 = Modifier.isPublic(c1.getModifiers());
+			boolean p2 = Modifier.isPublic(c2.getModifiers());
+			if (p1 != p2) {
+				return (p1 ? -1 : 1);
 			}
+			int c1pl = c1.getParameterCount();
+			int c2pl = c2.getParameterCount();
+			return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
 		});
 	}
 
@@ -80,18 +77,15 @@ abstract class AutowireUtils {
 	 * @param factoryMethods the factory method array to sort
 	 */
 	public static void sortFactoryMethods(Method[] factoryMethods) {
-		Arrays.sort(factoryMethods, new Comparator<Method>() {
-			@Override
-			public int compare(Method fm1, Method fm2) {
-				boolean p1 = Modifier.isPublic(fm1.getModifiers());
-				boolean p2 = Modifier.isPublic(fm2.getModifiers());
-				if (p1 != p2) {
-					return (p1 ? -1 : 1);
-				}
-				int c1pl = fm1.getParameterCount();
-				int c2pl = fm2.getParameterCount();
-				return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
+		Arrays.sort(factoryMethods, (fm1, fm2) -> {
+			boolean p1 = Modifier.isPublic(fm1.getModifiers());
+			boolean p2 = Modifier.isPublic(fm2.getModifiers());
+			if (p1 != p2) {
+				return (p1 ? -1 : 1);
 			}
+			int c1pl = fm1.getParameterCount();
+			int c2pl = fm2.getParameterCount();
+			return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
 		});
 	}
 
@@ -189,10 +183,11 @@ abstract class AutowireUtils {
 	 * @return the resolved target return type or the standard method return type
 	 * @since 3.2.5
 	 */
-	public static Class<?> resolveReturnTypeForFactoryMethod(Method method, Object[] args, ClassLoader classLoader) {
+	public static Class<?> resolveReturnTypeForFactoryMethod(
+			Method method, Object[] args, @Nullable ClassLoader classLoader) {
+
 		Assert.notNull(method, "Method must not be null");
 		Assert.notNull(args, "Argument array must not be null");
-		Assert.notNull(classLoader, "ClassLoader must not be null");
 
 		TypeVariable<Method>[] declaredTypeVariables = method.getTypeParameters();
 		Type genericReturnType = method.getGenericReturnType();
@@ -220,15 +215,18 @@ abstract class AutowireUtils {
 							return typedValue.getTargetType();
 						}
 						try {
-							return typedValue.resolveTargetType(classLoader);
+							Class<?> resolvedType = typedValue.resolveTargetType(classLoader);
+							if (resolvedType != null) {
+								return resolvedType;
+							}
 						}
 						catch (ClassNotFoundException ex) {
 							throw new IllegalStateException("Failed to resolve value type [" +
 									typedValue.getTargetTypeName() + "] for factory method argument", ex);
 						}
 					}
-					// Only consider argument type if it is a simple value...
-					if (arg != null && !(arg instanceof BeanMetadataElement)) {
+					else if (arg != null && !(arg instanceof BeanMetadataElement)) {
+						// Only consider argument type if it is a simple value...
 						return arg.getClass();
 					}
 					return method.getReturnType();

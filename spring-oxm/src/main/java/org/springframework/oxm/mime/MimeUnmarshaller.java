@@ -19,6 +19,7 @@ package org.springframework.oxm.mime;
 import java.io.IOException;
 import javax.xml.transform.Source;
 
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.XmlMappingException;
 
@@ -42,6 +43,6 @@ public interface MimeUnmarshaller extends Unmarshaller {
 	 * @throws XmlMappingException if the given source cannot be mapped to an object
 	 * @throws IOException if an I/O Exception occurs
 	 */
-	Object unmarshal(Source source, MimeContainer mimeContainer) throws XmlMappingException, IOException;
+	Object unmarshal(Source source, @Nullable MimeContainer mimeContainer) throws XmlMappingException, IOException;
 
 }

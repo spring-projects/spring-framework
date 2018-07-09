@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ public abstract class AspectJProxyUtils {
 	 * This will expose the current Spring AOP invocation (necessary for some AspectJ pointcut matching)
 	 * and make available the current AspectJ JoinPoint. The call will have no effect if there are no
 	 * AspectJ advisors in the advisor chain.
-	 * @param advisors Advisors available
-	 * @return {@code true} if any special {@link Advisor Advisors} were added, otherwise {@code false}.
+	 * @param advisors the advisors available
+	 * @return {@code true} if any special {@link Advisor Advisors} were added, otherwise {@code false}
 	 */
 	public static boolean makeAdvisorChainAspectJCapableIfNecessary(List<Advisor> advisors) {
 		// Don't add advisors to an empty list; may indicate that proxying is just not required
@@ -66,7 +66,7 @@ public abstract class AspectJProxyUtils {
 		return (advisor instanceof InstantiationModelAwarePointcutAdvisor ||
 				advisor.getAdvice() instanceof AbstractAspectJAdvice ||
 				(advisor instanceof PointcutAdvisor &&
-						 ((PointcutAdvisor) advisor).getPointcut() instanceof AspectJExpressionPointcut));
+						((PointcutAdvisor) advisor).getPointcut() instanceof AspectJExpressionPointcut));
 	}
 
 }

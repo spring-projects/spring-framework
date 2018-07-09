@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.util;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Simple strategy interface for resolving a String value.
@@ -37,6 +39,7 @@ public interface StringValueResolver {
 	 * to resolve or when ignoring unresolvable placeholders)
 	 * @throws IllegalArgumentException in case of an unresolvable String value
 	 */
+	@Nullable
 	String resolveStringValue(String strVal);
 
 }

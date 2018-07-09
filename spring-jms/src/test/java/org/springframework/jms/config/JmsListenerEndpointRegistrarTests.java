@@ -43,21 +43,21 @@ public class JmsListenerEndpointRegistrarTests {
 
 	@Before
 	public void setup() {
-		registrar.setEndpointRegistry(registry);
-		registrar.setBeanFactory(new StaticListableBeanFactory());
+		this.registrar.setEndpointRegistry(this.registry);
+		this.registrar.setBeanFactory(new StaticListableBeanFactory());
 	}
 
 
 	@Test
 	public void registerNullEndpoint() {
-		thrown.expect(IllegalArgumentException.class);
-		registrar.registerEndpoint(null, containerFactory);
+		this.thrown.expect(IllegalArgumentException.class);
+		this.registrar.registerEndpoint(null, this.containerFactory);
 	}
 
 	@Test
 	public void registerNullEndpointId() {
-		thrown.expect(IllegalArgumentException.class);
-		registrar.registerEndpoint(new SimpleJmsListenerEndpoint(), containerFactory);
+		this.thrown.expect(IllegalArgumentException.class);
+		this.registrar.registerEndpoint(new SimpleJmsListenerEndpoint(), this.containerFactory);
 	}
 
 	@Test
@@ -65,43 +65,43 @@ public class JmsListenerEndpointRegistrarTests {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setId("");
 
-		thrown.expect(IllegalArgumentException.class);
-		registrar.registerEndpoint(endpoint, containerFactory);
+		this.thrown.expect(IllegalArgumentException.class);
+		this.registrar.registerEndpoint(endpoint, this.containerFactory);
 	}
 
 	@Test
 	public void registerNullContainerFactoryIsAllowed() throws Exception {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setId("some id");
-		registrar.setContainerFactory(containerFactory);
-		registrar.registerEndpoint(endpoint, null);
-		registrar.afterPropertiesSet();
-		assertNotNull("Container not created", registry.getListenerContainer("some id"));
-		assertEquals(1, registry.getListenerContainers().size());
-		assertEquals("some id", registry.getListenerContainerIds().iterator().next());
+		this.registrar.setContainerFactory(this.containerFactory);
+		this.registrar.registerEndpoint(endpoint, null);
+		this.registrar.afterPropertiesSet();
+		assertNotNull("Container not created", this.registry.getListenerContainer("some id"));
+		assertEquals(1, this.registry.getListenerContainers().size());
+		assertEquals("some id", this.registry.getListenerContainerIds().iterator().next());
 	}
 
 	@Test
 	public void registerNullContainerFactoryWithNoDefault() throws Exception {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setId("some id");
-		registrar.registerEndpoint(endpoint, null);
+		this.registrar.registerEndpoint(endpoint, null);
 
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage(endpoint.toString());
-		registrar.afterPropertiesSet();
+		this.thrown.expect(IllegalStateException.class);
+		this.thrown.expectMessage(endpoint.toString());
+		this.registrar.afterPropertiesSet();
 	}
 
 	@Test
 	public void registerContainerWithoutFactory() throws Exception {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setId("myEndpoint");
-		registrar.setContainerFactory(containerFactory);
-		registrar.registerEndpoint(endpoint);
-		registrar.afterPropertiesSet();
-		assertNotNull("Container not created", registry.getListenerContainer("myEndpoint"));
-		assertEquals(1, registry.getListenerContainers().size());
-		assertEquals("myEndpoint", registry.getListenerContainerIds().iterator().next());
+		this.registrar.setContainerFactory(this.containerFactory);
+		this.registrar.registerEndpoint(endpoint);
+		this.registrar.afterPropertiesSet();
+		assertNotNull("Container not created", this.registry.getListenerContainer("myEndpoint"));
+		assertEquals(1, this.registry.getListenerContainers().size());
+		assertEquals("myEndpoint", this.registry.getListenerContainerIds().iterator().next());
 	}
 
 }

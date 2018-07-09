@@ -571,14 +571,14 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	@RequestMapping("/category")
 	public static class MultiPathController {
 
-		@RequestMapping(value = {"/{category}/page/{page}", "/**/{category}/page/{page}"})
+		@RequestMapping(value = {"/{category}/page/{page}", "/*/{category}/page/{page}"})
 		public void category(@PathVariable String category, @PathVariable int page, Writer writer) throws IOException {
 			writer.write("handle1-");
 			writer.write("category-" + category);
 			writer.write("page-" + page);
 		}
 
-		@RequestMapping(value = {"/{category}", "/**/{category}"})
+		@RequestMapping(value = {"/{category}", "/*/{category}"})
 		public void category(@PathVariable String category, Writer writer) throws IOException {
 			writer.write("handle2-");
 			writer.write("category-" + category);
@@ -598,7 +598,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	}
 
 	@Controller
-	@RequestMapping("/*/menu/**")
+	@RequestMapping("/*/menu/") // was /*/menu/**
 	public static class MenuTreeController {
 
 		@RequestMapping("type/{var}")

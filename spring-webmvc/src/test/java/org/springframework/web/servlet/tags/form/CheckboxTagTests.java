@@ -164,7 +164,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 	@Test
 	public void withSingleValueBooleanObjectUnchecked() throws Exception {
-		this.bean.setSomeBoolean(new Boolean(false));
+		this.bean.setSomeBoolean(Boolean.FALSE);
 		this.tag.setPath("someBoolean");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
@@ -692,7 +692,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.bean.setDate(getDate());
 		this.bean.setName("Rob Harrop");
 		this.bean.setJedi(true);
-		this.bean.setSomeBoolean(new Boolean(true));
+		this.bean.setSomeBoolean(Boolean.TRUE);
 		this.bean.setStringArray(new String[] {"bar", "foo"});
 		this.bean.setSomeIntegerArray(new Integer[] {new Integer(2), new Integer(1)});
 		this.bean.setOtherColours(colours);

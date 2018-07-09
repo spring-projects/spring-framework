@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,12 @@ import org.springframework.core.annotation.AliasFor;
  * <p>When used as a method-level annotation in conjunction with
  * {@link Bean @Bean}, {@code @Scope} indicates the name of a scope to use
  * for the instance returned from the method.
+ *
+ * <p><b>NOTE:</b> {@code @Scope} annotations are only introspected on the
+ * concrete bean class (for annotated components) or the factory method
+ * (for {@code @Bean} methods). In contrast to XML bean definitions,
+ * there is no notion of bean definition inheritance, and inheritance
+ * hierarchies at the class level are irrelevant for metadata purposes.
  *
  * <p>In this context, <em>scope</em> means the lifecycle of an instance,
  * such as {@code singleton}, {@code prototype}, and so forth. Scopes

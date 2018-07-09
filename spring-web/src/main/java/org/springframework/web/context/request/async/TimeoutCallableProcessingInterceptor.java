@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
-import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -39,7 +37,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class TimeoutCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
+public class TimeoutCallableProcessingInterceptor implements CallableProcessingInterceptor {
 
 	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {

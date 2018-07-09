@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.web.server.session.MockWebSessionManager;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
  * "checkNotModified" unit tests for {@link DefaultServerWebExchange}.
@@ -54,12 +54,6 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 
 
 	private SimpleDateFormat dateFormat;
-
-	private MockServerHttpRequest request;
-
-	private MockServerHttpResponse response;
-
-	private DefaultServerWebExchange exchange;
 
 	private Instant currentDate;
 
@@ -76,86 +70,88 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 
 
 	@Before
-	public void setUp() throws URISyntaxException {
-		currentDate = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		request = new MockServerHttpRequest(method, "http://example.org");
-		response = new MockServerHttpResponse();
-		exchange = new DefaultServerWebExchange(request, response, new MockWebSessionManager());
+	public void setup() throws URISyntaxException {
+		this.currentDate = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		this.dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+		this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
+
 
 	@Test
 	public void checkNotModifiedNon2xxStatus() {
-		request.getHeaders().setIfModifiedSince(this.currentDate.toEpochMilli());
-		response.setStatusCode(HttpStatus.NOT_MODIFIED);
+		MockServerHttpRequest request = get("/").ifModifiedSince(this.currentDate.toEpochMilli()).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getResponse().setStatusCode(HttpStatus.NOT_MODIFIED);
 
 		assertFalse(exchange.checkNotModified(this.currentDate));
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(-1, response.getHeaders().getLastModified());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(-1, exchange.getResponse().getHeaders().getLastModified());
 	}
 
 	@Test // SPR-14559
 	public void checkNotModifiedInvalidIfNoneMatchHeader() {
 		String eTag = "\"etagvalue\"";
-		request.getHeaders().setIfNoneMatch("missingquotes");
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch("missingquotes"));
 		assertFalse(exchange.checkNotModified(eTag));
-		assertNull(response.getStatusCode());
-		assertEquals(eTag, response.getHeaders().getETag());
+		assertNull(exchange.getResponse().getStatusCode());
+		assertEquals(eTag, exchange.getResponse().getHeaders().getETag());
 	}
 
 	@Test
 	public void checkNotModifiedHeaderAlreadySet() {
-		request.getHeaders().setIfModifiedSince(currentDate.toEpochMilli());
-		response.getHeaders().add("Last-Modified", CURRENT_TIME);
+		MockServerHttpRequest request = get("/").ifModifiedSince(currentDate.toEpochMilli()).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getResponse().getHeaders().add("Last-Modified", CURRENT_TIME);
 
 		assertTrue(exchange.checkNotModified(currentDate));
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(1, response.getHeaders().get("Last-Modified").size());
-		assertEquals(CURRENT_TIME, response.getHeaders().getFirst("Last-Modified"));
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(1, exchange.getResponse().getHeaders().get("Last-Modified").size());
+		assertEquals(CURRENT_TIME, exchange.getResponse().getHeaders().getFirst("Last-Modified"));
 	}
 
 	@Test
 	public void checkNotModifiedTimestamp() throws Exception {
-		request.getHeaders().setIfModifiedSince(currentDate.toEpochMilli());
+		MockServerHttpRequest request = get("/").ifModifiedSince(currentDate.toEpochMilli()).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertTrue(exchange.checkNotModified(currentDate));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(currentDate.toEpochMilli(), response.getHeaders().getLastModified());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(currentDate.toEpochMilli(), exchange.getResponse().getHeaders().getLastModified());
 	}
 
 	@Test
 	public void checkModifiedTimestamp() {
 		Instant oneMinuteAgo = currentDate.minusSeconds(60);
-		request.getHeaders().setIfModifiedSince(oneMinuteAgo.toEpochMilli());
+		MockServerHttpRequest request = get("/").ifModifiedSince(oneMinuteAgo.toEpochMilli()).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertFalse(exchange.checkNotModified(currentDate));
 
-		assertNull(response.getStatusCode());
-		assertEquals(currentDate.toEpochMilli(), response.getHeaders().getLastModified());
+		assertNull(exchange.getResponse().getStatusCode());
+		assertEquals(currentDate.toEpochMilli(), exchange.getResponse().getHeaders().getLastModified());
 	}
 
 	@Test
 	public void checkNotModifiedETag() {
 		String eTag = "\"Foo\"";
-		request.getHeaders().setIfNoneMatch(eTag);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag));
 
 		assertTrue(exchange.checkNotModified(eTag));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(eTag, response.getHeaders().getETag());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(eTag, exchange.getResponse().getHeaders().getETag());
 	}
 
 	@Test
 	public void checkNotModifiedETagWithSeparatorChars() {
 		String eTag = "\"Foo, Bar\"";
-		request.getHeaders().setIfNoneMatch(eTag);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag));
 
 		assertTrue(exchange.checkNotModified(eTag));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(eTag, response.getHeaders().getETag());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(eTag, exchange.getResponse().getHeaders().getETag());
 	}
 
 
@@ -163,170 +159,178 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	public void checkModifiedETag() {
 		String currentETag = "\"Foo\"";
 		String oldEtag = "Bar";
-		request.getHeaders().setIfNoneMatch(oldEtag);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(oldEtag));
 
 		assertFalse(exchange.checkNotModified(currentETag));
 
-		assertNull(response.getStatusCode());
-		assertEquals(currentETag, response.getHeaders().getETag());
+		assertNull(exchange.getResponse().getStatusCode());
+		assertEquals(currentETag, exchange.getResponse().getHeaders().getETag());
 	}
 
 	@Test
 	public void checkNotModifiedUnpaddedETag() {
 		String eTag = "Foo";
 		String paddedEtag = String.format("\"%s\"", eTag);
-		request.getHeaders().setIfNoneMatch(paddedEtag);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(paddedEtag));
 
 		assertTrue(exchange.checkNotModified(eTag));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(paddedEtag, response.getHeaders().getETag());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(paddedEtag, exchange.getResponse().getHeaders().getETag());
 	}
 
 	@Test
 	public void checkModifiedUnpaddedETag() {
 		String currentETag = "Foo";
 		String oldEtag = "Bar";
-		request.getHeaders().setIfNoneMatch(oldEtag);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(oldEtag));
 
 		assertFalse(exchange.checkNotModified(currentETag));
 
-		assertNull(response.getStatusCode());
-		assertEquals(String.format("\"%s\"", currentETag), response.getHeaders().getETag());
+		assertNull(exchange.getResponse().getStatusCode());
+		assertEquals(String.format("\"%s\"", currentETag), exchange.getResponse().getHeaders().getETag());
 	}
 
 	@Test
 	public void checkNotModifiedWildcardIsIgnored() {
 		String eTag = "\"Foo\"";
-		request.getHeaders().setIfNoneMatch("*");
-
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch("*"));
 		assertFalse(exchange.checkNotModified(eTag));
 
-		assertNull(response.getStatusCode());
-		assertEquals(eTag, response.getHeaders().getETag());
+		assertNull(exchange.getResponse().getStatusCode());
+		assertEquals(eTag, exchange.getResponse().getHeaders().getETag());
 	}
 
 	@Test
 	public void checkNotModifiedETagAndTimestamp() {
 		String eTag = "\"Foo\"";
-		request.getHeaders().setIfNoneMatch(eTag);
-		request.getHeaders().setIfModifiedSince(currentDate.toEpochMilli());
+		long time = currentDate.toEpochMilli();
+		MockServerHttpRequest request = get("/").ifNoneMatch(eTag).ifModifiedSince(time).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertTrue(exchange.checkNotModified(eTag, currentDate));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(eTag, response.getHeaders().getETag());
-		assertEquals(currentDate.toEpochMilli(), response.getHeaders().getLastModified());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(eTag, exchange.getResponse().getHeaders().getETag());
+		assertEquals(time, exchange.getResponse().getHeaders().getLastModified());
 	}
 
 	// SPR-14224
 	@Test
 	public void checkNotModifiedETagAndModifiedTimestamp() {
 		String eTag = "\"Foo\"";
-		request.getHeaders().setIfNoneMatch(eTag);
 		Instant oneMinuteAgo = currentDate.minusSeconds(60);
-		request.getHeaders().setIfModifiedSince(oneMinuteAgo.toEpochMilli());
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
+				.ifNoneMatch(eTag)
+				.ifModifiedSince(oneMinuteAgo.toEpochMilli())
+				);
 
 		assertTrue(exchange.checkNotModified(eTag, currentDate));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(eTag, response.getHeaders().getETag());
-		assertEquals(currentDate.toEpochMilli(), response.getHeaders().getLastModified());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(eTag, exchange.getResponse().getHeaders().getETag());
+		assertEquals(currentDate.toEpochMilli(), exchange.getResponse().getHeaders().getLastModified());
 	}
 
 	@Test
 	public void checkModifiedETagAndNotModifiedTimestamp() throws Exception {
 		String currentETag = "\"Foo\"";
 		String oldEtag = "\"Bar\"";
-		request.getHeaders().setIfNoneMatch(oldEtag);
-		request.getHeaders().setIfModifiedSince(currentDate.toEpochMilli());
+		long time = currentDate.toEpochMilli();
+		MockServerHttpRequest request = get("/").ifNoneMatch(oldEtag).ifModifiedSince(time).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertFalse(exchange.checkNotModified(currentETag, currentDate));
 
-		assertNull(response.getStatusCode());
-		assertEquals(currentETag, response.getHeaders().getETag());
-		assertEquals(currentDate.toEpochMilli(), response.getHeaders().getLastModified());
+		assertNull(exchange.getResponse().getStatusCode());
+		assertEquals(currentETag, exchange.getResponse().getHeaders().getETag());
+		assertEquals(time, exchange.getResponse().getHeaders().getLastModified());
 	}
 
 	@Test
 	public void checkNotModifiedETagWeakStrong() {
 		String eTag = "\"Foo\"";
 		String weakEtag = String.format("W/%s", eTag);
-		request.getHeaders().setIfNoneMatch(eTag);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(eTag));
 
 		assertTrue(exchange.checkNotModified(weakEtag));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(weakEtag, response.getHeaders().getETag());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(weakEtag, exchange.getResponse().getHeaders().getETag());
 	}
 
 	@Test
 	public void checkNotModifiedETagStrongWeak() {
 		String eTag = "\"Foo\"";
-		request.getHeaders().setIfNoneMatch(String.format("W/%s", eTag));
+		MockServerHttpRequest request = get("/").ifNoneMatch(String.format("W/%s", eTag)).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertTrue(exchange.checkNotModified(eTag));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(eTag, response.getHeaders().getETag());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(eTag, exchange.getResponse().getHeaders().getETag());
 	}
 
 	@Test
 	public void checkNotModifiedMultipleETags() {
 		String eTag = "\"Bar\"";
 		String multipleETags = String.format("\"Foo\", %s", eTag);
-		request.getHeaders().setIfNoneMatch(multipleETags);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").ifNoneMatch(multipleETags));
 
 		assertTrue(exchange.checkNotModified(eTag));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(eTag, response.getHeaders().getETag());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(eTag, exchange.getResponse().getHeaders().getETag());
 	}
 
 	@Test
 	public void checkNotModifiedTimestampWithLengthPart() throws Exception {
 		long epochTime = dateFormat.parse(CURRENT_TIME).getTime();
-		request.setHttpMethod(HttpMethod.GET);
-		request.setHeader("If-Modified-Since", "Wed, 09 Apr 2014 09:57:42 GMT; length=13774");
+		String header = "Wed, 09 Apr 2014 09:57:42 GMT; length=13774";
+		MockServerHttpRequest request = get("/").header("If-Modified-Since", header).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertTrue(exchange.checkNotModified(Instant.ofEpochMilli(epochTime)));
 
-		assertEquals(304, response.getStatusCode().value());
-		assertEquals(epochTime, response.getHeaders().getLastModified());
+		assertEquals(304, exchange.getResponse().getStatusCode().value());
+		assertEquals(epochTime, exchange.getResponse().getHeaders().getLastModified());
 	}
 
 	@Test
 	public void checkModifiedTimestampWithLengthPart() throws Exception {
 		long epochTime = dateFormat.parse(CURRENT_TIME).getTime();
-		request.setHttpMethod(HttpMethod.GET);
-		request.setHeader("If-Modified-Since", "Tue, 08 Apr 2014 09:57:42 GMT; length=13774");
+		String header = "Tue, 08 Apr 2014 09:57:42 GMT; length=13774";
+		MockServerHttpRequest request = get("/").header("If-Modified-Since", header).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertFalse(exchange.checkNotModified(Instant.ofEpochMilli(epochTime)));
 
-		assertNull(response.getStatusCode());
-		assertEquals(epochTime, response.getHeaders().getLastModified());
+		assertNull(exchange.getResponse().getStatusCode());
+		assertEquals(epochTime, exchange.getResponse().getHeaders().getLastModified());
 	}
 
 	@Test
 	public void checkNotModifiedTimestampConditionalPut() throws Exception {
 		Instant oneMinuteAgo = currentDate.minusSeconds(60);
-		request.setHttpMethod(HttpMethod.PUT);
-		request.getHeaders().setIfUnmodifiedSince(currentDate.toEpochMilli());
+		long millis = currentDate.toEpochMilli();
+		MockServerHttpRequest request = MockServerHttpRequest.put("/").ifUnmodifiedSince(millis).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertFalse(exchange.checkNotModified(oneMinuteAgo));
-		assertNull(response.getStatusCode());
-		assertEquals(-1, response.getHeaders().getLastModified());
+		assertNull(exchange.getResponse().getStatusCode());
+		assertEquals(-1, exchange.getResponse().getHeaders().getLastModified());
 	}
 
 	@Test
 	public void checkNotModifiedTimestampConditionalPutConflict() throws Exception {
 		Instant oneMinuteAgo = currentDate.minusSeconds(60);
-		request.setHttpMethod(HttpMethod.PUT);
-		request.getHeaders().setIfUnmodifiedSince(oneMinuteAgo.toEpochMilli());
+		long millis = oneMinuteAgo.toEpochMilli();
+		MockServerHttpRequest request = MockServerHttpRequest.put("/").ifUnmodifiedSince(millis).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertTrue(exchange.checkNotModified(currentDate));
-		assertEquals(412, response.getStatusCode().value());
-		assertEquals(-1, response.getHeaders().getLastModified());
+		assertEquals(412, exchange.getResponse().getStatusCode().value());
+		assertEquals(-1, exchange.getResponse().getHeaders().getLastModified());
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.websocket.server.ServerContainer;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 
@@ -46,47 +47,57 @@ import org.springframework.web.context.ServletContextAware;
 public class ServletServerContainerFactoryBean
 		implements FactoryBean<WebSocketContainer>, ServletContextAware, InitializingBean {
 
+	@Nullable
 	private Long asyncSendTimeout;
 
+	@Nullable
 	private Long maxSessionIdleTimeout;
 
+	@Nullable
 	private Integer maxTextMessageBufferSize;
 
+	@Nullable
 	private Integer maxBinaryMessageBufferSize;
 
+	@Nullable
 	private ServletContext servletContext;
 
+	@Nullable
 	private ServerContainer serverContainer;
 
 
-	public void setAsyncSendTimeout(long timeoutInMillis) {
+	public void setAsyncSendTimeout(Long timeoutInMillis) {
 		this.asyncSendTimeout = timeoutInMillis;
 	}
 
-	public long getAsyncSendTimeout() {
+	@Nullable
+	public Long getAsyncSendTimeout() {
 		return this.asyncSendTimeout;
 	}
 
-	public void setMaxSessionIdleTimeout(long timeoutInMillis) {
+	public void setMaxSessionIdleTimeout(Long timeoutInMillis) {
 		this.maxSessionIdleTimeout = timeoutInMillis;
 	}
 
+	@Nullable
 	public Long getMaxSessionIdleTimeout() {
 		return this.maxSessionIdleTimeout;
 	}
 
-	public void setMaxTextMessageBufferSize(int bufferSize) {
+	public void setMaxTextMessageBufferSize(Integer bufferSize) {
 		this.maxTextMessageBufferSize = bufferSize;
 	}
 
+	@Nullable
 	public Integer getMaxTextMessageBufferSize() {
 		return this.maxTextMessageBufferSize;
 	}
 
-	public void setMaxBinaryMessageBufferSize(int bufferSize) {
+	public void setMaxBinaryMessageBufferSize(Integer bufferSize) {
 		this.maxBinaryMessageBufferSize = bufferSize;
 	}
 
+	@Nullable
 	public Integer getMaxBinaryMessageBufferSize() {
 		return this.maxBinaryMessageBufferSize;
 	}
@@ -122,6 +133,7 @@ public class ServletServerContainerFactoryBean
 
 
 	@Override
+	@Nullable
 	public ServerContainer getObject() {
 		return this.serverContainer;
 	}

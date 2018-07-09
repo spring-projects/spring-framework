@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.AfterAdvice;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -60,7 +61,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 
 	private final Object throwsAdvice;
 
-	/** Methods on throws advice, keyed by exception class */
+	/** Methods on throws advice, keyed by exception class. */
 	private final Map<Class<?>, Method> exceptionHandlerMap = new HashMap<>();
 
 
@@ -103,6 +104,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 	 * @param exception the exception thrown
 	 * @return a handler for the given exception type
 	 */
+	@Nullable
 	private Method getExceptionHandler(Throwable exception) {
 		Class<?> exceptionClass = exception.getClass();
 		if (logger.isTraceEnabled()) {

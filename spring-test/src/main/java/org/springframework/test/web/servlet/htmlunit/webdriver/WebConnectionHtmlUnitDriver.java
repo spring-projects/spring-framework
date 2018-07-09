@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.gargoylesoftware.htmlunit.WebConnection;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.util.Assert;
  */
 public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 
+	@Nullable
 	private WebClient webClient;
 
 
@@ -91,17 +93,19 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	 * Return the current {@link WebClient}.
 	 * @since 4.3
 	 */
+	@Override
 	public WebClient getWebClient() {
+		Assert.state(this.webClient != null, "No WebClient set");
 		return this.webClient;
 	}
 
 	/**
 	 * Set the {@link WebConnection} to be used with the {@link WebClient}.
-	 * @param webConnection the {@code WebConnection} to use (never {@code null})
+	 * @param webConnection the {@code WebConnection} to use
 	 */
 	public void setWebConnection(WebConnection webConnection) {
 		Assert.notNull(webConnection, "WebConnection must not be null");
-		this.webClient.setWebConnection(webConnection);
+		getWebClient().setWebConnection(webConnection);
 	}
 
 	/**
@@ -109,7 +113,7 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	 * @return the current {@code WebConnection}
 	 */
 	public WebConnection getWebConnection() {
-		return this.webClient.getWebConnection();
+		return getWebClient().getWebConnection();
 	}
 
 }

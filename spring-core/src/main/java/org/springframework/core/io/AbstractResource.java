@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 import org.springframework.core.NestedIOException;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -57,8 +57,7 @@ public abstract class AbstractResource implements Resource {
 		catch (IOException ex) {
 			// Fall back to stream existence: can we open the stream?
 			try {
-				InputStream is = getInputStream();
-				is.close();
+				getInputStream().close();
 				return true;
 			}
 			catch (Throwable isEx) {
@@ -68,11 +67,12 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation always returns {@code true}.
+	 * This implementation always returns {@code true} for a resource
+	 * that {@link #exists() exists} (revised as of 5.1).
 	 */
 	@Override
 	public boolean isReadable() {
-		return true;
+		return exists();
 	}
 
 	/**
@@ -125,8 +125,10 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation returns {@link Channels#newChannel(InputStream)} with the result of
-	 * {@link #getInputStream()}.
+	 * This implementation returns {@link Channels#newChannel(InputStream)}
+	 * with the result of {@link #getInputStream()}.
+	 * <p>This is the same as in {@link Resource}'s corresponding default method
+	 * but mirrored here for efficient JVM-level dispatching in a class hierarchy.
 	 */
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
@@ -138,12 +140,10 @@ public abstract class AbstractResource implements Resource {
 	 * content length. Subclasses will almost always be able to provide
 	 * a more optimal version of this, e.g. checking a File length.
 	 * @see #getInputStream()
-	 * @throws IllegalStateException if {@link #getInputStream()} returns null.
 	 */
 	@Override
 	public long contentLength() throws IOException {
 		InputStream is = getInputStream();
-		Assert.state(is != null, "Resource InputStream must not be null");
 		try {
 			long size = 0;
 			byte[] buf = new byte[255];
@@ -181,8 +181,9 @@ public abstract class AbstractResource implements Resource {
 	 * Determine the File to use for timestamp checking.
 	 * <p>The default implementation delegates to {@link #getFile()}.
 	 * @return the File to use for timestamp checking (never {@code null})
-	 * @throws IOException if the resource cannot be resolved as absolute
-	 * file path, i.e. if the resource is not available in a file system
+	 * @throws FileNotFoundException if the resource cannot be resolved as
+	 * an absolute file path, i.e. is not available in a file system
+	 * @throws IOException in case of general resolution/reading failures
 	 */
 	protected File getFileForLastModifiedCheck() throws IOException {
 		return getFile();
@@ -202,28 +203,20 @@ public abstract class AbstractResource implements Resource {
 	 * assuming that this resource type does not have a filename.
 	 */
 	@Override
+	@Nullable
 	public String getFilename() {
 		return null;
 	}
 
 
 	/**
-	 * This implementation returns the description of this resource.
-	 * @see #getDescription()
-	 */
-	@Override
-	public String toString() {
-		return getDescription();
-	}
-
-	/**
 	 * This implementation compares description strings.
 	 * @see #getDescription()
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof Resource && ((Resource) obj).getDescription().equals(getDescription())));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof Resource &&
+				((Resource) other).getDescription().equals(getDescription())));
 	}
 
 	/**
@@ -233,6 +226,15 @@ public abstract class AbstractResource implements Resource {
 	@Override
 	public int hashCode() {
 		return getDescription().hashCode();
+	}
+
+	/**
+	 * This implementation returns the description of this resource.
+	 * @see #getDescription()
+	 */
+	@Override
+	public String toString() {
+		return getDescription();
 	}
 
 }

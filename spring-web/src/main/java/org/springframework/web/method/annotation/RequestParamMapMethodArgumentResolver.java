@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -50,37 +51,33 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
-		if (requestParam != null) {
-			if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-				return !StringUtils.hasText(requestParam.name());
-			}
-		}
-		return false;
+		return (requestParam != null && Map.class.isAssignableFrom(parameter.getParameterType()) &&
+				!StringUtils.hasText(requestParam.name()));
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
 
 		Map<String, String[]> parameterMap = webRequest.getParameterMap();
 		if (MultiValueMap.class.isAssignableFrom(paramType)) {
 			MultiValueMap<String, String> result = new LinkedMultiValueMap<>(parameterMap.size());
-			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-				for (String value : entry.getValue()) {
-					result.add(entry.getKey(), value);
+			parameterMap.forEach((key, values) -> {
+				for (String value : values) {
+					result.add(key, value);
 				}
-			}
+			});
 			return result;
 		}
 		else {
 			Map<String, String> result = new LinkedHashMap<>(parameterMap.size());
-			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-				if (entry.getValue().length > 0) {
-					result.put(entry.getKey(), entry.getValue()[0]);
+			parameterMap.forEach((key, values) -> {
+				if (values.length > 0) {
+					result.put(key, values[0]);
 				}
-			}
+			});
 			return result;
 		}
 	}

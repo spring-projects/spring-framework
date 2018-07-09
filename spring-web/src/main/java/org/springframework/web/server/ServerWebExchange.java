@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,18 @@ package org.springframework.web.server;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -37,6 +42,16 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  */
 public interface ServerWebExchange {
+
+	/**
+	 * Name of {@link #getAttributes() attribute} whose value can be used to
+	 * correlate log messages for this exchange. Use {@link #getLogPrefix()} to
+	 * obtain a consistently formatted prefix based on this attribute.
+	 * @since 5.1
+	 * @see #getLogPrefix()
+	 */
+	String LOG_ID_ATTRIBUTE = ServerWebExchange.class.getName() + ".LOG_ID";
+
 
 	/**
 	 * Return the current HTTP request.
@@ -59,7 +74,37 @@ public interface ServerWebExchange {
 	 * @param <T> the attribute type
 	 * @return the attribute value
 	 */
-	<T> Optional<T> getAttribute(String name);
+	@SuppressWarnings("unchecked")
+	@Nullable
+	default <T> T getAttribute(String name) {
+		return (T) getAttributes().get(name);
+	}
+
+	/**
+	 * Return the request attribute value or if not present raise an
+	 * {@link IllegalArgumentException}.
+	 * @param name the attribute name
+	 * @param <T> the attribute type
+	 * @return the attribute value
+	 */
+	@SuppressWarnings("unchecked")
+	default <T> T getRequiredAttribute(String name) {
+		T value = getAttribute(name);
+		Assert.notNull(value, "Required attribute '" + name + "' is missing.");
+		return value;
+	}
+
+	/**
+	 * Return the request attribute value, or a default, fallback value.
+	 * @param name the attribute name
+	 * @param defaultValue a default value to return instead
+	 * @param <T> the attribute type
+	 * @return the attribute value
+	 */
+	@SuppressWarnings("unchecked")
+	default <T> T getAttributeOrDefault(String name, T defaultValue) {
+		return (T) getAttributes().getOrDefault(name, defaultValue);
+	}
 
 	/**
 	 * Return the web session for the current request. Always guaranteed  to
@@ -78,16 +123,40 @@ public interface ServerWebExchange {
 
 	/**
 	 * Return the form data from the body of the request if the Content-Type is
-	 * {@code "application/x-www-form-urlencoded"} or an empty map.
+	 * {@code "application/x-www-form-urlencoded"} or an empty map otherwise.
+	 *
+	 * <p><strong>Note:</strong> calling this method causes the request body to
+	 * be read and parsed in full and the resulting {@code MultiValueMap} is
+	 * cached so that this method is safe to call more than once.
 	 */
 	Mono<MultiValueMap<String, String>> getFormData();
 
 	/**
-	 * Return a combined map that represents both
-	 * {@link ServerHttpRequest#getQueryParams()} and {@link #getFormData()}
-	 * or an empty map.
+	 * Return the parts of a multipart request if the Content-Type is
+	 * {@code "multipart/form-data"} or an empty map otherwise.
+	 *
+	 * <p><strong>Note:</strong> calling this method causes the request body to
+	 * be read and parsed in full and the resulting {@code MultiValueMap} is
+	 * cached so that this method is safe to call more than once.
 	 */
-	Mono<MultiValueMap<String, String>> getRequestParams();
+	Mono<MultiValueMap<String, Part>> getMultipartData();
+
+	/**
+	 * Return the {@link LocaleContext} using the configured
+	 * {@link org.springframework.web.server.i18n.LocaleContextResolver}.
+	 */
+	LocaleContext getLocaleContext();
+
+	/**
+	 * Return the {@link ApplicationContext} associated with the web application,
+	 * if it was initialized with one via
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
+	 * WebHttpHandlerBuilder#applicationContext}.
+	 * @since 5.0.3
+	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)
+	 */
+	@Nullable
+	ApplicationContext getApplicationContext();
 
 	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods
@@ -118,12 +187,10 @@ public interface ServerWebExchange {
 	 * status, and adding "ETag" and "Last-Modified" headers when applicable.
 	 * This method works with conditional GET/HEAD requests as well as with
 	 * conditional POST/PUT/DELETE requests.
-	 *
 	 * <p><strong>Note:</strong> The HTTP specification recommends setting both
 	 * ETag and Last-Modified values, but you can also use
 	 * {@code #checkNotModified(String)} or
 	 * {@link #checkNotModified(Instant)}.
-	 *
 	 * @param etag the entity tag that the application determined for the
 	 * underlying resource. This parameter will be padded with quotes (")
 	 * if necessary.
@@ -131,8 +198,36 @@ public interface ServerWebExchange {
 	 * determined for the underlying resource
 	 * @return true if the request does not require further processing.
 	 */
-	boolean checkNotModified(String etag, Instant lastModified);
+	boolean checkNotModified(@Nullable String etag, Instant lastModified);
 
+	/**
+	 * Transform the given url according to the registered transformation function(s).
+	 * By default, this method returns the given {@code url}, though additional
+	 * transformation functions can by registered with {@link #addUrlTransformer}
+	 * @param url the URL to transform
+	 * @return the transformed URL
+	 */
+	String transformUrl(String url);
+
+	/**
+	 * Register an additional URL transformation function for use with {@link #transformUrl}.
+	 * The given function can be used to insert an id for authentication, a nonce for CSRF
+	 * protection, etc.
+	 * <p>Note that the given function is applied after any previously registered functions.
+	 * @param transformer a URL transformation function to add
+	 */
+	void addUrlTransformer(Function<String, String> transformer);
+
+	/**
+	 * Return a log message prefix to use to correlate messages for this exchange.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
+	 * along with some extra formatting so that the prefix can be conveniently
+	 * prepended with no further formatting no separators required.
+	 * @return the log message prefix or an empty String if the
+	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * @since 5.1
+	 */
+	String getLogPrefix();
 
 	/**
 	 * Return a builder to mutate properties of this exchange by wrapping it

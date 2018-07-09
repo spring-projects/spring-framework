@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of the {@link org.springframework.beans.factory.BeanFactory}
@@ -117,7 +118,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * <p>Note: This is intended for creating a fresh instance, populating annotated
 	 * fields and methods as well as applying all standard bean initialization callbacks.
-	 * It does <i>not</> imply traditional by-name or by-type autowiring of properties;
+	 * It does <i>not</i> imply traditional by-name or by-type autowiring of properties;
 	 * use {@link #createBean(Class, int, boolean)} for those purposes.
 	 * @param beanClass the class of the bean to create
 	 * @return the new bean instance
@@ -337,7 +338,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @since 2.5
 	 * @see #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)
 	 */
-	Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) throws BeansException;
+	@Nullable
+	Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) throws BeansException;
 
 	/**
 	 * Resolve the specified dependency against the beans defined in this factory.
@@ -353,7 +355,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @since 2.5
 	 * @see DependencyDescriptor
 	 */
-	Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
-			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException;
+	@Nullable
+	Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
+			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException;
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,9 @@ import org.springframework.web.multipart.MultipartResolver;
  */
 public class MultipartFilter extends OncePerRequestFilter {
 
+	/**
+	 * The default name for the multipart resolver bean.
+	 */
 	public static final String DEFAULT_MULTIPART_RESOLVER_BEAN_NAME = "filterMultipartResolver";
 
 	private final MultipartResolver defaultMultipartResolver = new StandardServletMultipartResolver();
@@ -105,16 +108,15 @@ public class MultipartFilter extends OncePerRequestFilter {
 
 		HttpServletRequest processedRequest = request;
 		if (multipartResolver.isMultipart(processedRequest)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Resolving multipart request [" + processedRequest.getRequestURI() +
-						"] with MultipartFilter");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Resolving multipart request");
 			}
 			processedRequest = multipartResolver.resolveMultipart(processedRequest);
 		}
 		else {
 			// A regular request...
-			if (logger.isDebugEnabled()) {
-				logger.debug("Request [" + processedRequest.getRequestURI() + "] is not a multipart request");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Not a multipart request");
 			}
 		}
 
@@ -146,7 +148,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	 * bean name is "filterMultipartResolver".
 	 * <p>This can be overridden to use a custom MultipartResolver instance,
 	 * for example if not using a Spring web application context.
-	 * @return the MultipartResolver instance, or {@code null} if none found
+	 * @return the MultipartResolver instance
 	 */
 	protected MultipartResolver lookupMultipartResolver() {
 		WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(getServletContext());

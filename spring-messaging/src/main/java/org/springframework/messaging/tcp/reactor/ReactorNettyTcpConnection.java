@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,22 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import java.util.function.BiConsumer;
-
 import io.netty.buffer.ByteBuf;
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.NettyInbound;
-import reactor.ipc.netty.NettyOutbound;
+import reactor.netty.NettyInbound;
+import reactor.netty.NettyOutbound;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * An implementation of {@link org.springframework.messaging.tcp.TcpConnection
- * TcpConnection} based on the TCP client support of the Reactor project.
- *
- * @param <P> the payload type of messages read or written to the TCP stream.
+ * Reactor Netty based implementation of {@link TcpConnection}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <P> the type of payload for outbound messages
  */
 public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
@@ -43,41 +39,39 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
 	private final NettyOutbound outbound;
 
-	private final DirectProcessor<Void> closeProcessor;
+	private final ReactorNettyCodec<P> codec;
 
-	private final BiConsumer<? super ByteBuf, ? super Message<P>> encoder;
+	private final DirectProcessor<Void> closeProcessor;
 
 
 	public ReactorNettyTcpConnection(NettyInbound inbound, NettyOutbound outbound,
-			BiConsumer<? super ByteBuf, ? super Message<P>> encoder,
-			DirectProcessor<Void> closeProcessor) {
+			ReactorNettyCodec<P> codec, DirectProcessor<Void> closeProcessor) {
 
 		this.inbound = inbound;
 		this.outbound = outbound;
-		this.encoder = encoder;
+		this.codec = codec;
 		this.closeProcessor = closeProcessor;
 	}
 
 
 	@Override
 	public ListenableFuture<Void> send(Message<P> message) {
-		ByteBuf byteBuf = this.outbound.alloc()
-		                               .buffer();
-		this.encoder.accept(byteBuf, message);
-		return new MonoToListenableFutureAdapter<>(this.outbound.send(Mono.just(byteBuf))
-		                                                        .then());
+		ByteBuf byteBuf = this.outbound.alloc().buffer();
+		this.codec.encode(message, byteBuf);
+		Mono<Void> sendCompletion = this.outbound.send(Mono.just(byteBuf)).then();
+		return new MonoToListenableFutureAdapter<>(sendCompletion);
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
-		this.inbound.onReadIdle(inactivityDuration, runnable);
+		this.inbound.withConnection(conn -> conn.onReadIdle(inactivityDuration, runnable));
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
-		this.outbound.onWriteIdle(inactivityDuration, runnable);
+		this.inbound.withConnection(conn -> conn.onWriteIdle(inactivityDuration, runnable));
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +39,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -91,7 +93,6 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 
-	@SuppressWarnings("ConstantConditions")
 	@Test
 	public void nullHandler() {
 		Object handler = null;
@@ -101,7 +102,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void setCustomArgumentResolvers() throws Exception {
+	public void setCustomArgumentResolvers() {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 		this.resolver.setCustomArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();
@@ -111,7 +112,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void setArgumentResolvers() throws Exception {
+	public void setArgumentResolvers() {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 		this.resolver.setArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();
@@ -213,8 +214,8 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@Test
 	public void resolveExceptionGlobalHandler() throws Exception {
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
-		this.resolver.setApplicationContext(cxt);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
 
 		IllegalAccessException ex = new IllegalAccessException();
@@ -228,8 +229,8 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@Test
 	public void resolveExceptionGlobalHandlerOrdered() throws Exception {
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
-		this.resolver.setApplicationContext(cxt);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
 
 		IllegalStateException ex = new IllegalStateException();
@@ -243,8 +244,8 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@Test  // SPR-12605
 	public void resolveExceptionWithHandlerMethodArg() throws Exception {
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
-		this.resolver.setApplicationContext(cxt);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
 
 		ArrayIndexOutOfBoundsException ex = new ArrayIndexOutOfBoundsException();
@@ -258,8 +259,8 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@Test
 	public void resolveExceptionWithAssertionError() throws Exception {
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
-		this.resolver.setApplicationContext(cxt);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
 
 		AssertionError err = new AssertionError("argh");
@@ -274,8 +275,8 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@Test
 	public void resolveExceptionWithAssertionErrorAsRootCause() throws Exception {
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
-		this.resolver.setApplicationContext(cxt);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
 
 		AssertionError err = new AssertionError("argh");
@@ -290,8 +291,8 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@Test
 	public void resolveExceptionControllerAdviceHandler() throws Exception {
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
-		this.resolver.setApplicationContext(cxt);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
 
 		IllegalStateException ex = new IllegalStateException();
@@ -305,8 +306,8 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@Test
 	public void resolveExceptionControllerAdviceNoHandler() throws Exception {
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
-		this.resolver.setApplicationContext(cxt);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
 
 		IllegalStateException ex = new IllegalStateException();
@@ -315,6 +316,21 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertNotNull("Exception was not handled", mav);
 		assertTrue(mav.isEmpty());
 		assertEquals("DefaultTestExceptionResolver: IllegalStateException", this.response.getContentAsString());
+	}
+
+	@Test  // SPR-16496
+	public void resolveExceptionControllerAdviceAgainstProxy() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setApplicationContext(ctx);
+		this.resolver.afterPropertiesSet();
+
+		IllegalStateException ex = new IllegalStateException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ProxyFactory(new ResponseBodyController()).getProxy(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertNotNull("Exception was not handled", mav);
+		assertTrue(mav.isEmpty());
+		assertEquals("BasePackageTestExceptionResolver: IllegalStateException", this.response.getContentAsString());
 	}
 
 
@@ -348,8 +364,18 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 
+	interface ResponseBodyInterface {
+
+		void handle();
+
+		@ExceptionHandler
+		@ResponseBody
+		String handleException(IllegalArgumentException ex);
+	}
+
+
 	@Controller
-	static class ResponseBodyController {
+	static class ResponseBodyController extends WebApplicationObjectSupport implements ResponseBodyInterface {
 
 		public void handle() {}
 
@@ -454,7 +480,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 
-	@RestControllerAdvice("org.springframework.web.servlet.mvc.method.annotation")
+	@RestControllerAdvice(assignableTypes = WebApplicationObjectSupport.class)
 	@Order(2)
 	static class BasePackageTestExceptionResolver {
 

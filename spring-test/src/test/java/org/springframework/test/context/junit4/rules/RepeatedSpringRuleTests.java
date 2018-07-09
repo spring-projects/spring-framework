@@ -73,7 +73,7 @@ public class RepeatedSpringRuleTests extends RepeatedSpringRunnerTests {
 	public abstract static class AbstractRepeatedTestCase {
 
 		@ClassRule
-		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+		public static final SpringClassRule springClassRule = new SpringClassRule();
 
 		@Rule
 		public final SpringMethodRule springMethodRule = new SpringMethodRule();

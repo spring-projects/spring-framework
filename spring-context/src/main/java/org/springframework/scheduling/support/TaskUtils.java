@@ -21,6 +21,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 import org.springframework.util.ReflectionUtils;
 
@@ -60,7 +61,7 @@ public abstract class TaskUtils {
 	 * returned {@link Future}. In both cases, the errors will be logged.
 	 */
 	public static DelegatingErrorHandlingRunnable decorateTaskWithErrorHandler(
-			Runnable task, ErrorHandler errorHandler, boolean isRepeatingTask) {
+			Runnable task, @Nullable ErrorHandler errorHandler, boolean isRepeatingTask) {
 
 		if (task instanceof DelegatingErrorHandlingRunnable) {
 			return (DelegatingErrorHandlingRunnable) task;

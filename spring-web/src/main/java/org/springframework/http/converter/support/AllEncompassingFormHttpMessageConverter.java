@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.converter.support;
 
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -36,20 +37,30 @@ import org.springframework.util.ClassUtils;
 public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConverter {
 
 	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
+			ClassUtils.isPresent("javax.xml.bind.Binder",
+					AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", AllEncompassingFormHttpMessageConverter.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
+					AllEncompassingFormHttpMessageConverter.class.getClassLoader()) &&
+			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+					AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 	private static final boolean jackson2XmlPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
+					AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 	private static final boolean jackson2SmilePresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
+					AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 	private static final boolean gsonPresent =
-			ClassUtils.isPresent("com.google.gson.Gson", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
+			ClassUtils.isPresent("com.google.gson.Gson",
+					AllEncompassingFormHttpMessageConverter.class.getClassLoader());
+
+	private static final boolean jsonbPresent =
+			ClassUtils.isPresent("javax.json.bind.Jsonb",
+					AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 
 	public AllEncompassingFormHttpMessageConverter() {
@@ -64,6 +75,9 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		}
 		else if (gsonPresent) {
 			addPartConverter(new GsonHttpMessageConverter());
+		}
+		else if (jsonbPresent) {
+			addPartConverter(new JsonbHttpMessageConverter());
 		}
 
 		if (jackson2XmlPresent) {

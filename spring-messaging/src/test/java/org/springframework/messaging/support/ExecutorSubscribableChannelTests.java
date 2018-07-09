@@ -186,13 +186,11 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 
-	private abstract static class AbstractTestInterceptor extends ChannelInterceptorAdapter
-			implements ExecutorChannelInterceptor {
+	private abstract static class AbstractTestInterceptor implements ChannelInterceptor, ExecutorChannelInterceptor {
 
 		private AtomicInteger counter = new AtomicInteger();
 
 		private volatile boolean afterHandledInvoked;
-
 
 		public AtomicInteger getCounter() {
 			return this.counter;
@@ -210,17 +208,19 @@ public class ExecutorSubscribableChannelTests {
 		}
 
 		@Override
-		public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
+		public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler,
+				Exception ex) {
+
 			this.afterHandledInvoked = true;
 		}
 	}
+
 
 	private static class BeforeHandleInterceptor extends AbstractTestInterceptor {
 
 		private Message<?> messageToReturn;
 
 		private RuntimeException exceptionToRaise;
-
 
 		public void setMessageToReturn(Message<?> messageToReturn) {
 			this.messageToReturn = messageToReturn;
@@ -241,6 +241,7 @@ public class ExecutorSubscribableChannelTests {
 			return (this.messageToReturn != null ? this.messageToReturn : message);
 		}
 	}
+
 
 	private static class NullReturningBeforeHandleInterceptor extends AbstractTestInterceptor {
 

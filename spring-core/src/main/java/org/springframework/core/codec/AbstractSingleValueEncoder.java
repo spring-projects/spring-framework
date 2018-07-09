@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -32,6 +33,7 @@ import org.springframework.util.MimeType;
  *
  * @author Arjen Poutsma
  * @since 5.0
+ * @param <T> the element type
  */
 public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 
@@ -43,7 +45,7 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 
 	@Override
 	public final Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(inputStream).
 				take(1).
@@ -56,10 +58,10 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 	 * @param dataBufferFactory a buffer factory used to create the output
 	 * @param type the stream element type to process
 	 * @param mimeType the mime type to process
-	 * @param hints Additional information about how to do decode, optional
+	 * @param hints additional information about how to do decode, optional
 	 * @return the output stream
 	 */
 	protected abstract Flux<DataBuffer> encode(T t, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Map<String, Object> hints);
+			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -32,9 +33,10 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionException {
 
-	private int numberOfBeansFound;
+	private final int numberOfBeansFound;
 
-	private Collection<String> beanNamesFound;
+	@Nullable
+	private final Collection<String> beanNamesFound;
 
 
 	/**
@@ -46,6 +48,7 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	public NoUniqueBeanDefinitionException(Class<?> type, int numberOfBeansFound, String message) {
 		super(type, message);
 		this.numberOfBeansFound = numberOfBeansFound;
+		this.beanNamesFound = null;
 	}
 
 	/**
@@ -54,8 +57,9 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	 * @param beanNamesFound the names of all matching beans (as a Collection)
 	 */
 	public NoUniqueBeanDefinitionException(Class<?> type, Collection<String> beanNamesFound) {
-		this(type, beanNamesFound.size(), "expected single matching bean but found " + beanNamesFound.size() + ": " +
+		super(type, "expected single matching bean but found " + beanNamesFound.size() + ": " +
 				StringUtils.collectionToCommaDelimitedString(beanNamesFound));
+		this.numberOfBeansFound =  beanNamesFound.size();
 		this.beanNamesFound = beanNamesFound;
 	}
 
@@ -85,6 +89,7 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	 * @since 4.3
 	 * @see #getBeanType()
 	 */
+	@Nullable
 	public Collection<String> getBeanNamesFound() {
 		return this.beanNamesFound;
 	}

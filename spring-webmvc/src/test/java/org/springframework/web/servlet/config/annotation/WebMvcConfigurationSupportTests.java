@@ -175,7 +175,7 @@ public class WebMvcConfigurationSupportTests {
 		ApplicationContext context = initContext(WebConfig.class);
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertEquals(11, converters.size());
+		assertEquals(12, converters.size());
 		converters.stream()
 				.filter(converter -> converter instanceof AbstractJackson2HttpMessageConverter)
 				.forEach(converter -> {
@@ -362,7 +362,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@EnableWebMvc
 	@Configuration
-	static class CustomViewResolverOrderConfig extends WebMvcConfigurerAdapter {
+	static class CustomViewResolverOrderConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -373,7 +373,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@EnableWebMvc
 	@Configuration
-	static class CustomArgumentResolverConfig extends WebMvcConfigurerAdapter {
+	static class CustomArgumentResolverConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {

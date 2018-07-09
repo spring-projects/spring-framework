@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.WebUtils;
@@ -37,6 +38,9 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class MultipartResolutionDelegate {
 
+	/**
+	 * Indicates an unresolvable value.
+	 */
 	public static final Object UNRESOLVABLE = new Object();
 
 
@@ -66,6 +70,7 @@ public abstract class MultipartResolutionDelegate {
 				(Part.class == paramType || isPartCollection(parameter) || isPartArray(parameter)));
 	}
 
+	@Nullable
 	public static Object resolveMultipartArgument(String name, MethodParameter parameter, HttpServletRequest request)
 			throws Exception {
 
@@ -91,7 +96,7 @@ public abstract class MultipartResolutionDelegate {
 			}
 			if (multipartRequest != null) {
 				List<MultipartFile> multipartFiles = multipartRequest.getFiles(name);
-				return multipartFiles.toArray(new MultipartFile[multipartFiles.size()]);
+				return multipartFiles.toArray(new MultipartFile[0]);
 			}
 			else {
 				return null;
@@ -127,10 +132,11 @@ public abstract class MultipartResolutionDelegate {
 		return (Part.class == methodParam.getNestedParameterType().getComponentType());
 	}
 
+	@Nullable
 	private static Class<?> getCollectionParameterType(MethodParameter methodParam) {
 		Class<?> paramType = methodParam.getNestedParameterType();
 		if (Collection.class == paramType || List.class.isAssignableFrom(paramType)){
-			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
+			Class<?> valueType = ResolvableType.forMethodParameter(methodParam).asCollection().resolveGeneric();
 			if (valueType != null) {
 				return valueType;
 			}
@@ -161,7 +167,7 @@ public abstract class MultipartResolutionDelegate {
 				result.add(part);
 			}
 		}
-		return result.toArray(new Part[result.size()]);
+		return result.toArray(new Part[0]);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@
 
 package org.springframework.messaging.simp.user;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.*;
-
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
@@ -37,6 +32,10 @@ import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.*;
 
 /**
  * Unit tests for
@@ -124,7 +123,6 @@ public class UserDestinationMessageHandlerTests {
 
 	@Test
 	public void handleMessageFromBrokerWithActiveSession() {
-
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));
 		when(this.registry.getUser("joe")).thenReturn(simpUser);

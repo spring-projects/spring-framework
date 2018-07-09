@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -48,7 +49,7 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 
 
 	protected AbstractMonoToListenableFutureAdapter(Mono<S> mono) {
-		Assert.notNull(mono, "'mono' must not be null");
+		Assert.notNull(mono, "Mono must not be null");
 		this.monoProcessor = mono
 				.doOnSuccess(result -> {
 					T adapted;
@@ -56,27 +57,27 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 						adapted = adapt(result);
 					}
 					catch (Throwable ex) {
-						registry.failure(ex);
+						this.registry.failure(ex);
 						return;
 					}
-					registry.success(adapted);
+					this.registry.success(adapted);
 				})
 				.doOnError(this.registry::failure)
-				.subscribe();
+				.toProcessor();
 	}
 
 
 	@Override
+	@Nullable
 	public T get() throws InterruptedException {
 		S result = this.monoProcessor.block();
 		return adapt(result);
 	}
 
 	@Override
-	public T get(long timeout, TimeUnit unit)
-			throws InterruptedException, ExecutionException, TimeoutException {
-
-		Assert.notNull(unit);
+	@Nullable
+	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+		Assert.notNull(unit, "TimeUnit must not be null");
 		Duration duration = Duration.ofMillis(TimeUnit.MILLISECONDS.convert(timeout, unit));
 		S result = this.monoProcessor.block(duration);
 		return adapt(result);
@@ -112,6 +113,8 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 		this.registry.addFailureCallback(failureCallback);
 	}
 
-	protected abstract T adapt(S result);
+
+	@Nullable
+	protected abstract T adapt(@Nullable S result);
 
 }

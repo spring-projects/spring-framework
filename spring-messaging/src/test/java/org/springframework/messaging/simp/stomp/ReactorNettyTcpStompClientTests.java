@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -139,7 +140,7 @@ public class ReactorNettyTcpStompClientTests {
 		}
 
 		@Override
-		public void handleFrame(StompHeaders headers, Object payload) {
+		public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 			logger.error("STOMP error frame " + headers + " payload=" + payload);
 		}
 
@@ -159,7 +160,7 @@ public class ReactorNettyTcpStompClientTests {
 		private final List<String> received = new ArrayList<>();
 
 		public ConsumingHandler(String... topics) {
-			Assert.notEmpty(topics);
+			Assert.notEmpty(topics, "Topics must not be empty");
 			this.topics = Arrays.asList(topics);
 			this.subscriptionLatch = new CountDownLatch(this.topics.size());
 		}
@@ -167,7 +168,6 @@ public class ReactorNettyTcpStompClientTests {
 		public List<String> getReceived() {
 			return this.received;
 		}
-
 
 		@Override
 		public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
@@ -179,7 +179,7 @@ public class ReactorNettyTcpStompClientTests {
 						return String.class;
 					}
 					@Override
-					public void handleFrame(StompHeaders headers, Object payload) {
+					public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 						received.add((String) payload);
 					}
 				});

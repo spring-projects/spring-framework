@@ -8,4 +8,9 @@
  * by subclassing the AbstractView class in this package can be
  * very helpful if an application has unusual view requirements.
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.web.servlet.view;
+
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

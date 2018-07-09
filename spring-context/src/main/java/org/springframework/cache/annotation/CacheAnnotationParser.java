@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.cache.interceptor.CacheOperation;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for parsing known caching annotation types.
@@ -40,10 +41,11 @@ public interface CacheAnnotationParser {
 	 * metadata attribute class. Returns {@code null} if the class
 	 * is not cacheable.
 	 * @param type the annotated class
-	 * @return CacheOperation the configured caching operation,
+	 * @return the configured caching operation,
 	 * or {@code null} if none was found
 	 * @see AnnotationCacheOperationSource#findCacheOperations(Class)
 	 */
+	@Nullable
 	Collection<CacheOperation> parseCacheAnnotations(Class<?> type);
 
 	/**
@@ -53,9 +55,10 @@ public interface CacheAnnotationParser {
 	 * metadata attribute class. Returns {@code null} if the method
 	 * is not cacheable.
 	 * @param method the annotated method
-	 * @return CacheOperation the configured caching operation,
+	 * @return the configured caching operation,
 	 * or {@code null} if none was found
 	 * @see AnnotationCacheOperationSource#findCacheOperations(Method)
 	 */
+	@Nullable
 	Collection<CacheOperation> parseCacheAnnotations(Method method);
 }

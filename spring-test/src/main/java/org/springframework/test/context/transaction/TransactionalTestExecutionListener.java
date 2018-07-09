@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
@@ -135,6 +136,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	// Do not require @Transactional test methods to be public.
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource(false);
 
+
 	/**
 	 * Returns {@code 4000}.
 	 */
@@ -156,12 +158,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	@Override
 	public void beforeTestMethod(final TestContext testContext) throws Exception {
-		final Method testMethod = testContext.getTestMethod();
-		final Class<?> testClass = testContext.getTestClass();
-		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
+		Method testMethod = testContext.getTestMethod();
+		Class<?> testClass = testContext.getTestClass();
+		Assert.notNull(testMethod, "Test method of supplied TestContext must not be null");
 
 		TransactionContext txContext = TransactionContextHolder.removeCurrentTransactionContext();
-		Assert.state(txContext == null, "Cannot start a new transaction without ending the existing transaction.");
+		Assert.state(txContext == null, "Cannot start new transaction without ending existing transaction");
 
 		PlatformTransactionManager tm = null;
 		TransactionAttribute transactionAttribute = this.attributeSource.getTransactionAttribute(testMethod, testClass);
@@ -171,8 +173,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				transactionAttribute);
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("Explicit transaction definition [" + transactionAttribute + "] found for test context " +
-						testContext);
+				logger.debug("Explicit transaction definition [" + transactionAttribute +
+						"] found for test context " + testContext);
 			}
 
 			if (transactionAttribute.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
@@ -180,10 +182,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			}
 
 			tm = getTransactionManager(testContext, transactionAttribute.getQualifier());
-
-			Assert.state(tm != null, () -> String.format(
-					"Failed to retrieve PlatformTransactionManager for @Transactional test for test context %s.",
-					testContext));
+			Assert.state(tm != null,
+					() -> "Failed to retrieve PlatformTransactionManager for @Transactional test: " + testContext);
 		}
 
 		if (tm != null) {
@@ -212,7 +212,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			TransactionStatus transactionStatus = txContext.getTransactionStatus();
 			try {
 				// If the transaction is still active...
-				if ((transactionStatus != null) && !transactionStatus.isCompleted()) {
+				if (transactionStatus != null && !transactionStatus.isCompleted()) {
 					txContext.endTransaction();
 				}
 			}
@@ -306,7 +306,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @throws BeansException if an error occurs while retrieving the transaction manager
 	 * @see #getTransactionManager(TestContext)
 	 */
-	protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
+	@Nullable
+	protected PlatformTransactionManager getTransactionManager(TestContext testContext, @Nullable String qualifier) {
 		// Look up by type and qualifier from @Transactional
 		if (StringUtils.hasText(qualifier)) {
 			try {
@@ -344,6 +345,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * exists in the ApplicationContext
 	 * @see #getTransactionManager(TestContext, String)
 	 */
+	@Nullable
 	protected PlatformTransactionManager getTransactionManager(TestContext testContext) {
 		return TestContextTransactionUtils.retrieveTransactionManager(testContext, null);
 	}
@@ -366,8 +368,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (rollbackPresent) {
 			boolean defaultRollback = rollback.value();
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Retrieved default @Rollback(%s) for test class [%s].", defaultRollback,
-					testClass.getName()));
+				logger.debug(String.format("Retrieved default @Rollback(%s) for test class [%s].",
+						defaultRollback, testClass.getName()));
 			}
 			return defaultRollback;
 		}

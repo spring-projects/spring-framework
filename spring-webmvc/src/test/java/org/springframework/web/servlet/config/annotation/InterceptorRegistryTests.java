@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
@@ -38,13 +40,17 @@ import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapt
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test fixture with a {@link InterceptorRegistry}, two {@link HandlerInterceptor}s and two
  * {@link WebRequestInterceptor}s.
  *
  * @author Rossen Stoyanchev
+ * @author Eko Kurniawan Khannedy
  */
 public class InterceptorRegistryTests {
 
@@ -138,14 +144,12 @@ public class InterceptorRegistryTests {
 		verifyWebInterceptor(interceptors.get(0), this.webInterceptor2);
 	}
 
-	// SPR-11130
-
-	@Test
+	@Test  // SPR-11130
 	public void addInterceptorWithExcludePathPatternOnly() {
 		this.registry.addInterceptor(this.interceptor1).excludePathPatterns("/path1/secret");
 		this.registry.addInterceptor(this.interceptor2).addPathPatterns("/path2");
 
-		assertEquals(Arrays.asList(this.interceptor1), getInterceptorsForPath("/path1"));
+		assertEquals(Collections.singletonList(this.interceptor1), getInterceptorsForPath("/path1"));
 		assertEquals(Arrays.asList(this.interceptor1, this.interceptor2), getInterceptorsForPath("/path2"));
 		assertEquals(Collections.emptyList(), getInterceptorsForPath("/path1/secret"));
 	}
@@ -171,7 +175,9 @@ public class InterceptorRegistryTests {
 		return result;
 	}
 
-	private void verifyWebInterceptor(HandlerInterceptor interceptor, TestWebRequestInterceptor webInterceptor) throws Exception {
+	private void verifyWebInterceptor(HandlerInterceptor interceptor,
+			TestWebRequestInterceptor webInterceptor) throws Exception {
+
 		assertTrue(interceptor instanceof WebRequestHandlerInterceptorAdapter);
 		interceptor.preHandle(this.request, this.response, null);
 		assertTrue(webInterceptor.preHandleInvoked);
@@ -187,12 +193,35 @@ public class InterceptorRegistryTests {
 		}
 
 		@Override
-		public void postHandle(WebRequest request, ModelMap model) throws Exception {
+		public void postHandle(WebRequest request, @Nullable ModelMap model) throws Exception {
 		}
 
 		@Override
-		public void afterCompletion(WebRequest request, Exception ex) throws Exception {
+		public void afterCompletion(WebRequest request, @Nullable Exception ex) throws Exception {
 		}
 	}
 
+	@Test
+	public void orderedInterceptors() throws Exception {
+		this.registry.addInterceptor(this.interceptor1).order(Ordered.LOWEST_PRECEDENCE);
+		this.registry.addInterceptor(this.interceptor2).order(Ordered.HIGHEST_PRECEDENCE);
+
+		List<Object> interceptors = this.registry.getInterceptors();
+		assertEquals(2, interceptors.size());
+
+		assertSame(this.interceptor2, interceptors.get(0));
+		assertSame(this.interceptor1, interceptors.get(1));
+	}
+
+	@Test
+	public void nonOrderedInterceptors() throws Exception {
+		this.registry.addInterceptor(this.interceptor1).order(0);
+		this.registry.addInterceptor(this.interceptor2).order(0);
+
+		List<Object> interceptors = this.registry.getInterceptors();
+		assertEquals(2, interceptors.size());
+
+		assertSame(this.interceptor1, interceptors.get(0));
+		assertSame(this.interceptor2, interceptors.get(1));
+	}
 }

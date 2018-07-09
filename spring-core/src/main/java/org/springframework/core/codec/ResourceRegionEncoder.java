@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.core.codec;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.OptionalLong;
@@ -34,21 +33,28 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.support.ResourceRegion;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Encoder for {@link ResourceRegion}s.
+ * Encoder for {@link ResourceRegion ResourceRegions}.
  *
  * @author Brian Clozel
  * @since 5.0
  */
 public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 
+	/**
+	 * The default buffer size used by the encoder.
+	 */
 	public static final int DEFAULT_BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
 
+	/**
+	 * The hint key that contains the boundary string.
+	 */
 	public static final String BOUNDARY_STRING_HINT = ResourceRegionEncoder.class.getName() + ".boundaryString";
 
 	private final int bufferSize;
@@ -65,16 +71,15 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 	}
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		return super.canEncode(elementType, mimeType)
-				&& ResourceRegion.class.isAssignableFrom(elementType.getRawClass());
+				&& ResourceRegion.class.isAssignableFrom(elementType.resolve(Object.class));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Flux<DataBuffer> encode(Publisher<? extends ResourceRegion> inputStream,
-			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+			DataBufferFactory bufferFactory, ResolvableType elementType, @Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints) {
 
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
@@ -82,21 +87,19 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 
 		if (inputStream instanceof Mono) {
 			return ((Mono<? extends ResourceRegion>) inputStream)
-					.flatMap(region -> writeResourceRegion(region, bufferFactory));
+					.flatMapMany(region -> writeResourceRegion(region, bufferFactory, hints));
 		}
 		else {
-			Assert.notNull(hints, "'hints' must not be null");
-			Assert.isTrue(hints.containsKey(BOUNDARY_STRING_HINT), "'hints' must contain boundaryString hint");
-			final String boundaryString = (String) hints.get(BOUNDARY_STRING_HINT);
-
+			final String boundaryString = Hints.getRequiredHint(hints, BOUNDARY_STRING_HINT);
 			byte[] startBoundary = getAsciiBytes("\r\n--" + boundaryString + "\r\n");
-			byte[] contentType = getAsciiBytes("Content-Type: " + mimeType.toString() + "\r\n");
+			byte[] contentType =
+					(mimeType != null ? getAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0]);
 
 			Flux<DataBuffer> regions = Flux.from(inputStream).
 					concatMap(region ->
 							Flux.concat(
 									getRegionPrefix(bufferFactory, startBoundary, contentType, region),
-									writeResourceRegion(region, bufferFactory)
+									writeResourceRegion(region, bufferFactory, hints)
 							));
 			return Flux.concat(regions, getRegionSuffix(bufferFactory, boundaryString));
 		}
@@ -112,16 +115,20 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		);
 	}
 
-	private Flux<DataBuffer> writeResourceRegion(ResourceRegion region, DataBufferFactory bufferFactory) {
-		try {
-			ReadableByteChannel resourceChannel = region.getResource().readableChannel();
-			Flux<DataBuffer> in = DataBufferUtils.read(resourceChannel, bufferFactory, this.bufferSize);
-			Flux<DataBuffer> skipped = DataBufferUtils.skipUntilByteCount(in, region.getPosition());
-			return DataBufferUtils.takeUntilByteCount(skipped, region.getCount());
+	private Flux<DataBuffer> writeResourceRegion(
+			ResourceRegion region, DataBufferFactory bufferFactory, @Nullable Map<String, Object> hints) {
+
+		Resource resource = region.getResource();
+		long position = region.getPosition();
+		long count = region.getCount();
+
+		if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+			logger.debug(Hints.getLogPrefix(hints) +
+					"Writing region " + position + "-" + (position + count) + " of [" + resource + "]");
 		}
-		catch (IOException exc) {
-			return Flux.error(exc);
-		}
+
+		Flux<DataBuffer> in = DataBufferUtils.read(resource, position, bufferFactory, this.bufferSize);
+		return DataBufferUtils.takeUntilByteCount(in, count);
 	}
 
 	private Flux<DataBuffer> getRegionSuffix(DataBufferFactory bufferFactory, String boundaryString) {
@@ -138,7 +145,8 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		long end = start + region.getCount() - 1;
 		OptionalLong contentLength = contentLength(region.getResource());
 		if (contentLength.isPresent()) {
-			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + '/' + contentLength.getAsLong() + "\r\n\r\n");
+			long length = contentLength.getAsLong();
+			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + '/' + length + "\r\n\r\n");
 		}
 		else {
 			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + "\r\n\r\n");

@@ -41,7 +41,7 @@ public abstract class AnnotationVisitor {
 
     /**
      * The ASM API version implemented by this visitor. The value of this field
-     * must be one of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     * must be one of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     protected final int api;
 
@@ -56,7 +56,7 @@ public abstract class AnnotationVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     public AnnotationVisitor(final int api) {
         this(api, null);
@@ -67,13 +67,13 @@ public abstract class AnnotationVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      * @param av
      *            the annotation visitor to which this visitor must delegate
      *            method calls. May be null.
      */
     public AnnotationVisitor(final int api, final AnnotationVisitor av) {
-        if (api != Opcodes.ASM4 && api != Opcodes.ASM5) {
+        if (api < Opcodes.ASM4 || api > Opcodes.ASM6) {
             throw new IllegalArgumentException();
         }
         this.api = api;
@@ -89,7 +89,7 @@ public abstract class AnnotationVisitor {
      *            the actual value, whose type must be {@link Byte},
      *            {@link Boolean}, {@link Character}, {@link Short},
      *            {@link Integer} , {@link Long}, {@link Float}, {@link Double},
-     *            {@link String} or {@link Type} or OBJECT or ARRAY sort. This
+     *            {@link String} or {@link Type} of OBJECT or ARRAY sort. This
      *            value can also be an array of byte, boolean, short, char, int,
      *            long, float or double values (this is equivalent to using
      *            {@link #visitArray visitArray} and visiting each array element

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,14 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiObjectLocator;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteInvocationFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing RMI services
@@ -96,9 +98,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * but can also be optional if the lookup returns a typed stub.
 	 */
 	public void setServiceInterface(Class<?> serviceInterface) {
-		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("'serviceInterface' must be an interface");
-		}
+		Assert.notNull(serviceInterface, "'serviceInterface' must not be null");
+		Assert.isTrue(serviceInterface.isInterface(), "'serviceInterface' must be an interface");
 		this.serviceInterface = serviceInterface;
 	}
 
@@ -338,6 +339,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @throws Throwable in case of invocation failure
 	 * @see #invoke
 	 */
+	@Nullable
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
 		Object freshStub;
 		synchronized (this.stubMonitor) {
@@ -358,6 +360,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @return the invocation result, if any
 	 * @throws Throwable in case of invocation failure
 	 */
+	@Nullable
 	protected Object doInvoke(MethodInvocation invocation, Object stub) throws Throwable {
 		if (stub instanceof RmiInvocationHandler) {
 			// RMI invoker

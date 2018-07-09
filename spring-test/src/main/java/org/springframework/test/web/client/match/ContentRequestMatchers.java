@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Factory for request content {@code RequestMatcher}'s. An instance of this
@@ -49,6 +51,8 @@ public class ContentRequestMatchers {
 
 	private final XmlExpectationsHelper xmlHelper;
 
+	private final JsonExpectationsHelper jsonHelper;
+
 
 	/**
 	 * Class constructor, not for direct instantiation.
@@ -56,6 +60,7 @@ public class ContentRequestMatchers {
 	 */
 	protected ContentRequestMatchers() {
 		this.xmlHelper = new XmlExpectationsHelper();
+		this.jsonHelper = new JsonExpectationsHelper();
 	}
 
 
@@ -70,13 +75,10 @@ public class ContentRequestMatchers {
 	 * Assert the request content type as a {@link MediaType}.
 	 */
 	public RequestMatcher contentType(final MediaType expectedContentType) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MediaType actualContentType = request.getHeaders().getContentType();
-				assertTrue("Content type not set", actualContentType != null);
-				assertEquals("Content type", expectedContentType, actualContentType);
-			}
+		return request -> {
+			MediaType actualContentType = request.getHeaders().getContentType();
+			assertTrue("Content type not set", actualContentType != null);
+			assertEquals("Content type", expectedContentType, actualContentType);
 		};
 	}
 
@@ -93,11 +95,10 @@ public class ContentRequestMatchers {
 	 * content type as defined by {@link MediaType#isCompatibleWith(MediaType)}.
 	 */
 	public RequestMatcher contentTypeCompatibleWith(final MediaType contentType) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MediaType actualContentType = request.getHeaders().getContentType();
-				assertTrue("Content type not set", actualContentType != null);
+		return request -> {
+			MediaType actualContentType = request.getHeaders().getContentType();
+			assertTrue("Content type not set", actualContentType != null);
+			if (actualContentType != null) {
 				assertTrue("Content type [" + actualContentType + "] is not compatible with [" + contentType + "]",
 						actualContentType.isCompatibleWith(contentType));
 			}
@@ -108,12 +109,9 @@ public class ContentRequestMatchers {
 	 * Get the body of the request as a UTF-8 string and appply the given {@link Matcher}.
 	 */
 	public RequestMatcher string(final Matcher<? super String> matcher) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				assertThat("Request content", mockRequest.getBodyAsString(), matcher);
-			}
+		return request -> {
+			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+			assertThat("Request content", mockRequest.getBodyAsString(), matcher);
 		};
 	}
 
@@ -121,12 +119,9 @@ public class ContentRequestMatchers {
 	 * Get the body of the request as a UTF-8 string and compare it to the given String.
 	 */
 	public RequestMatcher string(final String expectedContent) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				assertEquals("Request content", expectedContent, mockRequest.getBodyAsString());
-			}
+		return request -> {
+			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+			assertEquals("Request content", expectedContent, mockRequest.getBodyAsString());
 		};
 	}
 
@@ -134,12 +129,9 @@ public class ContentRequestMatchers {
 	 * Compare the body of the request to the given byte array.
 	 */
 	public RequestMatcher bytes(final byte[] expectedContent) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				assertEquals("Request content", expectedContent, mockRequest.getBodyAsBytes());
-			}
+		return request -> {
+			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+			assertEquals("Request content", expectedContent, mockRequest.getBodyAsBytes());
 		};
 	}
 
@@ -148,23 +140,20 @@ public class ContentRequestMatchers {
 	 * @since 4.3
 	 */
 	public RequestMatcher formData(final MultiValueMap<String, String> expectedContent) {
-		return new RequestMatcher() {
-			@Override
-			public void match(final ClientHttpRequest request) throws IOException, AssertionError {
-				HttpInputMessage inputMessage = new HttpInputMessage() {
-					@Override
-					public InputStream getBody() throws IOException {
-						MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-						return new ByteArrayInputStream(mockRequest.getBodyAsBytes());
-					}
-					@Override
-					public HttpHeaders getHeaders() {
-						return request.getHeaders();
-					}
-				};
-				FormHttpMessageConverter converter = new FormHttpMessageConverter();
-				assertEquals("Request content", expectedContent, converter.read(null, inputMessage));
-			}
+		return request -> {
+			HttpInputMessage inputMessage = new HttpInputMessage() {
+				@Override
+				public InputStream getBody() throws IOException {
+					MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+					return new ByteArrayInputStream(mockRequest.getBodyAsBytes());
+				}
+				@Override
+				public HttpHeaders getHeaders() {
+					return request.getHeaders();
+				}
+			};
+			FormHttpMessageConverter converter = new FormHttpMessageConverter();
+			assertEquals("Request content", expectedContent, converter.read(null, inputMessage));
 		};
 	}
 
@@ -173,7 +162,7 @@ public class ContentRequestMatchers {
 	 * two are "similar" - i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this matcher assumes the
-	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit<a/> library is available.
+	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit</a> library is available.
 	 * @param expectedXmlContent the expected XML content
 	 */
 	public RequestMatcher xml(final String expectedXmlContent) {
@@ -210,6 +199,47 @@ public class ContentRequestMatchers {
 		};
 	}
 
+	/**
+	 * Parse the expected and actual strings as JSON and assert the two
+	 * are "similar" - i.e. they contain the same attribute-value pairs
+	 * regardless of formatting with a lenient checking (extensible, and non-strict array
+	 * ordering).
+	 * <p>Use of this matcher requires the <a
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
+	 * @param expectedJsonContent the expected JSON content
+	 * @since 5.0.5
+	 */
+	public RequestMatcher json(final String expectedJsonContent) {
+		return json(expectedJsonContent, false);
+	}
+
+	/**
+	 * Parse the request body and the given string as JSON and assert the two
+	 * are "similar" - i.e. they contain the same attribute-value pairs
+	 * regardless of formatting.
+	 * <p>Can compare in two modes, depending on {@code strict} parameter value:
+	 * <ul>
+	 * <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
+	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
+	 * </ul>
+	 * <p>Use of this matcher requires the <a
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
+	 * @param expectedJsonContent the expected JSON content
+	 * @param strict enables strict checking
+	 * @since 5.0.5
+	 */
+	public RequestMatcher json(final String expectedJsonContent, final boolean strict) {
+		return request -> {
+			try {
+				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+				this.jsonHelper.assertJsonEqual(expectedJsonContent, mockRequest.getBodyAsString(), strict);
+			}
+			catch (Exception ex) {
+				throw new AssertionError("Failed to parse expected or actual JSON request content", ex);
+			}
+		};
+	}
+
 
 	/**
 	 * Abstract base class for XML {@link RequestMatcher}'s.
@@ -231,4 +261,3 @@ public class ContentRequestMatchers {
 	}
 
 }
-

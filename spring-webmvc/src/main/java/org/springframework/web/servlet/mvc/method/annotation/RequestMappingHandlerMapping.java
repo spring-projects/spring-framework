@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,17 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -61,8 +66,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useTrailingSlashMatch = true;
 
+	private Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
+
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
@@ -98,6 +106,20 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
+	}
+
+	/**
+	 * Configure path prefixes to apply to controller methods.
+	 * <p>Prefixes are used to enrich the mappings of every {@code @RequestMapping}
+	 * method whose controller type is matched by the corresponding
+	 * {@code Predicate}. The prefix for the first matching predicate is used.
+	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
+	 * HandlerTypePredicate} to group controllers.
+	 * @param prefixes a map with path prefixes as key
+	 * @since 5.1
+	 */
+	public void setPathPrefixes(Map<String, Predicate<Class<?>>> prefixes) {
+		this.pathPrefixes = Collections.unmodifiableMap(new LinkedHashMap<>(prefixes));
 	}
 
 	/**
@@ -150,6 +172,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * The configured path prefixes as a read-only, possibly empty map.
+	 * @since 5.1
+	 */
+	public Map<String, Predicate<Class<?>>> getPathPrefixes() {
+		return this.pathPrefixes;
+	}
+
+	/**
 	 * Return the configured {@link ContentNegotiationManager}.
 	 */
 	public ContentNegotiationManager getContentNegotiationManager() {
@@ -159,6 +189,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Return the file extensions to use for suffix pattern matching.
 	 */
+	@Nullable
 	public List<String> getFileExtensions() {
 		return this.config.getFileExtensions();
 	}
@@ -166,7 +197,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * {@inheritDoc}
-	 * Expects a handler to have a type-level @{@link Controller} annotation.
+	 * <p>Expects a handler to have either a type-level @{@link Controller}
+	 * annotation or a type-level @{@link RequestMapping} annotation.
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
@@ -183,6 +215,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @see #getCustomTypeCondition(Class)
 	 */
 	@Override
+	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
@@ -190,8 +223,26 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			if (typeInfo != null) {
 				info = typeInfo.combine(info);
 			}
+			String prefix = getPathPrefix(handlerType);
+			if (prefix != null) {
+				info = RequestMappingInfo.paths(prefix).build().combine(info);
+			}
 		}
 		return info;
+	}
+
+	@Nullable
+	String getPathPrefix(Class<?> handlerType) {
+		for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
+			if (entry.getValue().test(handlerType)) {
+				String prefix = entry.getKey();
+				if (this.embeddedValueResolver != null) {
+					prefix = this.embeddedValueResolver.resolveStringValue(prefix);
+				}
+				return prefix;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -201,6 +252,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @see #getCustomTypeCondition(Class)
 	 * @see #getCustomMethodCondition(Method)
 	 */
+	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
 		RequestCondition<?> condition = (element instanceof Class ?
@@ -219,6 +271,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
+	@Nullable
 	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
 		return null;
 	}
@@ -234,6 +287,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
+	@Nullable
 	protected RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
 	}
@@ -245,19 +299,20 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * result of merging annotation attributes within an annotation hierarchy.
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(
-			RequestMapping requestMapping, RequestCondition<?> customCondition) {
+			RequestMapping requestMapping, @Nullable RequestCondition<?> customCondition) {
 
-		return RequestMappingInfo
+		RequestMappingInfo.Builder builder = RequestMappingInfo
 				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
 				.methods(requestMapping.method())
 				.params(requestMapping.params())
 				.headers(requestMapping.headers())
 				.consumes(requestMapping.consumes())
 				.produces(requestMapping.produces())
-				.mappingName(requestMapping.name())
-				.customCondition(customCondition)
-				.options(this.config)
-				.build();
+				.mappingName(requestMapping.name());
+		if (customCondition != null) {
+			builder.customCondition(customCondition);
+		}
+		return builder.options(this.config).build();
 	}
 
 	/**
@@ -312,7 +367,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return config.applyPermitDefaultValues();
 	}
 
-	private void updateCorsConfig(CorsConfiguration config, CrossOrigin annotation) {
+	private void updateCorsConfig(CorsConfiguration config, @Nullable CrossOrigin annotation) {
 		if (annotation == null) {
 			return;
 		}
@@ -347,7 +402,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	private String resolveCorsAnnotationValue(String value) {
-		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
+		if (this.embeddedValueResolver != null) {
+			String resolved = this.embeddedValueResolver.resolveStringValue(value);
+			return (resolved != null ? resolved : "");
+		}
+		else {
+			return value;
+		}
 	}
 
 }

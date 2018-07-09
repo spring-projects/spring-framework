@@ -4,7 +4,7 @@ The following has been tested against IntelliJ IDEA 2016.2.2
 
 _Within your locally cloned spring-framework working directory:_
 
-1. Precompile `spring-oxm` with `./gradlew cleanIdea :spring-oxm:compileTestJava`
+1. Precompile `spring-oxm` with `./gradlew :spring-oxm:compileTestJava`
 2. Import into IntelliJ (File -> New -> Project from Existing Sources -> Navigate to directory -> Select build.gradle)
 3. When prompted exclude the `spring-aspects` module (or after the import via File-> Project Structure -> Modules)
 4. Code away
@@ -20,6 +20,8 @@ IntelliJ IDEA. See http://youtrack.jetbrains.com/issue/IDEA-64446 for details. I
 IntelliJ IDEA. Resolving this is a work in progress. If attempting to run all JUnit tests from within
 IntelliJ IDEA, you will likely need to set the following VM options to avoid out of memory errors:
     -XX:MaxPermSize=2048m -Xmx2048m -XX:MaxHeapSize=2048m
+4. If you invoke "Rebuild Project" in the IDE, you'll have to generate some test
+resources of the `spring-oxm` module again (`./gradlew :spring-oxm:compileTestJava`)    
 
 
 ## Tips

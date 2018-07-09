@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.springframework.web.util.NestedServletException;
 
@@ -49,6 +51,7 @@ import org.springframework.web.util.NestedServletException;
  */
 public class GroovyMarkupView extends AbstractTemplateView {
 
+	@Nullable
 	private MarkupTemplateEngine engine;
 
 
@@ -85,7 +88,7 @@ public class GroovyMarkupView extends AbstractTemplateView {
 	 */
 	protected MarkupTemplateEngine autodetectMarkupTemplateEngine() throws BeansException {
 		try {
-			return BeanFactoryUtils.beanOfTypeIncludingAncestors(getApplicationContext(),
+			return BeanFactoryUtils.beanOfTypeIncludingAncestors(obtainApplicationContext(),
 					GroovyMarkupConfig.class, true, false).getTemplateEngine();
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -98,6 +101,7 @@ public class GroovyMarkupView extends AbstractTemplateView {
 
 	@Override
 	public boolean checkResource(Locale locale) throws Exception {
+		Assert.state(this.engine != null, "No MarkupTemplateEngine set");
 		try {
 			this.engine.resolveTemplate(getUrl());
 		}
@@ -111,7 +115,10 @@ public class GroovyMarkupView extends AbstractTemplateView {
 	protected void renderMergedTemplateModel(Map<String, Object> model,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		Template template = getTemplate(getUrl());
+		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
+
+		Template template = getTemplate(url);
 		template.make(model).writeTo(new BufferedWriter(response.getWriter()));
 	}
 
@@ -120,6 +127,7 @@ public class GroovyMarkupView extends AbstractTemplateView {
 	 * for the given view URL.
 	 */
 	protected Template getTemplate(String viewUrl) throws Exception {
+		Assert.state(this.engine != null, "No MarkupTemplateEngine set");
 		try {
 			return this.engine.createTemplateByPath(viewUrl);
 		}

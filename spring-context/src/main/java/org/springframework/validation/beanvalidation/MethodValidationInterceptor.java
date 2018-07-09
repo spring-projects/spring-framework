@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,12 @@ import org.springframework.validation.annotation.Validated;
  * at the type level of the containing target class, applying to all public service methods
  * of that class. By default, JSR-303 will validate against its default group only.
  *
- * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1 provider
- * (such as Hibernate Validator 5.x).
+ * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1 provider.
  *
  * @author Juergen Hoeller
  * @since 3.1
  * @see MethodValidationPostProcessor
  * @see javax.validation.executable.ExecutableValidator
- * @see org.hibernate.validator.method.MethodValidator
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 

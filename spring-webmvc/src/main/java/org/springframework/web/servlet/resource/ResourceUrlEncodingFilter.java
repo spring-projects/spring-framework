@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -65,9 +66,10 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		private final HttpServletRequest request;
 
 		/* Cache the index and prefix of the path within the DispatcherServlet mapping */
+		@Nullable
 		private Integer indexLookupPath;
 
-		private String prefixLookupPath;
+		private String prefixLookupPath = "";
 
 		public ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
@@ -78,15 +80,16 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		public String encodeURL(String url) {
 			ResourceUrlProvider resourceUrlProvider = getResourceUrlProvider();
 			if (resourceUrlProvider == null) {
-				logger.debug("Request attribute exposing ResourceUrlProvider not found");
+				logger.trace("ResourceUrlProvider not available via " +
+						"request attribute ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR");
 				return super.encodeURL(url);
 			}
 
-			initLookupPath(resourceUrlProvider);
+			int index = initLookupPath(resourceUrlProvider);
 			if (url.startsWith(this.prefixLookupPath)) {
 				int suffixIndex = getQueryParamsIndex(url);
 				String suffix = url.substring(suffixIndex);
-				String lookupPath = url.substring(this.indexLookupPath, suffixIndex);
+				String lookupPath = url.substring(index, suffixIndex);
 				lookupPath = resourceUrlProvider.getForLookupPath(lookupPath);
 				if (lookupPath != null) {
 					return super.encodeURL(this.prefixLookupPath + lookupPath + suffix);
@@ -96,19 +99,19 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 			return super.encodeURL(url);
 		}
 
+		@Nullable
 		private ResourceUrlProvider getResourceUrlProvider() {
 			return (ResourceUrlProvider) this.request.getAttribute(
 					ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR);
 		}
 
-		private void initLookupPath(ResourceUrlProvider urlProvider) {
+		private int initLookupPath(ResourceUrlProvider urlProvider) {
 			if (this.indexLookupPath == null) {
 				UrlPathHelper pathHelper = urlProvider.getUrlPathHelper();
 				String requestUri = pathHelper.getRequestUri(this.request);
 				String lookupPath = pathHelper.getLookupPathForRequest(this.request);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
-
 				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
 					String contextPath = pathHelper.getContextPath(this.request);
 					if (requestUri.equals(contextPath)) {
@@ -117,10 +120,11 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 					}
 				}
 			}
+			return this.indexLookupPath;
 		}
 
 		private int getQueryParamsIndex(String url) {
-			int index = url.indexOf("?");
+			int index = url.indexOf('?');
 			return (index > 0 ? index : url.length());
 		}
 	}

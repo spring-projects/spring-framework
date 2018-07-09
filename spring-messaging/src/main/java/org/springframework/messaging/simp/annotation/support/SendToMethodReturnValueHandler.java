@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.messaging.simp.annotation.support;
 
 import java.lang.annotation.Annotation;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -68,11 +70,12 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	private PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("{", "}", null, false);
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 
 	public SendToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
-		Assert.notNull(messagingTemplate, "messagingTemplate must not be null");
+		Assert.notNull(messagingTemplate, "'messagingTemplate' must not be null");
 		this.messagingTemplate = messagingTemplate;
 		this.annotationRequired = annotationRequired;
 	}
@@ -119,13 +122,14 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	 * messages sent to the client outbound channel.
 	 * <p>By default this property is not set.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
 	/**
-	 * @return the configured header initializer.
+	 * Return the configured header initializer.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -141,18 +145,19 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType, Message<?> message)
+			throws Exception {
+
 		if (returnValue == null) {
 			return;
 		}
 
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
-		PlaceholderResolver varResolver = initVarResolver(headers);
-		Object annotation = findAnnotation(returnType);
+		DestinationHelper destinationHelper = getDestinationHelper(headers, returnType);
 
-		if (annotation != null && annotation instanceof SendToUser) {
-			SendToUser sendToUser = (SendToUser) annotation;
+		SendToUser sendToUser = destinationHelper.getSendToUser();
+		if (sendToUser != null) {
 			boolean broadcast = sendToUser.broadcast();
 			String user = getUserName(message, headers);
 			if (user == null) {
@@ -164,7 +169,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			}
 			String[] destinations = getTargetDestinations(sendToUser, message, this.defaultUserDestinationPrefix);
 			for (String destination : destinations) {
-				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
+				destination = destinationHelper.expandTemplateVars(destination);
 				if (broadcast) {
 					this.messagingTemplate.convertAndSendToUser(
 							user, destination, returnValue, createHeaders(null, returnType));
@@ -175,52 +180,36 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				}
 			}
 		}
-		else {
-			SendTo sendTo = (SendTo) annotation;
+
+		SendTo sendTo = destinationHelper.getSendTo();
+		if (sendTo != null || sendToUser == null) {
 			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
-				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
+				destination = destinationHelper.expandTemplateVars(destination);
 				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, returnType));
 			}
 		}
 	}
 
-	private Object findAnnotation(MethodParameter returnType) {
-		Annotation[] anns = new Annotation[4];
-		anns[0] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendToUser.class);
-		anns[1] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendTo.class);
-		anns[2] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
-		anns[3] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
+	private DestinationHelper getDestinationHelper(MessageHeaders headers, MethodParameter returnType) {
 
-		if (anns[0] != null && !ObjectUtils.isEmpty(((SendToUser) anns[0]).value())) {
-			return anns[0];
-		}
-		if (anns[1] != null && !ObjectUtils.isEmpty(((SendTo) anns[1]).value())) {
-			return anns[1];
-		}
-		if (anns[2] != null && !ObjectUtils.isEmpty(((SendToUser) anns[2]).value())) {
-			return anns[2];
-		}
-		if (anns[3] != null && !ObjectUtils.isEmpty(((SendTo) anns[3]).value())) {
-			return anns[3];
+		SendToUser m1 = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendToUser.class);
+		SendTo m2 = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendTo.class);
+		if ((m1 != null && !ObjectUtils.isEmpty(m1.value())) || (m2 != null && !ObjectUtils.isEmpty(m2.value()))) {
+			return new DestinationHelper(headers, m1, m2);
 		}
 
-		for (int i=0; i < 4; i++) {
-			if (anns[i] != null) {
-				return anns[i];
-			}
+		SendToUser c1 = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
+		SendTo c2 = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
+		if ((c1 != null && !ObjectUtils.isEmpty(c1.value())) || (c2 != null && !ObjectUtils.isEmpty(c2.value()))) {
+			return new DestinationHelper(headers, c1, c2);
 		}
 
-		return null;
+		return m1 != null || m2 != null ?
+			new DestinationHelper(headers, m1, m2) : new DestinationHelper(headers, c1, c2);
 	}
 
-	@SuppressWarnings("unchecked")
-	private PlaceholderResolver initVarResolver(MessageHeaders headers) {
-		String name = DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER;
-		Map<String, String> vars = (Map<String, String>) headers.get(name);
-		return new DestinationVariablePlaceholderResolver(vars);
-	}
-
+	@Nullable
 	protected String getUserName(Message<?> message, MessageHeaders headers) {
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
 		if (principal != null) {
@@ -230,13 +219,14 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		return null;
 	}
 
-	protected String[] getTargetDestinations(Annotation annotation, Message<?> message, String defaultPrefix) {
+	protected String[] getTargetDestinations(@Nullable Annotation annotation, Message<?> message, String defaultPrefix) {
 		if (annotation != null) {
 			String[] value = (String[]) AnnotationUtils.getValue(annotation);
 			if (!ObjectUtils.isEmpty(value)) {
 				return value;
 			}
 		}
+
 		String name = DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER;
 		String destination = (String) message.getHeaders().get(name);
 		if (!StringUtils.hasText(destination)) {
@@ -247,7 +237,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + '/' + destination});
 	}
 
-	private MessageHeaders createHeaders(String sessionId, MethodParameter returnType) {
+	private MessageHeaders createHeaders(@Nullable String sessionId, MethodParameter returnType) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
@@ -263,22 +253,47 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	@Override
 	public String toString() {
-		return "SendToMethodReturnValueHandler [annotationRequired=" + annotationRequired + "]";
+		return "SendToMethodReturnValueHandler [annotationRequired=" + this.annotationRequired + "]";
 	}
 
 
-	private static class DestinationVariablePlaceholderResolver implements PlaceholderResolver {
+	private class DestinationHelper {
 
-		private final Map<String, String> vars;
+		private final PlaceholderResolver placeholderResolver;
 
-		public DestinationVariablePlaceholderResolver(Map<String, String> vars) {
-			this.vars = vars;
+		@Nullable
+		private final SendTo sendTo;
+
+		@Nullable
+		private final SendToUser sendToUser;
+
+
+		public DestinationHelper(MessageHeaders headers, @Nullable SendToUser sendToUser, @Nullable SendTo sendTo) {
+			Map<String, String> variables = getTemplateVariables(headers);
+			this.placeholderResolver = variables::get;
+			this.sendTo = sendTo;
+			this.sendToUser = sendToUser;
 		}
 
-		@Override
-		public String resolvePlaceholder(String placeholderName) {
-			return (this.vars != null ? this.vars.get(placeholderName) : null);
+		@SuppressWarnings("unchecked")
+		private Map<String, String> getTemplateVariables(MessageHeaders headers) {
+			String name = DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER;
+			return (Map<String, String>) headers.getOrDefault(name, Collections.emptyMap());
+		}
+
+		@Nullable
+		public SendTo getSendTo() {
+			return this.sendTo;
+		}
+
+		@Nullable
+		public SendToUser getSendToUser() {
+			return this.sendToUser;
+		}
+
+
+		public String expandTemplateVars(String destination) {
+			return placeholderHelper.replacePlaceholders(destination, this.placeholderResolver);
 		}
 	}
-
 }

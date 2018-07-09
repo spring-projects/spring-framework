@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class InvocableHandlerMethodTests {
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("No suitable resolver for argument [0] [type=java.lang.Integer]"));
+			assertTrue(ex.getMessage().contains("Could not resolve parameter [0]"));
 		}
 	}
 
@@ -153,7 +153,7 @@ public class InvocableHandlerMethodTests {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 			assertTrue(ex.getMessage().contains("Controller ["));
 			assertTrue(ex.getMessage().contains("Method ["));
-			assertTrue(ex.getMessage().contains("Resolved arguments: "));
+			assertTrue(ex.getMessage().contains("with argument values:"));
 			assertTrue(ex.getMessage().contains("[0] [type=java.lang.String] [value=__invalid__]"));
 			assertTrue(ex.getMessage().contains("[1] [type=java.lang.String] [value=value"));
 		}
@@ -192,7 +192,7 @@ public class InvocableHandlerMethodTests {
 		catch (IllegalStateException actual) {
 			assertNotNull(actual.getCause());
 			assertSame(expected, actual.getCause());
-			assertTrue(actual.getMessage().contains("Failed to invoke controller method"));
+			assertTrue(actual.getMessage().contains("Invocation failure"));
 		}
 	}
 

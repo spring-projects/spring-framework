@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,18 +25,22 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * Parse the <mvc:tiles-configurer> MVC namespace element and register
- * a corresponding TilesConfigurer bean.
-
+ * Parse the <code>&lt;mvc:tiles-configurer&gt;</code> MVC namespace element and register
+ * a corresponding {@code TilesConfigurer} bean.
+ *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 4.1
  */
 public class TilesConfigurerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
+	/**
+	 * The bean name used for the {@code TilesConfigurer}.
+	 */
 	public static final String BEAN_NAME = "mvcTilesConfigurer";
 
 
@@ -58,7 +62,7 @@ public class TilesConfigurerBeanDefinitionParser extends AbstractSingleBeanDefin
 			for (Element childElement : childElements) {
 				locations.add(childElement.getAttribute("location"));
 			}
-			builder.addPropertyValue("definitions", locations.toArray(new String[locations.size()]));
+			builder.addPropertyValue("definitions", StringUtils.toStringArray(locations));
 		}
 		if (element.hasAttribute("check-refresh")) {
 			builder.addPropertyValue("checkRefresh", element.getAttribute("check-refresh"));

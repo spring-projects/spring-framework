@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -66,12 +67,16 @@ import org.springframework.util.concurrent.ListenableFutureTask;
 public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, WorkManager, InitializingBean {
 
+	@Nullable
 	private WorkManager workManager;
 
+	@Nullable
 	private String workManagerName;
 
+	@Nullable
 	private WorkListener workListener;
 
+	@Nullable
 	private TaskDecorator taskDecorator;
 
 
@@ -128,6 +133,11 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		}
 	}
 
+	private WorkManager obtainWorkManager() {
+		Assert.state(this.workManager != null, "No WorkManager specified");
+		return this.workManager;
+	}
+
 
 	//-------------------------------------------------------------------------
 	// Implementation of the Spring SchedulingTaskExecutor interface
@@ -135,14 +145,13 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 
 	@Override
 	public void execute(Runnable task) {
-		Assert.state(this.workManager != null, "No WorkManager specified");
 		Work work = new DelegatingWork(this.taskDecorator != null ? this.taskDecorator.decorate(task) : task);
 		try {
 			if (this.workListener != null) {
-				this.workManager.schedule(work, this.workListener);
+				obtainWorkManager().schedule(work, this.workListener);
 			}
 			else {
-				this.workManager.schedule(work);
+				obtainWorkManager().schedule(work);
 			}
 		}
 		catch (WorkRejectedException ex) {
@@ -201,24 +210,24 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 
 	@Override
 	public WorkItem schedule(Work work) throws WorkException, IllegalArgumentException {
-		return this.workManager.schedule(work);
+		return obtainWorkManager().schedule(work);
 	}
 
 	@Override
 	public WorkItem schedule(Work work, WorkListener workListener) throws WorkException {
-		return this.workManager.schedule(work, workListener);
+		return obtainWorkManager().schedule(work, workListener);
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
 	public boolean waitForAll(Collection workItems, long timeout) throws InterruptedException {
-		return this.workManager.waitForAll(workItems, timeout);
+		return obtainWorkManager().waitForAll(workItems, timeout);
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
 	public Collection waitForAny(Collection workItems, long timeout) throws InterruptedException {
-		return this.workManager.waitForAny(workItems, timeout);
+		return obtainWorkManager().waitForAny(workItems, timeout);
 	}
 
 }

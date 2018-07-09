@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class CustomEnvironmentTests {
 	@Test
 	public void control() {
 		Environment env = new AbstractEnvironment() { };
-		assertThat(env.acceptsProfiles(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME), is(true));
+		assertThat(env.acceptsProfiles(defaultProfile()), is(true));
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class CustomEnvironmentTests {
 		}
 
 		Environment env = new CustomEnvironment();
-		assertThat(env.acceptsProfiles(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME), is(false));
+		assertThat(env.acceptsProfiles(defaultProfile()), is(false));
 	}
 
 	@Test
@@ -64,8 +64,8 @@ public class CustomEnvironmentTests {
 		}
 
 		Environment env = new CustomEnvironment();
-		assertThat(env.acceptsProfiles(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME), is(false));
-		assertThat(env.acceptsProfiles("rd1"), is(true));
+		assertThat(env.acceptsProfiles(defaultProfile()), is(false));
+		assertThat(env.acceptsProfiles(Profiles.of("rd1")), is(true));
 	}
 
 	@Test
@@ -79,28 +79,32 @@ public class CustomEnvironmentTests {
 		}
 
 		ConfigurableEnvironment env = new CustomEnvironment();
-		assertThat(env.acceptsProfiles(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME), is(false));
-		assertThat(env.acceptsProfiles("rd1", "rd2"), is(true));
+		assertThat(env.acceptsProfiles(defaultProfile()), is(false));
+		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2")), is(true));
 
 		// finally, issue additional assertions to cover all combinations of calling these
 		// methods, however unlikely.
 		env.setDefaultProfiles("d1");
-		assertThat(env.acceptsProfiles("rd1", "rd2"), is(false));
-		assertThat(env.acceptsProfiles("d1"), is(true));
+		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2")), is(false));
+		assertThat(env.acceptsProfiles(Profiles.of("d1")), is(true));
 
 		env.setActiveProfiles("a1", "a2");
-		assertThat(env.acceptsProfiles("d1"), is(false));
-		assertThat(env.acceptsProfiles("a1", "a2"), is(true));
+		assertThat(env.acceptsProfiles(Profiles.of("d1")), is(false));
+		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2")), is(true));
 
 		env.setActiveProfiles();
-		assertThat(env.acceptsProfiles("d1"), is(true));
-		assertThat(env.acceptsProfiles("a1", "a2"), is(false));
+		assertThat(env.acceptsProfiles(Profiles.of("d1")), is(true));
+		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2")), is(false));
 
 		env.setDefaultProfiles();
-		assertThat(env.acceptsProfiles(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME), is(false));
-		assertThat(env.acceptsProfiles("rd1", "rd2"), is(false));
-		assertThat(env.acceptsProfiles("d1"), is(false));
-		assertThat(env.acceptsProfiles("a1", "a2"), is(false));
+		assertThat(env.acceptsProfiles(defaultProfile()), is(false));
+		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2")), is(false));
+		assertThat(env.acceptsProfiles(Profiles.of("d1")), is(false));
+		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2")), is(false));
+	}
+
+	private Profiles defaultProfile() {
+		return Profiles.of(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME);
 	}
 
 

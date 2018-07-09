@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,12 +46,13 @@ import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
-import static org.glassfish.tyrus.spi.WebSocketEngine.UpgradeStatus.*;
+import static org.glassfish.tyrus.spi.WebSocketEngine.UpgradeStatus.SUCCESS;
 
 /**
  * A base class for {@code RequestUpgradeStrategy} implementations on top of
@@ -113,6 +114,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		return StringUtils.tokenizeToStringArray(Version.getSupportedWireProtocolVersions(), ",");
 	}
 
+	@Override
 	protected List<WebSocketExtension> getInstalledExtensions(WebSocketContainer container) {
 		try {
 			return super.getInstalledExtensions(container);
@@ -124,7 +126,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, List<Extension> extensions, Endpoint endpoint)
+			@Nullable String selectedProtocol, List<Extension> extensions, Endpoint endpoint)
 			throws HandshakeFailureException {
 
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
@@ -164,7 +166,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		}
 	}
 
-	private Object createTyrusEndpoint(Endpoint endpoint, String endpointPath, String protocol,
+	private Object createTyrusEndpoint(Endpoint endpoint, String endpointPath, @Nullable String protocol,
 			List<Extension> extensions, WebSocketContainer container, TyrusWebSocketEngine engine)
 			throws DeploymentException {
 
@@ -182,13 +184,11 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 						.secure(request.isSecure())
 						.remoteAddr(request.getRemoteAddr())
 						.build();
-		for (String header : headers.keySet()) {
-			context.getHeaders().put(header, headers.get(header));
-		}
+		headers.forEach((header, value) -> context.getHeaders().put(header, value));
 		return context;
 	}
 
-	private void unregisterTyrusEndpoint(TyrusWebSocketEngine engine, Object tyrusEndpoint) {
+	private void unregisterTyrusEndpoint(TyrusWebSocketEngine engine, @Nullable Object tyrusEndpoint) {
 		if (tyrusEndpoint != null) {
 			try {
 				unregister(engine, tyrusEndpoint);

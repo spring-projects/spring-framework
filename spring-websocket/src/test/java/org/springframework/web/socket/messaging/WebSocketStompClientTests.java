@@ -100,7 +100,6 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void webSocketConnectionEstablished() throws Exception {
 		connect().afterConnectionEstablished(this.webSocketSession);
 		verify(this.stompSession).afterConnected(notNull());

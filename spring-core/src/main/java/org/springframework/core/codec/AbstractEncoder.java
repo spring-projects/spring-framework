@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ package org.springframework.core.codec;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -29,8 +32,11 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0
+ * @param <T> the element type
  */
 public abstract class AbstractEncoder<T> implements Encoder<T> {
+
+	protected Log logger = LogFactory.getLog(getClass());
 
 	private final List<MimeType> encodableMimeTypes;
 
@@ -40,13 +46,31 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 	}
 
 
+	/**
+	 * Set an alternative logger to use than the one based on the class name.
+	 * @param logger the logger to use
+	 * @since 5.1
+	 */
+	public void setLogger(Log logger) {
+		this.logger = logger;
+	}
+
+	/**
+	 * Return the currently configured Logger.
+	 * @since 5.1
+	 */
+	public Log getLogger() {
+		return logger;
+	}
+
+
 	@Override
 	public List<MimeType> getEncodableMimeTypes() {
 		return this.encodableMimeTypes;
 	}
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		if (mimeType == null) {
 			return true;
 		}

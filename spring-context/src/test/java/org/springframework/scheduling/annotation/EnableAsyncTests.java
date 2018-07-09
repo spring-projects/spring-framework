@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.junit.Test;
@@ -42,6 +43,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
@@ -180,9 +182,23 @@ public class EnableAsyncTests {
 	}
 
 	@Test
-	public void customExecutorIsPropagated() throws InterruptedException {
+	public void customExecutorBean() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(CustomExecutorAsyncConfig.class);
+		ctx.register(CustomExecutorBean.class);
+		ctx.refresh();
+
+		AsyncBean asyncBean = ctx.getBean(AsyncBean.class);
+		asyncBean.work();
+		Thread.sleep(500);
+		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
+
+		ctx.close();
+	}
+
+	@Test
+	public void customExecutorConfig() throws InterruptedException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(CustomExecutorConfig.class);
 		ctx.refresh();
 
 		AsyncBean asyncBean = ctx.getBean(AsyncBean.class);
@@ -196,8 +212,32 @@ public class EnableAsyncTests {
 
 		asyncBean.fail();
 		Thread.sleep(500);
-		Method m = ReflectionUtils.findMethod(AsyncBean.class, "fail");
-		exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
+		Method method = ReflectionUtils.findMethod(AsyncBean.class, "fail");
+		exceptionHandler.assertCalledWith(method, UnsupportedOperationException.class);
+
+		ctx.close();
+	}
+
+	@Test
+	public void spr14949FindsOnInterfaceWithInterfaceProxy() throws InterruptedException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14949ConfigA.class);
+
+		AsyncInterface asyncBean = ctx.getBean(AsyncInterface.class);
+		asyncBean.work();
+		Thread.sleep(500);
+		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
+
+		ctx.close();
+	}
+
+	@Test
+	public void spr14949FindsOnInterfaceWithCglibProxy() throws InterruptedException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14949ConfigB.class);
+
+		AsyncInterface asyncBean = ctx.getBean(AsyncInterface.class);
+		asyncBean.work();
+		Thread.sleep(500);
+		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
 
 		ctx.close();
 	}
@@ -335,7 +375,45 @@ public class EnableAsyncTests {
 
 	@Configuration
 	@EnableAsync
-	static class CustomExecutorAsyncConfig implements AsyncConfigurer {
+	static class AsyncWithExecutorQualifiedByNameConfig {
+
+		@Bean
+		public AsyncBeanWithExecutorQualifiedByName asyncBean() {
+			return new AsyncBeanWithExecutorQualifiedByName();
+		}
+
+		@Bean
+		public Executor e1() {
+			return new ThreadPoolTaskExecutor();
+		}
+
+		@Bean
+		@Qualifier("e2")
+		public Executor otherExecutor() {
+			return new ThreadPoolTaskExecutor();
+		}
+	}
+
+
+	@Configuration
+	@EnableAsync
+	static class CustomExecutorBean {
+
+		@Bean
+		public AsyncBean asyncBean() {
+			return new AsyncBean();
+		}
+
+		@Bean
+		public Executor taskExecutor() {
+			return Executors.newSingleThreadExecutor(new CustomizableThreadFactory("Custom-"));
+		}
+	}
+
+
+	@Configuration
+	@EnableAsync
+	static class CustomExecutorConfig implements AsyncConfigurer {
 
 		@Bean
 		public AsyncBean asyncBean() {
@@ -362,24 +440,75 @@ public class EnableAsyncTests {
 	}
 
 
+	public interface AsyncInterface {
+
+		@Async
+		void work();
+
+		Thread getThreadOfExecution();
+	}
+
+
+	public static class AsyncService implements AsyncInterface {
+
+		private Thread threadOfExecution;
+
+		@Override
+		public void work() {
+			this.threadOfExecution = Thread.currentThread();
+		}
+
+		@Override
+		public Thread getThreadOfExecution() {
+			return threadOfExecution;
+		}
+	}
+
+
 	@Configuration
 	@EnableAsync
-	static class AsyncWithExecutorQualifiedByNameConfig {
+	static class Spr14949ConfigA implements AsyncConfigurer {
 
 		@Bean
-		public AsyncBeanWithExecutorQualifiedByName asyncBean() {
-			return new AsyncBeanWithExecutorQualifiedByName();
+		public AsyncInterface asyncBean() {
+			return new AsyncService();
 		}
 
-		@Bean
-		public Executor e1() {
-			return new ThreadPoolTaskExecutor();
+		@Override
+		public Executor getAsyncExecutor() {
+			ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+			executor.setThreadNamePrefix("Custom-");
+			executor.initialize();
+			return executor;
 		}
 
+		@Override
+		public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+			return null;
+		}
+	}
+
+
+	@Configuration
+	@EnableAsync(proxyTargetClass = true)
+	static class Spr14949ConfigB implements AsyncConfigurer {
+
 		@Bean
-		@Qualifier("e2")
-		public Executor otherExecutor() {
-			return new ThreadPoolTaskExecutor();
+		public AsyncInterface asyncBean() {
+			return new AsyncService();
+		}
+
+		@Override
+		public Executor getAsyncExecutor() {
+			ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+			executor.setThreadNamePrefix("Custom-");
+			executor.initialize();
+			return executor;
+		}
+
+		@Override
+		public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+			return null;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.PatternMatchUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Factory for creating {@link SQLErrorCodes} based on the
@@ -145,6 +147,7 @@ public class SQLErrorCodesFactory {
 	 * @return the resource, or {@code null} if the resource wasn't found
 	 * @see #getInstance
 	 */
+	@Nullable
 	protected Resource loadResource(String path) {
 		return new ClassPathResource(path, getClass().getClassLoader());
 	}
@@ -152,7 +155,7 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Return the {@link SQLErrorCodes} instance for the given database.
-	 * <p>No need for a database metadata lookup.
+	 * <p>No need for a database meta-data lookup.
 	 * @param databaseName the database name (must not be {@code null})
 	 * @return the {@code SQLErrorCodes} instance for the given database
 	 * @throws IllegalArgumentException if the supplied database name is {@code null}
@@ -208,16 +211,16 @@ public class SQLErrorCodesFactory {
 				if (sec == null) {
 					// We could not find it - got to look it up.
 					try {
-						String name = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
-						if (name != null) {
+						String name = JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
+						if (StringUtils.hasLength(name)) {
 							return registerDatabase(dataSource, name);
 						}
 					}
 					catch (MetaDataAccessException ex) {
 						logger.warn("Error while extracting database name - falling back to empty error codes", ex);
-						// Fallback is to return an empty SQLErrorCodes instance.
-						return new SQLErrorCodes();
 					}
+					// Fallback is to return an empty SQLErrorCodes instance.
+					return new SQLErrorCodes();
 				}
 			}
 		}
@@ -250,11 +253,12 @@ public class SQLErrorCodesFactory {
 	/**
 	 * Clear the cache for the specified {@link DataSource}, if registered.
 	 * @param dataSource the {@code DataSource} identifying the database
-	 * @return the corresponding {@code SQLErrorCodes} object,
+	 * @return the corresponding {@code SQLErrorCodes} object that got removed,
 	 * or {@code null} if not registered
 	 * @since 4.3.5
 	 * @see #registerDatabase(DataSource, String)
 	 */
+	@Nullable
 	public SQLErrorCodes unregisterDatabase(DataSource dataSource) {
 		return this.dataSourceCache.remove(dataSource);
 	}

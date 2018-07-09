@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -51,8 +52,9 @@ public class BufferingStompDecoder {
 
 	private final int bufferSizeLimit;
 
-	private final Queue<ByteBuffer> chunks = new LinkedBlockingQueue<ByteBuffer>();
+	private final Queue<ByteBuffer> chunks = new LinkedBlockingQueue<>();
 
+	@Nullable
 	private volatile Integer expectedContentLength;
 
 
@@ -86,7 +88,7 @@ public class BufferingStompDecoder {
 
 	/**
 	 * Decodes one or more STOMP frames from the given {@code ByteBuffer} into a
-	 * list of {@link Message}s.
+	 * list of {@link Message Messages}.
 	 * <p>If there was enough data to parse a "content-length" header, then the
 	 * value is used to determine how much more data is needed before a new
 	 * attempt to decode is made.
@@ -102,12 +104,13 @@ public class BufferingStompDecoder {
 		this.chunks.add(newBuffer);
 		checkBufferLimits();
 
-		if (this.expectedContentLength != null && getBufferSize() < this.expectedContentLength) {
+		Integer contentLength = this.expectedContentLength;
+		if (contentLength != null && getBufferSize() < contentLength) {
 			return Collections.emptyList();
 		}
 
 		ByteBuffer bufferToDecode = assembleChunksAndReset();
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
 		List<Message<byte[]>> messages = this.stompDecoder.decode(bufferToDecode, headers);
 
 		if (bufferToDecode.hasRemaining()) {
@@ -136,12 +139,11 @@ public class BufferingStompDecoder {
 	}
 
 	private void checkBufferLimits() {
-		if (this.expectedContentLength != null) {
-			if (this.expectedContentLength > this.bufferSizeLimit) {
-				throw new StompConversionException(
-						"STOMP 'content-length' header value " + this.expectedContentLength +
-						"  exceeds configured buffer size limit " + this.bufferSizeLimit);
-			}
+		Integer contentLength = this.expectedContentLength;
+		if (contentLength != null && contentLength > this.bufferSizeLimit) {
+			throw new StompConversionException(
+					"STOMP 'content-length' header value " + this.expectedContentLength +
+					"  exceeds configured buffer size limit " + this.bufferSizeLimit);
 		}
 		if (getBufferSize() > this.bufferSizeLimit) {
 			throw new StompConversionException("The configured STOMP buffer size limit of " +
@@ -163,6 +165,7 @@ public class BufferingStompDecoder {
 	/**
 	 * Get the expected content length of the currently buffered, incomplete STOMP frame.
 	 */
+	@Nullable
 	public Integer getExpectedContentLength() {
 		return this.expectedContentLength;
 	}

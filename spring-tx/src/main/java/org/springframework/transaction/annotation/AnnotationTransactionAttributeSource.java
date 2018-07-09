@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.util.Assert;
@@ -129,11 +130,13 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 
 	@Override
+	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Method method) {
 		return determineTransactionAttribute(method);
 	}
 
 	@Override
+	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
 		return determineTransactionAttribute(clazz);
 	}
@@ -146,16 +149,15 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * Returns {@code null} if it's not transactional.
 	 * <p>Can be overridden to support custom annotations that carry transaction metadata.
 	 * @param ae the annotated method or class
-	 * @return TransactionAttribute the configured transaction attribute,
+	 * @return the configured transaction attribute,
 	 * or {@code null} if none was found
 	 */
+	@Nullable
 	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement ae) {
-		if (ae.getAnnotations().length > 0) {
-			for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
-				TransactionAttribute attr = annotationParser.parseTransactionAnnotation(ae);
-				if (attr != null) {
-					return attr;
-				}
+		for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
+			TransactionAttribute attr = annotationParser.parseTransactionAnnotation(ae);
+			if (attr != null) {
+				return attr;
 			}
 		}
 		return null;

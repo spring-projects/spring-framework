@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -78,6 +79,7 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	}
 
 	/**
+	 * Return the allowed {@code Origin} header values.
 	 * @since 4.1.5
 	 * @see #setAllowedOrigins
 	 */
@@ -103,7 +105,7 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 
 	@Override
 	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, Exception exception) {
+			WebSocketHandler wsHandler, @Nullable Exception exception) {
 	}
 
 }

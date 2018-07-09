@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -46,8 +47,12 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<String, String>> {
+public class FormHttpMessageReader extends LoggingCodecSupport
+		implements HttpMessageReader<MultiValueMap<String, String>> {
 
+	/**
+	 * The default charset used by the reader.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final ResolvableType MULTIVALUE_TYPE =
@@ -63,7 +68,7 @@ public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<St
 	 * <p>By default this is set to "UTF-8".
 	 */
 	public void setDefaultCharset(Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
+		Assert.notNull(charset, "Charset must not be null");
 		this.defaultCharset = charset;
 	}
 
@@ -76,36 +81,41 @@ public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<St
 
 
 	@Override
-	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
-		return MULTIVALUE_TYPE.isAssignableFrom(elementType) &&
-				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType));
+	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
+		return ((MULTIVALUE_TYPE.isAssignableFrom(elementType) ||
+				(elementType.hasUnresolvableGenerics() &&
+						MultiValueMap.class.isAssignableFrom(elementType.resolve(Object.class)))) &&
+				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)));
 	}
 
 	@Override
 	public Flux<MultiValueMap<String, String>> read(ResolvableType elementType,
-			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+			ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
-		return Flux.from(readMono(elementType, inputMessage, hints));
+		return Flux.from(readMono(elementType, message, hints));
 	}
 
 	@Override
 	public Mono<MultiValueMap<String, String>> readMono(ResolvableType elementType,
-			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+			ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
-		MediaType contentType = inputMessage.getHeaders().getContentType();
+		MediaType contentType = message.getHeaders().getContentType();
 		Charset charset = getMediaTypeCharset(contentType);
 
-		return inputMessage.getBody()
-				.reduce(DataBuffer::write)
+		return DataBufferUtils.join(message.getBody())
 				.map(buffer -> {
 					CharBuffer charBuffer = charset.decode(buffer.asByteBuffer());
 					String body = charBuffer.toString();
 					DataBufferUtils.release(buffer);
-					return parseFormData(charset, body);
+					MultiValueMap<String, String> formData = parseFormData(charset, body);
+					if (shouldLogRequestDetails()) {
+						logger.debug(Hints.getLogPrefix(hints) + "Decoded " + formData);
+					}
+					return formData;
 				});
 	}
 
-	private Charset getMediaTypeCharset(MediaType mediaType) {
+	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {
 		if (mediaType != null && mediaType.getCharset() != null) {
 			return mediaType.getCharset();
 		}

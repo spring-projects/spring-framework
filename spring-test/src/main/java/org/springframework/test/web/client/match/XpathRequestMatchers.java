@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
@@ -48,12 +49,12 @@ public class XpathRequestMatchers {
 	 * {@link MockRestRequestMatchers#xpath(String, Object...)} or
 	 * {@link MockRestRequestMatchers#xpath(String, Map, Object...)}.
 	 * @param expression the XPath expression
-	 * @param namespaces XML namespaces referenced in the XPath expression, or {@code null}
+	 * @param namespaces the XML namespaces referenced in the XPath expression, or {@code null}
 	 * @param args arguments to parameterize the XPath expression with using the
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
-	 * @throws XPathExpressionException
+	 * @throws XPathExpressionException if expression compilation failed
 	 */
-	protected XpathRequestMatchers(String expression, Map<String, String> namespaces, Object ... args)
+	protected XpathRequestMatchers(String expression, @Nullable Map<String, String> namespaces, Object ... args)
 			throws XPathExpressionException {
 
 		this.xpathHelper = new XpathExpectationsHelper(expression, namespaces, args);

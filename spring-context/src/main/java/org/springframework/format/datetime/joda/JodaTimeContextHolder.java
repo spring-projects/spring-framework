@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Locale;
 import org.joda.time.format.DateTimeFormatter;
 
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.Nullable;
 
 /**
  * A holder for a thread-local {@link JodaTimeContext}
@@ -37,6 +38,10 @@ public final class JodaTimeContextHolder {
 			new NamedThreadLocal<>("JodaTimeContext");
 
 
+	private JodaTimeContextHolder() {
+	}
+
+
 	/**
 	 * Reset the JodaTimeContext for the current thread.
 	 */
@@ -49,7 +54,7 @@ public final class JodaTimeContextHolder {
 	 * @param jodaTimeContext the current JodaTimeContext,
 	 * or {@code null} to reset the thread-bound context
 	 */
-	public static void setJodaTimeContext(JodaTimeContext jodaTimeContext) {
+	public static void setJodaTimeContext(@Nullable JodaTimeContext jodaTimeContext) {
 		if (jodaTimeContext == null) {
 			resetJodaTimeContext();
 		}
@@ -62,6 +67,7 @@ public final class JodaTimeContextHolder {
 	 * Return the JodaTimeContext associated with the current thread, if any.
 	 * @return the current JodaTimeContext, or {@code null} if none
 	 */
+	@Nullable
 	public static JodaTimeContext getJodaTimeContext() {
 		return jodaTimeContextHolder.get();
 	}
@@ -74,7 +80,7 @@ public final class JodaTimeContextHolder {
 	 * @param locale the current user locale (may be {@code null} if not known)
 	 * @return the user-specific DateTimeFormatter
 	 */
-	public static DateTimeFormatter getFormatter(DateTimeFormatter formatter, Locale locale) {
+	public static DateTimeFormatter getFormatter(DateTimeFormatter formatter, @Nullable Locale locale) {
 		DateTimeFormatter formatterToUse = (locale != null ? formatter.withLocale(locale) : formatter);
 		JodaTimeContext context = getJodaTimeContext();
 		return (context != null ? context.getFormatter(formatterToUse) : formatterToUse);

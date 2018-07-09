@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,17 +73,17 @@ public class ModelResultMatchersTests {
 		this.matchers.attributeExists("bad").match(this.mvcResult);
 	}
 
-    @Test
-    public void  attributeDoesNotExist() throws Exception {
-        this.matchers.attributeDoesNotExist("bad").match(this.mvcResult);
-    }
+	@Test
+	public void  attributeDoesNotExist() throws Exception {
+		this.matchers.attributeDoesNotExist("bad").match(this.mvcResult);
+	}
 
-    @Test(expected = AssertionError.class)
-    public void attributeDoesNotExist_doesExist() throws Exception {
-        this.matchers.attributeDoesNotExist("good").match(this.mvcResultWithError);
-    }
+	@Test(expected = AssertionError.class)
+	public void attributeDoesNotExist_doesExist() throws Exception {
+		this.matchers.attributeDoesNotExist("good").match(this.mvcResultWithError);
+	}
 
-    @Test
+	@Test
 	public void attribute_equal() throws Exception {
 		this.matchers.attribute("good", is("good")).match(this.mvcResult);
 	}

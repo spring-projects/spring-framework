@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,19 @@ package org.springframework.context.index;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
  * Provide access to the candidates that are defined in {@code META-INF/spring.components}.
- * <p>
- * An arbitrary number of stereotypes can be registered (and queried) on the index: a
+ *
+ * <p>An arbitrary number of stereotypes can be registered (and queried) on the index: a
  * typical example is the fully qualified name of an annotation that flags the class for
  * a certain use case. The following call returns all the {@code @Component}
  * <b>candidate</b> types for the {@code com.example} package (and its sub-packages):
@@ -38,7 +39,7 @@ import org.springframework.util.MultiValueMap;
  *         "com.example", "org.springframework.stereotype.Component");
  * </pre>
  *
- * The {@code type} is usually the fully qualified name of a class, though this is
+ * <p>The {@code type} is usually the fully qualified name of a class, though this is
  * not a rule. Similarly, the {@code stereotype} is usually the fully qualified name of
  * a target type but it can be any marker really.
  *
@@ -47,11 +48,15 @@ import org.springframework.util.MultiValueMap;
  */
 public class CandidateComponentsIndex {
 
-	private final MultiValueMap<String, String> index;
+	private static final AntPathMatcher pathMatcher = new AntPathMatcher(".");
+
+	private final MultiValueMap<String, Entry> index;
+
 
 	CandidateComponentsIndex(List<Properties> content) {
 		this.index = parseIndex(content);
 	}
+
 
 	/**
 	 * Return the candidate types that are associated with the specified stereotype.
@@ -61,27 +66,47 @@ public class CandidateComponentsIndex {
 	 * or an empty set if none has been found for the specified {@code basePackage}
 	 */
 	public Set<String> getCandidateTypes(String basePackage, String stereotype) {
-		List<String> candidates = this.index.get(stereotype);
+		List<Entry> candidates = this.index.get(stereotype);
 		if (candidates != null) {
 			return candidates.parallelStream()
-					.filter(t -> t.startsWith(basePackage))
+					.filter(t -> t.match(basePackage))
+					.map(t -> t.type)
 					.collect(Collectors.toSet());
 		}
 		return Collections.emptySet();
 	}
 
-	private static MultiValueMap<String, String> parseIndex(List<Properties> content) {
-		MultiValueMap<String, String> index = new LinkedMultiValueMap<>();
+	private static MultiValueMap<String, Entry> parseIndex(List<Properties> content) {
+		MultiValueMap<String, Entry> index = new LinkedMultiValueMap<>();
 		for (Properties entry : content) {
-			for (Map.Entry<Object, Object> entries : entry.entrySet()) {
-				String type = (String) entries.getKey();
-				String[] stereotypes = ((String) entries.getValue()).split(",");
+			entry.forEach((type, values) -> {
+				String[] stereotypes = ((String) values).split(",");
 				for (String stereotype : stereotypes) {
-					index.add(stereotype, type);
+					index.add(stereotype, new Entry((String) type));
 				}
-			}
+			});
 		}
 		return index;
+	}
+
+	private static class Entry {
+		private final String type;
+		private final String packageName;
+
+		Entry(String type) {
+			this.type = type;
+			this.packageName = ClassUtils.getPackageName(type);
+		}
+
+		public boolean match(String basePackage) {
+			if (pathMatcher.isPattern(basePackage)) {
+				return pathMatcher.match(basePackage, this.packageName);
+			}
+			else {
+				return this.type.startsWith(basePackage);
+			}
+		}
+
 	}
 
 }

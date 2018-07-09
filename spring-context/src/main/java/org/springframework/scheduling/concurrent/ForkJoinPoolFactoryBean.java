@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * A Spring {@link FactoryBean} that builds and exposes a preconfigured {@link ForkJoinPool}.
@@ -43,12 +44,14 @@ public class ForkJoinPoolFactoryBean implements FactoryBean<ForkJoinPool>, Initi
 
 	private ForkJoinPool.ForkJoinWorkerThreadFactory threadFactory = ForkJoinPool.defaultForkJoinWorkerThreadFactory;
 
+	@Nullable
 	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler;
 
 	private boolean asyncMode = false;
 
 	private int awaitTerminationSeconds = 0;
 
+	@Nullable
 	private ForkJoinPool forkJoinPool;
 
 
@@ -131,6 +134,7 @@ public class ForkJoinPoolFactoryBean implements FactoryBean<ForkJoinPool>, Initi
 
 
 	@Override
+	@Nullable
 	public ForkJoinPool getObject() {
 		return this.forkJoinPool;
 	}
@@ -148,16 +152,18 @@ public class ForkJoinPoolFactoryBean implements FactoryBean<ForkJoinPool>, Initi
 
 	@Override
 	public void destroy() {
-		// Ignored for the common pool.
-		this.forkJoinPool.shutdown();
+		if (this.forkJoinPool != null) {
+			// Ignored for the common pool.
+			this.forkJoinPool.shutdown();
 
-		// Wait for all tasks to terminate - works for the common pool as well.
-		if (this.awaitTerminationSeconds > 0) {
-			try {
-				this.forkJoinPool.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS);
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
+			// Wait for all tasks to terminate - works for the common pool as well.
+			if (this.awaitTerminationSeconds > 0) {
+				try {
+					this.forkJoinPool.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS);
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
 			}
 		}
 	}

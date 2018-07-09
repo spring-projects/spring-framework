@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.function.Consumer;
 
-import reactor.core.publisher.Flux;
-
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.server.RequestPath;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Represents a reactive server-side HTTP request
+ * Represents a reactive server-side HTTP request.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -38,16 +39,19 @@ import org.springframework.util.MultiValueMap;
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
 
 	/**
-	 * Returns the portion of the URL path that represents the context path for
-	 * the current {@link HttpHandler}. The context path is always at the
-	 * beginning of the request path. It starts with "/" but but does not end
-	 * with "/". This method may return an empty string if no context path is
-	 * configured.
-	 * @return the context path (not decoded) or an empty string
+	 * Return an id that represents the underlying connection, if available, or
+	 * the request, for the purpose of correlating log messages.
+	 * @since 5.1
+	 * @see org.springframework.web.server.ServerWebExchange#getLogPrefix()
 	 */
-	default String getContextPath() {
-		return "";
-	}
+	String getId();
+
+	/**
+	 * Returns a structured representation of the request path including the
+	 * context path + path within application portions, path segments with
+	 * encoded and decoded values, and path parameters.
+	 */
+	RequestPath getPath();
 
 	/**
 	 * Return a read-only map with parsed and decoded query parameter values.
@@ -59,6 +63,24 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 */
 	MultiValueMap<String, HttpCookie> getCookies();
 
+	/**
+	 * Return the remote address where this request is connected to, if available.
+	 */
+	@Nullable
+	default InetSocketAddress getRemoteAddress() {
+		return null;
+	}
+
+	/**
+	 * Return the SSL session information if the request has been transmitted
+	 * over a secure protocol including SSL certificates, if available.
+	 * @return the session information, or {@code null} if none available
+	 * @since 5.0.2
+	 */
+	@Nullable
+	default SslInfo getSslInfo() {
+		return null;
+	}
 
 	/**
 	 * Return a builder to mutate properties of this request by wrapping it
@@ -81,14 +103,60 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		Builder method(HttpMethod httpMethod);
 
 		/**
-		 * Set the request URI to return.
+		 * Set the URI to use with the following conditions:
+		 * <ul>
+		 * <li>If {@link #path(String) path} is also set, it overrides the path
+		 * of the URI provided here.
+		 * <li>If {@link #contextPath(String) contextPath} is also set, or
+		 * already present, it must match the start of the path of the URI
+		 * provided here.
+		 * </ul>
+		 */
+		Builder uri(URI uri);
+
+		/**
+		 * Set the path to use instead of the {@code "rawPath"} of the URI of
+		 * the request with the following conditions:
+		 * <ul>
+		 * <li>If {@link #uri(URI) uri} is also set, the path given here
+		 * overrides the path of the given URI.
+		 * <li>If {@link #contextPath(String) contextPath} is also set, or
+		 * already present, it must match the start of the path given here.
+		 * <li>The given value must begin with a slash.
+		 * </ul>
 		 */
 		Builder path(String path);
 
 		/**
-		 * Set the contextPath to return.
+		 * Set the contextPath to use.
+		 * <p>The given value must be a valid {@link RequestPath#contextPath()
+		 * contextPath} and it must match the start of the path of the URI of
+		 * the request. That means changing the contextPath, implies also
+		 * changing the path via {@link #path(String)}.
 		 */
 		Builder contextPath(String contextPath);
+
+		/**
+		 * Set or override the specified header.
+		 */
+		Builder header(String key, String value);
+
+		/**
+		 * Manipulate request headers. The provided {@code HttpHeaders} contains
+		 * current request headers, so that the {@code Consumer} can
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} or
+		 * {@linkplain HttpHeaders#remove(Object) remove} existing values, or
+		 * use any other {@link HttpHeaders} methods.
+		 */
+		Builder headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Set the SSL session information. This may be useful in environments
+		 * where TLS termination is done at the router, but SSL information is
+		 * made available in some other way such as through a header.
+		 * @since 5.0.7
+		 */
+		Builder sslInfo(SslInfo sslInfo);
 
 		/**
 		 * Build a {@link ServerHttpRequest} decorator with the mutated properties.

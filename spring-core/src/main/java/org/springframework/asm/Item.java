@@ -51,6 +51,7 @@ final class Item {
      * {@link ClassWriter#STR}, {@link ClassWriter#CLASS},
      * {@link ClassWriter#NAME_TYPE}, {@link ClassWriter#FIELD},
      * {@link ClassWriter#METH}, {@link ClassWriter#IMETH},
+     * {@link ClassWriter#MODULE}, {@link ClassWriter#PACKAGE},
      * {@link ClassWriter#MTYPE}, {@link ClassWriter#INDY}.
      * 
      * MethodHandle constant 9 variations are stored using a range of 9 values
@@ -201,6 +202,7 @@ final class Item {
      * @param strVal3
      *            third part of the value of this item.
      */
+    @SuppressWarnings("fallthrough")
     void set(final int type, final String strVal1, final String strVal2,
             final String strVal3) {
         this.type = type;
@@ -210,11 +212,11 @@ final class Item {
         switch (type) {
         case ClassWriter.CLASS:
             this.intVal = 0;     // intVal of a class must be zero, see visitInnerClass
-			hashCode = 0x7FFFFFFF & (type + strVal1.hashCode());
-			return;
         case ClassWriter.UTF8:
         case ClassWriter.STR:
         case ClassWriter.MTYPE:
+        case ClassWriter.MODULE:
+        case ClassWriter.PACKAGE:
         case ClassWriter.TYPE_NORMAL:
             hashCode = 0x7FFFFFFF & (type + strVal1.hashCode());
             return;
@@ -283,6 +285,8 @@ final class Item {
         case ClassWriter.UTF8:
         case ClassWriter.STR:
         case ClassWriter.CLASS:
+        case ClassWriter.MODULE:
+        case ClassWriter.PACKAGE:
         case ClassWriter.MTYPE:
         case ClassWriter.TYPE_NORMAL:
             return i.strVal1.equals(strVal1);

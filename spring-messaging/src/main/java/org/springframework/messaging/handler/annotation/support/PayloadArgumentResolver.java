@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
@@ -104,6 +105,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		Payload ann = parameter.getParameterAnnotation(Payload.class);
 		if (ann != null && StringUtils.hasText(ann.expression())) {
@@ -155,7 +157,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	 * Specify if the given {@code payload} is empty.
 	 * @param payload the payload to check (can be {@code null})
 	 */
-	protected boolean isEmptyPayload(Object payload) {
+	protected boolean isEmptyPayload(@Nullable Object payload) {
 		if (payload == null) {
 			return true;
 		}

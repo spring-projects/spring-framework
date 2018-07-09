@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,9 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 import static org.junit.Assert.*;
-
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ResourceUrlProvider}.
@@ -87,6 +89,16 @@ public class ResourceUrlProviderTests {
 		assertEquals("/resources/foo.css#hash", resolvedUrl);
 	}
 
+	@Test // SPR-16526
+	public void getStaticResourceWithMissingContextPath() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContextPath("/contextpath-longer-than-request-path");
+		request.setRequestURI("/contextpath-longer-than-request-path/style.css");
+		String url = "/resources/foo.css";
+		String resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
+		assertNull(resolvedUrl);
+	}
+
 	@Test
 	public void getFingerprintedResourceUrl() {
 		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
@@ -125,6 +137,7 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test // SPR-12592
+	@SuppressWarnings("resource")
 	public void initializeOnce() throws Exception {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
@@ -134,6 +147,25 @@ public class ResourceUrlProviderTests {
 		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
 		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey("/resources/**"));
 		assertFalse(urlProviderBean.isAutodetect());
+	}
+
+	@Test // SPR-16296
+	public void getForLookupPathShouldNotFailIfPathContainsDoubleSlashes() {
+		// given
+		ResourceResolver mockResourceResolver = mock(ResourceResolver.class);
+		when(mockResourceResolver.resolveUrlPath(any(), any(), any())).thenReturn("some-path");
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.getResourceResolvers().add(mockResourceResolver);
+
+		ResourceUrlProvider provider = new ResourceUrlProvider();
+		provider.getHandlerMap().put("/some-pattern/**", handler);
+
+		// when
+		String lookupForPath = provider.getForLookupPath("/some-pattern/some-lib//some-resource");
+
+		// then
+		assertEquals("/some-pattern/some-path", lookupForPath);
 	}
 
 
