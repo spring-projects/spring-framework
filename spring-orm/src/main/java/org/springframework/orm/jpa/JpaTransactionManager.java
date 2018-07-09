@@ -533,9 +533,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		}
 		catch (RollbackException ex) {
 			if (ex.getCause() instanceof RuntimeException) {
-				DataAccessException dex = getJpaDialect().translateExceptionIfPossible((RuntimeException) ex.getCause());
-				if (dex != null) {
-					throw dex;
+				DataAccessException dae = getJpaDialect().translateExceptionIfPossible((RuntimeException) ex.getCause());
+				if (dae != null) {
+					throw dae;
 				}
 			}
 			throw new TransactionSystemException("Could not commit JPA transaction", ex);

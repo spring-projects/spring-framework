@@ -180,9 +180,9 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 		}
 
 		// First, try custom translation from overridden method.
-		DataAccessException dex = customTranslate(task, sql, sqlEx);
-		if (dex != null) {
-			return dex;
+		DataAccessException dae = customTranslate(task, sql, sqlEx);
+		if (dae != null) {
+			return dae;
 		}
 
 		// Next, try the custom SQLException translator, if available.
@@ -288,15 +288,15 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	}
 
 	/**
-	 * Subclasses can override this method to attempt a custom mapping from SQLException
-	 * to DataAccessException.
+	 * Subclasses can override this method to attempt a custom mapping from
+	 * {@link SQLException} to {@link DataAccessException}.
 	 * @param task readable text describing the task being attempted
-	 * @param sql the SQL query or update that caused the problem. May be {@code null}.
+	 * @param sql the SQL query or update that caused the problem (may be {@code null})
 	 * @param sqlEx the offending SQLException
-	 * @return null if no custom translation was possible, otherwise a DataAccessException
-	 * resulting from custom translation. This exception should include the sqlEx parameter
-	 * as a nested root cause. This implementation always returns null, meaning that
-	 * the translator always falls back to the default error codes.
+	 * @return {@code null} if no custom translation applies, otherwise a {@link DataAccessException}
+	 * resulting from custom translation. This exception should include the {@code sqlEx} parameter
+	 * as a nested root cause. This implementation always returns {@code null}, meaning that the
+	 * translator always falls back to the default error codes.
 	 */
 	@Nullable
 	protected DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlEx) {
@@ -304,16 +304,16 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	}
 
 	/**
-	 * Create a custom DataAccessException, based on a given exception
-	 * class from a CustomSQLErrorCodesTranslation definition.
+	 * Create a custom {@link DataAccessException}, based on a given exception
+	 * class from a {@link CustomSQLErrorCodesTranslation} definition.
 	 * @param task readable text describing the task being attempted
-	 * @param sql the SQL query or update that caused the problem. May be {@code null}.
+	 * @param sql the SQL query or update that caused the problem (may be {@code null})
 	 * @param sqlEx the offending SQLException
 	 * @param exceptionClass the exception class to use, as defined in the
-	 * CustomSQLErrorCodesTranslation definition
-	 * @return null if the custom exception could not be created, otherwise
-	 * the resulting DataAccessException. This exception should include the
-	 * sqlEx parameter as a nested root cause.
+	 * {@link CustomSQLErrorCodesTranslation} definition
+	 * @return {@code null} if the custom exception could not be created, otherwise
+	 * the resulting {@link DataAccessException}. This exception should include the
+	 * {@code sqlEx} parameter as a nested root cause.
 	 * @see CustomSQLErrorCodesTranslation#setExceptionClass
 	 */
 	@Nullable

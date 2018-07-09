@@ -239,8 +239,8 @@ public abstract class DataAccessUtils {
 			RuntimeException rawException, PersistenceExceptionTranslator pet) {
 
 		Assert.notNull(pet, "PersistenceExceptionTranslator must not be null");
-		DataAccessException dex = pet.translateExceptionIfPossible(rawException);
-		return (dex != null ? dex : rawException);
+		DataAccessException dae = pet.translateExceptionIfPossible(rawException);
+		return (dae != null ? dae : rawException);
 	}
 
 }
