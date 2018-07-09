@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,57 +214,6 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		}
 
 		@Override
-		public int readLine(final byte[] b, final int off, final int len) throws IOException {
-			int count = is.readLine(b, off, len);
-			cache(b, off, count);
-			return count;
-		}
-
-		private void cache(final byte[] b, final int off, final int count) {
-			if (contentCacheLimit != null && cachedContent.size() == contentCacheLimit) {
-				this.overflow = true;
-				handleContentOverflow(contentCacheLimit);
-			} else {
-				int sizeToCache = contentCacheLimit == null || count + cachedContent.size() < contentCacheLimit
-						? count
-						: contentCacheLimit - cachedContent.size();
-				cachedContent.write(b, off, sizeToCache);
-				if (sizeToCache < count) {
-					this.overflow = true;
-					handleContentOverflow(contentCacheLimit);
-				}
-			}
-		}
-
-		@Override
-		public int read(final byte[] b) throws IOException {
-			int count = super.read(b);
-			if (!this.overflow && count > 0) {
-				if (contentCacheLimit != null && cachedContent.size() == contentCacheLimit) {
-					this.overflow = true;
-					handleContentOverflow(contentCacheLimit);
-				} else {
-                    int sizeToCache = contentCacheLimit == null || count + cachedContent.size() < contentCacheLimit
-                            ? count
-                            : contentCacheLimit - cachedContent.size();
-                    cachedContent.write(b, 0, sizeToCache);
-                    if (sizeToCache < count) {
-                    	this.overflow = true;
-                    	handleContentOverflow(contentCacheLimit);
-					}
-				}
-			}
-			return count;
-		}
-
-		@Override
-		public int read(final byte[] b, final int off, final int len) throws IOException {
-			int count = is.read(b, off, len);
-			cache(b, off, count);
-			return count;
-		}
-
-		@Override
 		public int read() throws IOException {
 			int ch = this.is.read();
 			if (ch != -1 && !this.overflow) {
@@ -277,6 +226,40 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 				}
 			}
 			return ch;
+		}
+
+		@Override
+		public int read(byte[] b) throws IOException {
+			int count = this.is.read(b);
+			writeToCache(b, 0, count);
+			return count;
+		}
+
+		private void writeToCache(final byte[] b, final int off, int count) {
+			if (!this.overflow && count > 0) {
+				if (contentCacheLimit != null &&
+						count + cachedContent.size() > contentCacheLimit) {
+					this.overflow = true;
+					cachedContent.write(b, off, contentCacheLimit - cachedContent.size());
+					handleContentOverflow(contentCacheLimit);
+					return;
+				}
+				cachedContent.write(b, off, count);
+			}
+		}
+
+		@Override
+		public int read(final byte[] b, final int off, final int len) throws IOException {
+			int count = this.is.read(b, off, len);
+			writeToCache(b, off, count);
+			return count;
+		}
+
+		@Override
+		public int readLine(final byte[] b, final int off, final int len) throws IOException {
+			int count = this.is.readLine(b, off, len);
+			writeToCache(b, off, count);
+			return count;
 		}
 
 		@Override
