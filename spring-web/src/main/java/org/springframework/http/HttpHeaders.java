@@ -747,7 +747,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String credentialsString = username + ":" + password;
 		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
 		String encodedCredentials = new String(encodedBytes, charset);
-		set(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
+		set(AUTHORIZATION, "Basic " + encodedCredentials);
+	}
+
+	/**
+	 * Set the value of the {@linkplain #AUTHORIZATION Authorization} header to
+	 * the given Bearer token.
+	 * @param token the Base64 encoded token
+	 * @since 5.1
+	 * @see <a href="https://tools.ietf.org/html/rfc6750">RFC 6750</a>
+	 */
+	public void setBearerAuth(String token) {
+		Assert.notNull(token, "Token must not be null");
+
+		set(AUTHORIZATION, "Bearer " + token);
 	}
 
 	/**

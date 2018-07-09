@@ -549,4 +549,13 @@ public class HttpHeadersTests {
 		headers.setBasicAuth(username, password);
 	}
 
+	@Test
+	public void bearerAuth() {
+		String token = "foo";
+
+		headers.setBearerAuth(token);
+		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
+		assertEquals("Bearer foo", authorization);
+	}
+
 }
