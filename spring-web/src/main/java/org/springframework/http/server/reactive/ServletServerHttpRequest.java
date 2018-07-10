@@ -199,15 +199,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	@Nullable
 	DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
-		if (logger.isTraceEnabled()) {
-			logger.trace(getLogPrefix() + "Read " + read + (read != -1 ? " bytes" : ""));
-		}
-		else {
-			Log rsReadLogger = AbstractListenerReadPublisher.rsReadLogger;
-			if (rsReadLogger.isTraceEnabled()) {
-				rsReadLogger.trace(getLogPrefix() + "Read " + read + (read != -1 ? " bytes" : ""));
-			}
-		}
+		logBytesRead(read);
 
 		if (read > 0) {
 			DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(read);
@@ -220,6 +212,13 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		return null;
+	}
+
+	protected final void logBytesRead(int read) {
+		Log rsReadLogger = AbstractListenerReadPublisher.rsReadLogger;
+		if (rsReadLogger.isTraceEnabled()) {
+			rsReadLogger.trace(getLogPrefix() + "Read " + read + (read != -1 ? " bytes" : ""));
+		}
 	}
 
 	@SuppressWarnings("unchecked")

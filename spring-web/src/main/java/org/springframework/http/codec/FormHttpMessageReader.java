@@ -108,8 +108,10 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 					String body = charBuffer.toString();
 					DataBufferUtils.release(buffer);
 					MultiValueMap<String, String> formData = parseFormData(charset, body);
-					if (shouldLogRequestDetails()) {
-						logger.debug(Hints.getLogPrefix(hints) + "Decoded " + formData);
+					if (logger.isDebugEnabled()) {
+						String details = isEnableLoggingRequestDetails() ?
+								formData.toString() : "form fields " + formData.keySet() + " (content masked)";
+						logger.debug(Hints.getLogPrefix(hints) + "Read " + details);
 					}
 					return formData;
 				});

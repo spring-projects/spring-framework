@@ -31,7 +31,6 @@ import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
-import org.apache.commons.logging.Log;
 import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Flux;
 
@@ -182,11 +181,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 				ByteBuffer byteBuffer = pooledByteBuffer.getBuffer();
 				int read = this.channel.read(byteBuffer);
 
-				Log logger = UndertowServerHttpRequest.this.logger;
-				if (logger.isTraceEnabled()) {
-					logger.trace(getLogPrefix() + "Read " + read + (read != -1 ? " bytes" : ""));
-				}
-				else if (rsReadLogger.isTraceEnabled()) {
+				if (rsReadLogger.isTraceEnabled()) {
 					rsReadLogger.trace(getLogPrefix() + "Read " + read + (read != -1 ? " bytes" : ""));
 				}
 

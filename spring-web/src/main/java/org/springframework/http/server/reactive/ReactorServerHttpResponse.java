@@ -45,16 +45,11 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 	private final HttpServerResponse response;
 
-	private final ReactorServerHttpRequest request;
 
-
-	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory,
-			ReactorServerHttpRequest request) {
-
+	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory) {
 		super(bufferFactory);
 		Assert.notNull(response, "HttpServerResponse must not be null");
 		this.response = response;
-		this.request = request;
 	}
 
 
@@ -119,12 +114,7 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 	}
 
 	private Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
-		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf)
-				.doOnNext(byteBuf -> {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Writing " + byteBuf.readableBytes() + " bytes");
-					}
-				});
+		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
 	}
 
 }

@@ -27,9 +27,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -46,7 +48,8 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class MultipartHttpMessageReader implements HttpMessageReader<MultiValueMap<String, Part>> {
+public class MultipartHttpMessageReader extends LoggingCodecSupport
+		implements HttpMessageReader<MultiValueMap<String, Part>> {
 
 	private static final ResolvableType MULTIPART_VALUE_TYPE = ResolvableType.forClassWithGenerics(
 			MultiValueMap.class, String.class, Part.class);
@@ -85,8 +88,19 @@ public class MultipartHttpMessageReader implements HttpMessageReader<MultiValueM
 	public Mono<MultiValueMap<String, Part>> readMono(ResolvableType elementType,
 			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
 
-		return this.partReader.read(elementType, inputMessage, hints)
-				.collectMultimap(Part::name).map(this::toMultiValueMap);
+
+		Map<String, Object> allHints = Hints.merge(hints, Hints.SUPPRESS_LOGGING_HINT, true);
+
+		return this.partReader.read(elementType, inputMessage, allHints)
+				.collectMultimap(Part::name)
+				.doOnNext(map -> {
+					if (logger.isDebugEnabled()) {
+						String details = isEnableLoggingRequestDetails() ?
+								map.toString() : "parts " + map.keySet() + " (content masked)";
+						logger.debug(Hints.getLogPrefix(hints) + "Parsed " + details);
+					}
+				})
+				.map(this::toMultiValueMap);
 	}
 
 	private LinkedMultiValueMap<String, Part> toMultiValueMap(Map<String, Collection<Part>> map) {

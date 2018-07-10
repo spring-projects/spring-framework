@@ -309,9 +309,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Perform cleanup of request attributes after include request?. */
 	private boolean cleanupAfterInclude = true;
 
-	/** Do not log potentially sensitive information (params at DEBUG and headers at TRACE). */
-	private boolean disableLoggingRequestDetails = false;
-
 	/** MultipartResolver used by this servlet. */
 	@Nullable
 	private MultipartResolver multipartResolver;
@@ -487,25 +484,6 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.cleanupAfterInclude = cleanupAfterInclude;
 	}
 
-	/**
-	 * Set whether the {@code DispatcherServlet} should not log request
-	 * parameters and headers. By default request parameters are logged at DEBUG
-	 * while headers are logged at TRACE under the log category
-	 * {@code "org.springframework.web.servlet.DispatcherServlet"}. Those may
-	 * contain sensitive information, however this is typically not a problem
-	 * since DEBUG and TRACE are only expected to be enabled in development.
-	 * This property may be used to explicitly disable logging of such
-	 * information regardless of the log level.
-	 * <p>By default this is set to {@code false} in which case request details
-	 * are logged. If set to {@code true} request details will not be logged at
-	 * any log level.
-	 * @param disableLoggingRequestDetails whether to disable or not
-	 * @since 5.1
-	 */
-	public void setDisableLoggingRequestDetails(boolean disableLoggingRequestDetails) {
-		this.disableLoggingRequestDetails = disableLoggingRequestDetails;
-	}
-
 
 	/**
 	 * This implementation calls {@link #initStrategies}.
@@ -529,20 +507,6 @@ public class DispatcherServlet extends FrameworkServlet {
 		initRequestToViewNameTranslator(context);
 		initViewResolvers(context);
 		initFlashMapManager(context);
-
-		if (logger.isDebugEnabled()) {
-			if (this.disableLoggingRequestDetails) {
-				logger.debug("Logging request parameters and headers is OFF.");
-			}
-			else {
-				logger.warn("\n\n" +
-						"!!!!!!!!!!!!!!!!!!!\n" +
-						"Logging request parameters (DEBUG) and headers (TRACE) may show sensitive data.\n" +
-						"If not in development, use the DispatcherServlet property \"disableLoggingRequestDetails=true\",\n" +
-						"or lower the log level.\n" +
-						"!!!!!!!!!!!!!!!!!!!\n");
-			}
-		}
 	}
 
 	/**
@@ -990,26 +954,32 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void logRequest(HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 
-			String params = "";
-			if (!this.disableLoggingRequestDetails) {
+			String params;
+			if (isEnableLoggingRequestDetails()) {
 				params = request.getParameterMap().entrySet().stream()
 						.map(entry -> entry.getKey() + ":" + Arrays.toString(entry.getValue()))
-						.collect(Collectors.joining(", ", ", parameters={", "}"));
+						.collect(Collectors.joining(", "));
 			}
+			else {
+				params = request.getParameterMap().isEmpty() ? "" :  "masked";
+			}
+
+			String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
 
 			String dispatchType = !request.getDispatcherType().equals(DispatcherType.REQUEST) ?
 					"\"" + request.getDispatcherType().name() + "\" dispatch for " : "";
 
-			String message = dispatchType + request.getMethod() + " \"" + getRequestUri(request) + "\"" + params;
+			String message = dispatchType + request.getMethod() +
+					" \"" + getRequestUri(request) + query + "\", parameters={" + params + "}";
 
 			if (logger.isTraceEnabled()) {
-				String headers = "";
-				if (!this.disableLoggingRequestDetails) {
-					headers = Collections.list(request.getHeaderNames()).stream()
-							.map(name -> name + ":" + Collections.list(request.getHeaders(name)))
-							.collect(Collectors.joining(", ", ", headers={", "}"));
+				List<String> values = Collections.list(request.getHeaderNames());
+				String headers = values.size() > 0 ? "masked" : "";
+				if (isEnableLoggingRequestDetails()) {
+					headers = values.stream().map(name -> name + ":" + Collections.list(request.getHeaders(name)))
+							.collect(Collectors.joining(", "));
 				}
-				logger.trace(message + headers + " in DispatcherServlet '" + getServletName() + "'");
+				logger.trace(message + ", headers={" + headers + "} in DispatcherServlet '" + getServletName() + "'");
 			}
 			else {
 				logger.debug(message);

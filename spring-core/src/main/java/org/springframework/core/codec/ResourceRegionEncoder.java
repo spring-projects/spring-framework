@@ -122,7 +122,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		long position = region.getPosition();
 		long count = region.getCount();
 
-		if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 			logger.debug(Hints.getLogPrefix(hints) +
 					"Writing region " + position + "-" + (position + count) + " of [" + resource + "]");
 		}

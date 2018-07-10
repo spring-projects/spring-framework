@@ -208,7 +208,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	}
 
 	private static Mono<String> partFluxDescription(Flux<? extends Part> partsFlux) {
-		return partsFlux.log().collectList().map(MultipartIntegrationTests::partListDescription);
+		return partsFlux.collectList().map(MultipartIntegrationTests::partListDescription);
 	}
 
 	private static String partListDescription(List<? extends Part> parts) {

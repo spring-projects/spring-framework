@@ -68,7 +68,7 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 			String logPrefix = Hints.getLogPrefix(hints);
 			logger.debug(logPrefix + "Writing [" + resource + "]");
 		}

@@ -68,7 +68,7 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		Charset charset = getCharset(mimeType);
 
 		return Flux.from(inputStream).map(charSequence -> {
-			if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 				String logPrefix = Hints.getLogPrefix(hints);
 				logger.debug(logPrefix + "Writing '" + charSequence + "'");
 			}

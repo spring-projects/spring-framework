@@ -74,7 +74,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		try {
-			if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 				logger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
 			}
 			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);

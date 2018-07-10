@@ -165,13 +165,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.request.receive().retain()
-				.doOnNext(buffer -> {
-					if (logger.isTraceEnabled()) {
-						logger.trace(getLogPrefix() + "Read " + buffer.readableBytes() + " bytes");
-					}
-				})
-				.map(this.bufferFactory::wrap);
+		return this.request.receive().retain().map(this.bufferFactory::wrap);
 	}
 
 	@SuppressWarnings("unchecked")

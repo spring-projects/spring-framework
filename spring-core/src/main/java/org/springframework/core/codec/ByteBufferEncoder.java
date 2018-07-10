@@ -55,7 +55,7 @@ public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 
 		return Flux.from(inputStream).map(byteBuffer -> {
 			DataBuffer dataBuffer = bufferFactory.wrap(byteBuffer);
-			if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 				String logPrefix = Hints.getLogPrefix(hints);
 				logger.debug(logPrefix + "Writing " + dataBuffer.readableByteCount() + " bytes");
 			}

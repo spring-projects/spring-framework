@@ -74,7 +74,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	@Nullable
 	private Encoder<?> jackson2JsonEncoder;
 
-	private boolean disableLoggingRequestDetails = false;
+	private boolean enableLoggingRequestDetails = false;
 
 	private boolean registerDefaults = true;
 
@@ -90,12 +90,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	}
 
 	@Override
-	public void disableLoggingRequestDetails(boolean disableLoggingRequestDetails) {
-		this.disableLoggingRequestDetails = disableLoggingRequestDetails;
+	public void enableLoggingRequestDetails(boolean enable) {
+		this.enableLoggingRequestDetails = enable;
 	}
 
-	protected boolean isDisableLoggingRequestDetails() {
-		return this.disableLoggingRequestDetails;
+	protected boolean isEnableLoggingRequestDetails() {
+		return this.enableLoggingRequestDetails;
 	}
 
 	/**
@@ -121,7 +121,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
 
 		FormHttpMessageReader formReader = new FormHttpMessageReader();
-		formReader.setDisableLoggingRequestDetails(this.disableLoggingRequestDetails);
+		formReader.setEnableLoggingRequestDetails(this.enableLoggingRequestDetails);
 		readers.add(formReader);
 
 		extendTypedReaders(readers);

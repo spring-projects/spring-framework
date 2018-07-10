@@ -86,9 +86,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 				ServletRequest request = getNativeRequest();
 				int read = ((CoyoteInputStream) request.getInputStream()).read(byteBuffer);
-				if (logger.isTraceEnabled()) {
-					logger.trace(getLogPrefix() + "read:" + read);
-				}
+				logBytesRead(read);
 
 				if (read > 0) {
 					dataBuffer.writePosition(read);

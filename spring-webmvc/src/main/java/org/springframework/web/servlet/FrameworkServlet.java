@@ -19,8 +19,10 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -216,6 +218,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/** Flag used to detect whether onRefresh has already been called. */
 	private boolean refreshEventReceived = false;
+
+	/** Whether to log potentially sensitive info (request params at DEBUG + headers at TRACE). */
+	private boolean enableLoggingRequestDetails = false;
 
 
 	/**
@@ -468,6 +473,26 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * Whether to log request params at DEBUG level, and headers at TRACE level.
+	 * Both may contain sensitive information.
+	 * <p>By default set to {@code false} so that request details are not shown.
+	 * @param enable whether to enable or not
+	 * @since 5.1
+	 */
+	public void setEnableLoggingRequestDetails(boolean enable) {
+		this.enableLoggingRequestDetails = enable;
+	}
+
+	/**
+	 * Whether logging of potentially sensitive, request details at DEBUG and
+	 * TRACE level is allowed.
+	 * @since 5.1
+	 */
+	public boolean isEnableLoggingRequestDetails() {
+		return this.enableLoggingRequestDetails;
+	}
+
+	/**
 	 * Called by Spring via {@link ApplicationContextAware} to inject the current
 	 * application context. This method allows FrameworkServlets to be registered as
 	 * Spring beans inside an existing {@link WebApplicationContext} rather than
@@ -504,6 +529,14 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		catch (ServletException | RuntimeException ex) {
 			logger.error("Context initialization failed", ex);
 			throw ex;
+		}
+
+		if (logger.isDebugEnabled()) {
+			String value = this.enableLoggingRequestDetails ?
+					"shown which may lead to unsafe logging of potentially sensitive data" :
+					"masked to prevent unsafe logging of potentially sensitive data";
+			logger.debug("enableLoggingRequestDetails='" + this.enableLoggingRequestDetails +
+					"': request parameters and headers will be " + value);
 		}
 
 		if (logger.isInfoEnabled()) {
@@ -989,38 +1022,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			if (requestAttributes != null) {
 				requestAttributes.requestCompleted();
 			}
-
-			if (logger.isDebugEnabled()) {
-				boolean isRequestDispatch = request.getDispatcherType().equals(DispatcherType.REQUEST);
-				String dispatchType = request.getDispatcherType().name();
-				if (failureCause != null) {
-					if (!isRequestDispatch) {
-						logger.debug("Unresolved failure from \"" + dispatchType + "\" dispatch: " + failureCause);
-					}
-					else if (logger.isTraceEnabled()) {
-						logger.trace("Failed to complete request", failureCause);
-					}
-					else {
-						logger.debug("Failed to complete request: " + failureCause);
-					}
-				}
-				else {
-					if (asyncManager.isConcurrentHandlingStarted()) {
-						logger.debug("Exiting but response remains open for further handling");
-					}
-					else {
-						int status = response.getStatus();
-						if (!isRequestDispatch) {
-							logger.debug("Exiting from \"" + dispatchType + "\" dispatch (status " + status + ")");
-						}
-						else {
-							HttpStatus httpStatus = HttpStatus.resolve(status);
-							logger.debug("Completed " + (httpStatus != null ? httpStatus : status));
-						}
-					}
-				}
-			}
-
+			logResult(request, response, failureCause, asyncManager);
 			publishRequestHandledEvent(request, response, startTime, failureCause);
 		}
 	}
@@ -1081,6 +1083,59 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		RequestContextHolder.setRequestAttributes(previousAttributes, this.threadContextInheritable);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Cleared thread-bound request context: " + request);
+		}
+	}
+
+	private void logResult(HttpServletRequest request, HttpServletResponse response,
+			@Nullable Throwable failureCause, WebAsyncManager asyncManager) {
+
+		if (!logger.isDebugEnabled()) {
+			return;
+		}
+
+		String dispatchType = request.getDispatcherType().name();
+		boolean initialDispatch = request.getDispatcherType().equals(DispatcherType.REQUEST);
+
+		if (failureCause != null) {
+			if (!initialDispatch) {
+				// FORWARD/ERROR/ASYNC: minimal message (there should be enough context already)
+				logger.debug("Unresolved failure from \"" + dispatchType + "\" dispatch: " + failureCause);
+			}
+			else if (logger.isTraceEnabled()) {
+				logger.trace("Failed to complete request", failureCause);
+			}
+			else {
+				logger.debug("Failed to complete request: " + failureCause);
+			}
+			return;
+		}
+
+		if (asyncManager.isConcurrentHandlingStarted()) {
+			logger.debug("Exiting but response remains open for further handling");
+			return;
+		}
+
+		int status = response.getStatus();
+		String headers = ""; // nothing below trace
+
+		if (logger.isTraceEnabled()) {
+			Collection<String> names = response.getHeaderNames();
+			if (this.enableLoggingRequestDetails) {
+				headers = names.stream().map(name -> name + ":" + response.getHeaders(name))
+						.collect(Collectors.joining(", "));
+			}
+			else {
+				headers = names.isEmpty() ? "" : "masked";
+			}
+			headers = ", headers={" + headers + "}";
+		}
+
+		if (!initialDispatch) {
+			logger.debug("Exiting from \"" + dispatchType + "\" dispatch, status " + status + headers);
+		}
+		else {
+			HttpStatus httpStatus = HttpStatus.resolve(status);
+			logger.debug("Completed " + (httpStatus != null ? httpStatus : status) + headers);
 		}
 	}
 

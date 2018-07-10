@@ -54,7 +54,7 @@ public class ByteArrayEncoder extends AbstractEncoder<byte[]> {
 
 		return Flux.from(inputStream).map(bytes -> {
 			DataBuffer dataBuffer = bufferFactory.wrap(bytes);
-			if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 				String logPrefix = Hints.getLogPrefix(hints);
 				logger.debug(logPrefix + "Writing " + dataBuffer.readableByteCount() + " bytes");
 			}

@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -71,7 +72,7 @@ public abstract class ExchangeFunctions {
 
 		private final ExchangeStrategies strategies;
 
-		private boolean disableLoggingRequestDetails;
+		private boolean enableLoggingRequestDetails;
 
 
 		public DefaultExchangeFunction(ClientHttpConnector connector, ExchangeStrategies strategies) {
@@ -83,8 +84,8 @@ public abstract class ExchangeFunctions {
 			strategies.messageWriters().stream()
 					.filter(LoggingCodecSupport.class::isInstance)
 					.forEach(reader -> {
-						if (((LoggingCodecSupport) reader).isDisableLoggingRequestDetails()) {
-							this.disableLoggingRequestDetails = true;
+						if (((LoggingCodecSupport) reader).isEnableLoggingRequestDetails()) {
+							this.enableLoggingRequestDetails = true;
 						}
 					});
 		}
@@ -109,12 +110,13 @@ public abstract class ExchangeFunctions {
 
 		private void logRequest(ClientRequest request) {
 			if (logger.isDebugEnabled()) {
-				String formatted = request.url().toString();
-				if (this.disableLoggingRequestDetails) {
-					int index = formatted.indexOf("?");
-					formatted = (index != -1 ? formatted.substring(0, index) : formatted);
+				String message = request.logPrefix() + "HTTP " + request.method() + " " + request.url();
+				if (logger.isTraceEnabled()) {
+					logger.trace(message + ", headers=" + formatHeaders(request.headers()));
 				}
-				logger.debug(request.logPrefix() + "HTTP " + request.method() + " " + formatted);
+				else {
+					logger.debug(message);
+				}
 			}
 		}
 
@@ -122,15 +124,18 @@ public abstract class ExchangeFunctions {
 			if (logger.isDebugEnabled()) {
 				int code = response.getRawStatusCode();
 				HttpStatus status = HttpStatus.resolve(code);
-				String message = "Response " + (status != null ? status : code);
+				String message = logPrefix + "Response " + (status != null ? status : code);
 				if (logger.isTraceEnabled()) {
-					String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + response.getHeaders();
-					logger.trace(logPrefix + message + headers);
+					logger.trace(message + ", headers=" + formatHeaders(response.getHeaders()));
 				}
 				else {
-					logger.debug(logPrefix + message);
+					logger.debug(message);
 				}
 			}
+		}
+
+		private String formatHeaders(HttpHeaders headers) {
+			return this.enableLoggingRequestDetails ? headers.toString() : headers.isEmpty() ? "{}" : "{masked}";
 		}
 	}
 

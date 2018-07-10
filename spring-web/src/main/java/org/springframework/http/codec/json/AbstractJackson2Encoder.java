@@ -141,7 +141,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
 			ResolvableType elementType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
 
-		if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 			logger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
 		}
 

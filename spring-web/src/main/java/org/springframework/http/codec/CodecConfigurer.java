@@ -111,19 +111,13 @@ public interface CodecConfigurer {
 		void jackson2JsonEncoder(Encoder<?> encoder);
 
 		/**
-		 * Whether to disable logging of request details for form and multipart
-		 * requests at any log level. By default such data is logged under
-		 * {@code "org.springframework.http.codec"} but may contain sensitive
-		 * information. Typically that's not an issue since DEBUG is used in
-		 * development, but this option may be used to explicitly disable any
-		 * logging of form and multipart data at any log level.
-		 * <p>By default this is set to {@code false} in which case form and
-		 * multipart data is logged at DEBUG or TRACE. When set to {@code true}
-		 * values will not be logged at any level.
-		 * @param disableLoggingRequestDetails whether to disable loggins
+		 * Whether to log form data at DEBUG level, and headers at TRACE level.
+		 * Both may contain sensitive information.
+		 * <p>By default set to {@code false} so that request details are not shown.
+		 * @param enable whether to enable or not
 		 * @since 5.1
 		 */
-		void disableLoggingRequestDetails(boolean disableLoggingRequestDetails);
+		void enableLoggingRequestDetails(boolean enable);
 	}
 
 

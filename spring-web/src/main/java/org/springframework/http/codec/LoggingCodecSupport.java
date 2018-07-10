@@ -33,41 +33,26 @@ public class LoggingCodecSupport {
 
 	protected final Log logger = HttpLog.create(LogFactory.getLog(getClass()));
 
-	/** Do not log potentially sensitive information (params at DEBUG and headers at TRACE). */
-	private boolean disableLoggingRequestDetails = false;
+	/** Whether to log potentially sensitive info (form data at DEBUG and headers at TRACE). */
+	private boolean enableLoggingRequestDetails = false;
 
 
 	/**
-	 * Whether to disable any logging of request details by this codec.
-	 * By default values being encoded or decoded are logged at DEBUG and TRACE
-	 * level under {@code "org.springframework.http.codec"} which may show
-	 * sensitive data for form and multipart data. Typically that's not an issue
-	 * since DEBUG and TRACE are intended for development, but this property may
-	 * be used to explicitly disable any logging of such information regardless
-	 * of the log level.
-	 * <p>By default this is set to {@code false} in which case values encoded
-	 * or decoded are logged at DEBUG level. When set to {@code true} values
-	 * will not be logged at any level.
-	 * @param disableLoggingRequestDetails whether to disable
+	 * Whether to log form data at DEBUG level, and headers at TRACE level.
+	 * Both may contain sensitive information.
+	 * <p>By default set to {@code false} so that request details are not shown.
+	 * @param enable whether to enable or not
 	 */
-	public void setDisableLoggingRequestDetails(boolean disableLoggingRequestDetails) {
-		this.disableLoggingRequestDetails = disableLoggingRequestDetails;
+	public void setEnableLoggingRequestDetails(boolean enable) {
+		this.enableLoggingRequestDetails = enable;
 	}
 
 	/**
 	 * Whether any logging of values being encoded or decoded is explicitly
 	 * disabled regardless of log level.
 	 */
-	public boolean isDisableLoggingRequestDetails() {
-		return this.disableLoggingRequestDetails;
-	}
-
-	/**
-	 * Returns "true" if logger is at DEBUG level and the logging of values
-	 * being encoded or decoded is not explicitly disabled.
-	 */
-	protected boolean shouldLogRequestDetails() {
-		return !this.disableLoggingRequestDetails && logger.isDebugEnabled();
+	public boolean isEnableLoggingRequestDetails() {
+		return this.enableLoggingRequestDetails;
 	}
 
 }

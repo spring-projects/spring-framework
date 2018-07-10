@@ -57,7 +57,7 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
 		try {
 			ReactorServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
-			ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory, request);
+			ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
 
 			if (request.getMethod() == HttpMethod.HEAD) {
 				response = new HttpHeadResponseDecorator(response);

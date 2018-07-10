@@ -131,8 +131,10 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		Assert.notNull(charset, "No charset"); // should never occur
 
 		return Mono.from(inputStream).flatMap(form -> {
-			if (shouldLogRequestDetails()) {
-				logger.debug(Hints.getLogPrefix(hints) + "Encoding " + form);
+			if (logger.isDebugEnabled()) {
+				String details = isEnableLoggingRequestDetails() ?
+						form.toString() : "form fields " + form.keySet() + " (content masked)";
+				logger.debug(Hints.getLogPrefix(hints) + "Writing " + details);
 			}
 			String value = serializeForm(form, charset);
 			ByteBuffer byteBuffer = charset.encode(value);

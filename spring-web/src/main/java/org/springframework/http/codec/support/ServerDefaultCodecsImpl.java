@@ -52,10 +52,15 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 	@Override
 	protected void extendTypedReaders(List<HttpMessageReader<?>> typedReaders) {
 		if (synchronossMultipartPresent) {
+			boolean enable = isEnableLoggingRequestDetails();
+
 			SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
-			partReader.setDisableLoggingRequestDetails(isDisableLoggingRequestDetails());
+			partReader.setEnableLoggingRequestDetails(enable);
 			typedReaders.add(partReader);
-			typedReaders.add(new MultipartHttpMessageReader(partReader));
+
+			MultipartHttpMessageReader reader = new MultipartHttpMessageReader(partReader);
+			reader.setEnableLoggingRequestDetails(enable);
+			typedReaders.add(reader);
 		}
 	}
 

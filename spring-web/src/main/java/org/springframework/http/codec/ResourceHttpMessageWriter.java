@@ -145,7 +145,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			return mediaType;
 		}
 		mediaType = MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
-		if (logger.isDebugEnabled()) {
+		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 			logger.debug(Hints.getLogPrefix(hints) + "Resource associated with '" + mediaType + "'");
 		}
 		return mediaType;

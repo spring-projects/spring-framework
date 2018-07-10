@@ -138,6 +138,9 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 		return parts.flatMap(part -> {
 			ServerHttpRequest partRequest = new PartServerHttpRequest(exchange.getRequest(), part);
 			ServerWebExchange partExchange = exchange.mutate().request(partRequest).build();
+			if (logger.isDebugEnabled()) {
+				logger.debug(exchange.getLogPrefix() + "Decoding part '" + part.name() + "'");
+			}
 			return readBody(elementType, isRequired, bindingContext, partExchange);
 		});
 	}

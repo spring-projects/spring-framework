@@ -99,7 +99,7 @@ public abstract class Hints {
 	 * @param hints the hints map
 	 * @return whether logging of data is allowed
 	 */
-	public static boolean suppressLogging(@Nullable Map<String, Object> hints) {
+	public static boolean isLoggingSuppressed(@Nullable Map<String, Object> hints) {
 		return hints != null && (boolean) hints.getOrDefault(SUPPRESS_LOGGING_HINT, false);
 	}
 
