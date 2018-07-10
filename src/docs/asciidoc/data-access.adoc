@@ -1835,7 +1835,7 @@ Code within the callback can roll the transaction back by calling the
 			try {
 				updateOperation1();
 				updateOperation2();
-			} catch (SomeBusinessExeption ex) {
+			} catch (SomeBusinessException ex) {
 				**status.setRollbackOnly();**
 			}
 		}
