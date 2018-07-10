@@ -83,18 +83,6 @@ public class SockJsServiceRegistration {
 	public SockJsServiceRegistration() {
 	}
 
-	/**
-	 * Deprecated constructor with a TaskScheduler.
-	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
-	 * it is obvious that it is needed; call {@link #getTaskScheduler()} to check
-	 * and then {@link #setTaskScheduler(TaskScheduler)} to set it before a call
-	 * to {@link #createSockJsService()}
-	 */
-	@Deprecated
-	public SockJsServiceRegistration(TaskScheduler defaultTaskScheduler) {
-		this.scheduler = defaultTaskScheduler;
-	}
-
 
 	/**
 	 * A scheduler instance to use for scheduling SockJS heart-beats.
