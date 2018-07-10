@@ -64,6 +64,7 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.1
  */
 public abstract class AbstractMessageConverterMethodProcessor extends AbstractMessageConverterMethodArgumentResolver
@@ -194,7 +195,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		if (isResourceType(value, returnType)) {
 			outputMessage.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
-			if (value != null && inputMessage.getHeaders().getFirst(HttpHeaders.RANGE) != null) {
+			if (value != null && inputMessage.getHeaders().getFirst(HttpHeaders.RANGE) != null
+					&& outputMessage.getServletResponse().getStatus() == 200) {
 				Resource resource = (Resource) value;
 				try {
 					List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
@@ -315,7 +317,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	/**
-	 * Return whether the returned value or the declared return type extend {@link Resource}.
+	 * Return whether the returned value or the declared return type extends {@link Resource}.
 	 */
 	protected boolean isResourceType(@Nullable Object value, MethodParameter returnType) {
 		Class<?> clazz = getReturnValueType(value, returnType);
