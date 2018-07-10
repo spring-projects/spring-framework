@@ -323,6 +323,19 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Return a {@link ResolvableType} for this bean definition,
+	 * either from runtime-cached type information or from configuration-time
+	 * {@link #setTargetType(ResolvableType)} or {@link #setBeanClass(Class)}.
+	 * @since 5.1
+	 * @see #getTargetType()
+	 * @see #getBeanClass()
+	 */
+	public ResolvableType getResolvableType() {
+		ResolvableType targetType = this.targetType;
+		return (targetType != null ? targetType : ResolvableType.forClass(getBeanClass()));
+	}
+
+	/**
 	 * Specify a factory method name that refers to a non-overloaded method.
 	 */
 	public void setUniqueFactoryMethodName(String name) {

@@ -2363,6 +2363,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		GenericInterface1Impl bean1 = (GenericInterface1Impl) bf.getBean("bean1");
 		GenericInterface2Impl bean2 = (GenericInterface2Impl) bf.getBean("bean2");
 		assertSame(bean2, bean1.gi2);
+		assertEquals(ResolvableType.forClass(GenericInterface1Impl.class), bd.getResolvableType());
 	}
 
 	@Test
@@ -2381,6 +2382,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		GenericInterface1Impl bean1 = (GenericInterface1Impl) bf.getBean("bean1");
 		GenericInterface2Impl bean2 = (GenericInterface2Impl) bf.getBean("bean2");
 		assertSame(bean2, bean1.gi2);
+		assertEquals(ResolvableType.forClass(GenericInterface1Impl.class), bd.getResolvableType());
 	}
 
 	@Test
@@ -2401,7 +2403,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		GenericInterface1Impl bean1 = (GenericInterface1Impl) bf.getBean("bean1");
 		GenericInterface2Impl bean2 = (GenericInterface2Impl) bf.getBean("bean2");
 		assertSame(bean2, bean1.gi2);
-
 		assertArrayEquals(new String[] {"bean1"}, bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(GenericInterface1.class, String.class)));
 		assertArrayEquals(new String[] {"bean2"}, bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(GenericInterface2.class, String.class)));
 	}
@@ -2428,7 +2429,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testGenericsBasedInjectionWithBeanDefinitionTargetResolvableType() throws Exception {
+	public void testGenericsBasedInjectionWithBeanDefinitionTargetResolvableType() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -2443,6 +2444,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("bean3", new RootBeanDefinition(MultiGenericFieldInjection.class));
 
 		assertEquals("bean1 a bean2 123", bf.getBean("bean3").toString());
+		assertEquals(ResolvableType.forClassWithGenerics(GenericInterface2Bean.class, String.class), bd1.getResolvableType());
+		assertEquals(ResolvableType.forClassWithGenerics(GenericInterface2Bean.class, Integer.class), bd2.getResolvableType());
 	}
 
 	@Test
