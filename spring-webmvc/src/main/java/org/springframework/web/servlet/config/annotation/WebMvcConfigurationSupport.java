@@ -24,7 +24,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -448,12 +447,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * {@link #addViewControllers}.
 	 */
 	@Bean
+	@Nullable
 	public HandlerMapping viewControllerHandlerMapping() {
 		ViewControllerRegistry registry = new ViewControllerRegistry(this.applicationContext);
 		addViewControllers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.buildHandlerMapping();
-		handlerMapping = (handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
+		if (handlerMapping == null) {
+			return null;
+		}
 		handlerMapping.setPathMatcher(mvcPathMatcher());
 		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 		handlerMapping.setInterceptors(getInterceptors());
@@ -487,6 +489,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * {@link #addResourceHandlers}.
 	 */
 	@Bean
+	@Nullable
 	public HandlerMapping resourceHandlerMapping() {
 		Assert.state(this.applicationContext != null, "No ApplicationContext set");
 		Assert.state(this.servletContext != null, "No ServletContext set");
@@ -496,15 +499,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
-		if (handlerMapping != null) {
-			handlerMapping.setPathMatcher(mvcPathMatcher());
-			handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
-			handlerMapping.setInterceptors(getInterceptors());
-			handlerMapping.setCorsConfigurations(getCorsConfigurations());
+		if (handlerMapping == null) {
+			return null;
 		}
-		else {
-			handlerMapping = new EmptyHandlerMapping();
-		}
+		handlerMapping.setPathMatcher(mvcPathMatcher());
+		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
+		handlerMapping.setInterceptors(getInterceptors());
+		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		return handlerMapping;
 	}
 
@@ -539,13 +540,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * override {@link #configureDefaultServletHandling}.
 	 */
 	@Bean
+	@Nullable
 	public HandlerMapping defaultServletHandlerMapping() {
 		Assert.state(this.servletContext != null, "No ServletContext set");
 		DefaultServletHandlerConfigurer configurer = new DefaultServletHandlerConfigurer(this.servletContext);
 		configureDefaultServletHandling(configurer);
-
-		HandlerMapping handlerMapping = configurer.buildHandlerMapping();
-		return (handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
+		return configurer.buildHandlerMapping();
 	}
 
 	/**
@@ -645,7 +645,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Override this method to add custom {@link Converter}s and {@link Formatter Converter}s and {@link Formatters}.
+	 * Override this method to add custom {@link Converter}s and
+	 * {@link Formatter Converter}s and {@link Formatters}.
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
 	}
@@ -1043,16 +1044,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Lazy
 	public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
 		return new HandlerMappingIntrospector();
-	}
-
-
-
-	private static final class EmptyHandlerMapping extends AbstractHandlerMapping {
-
-		@Override
-		protected Object getHandlerInternal(HttpServletRequest request) {
-			return null;
-		}
 	}
 
 

@@ -458,9 +458,8 @@ public class MessageBrokerConfigurationTests {
 		UserDestinationMessageHandler handler = context.getBean(UserDestinationMessageHandler.class);
 		assertNull(handler.getBroadcastDestination());
 
-		String name = "userRegistryMessageHandler";
-		MessageHandler messageHandler = context.getBean(name, MessageHandler.class);
-		assertNotEquals(UserRegistryMessageHandler.class, messageHandler.getClass());
+		Object nullBean = context.getBean("userRegistryMessageHandler");
+		assertTrue(nullBean.equals(null));
 	}
 
 	@Test // SPR-16275

@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.Nullable;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
@@ -290,10 +289,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
+	@Nullable
 	public AbstractBrokerMessageHandler simpleBrokerMessageHandler() {
 		SimpleBrokerMessageHandler handler = getBrokerRegistry().getSimpleBroker(brokerChannel());
 		if (handler == null) {
-			return new NoOpBrokerMessageHandler();
+			return null;
 		}
 		updateUserDestinationResolver(handler);
 		return handler;
@@ -307,10 +307,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
+	@Nullable
 	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
 		StompBrokerRelayMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
 		if (handler == null) {
-			return new NoOpBrokerMessageHandler();
+			return null;
 		}
 		Map<String, MessageHandler> subscriptions = new HashMap<>(1);
 		String destination = getBrokerRegistry().getUserDestinationBroadcast();
@@ -338,9 +339,10 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
+	@Nullable
 	public MessageHandler userRegistryMessageHandler() {
 		if (getBrokerRegistry().getUserRegistryBroadcast() == null) {
-			return new NoOpMessageHandler();
+			return null;
 		}
 		SimpUserRegistry userRegistry = userRegistry();
 		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry, "MultiServerUserRegistry required");
@@ -424,7 +426,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected abstract SimpUserRegistry createLocalUserRegistry();
 
 	/**
-	 * Return a {@link org.springframework.validation.Validator org.springframework.validation.Validators} instance for validating
+	 * Return a {@link org.springframework.validation.Validator
+	 * org.springframework.validation.Validators} instance for validating
 	 * {@code @Payload} method arguments.
 	 * <p>In order, this method tries to get a Validator instance:
 	 * <ul>
@@ -475,38 +478,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Nullable
 	public Validator getValidator() {
 		return null;
-	}
-
-
-	private static class NoOpMessageHandler implements MessageHandler {
-
-		@Override
-		public void handleMessage(Message<?> message) {
-		}
-	}
-
-
-	private class NoOpBrokerMessageHandler extends AbstractBrokerMessageHandler {
-
-		public NoOpBrokerMessageHandler() {
-			super(clientInboundChannel(), clientOutboundChannel(), brokerChannel());
-		}
-
-		@Override
-		public void start() {
-		}
-
-		@Override
-		public void stop() {
-		}
-
-		@Override
-		public void handleMessage(Message<?> message) {
-		}
-
-		@Override
-		protected void handleMessageInternal(Message<?> message) {
-		}
 	}
 
 }
