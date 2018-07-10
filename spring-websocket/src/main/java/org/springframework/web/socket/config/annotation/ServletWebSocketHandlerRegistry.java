@@ -100,16 +100,16 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	}
 
 	/**
-	 * Set a TaskScheduler is set on each SockJS registration that hasn't had one
-	 * registered explicitly. This method needs to be invoked prior to calling
-	 * {@link #getHandlerMapping()}.
+	 * Provide the TaskScheduler to use for SockJS endpoints for which a task
+	 * scheduler has not been explicitly registered. This method must be called
+	 * prior to {@link #getHandlerMapping()}.
 	 */
 	protected void setTaskScheduler(TaskScheduler scheduler) {
 		this.registrations.stream()
 				.map(ServletWebSocketHandlerRegistration::getSockJsServiceRegistration)
 				.filter(Objects::nonNull)
 				.filter(r -> r.getTaskScheduler() == null)
-				.forEach(r -> r.setTaskScheduler(scheduler));
+				.forEach(registration -> registration.setTaskScheduler(scheduler));
 	}
 
 	public AbstractHandlerMapping getHandlerMapping() {
