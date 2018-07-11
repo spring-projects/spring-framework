@@ -3629,14 +3629,13 @@ Spring MVC supports Reactor and RxJava through the
 `spring-core` which allows it to adapt from multiple reactive libraries.
 ====
 
-When streaming to the response via reactive types, Spring MVC supports reactive back
-pressure, but still needs to use blocking I/O to perform actual writes. This is done
-through the <<mvc-ann-async-configuration-spring-mvc,configured>> MVC `TaskExecutor` on
-a separate thread in order to avoid blocking the upstream source (e.g. a `Flux` returned
-from the `WebClient`). By default a `SyncTaskExecutor` is used which is not suitable for
-production. https://jira.spring.io/browse/SPR-16203[SPR-16203] will provide better
-defaults in Spring Framework 5.1. In the mean time please configure the executor through
-the <<mvc-ann-async-configuration-spring-mvc,MVC config>>.
+For streaming to the response, reactive back pressure is supported, but writes to the
+response are still blocking, and are executed on a separate thread through the
+<<mvc-ann-async-configuration-spring-mvc,configured>> `TaskExecutor` in order to avoid
+blocking the upstream source (e.g. a `Flux` returned from the `WebClient`).
+By default `SimpleAsyncTaskExecutor` is used for the blocking writes but that is not
+suitable under load. If you plan to stream with a reactive type, please use the
+<<mvc-ann-async-configuration-spring-mvc,MVC config>> to configure a task executor.
 
 
 

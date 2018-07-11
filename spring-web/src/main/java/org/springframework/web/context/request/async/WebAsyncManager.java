@@ -30,10 +30,12 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * The central class for managing asynchronous request processing, mainly intended
@@ -61,6 +63,9 @@ public final class WebAsyncManager {
 
 	private static final Object RESULT_NONE = new Object();
 
+	private static final AsyncTaskExecutor DEFAULT_TASK_EXECUTOR =
+			new SimpleAsyncTaskExecutor(WebHttpHandlerBuilder.class.getSimpleName());
+
 	private static final Log logger = LogFactory.getLog(WebAsyncManager.class);
 
 	private static final CallableProcessingInterceptor timeoutCallableInterceptor =
@@ -69,10 +74,12 @@ public final class WebAsyncManager {
 	private static final DeferredResultProcessingInterceptor timeoutDeferredResultInterceptor =
 			new TimeoutDeferredResultProcessingInterceptor();
 
+	private static Boolean taskExecutorWarning = true;
+
 
 	private AsyncWebRequest asyncWebRequest;
 
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor(this.getClass().getSimpleName());
+	private AsyncTaskExecutor taskExecutor = DEFAULT_TASK_EXECUTOR;
 
 	private volatile Object concurrentResult = RESULT_NONE;
 
@@ -277,6 +284,9 @@ public final class WebAsyncManager {
 		if (executor != null) {
 			this.taskExecutor = executor;
 		}
+		else {
+			logExecutorWarning();
+		}
 
 		List<CallableProcessingInterceptor> interceptors = new ArrayList<>();
 		interceptors.add(webAsyncTask.getInterceptor());
@@ -327,6 +337,27 @@ public final class WebAsyncManager {
 			Object result = interceptorChain.applyPostProcess(this.asyncWebRequest, callable, ex);
 			setConcurrentResultAndDispatch(result);
 			throw ex;
+		}
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	private void logExecutorWarning() {
+		if (taskExecutorWarning && logger.isWarnEnabled()) {
+			synchronized (DEFAULT_TASK_EXECUTOR) {
+				AsyncTaskExecutor executor = this.taskExecutor;
+				if (taskExecutorWarning &&
+						(executor instanceof SimpleAsyncTaskExecutor || executor instanceof SyncTaskExecutor)) {
+					String executorTypeName = executor.getClass().getSimpleName();
+					logger.warn("\n!!!\n" +
+							"An Executor is required to handle java.util.concurrent.Callable return values.\n" +
+							"Please, configure a TaskExecutor in the MVC config under \"async support\".\n" +
+							"The " + executorTypeName + " currently in use is not suitable under load.\n" +
+							"-------------------------------\n" +
+							"Request URI: '" + formatRequestUri() + "'\n" +
+							"!!!");
+					taskExecutorWarning = false;
+				}
+			}
 		}
 	}
 

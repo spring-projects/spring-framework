@@ -35,6 +35,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
@@ -79,6 +80,8 @@ class ReactiveTypeHandler {
 
 	private final TaskExecutor taskExecutor;
 
+	private Boolean taskExecutorWarning;
+
 	private final ContentNegotiationManager contentNegotiationManager;
 
 
@@ -92,6 +95,7 @@ class ReactiveTypeHandler {
 		Assert.notNull(manager, "ContentNegotiationManager is required");
 		this.reactiveRegistry = registry;
 		this.taskExecutor = executor;
+		this.taskExecutorWarning = executor instanceof SimpleAsyncTaskExecutor || executor instanceof SyncTaskExecutor;
 		this.contentNegotiationManager = manager;
 	}
 
@@ -127,16 +131,19 @@ class ReactiveTypeHandler {
 		if (adapter.isMultiValue()) {
 			if (mediaTypes.stream().anyMatch(MediaType.TEXT_EVENT_STREAM::includes) ||
 					ServerSentEvent.class.isAssignableFrom(elementClass)) {
+				logExecutorWarning(returnType);
 				SseEmitter emitter = new SseEmitter(STREAMING_TIMEOUT_VALUE);
 				new SseEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
 			if (CharSequence.class.isAssignableFrom(elementClass)) {
+				logExecutorWarning(returnType);
 				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(MediaType.TEXT_PLAIN));
 				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
 			if (mediaTypes.stream().anyMatch(MediaType.APPLICATION_STREAM_JSON::includes)) {
+				logExecutorWarning(returnType);
 				ResponseBodyEmitter emitter = getEmitter(MediaType.APPLICATION_STREAM_JSON);
 				new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
@@ -169,6 +176,27 @@ class ReactiveTypeHandler {
 				outputMessage.getHeaders().setContentType(mediaType);
 			}
 		};
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	private void logExecutorWarning(MethodParameter returnType) {
+		if (this.taskExecutorWarning && logger.isWarnEnabled()) {
+			synchronized (this) {
+				if (this.taskExecutorWarning) {
+					String executorTypeName = this.taskExecutor.getClass().getSimpleName();
+					logger.warn("\n!!!\n" +
+							"Streaming through a reactive type requires an Executor to write to the response.\n" +
+							"Please, configure a TaskExecutor in the MVC config under \"async support\".\n" +
+							"The " + executorTypeName + " currently in use is not suitable under load.\n" +
+							"-------------------------------\n" +
+							"Controller:\t" + returnType.getContainingClass().getName() + "\n" +
+							"Method:\t\t" + returnType.getMethod().getName() + "\n" +
+							"Returning:\t" + ResolvableType.forMethodParameter(returnType).toString() + "\n" +
+							"!!!");
+					this.taskExecutorWarning = false;
+				}
+			}
+		}
 	}
 
 
