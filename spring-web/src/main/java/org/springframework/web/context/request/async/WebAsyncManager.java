@@ -35,7 +35,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
-import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * The central class for managing asynchronous request processing, mainly intended
@@ -64,7 +63,7 @@ public final class WebAsyncManager {
 	private static final Object RESULT_NONE = new Object();
 
 	private static final AsyncTaskExecutor DEFAULT_TASK_EXECUTOR =
-			new SimpleAsyncTaskExecutor(WebHttpHandlerBuilder.class.getSimpleName());
+			new SimpleAsyncTaskExecutor(WebAsyncManager.class.getSimpleName());
 
 	private static final Log logger = LogFactory.getLog(WebAsyncManager.class);
 
