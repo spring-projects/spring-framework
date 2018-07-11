@@ -87,9 +87,8 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 */
 	public CustomNumberEditor(Class<? extends Number> numberClass,
 			@Nullable NumberFormat numberFormat, boolean allowEmpty) throws IllegalArgumentException {
-
-		if (!Number.class.isAssignableFrom(numberClass)) {
-			throw new IllegalArgumentException("Property class must be a subclass of Number");
+		if (numberClass == null) {
+			throw new IllegalArgumentException("Property class must be not null");
 		}
 		this.numberClass = numberClass;
 		this.numberFormat = numberFormat;
