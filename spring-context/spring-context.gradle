@@ -26,7 +26,7 @@ dependencies {
 	testCompile("org.codehaus.groovy:groovy-xml:${groovyVersion}")
 	testCompile("org.codehaus.groovy:groovy-jsr223:${groovyVersion}")
 	testCompile("org.codehaus.groovy:groovy-test:${groovyVersion}")
-	testCompile("org.apache.commons:commons-pool2:2.5.0")
+	testCompile("org.apache.commons:commons-pool2:2.6.0")
 	testCompile("javax.inject:javax.inject-tck:1")
 	testRuntime("javax.xml.bind:jaxb-api:2.3.0")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
