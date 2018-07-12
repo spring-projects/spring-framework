@@ -66,6 +66,14 @@ public class ClientResponseWrapperTests {
 	}
 
 	@Test
+	public void rawStatusCode() {
+		int status = 999;
+		when(mockResponse.rawStatusCode()).thenReturn(status);
+
+		assertEquals(status, wrapper.rawStatusCode());
+	}
+
+	@Test
 	public void headers() {
 		ClientResponse.Headers headers = mock(ClientResponse.Headers.class);
 		when(mockResponse.headers()).thenReturn(headers);

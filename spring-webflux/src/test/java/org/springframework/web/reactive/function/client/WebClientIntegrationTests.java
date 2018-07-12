@@ -55,6 +55,7 @@ import static org.junit.Assert.*;
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
+ * @author Denys Ivano
  */
 public class WebClientIntegrationTests {
 
@@ -413,7 +414,7 @@ public class WebClientIntegrationTests {
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.expectError(WebClientException.class)
+				.expectError(WebClientResponseException.class)
 				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
@@ -433,7 +434,7 @@ public class WebClientIntegrationTests {
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.expectError(WebClientException.class)
+				.expectError(WebClientResponseException.class)
 				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
@@ -459,6 +460,9 @@ public class WebClientIntegrationTests {
 					assertTrue(throwable instanceof WebClientResponseException);
 					WebClientResponseException ex = (WebClientResponseException) throwable;
 					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
+					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getRawStatusCode());
+					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+							ex.getStatusText());
 					assertEquals(MediaType.TEXT_PLAIN, ex.getHeaders().getContentType());
 					assertEquals(errorMessage, ex.getResponseBodyAsString());
 				})
@@ -468,6 +472,62 @@ public class WebClientIntegrationTests {
 		expectRequest(request -> {
 			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
 			assertEquals("/greeting?name=Spring", request.getPath());
+		});
+	}
+
+	@Test
+	public void shouldSupportUnknownStatusCode() {
+		int errorStatus = 555;
+		assertNull(HttpStatus.resolve(errorStatus));
+		String errorMessage = "Something went wrong";
+		prepareResponse(response -> response.setResponseCode(errorStatus)
+				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
+
+		Mono<ClientResponse> result = this.webClient.get()
+				.uri("/unknownPage")
+				.exchange();
+
+		StepVerifier.create(result)
+				.consumeNextWith(response -> assertEquals(555, response.rawStatusCode()))
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/unknownPage", request.getPath());
+		});
+	}
+
+	@Test
+	public void shouldGetErrorSignalWhenRetrievingUnknownStatusCode() {
+		int errorStatus = 555;
+		assertNull(HttpStatus.resolve(errorStatus));
+		String errorMessage = "Something went wrong";
+		prepareResponse(response -> response.setResponseCode(errorStatus)
+				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/unknownPage")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertTrue(throwable instanceof UnknownHttpStatusCodeException);
+					UnknownHttpStatusCodeException ex = (UnknownHttpStatusCodeException) throwable;
+					assertEquals("Unknown status code ["+errorStatus+"]", ex.getMessage());
+					assertEquals(errorStatus, ex.getRawStatusCode());
+					assertEquals("", ex.getStatusText());
+					assertEquals(MediaType.TEXT_PLAIN, ex.getHeaders().getContentType());
+					assertEquals(errorMessage, ex.getResponseBodyAsString());
+				})
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/unknownPage", request.getPath());
 		});
 	}
 

@@ -59,6 +59,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * Default implementation of {@link WebClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 class DefaultWebClient implements WebClient {
@@ -375,7 +376,7 @@ class DefaultWebClient implements WebClient {
 
 		private final Mono<ClientResponse> responseMono;
 
-		private List<StatusHandler> statusHandlers = new ArrayList<>(1);
+		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
 		DefaultResponseSpec(Mono<ClientResponse> responseMono) {
 			this.responseMono = responseMono;
@@ -435,13 +436,17 @@ class DefaultWebClient implements WebClient {
 
 		private <T extends Publisher<?>> T bodyToPublisher(ClientResponse response,
 				T bodyPublisher, Function<Mono<? extends Throwable>, T> errorFunction) {
-
-			return this.statusHandlers.stream()
-					.filter(statusHandler -> statusHandler.test(response.statusCode()))
-					.findFirst()
-					.map(statusHandler -> statusHandler.apply(response))
-					.map(errorFunction::apply)
-					.orElse(bodyPublisher);
+			if (HttpStatus.resolve(response.rawStatusCode()) != null) {
+				return this.statusHandlers.stream()
+						.filter(statusHandler -> statusHandler.test(response.statusCode()))
+						.findFirst()
+						.map(statusHandler -> statusHandler.apply(response))
+						.map(errorFunction::apply)
+						.orElse(bodyPublisher);
+			}
+			else {
+				return errorFunction.apply(createResponseException(response));
+			}
 		}
 
 		private static Mono<WebClientResponseException> createResponseException(ClientResponse response) {
@@ -454,18 +459,26 @@ class DefaultWebClient implements WebClient {
 					})
 					.defaultIfEmpty(new byte[0])
 					.map(bodyBytes -> {
-						String msg = String.format("ClientResponse has erroneous status code: %d %s", response.statusCode().value(),
-								response.statusCode().getReasonPhrase());
 						Charset charset = response.headers().contentType()
 								.map(MimeType::getCharset)
 								.orElse(StandardCharsets.ISO_8859_1);
-						return new WebClientResponseException(msg,
-								response.statusCode().value(),
-								response.statusCode().getReasonPhrase(),
-								response.headers().asHttpHeaders(),
-								bodyBytes,
-								charset
-								);
+						if (HttpStatus.resolve(response.rawStatusCode()) != null) {
+							String msg = String.format("ClientResponse has erroneous status code: %d %s",
+									response.statusCode().value(), response.statusCode().getReasonPhrase());
+							return new WebClientResponseException(msg,
+									response.statusCode().value(),
+									response.statusCode().getReasonPhrase(),
+									response.headers().asHttpHeaders(),
+									bodyBytes,
+									charset);
+						}
+						else {
+							return new UnknownHttpStatusCodeException(
+									response.rawStatusCode(),
+									response.headers().asHttpHeaders(),
+									bodyBytes,
+									charset);
+						}
 					});
 		}
 

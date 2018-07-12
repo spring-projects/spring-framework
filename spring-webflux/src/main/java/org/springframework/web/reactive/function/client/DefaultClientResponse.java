@@ -77,6 +77,11 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
+	public int rawStatusCode() {
+		return this.response.getRawStatusCode();
+	}
+
+	@Override
 	public Headers headers() {
 		return this.headers;
 	}
@@ -177,11 +182,11 @@ class DefaultClientResponse implements ClientResponse {
 
 	private <T> Mono<ResponseEntity<T>> toEntityInternal(Mono<T> bodyMono) {
 		HttpHeaders headers = headers().asHttpHeaders();
-		HttpStatus statusCode = statusCode();
+		int status = rawStatusCode();
 		return bodyMono
-				.map(body -> new ResponseEntity<>(body, headers, statusCode))
+				.map(body -> createEntity(body, headers, status))
 				.switchIfEmpty(Mono.defer(
-						() -> Mono.just(new ResponseEntity<>(headers, statusCode))));
+						() -> Mono.just(createEntity(headers, status))));
 	}
 
 	@Override
@@ -196,10 +201,24 @@ class DefaultClientResponse implements ClientResponse {
 
 	private <T> Mono<ResponseEntity<List<T>>> toEntityListInternal(Flux<T> bodyFlux) {
 		HttpHeaders headers = headers().asHttpHeaders();
-		HttpStatus statusCode = statusCode();
+		int status = rawStatusCode();
 		return bodyFlux
 				.collectList()
-				.map(body -> new ResponseEntity<>(body, headers, statusCode));
+				.map(body -> createEntity(body, headers, status));
+	}
+
+	private <T> ResponseEntity<T> createEntity(HttpHeaders headers, int status) {
+		HttpStatus resolvedStatus = HttpStatus.resolve(status);
+		return resolvedStatus != null
+				? new ResponseEntity<>(headers, resolvedStatus)
+				: ResponseEntity.status(status).headers(headers).build();
+	}
+
+	private <T> ResponseEntity<T> createEntity(T body, HttpHeaders headers, int status) {
+		HttpStatus resolvedStatus = HttpStatus.resolve(status);
+		return resolvedStatus != null
+				? new ResponseEntity<>(body, headers, resolvedStatus)
+				: ResponseEntity.status(status).headers(headers).body(body);
 	}
 
 

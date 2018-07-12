@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ public class WebClientResponseException extends WebClientException {
 
 	/**
 	 * Construct a new instance of with the given response data.
+	 * @param message the exception message
 	 * @param statusCode the raw status code value
 	 * @param statusText the status text
 	 * @param headers the response headers (may be {@code null})
@@ -69,6 +70,7 @@ public class WebClientResponseException extends WebClientException {
 
 	/**
 	 * Return the HTTP status code value.
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
 	 */
 	public HttpStatus getStatusCode() {
 		return HttpStatus.valueOf(this.statusCode);
