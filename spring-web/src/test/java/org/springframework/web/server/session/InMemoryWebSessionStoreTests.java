@@ -18,7 +18,6 @@ package org.springframework.web.server.session;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -28,7 +27,11 @@ import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.web.server.WebSession;
 
 import static junit.framework.TestCase.assertSame;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link InMemoryWebSessionStore}.
@@ -93,49 +96,37 @@ public class InMemoryWebSessionStoreTests {
 	}
 
 	@Test
-	public void expirationCheckBasedOnTimeWindow() {
+	public void expirationCheckPeriod() {
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(this.store);
 		Map<?,?> sessions = (Map<?, ?>) accessor.getPropertyValue("sessions");
+		assertNotNull(sessions);
 
 		// Create 100 sessions
 		IntStream.range(0, 100).forEach(i -> insertSession());
-
-		// Force a new clock (31 min later) but don't use setter which would clean expired sessions
-		Clock newClock = Clock.offset(this.store.getClock(), Duration.ofMinutes(31));
-		accessor.setPropertyValue("clock", newClock);
-
 		assertEquals(100, sessions.size());
 
-		// Create 50 more which forces a time-based check (clock moved forward)
-		IntStream.range(0, 50).forEach(i -> insertSession());
-		assertEquals(50, sessions.size());
+		// Force a new clock (31 min later), don't use setter which would clean expired sessions
+		accessor.setPropertyValue("clock", Clock.offset(this.store.getClock(), Duration.ofMinutes(31)));
+		assertEquals(100, sessions.size());
+
+		// Create 1 more which forces a time-based check (clock moved forward)
+		insertSession();
+		assertEquals(1, sessions.size());
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
-	public void expirationCheckBasedOnSessionCount() {
+	public void maxSessions() {
 
-		DirectFieldAccessor accessor = new DirectFieldAccessor(this.store);
-		Map<String, WebSession> sessions = (Map<String, WebSession>) accessor.getPropertyValue("sessions");
+		IntStream.range(0, 10000).forEach(i -> insertSession());
 
-		// Create 100 sessions
-		IntStream.range(0, 100).forEach(i -> insertSession());
-
-		// Copy sessions (about to be expired)
-		Map<String, WebSession> expiredSessions = new HashMap<>(sessions);
-
-		// Set new clock which expires and removes above sessions
-		this.store.setClock(Clock.offset(this.store.getClock(), Duration.ofMinutes(31)));
-		assertEquals(0, sessions.size());
-
-		// Re-insert expired sessions
-		sessions.putAll(expiredSessions);
-		assertEquals(100, sessions.size());
-
-		// Create 600 more to go over the threshold
-		IntStream.range(0, 600).forEach(i -> insertSession());
-		assertEquals(600, sessions.size());
+		try {
+			insertSession();
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertEquals("Max sessions limit reached: 10000", ex.getMessage());
+		}
 	}
 
 	private WebSession insertSession() {
