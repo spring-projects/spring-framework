@@ -62,7 +62,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	 * {@link IllegalStateException}.
 	 * <p>By default set to 10000.
 	 * @param maxSessions the maximum number of sessions
-	 * @since 5.1
+	 * @since 5.0.8
 	 */
 	public void setMaxSessions(int maxSessions) {
 		this.maxSessions = maxSessions;
@@ -70,7 +70,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 	/**
 	 * Return the maximum number of sessions that can be stored.
-	 * @since 5.1
+	 * @since 5.0.8
 	 */
 	public int getMaxSessions() {
 		return this.maxSessions;
@@ -102,9 +102,9 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	 * Return the map of sessions with an {@link Collections#unmodifiableMap
 	 * unmodifiable} wrapper. This could be used for management purposes, to
 	 * list active sessions, invalidate expired ones, etc.
-	 * @since 5.1
+	 * @since 5.0.8
 	 */
-	public Map<String, InMemoryWebSession> getSessions() {
+	public Map<String, WebSession> getSessions() {
 		return Collections.unmodifiableMap(this.sessions);
 	}
 
@@ -153,7 +153,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	 * kicked off lazily during calls to {@link #createWebSession() create} or
 	 * {@link #retrieveSession retrieve}, no less than 60 seconds apart.
 	 * This method can be called to force a check at a specific time.
-	 * @since 5.1
+	 * @since 5.0.8
 	 */
 	public void removeExpiredSessions() {
 		this.expiredSessionChecker.removeExpiredSessions(this.clock.instant());
