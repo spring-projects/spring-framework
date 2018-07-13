@@ -512,7 +512,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (String beanName : beanNames) {
 			try {
 				Object beanInstance = getBean(beanName);
-				result.put(beanName, (beanInstance instanceof NullBean ? null : (T) beanInstance));
+				if (!(beanInstance instanceof NullBean)) {
+					result.put(beanName, (T) beanInstance);
+				}
 			}
 			catch (BeanCreationException ex) {
 				Throwable rootCause = ex.getMostSpecificCause();

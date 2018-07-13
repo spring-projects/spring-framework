@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,6 +67,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
@@ -120,6 +122,11 @@ public class WebMvcConfigurationSupportTests {
 	@Test
 	public void emptyHandlerMappings() {
 		ApplicationContext context = initContext(WebConfig.class);
+
+		Map<String, HandlerMapping> handlerMappings = context.getBeansOfType(HandlerMapping.class);
+		assertFalse(handlerMappings.containsKey("viewControllerHandlerMapping"));
+		assertFalse(handlerMappings.containsKey("resourceHandlerMapping"));
+		assertFalse(handlerMappings.containsKey("defaultServletHandlerMapping"));
 
 		Object nullBean = context.getBean("viewControllerHandlerMapping");
 		assertTrue(nullBean.equals(null));
