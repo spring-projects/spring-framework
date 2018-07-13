@@ -17,6 +17,8 @@
 package org.springframework.web.util;
 
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -118,6 +120,10 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	@Nullable
 	private String fragment;
+
+	private boolean encodeTemplate;
+
+	private Charset charset = StandardCharsets.UTF_8;
 
 
 	/**
@@ -319,6 +325,43 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 
+	// encode methods
+
+	/**
+	 * Request to have the URI template encoded first at build time, and
+	 * URI variables encoded later when expanded.
+	 *
+	 * <p>In comparison to {@link UriComponents#encode()}, this method has the
+	 * same effect on the URI template, i.e. each URI component is encoded by
+	 * quoting <em>only</em> illegal characters within that URI component type.
+	 * However URI variables are encoded more strictly, by quoting both illegal
+	 * characters and characters with reserved meaning.
+	 *
+	 * <p>For most cases, prefer this method over {@link UriComponents#encode()}
+	 * which is useful only if intentionally expanding variables with reserved
+	 * characters. For example ';' is legal in a path, but also has reserved
+	 * meaning as a separator. When expanding a variable that contains ';' it
+	 * probably should be encoded, unless the intent is to insert path params
+	 * through the expanded variable.
+	 *
+	 * @since 5.0.8
+	 */
+	public final UriComponentsBuilder encode() {
+		return encode(StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * A variant of {@link #encode()} with a charset other than "UTF-8".
+	 * @param charset the charset to use for encoding
+	 * @since 5.0.8
+	 */
+	public UriComponentsBuilder encode(Charset charset) {
+		this.encodeTemplate = true;
+		this.charset = charset;
+		return this;
+	}
+
+
 	// build methods
 
 	/**
@@ -341,8 +384,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			return new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
-			return new HierarchicalUriComponents(this.scheme, this.fragment, this.userInfo,
-					this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded, true);
+			HierarchicalUriComponents uriComponents =
+					new HierarchicalUriComponents(this.scheme, this.fragment, this.userInfo,
+							this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded);
+
+			return this.encodeTemplate ? uriComponents.encodeTemplate(this.charset) : uriComponents;
 		}
 	}
 
@@ -354,7 +400,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return the URI components with expanded values
 	 */
 	public UriComponents buildAndExpand(Map<String, ?> uriVariables) {
-		return build(false).expand(uriVariables);
+		return build().expand(uriVariables);
 	}
 
 	/**
@@ -365,30 +411,17 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return the URI components with expanded values
 	 */
 	public UriComponents buildAndExpand(Object... uriVariableValues) {
-		return build(false).expand(uriVariableValues);
+		return build().expand(uriVariableValues);
 	}
 
-
-	/**
-	 * Build a {@link URI} instance and replaces URI template variables
-	 * with the values from an array.
-	 * @param uriVariables the map of URI variables
-	 * @return the URI
-	 */
 	@Override
 	public URI build(Object... uriVariables) {
-		return buildAndExpand(uriVariables).encode().toUri();
+		return encode().buildAndExpand(uriVariables).toUri();
 	}
 
-	/**
-	 * Build a {@link URI} instance and replaces URI template variables
-	 * with the values from a map.
-	 * @param uriVariables the map of URI variables
-	 * @return the URI
-	 */
 	@Override
 	public URI build(Map<String, ?> uriVariables) {
-		return buildAndExpand(uriVariables).encode().toUri();
+		return encode().buildAndExpand(uriVariables).toUri();
 	}
 
 
@@ -400,7 +433,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @see UriComponents#toUriString()
 	 */
 	public String toUriString() {
-		return build(false).encode().toUriString();
+		return build().encode().toUriString();
 	}
 
 
