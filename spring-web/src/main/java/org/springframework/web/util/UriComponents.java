@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -128,21 +129,22 @@ public abstract class UriComponents implements Serializable {
 
 
 	/**
-	 * A variant of {@link #encode(Charset)} that uses "UTF-8" as the charset.
-	 * @return a new {@code UriComponents} instance with encoded values
+	 * Invoke this <em>after</em> expanding URI variables to encode the
+	 * resulting URI component values.
+	 * <p>In comparison to {@link UriComponentsBuilder#encode()}, this method
+	 * quotes <em>only</em> illegal characters within a given URI component type,
+	 * but not all characters with reserved meaning. For most cases, prefer
+	 * using {@link UriComponentsBuilder#encode()} over this method.
+	 * @see UriComponentsBuilder#encode()
 	 */
 	public final UriComponents encode() {
 		return encode(StandardCharsets.UTF_8);
 	}
 
 	/**
-	 * Encode each URI component by percent encoding illegal characters, which
-	 * includes non-US-ASCII characters, and also characters that are otherwise
-	 * illegal within a given URI component type, as defined in RFC 3986. The
-	 * effect of this method, with regards to encoding, is comparable to using
-	 * the multi-argument constructor of {@link URI}.
-	 * @param charset the encoding of the values contained in this map
-	 * @return a new {@code UriComponents} instance with encoded values
+	 * A variant of {@link #encode()} with a charset other than "UTF-8".
+	 * @param charset the charset to use for encoding
+	 * @see UriComponentsBuilder#encode(Charset)
 	 */
 	public abstract UriComponents encode(Charset charset);
 
@@ -235,6 +237,13 @@ public abstract class UriComponents implements Serializable {
 
 	@Nullable
 	static String expandUriComponent(@Nullable String source, UriTemplateVariables uriVariables) {
+		return expandUriComponent(source, uriVariables, null);
+	}
+
+	@Nullable
+	static String expandUriComponent(@Nullable String source, UriTemplateVariables uriVariables,
+			@Nullable UnaryOperator<String> variableEncoder) {
+
 		if (source == null) {
 			return null;
 		}
@@ -249,13 +258,14 @@ public abstract class UriComponents implements Serializable {
 		while (matcher.find()) {
 			String match = matcher.group(1);
 			String variableName = getVariableName(match);
-			Object variableValue = uriVariables.getValue(variableName);
-			if (UriTemplateVariables.SKIP_VALUE.equals(variableValue)) {
+			Object variablesValue = uriVariables.getValue(variableName);
+			if (UriTemplateVariables.SKIP_VALUE.equals(variablesValue)) {
 				continue;
 			}
-			String variableValueString = getVariableValueAsString(variableValue);
-			String replacement = Matcher.quoteReplacement(variableValueString);
-			matcher.appendReplacement(sb, replacement);
+			String formattedValue = getVariableValueAsString(variablesValue);
+			formattedValue = Matcher.quoteReplacement(formattedValue);
+			formattedValue = variableEncoder != null ? variableEncoder.apply(formattedValue) : formattedValue;
+			matcher.appendReplacement(sb, formattedValue);
 		}
 		matcher.appendTail(sb);
 		return sb.toString();
@@ -299,7 +309,9 @@ public abstract class UriComponents implements Serializable {
 	public interface UriTemplateVariables {
 
 		/**
-		 * Indicates a skipped value.
+		 * Constant for a value that indicates a URI variable name should be
+		 * ignored and left as is. This is useful for partial expanding of some
+		 * but not all URI variables.
 		 */
 		Object SKIP_VALUE = UriTemplateVariables.class;
 
