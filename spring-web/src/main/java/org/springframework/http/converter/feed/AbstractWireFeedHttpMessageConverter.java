@@ -90,7 +90,7 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 				Charset.forName(wireFeed.getEncoding()) : DEFAULT_CHARSET);
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		if (contentType != null) {
-			contentType = new MediaType(contentType.getType(), contentType.getSubtype(), charset);
+			contentType = new MediaType(contentType, charset);
 			outputMessage.getHeaders().setContentType(contentType);
 		}
 

@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.rometools.rome.feed.atom.Entry;
 import com.rometools.rome.feed.atom.Feed;
@@ -37,6 +39,7 @@ import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.tests.XmlContent;
 
+import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -106,7 +109,9 @@ public class AtomFeedHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(feed, null, outputMessage);
 
-		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(new MediaType("application", "atom+xml", StandardCharsets.UTF_8));
+		assertThat(outputMessage.getHeaders().getContentType())
+				.as("Invalid content-type")
+				.isEqualTo(new MediaType("application", "atom+xml", StandardCharsets.UTF_8));
 		String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\">" + "<title>title</title>" +
 				"<entry><id>id1</id><title>title1</title></entry>" +
 				"<entry><id>id2</id><title>title2</title></entry></feed>";
@@ -125,7 +130,24 @@ public class AtomFeedHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(feed, null, outputMessage);
 
-		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(new MediaType("application", "atom+xml", Charset.forName(encoding)));
+		assertThat(outputMessage.getHeaders().getContentType())
+				.as("Invalid content-type")
+				.isEqualTo(new MediaType("application", "atom+xml", Charset.forName(encoding)));
+	}
+
+	@Test
+	public void writeOtherContentTypeParameters() throws IOException {
+		Feed feed = new Feed("atom_1.0");
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		converter.write(feed, new MediaType("application", "atom+xml", singletonMap("type", "feed")), outputMessage);
+
+		Map<String, String> expectedParameters = new HashMap<>();
+		expectedParameters.put("charset", "UTF-8");
+		expectedParameters.put("type", "feed");
+		assertThat(outputMessage.getHeaders().getContentType())
+				.as("Invalid content-type")
+				.isEqualTo(new MediaType("application", "atom+xml", expectedParameters));
 	}
 
 }
