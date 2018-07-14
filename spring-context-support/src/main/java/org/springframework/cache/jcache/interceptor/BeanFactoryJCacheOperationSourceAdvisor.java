@@ -19,6 +19,7 @@ package org.springframework.cache.jcache.interceptor;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
+import org.springframework.lang.Nullable;
 
 /**
  * Advisor driven by a {@link JCacheOperationSource}, used to include a
@@ -30,6 +31,7 @@ import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
 @SuppressWarnings("serial")
 public class BeanFactoryJCacheOperationSourceAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
+	@Nullable
 	private JCacheOperationSource cacheOperationSource;
 
 	private final JCacheOperationSourcePointcut pointcut = new JCacheOperationSourcePointcut() {

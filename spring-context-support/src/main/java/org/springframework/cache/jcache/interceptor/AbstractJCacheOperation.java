@@ -50,7 +50,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 
 
 	/**
-	 * Create a new instance.
+	 * Construct a new {@code AbstractJCacheOperation}.
 	 * @param methodDetails the {@link CacheMethodDetails} related to the cached method
 	 * @param cacheResolver the cache resolver to resolve regular caches
 	 */

@@ -39,6 +39,7 @@ abstract class AbstractKeyCacheInterceptor<O extends AbstractJCacheKeyOperation<
 		super(errorHandler);
 	}
 
+
 	/**
 	 * Generate a key for the specified invocation.
 	 * @param context the context of the invocation
@@ -58,8 +59,7 @@ abstract class AbstractKeyCacheInterceptor<O extends AbstractJCacheKeyOperation<
 	 * @param context the context of the invocation.
 	 * @return the related {@code CacheKeyInvocationContext}
 	 */
-	protected CacheKeyInvocationContext<A> createCacheKeyInvocationContext(
-			CacheOperationInvocationContext<O> context) {
+	protected CacheKeyInvocationContext<A> createCacheKeyInvocationContext(CacheOperationInvocationContext<O> context) {
 		return new DefaultCacheKeyInvocationContext<>(context.getOperation(), context.getTarget(), context.getArgs());
 	}
 

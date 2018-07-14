@@ -51,6 +51,7 @@ abstract class AbstractCacheInterceptor<O extends AbstractJCacheOperation<A>, A 
 	}
 
 
+	@Nullable
 	protected abstract Object invoke(CacheOperationInvocationContext<O> context, CacheOperationInvoker invoker)
 			throws Throwable;
 

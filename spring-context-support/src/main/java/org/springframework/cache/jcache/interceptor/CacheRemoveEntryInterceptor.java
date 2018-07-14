@@ -36,13 +36,14 @@ class CacheRemoveEntryInterceptor extends AbstractKeyCacheInterceptor<CacheRemov
 		super(errorHandler);
 	}
 
+
 	@Override
-	protected Object invoke(CacheOperationInvocationContext<CacheRemoveOperation> context,
-			CacheOperationInvoker invoker) {
+	protected Object invoke(
+			CacheOperationInvocationContext<CacheRemoveOperation> context, CacheOperationInvoker invoker) {
+
 		CacheRemoveOperation operation = context.getOperation();
 
-		final boolean earlyRemove = operation.isEarlyRemove();
-
+		boolean earlyRemove = operation.isEarlyRemove();
 		if (earlyRemove) {
 			removeValue(context);
 		}

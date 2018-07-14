@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache.config;
+package org.springframework.util.function;
 
-import org.springframework.cache.annotation.CachingConfigurerSupport;
-import org.springframework.cache.interceptor.CacheResolver;
+import java.util.function.Supplier;
+
 import org.springframework.lang.Nullable;
 
 /**
- * An extension of {@link CachingConfigurerSupport} that also implements
- * {@link JCacheConfigurer}.
+ * Convenience utilities for {@link java.util.function.Supplier} handling.
  *
- * <p>Users of JSR-107 annotations may extend from this class rather than
- * implementing from {@link JCacheConfigurer} directly.
- *
- * @author Stephane Nicoll
- * @since 4.1
- * @see JCacheConfigurer
- * @see CachingConfigurerSupport
+ * @author Juergen Hoeller
+ * @since 5.1
+ * @see SingletonSupplier
  */
-public class JCacheConfigurerSupport extends CachingConfigurerSupport implements JCacheConfigurer {
+public abstract class SupplierUtils {
 
-	@Override
+	/**
+	 * Resolve the given {@code Supplier}, getting its result or immediately
+	 * returning {@code null} if the supplier itself was {@code null}.
+	 * @param supplier the supplier to resolve
+	 * @return the supplier's result, or {@code null} if none
+	 */
 	@Nullable
-	public CacheResolver exceptionCacheResolver() {
-		return null;
+	public static <T> T resolve(@Nullable Supplier<T> supplier) {
+		return (supplier != null ? supplier.get() : null);
 	}
 
 }

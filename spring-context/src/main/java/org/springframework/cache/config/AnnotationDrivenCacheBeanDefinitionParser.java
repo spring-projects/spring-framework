@@ -112,21 +112,21 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	 */
 	private static void parseCacheResolution(Element element, BeanDefinition def, boolean setBoth) {
 		String name = element.getAttribute("cache-resolver");
-		if (StringUtils.hasText(name)) {
+		boolean hasText = StringUtils.hasText(name);
+		if (hasText) {
 			def.getPropertyValues().add("cacheResolver", new RuntimeBeanReference(name.trim()));
 		}
-		if (!StringUtils.hasText(name) || setBoth) {
+		if (!hasText || setBoth) {
 			def.getPropertyValues().add("cacheManager",
 					new RuntimeBeanReference(CacheNamespaceHandler.extractCacheManager(element)));
 		}
 	}
 
-	private static BeanDefinition parseErrorHandler(Element element, BeanDefinition def) {
+	private static void parseErrorHandler(Element element, BeanDefinition def) {
 		String name = element.getAttribute("error-handler");
 		if (StringUtils.hasText(name)) {
 			def.getPropertyValues().add("errorHandler", new RuntimeBeanReference(name.trim()));
 		}
-		return def;
 	}
 
 

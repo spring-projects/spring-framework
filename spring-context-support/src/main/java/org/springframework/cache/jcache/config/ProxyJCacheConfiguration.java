@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Role;
  * <p>Can safely be used alongside Spring's caching support.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  * @see org.springframework.cache.annotation.EnableCaching
  * @see org.springframework.cache.annotation.CachingConfigurationSelector
@@ -55,11 +56,8 @@ public class ProxyJCacheConfiguration extends AbstractJCacheConfiguration {
 	@Bean(name = "jCacheInterceptor")
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public JCacheInterceptor cacheInterceptor() {
-		JCacheInterceptor interceptor = new JCacheInterceptor();
+		JCacheInterceptor interceptor = new JCacheInterceptor(this.errorHandler);
 		interceptor.setCacheOperationSource(cacheOperationSource());
-		if (this.errorHandler != null) {
-			interceptor.setErrorHandler(this.errorHandler);
-		}
 		return interceptor;
 	}
 

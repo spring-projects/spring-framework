@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Role;
  * to enable proxy-based annotation-driven cache management.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see EnableCaching
  * @see CachingConfigurationSelector
@@ -61,19 +62,8 @@ public class ProxyCachingConfiguration extends AbstractCachingConfiguration {
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public CacheInterceptor cacheInterceptor() {
 		CacheInterceptor interceptor = new CacheInterceptor();
-		interceptor.setCacheOperationSources(cacheOperationSource());
-		if (this.cacheResolver != null) {
-			interceptor.setCacheResolver(this.cacheResolver);
-		}
-		else if (this.cacheManager != null) {
-			interceptor.setCacheManager(this.cacheManager);
-		}
-		if (this.keyGenerator != null) {
-			interceptor.setKeyGenerator(this.keyGenerator);
-		}
-		if (this.errorHandler != null) {
-			interceptor.setErrorHandler(this.errorHandler);
-		}
+		interceptor.configure(this.errorHandler, this.keyGenerator, this.cacheResolver, this.cacheManager);
+		interceptor.setCacheOperationSource(cacheOperationSource());
 		return interceptor;
 	}
 

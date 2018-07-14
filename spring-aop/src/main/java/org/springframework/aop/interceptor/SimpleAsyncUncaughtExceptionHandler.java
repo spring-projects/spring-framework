@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import org.apache.commons.logging.LogFactory;
  */
 public class SimpleAsyncUncaughtExceptionHandler implements AsyncUncaughtExceptionHandler {
 
-	private final Log logger = LogFactory.getLog(SimpleAsyncUncaughtExceptionHandler.class);
+	private static final Log logger = LogFactory.getLog(SimpleAsyncUncaughtExceptionHandler.class);
+
 
 	@Override
 	public void handleUncaughtException(Throwable ex, Method method, Object... params) {
 		if (logger.isErrorEnabled()) {
-			logger.error(String.format("Unexpected error occurred invoking async " +
-					"method '%s'.", method), ex);
+			logger.error("Unexpected error occurred invoking async method: " + method, ex);
 		}
 	}
 

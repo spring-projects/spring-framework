@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,16 +33,19 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -205,6 +208,29 @@ public class EnableAsyncTests {
 		asyncBean.work();
 		Thread.sleep(500);
 		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
+
+		TestableAsyncUncaughtExceptionHandler exceptionHandler = (TestableAsyncUncaughtExceptionHandler)
+				ctx.getBean("exceptionHandler");
+		assertFalse("handler should not have been called yet", exceptionHandler.isCalled());
+
+		asyncBean.fail();
+		Thread.sleep(500);
+		Method method = ReflectionUtils.findMethod(AsyncBean.class, "fail");
+		exceptionHandler.assertCalledWith(method, UnsupportedOperationException.class);
+
+		ctx.close();
+	}
+
+	@Test
+	public void customExecutorBeanConfig() throws InterruptedException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(CustomExecutorBeanConfig.class, ExecutorPostProcessor.class);
+		ctx.refresh();
+
+		AsyncBean asyncBean = ctx.getBean(AsyncBean.class);
+		asyncBean.work();
+		Thread.sleep(500);
+		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Post-"));
 
 		TestableAsyncUncaughtExceptionHandler exceptionHandler = (TestableAsyncUncaughtExceptionHandler)
 				ctx.getBean("exceptionHandler");
@@ -436,6 +462,53 @@ public class EnableAsyncTests {
 		@Bean
 		public AsyncUncaughtExceptionHandler exceptionHandler() {
 			return new TestableAsyncUncaughtExceptionHandler();
+		}
+	}
+
+
+	@Configuration
+	@EnableAsync
+	static class CustomExecutorBeanConfig implements AsyncConfigurer {
+
+		@Bean
+		public AsyncBean asyncBean() {
+			return new AsyncBean();
+		}
+
+		@Override
+		public Executor getAsyncExecutor() {
+			return executor();
+		}
+
+		@Bean
+		public ThreadPoolTaskExecutor executor() {
+			ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+			executor.setThreadNamePrefix("Custom-");
+			executor.initialize();
+			return executor;
+		}
+
+		@Override
+		public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+			return exceptionHandler();
+		}
+
+		@Bean
+		public AsyncUncaughtExceptionHandler exceptionHandler() {
+			return new TestableAsyncUncaughtExceptionHandler();
+		}
+	}
+
+
+	public static class ExecutorPostProcessor implements BeanPostProcessor {
+
+		@Nullable
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			if (bean instanceof ThreadPoolTaskExecutor) {
+				((ThreadPoolTaskExecutor) bean).setThreadNamePrefix("Post-");
+			}
+			return bean;
 		}
 	}
 
