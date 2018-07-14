@@ -85,7 +85,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	}
 
 	/**
-	 * Exception thrown when an HTTP 500 Too Many Requests is received.
+	 * Exception thrown when an HTTP 500 Internal Server Error is received.
 	 *
 	 * @since 5.1
 	 * @see DefaultResponseErrorHandler
