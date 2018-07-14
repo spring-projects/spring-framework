@@ -24,7 +24,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.rometools.rome.feed.atom.Entry;
 import com.rometools.rome.feed.atom.Feed;
@@ -38,6 +40,8 @@ import org.xmlunit.diff.NodeMatcher;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+
+import static java.util.Collections.singletonMap;
 
 /**
  * @author Arjen Poutsma
@@ -127,6 +131,20 @@ public class AtomFeedHttpMessageConverterTests {
 		converter.write(feed, null, outputMessage);
 
 		assertEquals("Invalid content-type", new MediaType("application", "atom+xml", Charset.forName(encoding)),
+				outputMessage.getHeaders().getContentType());
+	}
+
+	@Test
+	public void writeOtherContentTypeParameters() throws IOException {
+		Feed feed = new Feed("atom_1.0");
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		converter.write(feed, new MediaType("application", "atom+xml", singletonMap("type", "feed")), outputMessage);
+
+		Map<String, String> expectedParameters = new HashMap<>();
+		expectedParameters.put("charset", "UTF-8");
+		expectedParameters.put("type", "feed");
+		assertEquals("Invalid content-type", new MediaType("application", "atom+xml", expectedParameters),
 				outputMessage.getHeaders().getContentType());
 	}
 

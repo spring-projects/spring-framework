@@ -23,7 +23,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Item;
@@ -35,6 +37,8 @@ import org.xmlunit.matchers.CompareMatcher;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+
+import static java.util.Collections.singletonMap;
 
 /**
  * @author Arjen Poutsma
@@ -130,6 +134,23 @@ public class RssChannelHttpMessageConverterTests {
 		converter.write(channel, null, outputMessage);
 
 		assertEquals("Invalid content-type", new MediaType("application", "rss+xml", Charset.forName(encoding)),
+				outputMessage.getHeaders().getContentType());
+	}
+
+	@Test
+	public void writeOtherContentTypeParameters() throws IOException {
+		Channel channel = new Channel("rss_2.0");
+		channel.setTitle("title");
+		channel.setLink("http://example.com");
+		channel.setDescription("description");
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		converter.write(channel, new MediaType("application", "rss+xml", singletonMap("x", "y")), outputMessage);
+
+		Map<String, String> expectedParameters = new HashMap<>();
+		expectedParameters.put("charset", "UTF-8");
+		expectedParameters.put("x", "y");
+		assertEquals("Invalid content-type", new MediaType("application", "rss+xml", expectedParameters),
 				outputMessage.getHeaders().getContentType());
 	}
 
