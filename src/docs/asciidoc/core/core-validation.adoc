@@ -1554,7 +1554,7 @@ Each Bean Validation constraint consists of two parts. First, a `@Constraint` an
 that declares the constraint and its configurable properties. Second, an implementation
 of the `javax.validation.ConstraintValidator` interface that implements the constraint's
 behavior. To associate a declaration with an implementation, each `@Constraint` annotation
-references a corresponding ValidationConstraint implementation class. At runtime, a
+references a corresponding `ConstraintValidator` implementation class. At runtime, a
 `ConstraintValidatorFactory` instantiates the referenced implementation when the
 constraint annotation is encountered in your domain model.
 
