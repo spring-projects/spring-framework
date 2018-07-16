@@ -17,7 +17,6 @@
 package org.springframework.web.util;
 
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,16 +48,33 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	public enum EncodingMode {
 
 		/**
-		 * Apply strict encoding to URI variables at the time of expanding,
-		 * quoting both illegal characters and characters with reserved meaning
-		 * via {@link UriUtils#encode(String, Charset)}.
+		 * Encode the URI template first, and URI variables later when expanded,
+		 * applying the following to each:
+		 * <ul>
+		 * <li>URI template is encoded by quoting <em>only</em> illegal
+		 * characters within a given URI component type.
+		 * <li>URI variables are encoded strictly, by quoting both illegal
+		 * characters and characters with reserved meaning.
+		 * </ul>
+		 * <p>For most cases this should be the preferred encoding mode.
+		 * @since 5.0.8
+		 * @see UriComponentsBuilder#encode()
+		 */
+		TEMPLATE_AND_VALUES,
+
+		/**
+		 * Encode only URI variables strictly quoting both illegal characters
+		 * and characters with reserved meaning.
+		 * @see UriUtils#encodeUriVariables(Object...)
+		 * @see UriUtils#encodeUriVariables(Map)
 		 */
 		VALUES_ONLY,
 
 		/**
-		 * Expand URI variables first, then encode the resulting URI component
+		 * Expand URI variables first, and then encode the expanded URI component
 		 * values, quoting <em>only</em> illegal characters within a given URI
 		 * component type, but not all characters with reserved meaning.
+		 * @see UriComponents#encode()
 		 */
 		URI_COMPONENT,
 
@@ -110,7 +126,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 
 	/**
-	 * Specify the {@link EncodingMode EncodingMode} to use when building URIs.
+	 * Specify the {@link EncodingMode EncodingMode} to use to encode URIs.
 	 * <p>By default set to
 	 * {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}.
 	 * @param encodingMode the encoding mode to use
@@ -216,13 +232,17 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 				result = UriComponentsBuilder.fromUriString(uriTemplate);
 			}
 
+			if (encodingMode.equals(EncodingMode.TEMPLATE_AND_VALUES)) {
+				result.encode();
+			}
+
 			parsePathIfNecessary(result);
 
 			return result;
 		}
 
 		private void parsePathIfNecessary(UriComponentsBuilder result) {
-			if (shouldParsePath() && encodingMode.equals(EncodingMode.URI_COMPONENT)) {
+			if (parsePath && encodingMode.equals(EncodingMode.URI_COMPONENT)) {
 				UriComponents uric = result.build();
 				String path = uric.getPath();
 				result.replacePath(null);

@@ -98,6 +98,22 @@ public class DefaultUriBuilderFactoryTests {
 	}
 
 	@Test
+	public void encodeTemplateAndValues() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VALUES);
+		UriBuilder uriBuilder = factory.uriString("/hotel list/{city} specials?q={value}");
+
+		String expected = "/hotel%20list/Z%C3%BCrich%20specials?q=a%2Bb";
+
+		Map<String, Object> vars = new HashMap<>();
+		vars.put("city", "Z\u00fcrich");
+		vars.put("value", "a+b");
+
+		assertEquals(expected, uriBuilder.build("Z\u00fcrich", "a+b").toString());
+		assertEquals(expected, uriBuilder.build(vars).toString());
+	}
+
+	@Test
 	public void encodingValuesOnly() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
 		factory.setEncodingMode(EncodingMode.VALUES_ONLY);
