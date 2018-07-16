@@ -30,7 +30,7 @@ ext {
 
 	aspectjVersion       = "1.9.1"
 	freemarkerVersion    = "2.3.28"
-	groovyVersion        = "2.5.0"
+	groovyVersion        = "2.5.1"
 	hsqldbVersion        = "2.4.1"
 	jackson2Version      = "2.9.6"
 	jettyVersion         = "9.4.11.v20180605"
