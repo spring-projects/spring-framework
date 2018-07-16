@@ -728,9 +728,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		ConstructorsCollectionResourceInjectionBean bean = (ConstructorsCollectionResourceInjectionBean) bf.getBean("annotatedBean");
 		assertNull(bean.getTestBean3());
 		assertSame(tb, bean.getTestBean4());
-		assertEquals(2, bean.getNestedTestBeans().size());
-		assertNull(bean.getNestedTestBeans().get(0));
-		assertSame(ntb2, bean.getNestedTestBeans().get(1));
+		assertEquals(1, bean.getNestedTestBeans().size());
+		assertSame(ntb2, bean.getNestedTestBeans().get(0));
 
 		Map<String, NestedTestBean> map = bf.getBeansOfType(NestedTestBean.class);
 		assertNull(map.get("nestedTestBean1"));
@@ -924,12 +923,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean2", tb2);
 
 		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
-		assertEquals(2, bean.getTestBeanMap().size());
+		assertEquals(1, bean.getTestBeanMap().size());
 		assertSame(tb1, bean.getTestBeanMap().get("testBean1"));
 		assertNull(bean.getTestBeanMap().get("testBean2"));
 
 		bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
-		assertEquals(2, bean.getTestBeanMap().size());
+		assertEquals(1, bean.getTestBeanMap().size());
 		assertSame(tb1, bean.getTestBeanMap().get("testBean1"));
 		assertNull(bean.getTestBeanMap().get("testBean2"));
 	}

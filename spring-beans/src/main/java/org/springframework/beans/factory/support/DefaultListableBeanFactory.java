@@ -1318,7 +1318,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private void addCandidateEntry(Map<String, Object> candidates, String candidateName,
 			DependencyDescriptor descriptor, Class<?> requiredType) {
 
-		if (descriptor instanceof MultiElementDescriptor || containsSingleton(candidateName)) {
+		if (descriptor instanceof MultiElementDescriptor) {
+			Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
+			if (!(beanInstance instanceof NullBean)) {
+				candidates.put(candidateName, beanInstance);
+			}
+		}
+		else if (containsSingleton(candidateName)) {
 			Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
 			candidates.put(candidateName, (beanInstance instanceof NullBean ? null : beanInstance));
 		}
