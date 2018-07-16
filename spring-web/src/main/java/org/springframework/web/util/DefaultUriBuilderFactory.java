@@ -20,11 +20,9 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -51,42 +49,32 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	public enum EncodingMode {
 
 		/**
-		 * The default way of encoding that {@link UriComponents} supports:
-		 * <ol>
-		 * <li>Expand URI variables.
-		 * <li>Encode individual URI components as described in
-		 * {@link UriComponents#encode(Charset)}.
-		 * </ol>
-		 * <p>This mode <strong>does not</strong> encode all characters with
-		 * reserved meaning but only the ones that are illegal within a given
-		 * URI component as defined in RFC 396. This matches the way the
-		 * multi-argument {@link URI} constructor does encoding.
-		 */
-		URI_COMPONENT,
-
-		/**
-		 * Comprehensive encoding of URI variable values prior to expanding:
-		 * <ol>
-		 * <li>Apply {@link UriUtils#encode(String, Charset)} to each URI variable value.
-		 * <li>Expand URI variable values.
-		 * </ol>
-		 * <p>This mode encodes all characters with reserved meaning, therefore
-		 * ensuring that expanded URI variable do not have any impact on the
-		 * structure or meaning of the URI.
+		 * Apply strict encoding to URI variables at the time of expanding,
+		 * quoting both illegal characters and characters with reserved meaning
+		 * via {@link UriUtils#encode(String, Charset)}.
 		 */
 		VALUES_ONLY,
 
 		/**
+		 * Expand URI variables first, then encode the resulting URI component
+		 * values, quoting <em>only</em> illegal characters within a given URI
+		 * component type, but not all characters with reserved meaning.
+		 */
+		URI_COMPONENT,
+
+		/**
 		 * No encoding should be applied.
 		 */
-		NONE }
+		NONE
+	}
 
 
+	@Nullable
 	private final UriComponentsBuilder baseUri;
 
-	private final Map<String, Object> defaultUriVariables = new HashMap<>();
-
 	private EncodingMode encodingMode = EncodingMode.URI_COMPONENT;
+
+	private final Map<String, Object> defaultUriVariables = new HashMap<>();
 
 	private boolean parsePath = true;
 
@@ -96,7 +84,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * <p>The target address must be specified on each UriBuilder.
 	 */
 	public DefaultUriBuilderFactory() {
-		this(UriComponentsBuilder.newInstance());
+		this.baseUri = null;
 	}
 
 	/**
@@ -109,7 +97,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * @param baseUriTemplate the URI template to use a base URL
 	 */
 	public DefaultUriBuilderFactory(String baseUriTemplate) {
-		this(UriComponentsBuilder.fromUriString(baseUriTemplate));
+		this.baseUri = UriComponentsBuilder.fromUriString(baseUriTemplate);
 	}
 
 	/**
@@ -117,10 +105,26 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * {@code UriComponentsBuilder}.
 	 */
 	public DefaultUriBuilderFactory(UriComponentsBuilder baseUri) {
-		Assert.notNull(baseUri, "'baseUri' is required");
 		this.baseUri = baseUri;
 	}
 
+
+	/**
+	 * Specify the {@link EncodingMode EncodingMode} to use when building URIs.
+	 * <p>By default set to
+	 * {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}.
+	 * @param encodingMode the encoding mode to use
+	 */
+	public void setEncodingMode(EncodingMode encodingMode) {
+		this.encodingMode = encodingMode;
+	}
+
+	/**
+	 * Return the configured encoding mode.
+	 */
+	public EncodingMode getEncodingMode() {
+		return this.encodingMode;
+	}
 
 	/**
 	 * Provide default URI variable values to use when expanding URI templates
@@ -142,30 +146,10 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	}
 
 	/**
-	 * Specify the {@link EncodingMode EncodingMode} to use when building URIs.
-	 * <p>By default set to
-	 * {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}.
-	 * @param encodingMode the encoding mode to use
-	 */
-	public void setEncodingMode(EncodingMode encodingMode) {
-		this.encodingMode = encodingMode;
-	}
-
-	/**
-	 * Return the configured encoding mode.
-	 */
-	public EncodingMode getEncodingMode() {
-		return this.encodingMode;
-	}
-
-	/**
-	 * Whether to parse the path into path segments for the URI string passed
-	 * into {@link #uriString(String)} or one of the expand methods.
-	 * <p>Setting this property to {@code true} ensures that URI variables
-	 * expanded into the path are subject to path segment encoding rules and
-	 * "/" characters are percent-encoded. If set to {@code false} the path is
-	 * kept as a full path and expanded URI variables will have "/" characters
-	 * preserved.
+	 * Whether to parse the input path into path segments if the encoding mode
+	 * is set to {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT},
+	 * which ensures that URI variables in the path are encoded according to
+	 * path segment rules and for example a '/' is encoded.
 	 * <p>By default this is set to {@code true}.
 	 * @param parsePath whether to parse the path into path segments
 	 */
@@ -174,7 +158,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	}
 
 	/**
-	 * Whether the handler is configured to parse the path into path segments.
+	 * Whether to parse the path into path segments if the encoding mode is set
+	 * to {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}.
 	 */
 	public boolean shouldParsePath() {
 		return this.parsePath;
@@ -210,29 +195,46 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		private final UriComponentsBuilder uriComponentsBuilder;
 
+
 		public DefaultUriBuilder(String uriTemplate) {
 			this.uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
 		}
 
 		private UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
-			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(uriTemplate);
-			UriComponents uriComponents = uriComponentsBuilder.build();
-			UriComponentsBuilder result = (uriComponents.getHost() == null ?
-					baseUri.cloneBuilder().uriComponents(uriComponents) : uriComponentsBuilder);
 
-			if (shouldParsePath()) {
+			if (StringUtils.isEmpty(uriTemplate)) {
+				return baseUri != null ? baseUri.cloneBuilder() : UriComponentsBuilder.newInstance();
+			}
+
+			UriComponentsBuilder result;
+			if (baseUri != null) {
+				UriComponentsBuilder uricBuilder = UriComponentsBuilder.fromUriString(uriTemplate);
+				UriComponents uric = uricBuilder.build();
+				result = uric.getHost() == null ? baseUri.cloneBuilder().uriComponents(uric) : uricBuilder;
+			}
+			else {
+				result = UriComponentsBuilder.fromUriString(uriTemplate);
+			}
+
+			parsePathIfNecessary(result);
+
+			return result;
+		}
+
+		private void parsePathIfNecessary(UriComponentsBuilder result) {
+			if (shouldParsePath() && encodingMode.equals(EncodingMode.URI_COMPONENT)) {
 				UriComponents uric = result.build();
 				String path = uric.getPath();
-				List<String> pathSegments = uric.getPathSegments();
 				result.replacePath(null);
-				result.pathSegment(StringUtils.toStringArray(pathSegments));
+				for (String segment : uric.getPathSegments()) {
+					result.pathSegment(segment);
+				}
 				if (path != null && path.endsWith("/")) {
 					result.path("/");
 				}
 			}
-
-			return result;
 		}
+
 
 		@Override
 		public DefaultUriBuilder scheme(@Nullable String scheme) {
@@ -335,11 +337,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 			if (encodingMode.equals(EncodingMode.VALUES_ONLY)) {
 				uriVars = UriUtils.encodeUriVariables(uriVars);
 			}
-			UriComponents uriComponents = this.uriComponentsBuilder.build().expand(uriVars);
-			if (encodingMode.equals(EncodingMode.URI_COMPONENT)) {
-				uriComponents = uriComponents.encode();
-			}
-			return URI.create(uriComponents.toString());
+			UriComponents uric = this.uriComponentsBuilder.build().expand(uriVars);
+			return createUri(uric);
 		}
 
 		@Override
@@ -350,11 +349,15 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 			if (encodingMode.equals(EncodingMode.VALUES_ONLY)) {
 				uriVars = UriUtils.encodeUriVariables(uriVars);
 			}
-			UriComponents uriComponents = this.uriComponentsBuilder.build().expand(uriVars);
+			UriComponents uric = this.uriComponentsBuilder.build().expand(uriVars);
+			return createUri(uric);
+		}
+
+		private URI createUri(UriComponents uric) {
 			if (encodingMode.equals(EncodingMode.URI_COMPONENT)) {
-				uriComponents = uriComponents.encode();
+				uric = uric.encode();
 			}
-			return URI.create(uriComponents.toString());
+			return URI.create(uric.toString());
 		}
 	}
 
