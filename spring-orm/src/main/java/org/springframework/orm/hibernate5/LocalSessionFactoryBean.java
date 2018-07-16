@@ -27,6 +27,7 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.model.naming.ImplicitNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
+import org.hibernate.cache.spi.RegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
@@ -110,16 +111,19 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	private Object jtaTransactionManager;
 
 	@Nullable
+	private RegionFactory cacheRegionFactory;
+
+	@Nullable
 	private MultiTenantConnectionProvider multiTenantConnectionProvider;
 
 	@Nullable
 	private CurrentTenantIdentifierResolver currentTenantIdentifierResolver;
 
 	@Nullable
-	private TypeFilter[] entityTypeFilters;
+	private Properties hibernateProperties;
 
 	@Nullable
-	private Properties hibernateProperties;
+	private TypeFilter[] entityTypeFilters;
 
 	@Nullable
 	private Class<?>[] annotatedClasses;
@@ -259,7 +263,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Set a Hibernate 5.0 ImplicitNamingStrategy for the SessionFactory.
+	 * Set a Hibernate 5 {@link ImplicitNamingStrategy} for the SessionFactory.
 	 * @see Configuration#setImplicitNamingStrategy
 	 */
 	public void setImplicitNamingStrategy(ImplicitNamingStrategy implicitNamingStrategy) {
@@ -267,7 +271,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Set a Hibernate 5.0 PhysicalNamingStrategy for the SessionFactory.
+	 * Set a Hibernate 5 {@link PhysicalNamingStrategy} for the SessionFactory.
 	 * @see Configuration#setPhysicalNamingStrategy
 	 */
 	public void setPhysicalNamingStrategy(PhysicalNamingStrategy physicalNamingStrategy) {
@@ -285,6 +289,18 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
+	 * Set the Hibernate {@link RegionFactory} to use for the SessionFactory.
+	 * Allows for using a Spring-managed {@code RegionFactory} instance.
+	 * <p>Note: If this is set, the Hibernate settings should not define a
+	 * cache provider to avoid meaningless double configuration.
+	 * @since 5.1
+	 * @see LocalSessionFactoryBuilder#setCacheRegionFactory
+	 */
+	public void setCacheRegionFactory(RegionFactory cacheRegionFactory) {
+		this.cacheRegionFactory = cacheRegionFactory;
+	}
+
+	/**
 	 * Set a {@link MultiTenantConnectionProvider} to be passed on to the SessionFactory.
 	 * @since 4.3
 	 * @see LocalSessionFactoryBuilder#setMultiTenantConnectionProvider
@@ -299,17 +315,6 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public void setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver currentTenantIdentifierResolver) {
 		this.currentTenantIdentifierResolver = currentTenantIdentifierResolver;
-	}
-
-	/**
-	 * Specify custom type filters for Spring-based scanning for entity classes.
-	 * <p>Default is to search all specified packages for classes annotated with
-	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
-	 * or {@code @javax.persistence.MappedSuperclass}.
-	 * @see #setPackagesToScan
-	 */
-	public void setEntityTypeFilters(TypeFilter... entityTypeFilters) {
-		this.entityTypeFilters = entityTypeFilters;
 	}
 
 	/**
@@ -332,6 +337,17 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			this.hibernateProperties = new Properties();
 		}
 		return this.hibernateProperties;
+	}
+
+	/**
+	 * Specify custom type filters for Spring-based scanning for entity classes.
+	 * <p>Default is to search all specified packages for classes annotated with
+	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
+	 * or {@code @javax.persistence.MappedSuperclass}.
+	 * @see #setPackagesToScan
+	 */
+	public void setEntityTypeFilters(TypeFilter... entityTypeFilters) {
+		this.entityTypeFilters = entityTypeFilters;
 	}
 
 	/**
@@ -546,6 +562,10 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			sfb.setBeanContainer(this.beanFactory);
 		}
 
+		if (this.cacheRegionFactory != null) {
+			sfb.setCacheRegionFactory(this.cacheRegionFactory);
+		}
+
 		if (this.multiTenantConnectionProvider != null) {
 			sfb.setMultiTenantConnectionProvider(this.multiTenantConnectionProvider);
 		}
@@ -554,12 +574,12 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			sfb.setCurrentTenantIdentifierResolver(this.currentTenantIdentifierResolver);
 		}
 
-		if (this.entityTypeFilters != null) {
-			sfb.setEntityTypeFilters(this.entityTypeFilters);
-		}
-
 		if (this.hibernateProperties != null) {
 			sfb.addProperties(this.hibernateProperties);
+		}
+
+		if (this.entityTypeFilters != null) {
+			sfb.setEntityTypeFilters(this.entityTypeFilters);
 		}
 
 		if (this.annotatedClasses != null) {

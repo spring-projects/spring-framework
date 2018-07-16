@@ -40,6 +40,7 @@ import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
+import org.hibernate.cache.spi.RegionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
@@ -254,6 +255,19 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 */
 	public LocalSessionFactoryBuilder setBeanContainer(ConfigurableListableBeanFactory beanFactory) {
 		getProperties().put(AvailableSettings.BEAN_CONTAINER, new SpringBeanContainer(beanFactory));
+		return this;
+	}
+
+	/**
+	 * Set the Hibernate {@link RegionFactory} to use for the SessionFactory.
+	 * Allows for using a Spring-managed {@code RegionFactory} instance.
+	 * <p>Note: If this is set, the Hibernate settings should not define a
+	 * cache provider to avoid meaningless double configuration.
+	 * @since 5.1
+	 * @see AvailableSettings#CACHE_REGION_FACTORY
+	 */
+	public LocalSessionFactoryBuilder setCacheRegionFactory(RegionFactory cacheRegionFactory) {
+		getProperties().put(AvailableSettings.CACHE_REGION_FACTORY, cacheRegionFactory);
 		return this;
 	}
 
