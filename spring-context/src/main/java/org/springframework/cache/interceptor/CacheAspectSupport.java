@@ -693,6 +693,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final Collection<String> cacheNames;
 
+		@Nullable
+		private Boolean conditionPassing;
+
 		public CacheOperationContext(CacheOperationMetadata metadata, Object[] args, Object target) {
 			this.metadata = metadata;
 			this.args = extractArgs(metadata.method, args);
@@ -733,12 +736,17 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 
 		protected boolean isConditionPassing(@Nullable Object result) {
-			if (StringUtils.hasText(this.metadata.operation.getCondition())) {
-				EvaluationContext evaluationContext = createEvaluationContext(result);
-				return evaluator.condition(this.metadata.operation.getCondition(),
-						this.metadata.methodKey, evaluationContext);
+			if (this.conditionPassing == null) {
+				if (StringUtils.hasText(this.metadata.operation.getCondition())) {
+					EvaluationContext evaluationContext = createEvaluationContext(result);
+					this.conditionPassing = evaluator.condition(this.metadata.operation.getCondition(),
+							this.metadata.methodKey, evaluationContext);
+				}
+				else {
+					this.conditionPassing = true;
+				}
 			}
-			return true;
+			return this.conditionPassing;
 		}
 
 		protected boolean canPutToCache(@Nullable Object value) {
