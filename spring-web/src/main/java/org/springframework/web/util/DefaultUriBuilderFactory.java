@@ -74,6 +74,9 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		 * Expand URI variables first, and then encode the expanded URI component
 		 * values, quoting <em>only</em> illegal characters within a given URI
 		 * component type, but not all characters with reserved meaning.
+		 * <p>This is the mode historically used in the {@code RestTemplate} but
+		 * as of 5.0.8 {@link #TEMPLATE_AND_VALUES} is the recommended encoding
+		 * mode to use instead.
 		 * @see UriComponents#encode()
 		 */
 		URI_COMPONENT,
@@ -88,7 +91,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	@Nullable
 	private final UriComponentsBuilder baseUri;
 
-	private EncodingMode encodingMode = EncodingMode.URI_COMPONENT;
+	private EncodingMode encodingMode = EncodingMode.TEMPLATE_AND_VALUES;
 
 	private final Map<String, Object> defaultUriVariables = new HashMap<>();
 
@@ -127,8 +130,12 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	/**
 	 * Specify the {@link EncodingMode EncodingMode} to use to encode URIs.
-	 * <p>By default set to
-	 * {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}.
+	 *
+	 * <p><strong>Note:</strong> in 5.1 the default value was changed from
+	 * {@link EncodingMode#URI_COMPONENT URI_COMPONENT} to the now recommended
+	 * {@link EncodingMode#TEMPLATE_AND_VALUES TEMPLATE_AND_VALUES} mode of
+	 * encoding.
+	 *
 	 * @param encodingMode the encoding mode to use
 	 */
 	public void setEncodingMode(EncodingMode encodingMode) {

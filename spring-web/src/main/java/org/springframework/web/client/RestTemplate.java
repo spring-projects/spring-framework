@@ -60,6 +60,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 import org.springframework.web.util.UriTemplateHandler;
 
 /**
@@ -165,7 +166,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
-	private UriTemplateHandler uriTemplateHandler = new DefaultUriBuilderFactory();
+	private UriTemplateHandler uriTemplateHandler;
 
 	private final ResponseExtractor<HttpHeaders> headersExtractor = new HeadersExtractor();
 
@@ -209,6 +210,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		if (jackson2CborPresent) {
 			this.messageConverters.add(new MappingJackson2CborHttpMessageConverter());
 		}
+
+		this.uriTemplateHandler = initUriTemplateHandler();
 	}
 
 	/**
@@ -231,6 +234,13 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public RestTemplate(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "At least one HttpMessageConverter required");
 		this.messageConverters.addAll(messageConverters);
+		this.uriTemplateHandler = initUriTemplateHandler();
+	}
+
+	private static DefaultUriBuilderFactory initUriTemplateHandler() {
+		DefaultUriBuilderFactory uriFactory = new DefaultUriBuilderFactory();
+		uriFactory.setEncodingMode(EncodingMode.URI_COMPONENT); // for backwards compatibility..
+		return uriFactory;
 	}
 
 
@@ -299,16 +309,18 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	/**
-	 * Customize how URI templates are expanded into URI instances.
-	 * <p>By default {@link DefaultUriBuilderFactory} with default settings is
-	 * used. You can supply a {@code DefaultUriBuilderFactory} configured
-	 * differently, or an entirely different implementation, for example that
-	 * plugs in a 3rd party URI template library.
+	 * Configure a strategy for expanding URI templates.
+	 * <p>By default, {@link DefaultUriBuilderFactory} is used and for
+	 * backwards compatibility, the encoding mode is set to
+	 * {@link EncodingMode#URI_COMPONENT URI_COMPONENT}. As of 5.0.8, prefer
+	 * using {@link EncodingMode#TEMPLATE_AND_VALUES TEMPLATE_AND_VALUES}.
+	 *
 	 * <p><strong>Note:</strong> in 5.0 the switch from
 	 * {@link org.springframework.web.util.DefaultUriTemplateHandler
 	 * DefaultUriTemplateHandler} (deprecated in 4.3), as the default to use, to
 	 * {@link DefaultUriBuilderFactory} brings in a different default for the
 	 * {@code parsePath} property (switching from false to true).
+	 *
 	 * @param handler the URI template handler to use
 	 */
 	public void setUriTemplateHandler(UriTemplateHandler handler) {

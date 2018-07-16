@@ -160,6 +160,7 @@ public class DefaultUriBuilderFactoryTests {
 	@Test
 	public void parsePathIsTurnedOff() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("/foo/{bar}");
+		factory.setEncodingMode(EncodingMode.URI_COMPONENT);
 		factory.setParsePath(false);
 		URI uri = factory.uriString("/baz/{id}").build("a/b", "c/d");
 		assertEquals("/foo/a/b/baz/c/d", uri.toString());
