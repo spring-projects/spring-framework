@@ -43,7 +43,7 @@ import static org.mockito.BDDMockito.*;
 public class MarshallingHttpMessageConverterTests {
 
 	@Test
-	public void canRead() throws Exception {
+	public void canRead() {
 		Unmarshaller unmarshaller = mock(Unmarshaller.class);
 
 		given(unmarshaller.supports(Integer.class)).willReturn(false);
@@ -58,7 +58,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void canWrite() throws Exception {
+	public void canWrite() {
 		Marshaller marshaller = mock(Marshaller.class);
 
 		given(marshaller.supports(Integer.class)).willReturn(false);
@@ -136,8 +136,8 @@ public class MarshallingHttpMessageConverterTests {
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter(marshaller);
 		converter.write(body, null, outputMessage);
 
-		assertEquals("Invalid content-type", new MediaType("application", "xml"), outputMessage.getHeaders()
-				.getContentType());
+		assertEquals("Invalid content-type", new MediaType("application", "xml"),
+				outputMessage.getHeaders().getContentType());
 	}
 
 	@Test

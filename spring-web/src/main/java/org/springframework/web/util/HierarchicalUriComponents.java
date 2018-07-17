@@ -255,7 +255,6 @@ final class HierarchicalUriComponents extends UriComponents {
 	// Encoding
 
 	HierarchicalUriComponents encodeTemplate(Charset charset) {
-
 		if (this.encodeState.isEncoded()) {
 			return this;
 		}

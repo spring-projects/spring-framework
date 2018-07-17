@@ -325,25 +325,22 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 
-	// encode methods
+	// Encode methods
 
 	/**
 	 * Request to have the URI template encoded first at build time, and
 	 * URI variables encoded later when expanded.
-	 *
 	 * <p>In comparison to {@link UriComponents#encode()}, this method has the
 	 * same effect on the URI template, i.e. each URI component is encoded by
 	 * quoting <em>only</em> illegal characters within that URI component type.
 	 * However URI variables are encoded more strictly, by quoting both illegal
 	 * characters and characters with reserved meaning.
-	 *
 	 * <p>For most cases, prefer this method over {@link UriComponents#encode()}
 	 * which is useful only if intentionally expanding variables with reserved
 	 * characters. For example ';' is legal in a path, but also has reserved
 	 * meaning as a separator. When expanding a variable that contains ';' it
 	 * probably should be encoded, unless the intent is to insert path params
 	 * through the expanded variable.
-	 *
 	 * @since 5.0.8
 	 */
 	public final UriComponentsBuilder encode() {
@@ -362,7 +359,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 
-	// build methods
+	// Build methods
 
 	/**
 	 * Build a {@code UriComponents} instance from the various components contained in this builder.
@@ -387,8 +384,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			HierarchicalUriComponents uriComponents =
 					new HierarchicalUriComponents(this.scheme, this.fragment, this.userInfo,
 							this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded);
-
-			return this.encodeTemplate ? uriComponents.encodeTemplate(this.charset) : uriComponents;
+			return (this.encodeTemplate ? uriComponents.encodeTemplate(this.charset) : uriComponents);
 		}
 	}
 
