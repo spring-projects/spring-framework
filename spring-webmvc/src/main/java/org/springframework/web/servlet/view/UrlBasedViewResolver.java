@@ -52,12 +52,12 @@ import org.springframework.web.servlet.View;
  * "/WEB-INF/jsp/test.jsp"
  *
  * <p>As a special feature, redirect URLs can be specified via the "redirect:"
- * prefix. E.g.: "redirect:myAction.do" will trigger a redirect to the given
+ * prefix. E.g.: "redirect:myAction" will trigger a redirect to the given
  * URL, rather than resolution as standard view name. This is typically used
  * for redirecting to a controller URL after finishing a form workflow.
  *
- * <p>Furthermore, forward URLs can be specified via the "forward:" prefix. E.g.:
- * "forward:myAction.do" will trigger a forward to the given URL, rather than
+ * <p>Furthermore, forward URLs can be specified via the "forward:" prefix.
+ * E.g.: "forward:myAction" will trigger a forward to the given URL, rather than
  * resolution as standard view name. This is typically used for controller URLs;
  * it is not supposed to be used for JSP URLs - use logical view names there.
  *
@@ -224,7 +224,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * interpreted as relative to the web application root, i.e. the context
 	 * path will be prepended to the URL.
 	 * <p><b>Redirect URLs can be specified via the "redirect:" prefix.</b>
-	 * E.g.: "redirect:myAction.do"
+	 * E.g.: "redirect:myAction"
 	 * @see RedirectView#setContextRelative
 	 * @see #REDIRECT_URL_PREFIX
 	 */
@@ -251,7 +251,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * difference. However, some clients depend on 303 when redirecting
 	 * after a POST request; turn this flag off in such a scenario.
 	 * <p><b>Redirect URLs can be specified via the "redirect:" prefix.</b>
-	 * E.g.: "redirect:myAction.do"
+	 * E.g.: "redirect:myAction"
 	 * @see RedirectView#setHttp10Compatible
 	 * @see #REDIRECT_URL_PREFIX
 	 */
@@ -469,21 +469,26 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		if (!canHandle(viewName, locale)) {
 			return null;
 		}
+
 		// Check for special "redirect:" prefix.
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
-			RedirectView view = new RedirectView(redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+			RedirectView view = new RedirectView(redirectUrl,
+					isRedirectContextRelative(), isRedirectHttp10Compatible());
 			String[] hosts = getRedirectHosts();
 			if (hosts != null) {
 				view.setHosts(hosts);
 			}
-			return applyLifecycleMethods(viewName, view);
+			return applyLifecycleMethods(REDIRECT_URL_PREFIX, view);
 		}
+
 		// Check for special "forward:" prefix.
 		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
 			String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
-			return new InternalResourceView(forwardUrl);
+			InternalResourceView view = new InternalResourceView(forwardUrl);
+			return applyLifecycleMethods(FORWARD_URL_PREFIX, view);
 		}
+
 		// Else fall back to superclass implementation: calling loadView.
 		return super.createView(viewName, locale);
 	}
