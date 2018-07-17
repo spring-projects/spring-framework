@@ -99,37 +99,47 @@ that holds configuration and preferences:
 = URI Encoding
 [.small]#Spring MVC and Spring WebFlux#
 
-When using `UriComponentsBuilder` directly, this is the preferred way to encode:
+`UriComponentsBuilder` exposes encoding options at 2 levels:
+
+. {api-spring-framework}/web/util/UriComponentsBuilder.html#encode--[UriComponentsBuilder#encode()] -
+pre-encodes the URI template first, then strictly encodes URI variables when expanded.
+. {api-spring-framework}/web/util/UriComponents.html#encode--[UriComponents#encode()] -
+encodes URI components _after_ URI variables are expanded.
+
+Both options replace non-ASCII and illegal characters with escaped octets, however option
+1 also replaces characters with reserved meaning that appear in URI variables.
+
+[TIP]
+====
+Consider ";" which is legal in a path but has reserved meaning. Option 1 replaces
+";" with "%3B" in URI variables but not in the URI template. By contrast, option 2 never
+replaces ";" since it is a legal character in a path.
+====
+
+For most cases option 1 is likely to give the expected result because in treats URI
+variables as opaque data to be fully encoded, while option 2 is useful only if
+intentionally expanding URI variables that contain reserved characters.
+
+Example usage using option 1:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	String uriTemplate = "http://example.com/hotels/{hotel}";
-
-	URI uri = UriComponentsBuilder.fromUriString(uriTemplate)
+	UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
 			.encode()
-			.buildAndexpand("Westin", "123")
-			.toUri();
+			.buildAndexpand("New York", "foo+bar")
+			.toUriString();
+
+	// Result is "/hotel%20list/New%20York?foo%2Bbar"
 ----
 
-First, the URI template is encoded when `UriComponents` is built. Then URI variables are
-encoded separately when expanded. The following rules apply to each:
-
-* The URI template is encoded by quoting _only_ characters that are illegal within a
-given URI component type. For example, spaces are illegal in a path and therefore encoded.
-* URI variables are encoded more strictly, by quoting both illegal characters and also
-characters with reserved meaning. For example ";" is legal in a path but has reserved
-meaning (as a path parameter separator) and therefore encoded.
-
-The `WebClient` and the `RestTemplate` rely on a `UriBuilderFactory` to expand URI template
-and apply encoding. The `DefaultUriBuilderFactory` provides multiple encoding modes:
+The `WebClient` and the `RestTemplate` expand and encode URI templates internally through
+the `UriBuilderFactory` strategy. Both can be configured wiht a custom instance:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
-
 	String baseUrl = "http://example.com";
 	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl)
 	factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VALUES);
@@ -140,16 +150,17 @@ and apply encoding. The `DefaultUriBuilderFactory` provides multiple encoding mo
 	WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
 ----
 
-Internally `DefaultUriBuilderFactory` uses `UriComponentsBuilder`. The
-`EncodingMode.TEMPLATE_AND_VALUES` corresponds to the `UriComponentsBuilder` encoding
-example shown earlier. It is the preferred mode.
+The `DefaultUriBuilderFactory` implementation shown above uses `UriComponentsBuilder`
+internally. The approach to encoding is controlled through one of the encoding modes
+listed below:
 
-Out of the box, `RestTemplate` is configured with `EncodingMode.URI_COMPONENTS` which has
-been used historically and still is the default for backwards compatibility. It works by
-expanding URI variables first, and then encoding the expanded URI component values,
-quoting _only_ illegal characters within a given URI component type, but not all
-characters with reserved meaning. As of 5.0.8, you can switch to the preferred
-`EncodingMode.TEMPLATE_AND_VALUES`.
+* `TEMPLATE_AND_VALUES` -- uses `UriComponentsBuilder#encode()`, corresponding to option
+1 above, to pre-encode the URI template and strictly encode URI variables when expanded.
+* `VALUES_ONLY` -- variant of `TEMPLATE_AND_VALUES` that does not encode the URI template.
+* `URI_COMPONENTS` -- uses `UriComponents#encode()`, corresponding to option 2 above, to
+encode URI component value _after_ URI variables are expanded.
+* `NONE` -- no encoding is applied.
 
-`WebClient` is configured with `EncodingMode.TEMPLATE_AND_VALUES` by default starting in
-5.1, In 5.0.x however the default remains `EncodingMode.URI_COMPONENTS`.
+Out of the box the `RestTemplate` uses `EncodingMode.URI_COMPONENTS` for historic reasons
+and for backwards compatibility. The `WebClient` uses `EncodingMode.TEMPLATE_AND_VALUES`
+starting in 5.1, and `EncodingMode.URI_COMPONENTS` in 5.0.x.
