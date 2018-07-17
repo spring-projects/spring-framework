@@ -853,8 +853,12 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #getBindingResult()
 	 */
 	public void validate() {
+		Object target = getTarget();
+		Assert.state(target != null, "No target to validate");
+		BindingResult bindingResult = getBindingResult();
+		// Call each validator with the same binding result
 		for (Validator validator : this.validators) {
-			validator.validate(getTarget(), getBindingResult());
+			validator.validate(target, bindingResult);
 		}
 	}
 
@@ -862,16 +866,21 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Invoke the specified Validators, if any, with the given validation hints.
 	 * <p>Note: Validation hints may get ignored by the actual target Validator.
 	 * @param validationHints one or more hint objects to be passed to a {@link SmartValidator}
+	 * @since 3.1
 	 * @see #setValidator(Validator)
 	 * @see SmartValidator#validate(Object, Errors, Object...)
 	 */
 	public void validate(Object... validationHints) {
+		Object target = getTarget();
+		Assert.state(target != null, "No target to validate");
+		BindingResult bindingResult = getBindingResult();
+		// Call each validator with the same binding result
 		for (Validator validator : getValidators()) {
 			if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator) {
-				((SmartValidator) validator).validate(getTarget(), getBindingResult(), validationHints);
+				((SmartValidator) validator).validate(target, bindingResult, validationHints);
 			}
 			else if (validator != null) {
-				validator.validate(getTarget(), getBindingResult());
+				validator.validate(target, bindingResult);
 			}
 		}
 	}

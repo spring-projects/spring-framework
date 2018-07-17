@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.validation;
-
-import org.springframework.lang.Nullable;
 
 /**
  * A validator for application-specific objects.
@@ -61,6 +59,7 @@ import org.springframework.lang.Nullable;
  * application.
  *
  * @author Rod Johnson
+ * @see SmartValidator
  * @see Errors
  * @see ValidationUtils
  */
@@ -87,10 +86,10 @@ public interface Validator {
 	 * typically has (or would) return {@code true}.
 	 * <p>The supplied {@link Errors errors} instance can be used to report
 	 * any resulting validation errors.
-	 * @param target the object that is to be validated (can be {@code null})
-	 * @param errors contextual state about the validation process (never {@code null})
+	 * @param target the object that is to be validated
+	 * @param errors contextual state about the validation process
 	 * @see ValidationUtils
 	 */
-	void validate(@Nullable Object target, Errors errors);
+	void validate(Object target, Errors errors);
 
 }

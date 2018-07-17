@@ -160,9 +160,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 				catch (Exception ex) {
 					// Leave stack trace for later, e.g. AbstractHandlerExceptionResolver
-					String message = ex.getMessage();
-					if (!message.contains(parameter.getExecutable().toGenericString())) {
-						if (logger.isDebugEnabled()) {
+					if (logger.isDebugEnabled()) {
+						String message = ex.getMessage();
+						if (message != null && !message.contains(parameter.getExecutable().toGenericString())) {
 							logger.debug(formatArgumentError(parameter, message));
 						}
 					}

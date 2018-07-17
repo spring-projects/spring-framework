@@ -222,7 +222,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		if (fieldError != null) {
 			Object value = fieldError.getRejectedValue();
 			// Do not apply formatting on binding failures like type mismatches.
-			return (fieldError.isBindingFailure() ? value : formatFieldValue(field, value));
+			return (fieldError.isBindingFailure() || getTarget() == null ? value : formatFieldValue(field, value));
 		}
 		else if (getTarget() != null) {
 			Object value = getActualFieldValue(fixedField(field));
@@ -321,9 +321,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public String[] resolveMessageCodes(String errorCode, @Nullable String field) {
-		Class<?> fieldType = (getTarget() != null ? getFieldType(field) : null);
 		return getMessageCodesResolver().resolveMessageCodes(
-				errorCode, getObjectName(), fixedField(field), fieldType);
+				errorCode, getObjectName(), fixedField(field), getFieldType(field));
 	}
 
 	@Override
@@ -332,7 +331,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
-	public void recordFieldValue(String field, Class<?> type, Object value) {
+	public void recordFieldValue(String field, Class<?> type, @Nullable Object value) {
 		this.fieldTypes.put(field, type);
 		this.fieldValues.put(field, value);
 	}
