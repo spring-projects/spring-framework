@@ -772,7 +772,9 @@ public abstract class StringUtils {
 	public static Locale parseLocale(String localeValue) {
 		String[] tokens = tokenizeLocaleSource(localeValue);
 		if (tokens.length == 1) {
-			return Locale.forLanguageTag(localeValue);
+			validateLocalePart(localeValue);
+			Locale resolved = Locale.forLanguageTag(localeValue);
+			return (resolved.getLanguage().length() > 0 ? resolved : null);
 		}
 		return parseLocaleTokens(localeValue, tokens);
 	}
@@ -821,7 +823,7 @@ public abstract class StringUtils {
 	private static void validateLocalePart(String localePart) {
 		for (int i = 0; i < localePart.length(); i++) {
 			char ch = localePart.charAt(i);
-			if (ch != ' ' && ch != '_' && ch != '#' && !Character.isLetterOrDigit(ch)) {
+			if (ch != ' ' && ch != '_' && ch != '-' && ch != '#' && !Character.isLetterOrDigit(ch)) {
 				throw new IllegalArgumentException(
 						"Locale part \"" + localePart + "\" contains invalid characters");
 			}
