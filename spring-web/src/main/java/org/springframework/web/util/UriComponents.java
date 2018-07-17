@@ -132,9 +132,10 @@ public abstract class UriComponents implements Serializable {
 	 * Invoke this <em>after</em> expanding URI variables to encode the
 	 * resulting URI component values.
 	 * <p>In comparison to {@link UriComponentsBuilder#encode()}, this method
-	 * quotes <em>only</em> illegal characters within a given URI component type,
-	 * but not all characters with reserved meaning. For most cases, prefer
-	 * using {@link UriComponentsBuilder#encode()} over this method.
+	 * <em>only</em> replaces non-ASCII and illegal (within a given URI
+	 * component type) characters, but not characters with reserved meaning.
+	 * For most cases, {@link UriComponentsBuilder#encode()} is more likely
+	 * to give the expected result.
 	 * @see UriComponentsBuilder#encode()
 	 */
 	public final UriComponents encode() {

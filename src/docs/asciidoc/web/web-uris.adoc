@@ -116,9 +116,9 @@ Consider ";" which is legal in a path but has reserved meaning. Option 1 replace
 replaces ";" since it is a legal character in a path.
 ====
 
-For most cases option 1 is likely to give the expected result because in treats URI
+For most cases option 1 is likely to give the expected result because it treats URI
 variables as opaque data to be fully encoded, while option 2 is useful only if
-intentionally expanding URI variables that contain reserved characters.
+URI variables intentionally contain reserved characters.
 
 Example usage using option 1:
 
@@ -135,7 +135,7 @@ Example usage using option 1:
 ----
 
 The `WebClient` and the `RestTemplate` expand and encode URI templates internally through
-the `UriBuilderFactory` strategy. Both can be configured wiht a custom instance:
+the `UriBuilderFactory` strategy. Both can be configured with a custom strategy:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -144,23 +144,29 @@ the `UriBuilderFactory` strategy. Both can be configured wiht a custom instance:
 	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl)
 	factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VALUES);
 
+	// Customize the RestTemplate..
 	RestTemplate restTemplate = new RestTemplate();
 	restTemplate.setUriTemplateHandler(factory);
 
+	// Customize the WebClient..
 	WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
 ----
 
-The `DefaultUriBuilderFactory` implementation shown above uses `UriComponentsBuilder`
-internally. The approach to encoding is controlled through one of the encoding modes
-listed below:
+The `DefaultUriBuilderFactory` implementation uses `UriComponentsBuilder` internally to
+expand and encode URI templates. As a factory it provides a single place to configure
+the approach to encoding based on one of the below encoding modes:
 
-* `TEMPLATE_AND_VALUES` -- uses `UriComponentsBuilder#encode()`, corresponding to option
-1 above, to pre-encode the URI template and strictly encode URI variables when expanded.
-* `VALUES_ONLY` -- variant of `TEMPLATE_AND_VALUES` that does not encode the URI template.
+* `TEMPLATE_AND_VALUES` -- uses `UriComponentsBuilder#encode()`, corresponding to
+option 1 above, to pre-encode the URI template and strictly encode URI variables when
+expanded.
+* `VALUES_ONLY` -- does not encode the URI template and instead applies strict encoding
+to URI variables via `UriUtils#encodeUriUriVariables` prior to expanding them into the
+template.
 * `URI_COMPONENTS` -- uses `UriComponents#encode()`, corresponding to option 2 above, to
 encode URI component value _after_ URI variables are expanded.
 * `NONE` -- no encoding is applied.
 
-Out of the box the `RestTemplate` uses `EncodingMode.URI_COMPONENTS` for historic reasons
-and for backwards compatibility. The `WebClient` uses `EncodingMode.TEMPLATE_AND_VALUES`
-starting in 5.1, and `EncodingMode.URI_COMPONENTS` in 5.0.x.
+Out of the box the `RestTemplate` is set to `EncodingMode.URI_COMPONENTS` for historic
+reasons and for backwards compatibility. The `WebClient` relies on the default value
+in `DefaultUriBuilderFactory` which was changed from `EncodingMode.URI_COMPONENTS` in
+5.0.x to `EncodingMode.TEMPLATE_AND_VALUES` in 5.1.

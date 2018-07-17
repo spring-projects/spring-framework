@@ -40,40 +40,44 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
-
 	/**
-	 * Constants that represent different URI encoding strategies.
+	 * Enum to represent multiple URI encoding strategies.
 	 * @see #setEncodingMode
 	 */
 	public enum EncodingMode {
 
 		/**
-		 * Encode the URI template first, and URI variables later when expanded,
-		 * applying the following to each:
+		 * Pre-encode the URI template first, then strictly encode URI variables
+		 * when expanded, with the following rules:
 		 * <ul>
-		 * <li>URI template is encoded by quoting <em>only</em> illegal
-		 * characters within a given URI component type.
-		 * <li>URI variables are encoded strictly, by quoting both illegal
-		 * characters and characters with reserved meaning.
+		 * <li>For the URI template replace <em>only</em> non-ASCII and illegal
+		 * (within a given URI component type) characters with escaped octets.
+		 * <li>For URI variables do the same and also replace characters with
+		 * reserved meaning.
 		 * </ul>
-		 * <p>For most cases this should be the preferred encoding mode.
+		 * <p>For most cases, this mode is most likely to give the expected
+		 * result because in treats URI variables as opaque data to be fully
+		 * encoded, while {@link #URI_COMPONENT} by comparison is useful only
+		 * if intentionally expanding URI variables with reserved characters.
 		 * @since 5.0.8
 		 * @see UriComponentsBuilder#encode()
 		 */
 		TEMPLATE_AND_VALUES,
 
 		/**
-		 * Encode only URI variables strictly quoting both illegal characters
-		 * and characters with reserved meaning.
+		 * Does not encode the URI template and instead applies strict encoding
+		 * to URI variables via {@link UriUtils#encodeUriVariables} prior to
+		 * expanding them into the template.
 		 * @see UriUtils#encodeUriVariables(Object...)
 		 * @see UriUtils#encodeUriVariables(Map)
 		 */
 		VALUES_ONLY,
 
 		/**
-		 * Expand URI variables first, and then encode the expanded URI component
-		 * values, quoting <em>only</em> illegal characters within a given URI
-		 * component type, but not all characters with reserved meaning.
+		 * Expand URI variables first, and then encode the resulting URI
+		 * component values, replacing <em>only</em> non-ASCII and illegal
+		 * (within a given URI component type) characters, but not characters
+		 * with reserved meaning.
 		 * @see UriComponents#encode()
 		 */
 		URI_COMPONENT,
@@ -126,9 +130,16 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 
 	/**
-	 * Specify the {@link EncodingMode EncodingMode} to use to encode URIs.
-	 * <p>By default set to
+	 * Set the encoding mode to use.
+	 * <p>By default this is set to {@link EncodingMode#TEMPLATE_AND_VALUES
+	 * EncodingMode.TEMPLATE_AND_VALUES}.
+	 * <p><strong>Note:</strong> In 5.1 the default was changed from
 	 * {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}.
+	 * Consequently the {@code WebClient}, which relies on the built-in default
+	 * has also been switched to the new default. The {@code RestTemplate}
+	 * however sets this explicitly to {@link EncodingMode#URI_COMPONENT
+	 * EncodingMode.URI_COMPONENT} explicitly for historic and backwards
+	 * compatibility reasons.
 	 * @param encodingMode the encoding mode to use
 	 */
 	public void setEncodingMode(EncodingMode encodingMode) {

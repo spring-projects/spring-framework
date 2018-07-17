@@ -328,22 +328,21 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	// encode methods
 
 	/**
-	 * Request to have the URI template encoded first at build time, and
-	 * URI variables encoded later when expanded.
-	 *
+	 * Request to have the URI template pre-encoded at build time, and
+	 * URI variables encoded separately when expanded.
 	 * <p>In comparison to {@link UriComponents#encode()}, this method has the
 	 * same effect on the URI template, i.e. each URI component is encoded by
-	 * quoting <em>only</em> illegal characters within that URI component type.
-	 * However URI variables are encoded more strictly, by quoting both illegal
-	 * characters and characters with reserved meaning.
-	 *
-	 * <p>For most cases, prefer this method over {@link UriComponents#encode()}
-	 * which is useful only if intentionally expanding variables with reserved
-	 * characters. For example ';' is legal in a path, but also has reserved
-	 * meaning as a separator. When expanding a variable that contains ';' it
-	 * probably should be encoded, unless the intent is to insert path params
-	 * through the expanded variable.
-	 *
+	 * replacing non-ASCII and illegal (within the URI component type) characters
+	 * with escaped octets. However URI variables are encoded more strictly, by
+	 * also escaping characters with reserved meaning.
+	 * <p>For most cases, this method is more likely to give the expected result
+	 * because in treats URI variables as opaque data to be fully encoded, while
+	 * {@link UriComponents#encode()} is useful only if intentionally expanding
+	 * URI variables that contain reserved characters.
+	 * <p>For example ';' is legal in a path but has reserved meaning. This
+	 * method replaces ";" with "%3B" in URI variables but not in the URI
+	 * template. By contrast, {@link UriComponents#encode()} never replaces ";"
+	 * since it is a legal character in a path.
 	 * @since 5.0.8
 	 */
 	public final UriComponentsBuilder encode() {
