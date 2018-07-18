@@ -19,18 +19,16 @@ package org.springframework.web.bind;
 import org.springframework.core.MethodParameter;
 
 /**
- * {@link ServletRequestBindingException} subclass that indicates that a path
+ * {@link ServletRequestBindingException} subclass that indicates that a matrix
  * variable expected in the method parameters of an {@code @RequestMapping}
- * method is not present among the URI variables extracted from the URL.
- * Typically that means the URI template does not match the path variable name
- * declared on the method parameter.
+ * method is not present among the matrix variables extracted from the URL.
  *
- * @author Rossen Stoyanchev
- * @since 4.2
- * @see MissingMatrixVariableException
+ * @author Juergen Hoeller
+ * @since 5.1
+ * @see MissingPathVariableException
  */
 @SuppressWarnings("serial")
-public class MissingPathVariableException extends ServletRequestBindingException {
+public class MissingMatrixVariableException extends ServletRequestBindingException {
 
 	private final String variableName;
 
@@ -38,11 +36,11 @@ public class MissingPathVariableException extends ServletRequestBindingException
 
 
 	/**
-	 * Constructor for MissingPathVariableException.
-	 * @param variableName the name of the missing path variable
+	 * Constructor for MissingMatrixVariableException.
+	 * @param variableName the name of the missing matrix variable
 	 * @param parameter the method parameter
 	 */
-	public MissingPathVariableException(String variableName, MethodParameter parameter) {
+	public MissingMatrixVariableException(String variableName, MethodParameter parameter) {
 		super("");
 		this.variableName = variableName;
 		this.parameter = parameter;
@@ -51,19 +49,19 @@ public class MissingPathVariableException extends ServletRequestBindingException
 
 	@Override
 	public String getMessage() {
-		return "Missing URI template variable '" + this.variableName +
+		return "Missing matrix variable '" + this.variableName +
 				"' for method parameter of type " + this.parameter.getNestedParameterType().getSimpleName();
 	}
 
 	/**
-	 * Return the expected name of the path variable.
+	 * Return the expected name of the matrix variable.
 	 */
 	public final String getVariableName() {
 		return this.variableName;
 	}
 
 	/**
-	 * Return the method parameter bound to the path variable.
+	 * Return the method parameter bound to the matrix variable.
 	 */
 	public final MethodParameter getParameter() {
 		return this.parameter;

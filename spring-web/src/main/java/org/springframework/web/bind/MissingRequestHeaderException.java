@@ -19,51 +19,49 @@ package org.springframework.web.bind;
 import org.springframework.core.MethodParameter;
 
 /**
- * {@link ServletRequestBindingException} subclass that indicates that a path
- * variable expected in the method parameters of an {@code @RequestMapping}
- * method is not present among the URI variables extracted from the URL.
- * Typically that means the URI template does not match the path variable name
- * declared on the method parameter.
+ * {@link ServletRequestBindingException} subclass that indicates
+ * that a request header expected in the method parameters of an
+ * {@code @RequestMapping} method is not present.
  *
- * @author Rossen Stoyanchev
- * @since 4.2
- * @see MissingMatrixVariableException
+ * @author Juergen Hoeller
+ * @since 5.1
+ * @see MissingRequestCookieException
  */
 @SuppressWarnings("serial")
-public class MissingPathVariableException extends ServletRequestBindingException {
+public class MissingRequestHeaderException extends ServletRequestBindingException {
 
-	private final String variableName;
+	private final String headerName;
 
 	private final MethodParameter parameter;
 
 
 	/**
-	 * Constructor for MissingPathVariableException.
-	 * @param variableName the name of the missing path variable
+	 * Constructor for MissingRequestHeaderException.
+	 * @param headerName the name of the missing request header
 	 * @param parameter the method parameter
 	 */
-	public MissingPathVariableException(String variableName, MethodParameter parameter) {
+	public MissingRequestHeaderException(String headerName, MethodParameter parameter) {
 		super("");
-		this.variableName = variableName;
+		this.headerName = headerName;
 		this.parameter = parameter;
 	}
 
 
 	@Override
 	public String getMessage() {
-		return "Missing URI template variable '" + this.variableName +
+		return "Missing request header '" + this.headerName +
 				"' for method parameter of type " + this.parameter.getNestedParameterType().getSimpleName();
 	}
 
 	/**
-	 * Return the expected name of the path variable.
+	 * Return the expected name of the request header.
 	 */
-	public final String getVariableName() {
-		return this.variableName;
+	public final String getHeaderName() {
+		return this.headerName;
 	}
 
 	/**
-	 * Return the method parameter bound to the path variable.
+	 * Return the method parameter bound to the request header.
 	 */
 	public final MethodParameter getParameter() {
 		return this.parameter;

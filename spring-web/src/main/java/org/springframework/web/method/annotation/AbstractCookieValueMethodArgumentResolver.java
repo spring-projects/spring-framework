@@ -20,6 +20,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -66,8 +67,7 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new ServletRequestBindingException("Missing cookie '" + name +
-				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
+		throw new MissingRequestCookieException(name, parameter);
 	}
 
 
