@@ -25,7 +25,8 @@ import org.springframework.util.ClassUtils;
  * debug information in the class file.
  *
  * <p>If Kotlin is present, {@link KotlinReflectionParameterNameDiscoverer} is added first
- * in the list and used for Kotlin classes and interfaces.
+ * in the list and used for Kotlin classes and interfaces. When compiling or running as
+ * a Graal native image, no {@link ParameterNameDiscoverer} is used.
  *
  * <p>Further discoverers may be added through {@link #addDiscoverer(ParameterNameDiscoverer)}.
  *
@@ -41,13 +42,18 @@ public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDisc
 	private static final boolean kotlinPresent =
 			ClassUtils.isPresent("kotlin.Unit", DefaultParameterNameDiscoverer.class.getClassLoader());
 
+	// See https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java
+	private static final boolean inImageCode = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
+
 
 	public DefaultParameterNameDiscoverer() {
-		if (kotlinPresent) {
-			addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
+		if (!inImageCode) {
+			if (kotlinPresent) {
+				addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
+			}
+			addDiscoverer(new StandardReflectionParameterNameDiscoverer());
+			addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		}
-		addDiscoverer(new StandardReflectionParameterNameDiscoverer());
-		addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 	}
 
 }
