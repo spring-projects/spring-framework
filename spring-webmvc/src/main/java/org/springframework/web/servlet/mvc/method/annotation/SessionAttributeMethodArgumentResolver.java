@@ -21,7 +21,7 @@ import javax.servlet.ServletException;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.MissingSessionAttributeException;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -56,8 +56,7 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueMe
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
-		throw new ServletRequestBindingException("Missing session attribute '" + name +
-				"' of type " +  parameter.getNestedParameterType().getSimpleName());
+		throw new MissingSessionAttributeException(name,  parameter.getNestedParameterType());
 	}
 
 }

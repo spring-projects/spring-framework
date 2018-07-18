@@ -21,7 +21,7 @@ import javax.servlet.ServletException;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.MissingServletRequestAttributeException;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -56,8 +56,7 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueMe
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
-		throw new ServletRequestBindingException("Missing request attribute '" + name +
-				"' of type " +  parameter.getNestedParameterType().getSimpleName());
+		throw new MissingServletRequestAttributeException(name, parameter.getNestedParameterType());
 	}
 
 }
