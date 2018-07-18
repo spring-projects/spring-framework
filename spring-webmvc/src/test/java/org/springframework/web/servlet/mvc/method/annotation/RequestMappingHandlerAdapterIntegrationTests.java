@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,13 +85,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * A test fixture with a controller with all supported method signature styles
@@ -378,7 +371,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 				User user,
 				@ModelAttribute OtherUser otherUser,
 				Model model,
-				UriComponentsBuilder builder) throws Exception {
+				UriComponentsBuilder builder) {
 
 			model.addAttribute("cookie", cookie).addAttribute("pathvar", pathvar).addAttribute("header", header)
 					.addAttribute("systemHeader", systemHeader).addAttribute("headerMap", headerMap)
@@ -404,7 +397,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 		@ResponseStatus(code = HttpStatus.ACCEPTED)
 		@ResponseBody
-		public String handleAndValidateRequestBody(@Valid TestBean modelAttr, Errors errors) throws Exception {
+		public String handleAndValidateRequestBody(@Valid TestBean modelAttr, Errors errors) {
 			return "Error count [" + errors.getErrorCount() + "]";
 		}
 
@@ -453,7 +446,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	private static class ColorArgumentResolver implements WebArgumentResolver {
 
 		@Override
-		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
+		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) {
 			return new Color(0);
 		}
 	}

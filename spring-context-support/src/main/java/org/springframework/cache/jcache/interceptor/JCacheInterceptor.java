@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.cache.interceptor.CacheOperationInvoker;
+import org.springframework.lang.Nullable;
 
 /**
  * AOP Alliance MethodInterceptor for declarative cache
@@ -42,6 +43,7 @@ import org.springframework.cache.interceptor.CacheOperationInvoker;
 public class JCacheInterceptor extends JCacheAspectSupport implements MethodInterceptor, Serializable {
 
 	@Override
+	@Nullable
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 

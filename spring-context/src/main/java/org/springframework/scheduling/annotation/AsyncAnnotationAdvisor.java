@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,9 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 
 	/**
 	 * Specify the default task executor to use for asynchronous methods.
+	 * @deprecated as of 5.0.8, in favor of {@link #AsyncAnnotationAdvisor(Executor, AsyncUncaughtExceptionHandler)}
 	 */
+	@Deprecated
 	public void setTaskExecutor(Executor executor) {
 		this.advice = buildAdvice(executor, this.exceptionHandler);
 	}

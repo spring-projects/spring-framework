@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.cache.annotation.CachePut;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ExceptionTypeFilter;
 
 /**
@@ -44,13 +45,17 @@ class CachePutOperation extends AbstractJCacheKeyOperation<CachePut> {
 			CacheMethodDetails<CachePut> methodDetails, CacheResolver cacheResolver, KeyGenerator keyGenerator) {
 
 		super(methodDetails, cacheResolver, keyGenerator);
+
 		CachePut ann = methodDetails.getCacheAnnotation();
 		this.exceptionTypeFilter = createExceptionTypeFilter(ann.cacheFor(), ann.noCacheFor());
-		this.valueParameterDetail = initializeValueParameterDetail(methodDetails.getMethod(), this.allParameterDetails);
-		if (this.valueParameterDetail == null) {
+
+		CacheParameterDetail valueParameterDetail =
+				initializeValueParameterDetail(methodDetails.getMethod(), this.allParameterDetails);
+		if (valueParameterDetail == null) {
 			throw new IllegalArgumentException("No parameter annotated with @CacheValue was found for " +
-					"" + methodDetails.getMethod());
+					methodDetails.getMethod());
 		}
+		this.valueParameterDetail = valueParameterDetail;
 	}
 
 
@@ -85,6 +90,7 @@ class CachePutOperation extends AbstractJCacheKeyOperation<CachePut> {
 	}
 
 
+	@Nullable
 	private static CacheParameterDetail initializeValueParameterDetail(
 			Method method, List<CacheParameterDetail> allParameters) {
 

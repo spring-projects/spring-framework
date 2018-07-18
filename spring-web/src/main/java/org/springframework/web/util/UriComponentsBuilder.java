@@ -325,7 +325,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 
-	// encode methods
+	// Encode methods
 
 	/**
 	 * Request to have the URI template pre-encoded at build time, and
@@ -361,7 +361,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 
-	// build methods
+	// Build methods
 
 	/**
 	 * Build a {@code UriComponents} instance from the various components contained in this builder.
@@ -386,8 +386,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			HierarchicalUriComponents uriComponents =
 					new HierarchicalUriComponents(this.scheme, this.fragment, this.userInfo,
 							this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded);
-
-			return this.encodeTemplate ? uriComponents.encodeTemplate(this.charset) : uriComponents;
+			return (this.encodeTemplate ? uriComponents.encodeTemplate(this.charset) : uriComponents);
 		}
 	}
 
@@ -406,7 +405,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * Build a {@code UriComponents} instance and replaces URI template variables
 	 * with the values from an array. This is a shortcut method which combines
 	 * calls to {@link #build()} and then {@link UriComponents#expand(Object...)}.
-	 * @param uriVariableValues URI variable values
+	 * @param uriVariableValues the URI variable values
 	 * @return the URI components with expanded values
 	 */
 	public UriComponents buildAndExpand(Object... uriVariableValues) {

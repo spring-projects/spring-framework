@@ -143,7 +143,7 @@ public interface BindingResult extends Errors {
 	 * @param value the original value
 	 * @since 5.0.4
 	 */
-	default void recordFieldValue(String field, Class<?> type, Object value) {
+	default void recordFieldValue(String field, Class<?> type, @Nullable Object value) {
 	}
 
 	/**

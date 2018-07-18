@@ -853,7 +853,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #getBindingResult()
 	 */
 	public void validate() {
-		for (Validator validator : this.validators) {
+		for (Validator validator : getValidators()) {
 			validator.validate(getTarget(), getBindingResult());
 		}
 	}

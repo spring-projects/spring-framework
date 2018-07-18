@@ -33,7 +33,6 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.validation.AbstractBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -289,13 +288,11 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		}
 
 		if (bindingFailure) {
-			if (binder.getBindingResult() instanceof AbstractBindingResult) {
-				AbstractBindingResult result = (AbstractBindingResult) binder.getBindingResult();
-				for (int i = 0; i < paramNames.length; i++) {
-					result.recordFieldValue(paramNames[i], paramTypes[i], args[i]);
-				}
+			BindingResult result = binder.getBindingResult();
+			for (int i = 0; i < paramNames.length; i++) {
+				result.recordFieldValue(paramNames[i], paramTypes[i], args[i]);
 			}
-			throw new BindException(binder.getBindingResult());
+			throw new BindException(result);
 		}
 
 		return BeanUtils.instantiateClass(ctor, args);
@@ -319,13 +316,17 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @param parameter the method parameter declaration
 	 */
 	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
-		Annotation[] annotations = parameter.getParameterAnnotations();
-		for (Annotation ann : annotations) {
+		for (Annotation ann : parameter.getParameterAnnotations()) {
 			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
 			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
 				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
-				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-				binder.validate(validationHints);
+				if (hints != null) {
+					Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+					binder.validate(validationHints);
+				}
+				else {
+					binder.validate();
+				}
 				break;
 			}
 		}
