@@ -29,8 +29,8 @@ import org.springframework.lang.Nullable;
  * @since 4.1
  * @param <A> the annotation type
  */
-class DefaultCacheKeyInvocationContext<A extends Annotation>
-		extends DefaultCacheInvocationContext<A> implements CacheKeyInvocationContext<A> {
+class DefaultCacheKeyInvocationContext<A extends Annotation> extends DefaultCacheInvocationContext<A>
+		implements CacheKeyInvocationContext<A> {
 
 	private final CacheInvocationParameter[] keyParameters;
 

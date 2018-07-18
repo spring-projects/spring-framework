@@ -309,8 +309,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			for (int i = 0; i < paramNames.length; i++) {
 				String paramName = paramNames[i];
 				if (!failedParams.contains(paramName)) {
-					result.recordFieldValue(paramName, paramTypes[i], args[i]);
-					validateValueIfApplicable(binder, parameter, ctor.getDeclaringClass(), paramName, args[i]);
+					Object value = args[i];
+					result.recordFieldValue(paramName, paramTypes[i], value);
+					validateValueIfApplicable(binder, parameter, ctor.getDeclaringClass(), paramName, value);
 				}
 			}
 			throw new BindException(result);
@@ -410,7 +411,10 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
 		if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
 			Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
-			return (hints instanceof Object[] ? (Object[]) hints : new Object[]{hints});
+			if (hints == null) {
+				return new Object[0];
+			}
+			return (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
 		}
 		return null;
 	}

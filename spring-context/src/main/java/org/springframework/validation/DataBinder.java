@@ -857,7 +857,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.state(target != null, "No target to validate");
 		BindingResult bindingResult = getBindingResult();
 		// Call each validator with the same binding result
-		for (Validator validator : this.validators) {
+		for (Validator validator : getValidators()) {
 			validator.validate(target, bindingResult);
 		}
 	}

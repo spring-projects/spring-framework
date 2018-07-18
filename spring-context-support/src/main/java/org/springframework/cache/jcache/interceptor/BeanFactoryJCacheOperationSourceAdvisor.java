@@ -41,6 +41,7 @@ public class BeanFactoryJCacheOperationSourceAdvisor extends AbstractBeanFactory
 		}
 	};
 
+
 	/**
 	 * Set the cache operation attribute source which is used to find cache
 	 * attributes. This should usually be identical to the source reference
