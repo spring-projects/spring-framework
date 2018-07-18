@@ -37,6 +37,7 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
@@ -125,6 +126,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractSubscribableChannel clientInboundChannel() {
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
+		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientInboundChannelRegistration();
 		if (reg.hasInterceptors()) {
 			channel.setInterceptors(reg.getInterceptors());
@@ -160,6 +162,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractSubscribableChannel clientOutboundChannel() {
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
+		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientOutboundChannelRegistration();
 		if (reg.hasInterceptors()) {
 			channel.setInterceptors(reg.getInterceptors());
@@ -198,6 +201,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		ExecutorSubscribableChannel channel = (reg.hasTaskExecutor() ?
 				new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel());
 		reg.interceptors(new ImmutableMessageChannelInterceptor());
+		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		channel.setInterceptors(reg.getInterceptors());
 		return channel;
 	}

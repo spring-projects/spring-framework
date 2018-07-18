@@ -24,10 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
@@ -51,7 +51,7 @@ public class StompDecoder {
 
 	static final byte[] HEARTBEAT_PAYLOAD = new byte[] {'\n'};
 
-	private static final Log logger = LogFactory.getLog(StompDecoder.class);
+	private static final Log logger = SimpLogging.forLogName(StompDecoder.class);
 
 	@Nullable
 	private MessageHeaderInitializer headerInitializer;

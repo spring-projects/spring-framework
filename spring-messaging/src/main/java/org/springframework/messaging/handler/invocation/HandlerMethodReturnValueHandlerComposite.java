@@ -37,10 +37,31 @@ import org.springframework.util.concurrent.ListenableFuture;
  */
 public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMethodReturnValueHandler {
 
-	private static final Log logger = LogFactory.getLog(HandlerMethodReturnValueHandlerComposite.class);
+	/** Public for wrapping with fallback logger. */
+	public static final Log defaultLogger = LogFactory.getLog(HandlerMethodReturnValueHandlerComposite.class);
+
+
+	private Log logger = defaultLogger;
 
 	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
 
+
+	/**
+	 * Set an alternative logger to use than the one based on the class name.
+	 * @param logger the logger to use
+	 * @since 5.1
+	 */
+	public void setLogger(Log logger) {
+		this.logger = logger;
+	}
+
+	/**
+	 * Return the currently configured Logger.
+	 * @since 5.1
+	 */
+	public Log getLogger() {
+		return logger;
+	}
 
 	/**
 	 * Return a read-only list with the configured handlers.

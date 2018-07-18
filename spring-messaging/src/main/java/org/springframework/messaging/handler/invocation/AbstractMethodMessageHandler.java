@@ -85,6 +85,10 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
+	private Log handlerMethodLogger;
+
+
 	private final List<String> destinationPrefixes = new ArrayList<>();
 
 	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<>(4);
@@ -232,6 +236,12 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (this.returnValueHandlers.getReturnValueHandlers().isEmpty()) {
 			this.returnValueHandlers.addHandlers(initReturnValueHandlers());
 		}
+		Log returnValueLogger = getReturnValueHandlerLogger();
+		if (returnValueLogger != null) {
+			this.returnValueHandlers.setLogger(returnValueLogger);
+		}
+
+		this.handlerMethodLogger = getHandlerMethodLogger();
 
 		ApplicationContext context = getApplicationContext();
 		if (context == null) {
@@ -366,6 +376,24 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * therefore suitable for direct lookups.
 	 */
 	protected abstract Set<String> getDirectLookupDestinations(T mapping);
+
+	/**
+	 * Return a logger to set on {@link HandlerMethodReturnValueHandlerComposite}.
+	 * @since 5.1
+	 */
+	@Nullable
+	protected Log getReturnValueHandlerLogger() {
+		return null;
+	}
+
+	/**
+	 * Return a logger to set on {@link InvocableHandlerMethod}.
+	 * @since 5.1
+	 */
+	@Nullable
+	protected Log getHandlerMethodLogger() {
+		return null;
+	}
 
 	/**
 	 * Subclasses can invoke this method to populate the MessagingAdviceBean cache
@@ -514,6 +542,9 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 		handlerMethod = handlerMethod.createWithResolvedBean();
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
+		if (this.handlerMethodLogger != null) {
+			invocable.setLogger(this.handlerMethodLogger);
+		}
 		invocable.setMessageMethodArgumentResolvers(this.argumentResolvers);
 		try {
 			Object returnValue = invocable.invoke(message);

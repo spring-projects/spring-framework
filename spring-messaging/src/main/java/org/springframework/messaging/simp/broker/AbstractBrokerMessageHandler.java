@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -31,6 +30,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -48,7 +48,7 @@ import org.springframework.util.CollectionUtils;
 public abstract class AbstractBrokerMessageHandler
 		implements MessageHandler, ApplicationEventPublisherAware, SmartLifecycle {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = SimpLogging.forLogName(getClass());
 
 	private final SubscribableChannel clientInboundChannel;
 

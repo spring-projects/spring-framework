@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -56,8 +58,10 @@ import org.springframework.messaging.handler.invocation.AbstractMethodMessageHan
 import org.springframework.messaging.handler.invocation.CompletableFutureReturnValueHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.messaging.handler.invocation.ListenableFutureReturnValueHandler;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageMappingInfo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -355,6 +359,16 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		handlers.add(sendToHandler);
 
 		return handlers;
+	}
+
+	@Override
+	protected Log getReturnValueHandlerLogger() {
+		return SimpLogging.forLog(HandlerMethodReturnValueHandlerComposite.defaultLogger);
+	}
+
+	@Override
+	protected Log getHandlerMethodLogger() {
+		return SimpLogging.forLog(HandlerMethod.defaultLogger);
 	}
 
 

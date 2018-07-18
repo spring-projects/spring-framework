@@ -32,6 +32,7 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
@@ -397,12 +398,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	@Override
 	protected void startInternal() {
 		if (this.tcpClient == null) {
-			StompDecoder decoder = new StompDecoder();
-			if (this.headerInitializer != null) {
-				decoder.setHeaderInitializer(this.headerInitializer);
-			}
-			ReactorNettyCodec<byte[]> codec = new StompReactorNettyCodec(decoder);
-			this.tcpClient = new ReactorNettyTcpClient<>(this.relayHost, this.relayPort, codec);
+			this.tcpClient = initTcpClient();
 		}
 
 		if (logger.isInfoEnabled()) {
@@ -428,6 +424,17 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		this.stats.incrementConnectCount();
 		this.tcpClient.connect(handler, new FixedIntervalReconnectStrategy(5000));
+	}
+
+	private ReactorNettyTcpClient<byte[]> initTcpClient() {
+		StompDecoder decoder = new StompDecoder();
+		if (this.headerInitializer != null) {
+			decoder.setHeaderInitializer(this.headerInitializer);
+		}
+		ReactorNettyCodec<byte[]> codec = new StompReactorNettyCodec(decoder);
+		ReactorNettyTcpClient<byte[]> client = new ReactorNettyTcpClient<>(this.relayHost, this.relayPort, codec);
+		client.setLogger(SimpLogging.forLog(client.getLogger()));
+		return client;
 	}
 
 	@Override

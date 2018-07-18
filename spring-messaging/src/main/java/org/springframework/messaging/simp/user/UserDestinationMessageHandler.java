@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.lang.Nullable;
@@ -30,6 +29,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.core.MessageSendingOperations;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  */
 public class UserDestinationMessageHandler implements MessageHandler, SmartLifecycle {
 
-	private static final Log logger = LogFactory.getLog(UserDestinationMessageHandler.class);
+	private static final Log logger = SimpLogging.forLogName(UserDestinationMessageHandler.class);
 
 
 	private final SubscribableChannel clientInboundChannel;

@@ -17,10 +17,10 @@
 package org.springframework.messaging.simp.broker;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.CollectionUtils;
@@ -40,7 +40,7 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 	private static final MultiValueMap<String, String> EMPTY_MAP =
 			CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(0));
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = SimpLogging.forLogName(getClass());
 
 
 	@Override

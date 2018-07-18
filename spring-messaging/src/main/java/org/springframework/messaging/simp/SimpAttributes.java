@@ -19,7 +19,6 @@ package org.springframework.messaging.simp;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -46,7 +45,7 @@ public class SimpAttributes {
 	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
 			SimpAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
-	private static final Log logger = LogFactory.getLog(SimpAttributes.class);
+	private static final Log logger = SimpLogging.forLogName(SimpAttributes.class);
 
 
 	private final String sessionId;

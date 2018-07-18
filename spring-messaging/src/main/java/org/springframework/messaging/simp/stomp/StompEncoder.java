@@ -28,10 +28,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
@@ -51,7 +51,7 @@ public class StompEncoder  {
 
 	private static final byte COLON = ':';
 
-	private static final Log logger = LogFactory.getLog(StompEncoder.class);
+	private static final Log logger = SimpLogging.forLogName(StompEncoder.class);
 
 	private static final int HEADER_KEY_CACHE_LIMIT = 32;
 
