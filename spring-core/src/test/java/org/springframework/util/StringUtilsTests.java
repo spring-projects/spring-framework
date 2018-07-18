@@ -734,9 +734,35 @@ public class StringUtilsTests {
 		assertEquals("Variant containing country code not extracted correctly", variant, locale.getVariant());
 	}
 
-	@Test  // SPR-14718
+	@Test  // SPR-14718, SPR-7598
 	public void testParseJava7Variant() {
-		assertEquals("sr_#LATN", StringUtils.parseLocaleString("sr_#LATN").toString());
+		assertEquals("sr__#LATN", StringUtils.parseLocaleString("sr__#LATN").toString());
+	}
+
+	@Test  // SPR-16651
+	public void testAvailableLocalesWithLocaleString() {
+		for (Locale locale : Locale.getAvailableLocales()) {
+			Locale parsedLocale = StringUtils.parseLocaleString(locale.toString());
+			if (parsedLocale == null) {
+				assertEquals("", locale.getLanguage());
+			}
+			else {
+				assertEquals(parsedLocale.toString(), locale.toString());
+			}
+		}
+	}
+
+	@Test  // SPR-16651
+	public void testAvailableLocalesWithLanguageTag() {
+		for (Locale locale : Locale.getAvailableLocales()) {
+			Locale parsedLocale = StringUtils.parseLocale(locale.toLanguageTag());
+			if (parsedLocale == null) {
+				assertEquals("", locale.getLanguage());
+			}
+			else {
+				assertEquals(parsedLocale.toLanguageTag(), locale.toLanguageTag());
+			}
+		}
 	}
 
 }
