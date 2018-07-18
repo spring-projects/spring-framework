@@ -101,13 +101,13 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		Model model = bindingContext.getModel();
 
 		return resolveName(resolvedName.toString(), nestedParameter, exchange)
-				.map(arg -> {
+				.flatMap(arg -> {
 					if ("".equals(arg) && namedValueInfo.defaultValue != null) {
 						arg = resolveStringValue(namedValueInfo.defaultValue);
 					}
 					arg = applyConversion(arg, namedValueInfo, parameter, bindingContext, exchange);
 					handleResolvedValue(arg, namedValueInfo.name, parameter, model, exchange);
-					return arg;
+					return Mono.justOrEmpty(arg);
 				})
 				.switchIfEmpty(getDefaultValue(
 						namedValueInfo, parameter, bindingContext, model, exchange));
