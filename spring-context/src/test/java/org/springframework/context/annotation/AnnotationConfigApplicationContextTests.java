@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
+import org.springframework.util.ObjectUtils;
 
-import static java.lang.String.format;
+import static java.lang.String.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.util.StringUtils.*;
@@ -208,6 +209,22 @@ public class AnnotationConfigApplicationContextTests {
 		assertSame(context.getBean("b", BeanB.class), context.getBean(BeanA.class).b);
 		assertSame(context.getBean("c"), context.getBean("a", BeanA.class).c);
 		assertSame(context, context.getBean("b", BeanB.class).applicationContext);
+	}
+
+	@Test
+	public void individualBeanWithNullReturningSupplier() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.registerBean("a", BeanA.class, () -> null);
+		context.registerBean("b", BeanB.class, BeanB::new);
+		context.registerBean("c", BeanC.class, BeanC::new);
+		context.refresh();
+
+		assertTrue(ObjectUtils.containsElement(context.getBeanNamesForType(BeanA.class), "a"));
+		assertTrue(ObjectUtils.containsElement(context.getBeanNamesForType(BeanB.class), "b"));
+		assertTrue(ObjectUtils.containsElement(context.getBeanNamesForType(BeanC.class), "c"));
+		assertTrue(context.getBeansOfType(BeanA.class).isEmpty());
+		assertSame(context.getBean(BeanB.class), context.getBeansOfType(BeanB.class).values().iterator().next());
+		assertSame(context.getBean(BeanC.class), context.getBeansOfType(BeanC.class).values().iterator().next());
 	}
 
 	@Test

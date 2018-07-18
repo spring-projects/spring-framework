@@ -1148,9 +1148,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #getObjectForBeanInstance
 	 */
 	protected BeanWrapper obtainFromSupplier(Supplier<?> instanceSupplier, String beanName) {
+		Object instance;
+
 		String outerBean = this.currentlyCreatedBean.get();
 		this.currentlyCreatedBean.set(beanName);
-		Object instance;
 		try {
 			instance = instanceSupplier.get();
 		}
@@ -1161,6 +1162,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			else {
 				this.currentlyCreatedBean.remove();
 			}
+		}
+
+		if (instance == null) {
+			instance = new NullBean();
 		}
 		BeanWrapper bw = new BeanWrapperImpl(instance);
 		initBeanWrapper(bw);
