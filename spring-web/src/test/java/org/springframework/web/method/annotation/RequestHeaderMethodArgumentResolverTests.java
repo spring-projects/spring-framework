@@ -32,6 +32,7 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.MissingServletRequestHeaderException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -187,7 +188,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		assertEquals("/bar", result);
 	}
 
-	@Test(expected = ServletRequestBindingException.class)
+	@Test(expected = MissingServletRequestHeaderException.class)
 	public void notFound() throws Exception {
 		resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
 	}
