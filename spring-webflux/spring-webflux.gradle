@@ -4,6 +4,7 @@ dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
+		mavenBom "org.eclipse.jetty:jetty-bom:${jettyVersion}"
 	}
 }
 
@@ -27,7 +28,7 @@ dependencies {
 		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 	}
-	optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
+	optional("org.eclipse.jetty.websocket:websocket-server") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
@@ -44,8 +45,8 @@ dependencies {
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
-	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
+	testCompile("org.eclipse.jetty:jetty-server")
+	testCompile("org.eclipse.jetty:jetty-servlet")
 	testCompile("io.undertow:undertow-core:${undertowVersion}")
 	testCompile("com.fasterxml:aalto-xml:1.1.0")
 	testCompile("com.squareup.okhttp3:mockwebserver:3.10.0")

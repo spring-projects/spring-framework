@@ -4,6 +4,7 @@ dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
+		mavenBom "org.eclipse.jetty:jetty-bom:${jettyVersion}"
 	}
 }
 
@@ -29,10 +30,10 @@ dependencies {
 	optional("io.netty:netty-all")
 	optional("io.projectreactor.netty:reactor-netty")
 	optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-	optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
+	optional("org.eclipse.jetty:jetty-server") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
-	optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
+	optional("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
 	optional("io.undertow:undertow-core:${undertowVersion}")
@@ -70,8 +71,8 @@ dependencies {
 	testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
 	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
-	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
+	testCompile("org.eclipse.jetty:jetty-server")
+	testCompile("org.eclipse.jetty:jetty-servlet")
 	testCompile("com.squareup.okhttp3:mockwebserver:3.10.0")
 	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	testCompile("org.skyscreamer:jsonassert:1.5.0")

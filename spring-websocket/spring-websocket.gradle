@@ -4,6 +4,7 @@ dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
+		mavenBom "org.eclipse.jetty:jetty-bom:${jettyVersion}"
 	}
 }
 
@@ -20,14 +21,14 @@ dependencies {
 		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 	}
 	optional("org.glassfish.tyrus:tyrus-container-servlet:1.13.1")
-	optional("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
+	optional("org.eclipse.jetty:jetty-webapp") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
-	optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
+	optional("org.eclipse.jetty.websocket:websocket-server") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
-	optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
-	optional("org.eclipse.jetty:jetty-client:${jettyVersion}")
+	optional("org.eclipse.jetty.websocket:websocket-client")
+	optional("org.eclipse.jetty:jetty-client")
 	optional("io.undertow:undertow-servlet:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.servlet", module: "jboss-servlet-api_3.1_spec"
 		exclude group: "org.jboss.spec.javax.annotation", module: "jboss-annotations-api_1.2_spec"

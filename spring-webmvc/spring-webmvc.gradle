@@ -3,6 +3,7 @@ description = "Spring Web MVC"
 dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		mavenBom "org.eclipse.jetty:jetty-bom:${jettyVersion}"
 	}
 }
 
@@ -43,10 +44,10 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	optional("org.reactivestreams:reactive-streams")
 	testCompile("javax.servlet:javax.servlet-api:4.0.1")
-	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
+	testCompile("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
-	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}") {
+	testCompile("org.eclipse.jetty:jetty-server") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
 	testCompile("org.hibernate:hibernate-validator:6.0.10.Final")
