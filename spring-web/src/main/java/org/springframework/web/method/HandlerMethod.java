@@ -18,6 +18,9 @@ package org.springframework.web.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -353,6 +356,9 @@ public class HandlerMethod {
 	 */
 	protected class HandlerMethodParameter extends SynthesizingMethodParameter {
 
+		@Nullable
+		private volatile Annotation[] combinedAnnotations;
+
 		public HandlerMethodParameter(int index) {
 			super(HandlerMethod.this.bridgedMethod, index);
 		}
@@ -374,6 +380,42 @@ public class HandlerMethod {
 		@Override
 		public <T extends Annotation> boolean hasMethodAnnotation(Class<T> annotationType) {
 			return HandlerMethod.this.hasMethodAnnotation(annotationType);
+		}
+
+		@Override
+		public Annotation[] getParameterAnnotations() {
+			Annotation[] anns = this.combinedAnnotations;
+			if (anns == null) {
+				anns = super.getParameterAnnotations();
+				Class<?>[] ifcs = getDeclaringClass().getInterfaces();
+				for (Class<?> ifc : ifcs) {
+					try {
+						Method method = ifc.getMethod(getExecutable().getName(), getExecutable().getParameterTypes());
+						Annotation[] paramAnns = method.getParameterAnnotations()[getParameterIndex()];
+						if (paramAnns.length > 0) {
+							List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
+							merged.addAll(Arrays.asList(anns));
+							for (Annotation fieldAnn : paramAnns) {
+								boolean existingType = false;
+								for (Annotation ann : anns) {
+									if (ann.annotationType() == fieldAnn.annotationType()) {
+										existingType = true;
+										break;
+									}
+								}
+								if (!existingType) {
+									merged.add(fieldAnn);
+								}
+							}
+							anns = merged.toArray(new Annotation[0]);
+						}
+					}
+					catch (NoSuchMethodException ex) {
+					}
+				}
+				this.combinedAnnotations = anns;
+			}
+			return anns;
 		}
 
 		@Override

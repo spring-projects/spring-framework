@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,6 +222,87 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	@Test
+	public void handleInInterface() throws Exception {
+		Class<?>[] parameterTypes = new Class<?>[] {int.class, String.class, String.class, String.class, Map.class,
+				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
+				Color.class, HttpServletRequest.class, HttpServletResponse.class, TestBean.class, TestBean.class,
+				User.class, OtherUser.class, Model.class, UriComponentsBuilder.class};
+
+		String datePattern = "yyyy.MM.dd";
+		String formattedDate = "2011.03.16";
+		Date date = new GregorianCalendar(2011, Calendar.MARCH, 16).getTime();
+		TestBean sessionAttribute = new TestBean();
+		TestBean requestAttribute = new TestBean();
+
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.addHeader("header", "headerValue");
+		request.addHeader("anotherHeader", "anotherHeaderValue");
+		request.addParameter("datePattern", datePattern);
+		request.addParameter("dateParam", formattedDate);
+		request.addParameter("paramByConvention", "paramByConventionValue");
+		request.addParameter("age", "25");
+		request.setCookies(new Cookie("cookie", "99"));
+		request.setContent("Hello World".getBytes("UTF-8"));
+		request.setUserPrincipal(new User());
+		request.setContextPath("/contextPath");
+		request.setServletPath("/main");
+		System.setProperty("systemHeader", "systemHeaderValue");
+		Map<String, String> uriTemplateVars = new HashMap<>();
+		uriTemplateVars.put("pathvar", "pathvarValue");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+		request.getSession().setAttribute("sessionAttribute", sessionAttribute);
+		request.setAttribute("requestAttribute", requestAttribute);
+
+		HandlerMethod handlerMethod = handlerMethod("handleInInterface", parameterTypes);
+		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
+		ModelMap model = mav.getModelMap();
+
+		assertEquals("viewName", mav.getViewName());
+		assertEquals(99, model.get("cookie"));
+		assertEquals("pathvarValue", model.get("pathvar"));
+		assertEquals("headerValue", model.get("header"));
+		assertEquals(date, model.get("dateParam"));
+
+		Map<?, ?> map = (Map<?, ?>) model.get("headerMap");
+		assertEquals("headerValue", map.get("header"));
+		assertEquals("anotherHeaderValue", map.get("anotherHeader"));
+		assertEquals("systemHeaderValue", model.get("systemHeader"));
+
+		map = (Map<?, ?>) model.get("paramMap");
+		assertEquals(formattedDate, map.get("dateParam"));
+		assertEquals("paramByConventionValue", map.get("paramByConvention"));
+
+		assertEquals("/contextPath", model.get("value"));
+
+		TestBean modelAttr = (TestBean) model.get("modelAttr");
+		assertEquals(25, modelAttr.getAge());
+		assertEquals("Set by model method [modelAttr]", modelAttr.getName());
+		assertSame(modelAttr, request.getSession().getAttribute("modelAttr"));
+
+		BindingResult bindingResult = (BindingResult) model.get(BindingResult.MODEL_KEY_PREFIX + "modelAttr");
+		assertSame(modelAttr, bindingResult.getTarget());
+		assertEquals(1, bindingResult.getErrorCount());
+
+		String conventionAttrName = "testBean";
+		TestBean modelAttrByConvention = (TestBean) model.get(conventionAttrName);
+		assertEquals(25, modelAttrByConvention.getAge());
+		assertEquals("Set by model method [modelAttrByConvention]", modelAttrByConvention.getName());
+		assertSame(modelAttrByConvention, request.getSession().getAttribute(conventionAttrName));
+
+		bindingResult = (BindingResult) model.get(BindingResult.MODEL_KEY_PREFIX + conventionAttrName);
+		assertSame(modelAttrByConvention, bindingResult.getTarget());
+
+		assertTrue(model.get("customArg") instanceof Color);
+		assertEquals(User.class, model.get("user").getClass());
+		assertEquals(OtherUser.class, model.get("otherUser").getClass());
+
+		assertSame(sessionAttribute, model.get("sessionAttribute"));
+		assertSame(requestAttribute, model.get("requestAttribute"));
+
+		assertEquals(new URI("http://localhost/contextPath/main/path"), model.get("url"));
+	}
+
+	@Test
 	public void handleRequestBody() throws Exception {
 		Class<?>[] parameterTypes = new Class<?>[] {byte[].class};
 
@@ -327,9 +408,36 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 
+	private interface HandlerIfc {
+
+		String handleInInterface(
+				@CookieValue("cookie") int cookie,
+				@PathVariable("pathvar") String pathvar,
+				@RequestHeader("header") String header,
+				@RequestHeader(defaultValue = "#{systemProperties.systemHeader}") String systemHeader,
+				@RequestHeader Map<String, Object> headerMap,
+				@RequestParam("dateParam") Date dateParam,
+				@RequestParam Map<String, Object> paramMap,
+				String paramByConvention,
+				@Value("#{request.contextPath}") String value,
+				@ModelAttribute("modelAttr") @Valid TestBean modelAttr,
+				Errors errors,
+				TestBean modelAttrByConvention,
+				Color customArg,
+				HttpServletRequest request,
+				HttpServletResponse response,
+				@SessionAttribute TestBean sessionAttribute,
+				@RequestAttribute TestBean requestAttribute,
+				User user,
+				@ModelAttribute OtherUser otherUser,
+				Model model,
+				UriComponentsBuilder builder);
+	}
+
+
 	@SuppressWarnings("unused")
 	@SessionAttributes(types = TestBean.class)
-	private static class Handler {
+	private static class Handler implements HandlerIfc {
 
 		@InitBinder("dateParam")
 		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String datePattern) {
@@ -370,6 +478,45 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 				@RequestAttribute TestBean requestAttribute,
 				User user,
 				@ModelAttribute OtherUser otherUser,
+				Model model,
+				UriComponentsBuilder builder) {
+
+			model.addAttribute("cookie", cookie).addAttribute("pathvar", pathvar).addAttribute("header", header)
+					.addAttribute("systemHeader", systemHeader).addAttribute("headerMap", headerMap)
+					.addAttribute("dateParam", dateParam).addAttribute("paramMap", paramMap)
+					.addAttribute("paramByConvention", paramByConvention).addAttribute("value", value)
+					.addAttribute("customArg", customArg).addAttribute(user)
+					.addAttribute("sessionAttribute", sessionAttribute)
+					.addAttribute("requestAttribute", requestAttribute)
+					.addAttribute("url", builder.path("/path").build().toUri());
+
+			assertNotNull(request);
+			assertNotNull(response);
+
+			return "viewName";
+		}
+
+		@Override
+		public String handleInInterface(
+				int cookie,
+				String pathvar,
+				String header,
+				String systemHeader,
+				Map<String, Object> headerMap,
+				Date dateParam,
+				Map<String, Object> paramMap,
+				String paramByConvention,
+				String value,
+				TestBean modelAttr,
+				Errors errors,
+				TestBean modelAttrByConvention,
+				Color customArg,
+				HttpServletRequest request,
+				HttpServletResponse response,
+				TestBean sessionAttribute,
+				TestBean requestAttribute,
+				User user,
+				OtherUser otherUser,
 				Model model,
 				UriComponentsBuilder builder) {
 
