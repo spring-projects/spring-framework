@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -285,7 +284,7 @@ public class FreeMarkerConfigurationFactory {
 			config.setDefaultEncoding(this.defaultEncoding);
 		}
 
-		List<TemplateLoader> templateLoaders = new LinkedList<>(this.templateLoaders);
+		List<TemplateLoader> templateLoaders = new ArrayList<>(this.templateLoaders);
 
 		// Register template loaders that are supposed to kick in early.
 		if (this.preTemplateLoaders != null) {

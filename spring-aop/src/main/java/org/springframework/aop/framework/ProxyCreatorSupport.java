@@ -34,7 +34,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 
 	private AopProxyFactory aopProxyFactory;
 
-	private List<AdvisedSupportListener> listeners = new LinkedList<>();
+	private final List<AdvisedSupportListener> listeners = new LinkedList<>();
 
 	/** Set to true when the first AOP proxy has been created. */
 	private boolean active = false;

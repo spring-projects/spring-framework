@@ -28,10 +28,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -350,12 +351,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
+		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<>();
+			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
 				if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {

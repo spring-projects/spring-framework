@@ -22,7 +22,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -460,7 +460,7 @@ public abstract class ScriptUtils {
 				separator = FALLBACK_STATEMENT_SEPARATOR;
 			}
 
-			List<String> statements = new LinkedList<>();
+			List<String> statements = new ArrayList<>();
 			splitSqlScript(resource, script, separator, commentPrefix, blockCommentStartDelimiter,
 					blockCommentEndDelimiter, statements);
 

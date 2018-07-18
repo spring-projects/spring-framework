@@ -18,7 +18,7 @@ package org.springframework.beans.factory;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.FatalBeanException;
@@ -141,7 +141,7 @@ public class BeanCreationException extends FatalBeanException {
 	 */
 	public void addRelatedCause(Throwable ex) {
 		if (this.relatedCauses == null) {
-			this.relatedCauses = new LinkedList<>();
+			this.relatedCauses = new ArrayList<>();
 		}
 		this.relatedCauses.add(ex);
 	}

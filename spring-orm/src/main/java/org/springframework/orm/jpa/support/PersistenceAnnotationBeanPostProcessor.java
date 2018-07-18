@@ -22,7 +22,9 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -405,7 +407,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	private InjectionMetadata buildPersistenceMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
+		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {
