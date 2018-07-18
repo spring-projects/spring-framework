@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,7 +38,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpLog;
+import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -73,7 +72,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 	private static final ResolvableType REGION_TYPE = ResolvableType.forClass(ResourceRegion.class);
 
-	private static final Log logger = HttpLog.create(LogFactory.getLog(ResourceHttpMessageWriter.class));
+	private static final Log logger = HttpLogging.forLogName(ResourceHttpMessageWriter.class);
 
 
 	private final ResourceEncoder encoder;

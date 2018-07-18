@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -27,6 +26,7 @@ import reactor.core.publisher.Operators;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.log.LogUtils;
 
 /**
  * Publisher returned from {@link ServerHttpResponse#writeWith(Publisher)}.
@@ -39,13 +39,13 @@ import org.springframework.util.Assert;
 class WriteResultPublisher implements Publisher<Void> {
 
 	/**
-	 * Special logger for tracing Reactive Streams signals.
-	 * <p>This logger is not exposed under "org.springframework" because it is
-	 * verbose. To enable this, and other related Reactive Streams loggers in
-	 * this package, set "spring-web.reactivestreams" to TRACE.
+	 * Special logger for debugging Reactive Streams signals.
+	 * @see LogUtils#getHiddenLog(Class)
+	 * @see AbstractListenerReadPublisher#rsReadLogger
+	 * @see AbstractListenerWriteProcessor#rsWriteLogger
+	 * @see AbstractListenerWriteFlushProcessor#rsWriteFlushLogger
 	 */
-	private static final Log rsWriteResultLogger =
-			LogFactory.getLog("spring-web.reactivestreams.WriteResultPublisher");
+	private static final Log rsWriteResultLogger = LogUtils.getHiddenLog(WriteResultPublisher.class);
 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);

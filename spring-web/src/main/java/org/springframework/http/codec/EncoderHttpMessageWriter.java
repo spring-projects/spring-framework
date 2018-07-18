@@ -30,7 +30,7 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpLog;
+import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -76,7 +76,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		if (encoder instanceof AbstractEncoder &&
 				encoder.getClass().getPackage().getName().startsWith("org.springframework.core.codec")) {
 
-			Log logger = HttpLog.create(((AbstractEncoder) encoder).getLogger());
+			Log logger = HttpLogging.forLog(((AbstractEncoder) encoder).getLogger());
 			((AbstractEncoder) encoder).setLogger(logger);
 		}
 	}

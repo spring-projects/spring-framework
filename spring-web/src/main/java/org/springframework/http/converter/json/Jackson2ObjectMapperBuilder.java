@@ -54,13 +54,12 @@ import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.KotlinDetector;
-import org.springframework.http.HttpLog;
+import org.springframework.http.HttpLogging;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -104,7 +103,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	private static volatile boolean kotlinWarningLogged = false;
 
-	private final Log logger = HttpLog.create(LogFactory.getLog(getClass()));
+	private final Log logger = HttpLogging.forLogName(getClass());
 
 	private final Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 

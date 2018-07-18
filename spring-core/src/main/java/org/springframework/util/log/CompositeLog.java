@@ -13,36 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http;
+package org.springframework.util.log;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.NoOpLog;
 
-import org.springframework.util.ObjectUtils;
-
 /**
- * Composite {@link Log} configured with a primary logger and a list of secondary
- * ones to fall back on if the main one is not enabled.
- *
- * <p>This class also declares {@link #webLogger} for use as fallback when
- * logging in the "org.springframework.http" package.
+ * Implementation of {@link Log} that wraps a list of loggers and delegates to
+ * the first one for which logging is enabled at the given level.
  *
  * @author Rossen Stoyanchev
  * @since 5.1
+ * @see LogUtils#getCompositeLog
  */
-public final class HttpLog implements Log {
-
-	/**
-	 * Logger with category "org.springframework.web.HTTP" to use as fallback
-	 * if "org.springframework.web" is on.
-	 */
-	public static final Log webLogger = LogFactory.getLog("org.springframework.web.HTTP");
+class CompositeLog implements Log {
 
 	private static final Log noOpLog = new NoOpLog();
 
@@ -60,7 +47,12 @@ public final class HttpLog implements Log {
 	private final Log traceLogger;
 
 
-	private HttpLog(List<Log> loggers) {
+	/**
+	 * Constructor with list of loggers. For optimal performance, the constructor
+	 * checks and remembers which logger is on for each log category.
+	 * @param loggers the loggers to use
+	 */
+	public CompositeLog(List<Log> loggers) {
 		this.fatalLogger = initLogger(loggers, Log::isFatalEnabled);
 		this.errorLogger = initLogger(loggers, Log::isErrorEnabled);
 		this.warnLogger  = initLogger(loggers, Log::isWarnEnabled);
@@ -163,33 +155,4 @@ public final class HttpLog implements Log {
 	public void trace(Object message, Throwable ex) {
 		this.traceLogger.trace(message, ex);
 	}
-
-
-	/**
-	 * Create a composite logger that uses the given primary logger, if enabled,
-	 * or falls back on {@link #webLogger}.
-	 * @param primaryLogger the primary logger
-	 * @return a composite logger
-	 */
-	public static Log create(Log primaryLogger) {
-		return createWith(primaryLogger, webLogger);
-	}
-
-	/**
-	 * Create a composite logger that uses the given primary logger, if enabled,
-	 * or falls back on one of the given secondary loggers..
-	 * @param primaryLogger the primary logger
-	 * @param secondaryLoggers fallback loggers
-	 * @return a composite logger
-	 */
-	public static Log createWith(Log primaryLogger, Log... secondaryLoggers) {
-		if (ObjectUtils.isEmpty(secondaryLoggers)) {
-			return primaryLogger;
-		}
-		List<Log> loggers = new ArrayList<>(1 + secondaryLoggers.length);
-		loggers.add(primaryLogger);
-		Collections.addAll(loggers, secondaryLoggers);
-		return new HttpLog(loggers);
-	}
-
 }

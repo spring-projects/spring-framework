@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.log.LogUtils;
 
 /**
  * Abstract base class for {@code Processor} implementations that bridge between
@@ -45,12 +45,13 @@ import org.springframework.util.Assert;
 public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, Void> {
 
 	/**
-	 * Special logger for tracing Reactive Streams signals.
-	 * <p>This logger is not exposed under "org.springframework" because it is
-	 * verbose. To enable this, and other related Reactive Streams loggers in
-	 * this package, set "spring-web.reactivestreams" to TRACE.
+	 * Special logger for debugging Reactive Streams signals.
+	 * @see LogUtils#getHiddenLog(Class)
+	 * @see AbstractListenerReadPublisher#rsReadLogger
+	 * @see AbstractListenerWriteFlushProcessor#rsWriteFlushLogger
+	 * @see WriteResultPublisher#rsWriteResultLogger
 	 */
-	protected static final Log rsWriteLogger = LogFactory.getLog("spring-web.reactivestreams.WriteProcessor");
+	protected static final Log rsWriteLogger = LogUtils.getHiddenLog(AbstractListenerWriteProcessor.class);
 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);

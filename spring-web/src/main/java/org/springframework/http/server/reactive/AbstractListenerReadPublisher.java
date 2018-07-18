@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -29,6 +28,7 @@ import reactor.core.publisher.Operators;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.log.LogUtils;
 
 /**
  * Abstract base class for {@code Publisher} implementations that bridge between
@@ -48,12 +48,13 @@ import org.springframework.util.Assert;
 public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	/**
-	 * Special logger for tracing Reactive Streams signals.
-	 * <p>This logger is not exposed under "org.springframework" because it is
-	 * verbose. To enable this, and other related Reactive Streams loggers in
-	 * this package, set "spring-web.reactivestreams" to TRACE.
+	 * Special logger for debugging Reactive Streams signals.
+	 * @see LogUtils#getHiddenLog(Class)
+	 * @see AbstractListenerWriteProcessor#rsWriteLogger
+	 * @see AbstractListenerWriteFlushProcessor#rsWriteFlushLogger
+	 * @see WriteResultPublisher#rsWriteResultLogger
 	 */
-	protected static Log rsReadLogger = LogFactory.getLog("spring-web.reactivestreams.ReadPublisher");
+	protected static Log rsReadLogger = LogUtils.getHiddenLog(AbstractListenerReadPublisher.class);
 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);

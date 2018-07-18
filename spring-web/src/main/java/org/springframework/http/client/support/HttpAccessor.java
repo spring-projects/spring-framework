@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -45,7 +45,7 @@ import org.springframework.util.Assert;
 public abstract class HttpAccessor {
 
 	/** Logger available to subclasses. */
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = HttpLogging.forLogName(getClass());
 
 	private ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 

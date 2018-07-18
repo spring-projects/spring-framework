@@ -27,7 +27,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Hints;
-import org.springframework.http.HttpLog;
+import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -70,7 +70,7 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 		if (decoder instanceof AbstractDecoder &&
 				decoder.getClass().getPackage().getName().startsWith("org.springframework.core.codec")) {
 
-			Log logger = HttpLog.create(((AbstractDecoder) decoder).getLogger());
+			Log logger = HttpLogging.forLog(((AbstractDecoder) decoder).getLogger());
 			((AbstractDecoder) decoder).setLogger(logger);
 		}
 	}
