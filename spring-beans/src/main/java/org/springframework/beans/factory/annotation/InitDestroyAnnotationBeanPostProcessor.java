@@ -23,9 +23,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -196,23 +197,23 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
 		final boolean debug = logger.isDebugEnabled();
-		LinkedList<LifecycleElement> initMethods = new LinkedList<>();
-		LinkedList<LifecycleElement> destroyMethods = new LinkedList<>();
+		List<LifecycleElement> initMethods = new ArrayList<>();
+		List<LifecycleElement> destroyMethods = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<LifecycleElement> currInitMethods = new LinkedList<>();
-			final LinkedList<LifecycleElement> currDestroyMethods = new LinkedList<>();
+			final List<LifecycleElement> currInitMethods = new ArrayList<>();
+			final List<LifecycleElement> currDestroyMethods = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-				if (initAnnotationType != null && method.isAnnotationPresent(initAnnotationType)) {
+				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
 					LifecycleElement element = new LifecycleElement(method);
 					currInitMethods.add(element);
 					if (debug) {
 						logger.debug("Found init method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
-				if (destroyAnnotationType != null && method.isAnnotationPresent(destroyAnnotationType)) {
+				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
 					currDestroyMethods.add(new LifecycleElement(method));
 					if (debug) {
 						logger.debug("Found destroy method on class [" + clazz.getName() + "]: " + method);

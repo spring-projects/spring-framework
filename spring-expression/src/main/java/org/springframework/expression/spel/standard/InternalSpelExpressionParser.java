@@ -20,7 +20,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -456,7 +455,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	/**
-	 * Used for consuming arguments for either a method or a constructor call
+	 * Used for consuming arguments for either a method or a constructor call.
 	 */
 	private void consumeArguments(List<SpelNodeImpl> accumulatedArguments) {
 		Token t = peekToken();
@@ -724,7 +723,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	 * TODO AndyC Could create complete identifiers (a.b.c) here rather than a sequence of them? (a, b, c)
 	 */
 	private SpelNodeImpl eatPossiblyQualifiedId() {
-		LinkedList<SpelNodeImpl> qualifiedIdPieces = new LinkedList<>();
+		Deque<SpelNodeImpl> qualifiedIdPieces = new ArrayDeque<>();
 		Token node = peekToken();
 		while (isValidQualifiedId(node)) {
 			nextToken();
