@@ -178,6 +178,13 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
+	@Test  // SPR-16060
+	public void findMethodAnnotationFromGenericInterface() throws Exception {
+		Method method = ImplementsInterfaceWithGenericAnnotatedMethod.class.getMethod("foo", String.class);
+		Order order = findAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
+
 	@Test
 	public void findMethodAnnotationFromInterfaceOnSuper() throws Exception {
 		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
@@ -286,7 +293,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void findAnnotationDeclaringClassForAllScenarios() throws Exception {
+	public void findAnnotationDeclaringClassForAllScenarios() {
 		// no class-level annotation
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedInterface.class));
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedClass.class));
@@ -395,7 +402,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void isAnnotationInheritedForAllScenarios() throws Exception {
+	public void isAnnotationInheritedForAllScenarios() {
 		// no class-level annotation
 		assertFalse(isAnnotationInherited(Transactional.class, NonAnnotatedInterface.class));
 		assertFalse(isAnnotationInherited(Transactional.class, NonAnnotatedClass.class));
@@ -504,7 +511,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getDefaultValueFromNonPublicAnnotation() throws Exception {
+	public void getDefaultValueFromNonPublicAnnotation() {
 		Annotation[] declaredAnnotations = NonPublicAnnotatedClass.class.getDeclaredAnnotations();
 		assertEquals(1, declaredAnnotations.length);
 		Annotation annotation = declaredAnnotations[0];
@@ -515,7 +522,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getDefaultValueFromAnnotationType() throws Exception {
+	public void getDefaultValueFromAnnotationType() {
 		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(Order.class, VALUE));
 		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(Order.class));
 	}
@@ -547,7 +554,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getRepeatableAnnotationsDeclaredOnClassWithAttributeAliases() throws Exception {
+	public void getRepeatableAnnotationsDeclaredOnClassWithAttributeAliases() {
 		final List<String> expectedLocations = asList("A", "B");
 
 		Set<ContextConfig> annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, null);
@@ -1748,6 +1755,18 @@ public class AnnotationUtilsTests {
 	}
 
 	public static class SubTransactionalAndOrderedClass extends TransactionalAndOrderedClass {
+	}
+
+	public interface InterfaceWithGenericAnnotatedMethod<T> {
+
+		@Order
+		void foo(T t);
+	}
+
+	public static class ImplementsInterfaceWithGenericAnnotatedMethod implements InterfaceWithGenericAnnotatedMethod<String> {
+
+		public void foo(String t) {
+		}
 	}
 
 	public interface InterfaceWithAnnotatedMethod {
