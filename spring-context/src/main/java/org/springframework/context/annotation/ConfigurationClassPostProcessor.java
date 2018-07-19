@@ -64,7 +64,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-import static org.springframework.context.annotation.AnnotationConfigUtils.*;
+import static org.springframework.context.annotation.AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR;
 
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
@@ -74,10 +74,10 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  * {@code <context:component-scan/>}. Otherwise, may be declared manually as
  * with any other BeanFactoryPostProcessor.
  *
- * <p>This post processor is {@link Ordered#HIGHEST_PRECEDENCE} as it is important
- * that any {@link Bean} methods declared in Configuration classes have their
- * respective bean definitions registered before any other BeanFactoryPostProcessor
- * executes.
+ * <p>This post processor is priority-ordered as it is important that any
+ * {@link Bean} methods declared in {@code @Configuration} classes have
+ * their corresponding bean definitions registered before any other
+ * {@link BeanFactoryPostProcessor} executes.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
