@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.context.event;
 
+import java.util.Map;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -23,6 +25,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * {@link GenericApplicationListener} adapter that determines supported event types
@@ -34,6 +37,9 @@ import org.springframework.util.Assert;
  * @see org.springframework.context.ApplicationListener#onApplicationEvent
  */
 public class GenericApplicationListenerAdapter implements GenericApplicationListener, SmartApplicationListener {
+
+	private static final Map<Class<?>, ResolvableType> eventTypeCache = new ConcurrentReferenceHashMap<>();
+
 
 	private final ApplicationListener<ApplicationEvent> delegate;
 
@@ -86,23 +92,27 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 		return (this.delegate instanceof Ordered ? ((Ordered) this.delegate).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}
 
-	@Nullable
-	static ResolvableType resolveDeclaredEventType(Class<?> listenerType) {
-		ResolvableType resolvableType = ResolvableType.forClass(listenerType).as(ApplicationListener.class);
-		return (resolvableType.hasGenerics() ? resolvableType.getGeneric() : null);
-	}
 
 	@Nullable
 	private static ResolvableType resolveDeclaredEventType(ApplicationListener<ApplicationEvent> listener) {
 		ResolvableType declaredEventType = resolveDeclaredEventType(listener.getClass());
-		if (declaredEventType == null || declaredEventType.isAssignableFrom(
-				ResolvableType.forClass(ApplicationEvent.class))) {
+		if (declaredEventType == null || declaredEventType.isAssignableFrom(ApplicationEvent.class)) {
 			Class<?> targetClass = AopUtils.getTargetClass(listener);
 			if (targetClass != listener.getClass()) {
 				declaredEventType = resolveDeclaredEventType(targetClass);
 			}
 		}
 		return declaredEventType;
+	}
+
+	@Nullable
+	static ResolvableType resolveDeclaredEventType(Class<?> listenerType) {
+		ResolvableType eventType = eventTypeCache.get(listenerType);
+		if (eventType == null) {
+			eventType = ResolvableType.forClass(listenerType).as(ApplicationListener.class).getGeneric();
+			eventTypeCache.put(listenerType, eventType);
+		}
+		return (eventType != ResolvableType.NONE ? eventType : null);
 	}
 
 }
