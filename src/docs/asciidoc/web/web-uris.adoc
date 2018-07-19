@@ -8,9 +8,8 @@
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	String uriTemplate = "http://example.com/hotels/{hotel}";
-
-	UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate)  // <1>
+	UriComponents uriComponents = UriComponentsBuilder
+			.fromUriString("http://example.com/hotels/{hotel}")  // <1>
 			.queryParam("q", "{q}")  // <2>
 			.encode() // <3>
 			.build(); // <4>
@@ -23,16 +22,38 @@
 <4> Build a `UriComponents`.
 <5> Expand variables, and obtain the `URI`.
 
-The above can also be done in shorthand form:
+The above can be consolidated into one chain and shortened with `buildAndExpand`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	URI uri = UriComponentsBuilder.fromUriString(uriTemplate)
+	URI uri = UriComponentsBuilder
+			.fromUriString("http://example.com/hotels/{hotel}")
 			.queryParam("q", "{q}")
 			.encode()
 			.buildAndExpand("Westin", "123")
 			.toUri();
+----
+
+It can be shortened further by going directly to URI (which implies encoding):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	URI uri = UriComponentsBuilder
+			.fromUriString("http://example.com/hotels/{hotel}")
+			.queryParam("q", "{q}")
+			.build("Westin", "123");
+----
+
+Or shorter further yet, with a full URI template:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	URI uri = UriComponentsBuilder
+			.fromUriString("http://example.com/hotels/{hotel}?q={q}")
+			.build("Westin", "123");
 ----
 
 
@@ -125,13 +146,32 @@ Example usage using option 1:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	UriComponentsBuilder.fromPath("/hotel list/{city}")
+URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
 			.encode()
-			.buildAndexpand("New York", "foo+bar")
-			.toUriString();
+			.buildAndExpand("New York", "foo+bar")
+			.toUri();
 
 	// Result is "/hotel%20list/New%20York?foo%2Bbar"
+----
+
+The above can be shortened by going directly to URI (which implies encoding):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
+			.queryParam("q", "{q}")
+			.build("New York", "foo+bar")
+----
+
+Or shorter further yet, with a full URI template:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}?q={q}")
+			.build("New York", "foo+bar")
 ----
 
 The `WebClient` and the `RestTemplate` expand and encode URI templates internally through

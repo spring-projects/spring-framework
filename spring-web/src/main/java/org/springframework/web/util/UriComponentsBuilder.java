@@ -150,6 +150,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		this.pathBuilder = other.pathBuilder.cloneBuilder();
 		this.queryParams.putAll(other.queryParams);
 		this.fragment = other.fragment;
+		this.encodeTemplate = other.encodeTemplate;
+		this.charset = other.charset;
 	}
 
 
