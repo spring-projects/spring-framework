@@ -832,6 +832,16 @@ public class MvcUriComponentsBuilder {
 			return this;
 		}
 
+		/**
+		 * Use this method only if you need to apply strong encoding to expanded
+		 * URI variables by quoting all characters with reserved meaning.
+		 * @since 5.0.8
+		 */
+		public MethodArgumentBuilder encode() {
+			this.baseUrl.encode();
+			return this;
+		}
+
 		public String build() {
 			return fromMethodInternal(this.baseUrl, this.controllerType, this.method, this.argumentValues)
 					.build(false).encode().toUriString();
