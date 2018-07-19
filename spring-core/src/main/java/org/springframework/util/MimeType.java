@@ -316,7 +316,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		}
 		else if (getType().equals(other.getType())) {
 			if (getSubtype().equals(other.getSubtype())) {
-				return true;
+				return parametersInclude(other);
 			}
 			if (isWildcardSubtype()) {
 				// Wildcard with suffix, e.g. application/*+xml
@@ -340,6 +340,37 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		}
 		return false;
 	}
+	
+	/**
+	 * Determine if the parameters in this {@code MimeType} include those
+	 * of the supplied {@code MimeType}, performing case-insensitive comparisons
+	 * for {@link Charset}s.
+	 * <p>Parameters are not included when this contains more parameters than
+	 * the supplied, when this contains a parameter that the supplied does not,
+	 * or when they both contain the same parameter with different values.</p>
+	 * @since 5.10.0
+	 */
+	private boolean parametersInclude(MimeType other) {
+		if (this.parameters.size() > other.parameters.size()) {
+			return false;
+		}
+
+		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
+			String key = entry.getKey();
+			if (!other.parameters.containsKey(key)) {
+				return false;
+			}
+			if (PARAM_CHARSET.equals(key)) {
+				if (getCharset() != null && !getCharset().equals(other.getCharset()))
+					return false;
+			}
+			else if (!ObjectUtils.nullSafeEquals(entry.getValue(), other.parameters.get(key))) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	/**
 	 * Indicate whether this MIME Type is compatible with the given MIME Type.
@@ -359,7 +390,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		}
 		else if (getType().equals(other.getType())) {
 			if (getSubtype().equals(other.getSubtype())) {
-				return true;
+				return parametersAreCompatibleWith(other);
 			}
 			// Wildcard with suffix? e.g. application/*+xml
 			if (isWildcardSubtype() || other.isWildcardSubtype()) {
@@ -381,6 +412,28 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Determine if the parameters in this {@code MimeType} and the supplied
+	 * {@code MimeType} are compatible, performing case-insensitive comparisons
+	 * for {@link Charset}s.
+	 * <p>Parameters are incompatible when they contain the same parameter
+	 * with different values.</p>
+	 * @since 5.10.0
+	 */
+	private boolean parametersAreCompatibleWith(MimeType other) {
+		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
+			String key = entry.getKey();
+			if (PARAM_CHARSET.equals(key)) {
+				if (other.getCharset() != null && !other.getCharset().equals(getCharset()))
+					return false;
+			}
+			else if (other.parameters.containsKey(key) && !entry.getValue().equals(other.parameters.get(key)))
+				return false;
+		}
+
+		return true;
 	}
 
 

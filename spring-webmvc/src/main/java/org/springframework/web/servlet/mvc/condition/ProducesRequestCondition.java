@@ -178,7 +178,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * Checks if any of the contained media type expressions match the given
 	 * request 'Content-Type' header and returns an instance that is guaranteed
 	 * to contain matching expressions only. The match is performed via
-	 * {@link MediaType#isCompatibleWith(MediaType)}.
+	 * {@link MediaType#includes(MediaType)}.
 	 * @param request the current request
 	 * @return the same instance if there are no expressions;
 	 * or a new condition with matching expressions;
@@ -327,7 +327,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 		private boolean matchMediaType(List<MediaType> acceptedMediaTypes) {
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
-				if (getMediaType().isCompatibleWith(acceptedMediaType)) {
++				if (acceptedMediaType.includes(getMediaType())) {
 					return true;
 				}
 			}
