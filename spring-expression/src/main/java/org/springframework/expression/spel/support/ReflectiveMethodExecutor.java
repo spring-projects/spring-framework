@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * {@link MethodExecutor} that works via reflection.
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -48,6 +50,10 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	private boolean argumentConversionOccurred = false;
 
 
+	/**
+	 * Create a new executor for the given method.
+	 * @param method the method to invoke
+	 */
 	public ReflectiveMethodExecutor(Method method) {
 		this.method = method;
 		if (method.isVarArgs()) {
@@ -60,6 +66,9 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	}
 
 
+	/**
+	 * Return the original method that this executor has been configured for.
+	 */
 	public Method getMethod() {
 		return this.method;
 	}
@@ -68,21 +77,22 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	 * Find the first public class in the methods declaring class hierarchy that declares this method.
 	 * Sometimes the reflective method discovery logic finds a suitable method that can easily be
 	 * called via reflection but cannot be called from generated code when compiling the expression
-	 * because of visibility restrictions. For example if a non public class overrides toString(), this
-	 * helper method will walk up the type hierarchy to find the first public type that declares the
-	 * method (if there is one!). For toString() it may walk as far as Object.
+	 * because of visibility restrictions. For example if a non-public class overrides toString(),
+	 * this helper method will walk up the type hierarchy to find the first public type that declares
+	 * the method (if there is one!). For toString() it may walk as far as Object.
 	 */
 	@Nullable
 	public Class<?> getPublicDeclaringClass() {
 		if (!this.computedPublicDeclaringClass) {
-			this.publicDeclaringClass = discoverPublicClass(this.method, this.method.getDeclaringClass());
+			this.publicDeclaringClass =
+					discoverPublicDeclaringClass(this.method, this.method.getDeclaringClass());
 			this.computedPublicDeclaringClass = true;
 		}
 		return this.publicDeclaringClass;
 	}
 
 	@Nullable
-	private Class<?> discoverPublicClass(Method method, Class<?> clazz) {
+	private Class<?> discoverPublicDeclaringClass(Method method, Class<?> clazz) {
 		if (Modifier.isPublic(clazz.getModifiers())) {
 			try {
 				clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
@@ -92,12 +102,8 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 				// Continue below...
 			}
 		}
-		Class<?>[] ifcs = clazz.getInterfaces();
-		for (Class<?> ifc: ifcs) {
-			discoverPublicClass(method, ifc);
-		}
 		if (clazz.getSuperclass() != null) {
-			return discoverPublicClass(method, clazz.getSuperclass());
+			return discoverPublicDeclaringClass(method, clazz.getSuperclass());
 		}
 		return null;
 	}
