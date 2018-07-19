@@ -29,6 +29,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpStatus;
@@ -80,6 +81,9 @@ public class HandlerMethod {
 
 	@Nullable
 	private HandlerMethod resolvedFromHandlerMethod;
+
+	@Nullable
+	private volatile List<Annotation[][]> interfaceParameterAnnotations;
 
 
 	/**
@@ -323,8 +327,43 @@ public class HandlerMethod {
 	 * @since 4.3
 	 */
 	public String getShortLogMessage() {
-		int args = this.method.getParameterCount();
-		return getBeanType().getName() + "#" + this.method.getName() + "[" + args + " args]";
+		return getBeanType().getName() + "#" + this.method.getName() +
+				"[" + this.method.getParameterCount() + " args]";
+	}
+
+
+	private List<Annotation[][]> getInterfaceParameterAnnotations() {
+		List<Annotation[][]> parameterAnnotations = this.interfaceParameterAnnotations;
+		if (parameterAnnotations == null) {
+			parameterAnnotations = new ArrayList<>();
+			for (Class<?> ifc : this.method.getDeclaringClass().getInterfaces()) {
+				for (Method candidate : ifc.getMethods()) {
+					if (isOverrideFor(candidate)) {
+						parameterAnnotations.add(candidate.getParameterAnnotations());
+					}
+				}
+			}
+			this.interfaceParameterAnnotations = parameterAnnotations;
+		}
+		return parameterAnnotations;
+	}
+
+	private boolean isOverrideFor(Method candidate) {
+		if (!candidate.getName().equals(this.method.getName()) ||
+				candidate.getParameterCount() != this.method.getParameterCount()) {
+			return false;
+		}
+		Class<?>[] paramTypes = this.method.getParameterTypes();
+		if (Arrays.equals(candidate.getParameterTypes(), paramTypes)) {
+			return true;
+		}
+		for (int i = 0; i < paramTypes.length; i++) {
+			if (paramTypes[i] !=
+					ResolvableType.forMethodParameter(candidate, i, this.method.getDeclaringClass()).resolve()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 
@@ -387,30 +426,24 @@ public class HandlerMethod {
 			Annotation[] anns = this.combinedAnnotations;
 			if (anns == null) {
 				anns = super.getParameterAnnotations();
-				Class<?>[] ifcs = getDeclaringClass().getInterfaces();
-				for (Class<?> ifc : ifcs) {
-					try {
-						Method method = ifc.getMethod(getExecutable().getName(), getExecutable().getParameterTypes());
-						Annotation[] paramAnns = method.getParameterAnnotations()[getParameterIndex()];
-						if (paramAnns.length > 0) {
-							List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
-							merged.addAll(Arrays.asList(anns));
-							for (Annotation fieldAnn : paramAnns) {
-								boolean existingType = false;
-								for (Annotation ann : anns) {
-									if (ann.annotationType() == fieldAnn.annotationType()) {
-										existingType = true;
-										break;
-									}
-								}
-								if (!existingType) {
-									merged.add(fieldAnn);
+				for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {
+					Annotation[] paramAnns = ifcAnns[getParameterIndex()];
+					if (paramAnns.length > 0) {
+						List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
+						merged.addAll(Arrays.asList(anns));
+						for (Annotation paramAnn : paramAnns) {
+							boolean existingType = false;
+							for (Annotation ann : anns) {
+								if (ann.annotationType() == paramAnn.annotationType()) {
+									existingType = true;
+									break;
 								}
 							}
-							anns = merged.toArray(new Annotation[0]);
+							if (!existingType) {
+								merged.add(paramAnn);
+							}
 						}
-					}
-					catch (NoSuchMethodException ex) {
+						anns = merged.toArray(new Annotation[0]);
 					}
 				}
 				this.combinedAnnotations = anns;
