@@ -149,20 +149,23 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		Map<String, MultiValueMap<String, String>> result = new LinkedHashMap<>();
 		uriVariables.forEach((uriVarKey, uriVarValue) -> {
+
 			int equalsIndex = uriVarValue.indexOf('=');
 			if (equalsIndex == -1) {
 				return;
 			}
 
-			String matrixVariables;
-
 			int semicolonIndex = uriVarValue.indexOf(';');
-			if ((semicolonIndex == -1) || (semicolonIndex == 0) || (equalsIndex < semicolonIndex)) {
+			if (semicolonIndex != -1 && semicolonIndex != 0) {
+				uriVariables.put(uriVarKey, uriVarValue.substring(0, semicolonIndex));
+			}
+
+			String matrixVariables;
+			if (semicolonIndex == -1 || semicolonIndex == 0 || equalsIndex < semicolonIndex) {
 				matrixVariables = uriVarValue;
 			}
 			else {
 				matrixVariables = uriVarValue.substring(semicolonIndex + 1);
-				uriVariables.put(uriVarKey, uriVarValue.substring(0, semicolonIndex));
 			}
 
 			MultiValueMap<String, String> vars = WebUtils.parseMatrixVariables(matrixVariables);
