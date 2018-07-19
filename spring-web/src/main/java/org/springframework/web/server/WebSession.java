@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ public interface WebSession {
 	 * </ul>
 	 * <p>Note that this method is not intended for direct use by applications.
 	 * Instead it is automatically invoked just before the response is
-	 * committed is committed.
+	 * committed.
 	 * @return {@code Mono} to indicate completion with success or error
 	 */
 	Mono<Void> save();
