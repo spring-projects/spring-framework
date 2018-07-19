@@ -83,6 +83,7 @@ public class InMemoryWebSessionStoreTests {
 		assertNotNull(session1);
 		String id = session1.getId();
 		Instant time1 = session1.getLastAccessTime();
+		session1.start();
 		session1.save().block();
 
 		// Fast-forward a few seconds
@@ -93,6 +94,34 @@ public class InMemoryWebSessionStoreTests {
 		assertSame(session1, session2);
 		Instant time2 = session2.getLastAccessTime();
 		assertTrue(time1.isBefore(time2));
+	}
+
+	@Test // SPR-17051
+	public void sessionInvalidatedBeforeSave() {
+		// Request 1 creates session
+		WebSession session1 = this.store.createWebSession().block();
+		assertNotNull(session1);
+		String id = session1.getId();
+		session1.start();
+		session1.save().block();
+
+		// Request 2 retrieves session
+		WebSession session2 = this.store.retrieveSession(id).block();
+		assertNotNull(session2);
+		assertSame(session1, session2);
+
+		// Request 3 retrieves and invalidates
+		WebSession session3 = this.store.retrieveSession(id).block();
+		assertNotNull(session3);
+		assertSame(session1, session3);
+		session3.invalidate().block();
+
+		// Request 2 saves session after invalidated
+		session2.save().block();
+
+		// Session should not be present
+		WebSession session4 = this.store.retrieveSession(id).block();
+		assertNull(session4);
 	}
 
 	@Test

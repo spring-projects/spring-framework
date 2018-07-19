@@ -116,13 +116,19 @@ public interface WebSession {
 	Mono<Void> invalidate();
 
 	/**
-	 * Save the session persisting attributes (e.g. if stored remotely) and also
-	 * sending the session id to the client if the session is new.
-	 * <p>Note that a session must be started explicitly via {@link #start()} or
-	 * implicitly by adding attributes or otherwise this method has no effect.
+	 * Save the session through the {@code WebSessionStore} as follows:
+	 * <ul>
+	 * <li>If the session is new (i.e. created but never persisted), it must have
+	 * been started explicitly via {@link #start()} or implicitly by adding
+	 * attributes, or otherwise this method should have no effect.
+	 * <li>If the session was retrieved through the {@code WebSessionStore},
+	 * the implementation for this method must check whether the session was
+	 * {@link #invalidate() invalidated} and if so return an error.
+	 * </ul>
+	 * <p>Note that this method is not intended for direct use by applications.
+	 * Instead it is automatically invoked just before the response is
+	 * committed is committed.
 	 * @return {@code Mono} to indicate completion with success or error
-	 * <p>Typically this method should be automatically invoked just before the
-	 * response is committed so applications don't have to by default.
 	 */
 	Mono<Void> save();
 
