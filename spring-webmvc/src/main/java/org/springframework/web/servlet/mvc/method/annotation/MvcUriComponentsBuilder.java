@@ -63,7 +63,6 @@ import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -547,8 +546,7 @@ public class MvcUriComponentsBuilder {
 		String path = pathMatcher.combine(typePath, methodPath);
 		builder.path(path);
 
-		UriComponents uriComponents = applyContributors(builder, method, args);
-		return UriComponentsBuilder.newInstance().uriComponents(uriComponents);
+		return applyContributors(builder, method, args);
 	}
 
 	private static UriComponentsBuilder getBaseUrlToUse(@Nullable UriComponentsBuilder baseUrl) {
@@ -626,7 +624,7 @@ public class MvcUriComponentsBuilder {
 		}
 	}
 
-	private static UriComponents applyContributors(UriComponentsBuilder builder, Method method, Object... args) {
+	private static UriComponentsBuilder applyContributors(UriComponentsBuilder builder, Method method, Object... args) {
 		CompositeUriComponentsContributor contributor = getUriComponentsContributor();
 
 		int paramCount = method.getParameterCount();
@@ -643,9 +641,8 @@ public class MvcUriComponentsBuilder {
 			contributor.contributeMethodArgument(param, args[i], builder, uriVars);
 		}
 
-		// We may not have all URI var values, expand only what we have
-		return builder.build().expand(name ->
-				uriVars.getOrDefault(name, UriComponents.UriTemplateVariables.SKIP_VALUE));
+		// This may not be all the URI variables, supply what we have so far..
+		return builder.uriVariables(uriVars);
 	}
 
 	private static CompositeUriComponentsContributor getUriComponentsContributor() {
@@ -851,7 +848,7 @@ public class MvcUriComponentsBuilder {
 		public MethodArgumentBuilder(@Nullable UriComponentsBuilder baseUrl, Class<?> controllerType, Method method) {
 			Assert.notNull(controllerType, "'controllerType' is required");
 			Assert.notNull(method, "'method' is required");
-			this.baseUrl = (baseUrl != null ? baseUrl : initBaseUrl());
+			this.baseUrl = baseUrl != null ? baseUrl : UriComponentsBuilder.fromPath(getPath());
 			this.controllerType = controllerType;
 			this.method = method;
 			this.argumentValues = new Object[method.getParameterCount()];
@@ -860,10 +857,10 @@ public class MvcUriComponentsBuilder {
 			}
 		}
 
-		private static UriComponentsBuilder initBaseUrl() {
+		private static String getPath() {
 			UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
 			String path = builder.build().getPath();
-			return (path != null ? UriComponentsBuilder.fromPath(path) : UriComponentsBuilder.newInstance());
+			return path != null ? path : "";
 		}
 
 		public MethodArgumentBuilder arg(int index, Object value) {
@@ -872,13 +869,13 @@ public class MvcUriComponentsBuilder {
 		}
 
 		public String build() {
-			return fromMethodInternal(this.baseUrl, this.controllerType, this.method,
-					this.argumentValues).build(false).encode().toUriString();
+			return fromMethodInternal(this.baseUrl, this.controllerType, this.method, this.argumentValues)
+					.build(false).encode().toUriString();
 		}
 
 		public String buildAndExpand(Object... uriVars) {
-			return fromMethodInternal(this.baseUrl, this.controllerType, this.method,
-					this.argumentValues).build(false).expand(uriVars).encode().toString();
+			return fromMethodInternal(this.baseUrl, this.controllerType, this.method, this.argumentValues)
+					.build(false).expand(uriVars).encode().toString();
 		}
 	}
 
