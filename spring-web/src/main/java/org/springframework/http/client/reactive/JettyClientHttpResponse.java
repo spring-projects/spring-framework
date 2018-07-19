@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.client.reactive;
 
 import java.net.HttpCookie;
+import java.util.List;
 
 import org.eclipse.jetty.reactive.client.ReactiveResponse;
 import org.reactivestreams.Publisher;
@@ -65,16 +67,20 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
-		getHeaders().get(HttpHeaders.SET_COOKIE).forEach(header -> {
-			HttpCookie.parse(header).forEach(cookie -> result.add(cookie.getName(), ResponseCookie.from(cookie.getName(), cookie.getValue())
-					.domain(cookie.getDomain())
-					.path(cookie.getPath())
-					.maxAge(cookie.getMaxAge())
-					.secure(cookie.getSecure())
-					.httpOnly(cookie.isHttpOnly())
-					.build()));
-
-		});
+		List<String> cookieHeader = getHeaders().get(HttpHeaders.SET_COOKIE);
+		if (cookieHeader != null) {
+			cookieHeader.forEach(header -> {
+				HttpCookie.parse(header)
+						.forEach(cookie -> result.add(cookie.getName(),
+								ResponseCookie.from(cookie.getName(), cookie.getValue())
+						.domain(cookie.getDomain())
+						.path(cookie.getPath())
+						.maxAge(cookie.getMaxAge())
+						.secure(cookie.getSecure())
+						.httpOnly(cookie.isHttpOnly())
+						.build()));
+			});
+		}
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
@@ -87,7 +93,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		this.reactiveResponse.getHeaders().stream()
-				.forEach(e -> headers.add(e.getName(), e.getValue()));
+				.forEach(field -> headers.add(field.getName(), field.getValue()));
 		return headers;
 	}
 
