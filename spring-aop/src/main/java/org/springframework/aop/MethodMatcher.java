@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,11 @@ import org.springframework.lang.Nullable;
 public interface MethodMatcher {
 
 	/**
-	 * Perform static checking whether the given method matches. If this
-	 * returns {@code false} or if the {@link #isRuntime()} method
-	 * returns {@code false}, no runtime check (i.e. no.
-	 * {@link #matches(java.lang.reflect.Method, Class, Object[])} call) will be made.
+	 * Perform static checking whether the given method matches.
+	 * <p>If this returns {@code false} or if the {@link #isRuntime()}
+	 * method returns {@code false}, no runtime check (i.e. no
+	 * {@link #matches(java.lang.reflect.Method, Class, Object[])} call)
+	 * will be made.
 	 * @param method the candidate method
 	 * @param targetClass the target class (may be {@code null}, in which case
 	 * the candidate class must be taken to be the method's declaring class)
