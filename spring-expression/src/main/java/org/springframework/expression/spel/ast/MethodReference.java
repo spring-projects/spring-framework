@@ -182,8 +182,7 @@ public class MethodReference extends SpelNodeImpl {
 			@Nullable TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 
 		List<MethodResolver> methodResolvers = evaluationContext.getMethodResolvers();
-		if (methodResolvers.size() != 1 ||
-				!(methodResolvers.get(0) instanceof ReflectiveMethodResolver)) {
+		if (methodResolvers.size() != 1 || !(methodResolvers.get(0) instanceof ReflectiveMethodResolver)) {
 			// Not a default ReflectiveMethodResolver - don't know whether caching is valid
 			return null;
 		}
