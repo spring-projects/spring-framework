@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -98,7 +97,7 @@ public abstract class Pointcuts {
 		public static final SetterPointcut INSTANCE = new SetterPointcut();
 
 		@Override
-		public boolean matches(Method method, @Nullable Class<?> targetClass) {
+		public boolean matches(Method method, Class<?> targetClass) {
 			return (method.getName().startsWith("set") &&
 					method.getParameterCount() == 1 &&
 					method.getReturnType() == Void.TYPE);
@@ -119,7 +118,7 @@ public abstract class Pointcuts {
 		public static final GetterPointcut INSTANCE = new GetterPointcut();
 
 		@Override
-		public boolean matches(Method method, @Nullable Class<?> targetClass) {
+		public boolean matches(Method method, Class<?> targetClass) {
 			return (method.getName().startsWith("get") &&
 					method.getParameterCount() == 0);
 		}

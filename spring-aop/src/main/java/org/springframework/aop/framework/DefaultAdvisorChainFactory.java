@@ -70,10 +70,10 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 						if (hasIntroductions == null) {
 							hasIntroductions = hasMatchingIntroductions(advisors, actualClass);
 						}
-						match = ((IntroductionAwareMethodMatcher) mm).matches(method, targetClass, hasIntroductions);
+						match = ((IntroductionAwareMethodMatcher) mm).matches(method, actualClass, hasIntroductions);
 					}
 					else {
-						match = mm.matches(method, targetClass);
+						match = mm.matches(method, actualClass);
 					}
 					if (match) {
 						MethodInterceptor[] interceptors = registry.getInterceptors(advisor);

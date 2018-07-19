@@ -152,11 +152,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @see #setTargetSource
 	 * @see #setTarget
 	 */
-	public void setTargetClass(Class<?> targetClass) {
+	public void setTargetClass(@Nullable Class<?> targetClass) {
 		this.targetSource = EmptyTargetSource.forClass(targetClass);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getTargetClass() {
 		return this.targetSource.getTargetClass();
 	}
