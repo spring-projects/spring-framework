@@ -619,9 +619,9 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			return null;
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		private Reference<K, V>[] createReferenceArray(int size) {
-			return (Reference<K, V>[]) Array.newInstance(Reference.class, size);
+			return new Reference[size];
 		}
 
 		private int getIndex(int hash, Reference<K, V>[] references) {
@@ -756,8 +756,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		/**
 		 * Execute the task.
-		 * @param ref the found reference or {@code null}
-		 * @param entry the found entry or {@code null}
+		 * @param ref the found reference (or {@code null})
+		 * @param entry the found entry (or {@code null})
 		 * @param entries access to the underlying entries
 		 * @return the result of the task
 		 * @see #execute(Reference, Entry)
@@ -768,8 +768,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		/**
 		 * Convenience method that can be used for tasks that do not need access to {@link Entries}.
-		 * @param ref the found reference or {@code null}
-		 * @param entry the found entry or {@code null}
+		 * @param ref the found reference (or {@code null})
+		 * @param entry the found entry (or {@code null})
 		 * @return the result of the task
 		 * @see #execute(Reference, Entry, Entries)
 		 */
