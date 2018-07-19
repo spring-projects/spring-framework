@@ -25,10 +25,12 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
 
 import static java.lang.String.*;
@@ -280,6 +282,30 @@ public class AnnotationConfigApplicationContextTests {
 	}
 
 	@Test
+	public void individualBeanWithFactoryBeanSupplier() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.registerBean("fb", TypedFactoryBean.class, TypedFactoryBean::new, bd -> bd.setLazyInit(true));
+		context.refresh();
+
+		assertEquals(String.class, context.getType("fb"));
+		assertEquals(TypedFactoryBean.class, context.getType("&fb"));
+	}
+
+	@Test
+	public void individualBeanWithFactoryBeanSupplierAndTargetType() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		RootBeanDefinition bd = new RootBeanDefinition();
+		bd.setInstanceSupplier(TypedFactoryBean::new);
+		bd.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, String.class));
+		bd.setLazyInit(true);
+		context.registerBeanDefinition("fb", bd);
+		context.refresh();
+
+		assertEquals(String.class, context.getType("fb"));
+		assertEquals(FactoryBean.class, context.getType("&fb"));
+	}
+
+	@Test
 	public void getBeanByTypeRaisesNoSuchBeanDefinitionException() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 
@@ -427,6 +453,28 @@ public class AnnotationConfigApplicationContextTests {
 	}
 
 	static class BeanC {}
+
+	static class TypedFactoryBean implements FactoryBean<String> {
+
+		public TypedFactoryBean() {
+			throw new IllegalStateException();
+		}
+
+		@Override
+		public String getObject() {
+			return "";
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return String.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
+	}
 
 	static class UntypedFactoryBean implements FactoryBean<Object> {
 

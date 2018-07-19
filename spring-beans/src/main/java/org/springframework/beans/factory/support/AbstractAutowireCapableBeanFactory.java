@@ -796,6 +796,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@Override
 	@Nullable
 	protected Class<?> getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
+		if (mbd.getInstanceSupplier() != null) {
+			ResolvableType targetType = mbd.targetType;
+			if (targetType != null) {
+				Class<?> result = targetType.as(FactoryBean.class).getGeneric().resolve();
+				if (result != null) {
+					return result;
+				}
+			}
+			if (mbd.hasBeanClass()) {
+				Class<?> result = GenericTypeResolver.resolveTypeArgument(mbd.getBeanClass(), FactoryBean.class);
+				if (result != null) {
+					return result;
+				}
+			}
+		}
+
 		String factoryBeanName = mbd.getFactoryBeanName();
 		String factoryMethodName = mbd.getFactoryMethodName();
 
