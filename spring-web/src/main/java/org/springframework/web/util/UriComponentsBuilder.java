@@ -20,6 +20,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
+import org.springframework.web.util.UriComponents.UriTemplateVariables;
 
 /**
  * Builder for {@link UriComponents}.
@@ -120,6 +122,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	@Nullable
 	private String fragment;
+
+	private final Map<String, Object> uriVariables = new HashMap<>(4);
 
 	private boolean encodeTemplate;
 
@@ -381,15 +385,20 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
+		UriComponents result;
 		if (this.ssp != null) {
-			return new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
+			result = new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
-			HierarchicalUriComponents uriComponents =
-					new HierarchicalUriComponents(this.scheme, this.fragment, this.userInfo,
-							this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded);
-			return (this.encodeTemplate ? uriComponents.encodeTemplate(this.charset) : uriComponents);
+			HierarchicalUriComponents uric = new HierarchicalUriComponents(this.scheme, this.fragment,
+					this.userInfo, this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded);
+
+			result = this.encodeTemplate ? uric.encodeTemplate(this.charset) : uric;
 		}
+		if (!this.uriVariables.isEmpty()) {
+			result = result.expand(name -> this.uriVariables.getOrDefault(name, UriTemplateVariables.SKIP_VALUE));
+		}
+		return result;
 	}
 
 	/**
@@ -433,7 +442,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @see UriComponents#toUriString()
 	 */
 	public String toUriString() {
-		return build().encode().toUriString();
+		return encode().build().toUriString();
 	}
 
 
@@ -749,6 +758,25 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		else {
 			this.fragment = null;
 		}
+		return this;
+	}
+
+	/**
+	 * Configure URI variables to be expanded at build time.
+	 * <p>The provided variables may be a subset of all required ones. At build
+	 * time, the available ones are expanded, while unresolved URI placeholders
+	 * are left in place and can still be expanded later.
+	 * <p>In contrast to {@link UriComponents#expand(Map)} or
+	 * {@link #buildAndExpand(Map)}, this method is useful when you need to
+	 * supply URI variables without building the {@link UriComponents} instance
+	 * just yet, or perhaps pre-expand some shared default values such as host
+	 * and port.
+	 * @param uriVariables the URI variables to use
+	 * @return this UriComponentsBuilder
+	 * @since 5.0.8
+	 */
+	public UriComponentsBuilder uriVariables(Map<String, Object> uriVariables) {
+		this.uriVariables.putAll(uriVariables);
 		return this;
 	}
 

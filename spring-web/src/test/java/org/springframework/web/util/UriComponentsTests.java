@@ -70,19 +70,12 @@ public class UriComponentsTests {
 	@Test
 	public void encodeAndExpandPartially() {
 
-		Map<String, Object> uriVars = new HashMap<>();
-		uriVars.put("city", "Z\u00fcrich");
-
 		UriComponents uri = UriComponentsBuilder
-				.fromPath("/hotel list/{city} specials").queryParam("q", "{value}").encode().build()
-				.expand(name -> uriVars.getOrDefault(name, UriTemplateVariables.SKIP_VALUE));
+				.fromPath("/hotel list/{city} specials").queryParam("q", "{value}").encode()
+				.uriVariables(Collections.singletonMap("city", "Z\u00fcrich"))
+				.build();
 
-		assertEquals("/hotel%20list/Z%C3%BCrich%20specials?q={value}", uri.toString());
-
-		uriVars.put("value", "a+b");
-		uri = uri.expand(uriVars);
-
-		assertEquals("/hotel%20list/Z%C3%BCrich%20specials?q=a%2Bb", uri.toString());
+		assertEquals("/hotel%20list/Z%C3%BCrich%20specials?q=a%2Bb", uri.expand("a+b").toString());
 	}
 
 	@Test
