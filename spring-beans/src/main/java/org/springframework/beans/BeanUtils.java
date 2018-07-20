@@ -119,11 +119,15 @@ public abstract class BeanUtils {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
-			Constructor<T> ctor = (KotlinDetector.isKotlinType(clazz) ?
-					KotlinDelegate.getPrimaryConstructor(clazz) : clazz.getDeclaredConstructor());
-			return instantiateClass(ctor);
+			return instantiateClass(clazz.getDeclaredConstructor());
 		}
 		catch (NoSuchMethodException ex) {
+			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(clazz)) {
+				Constructor<T> ctor = findPrimaryConstructor(clazz);
+				if (ctor != null) {
+					return instantiateClass(ctor);
+				}
+			}
 			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
 		catch (LinkageError err) {
@@ -166,7 +170,7 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			return (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) ?
+			return (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(ctor.getDeclaringClass()) ?
 					KotlinDelegate.instantiateClass(ctor, args) : ctor.newInstance(args));
 		}
 		catch (InstantiationException ex) {
@@ -196,7 +200,7 @@ public abstract class BeanUtils {
 	@Nullable
 	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		if (KotlinDetector.isKotlinType(clazz)) {
+		if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(clazz)) {
 			Constructor<T> kotlinPrimaryConstructor = KotlinDelegate.findPrimaryConstructor(clazz);
 			if (kotlinPrimaryConstructor != null) {
 				return kotlinPrimaryConstructor;
@@ -699,22 +703,6 @@ public abstract class BeanUtils {
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
 	private static class KotlinDelegate {
-
-		/**
-		 * Determine the Java constructor corresponding to the Kotlin primary constructor.
-		 * @param clazz the {@link Class} of the Kotlin class
-		 * @throws NoSuchMethodException if no such constructor found
-		 * @since 5.0.3
-		 * @see #findPrimaryConstructor
-		 * @see Class#getDeclaredConstructor
-		 */
-		public static <T> Constructor<T> getPrimaryConstructor(Class<T> clazz) throws NoSuchMethodException {
-			Constructor<T> ctor = findPrimaryConstructor(clazz);
-			if (ctor == null) {
-				throw new NoSuchMethodException();
-			}
-			return ctor;
-		}
 
 		/**
 		 * Retrieve the Java constructor corresponding to the Kotlin primary constructor, if any.

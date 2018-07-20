@@ -168,7 +168,8 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 		if (this.field != null) {
 			return !(this.field.getType() == Optional.class || hasNullableAnnotation() ||
-					(KotlinDetector.isKotlinType(this.field.getDeclaringClass()) &&
+					(KotlinDetector.isKotlinReflectPresent() &&
+							KotlinDetector.isKotlinType(this.field.getDeclaringClass()) &&
 							KotlinDelegate.isNullable(this.field)));
 		}
 		else {

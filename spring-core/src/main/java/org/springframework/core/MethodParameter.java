@@ -342,7 +342,9 @@ public class MethodParameter {
 	 */
 	public boolean isOptional() {
 		return (getParameterType() == Optional.class || hasNullableAnnotation() ||
-				(KotlinDetector.isKotlinType(getContainingClass()) && KotlinDelegate.isOptional(this)));
+				(KotlinDetector.isKotlinReflectPresent() &&
+						KotlinDetector.isKotlinType(getContainingClass()) &&
+						KotlinDelegate.isOptional(this)));
 	}
 
 	/**

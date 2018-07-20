@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.core;
 
 import java.lang.annotation.Annotation;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
@@ -31,19 +34,28 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("unchecked")
 public abstract class KotlinDetector {
 
+	private static final Log logger = LogFactory.getLog(KotlinDetector.class);
+
 	@Nullable
 	private static final Class<? extends Annotation> kotlinMetadata;
 
+	private static final boolean kotlinReflectPresent;
+
 	static {
 		Class<?> metadata;
+		ClassLoader classLoader = KotlinDetector.class.getClassLoader();
 		try {
-			metadata = ClassUtils.forName("kotlin.Metadata", KotlinDetector.class.getClassLoader());
+			metadata = ClassUtils.forName("kotlin.Metadata", classLoader);
 		}
 		catch (ClassNotFoundException ex) {
 			// Kotlin API not available - no Kotlin support
 			metadata = null;
 		}
 		kotlinMetadata = (Class<? extends Annotation>) metadata;
+		kotlinReflectPresent = ClassUtils.isPresent("kotlin.reflect.full.KClasses", classLoader);
+		if (kotlinMetadata != null && !kotlinReflectPresent) {
+			logger.info("Kotlin reflection implementation not found at runtime, related features won't be available.");
+		}
 	}
 
 
@@ -52,6 +64,14 @@ public abstract class KotlinDetector {
 	 */
 	public static boolean isKotlinPresent() {
 		return (kotlinMetadata != null);
+	}
+
+	/**
+	 * Determine whether Kotlin reflection is present.
+	 * @since 5.1
+	 */
+	public static boolean isKotlinReflectPresent() {
+		return kotlinReflectPresent;
 	}
 
 	/**
