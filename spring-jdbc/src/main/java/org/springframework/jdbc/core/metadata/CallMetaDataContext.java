@@ -520,7 +520,7 @@ public class CallMetaDataContext {
 										matchedParameters.put(parameterName,
 												SqlParameterSourceUtils.getTypedValue(parameterSource, sourceName));
 									}
-									else {
+									else if (logger.isWarnEnabled()) {
 										logger.warn("Unable to locate the corresponding parameter value for '" +
 												parameterName + "' within the parameter values provided: " +
 												caseInsensitiveParameterNames.values());
@@ -587,7 +587,7 @@ public class CallMetaDataContext {
 			for (String parameterName : callParameterNames.keySet()) {
 				String parameterNameToMatch = provider.parameterNameToUse(parameterName);
 				String callParameterName = callParameterNames.get(lowerCase(parameterNameToMatch));
-				if (!matchedParameters.containsKey(callParameterName)) {
+				if (!matchedParameters.containsKey(callParameterName) && logger.isWarnEnabled()) {
 					logger.warn("Unable to locate the corresponding parameter value for '" + parameterName +
 							"' within the parameter values provided: " + inParameters.keySet());
 				}

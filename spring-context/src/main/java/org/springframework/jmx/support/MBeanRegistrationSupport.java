@@ -151,7 +151,9 @@ public class MBeanRegistrationSupport {
 						registeredBean = this.server.registerMBean(mbean, objectName);
 					}
 					catch (InstanceNotFoundException ex2) {
-						logger.error("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						if (logger.isErrorEnabled()) {
+							logger.error("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						}
 						throw ex;
 					}
 				}
@@ -181,9 +183,9 @@ public class MBeanRegistrationSupport {
 		}
 		if (!snapshot.isEmpty()) {
 			logger.info("Unregistering JMX-exposed beans");
-		}
-		for (ObjectName objectName : snapshot) {
-			doUnregister(objectName);
+			for (ObjectName objectName : snapshot) {
+				doUnregister(objectName);
+			}
 		}
 	}
 

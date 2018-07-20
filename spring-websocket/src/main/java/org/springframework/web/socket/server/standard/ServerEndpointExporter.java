@@ -145,9 +145,9 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 		ServerContainer serverContainer = getServerContainer();
 		Assert.state(serverContainer != null,
 				"No ServerContainer set. Most likely the server's own WebSocket ServletContainerInitializer " +
-						"has not run yet. Was the Spring ApplicationContext refreshed through a " +
-						"org.springframework.web.context.ContextLoaderListener, " +
-						"i.e. after the ServletContext has been fully initialized?");
+				"has not run yet. Was the Spring ApplicationContext refreshed through a " +
+				"org.springframework.web.context.ContextLoaderListener, " +
+				"i.e. after the ServletContext has been fully initialized?");
 		try {
 			if (logger.isInfoEnabled()) {
 				logger.info("Registering @ServerEndpoint class: " + endpointClass);
