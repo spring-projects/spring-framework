@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,7 +209,9 @@ public class MBeanRegistrationSupport {
 						registeredBean = this.server.registerMBean(mbean, objectName);
 					}
 					catch (InstanceNotFoundException ex2) {
-						logger.error("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						if (logger.isErrorEnabled()) {
+							logger.error("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						}
 						throw ex;
 					}
 				}
@@ -239,9 +241,9 @@ public class MBeanRegistrationSupport {
 		}
 		if (!snapshot.isEmpty()) {
 			logger.info("Unregistering JMX-exposed beans");
-		}
-		for (ObjectName objectName : snapshot) {
-			doUnregister(objectName);
+			for (ObjectName objectName : snapshot) {
+				doUnregister(objectName);
+			}
 		}
 	}
 
