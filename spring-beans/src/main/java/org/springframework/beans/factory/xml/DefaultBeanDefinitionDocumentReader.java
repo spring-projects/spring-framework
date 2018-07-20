@@ -138,8 +138,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				// We cannot use Profiles.of(...) since profile expressions are not supported
 				// in XML config. See SPR-12458 for details.
 				if (!getReaderContext().getEnvironment().acceptsProfiles(specifiedProfiles)) {
-					if (logger.isInfoEnabled()) {
-						logger.info("Skipped XML bean definition file due to specified profiles [" + profileSpec +
+					if (logger.isDebugEnabled()) {
+						logger.debug("Skipped XML bean definition file due to specified profiles [" + profileSpec +
 								"] not matching: " + getReaderContext().getResource());
 					}
 					return;

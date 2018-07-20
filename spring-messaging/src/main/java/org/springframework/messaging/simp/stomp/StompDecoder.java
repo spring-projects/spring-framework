@@ -299,8 +299,8 @@ public class StompDecoder {
 			contentLength = headerAccessor.getContentLength();
 		}
 		catch (NumberFormatException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring invalid content-length: '" + headerAccessor);
 			}
 			contentLength = null;
 		}

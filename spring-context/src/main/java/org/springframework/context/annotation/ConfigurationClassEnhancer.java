@@ -348,9 +348,9 @@ class ConfigurationClassEnhancer {
 				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
 				// create the bean instance.
-				if (logger.isWarnEnabled() &&
+				if (logger.isInfoEnabled() &&
 						BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
-					logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " +
+					logger.info(String.format("@Bean method %s.%s is non-static and returns an object " +
 									"assignable to Spring's BeanFactoryPostProcessor interface. This will " +
 									"result in a failure to process annotations such as @Autowired, " +
 									"@Resource and @PostConstruct within the method's declaring " +
@@ -490,8 +490,8 @@ class ConfigurationClassEnhancer {
 				boolean finalMethod = Modifier.isFinal(clazz.getMethod("getObject").getModifiers());
 				if (finalClass || finalMethod) {
 					if (exposedType.isInterface()) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Creating interface proxy for FactoryBean '" + beanName + "' of type [" +
+						if (logger.isTraceEnabled()) {
+							logger.trace("Creating interface proxy for FactoryBean '" + beanName + "' of type [" +
 									clazz.getName() + "] for use within another @Bean method because its " +
 									(finalClass ? "implementation class" : "getObject() method") +
 									" is final: Otherwise a getObject() call would not be routed to the factory.");
@@ -499,8 +499,8 @@ class ConfigurationClassEnhancer {
 						return createInterfaceProxyForFactoryBean(factoryBean, exposedType, beanFactory, beanName);
 					}
 					else {
-						if (logger.isInfoEnabled()) {
-							logger.info("Unable to proxy FactoryBean '" + beanName + "' of type [" +
+						if (logger.isDebugEnabled()) {
+							logger.debug("Unable to proxy FactoryBean '" + beanName + "' of type [" +
 									clazz.getName() + "] for use within another @Bean method because its " +
 									(finalClass ? "implementation class" : "getObject() method") +
 									" is final: A getObject() call will NOT be routed to the factory. " +

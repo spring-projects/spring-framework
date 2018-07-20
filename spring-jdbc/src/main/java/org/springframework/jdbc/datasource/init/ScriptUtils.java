@@ -440,8 +440,8 @@ public abstract class ScriptUtils {
 			String blockCommentStartDelimiter, String blockCommentEndDelimiter) throws ScriptException {
 
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Executing SQL script from " + resource);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executing SQL script from " + resource);
 			}
 			long startTime = System.currentTimeMillis();
 
@@ -501,13 +501,13 @@ public abstract class ScriptUtils {
 					stmt.close();
 				}
 				catch (Throwable ex) {
-					logger.debug("Could not close JDBC Statement", ex);
+					logger.trace("Could not close JDBC Statement", ex);
 				}
 			}
 
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			if (logger.isInfoEnabled()) {
-				logger.info("Executed SQL script from " + resource + " in " + elapsedTime + " ms.");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executed SQL script from " + resource + " in " + elapsedTime + " ms.");
 			}
 		}
 		catch (Exception ex) {

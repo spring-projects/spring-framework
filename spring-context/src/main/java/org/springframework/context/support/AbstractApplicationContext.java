@@ -376,9 +376,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void publishEvent(Object event, @Nullable ResolvableType eventType) {
 		Assert.notNull(event, "Event must not be null");
-		if (logger.isTraceEnabled()) {
-			logger.trace("Publishing event in " + getDisplayName() + ": " + event);
-		}
 
 		// Decorate event as an ApplicationEvent if necessary
 		ApplicationEvent applicationEvent;
@@ -586,8 +583,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.closed.set(false);
 		this.active.set(true);
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Refreshing " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Refreshing " + this);
 		}
 
 		// Initialize any placeholder property sources in the context environment
@@ -619,11 +616,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
 		refreshBeanFactory();
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory);
-		}
-		return beanFactory;
+		return getBeanFactory();
 	}
 
 	/**
@@ -727,8 +720,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					hms.setParentMessageSource(getInternalParentMessageSource());
 				}
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using MessageSource [" + this.messageSource + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Using MessageSource [" + this.messageSource + "]");
 			}
 		}
 		else {
@@ -737,8 +730,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			dms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = dms;
 			beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
+			if (logger.isTraceEnabled()) {
+				logger.trace("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
 						"': using default [" + this.messageSource + "]");
 			}
 		}
@@ -754,15 +747,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster =
 					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
 			}
 		}
 		else {
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
 			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Unable to locate ApplicationEventMulticaster with name '" +
+			if (logger.isTraceEnabled()) {
+				logger.trace("Unable to locate ApplicationEventMulticaster with name '" +
 						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
 						"': using default [" + this.applicationEventMulticaster + "]");
 			}
@@ -779,8 +772,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (beanFactory.containsLocalBean(LIFECYCLE_PROCESSOR_BEAN_NAME)) {
 			this.lifecycleProcessor =
 					beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using LifecycleProcessor [" + this.lifecycleProcessor + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Using LifecycleProcessor [" + this.lifecycleProcessor + "]");
 			}
 		}
 		else {
@@ -788,8 +781,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			defaultProcessor.setBeanFactory(beanFactory);
 			this.lifecycleProcessor = defaultProcessor;
 			beanFactory.registerSingleton(LIFECYCLE_PROCESSOR_BEAN_NAME, this.lifecycleProcessor);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Unable to locate LifecycleProcessor with name '" +
+			if (logger.isTraceEnabled()) {
+				logger.trace("Unable to locate LifecycleProcessor with name '" +
 						LIFECYCLE_PROCESSOR_BEAN_NAME +
 						"': using default [" + this.lifecycleProcessor + "]");
 			}
@@ -989,8 +982,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void doClose() {
 		if (this.active.get() && this.closed.compareAndSet(false, true)) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Closing " + this);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Closing " + this);
 			}
 
 			LiveBeansView.unregisterApplicationContext(this);

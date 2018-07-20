@@ -497,8 +497,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected void checkUserTransactionAndTransactionManager() throws IllegalStateException {
 		// We at least need the JTA UserTransaction.
 		if (this.userTransaction != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JTA UserTransaction: " + this.userTransaction);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using JTA UserTransaction: " + this.userTransaction);
 			}
 		}
 		else {
@@ -508,8 +508,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 		// For transaction suspension, the JTA TransactionManager is necessary too.
 		if (this.transactionManager != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JTA TransactionManager: " + this.transactionManager);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using JTA TransactionManager: " + this.transactionManager);
 			}
 		}
 		else {
@@ -542,8 +542,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		if (this.transactionSynchronizationRegistry != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JTA TransactionSynchronizationRegistry: " + this.transactionSynchronizationRegistry);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using JTA TransactionSynchronizationRegistry: " + this.transactionSynchronizationRegistry);
 			}
 		}
 	}

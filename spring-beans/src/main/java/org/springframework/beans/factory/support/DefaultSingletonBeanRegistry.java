@@ -571,7 +571,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				bean.destroy();
 			}
 			catch (Throwable ex) {
-				logger.error("Destroy method on bean with name '" + beanName + "' threw an exception", ex);
+				logger.warn("Destroy method on bean with name '" + beanName + "' threw an exception", ex);
 			}
 		}
 

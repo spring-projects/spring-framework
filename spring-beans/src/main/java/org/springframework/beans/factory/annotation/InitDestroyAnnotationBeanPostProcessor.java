@@ -156,7 +156,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			metadata.invokeDestroyMethods(bean, beanName);
 		}
 		catch (InvocationTargetException ex) {
-			String msg = "Invocation of destroy method failed on bean with name '" + beanName + "'";
+			String msg = "Destroy method on bean with name '" + beanName + "' threw an exception";
 			if (logger.isDebugEnabled()) {
 				logger.warn(msg, ex.getTargetException());
 			}
@@ -165,7 +165,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			}
 		}
 		catch (Throwable ex) {
-			logger.error("Failed to invoke destroy method on bean with name '" + beanName + "'", ex);
+			logger.warn("Failed to invoke destroy method on bean with name '" + beanName + "'", ex);
 		}
 	}
 

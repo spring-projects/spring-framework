@@ -349,8 +349,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			if (this.members.isEmpty()) {
 				return;
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Starting beans in phase " + this.phase);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Starting beans in phase " + this.phase);
 			}
 			Collections.sort(this.members);
 			for (LifecycleGroupMember member : this.members) {
@@ -364,8 +364,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			if (this.members.isEmpty()) {
 				return;
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Stopping beans in phase " + this.phase);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Stopping beans in phase " + this.phase);
 			}
 			this.members.sort(Collections.reverseOrder());
 			CountDownLatch latch = new CountDownLatch(this.smartMemberCount);

@@ -129,8 +129,8 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 		catch (ClassNotFoundException ex) {
 			throw new IllegalStateException("Could not load JDBC driver class [" + driverClassNameToUse + "]", ex);
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Loaded JDBC driver: " + driverClassNameToUse);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loaded JDBC driver: " + driverClassNameToUse);
 		}
 	}
 

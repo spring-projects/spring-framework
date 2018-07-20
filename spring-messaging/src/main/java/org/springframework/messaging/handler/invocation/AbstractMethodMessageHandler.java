@@ -344,8 +344,8 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 
 		this.handlerMethods.put(mapping, newHandlerMethod);
-		if (logger.isInfoEnabled()) {
-			logger.info("Mapped \"" + mapping + "\" onto " + newHandlerMethod);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Mapped \"" + mapping + "\" onto " + newHandlerMethod);
 		}
 
 		for (String pattern : getDirectLookupDestinations(mapping)) {

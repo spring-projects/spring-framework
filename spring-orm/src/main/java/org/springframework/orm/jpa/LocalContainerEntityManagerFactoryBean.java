@@ -357,8 +357,8 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 			provider = (PersistenceProvider) BeanUtils.instantiateClass(providerClass);
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Building JPA container EntityManagerFactory for persistence unit '" +
+		if (logger.isDebugEnabled()) {
+			logger.debug("Building JPA container EntityManagerFactory for persistence unit '" +
 					this.persistenceUnitInfo.getPersistenceUnitName() + "'");
 		}
 		EntityManagerFactory emf =

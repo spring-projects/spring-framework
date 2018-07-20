@@ -289,8 +289,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 */
 	protected void initAllowedLocations() {
 		if (CollectionUtils.isEmpty(this.locations)) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Locations list is empty. No resources will be served unless a " +
+			if (logger.isInfoEnabled()) {
+				logger.info("Locations list is empty. No resources will be served unless a " +
 						"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
 			}
 			return;

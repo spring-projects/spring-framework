@@ -294,8 +294,10 @@ public class TableMetaDataContext {
 		insertStatement.append(") VALUES(");
 		if (columnCount < 1) {
 			if (this.generatedKeyColumnsUsed) {
-				logger.info("Unable to locate non-key columns for table '" +
-						getTableName() + "' so an empty insert statement is generated");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Unable to locate non-key columns for table '" +
+							getTableName() + "' so an empty insert statement is generated");
+				}
 			}
 			else {
 				throw new InvalidDataAccessApiUsageException("Unable to locate columns for table '" +

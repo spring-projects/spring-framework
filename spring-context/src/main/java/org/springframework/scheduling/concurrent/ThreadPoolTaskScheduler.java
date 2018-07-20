@@ -99,7 +99,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(removeOnCancelPolicy);
 		}
 		else if (removeOnCancelPolicy && this.scheduledExecutor != null) {
-			logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+			logger.debug("Could not apply remove-on-cancel policy - not a ScheduledThreadPoolExecutor");
 		}
 	}
 
@@ -122,7 +122,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 				((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(true);
 			}
 			else {
-				logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+				logger.debug("Could not apply remove-on-cancel policy - not a ScheduledThreadPoolExecutor");
 			}
 		}
 

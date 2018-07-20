@@ -259,8 +259,8 @@ public class FreeMarkerConfigurationFactory {
 
 		// Load config file if specified.
 		if (this.configLocation != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Loading FreeMarker configuration from " + this.configLocation);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loading FreeMarker configuration from " + this.configLocation);
 			}
 			PropertiesLoaderUtils.fillProperties(props, this.configLocation);
 		}
@@ -391,7 +391,7 @@ public class FreeMarkerConfigurationFactory {
 	protected TemplateLoader getAggregateTemplateLoader(List<TemplateLoader> templateLoaders) {
 		switch (templateLoaders.size()) {
 			case 0:
-				logger.info("No FreeMarker TemplateLoaders specified");
+				logger.debug("No FreeMarker TemplateLoaders specified");
 				return null;
 			case 1:
 				return templateLoaders.get(0);

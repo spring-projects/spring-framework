@@ -899,13 +899,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		Scope previous = this.scopes.put(scopeName, scope);
 		if (previous != null && previous != scope) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Replacing scope '" + scopeName + "' from [" + previous + "] to [" + scope + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Replacing scope '" + scopeName + "' from [" + previous + "] to [" + scope + "]");
 			}
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Registering scope '" + scopeName + "' with implementation [" + scope + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Registering scope '" + scopeName + "' with implementation [" + scope + "]");
 			}
 		}
 	}
@@ -1526,8 +1526,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 			else {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Bean creation exception on non-lazy FactoryBean type check: " + ex);
+				if (logger.isInfoEnabled()) {
+					logger.info("Bean creation exception on non-lazy FactoryBean type check: " + ex);
 				}
 			}
 			onSuppressedException(ex);

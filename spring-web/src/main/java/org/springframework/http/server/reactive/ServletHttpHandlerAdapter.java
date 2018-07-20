@@ -46,8 +46,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async
- * support and Servlet 3.1 non-blocking I/O.
+ * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async support
+ * and Servlet 3.1 non-blocking I/O.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -140,8 +140,8 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			}
 			if (mapping.endsWith("/*")) {
 				String path = mapping.substring(0, mapping.length() - 2);
-				if (!path.isEmpty()) {
-					logger.info("Found servlet mapping prefix '" + path + "' for '" + name + "'");
+				if (!path.isEmpty() && logger.isDebugEnabled()) {
+					logger.debug("Found servlet mapping prefix '" + path + "' for '" + name + "'");
 				}
 				return path;
 			}

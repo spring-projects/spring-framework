@@ -272,7 +272,7 @@ class ConfigurationClassParser {
 				processPropertySource(propertySource);
 			}
 			else {
-				logger.warn("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() +
+				logger.info("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() +
 						"]. Reason: Environment must implement ConfigurableEnvironment");
 			}
 		}

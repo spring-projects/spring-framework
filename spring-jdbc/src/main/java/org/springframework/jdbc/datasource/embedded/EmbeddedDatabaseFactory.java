@@ -187,7 +187,7 @@ public class EmbeddedDatabaseFactory {
 			if (this.dataSource instanceof SimpleDriverDataSource) {
 				SimpleDriverDataSource simpleDriverDataSource = (SimpleDriverDataSource) this.dataSource;
 				logger.info(String.format("Starting embedded database: url='%s', username='%s'",
-					simpleDriverDataSource.getUrl(), simpleDriverDataSource.getUsername()));
+						simpleDriverDataSource.getUrl(), simpleDriverDataSource.getUsername()));
 			}
 			else {
 				logger.info(String.format("Starting embedded database '%s'", this.databaseName));

@@ -95,8 +95,8 @@ public class PropertyComparator<T> implements Comparator<T> {
 			}
 		}
 		catch (RuntimeException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not sort objects [" + o1 + "] and [" + o2 + "]", ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not sort objects [" + o1 + "] and [" + o2 + "]", ex);
 			}
 			return 0;
 		}
@@ -119,7 +119,7 @@ public class PropertyComparator<T> implements Comparator<T> {
 			return this.beanWrapper.getPropertyValue(this.sortDefinition.getProperty());
 		}
 		catch (BeansException ex) {
-			logger.info("PropertyComparator could not access property - treating as null for sorting", ex);
+			logger.debug("PropertyComparator could not access property - treating as null for sorting", ex);
 			return null;
 		}
 	}

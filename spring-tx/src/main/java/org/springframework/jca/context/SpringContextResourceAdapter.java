@@ -164,8 +164,8 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 */
 	@Override
 	public void start(BootstrapContext bootstrapContext) throws ResourceAdapterInternalException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Starting SpringContextResourceAdapter with BootstrapContext: " + bootstrapContext);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Starting SpringContextResourceAdapter with BootstrapContext: " + bootstrapContext);
 		}
 		this.applicationContext = createApplicationContext(bootstrapContext);
 	}
@@ -211,7 +211,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 */
 	@Override
 	public void stop() {
-		logger.info("Stopping SpringContextResourceAdapter");
+		logger.debug("Stopping SpringContextResourceAdapter");
 		if (this.applicationContext != null) {
 			this.applicationContext.close();
 		}

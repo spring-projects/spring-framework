@@ -630,8 +630,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 * the TCP connection, failure to send a message, missed heartbeat, etc.
 		 */
 		protected void handleTcpConnectionFailure(String error, @Nullable Throwable ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("TCP connection failure in session " + this.sessionId + ": " + error, ex);
+			if (logger.isInfoEnabled()) {
+				logger.info("TCP connection failure in session " + this.sessionId + ": " + error, ex);
 			}
 			try {
 				sendStompErrorFrameToClient(error);

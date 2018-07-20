@@ -338,8 +338,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 
 		if (tableMeta.isEmpty()) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Unable to locate table meta-data for '" + tableName + "': column names must be provided");
+			if (logger.isInfoEnabled()) {
+				logger.info("Unable to locate table meta-data for '" + tableName + "': column names must be provided");
 			}
 		}
 		else {

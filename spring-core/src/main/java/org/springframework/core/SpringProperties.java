@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public final class SpringProperties {
 			URL url = (cl != null ? cl.getResource(PROPERTIES_RESOURCE_LOCATION) :
 					ClassLoader.getSystemResource(PROPERTIES_RESOURCE_LOCATION));
 			if (url != null) {
-				logger.info("Found 'spring.properties' file in local classpath");
+				logger.debug("Found 'spring.properties' file in local classpath");
 				InputStream is = url.openStream();
 				try {
 					localProperties.load(is);

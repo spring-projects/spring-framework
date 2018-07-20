@@ -76,24 +76,24 @@ public final class CallMetaDataProviderFactory {
 				boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
 				if (context.isFunction()) {
 					if (!supportedDatabaseProductsForFunctions.contains(databaseProductName)) {
-						if (logger.isWarnEnabled()) {
-							logger.warn(databaseProductName + " is not one of the databases fully supported for function calls " +
+						if (logger.isInfoEnabled()) {
+							logger.info(databaseProductName + " is not one of the databases fully supported for function calls " +
 									"-- supported are: " + supportedDatabaseProductsForFunctions);
 						}
 						if (accessProcedureColumnMetaData) {
-							logger.warn("Metadata processing disabled - you must specify all parameters explicitly");
+							logger.info("Metadata processing disabled - you must specify all parameters explicitly");
 							accessProcedureColumnMetaData = false;
 						}
 					}
 				}
 				else {
 					if (!supportedDatabaseProductsForProcedures.contains(databaseProductName)) {
-						if (logger.isWarnEnabled()) {
-							logger.warn(databaseProductName + " is not one of the databases fully supported for procedure calls " +
+						if (logger.isInfoEnabled()) {
+							logger.info(databaseProductName + " is not one of the databases fully supported for procedure calls " +
 									"-- supported are: " + supportedDatabaseProductsForProcedures);
 						}
 						if (accessProcedureColumnMetaData) {
-							logger.warn("Metadata processing disabled - you must specify all parameters explicitly");
+							logger.info("Metadata processing disabled - you must specify all parameters explicitly");
 							accessProcedureColumnMetaData = false;
 						}
 					}

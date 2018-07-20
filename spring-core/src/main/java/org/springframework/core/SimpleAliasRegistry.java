@@ -69,15 +69,15 @@ public class SimpleAliasRegistry implements AliasRegistry {
 						throw new IllegalStateException("Cannot define alias '" + alias + "' for name '" +
 								name + "': It is already registered for name '" + registeredName + "'.");
 					}
-					if (logger.isInfoEnabled()) {
-						logger.info("Overriding alias '" + alias + "' definition for registered name '" +
+					if (logger.isDebugEnabled()) {
+						logger.debug("Overriding alias '" + alias + "' definition for registered name '" +
 								registeredName + "' with new target name '" + name + "'");
 					}
 				}
 				checkForAliasCircle(name, alias);
 				this.aliasMap.put(alias, name);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Alias definition '" + alias + "' registered for name '" + name + "'");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Alias definition '" + alias + "' registered for name '" + name + "'");
 				}
 			}
 		}

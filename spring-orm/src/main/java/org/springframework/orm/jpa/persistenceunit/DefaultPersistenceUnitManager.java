@@ -513,8 +513,8 @@ public class DefaultPersistenceUnitManager
 
 		if (buildDefaultUnit) {
 			if (foundDefaultUnit) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Found explicit default unit with name '" + defaultName + "' in persistence.xml - " +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found explicit default unit with name '" + defaultName + "' in persistence.xml - " +
 							"overriding local default unit settings ('packagesToScan'/'mappingResources')");
 				}
 			}

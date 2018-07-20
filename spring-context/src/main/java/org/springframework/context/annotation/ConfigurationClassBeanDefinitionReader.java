@@ -309,8 +309,8 @@ class ConfigurationClassBeanDefinitionReader {
 			throw new BeanDefinitionStoreException(beanMethod.getConfigurationClass().getResource().getDescription(),
 					beanName, "@Bean definition illegally overridden by existing bean definition: " + existingBeanDef);
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format("Skipping bean definition for %s: a definition for bean '%s' " +
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Skipping bean definition for %s: a definition for bean '%s' " +
 					"already exists. This top-level bean definition is considered as an override.",
 					beanMethod, beanName));
 		}

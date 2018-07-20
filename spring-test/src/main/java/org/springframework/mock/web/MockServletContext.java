@@ -311,7 +311,9 @@ public class MockServletContext implements ServletContext {
 			return resourcePaths;
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't get resource paths for " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not get resource paths for " + resource, ex);
+			}
 			return null;
 		}
 	}
@@ -330,7 +332,9 @@ public class MockServletContext implements ServletContext {
 			throw ex;
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't get URL for " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not get URL for " + resource, ex);
+			}
 			return null;
 		}
 	}
@@ -346,7 +350,9 @@ public class MockServletContext implements ServletContext {
 			return resource.getInputStream();
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't open InputStream for " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not open InputStream for " + resource, ex);
+			}
 			return null;
 		}
 	}
@@ -414,8 +420,8 @@ public class MockServletContext implements ServletContext {
 		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
 	}
 
-	@Override
 	@Deprecated
+	@Override
 	@Nullable
 	public Servlet getServlet(String name) {
 		return null;
@@ -457,7 +463,9 @@ public class MockServletContext implements ServletContext {
 			return resource.getFile().getAbsolutePath();
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't determine real path of resource " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not determine real path of resource " + resource, ex);
+			}
 			return null;
 		}
 	}

@@ -374,8 +374,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			DataSource sfds = SessionFactoryUtils.getDataSource(getSessionFactory());
 			if (sfds != null) {
 				// Use the SessionFactory's DataSource for exposing transactions to JDBC code.
-				if (logger.isInfoEnabled()) {
-					logger.info("Using DataSource [" + sfds +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Using DataSource [" + sfds +
 							"] of Hibernate SessionFactory for HibernateTransactionManager");
 				}
 				setDataSource(sfds);

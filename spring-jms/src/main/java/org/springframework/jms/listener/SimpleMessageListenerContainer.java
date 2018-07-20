@@ -236,8 +236,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		invokeExceptionListener(ex);
 
 		// Now try to recover the shared Connection and all consumers...
-		if (logger.isInfoEnabled()) {
-			logger.info("Trying to recover from JMS Connection exception: " + ex);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Trying to recover from JMS Connection exception: " + ex);
 		}
 		try {
 			synchronized (this.consumersMonitor) {
@@ -246,7 +246,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 			}
 			refreshSharedConnection();
 			initializeConsumers();
-			logger.info("Successfully refreshed JMS Connection");
+			logger.debug("Successfully refreshed JMS Connection");
 		}
 		catch (JMSException recoverEx) {
 			logger.debug("Failed to recover JMS Connection", recoverEx);

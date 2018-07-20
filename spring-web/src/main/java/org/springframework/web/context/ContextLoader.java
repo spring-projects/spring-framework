@@ -264,8 +264,8 @@ public class ContextLoader {
 					"check whether you have multiple ContextLoader* definitions in your web.xml!");
 		}
 
-		Log logger = LogFactory.getLog(ContextLoader.class);
 		servletContext.log("Initializing Spring root WebApplicationContext");
+		Log logger = LogFactory.getLog(ContextLoader.class);
 		if (logger.isInfoEnabled()) {
 			logger.info("Root WebApplicationContext: initialization started");
 		}
@@ -301,10 +301,6 @@ public class ContextLoader {
 				currentContextPerThread.put(ccl, this.context);
 			}
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" +
-						WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
-			}
 			if (logger.isInfoEnabled()) {
 				long elapsedTime = System.currentTimeMillis() - startTime;
 				logger.info("Root WebApplicationContext: initialization completed in " + elapsedTime + " ms");
@@ -312,15 +308,10 @@ public class ContextLoader {
 
 			return this.context;
 		}
-		catch (RuntimeException ex) {
+		catch (RuntimeException | Error ex) {
 			logger.error("Context initialization failed", ex);
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ex);
 			throw ex;
-		}
-		catch (Error err) {
-			logger.error("Context initialization failed", err);
-			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, err);
-			throw err;
 		}
 	}
 

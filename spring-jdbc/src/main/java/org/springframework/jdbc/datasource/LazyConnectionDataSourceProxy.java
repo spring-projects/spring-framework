@@ -168,7 +168,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				}
 			}
 			catch (SQLException ex) {
-				logger.warn("Could not retrieve default auto-commit and transaction isolation settings", ex);
+				logger.info("Could not retrieve default auto-commit and transaction isolation settings", ex);
 			}
 		}
 	}

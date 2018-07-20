@@ -345,8 +345,8 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			if (this.startedCount > 0) {
 				this.connection.start();
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Established shared JMS Connection: " + this.connection);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Established shared JMS Connection: " + this.connection);
 			}
 		}
 	}
@@ -357,7 +357,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 */
 	@Override
 	public void onException(JMSException ex) {
-		logger.warn("Encountered a JMSException - resetting the underlying JMS Connection", ex);
+		logger.info("Encountered a JMSException - resetting the underlying JMS Connection", ex);
 		resetConnection();
 	}
 

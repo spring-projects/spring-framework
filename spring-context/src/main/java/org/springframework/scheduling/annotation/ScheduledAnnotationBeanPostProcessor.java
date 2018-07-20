@@ -253,7 +253,7 @@ public class ScheduledAnnotationBeanPostProcessor
 				this.registrar.setTaskScheduler(resolveSchedulerBean(this.beanFactory, TaskScheduler.class, false));
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
-				logger.debug("Could not find unique TaskScheduler bean", ex);
+				logger.trace("Could not find unique TaskScheduler bean", ex);
 				try {
 					this.registrar.setTaskScheduler(resolveSchedulerBean(this.beanFactory, TaskScheduler.class, true));
 				}
@@ -268,13 +268,13 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				logger.debug("Could not find default TaskScheduler bean", ex);
+				logger.trace("Could not find default TaskScheduler bean", ex);
 				// Search for ScheduledExecutorService bean next...
 				try {
 					this.registrar.setScheduler(resolveSchedulerBean(this.beanFactory, ScheduledExecutorService.class, false));
 				}
 				catch (NoUniqueBeanDefinitionException ex2) {
-					logger.debug("Could not find unique ScheduledExecutorService bean", ex2);
+					logger.trace("Could not find unique ScheduledExecutorService bean", ex2);
 					try {
 						this.registrar.setScheduler(resolveSchedulerBean(this.beanFactory, ScheduledExecutorService.class, true));
 					}
@@ -289,7 +289,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					}
 				}
 				catch (NoSuchBeanDefinitionException ex2) {
-					logger.debug("Could not find default ScheduledExecutorService bean", ex2);
+					logger.trace("Could not find default ScheduledExecutorService bean", ex2);
 					// Giving up -> falling back to default scheduler within the registrar...
 					logger.info("No TaskScheduler/ScheduledExecutorService bean found for scheduled processing");
 				}
@@ -350,8 +350,8 @@ public class ScheduledAnnotationBeanPostProcessor
 				// Non-empty set of methods
 				annotatedMethods.forEach((method, scheduledMethods) ->
 						scheduledMethods.forEach(scheduled -> processScheduled(scheduled, method, bean)));
-				if (logger.isDebugEnabled()) {
-					logger.debug(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
+				if (logger.isTraceEnabled()) {
+					logger.trace(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
 				}
 			}

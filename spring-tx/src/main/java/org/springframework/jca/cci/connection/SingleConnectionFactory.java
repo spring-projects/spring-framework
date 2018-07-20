@@ -154,8 +154,8 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 			}
 			this.target = doCreateConnection();
 			prepareConnection(this.target);
-			if (logger.isInfoEnabled()) {
-				logger.info("Established shared CCI Connection: " + this.target);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Established shared CCI Connection: " + this.target);
 			}
 			this.connection = getCloseSuppressingConnectionProxy(this.target);
 		}

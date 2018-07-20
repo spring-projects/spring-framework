@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class MockServletContext implements ServletContext {
 
-	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish: {@value} */
+	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish: {@value}. */
 	private static final String COMMON_DEFAULT_SERVLET_NAME = "default";
 
 	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
@@ -305,7 +305,9 @@ public class MockServletContext implements ServletContext {
 			return resourcePaths;
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't get resource paths for " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not get resource paths for " + resource, ex);
+			}
 			return null;
 		}
 	}
@@ -323,7 +325,9 @@ public class MockServletContext implements ServletContext {
 			throw ex;
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't get URL for " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not get URL for " + resource, ex);
+			}
 			return null;
 		}
 	}
@@ -338,7 +342,9 @@ public class MockServletContext implements ServletContext {
 			return resource.getInputStream();
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't open InputStream for " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not open InputStream for " + resource, ex);
+			}
 			return null;
 		}
 	}
@@ -406,8 +412,8 @@ public class MockServletContext implements ServletContext {
 		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
 	}
 
-	@Override
 	@Deprecated
+	@Override
 	public Servlet getServlet(String name) {
 		return null;
 	}
@@ -447,7 +453,9 @@ public class MockServletContext implements ServletContext {
 			return resource.getFile().getAbsolutePath();
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't determine real path of resource " + resource, ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not determine real path of resource " + resource, ex);
+			}
 			return null;
 		}
 	}
@@ -560,32 +568,32 @@ public class MockServletContext implements ServletContext {
 		return this.sessionCookieConfig;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public void setSessionTimeout(int sessionTimeout) {
 		this.sessionTimeout = sessionTimeout;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public int getSessionTimeout() {
 		return this.sessionTimeout;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public void setRequestCharacterEncoding(String requestCharacterEncoding) {
 		this.requestCharacterEncoding = requestCharacterEncoding;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public String getRequestCharacterEncoding() {
 		return this.requestCharacterEncoding;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public void setResponseCharacterEncoding(String responseCharacterEncoding) {
 		this.responseCharacterEncoding = responseCharacterEncoding;
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public String getResponseCharacterEncoding() {
 		return this.responseCharacterEncoding;
 	}
@@ -600,7 +608,7 @@ public class MockServletContext implements ServletContext {
 		throw new UnsupportedOperationException();
 	}
 
-	// @Override - but only against Servlet 4.0
+	@Override  // on Servlet 4.0
 	public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
 		throw new UnsupportedOperationException();
 	}

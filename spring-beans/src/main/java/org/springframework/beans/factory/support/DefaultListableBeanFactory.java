@@ -810,22 +810,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
-				if (logger.isWarnEnabled()) {
-					logger.warn("Overriding user-defined bean definition for bean '" + beanName +
+				if (logger.isInfoEnabled()) {
+					logger.info("Overriding user-defined bean definition for bean '" + beanName +
 							"' with a framework-generated bean definition: replacing [" +
 							existingDefinition + "] with [" + beanDefinition + "]");
 				}
 			}
 			else if (!beanDefinition.equals(existingDefinition)) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Overriding bean definition for bean '" + beanName +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Overriding bean definition for bean '" + beanName +
 							"' with a different definition: replacing [" + existingDefinition +
 							"] with [" + beanDefinition + "]");
 				}
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Overriding bean definition for bean '" + beanName +
+				if (logger.isTraceEnabled()) {
+					logger.trace("Overriding bean definition for bean '" + beanName +
 							"' with an equivalent definition: replacing [" + existingDefinition +
 							"] with [" + beanDefinition + "]");
 				}

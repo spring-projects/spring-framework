@@ -314,7 +314,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				this.exceptionHandler.obtain().handleUncaughtException(ex, method, params);
 			}
 			catch (Throwable ex2) {
-				logger.error("Exception handler for async method '" + method.toGenericString() +
+				logger.warn("Exception handler for async method '" + method.toGenericString() +
 						"' threw unexpected exception itself", ex2);
 			}
 		}

@@ -85,7 +85,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 				((DisposableBean) target).destroy();
 			}
 			catch (Throwable ex) {
-				logger.error("Couldn't invoke destroy method of bean with name '" + getTargetBeanName() + "'", ex);
+				logger.warn("Destroy method on bean with name '" + getTargetBeanName() + "' threw an exception", ex);
 			}
 		}
 	}

@@ -17,6 +17,7 @@
 package org.springframework.core.env;
 
 import java.security.AccessControlException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -106,7 +107,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	private final Set<String> defaultProfiles = new LinkedHashSet<>(getReservedDefaultProfiles());
 
-	private final MutablePropertySources propertySources = new MutablePropertySources(logger);
+	private final MutablePropertySources propertySources = new MutablePropertySources();
 
 	private final ConfigurablePropertyResolver propertyResolver =
 			new PropertySourcesPropertyResolver(this.propertySources);
@@ -121,9 +122,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	public AbstractEnvironment() {
 		customizePropertySources(this.propertySources);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Initialized " + getClass().getSimpleName() + " with PropertySources " + this.propertySources);
-		}
 	}
 
 
@@ -250,6 +248,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	public void setActiveProfiles(String... profiles) {
 		Assert.notNull(profiles, "Profile array must not be null");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Activating profiles " + Arrays.asList(profiles));
+		}
 		synchronized (this.activeProfiles) {
 			this.activeProfiles.clear();
 			for (String profile : profiles) {
