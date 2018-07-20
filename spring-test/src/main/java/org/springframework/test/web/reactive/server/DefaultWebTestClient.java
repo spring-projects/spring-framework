@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -40,6 +41,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonExpectationsHelper;
+import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
@@ -477,8 +479,31 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
+		public BodyContentSpec xml(String expectedXml) {
+			this.result.assertWithDiagnostics(() -> {
+				try {
+					new XmlExpectationsHelper().assertXmlEqual(expectedXml, getBodyAsString());
+				}
+				catch (Exception ex) {
+					throw new AssertionError("XML parsing error", ex);
+				}
+			});
+			return this;
+		}
+
+		@Override
 		public JsonPathAssertions jsonPath(String expression, Object... args) {
 			return new JsonPathAssertions(this, getBodyAsString(), expression, args);
+		}
+
+		@Override
+		public XpathAssertions xpath(String expression, Map<String, String> namespaces, Object... args) {
+			try {
+				return new XpathAssertions(this, expression, namespaces, args);
+			}
+			catch (XPathExpressionException ex) {
+				throw new AssertionError("XML parsing error", ex);
+			}
 		}
 
 		private String getBodyAsString() {
