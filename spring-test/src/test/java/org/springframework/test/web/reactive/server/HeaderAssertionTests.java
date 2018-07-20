@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -123,6 +124,15 @@ public class HeaderAssertionTests {
 			assertEquals("Response header 'Content-Type'=[application/json;charset=UTF-8] " +
 					"does not match [.*ISO-8859-1.*]", cause.getMessage());
 		}
+	}
+
+	@Test
+	public void valueMatcher() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("foo", "bar");
+		HeaderAssertions assertions = headerAssertions(headers);
+
+		assertions.value("foo", containsString("a"));
 	}
 
 	@Test

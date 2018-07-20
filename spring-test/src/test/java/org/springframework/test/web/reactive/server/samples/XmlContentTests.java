@@ -38,6 +38,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.hamcrest.Matchers.*;
+
 /**
  * Samples of tests using {@link WebTestClient} with XML content.
  *
@@ -81,6 +83,16 @@ public class XmlContentTests {
 				.xpath("/persons/person[1]/name").isEqualTo("Jane")
 				.xpath("/persons/person[2]/name").isEqualTo("Jason")
 				.xpath("/persons/person[3]/name").isEqualTo("John");
+	}
+
+	@Test
+	public void xpathMatches() {
+		this.client.get().uri("/persons")
+				.accept(MediaType.APPLICATION_XML)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.xpath("//person/name").string(startsWith("J"));
 	}
 
 	@Test

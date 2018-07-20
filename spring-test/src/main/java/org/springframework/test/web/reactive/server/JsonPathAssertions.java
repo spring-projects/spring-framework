@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.reactive.server;
 
+import org.hamcrest.Matcher;
+
 import org.springframework.test.util.JsonPathExpectationsHelper;
 
 /**
@@ -129,6 +131,24 @@ public class JsonPathAssertions {
 	 */
 	public WebTestClient.BodyContentSpec isMap() {
 		this.pathHelper.assertValueIsMap(this.content);
+		return this.bodySpec;
+	}
+
+	/**
+	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher)}.
+	 * @since 5.1
+	 */
+	public <T> WebTestClient.BodyContentSpec value(Matcher<T> matcher) {
+		this.pathHelper.assertValue(this.content, matcher);
+		return this.bodySpec;
+	}
+
+	/**
+	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
+	 * @since 5.1
+	 */
+	public <T> WebTestClient.BodyContentSpec value(Matcher<T> matcher, Class<T> targetType) {
+		this.pathHelper.assertValue(this.content, matcher, targetType);
 		return this.bodySpec;
 	}
 

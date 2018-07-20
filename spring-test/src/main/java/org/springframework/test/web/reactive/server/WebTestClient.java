@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.hamcrest.Matcher;
 import org.reactivestreams.Publisher;
 
 import org.springframework.context.ApplicationContext;
@@ -759,6 +760,19 @@ public interface WebTestClient {
 		<T extends S> T isEqualTo(B expected);
 
 		/**
+		 * Assert the extracted body with a {@link Matcher}.
+		 * @since 5.1
+		 */
+		<T extends S> T value(Matcher<B> matcher);
+
+		/**
+		 * Transform the extracted the body with a function, e.g. extracting a
+		 * property, and assert the mapped value with a {@link Matcher}.
+		 * @since 5.1
+		 */
+		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<R> matcher);
+
+		/**
 		 * Assert the exchange result with the given {@link Consumer}.
 		 */
 		<T extends S> T consumeWith(Consumer<EntityExchangeResult<B>> consumer);
@@ -851,8 +865,8 @@ public interface WebTestClient {
 		 * formatting specifiers as defined in {@link String#format}.
 		 * @param expression the XPath expression
 		 * @param args arguments to parameterize the expression
-		 * @see #xpath(String, Map, Object...)
 		 * @since 5.1
+		 * @see #xpath(String, Map, Object...)
 		 */
 		default XpathAssertions xpath(String expression, Object... args){
 			return xpath(expression, null, args);

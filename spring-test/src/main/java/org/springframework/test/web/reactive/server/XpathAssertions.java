@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.hamcrest.Matcher;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.XpathExpectationsHelper;
@@ -62,45 +64,66 @@ public class XpathAssertions {
 
 
 	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, String)}
+	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, String)}.
 	 */
 	public WebTestClient.BodyContentSpec isEqualTo(String expectedValue) {
 		return assertWith(() -> this.xpathHelper.assertString(getContent(), getCharset(), expectedValue));
 	}
 
 	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Double)}
+	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Double)}.
 	 */
 	public WebTestClient.BodyContentSpec isEqualTo(Double expectedValue) {
 		return assertWith(() -> this.xpathHelper.assertNumber(getContent(), getCharset(), expectedValue));
 	}
 
 	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertBoolean(byte[], String, boolean)}
+	 * Delegates to {@link XpathExpectationsHelper#assertBoolean(byte[], String, boolean)}.
 	 */
 	public WebTestClient.BodyContentSpec isEqualTo(boolean expectedValue) {
 		return assertWith(() -> this.xpathHelper.assertBoolean(getContent(), getCharset(), expectedValue));
 	}
 
 	/**
-	 * Delegates to {@link XpathExpectationsHelper#exists(byte[], String)}
+	 * Delegates to {@link XpathExpectationsHelper#exists(byte[], String)}.
 	 */
 	public WebTestClient.BodyContentSpec exists() {
 		return assertWith(() -> this.xpathHelper.exists(getContent(), getCharset()));
 	}
 
 	/**
-	 * Delegates to {@link XpathExpectationsHelper#doesNotExist(byte[], String)}
+	 * Delegates to {@link XpathExpectationsHelper#doesNotExist(byte[], String)}.
 	 */
 	public WebTestClient.BodyContentSpec doesNotExist() {
 		return assertWith(() -> this.xpathHelper.doesNotExist(getContent(), getCharset()));
 	}
 
 	/**
-	 * Delegates to {@link XpathExpectationsHelper[#assertNodeCount(byte[], String, int)}
+	 * Delegates to {@link XpathExpectationsHelper#assertNodeCount(byte[], String, int)}.
 	 */
 	public WebTestClient.BodyContentSpec nodeCount(int expectedCount) {
 		return assertWith(() -> this.xpathHelper.assertNodeCount(getContent(), getCharset(), expectedCount));
+	}
+
+	/**
+	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, Matcher)}.
+	 */
+	public WebTestClient.BodyContentSpec string(Matcher<? super String> matcher){
+		return assertWith(() -> this.xpathHelper.assertString(getContent(), getCharset(), matcher));
+	}
+
+	/**
+	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Matcher)}.
+	 */
+	public WebTestClient.BodyContentSpec number(Matcher<? super Double> matcher){
+		return assertWith(() -> this.xpathHelper.assertNumber(getContent(), getCharset(), matcher));
+	}
+
+	/**
+	 * Delegates to {@link XpathExpectationsHelper#assertNodeCount(byte[], String, Matcher)}.
+	 */
+	public WebTestClient.BodyContentSpec nodeCount(Matcher<Integer> matcher){
+		return assertWith(() -> this.xpathHelper.assertNodeCount(getContent(), getCharset(), matcher));
 	}
 
 
