@@ -18,8 +18,8 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
-import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import reactor.core.publisher.Flux;
 
 /**
  * Samples of tests using {@link WebTestClient} with serialized JSON content.
@@ -86,6 +88,18 @@ public class JsonContentTests {
 				.expectBody().isEmpty();
 	}
 
+	@Test
+	public void jsonPathMatches() {
+		this.client.get().uri("/persons")
+				.accept(MediaType.APPLICATION_JSON_UTF8)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$[*]").matches(Matchers.hasSize(3))
+				.jsonPath("$[0].name").matches(Matchers.is("Jane"))
+				.jsonPath("$[1].name").matches(Matchers.is("Jason"))
+				.jsonPath("$[2].name").matches(Matchers.is("John"));
+	}
 
 	@RestController
 	@RequestMapping("/persons")
