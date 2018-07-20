@@ -21,18 +21,18 @@ import java.util.Map;
 import java.util.Optional;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.hamcrest.Matcher;
-import org.w3c.dom.Node;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.XpathExpectationsHelper;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
+
 /**
- * XPath assertions for a {@link WebTestClient}.
+ * XPath assertions for the {@link WebTestClient}.
  *
  * @author Eric Deandrea
+ * @author Rossen Stoyanchev
  * @since 5.1
  */
 public class XpathAssertions {
@@ -41,96 +41,87 @@ public class XpathAssertions {
 
 	private final XpathExpectationsHelper xpathHelper;
 
-	XpathAssertions(WebTestClient.BodyContentSpec spec, String expression, @Nullable Map<String, String> namespaces, Object... args) throws XPathExpressionException {
+
+	XpathAssertions(WebTestClient.BodyContentSpec spec,
+			String expression, @Nullable Map<String, String> namespaces, Object... args) {
+
 		this.bodySpec = spec;
-		this.xpathHelper = new XpathExpectationsHelper(expression, namespaces, args);
+		this.xpathHelper = initXpathHelper(expression, namespaces, args);
 	}
 
+	private static XpathExpectationsHelper initXpathHelper(
+			String expression, @Nullable Map<String, String> namespaces, Object[] args) {
+
+		try {
+			return new XpathExpectationsHelper(expression, namespaces, args);
+		}
+		catch (XPathExpressionException ex) {
+			throw new AssertionError("XML parsing error", ex);
+		}
+	}
+
+
 	/**
-	 * Applies {@link XpathExpectationsHelper#assertString(byte[], String, String)}
+	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, String)}
 	 */
 	public WebTestClient.BodyContentSpec isEqualTo(String expectedValue) {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.assertString(getResponseBody(), getDefinedEncoding(), expectedValue));
+		return assertWith(() -> this.xpathHelper.assertString(getContent(), getCharset(), expectedValue));
 	}
 
 	/**
-	 * Applies {@link XpathExpectationsHelper#assertNumber(byte[], String, Double)}
+	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Double)}
 	 */
 	public WebTestClient.BodyContentSpec isEqualTo(Double expectedValue) {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.assertNumber(getResponseBody(), getDefinedEncoding(), expectedValue));
+		return assertWith(() -> this.xpathHelper.assertNumber(getContent(), getCharset(), expectedValue));
 	}
 
 	/**
-	 * Applies {@link XpathExpectationsHelper#assertBoolean(byte[], String, boolean)}
+	 * Delegates to {@link XpathExpectationsHelper#assertBoolean(byte[], String, boolean)}
 	 */
 	public WebTestClient.BodyContentSpec isEqualTo(boolean expectedValue) {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.assertBoolean(getResponseBody(), getDefinedEncoding(), expectedValue));
+		return assertWith(() -> this.xpathHelper.assertBoolean(getContent(), getCharset(), expectedValue));
 	}
 
 	/**
-	 * Applies {@link XpathExpectationsHelper#exists(byte[], String)}
+	 * Delegates to {@link XpathExpectationsHelper#exists(byte[], String)}
 	 */
 	public WebTestClient.BodyContentSpec exists() {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.exists(getResponseBody(), getDefinedEncoding()));
+		return assertWith(() -> this.xpathHelper.exists(getContent(), getCharset()));
 	}
 
 	/**
-	 * Applies {@link XpathExpectationsHelper#doesNotExist(byte[], String)}
+	 * Delegates to {@link XpathExpectationsHelper#doesNotExist(byte[], String)}
 	 */
 	public WebTestClient.BodyContentSpec doesNotExist() {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.doesNotExist(getResponseBody(), getDefinedEncoding()));
+		return assertWith(() -> this.xpathHelper.doesNotExist(getContent(), getCharset()));
 	}
 
 	/**
-	 * Applies {@link XpathExpectationsHelper[#assertNodeCount(byte[], String, int)}
+	 * Delegates to {@link XpathExpectationsHelper[#assertNodeCount(byte[], String, int)}
 	 */
 	public WebTestClient.BodyContentSpec nodeCount(int expectedCount) {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.assertNodeCount(getResponseBody(), getDefinedEncoding(), expectedCount));
+		return assertWith(() -> this.xpathHelper.assertNodeCount(getContent(), getCharset(), expectedCount));
 	}
 
-	/**
-	 * Applies {@link XpathExpectationsHelper#assertNodeCount(byte[], String, Matcher)}
-	 */
-	public WebTestClient.BodyContentSpec nodeCount(Matcher<Integer> matcher) {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.assertNodeCount(getResponseBody(), getDefinedEncoding(), matcher));
-	}
 
-	/**
-	 * Applies {@link XpathExpectationsHelper#assertNode(byte[], String, Matcher)}
-	 */
-	public WebTestClient.BodyContentSpec nodeMatches(Matcher<? super Node> matcher) {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.assertNode(getResponseBody(), getDefinedEncoding(), matcher));
-	}
-
-	/**
-	 * Applies {@link XpathExpectationsHelper#assertString(byte[], String, Matcher)}
-	 */
-	public WebTestClient.BodyContentSpec matchesString(Matcher<? super String> matcher) {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.assertString(getResponseBody(), getDefinedEncoding(), matcher));
-	}
-
-	/**
-	 * Applies {@link XpathExpectationsHelper#assertNumber(byte[], String, Matcher)}
-	 */
-	public WebTestClient.BodyContentSpec matchesNumber(Matcher<? super Double> matcher) {
-		return performXmlAssertionAndHandleError(() -> this.xpathHelper.assertNumber(getResponseBody(), getDefinedEncoding(), matcher));
-	}
-
-	private WebTestClient.BodyContentSpec performXmlAssertionAndHandleError(AssertionThrowingRunnable assertion) {
-		assertion.run();
+	private WebTestClient.BodyContentSpec assertWith(CheckedExceptionTask task) {
+		try {
+			task.run();
+		}
+		catch (Exception ex) {
+			throw new AssertionError("XML parsing error", ex);
+		}
 		return this.bodySpec;
 	}
 
-	private byte[] getResponseBody() {
-		return getResult().getResponseBody();
+	private byte[] getContent() {
+		byte[] body = this.bodySpec.returnResult().getResponseBody();
+		Assert.notNull(body, "Expected body content");
+		return body;
 	}
 
-	private EntityExchangeResult<byte[]> getResult() {
-		return this.bodySpec.returnResult();
-	}
-
-	private String getDefinedEncoding() {
-		return Optional.ofNullable(getResult())
+	private String getCharset() {
+		return Optional.of(this.bodySpec.returnResult())
 				.map(EntityExchangeResult::getResponseHeaders)
 				.map(HttpHeaders::getContentType)
 				.map(MimeType::getCharset)
@@ -138,22 +129,14 @@ public class XpathAssertions {
 				.name();
 	}
 
+
 	/**
 	 * Lets us be able to use lambda expressions that could throw checked exceptions, since
 	 * {@link XpathExpectationsHelper} throws {@link Exception} on its methods.
 	 */
-	@FunctionalInterface
-	private interface AssertionThrowingRunnable extends Runnable {
-		void runThrows() throws Exception;
+	private interface CheckedExceptionTask {
 
-		@Override
-		default void run() {
-			try {
-				runThrows();
-			}
-			catch (Exception ex) {
-				throw new AssertionError("XML parsing error", ex);
-			}
-		}
+		void run() throws Exception;
+
 	}
 }

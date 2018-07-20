@@ -497,13 +497,8 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public XpathAssertions xpath(String expression, Map<String, String> namespaces, Object... args) {
-			try {
-				return new XpathAssertions(this, expression, namespaces, args);
-			}
-			catch (XPathExpressionException ex) {
-				throw new AssertionError("XML parsing error", ex);
-			}
+		public XpathAssertions xpath(String expression, @Nullable Map<String, String> namespaces, Object... args) {
+			return new XpathAssertions(this, expression, namespaces, args);
 		}
 
 		private String getBodyAsString() {

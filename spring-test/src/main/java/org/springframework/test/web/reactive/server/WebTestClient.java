@@ -36,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -820,10 +821,15 @@ public interface WebTestClient {
 		BodyContentSpec json(String expectedJson);
 
 		/**
-		 * Parse the expected and actual response content as XML and perform a
-		 * comparison verifying the same structure.
+		 * Parse expected and actual response content as XML and assert that
+		 * the two are "similar", i.e. they contain the same elements and
+		 * attributes regardless of order.
+		 * <p>Use of this method requires the
+		 * <a href="https://github.com/xmlunit/xmlunit">XMLUnit</a> library on
+		 * the classpath.
 		 * @param expectedXml the expected JSON content.
 		 * @since 5.1
+		 * @see org.springframework.test.util.XmlExpectationsHelper#assertXmlEqual(String, String)
 		 */
 		BodyContentSpec xml(String expectedXml);
 
@@ -839,11 +845,11 @@ public interface WebTestClient {
 		JsonPathAssertions jsonPath(String expression, Object... args);
 
 		/**
-		 * Access to response body assertions using an XPath expression to inspect a specific
-		 * subset of the body.
+		 * Access to response body assertions using an XPath expression to
+		 * inspect a specific subset of the body.
 		 * <p>The XPath expression can be a parameterized string using
 		 * formatting specifiers as defined in {@link String#format}.
-		 * @param expression The XPath expression
+		 * @param expression the XPath expression
 		 * @param args arguments to parameterize the expression
 		 * @see #xpath(String, Map, Object...)
 		 * @since 5.1
@@ -853,16 +859,16 @@ public interface WebTestClient {
 		}
 
 		/**
-		 * Access to response body assertions with specific namespaces using an XPath
-		 * expression to inspect a specific subset of the body.
+		 * Access to response body assertions with specific namespaces using an
+		 * XPath expression to inspect a specific subset of the body.
 		 * <p>The XPath expression can be a parameterized string using
 		 * formatting specifiers as defined in {@link String#format}.
-		 * @param expression The XPath expression
-		 * @param namespaces The namespaces
+		 * @param expression the XPath expression
+		 * @param namespaces namespaces to use
 		 * @param args arguments to parameterize the expression
 		 * @since 5.1
 		 */
-		XpathAssertions xpath(String expression, Map<String, String> namespaces, Object... args);
+		XpathAssertions xpath(String expression, @Nullable  Map<String, String> namespaces, Object... args);
 
 		/**
 		 * Assert the response body content with the given {@link Consumer}.
