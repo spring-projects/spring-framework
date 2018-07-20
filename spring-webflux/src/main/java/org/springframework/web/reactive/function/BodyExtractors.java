@@ -29,8 +29,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -42,6 +44,7 @@ import org.springframework.util.MultiValueMap;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public abstract class BodyExtractors {
@@ -81,8 +84,8 @@ public abstract class BodyExtractors {
 		return (inputMessage, context) ->
 				readWithMessageReaders(inputMessage, context, elementType,
 						(HttpMessageReader<T> reader) -> readToMono(inputMessage, context, elementType, reader),
-						ex -> Mono.from(unsupportedErrorHandler(inputMessage, ex)),
-						Mono::empty);
+						ex -> Mono.from(unsupportedErrorHandler(inputMessage, context, ex)),
+						skipBodyAsMono(inputMessage, context));
 	}
 
 	/**
@@ -110,8 +113,8 @@ public abstract class BodyExtractors {
 		return (inputMessage, context) ->
 				readWithMessageReaders(inputMessage, context, elementType,
 						(HttpMessageReader<T> reader) -> readToFlux(inputMessage, context, elementType, reader),
-						ex -> unsupportedErrorHandler(inputMessage, ex),
-						Flux::empty);
+						ex -> unsupportedErrorHandler(inputMessage, context, ex),
+						skipBodyAsFlux(inputMessage, context));
 	}
 
 
@@ -183,7 +186,6 @@ public abstract class BodyExtractors {
 		if (VOID_TYPE.equals(elementType)) {
 			return emptySupplier.get();
 		}
-
 		MediaType contentType = Optional.ofNullable(message.getHeaders().getContentType())
 				.orElse(MediaType.APPLICATION_OCTET_STREAM);
 
@@ -193,6 +195,28 @@ public abstract class BodyExtractors {
 				.map(BodyExtractors::<T>cast)
 				.map(readerFunction)
 				.orElseGet(() -> errorFunction.apply(unsupportedError(context, elementType, contentType)));
+	}
+
+	private static <T> Supplier<Flux<T>> skipBodyAsFlux(ReactiveHttpInputMessage message,
+			BodyExtractor.Context context) {
+
+		if (isExtractingForClient(message, context)) {
+			return () -> consumeAndCancel(message).thenMany(Flux.empty());
+		}
+		else {
+			return Flux::empty;
+		}
+	}
+
+	private static <T> Supplier<Mono<T>> skipBodyAsMono(ReactiveHttpInputMessage message,
+			BodyExtractor.Context context) {
+
+		if (isExtractingForClient(message, context)) {
+			return () -> consumeAndCancel(message).then(Mono.empty());
+		}
+		else {
+			return Mono::empty;
+		}
 	}
 
 	private static UnsupportedMediaTypeException unsupportedError(BodyExtractor.Context context,
@@ -222,17 +246,21 @@ public abstract class BodyExtractors {
 	}
 
 	private static <T> Flux<T> unsupportedErrorHandler(
-			ReactiveHttpInputMessage inputMessage, UnsupportedMediaTypeException ex) {
+			ReactiveHttpInputMessage inputMessage, BodyExtractor.Context context,
+			UnsupportedMediaTypeException ex) {
 
+		Flux<T> result;
 		if (inputMessage.getHeaders().getContentType() == null) {
 			// Empty body with no content type is ok
-			return inputMessage.getBody().map(o -> {
+			result = inputMessage.getBody().map(o -> {
 				throw ex;
 			});
 		}
 		else {
-			return Flux.error(ex);
+			result = Flux.error(ex);
 		}
+		return isExtractingForClient(inputMessage, context) ?
+				consumeAndCancel(inputMessage).thenMany(result) : result;
 	}
 
 	private static <T> HttpMessageReader<T> findReader(
@@ -251,4 +279,23 @@ public abstract class BodyExtractors {
 		return (HttpMessageReader<T>) reader;
 	}
 
+	private static boolean isExtractingForClient(ReactiveHttpInputMessage message,
+			BodyExtractor.Context context) {
+		return !context.serverResponse().isPresent()
+				&& message instanceof ClientHttpResponse;
+	}
+
+	private static Mono<Void> consumeAndCancel(ReactiveHttpInputMessage message) {
+		return message.getBody()
+				.map(buffer -> {
+					DataBufferUtils.release(buffer);
+					throw new ReadCancellationException();
+				})
+				.onErrorResume(ReadCancellationException.class, ex -> Mono.empty())
+				.then();
+	}
+
+	@SuppressWarnings("serial")
+	private static class ReadCancellationException extends RuntimeException {
+	}
 }

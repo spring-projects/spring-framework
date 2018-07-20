@@ -28,8 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-import reactor.test.publisher.TestPublisher;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.StringDecoder;
@@ -48,9 +46,12 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * @author Arjen Poutsma
@@ -127,11 +128,7 @@ public class DefaultClientResponseTests {
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
-
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getBody()).thenReturn(body);
+		mockTextPlainResponse(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
 				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -147,13 +144,7 @@ public class DefaultClientResponseTests {
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
-
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body);
+		mockTextPlainResponse(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
 				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -169,13 +160,7 @@ public class DefaultClientResponseTests {
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
-
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body);
+		mockTextPlainResponse(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
 				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -193,13 +178,7 @@ public class DefaultClientResponseTests {
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
-
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body);
+		mockTextPlainResponse(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
 				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -216,13 +195,7 @@ public class DefaultClientResponseTests {
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
-
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body);
+		mockTextPlainResponse(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
 				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -241,13 +214,7 @@ public class DefaultClientResponseTests {
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
-
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body);
+		mockTextPlainResponse(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
 				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -296,13 +263,7 @@ public class DefaultClientResponseTests {
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
-
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body);
+		mockTextPlainResponse(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
 				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -323,13 +284,7 @@ public class DefaultClientResponseTests {
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
-
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body);
+		mockTextPlainResponse(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
 				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -379,12 +334,7 @@ public class DefaultClientResponseTests {
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body);
+		mockTextPlainResponse(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
 				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -399,55 +349,14 @@ public class DefaultClientResponseTests {
 		assertEquals(MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
 	}
 
-	@Test
-	public void toMonoVoid() {
-		TestPublisher<DataBuffer> body = TestPublisher.create();
 
+	private void mockTextPlainResponse(Flux<DataBuffer> body) {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
 		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body.flux());
-
-		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
-		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
-
-		StepVerifier.create(defaultClientResponse.bodyToMono(Void.class))
-				.then(() -> {
-					body.assertWasSubscribed();
-					body.complete();
-				})
-				.verifyComplete();
-	}
-
-	@Test
-	public void toMonoVoidNonEmptyBody() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
-		TestPublisher<DataBuffer> body = TestPublisher.create();
-
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
-		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(mockResponse.getRawStatusCode()).thenReturn(HttpStatus.OK.value());
-		when(mockResponse.getBody()).thenReturn(body.flux());
-
-		List<HttpMessageReader<?>> messageReaders = Collections
-				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
-		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
-
-		StepVerifier.create(defaultClientResponse.bodyToMono(Void.class))
-				.then(() -> {
-					body.assertWasSubscribed();
-					body.emit(dataBuffer);
-				})
-				.verifyComplete();
-
-		body.assertCancelled();
+		when(mockResponse.getBody()).thenReturn(body);
 	}
 
 }
