@@ -25,7 +25,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.mail.internet.MimeUtility;
@@ -351,11 +351,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			HttpOutputMessage outputMessage) throws IOException {
 
 		final byte[] boundary = generateMultipartBoundary();
-		Map<String, String> parameters = new HashMap<>(2);
-		parameters.put("boundary", new String(boundary, "US-ASCII"));
+		Map<String, String> parameters = new LinkedHashMap<>(2);
 		if (!isFilenameCharsetSet()) {
 			parameters.put("charset", this.charset.name());
 		}
+		parameters.put("boundary", new String(boundary, "US-ASCII"));
 
 		MediaType contentType = new MediaType(MediaType.MULTIPART_FORM_DATA, parameters);
 		HttpHeaders headers = outputMessage.getHeaders();
