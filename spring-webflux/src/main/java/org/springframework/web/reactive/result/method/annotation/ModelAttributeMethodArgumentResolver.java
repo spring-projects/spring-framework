@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -271,13 +271,17 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	}
 
 	private void validateIfApplicable(WebExchangeDataBinder binder, MethodParameter parameter) {
-		Annotation[] annotations = parameter.getParameterAnnotations();
-		for (Annotation ann : annotations) {
-			Validated validAnnot = AnnotationUtils.getAnnotation(ann, Validated.class);
-			if (validAnnot != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = (validAnnot != null ? validAnnot.value() : AnnotationUtils.getValue(ann));
-				Object hintArray = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-				binder.validate(hintArray);
+		for (Annotation ann : parameter.getParameterAnnotations()) {
+			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
+			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
+				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
+				if (hints != null) {
+					Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+					binder.validate(validationHints);
+				}
+				else {
+					binder.validate();
+				}
 			}
 		}
 	}
