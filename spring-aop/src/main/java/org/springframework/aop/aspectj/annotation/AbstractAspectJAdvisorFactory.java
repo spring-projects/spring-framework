@@ -208,9 +208,10 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		private AspectJAnnotationType determineAnnotationType(A annotation) {
-			for (Class<?> type : annotationTypes.keySet()) {
+			for (Map.Entry<Class<?>, AspectJAnnotationType> typeEntry : annotationTypes.entrySet()) {
+				Class<?> type = typeEntry.getKey();
 				if (type.isInstance(annotation)) {
-					return annotationTypes.get(type);
+					return typeEntry.getValue();
 				}
 			}
 			throw new IllegalStateException("Unknown annotation type: " + annotation.toString());
