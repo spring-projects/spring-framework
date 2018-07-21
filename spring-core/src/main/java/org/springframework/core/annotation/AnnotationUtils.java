@@ -1344,11 +1344,12 @@ public abstract class AnnotationUtils {
 		}
 
 		// Replace any remaining placeholders with actual default values
-		for (String attributeName : attributes.keySet()) {
+		for (Map.Entry<String, Object> attributeEntry : attributes.entrySet()) {
+			String attributeName = attributeEntry.getKey();
 			if (valuesAlreadyReplaced.contains(attributeName)) {
 				continue;
 			}
-			Object value = attributes.get(attributeName);
+			Object value = attributeEntry.getValue();
 			if (value instanceof DefaultValueHolder) {
 				value = ((DefaultValueHolder) value).defaultValue;
 				attributes.put(attributeName,
