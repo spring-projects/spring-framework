@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -78,6 +79,18 @@ public class HeaderAssertions {
 	public WebTestClient.ResponseSpec value(String name, Matcher<? super String> matcher) {
 		String value = getRequiredValue(name);
 		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat(value, matcher));
+		return this.responseSpec;
+	}
+
+	/**
+	 * Assert the primary value of the response header with a {@link Matcher}.
+	 * @param name the header name
+	 * @param consumer the matcher to sue
+	 * @since 5.1
+	 */
+	public WebTestClient.ResponseSpec value(String name, Consumer<String> consumer) {
+		String value = getRequiredValue(name);
+		this.exchangeResult.assertWithDiagnostics(() -> consumer.accept(value));
 		return this.responseSpec;
 	}
 

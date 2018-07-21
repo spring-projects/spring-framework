@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -96,6 +97,18 @@ public class ResponseEntityTests {
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
 				.expectBodyList(Person.class).isEqualTo(expected);
+	}
+
+	@Test
+	public void entityListWithConsumer() {
+
+		this.client.get()
+				.exchange()
+				.expectStatus().isOk()
+				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectBodyList(Person.class).value(people -> {
+					MatcherAssert.assertThat(people, hasItem(new Person("Jason")));
+				});
 	}
 
 	@Test

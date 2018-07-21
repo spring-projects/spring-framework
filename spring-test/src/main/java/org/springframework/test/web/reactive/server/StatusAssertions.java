@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.util.function.Consumer;
+
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 
@@ -205,6 +207,17 @@ public class StatusAssertions {
 	public WebTestClient.ResponseSpec value(Matcher<Integer> matcher) {
 		int value = this.exchangeResult.getStatus().value();
 		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat("Response status", value, matcher));
+		return this.responseSpec;
+	}
+
+	/**
+	 * Match the response status value with a Hamcrest matcher.
+	 * @param consumer the matcher to use
+	 * @since 5.1
+	 */
+	public WebTestClient.ResponseSpec value(Consumer<Integer> consumer) {
+		int value = this.exchangeResult.getStatus().value();
+		this.exchangeResult.assertWithDiagnostics(() -> consumer.accept(value));
 		return this.responseSpec;
 	}
 

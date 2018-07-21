@@ -773,6 +773,12 @@ public interface WebTestClient {
 		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<R> matcher);
 
 		/**
+		 * Assert the extracted body with a {@link Matcher}.
+		 * @since 5.1
+		 */
+		<T extends S> T value(Consumer<B> consumer);
+
+		/**
 		 * Assert the exchange result with the given {@link Consumer}.
 		 */
 		<T extends S> T consumeWith(Consumer<EntityExchangeResult<B>> consumer);

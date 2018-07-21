@@ -403,6 +403,12 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
+		public <T extends S> T value(Consumer<B> consumer) {
+			this.result.assertWithDiagnostics(() -> consumer.accept(this.result.getResponseBody()));
+			return self();
+		}
+
+		@Override
 		public <T extends S> T consumeWith(Consumer<EntityExchangeResult<B>> consumer) {
 			this.result.assertWithDiagnostics(() -> consumer.accept(this.result));
 			return self();

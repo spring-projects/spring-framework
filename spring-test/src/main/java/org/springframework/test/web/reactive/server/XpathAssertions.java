@@ -19,6 +19,7 @@ package org.springframework.test.web.reactive.server;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
@@ -107,6 +108,7 @@ public class XpathAssertions {
 
 	/**
 	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, Matcher)}.
+	 * @since 5.1
 	 */
 	public WebTestClient.BodyContentSpec string(Matcher<? super String> matcher){
 		return assertWith(() -> this.xpathHelper.assertString(getContent(), getCharset(), matcher));
@@ -114,6 +116,7 @@ public class XpathAssertions {
 
 	/**
 	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Matcher)}.
+	 * @since 5.1
 	 */
 	public WebTestClient.BodyContentSpec number(Matcher<? super Double> matcher){
 		return assertWith(() -> this.xpathHelper.assertNumber(getContent(), getCharset(), matcher));
@@ -121,9 +124,43 @@ public class XpathAssertions {
 
 	/**
 	 * Delegates to {@link XpathExpectationsHelper#assertNodeCount(byte[], String, Matcher)}.
+	 * @since 5.1
 	 */
 	public WebTestClient.BodyContentSpec nodeCount(Matcher<Integer> matcher){
 		return assertWith(() -> this.xpathHelper.assertNodeCount(getContent(), getCharset(), matcher));
+	}
+
+	/**
+	 * Consume the result of the XPath evaluation as a String.
+	 * @since 5.1
+	 */
+	public WebTestClient.BodyContentSpec string(Consumer<String> consumer){
+		return assertWith(() -> {
+			String value = this.xpathHelper.evaluateXpath(getContent(), getCharset(), String.class);
+			consumer.accept(value);
+		});
+	}
+
+	/**
+	 * Consume the result of the XPath evaluation as a Double.
+	 * @since 5.1
+	 */
+	public WebTestClient.BodyContentSpec number(Consumer<Double> consumer){
+		return assertWith(() -> {
+			Double value = this.xpathHelper.evaluateXpath(getContent(), getCharset(), Double.class);
+			consumer.accept(value);
+		});
+	}
+
+	/**
+	 * Consume the count of nodes as result of the XPath evaluation.
+	 * @since 5.1
+	 */
+	public WebTestClient.BodyContentSpec nodeCount(Consumer<Integer> consumer){
+		return assertWith(() -> {
+			Integer value = this.xpathHelper.evaluateXpath(getContent(), getCharset(), Integer.class);
+			consumer.accept(value);
+		});
 	}
 
 
