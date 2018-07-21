@@ -385,11 +385,11 @@ public class ProxyFactoryTests {
 	public void testGetProxyByTargetAndInterceptor(){
 			CountingBeforeAdvice cba = new CountingBeforeAdvice();
 		ITestBean iTestBean = ProxyFactory.getProxy(new TestBean(),cba);
-		Assert.assertTrue(Proxy.isProxyClass(iTestBean.getClass()));
+		assertTrue(Proxy.isProxyClass(iTestBean.getClass()));
 		iTestBean.setName("TestBean");
-		Assert.assertEquals(1,cba.getCalls());
-		Assert.assertEquals("TestBean",iTestBean.getName());
-		Assert.assertEquals(2,cba.getCalls());
+		assertEquals(1,cba.getCalls());
+		assertEquals("TestBean",iTestBean.getName());
+		assertEquals(2,cba.getCalls());
 	}
 
 
