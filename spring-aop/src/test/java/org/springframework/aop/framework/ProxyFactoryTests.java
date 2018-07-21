@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import javax.accessibility.Accessible;
@@ -24,6 +25,7 @@ import javax.swing.RootPaneContainer;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -377,6 +379,17 @@ public class ProxyFactoryTests {
 			return invocation.getMethod().invoke(target, invocation.getArguments());
 		});
 		assertEquals("tb", proxy.getName());
+	}
+
+	@Test
+	public void testGetProxyByTargetAndInterceptor(){
+			CountingBeforeAdvice cba = new CountingBeforeAdvice();
+		ITestBean iTestBean = ProxyFactory.getProxy(new TestBean(),cba);
+		Assert.assertTrue(Proxy.isProxyClass(iTestBean.getClass()));
+		iTestBean.setName("TestBean");
+		Assert.assertEquals(1,cba.getCalls());
+		Assert.assertEquals("TestBean",iTestBean.getName());
+		Assert.assertEquals(2,cba.getCalls());
 	}
 
 

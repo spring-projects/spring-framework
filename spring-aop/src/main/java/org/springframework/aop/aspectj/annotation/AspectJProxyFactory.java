@@ -26,6 +26,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
 import org.springframework.aop.framework.ProxyCreatorSupport;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
@@ -47,7 +48,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.aop.framework.ProxyFactory
  */
 @SuppressWarnings("serial")
-public class AspectJProxyFactory extends ProxyCreatorSupport {
+public class AspectJProxyFactory extends ProxyFactory {
 
 	/** Cache for singleton aspect instances. */
 	private static final Map<Class<?>, Object> aspectCache = new ConcurrentHashMap<>();
@@ -177,33 +178,6 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 			}
 		}
 		return instance;
-	}
-
-
-	/**
-	 * Create a new proxy according to the settings in this factory.
-	 * <p>Can be called repeatedly. Effect will vary if we've added
-	 * or removed interfaces. Can add and remove interceptors.
-	 * <p>Uses a default class loader: Usually, the thread context class loader
-	 * (if necessary for proxy creation).
-	 * @return the new proxy
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> T getProxy() {
-		return (T) createAopProxy().getProxy();
-	}
-
-	/**
-	 * Create a new proxy according to the settings in this factory.
-	 * <p>Can be called repeatedly. Effect will vary if we've added
-	 * or removed interfaces. Can add and remove interceptors.
-	 * <p>Uses the given class loader (if necessary for proxy creation).
-	 * @param classLoader the class loader to create the proxy with
-	 * @return the new proxy
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> T getProxy(ClassLoader classLoader) {
-		return (T) createAopProxy().getProxy(classLoader);
 	}
 
 }
