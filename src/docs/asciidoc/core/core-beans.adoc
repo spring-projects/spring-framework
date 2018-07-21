@@ -459,7 +459,7 @@ In addition to bean definitions that contain information on how to create a spec
 bean, the `ApplicationContext` implementations also permit the registration of existing
 objects that are created outside the container, by users. This is done by accessing the
 ApplicationContext's BeanFactory via the method `getBeanFactory()` which returns the
-BeanFactory implementation `DefaultListableBeanFactory`. `DefaultListableBeanFactory`
+BeanFactory implementation `ConfigurableApplicationContext`. `ConfigurableApplicationContext`
 supports this registration through the methods `registerSingleton(..)` and
 `registerBeanDefinition(..)`. However, typical applications work solely with beans
 defined through metadata bean definitions.
