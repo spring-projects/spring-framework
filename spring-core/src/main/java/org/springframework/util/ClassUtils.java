@@ -771,6 +771,8 @@ public abstract class ClassUtils {
 	 * @param interfaces the interfaces to merge
 	 * @param classLoader the ClassLoader to create the composite Class in
 	 * @return the merged interface as Class
+	 * @throws IllegalArgumentException if the specified interfaces expose
+	 * conflicting method signatures (or a similar constraint is violated)
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
 	@SuppressWarnings("deprecation")
