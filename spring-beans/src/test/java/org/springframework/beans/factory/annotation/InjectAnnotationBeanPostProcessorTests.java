@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor}
- * processing the JSR-303 {@link javax.inject.Inject} annotation.
+ * processing the JSR-330 {@link javax.inject.Inject} annotation.
  *
  * @author Juergen Hoeller
  * @since 3.0
@@ -550,11 +550,9 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 	/**
-	 * Verifies that a dependency on a {@link org.springframework.beans.factory.FactoryBean} can be autowired via
-	 * {@link org.springframework.beans.factory.annotation.Autowired @Inject}, specifically addressing the JIRA issue
-	 * raised in <a
-	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4040"
-	 * target="_blank">SPR-4040</a>.
+	 * Verifies that a dependency on a {@link org.springframework.beans.factory.FactoryBean}
+	 * can be autowired via {@link org.springframework.beans.factory.annotation.Autowired @Inject},
+	 * specifically addressing SPR-4040.
 	 */
 	@Test
 	public void testBeanAutowiredWithFactoryBean() {
@@ -1315,7 +1313,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	public static class StringFactoryBean implements FactoryBean<String> {
 
 		@Override
-		public String getObject() throws Exception {
+		public String getObject() {
 			return "";
 		}
 

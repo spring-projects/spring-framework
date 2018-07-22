@@ -294,7 +294,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	private void marshalDocument(IMarshallingContext marshallingContext, Object graph) throws IOException, JiBXException {
 		if (StringUtils.hasLength(this.docTypeRootElementName)) {
 			IXMLWriter xmlWriter = marshallingContext.getXmlWriter();
-			xmlWriter.writeDocType(this.docTypeRootElementName, this.docTypeSystemId, this.docTypePublicId, this.docTypeInternalSubset);
+			xmlWriter.writeDocType(this.docTypeRootElementName, this.docTypeSystemId,
+					this.docTypePublicId, this.docTypeInternalSubset);
 		}
 		marshallingContext.marshalDocument(graph);
 	}
