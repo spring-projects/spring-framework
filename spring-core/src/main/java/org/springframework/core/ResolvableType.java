@@ -430,7 +430,8 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return NONE;
 		}
-		if (ObjectUtils.nullSafeEquals(resolve(), type)) {
+		Class<?> resolved = resolve();
+		if (resolved == null || resolved == type) {
 			return this;
 		}
 		for (ResolvableType interfaceType : getInterfaces()) {
@@ -468,7 +469,7 @@ public class ResolvableType implements Serializable {
 	 */
 	public ResolvableType[] getInterfaces() {
 		Class<?> resolved = resolve();
-		if (resolved == null || ObjectUtils.isEmpty(resolved.getGenericInterfaces())) {
+		if (resolved == null || resolved.getGenericInterfaces().length == 0) {
 			return EMPTY_TYPES_ARRAY;
 		}
 		ResolvableType[] interfaces = this.interfaces;
@@ -818,7 +819,7 @@ public class ResolvableType implements Serializable {
 
 	@Nullable
 	private Type resolveBounds(Type[] bounds) {
-		if (ObjectUtils.isEmpty(bounds) || Object.class == bounds[0]) {
+		if (bounds.length == 0 || bounds[0] == Object.class) {
 			return null;
 		}
 		return bounds[0];
@@ -1638,6 +1639,9 @@ public class ResolvableType implements Serializable {
 	}
 
 
+	/**
+	 * Internal {@link Type} used to represent an empty value.
+	 */
 	@SuppressWarnings("serial")
 	static class EmptyType implements Type, Serializable {
 
