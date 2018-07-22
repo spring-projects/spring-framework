@@ -16,10 +16,12 @@
 
 package org.springframework.aop.framework;
 
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -93,8 +95,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * (if necessary for proxy creation).
 	 * @return the proxy object
 	 */
-	public Object getProxy() {
-		return createAopProxy().getProxy();
+	@SuppressWarnings("unchecked")
+	public <T> T getProxy() {
+		return (T)createAopProxy().getProxy();
 	}
 
 	/**
@@ -106,8 +109,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * (or {@code null} for the low-level proxy facility's default)
 	 * @return the proxy object
 	 */
-	public Object getProxy(@Nullable ClassLoader classLoader) {
-		return createAopProxy().getProxy(classLoader);
+	@SuppressWarnings("unchecked")
+	public <T> T getProxy(@Nullable ClassLoader classLoader) {
+		return (T)createAopProxy().getProxy(classLoader);
 	}
 
 
@@ -145,13 +149,28 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @param targetSource the TargetSource that the proxy should invoke
 	 * @return the proxy object
 	 */
-	public static Object getProxy(TargetSource targetSource) {
+	public static <T> T getProxy(TargetSource targetSource) {
 		if (targetSource.getTargetClass() == null) {
 			throw new IllegalArgumentException("Cannot create class proxy for TargetSource with null target class");
 		}
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTargetSource(targetSource);
 		proxyFactory.setProxyTargetClass(true);
+		return proxyFactory.getProxy();
+	}
+
+	/**
+	 * Create a proxy for given target and interceptor.
+	 * Convenience method for creating a proxy for a single advice.
+	 * @param advice the advice that the proxy should invoke
+	 * @param target the target object to be proxied
+	 * @return the proxy object
+	 */
+	public static <T> T getProxy(T target, Advice advice) {
+		Assert.notNull(target, "Target can not be null");
+		Assert.notNull(target, "Interceptor can not be null");
+		ProxyFactory proxyFactory = new ProxyFactory(target);
+		proxyFactory.addAdvice(advice);
 		return proxyFactory.getProxy();
 	}
 
