@@ -434,9 +434,15 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			// Note: AspectJ is only going to take Method.getDeclaringClass() into account.
 			Set<Class<?>> ifcs = ClassUtils.getAllInterfacesForClassAsSet(targetClass);
 			if (ifcs.size() > 1) {
-				Class<?> compositeInterface = ClassUtils.createCompositeInterface(
-						ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
-				targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
+				try {
+					Class<?> compositeInterface = ClassUtils.createCompositeInterface(
+							ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
+					targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
+				}
+				catch (IllegalArgumentException ex) {
+					// Implemented interfaces probably expose conflicting method signatures...
+					// Proceed with original target method.
+				}
 			}
 		}
 		return getShadowMatch(targetMethod, method);
@@ -561,6 +567,19 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return sb.toString();
 	}
 
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization, just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		// pointcutExpression will be initialized lazily by checkReadyToMatch()
+		this.shadowMatchCache = new ConcurrentHashMap<>(32);
+	}
+
 
 	/**
 	 * Handler for the Spring-specific {@code bean()} pointcut designator
@@ -654,20 +673,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			return BeanFactoryAnnotationUtils.isQualifierMatch(
 					this.expressionPattern::matches, advisedBeanName, beanFactory);
 		}
-	}
-
-
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-		// Rely on default serialization, just initialize state after deserialization.
-		ois.defaultReadObject();
-
-		// Initialize transient fields.
-		// pointcutExpression will be initialized lazily by checkReadyToMatch()
-		this.shadowMatchCache = new ConcurrentHashMap<>(32);
 	}
 
 
