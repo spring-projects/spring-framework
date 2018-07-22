@@ -430,7 +430,8 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return NONE;
 		}
-		if (ObjectUtils.nullSafeEquals(resolve(), type)) {
+		Class<?> resolved = resolve();
+		if (resolved == null || resolved == type) {
 			return this;
 		}
 		for (ResolvableType interfaceType : getInterfaces()) {
@@ -445,6 +446,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Return a {@link ResolvableType} representing the direct supertype of this type.
 	 * If no supertype is available this method returns {@link #NONE}.
+	 * <p>Note: The resulting {@link ResolvableType} instance may not be {@link Serializable}.
 	 * @see #getInterfaces()
 	 */
 	public ResolvableType getSuperType() {
@@ -454,7 +456,7 @@ public class ResolvableType implements Serializable {
 		}
 		ResolvableType superType = this.superType;
 		if (superType == null) {
-			superType = forType(SerializableTypeWrapper.forGenericSuperclass(resolved), asVariableResolver());
+			superType = forType(resolved.getGenericSuperclass(), this);
 			this.superType = superType;
 		}
 		return superType;
@@ -464,16 +466,21 @@ public class ResolvableType implements Serializable {
 	 * Return a {@link ResolvableType} array representing the direct interfaces
 	 * implemented by this type. If this type does not implement any interfaces an
 	 * empty array is returned.
+	 * <p>Note: The resulting {@link ResolvableType} instances may not be {@link Serializable}.
 	 * @see #getSuperType()
 	 */
 	public ResolvableType[] getInterfaces() {
 		Class<?> resolved = resolve();
-		if (resolved == null || ObjectUtils.isEmpty(resolved.getGenericInterfaces())) {
+		if (resolved == null) {
 			return EMPTY_TYPES_ARRAY;
 		}
 		ResolvableType[] interfaces = this.interfaces;
 		if (interfaces == null) {
-			interfaces = forTypes(SerializableTypeWrapper.forGenericInterfaces(resolved), asVariableResolver());
+			Type[] genericIfcs = resolved.getGenericInterfaces();
+			interfaces = new ResolvableType[genericIfcs.length];
+			for (int i = 0; i < genericIfcs.length; i++) {
+				interfaces[i] = forType(genericIfcs[i], this);
+			}
 			this.interfaces = interfaces;
 		}
 		return interfaces;
@@ -673,8 +680,11 @@ public class ResolvableType implements Serializable {
 		ResolvableType[] generics = this.generics;
 		if (generics == null) {
 			if (this.type instanceof Class) {
-				Class<?> typeClass = (Class<?>) this.type;
-				generics = forTypes(SerializableTypeWrapper.forTypeParameters(typeClass), this.variableResolver);
+				Type[] typeParams = ((Class<?>) this.type).getTypeParameters();
+				generics = new ResolvableType[typeParams.length];
+				for (int i = 0; i < generics.length; i++) {
+					generics[i] = ResolvableType.forType(typeParams[i], this);
+				}
 			}
 			else if (this.type instanceof ParameterizedType) {
 				Type[] actualTypeArguments = ((ParameterizedType) this.type).getActualTypeArguments();
@@ -818,7 +828,7 @@ public class ResolvableType implements Serializable {
 
 	@Nullable
 	private Type resolveBounds(Type[] bounds) {
-		if (ObjectUtils.isEmpty(bounds) || Object.class == bounds[0]) {
+		if (bounds.length == 0 || bounds[0] == Object.class) {
 			return null;
 		}
 		return bounds[0];
@@ -1309,17 +1319,9 @@ public class ResolvableType implements Serializable {
 		return new ResolvableType(arrayClass, null, null, componentType);
 	}
 
-	private static ResolvableType[] forTypes(Type[] types, @Nullable VariableResolver owner) {
-		ResolvableType[] result = new ResolvableType[types.length];
-		for (int i = 0; i < types.length; i++) {
-			result[i] = forType(types[i], owner);
-		}
-		return result;
-	}
-
 	/**
 	 * Return a {@link ResolvableType} for the specified {@link Type}.
-	 * Note: The resulting {@link ResolvableType} may not be {@link Serializable}.
+	 * <p>Note: The resulting {@link ResolvableType} instance may not be {@link Serializable}.
 	 * @param type the source type (potentially {@code null})
 	 * @return a {@link ResolvableType} for the specified {@link Type}
 	 * @see #forType(Type, ResolvableType)
@@ -1330,7 +1332,8 @@ public class ResolvableType implements Serializable {
 
 	/**
 	 * Return a {@link ResolvableType} for the specified {@link Type} backed by the given
-	 * owner type. Note: The resulting {@link ResolvableType} may not be {@link Serializable}.
+	 * owner type.
+	 * <p>Note: The resulting {@link ResolvableType} instance may not be {@link Serializable}.
 	 * @param type the source type or {@code null}
 	 * @param owner the owner type used to resolve variables
 	 * @return a {@link ResolvableType} for the specified {@link Type} and owner
@@ -1347,7 +1350,7 @@ public class ResolvableType implements Serializable {
 
 	/**
 	 * Return a {@link ResolvableType} for the specified {@link ParameterizedTypeReference}.
-	 * Note: The resulting {@link ResolvableType} may not be {@link Serializable}.
+	 * <p>Note: The resulting {@link ResolvableType} instance may not be {@link Serializable}.
 	 * @param typeReference the reference to obtain the source type from
 	 * @return a {@link ResolvableType} for the specified {@link ParameterizedTypeReference}
 	 * @since 4.3.12

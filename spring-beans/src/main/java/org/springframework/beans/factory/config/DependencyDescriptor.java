@@ -75,7 +75,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	private Class<?> containingClass;
 
 	@Nullable
-	private volatile ResolvableType resolvableType;
+	private transient volatile ResolvableType resolvableType;
 
 
 	/**

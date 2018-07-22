@@ -41,9 +41,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>{@link #forField(Field) Fields} or {@link #forMethodParameter(MethodParameter)
  * MethodParameters} can be used as the root source for a serializable type.
- * Alternatively the {@link #forGenericSuperclass(Class) superclass},
- * {@link #forGenericInterfaces(Class) interfaces} or {@link #forTypeParameters(Class)
- * type parameters} or a regular {@link Class} can also be used as source.
+ * Alternatively, a regular {@link Class} can also be used as source.
  *
  * <p>The returned type will either be a {@link Class} or a serializable proxy of
  * {@link GenericArrayType}, {@link ParameterizedType}, {@link TypeVariable} or
@@ -82,41 +80,6 @@ final class SerializableTypeWrapper {
 	@Nullable
 	public static Type forMethodParameter(MethodParameter methodParameter) {
 		return forTypeProvider(new MethodParameterTypeProvider(methodParameter));
-	}
-
-	/**
-	 * Return a {@link Serializable} variant of {@link Class#getGenericSuperclass()}.
-	 */
-	@SuppressWarnings("serial")
-	@Nullable
-	public static Type forGenericSuperclass(final Class<?> type) {
-		return forTypeProvider(type::getGenericSuperclass);
-	}
-
-	/**
-	 * Return a {@link Serializable} variant of {@link Class#getGenericInterfaces()}.
-	 */
-	@SuppressWarnings("serial")
-	public static Type[] forGenericInterfaces(final Class<?> type) {
-		Type[] result = new Type[type.getGenericInterfaces().length];
-		for (int i = 0; i < result.length; i++) {
-			final int index = i;
-			result[i] = forTypeProvider(() -> type.getGenericInterfaces()[index]);
-		}
-		return result;
-	}
-
-	/**
-	 * Return a {@link Serializable} variant of {@link Class#getTypeParameters()}.
-	 */
-	@SuppressWarnings("serial")
-	public static Type[] forTypeParameters(final Class<?> type) {
-		Type[] result = new Type[type.getTypeParameters().length];
-		for (int i = 0; i < result.length; i++) {
-			final int index = i;
-			result[i] = forTypeProvider(() -> type.getTypeParameters()[index]);
-		}
-		return result;
 	}
 
 	/**
