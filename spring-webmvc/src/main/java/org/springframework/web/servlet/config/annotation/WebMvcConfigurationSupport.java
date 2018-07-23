@@ -805,7 +805,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		messageConverters.add(stringHttpMessageConverter);
 		messageConverters.add(new ResourceHttpMessageConverter());
 		messageConverters.add(new ResourceRegionHttpMessageConverter());
-		messageConverters.add(new SourceHttpMessageConverter<>());
+		try {
+			messageConverters.add(new SourceHttpMessageConverter<>());
+		}
+		catch (Error err) {
+			// Ignore when no TransformerFactory implementation is available
+		}
 		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
 		if (romePresent) {

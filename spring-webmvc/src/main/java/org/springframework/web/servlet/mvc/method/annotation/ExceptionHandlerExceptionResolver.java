@@ -111,7 +111,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters = new ArrayList<>();
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(stringHttpMessageConverter);
-		this.messageConverters.add(new SourceHttpMessageConverter<>());
+		try {
+			this.messageConverters.add(new SourceHttpMessageConverter<>());
+		}
+		catch (Error err) {
+			// Ignore when no TransformerFactory implementation is available
+		}
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 

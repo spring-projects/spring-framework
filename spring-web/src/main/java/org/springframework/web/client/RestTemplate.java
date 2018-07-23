@@ -179,7 +179,12 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter(false));
-		this.messageConverters.add(new SourceHttpMessageConverter<>());
+		try {
+			this.messageConverters.add(new SourceHttpMessageConverter<>());
+		}
+		catch (Error err) {
+			// Ignore when no TransformerFactory implementation is available
+		}
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
 		if (romePresent) {
