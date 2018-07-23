@@ -44,12 +44,6 @@ import static org.springframework.util.StringUtils.*;
  */
 public class AnnotationConfigApplicationContextTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void nullGetBeanParameterIsDisallowed() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
-		context.getBean((Class<?>) null);
-	}
-
 	@Test
 	public void scanAndRefresh() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();

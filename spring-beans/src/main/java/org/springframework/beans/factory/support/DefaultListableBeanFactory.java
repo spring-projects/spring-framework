@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 
 import org.springframework.beans.BeanUtils;
@@ -333,17 +334,80 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBean(requiredType, (Object[]) null);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getBean(Class<T> requiredType, @Nullable Object... args) throws BeansException {
-		NamedBeanHolder<T> namedBean = resolveNamedBean(requiredType, args);
+		Object resolved = resolveBean(ResolvableType.forRawClass(requiredType), args, false);
+		if (resolved == null) {
+			throw new NoSuchBeanDefinitionException(requiredType);
+		}
+		return (T) resolved;
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) throws BeansException {
+		return getBeanProvider(ResolvableType.forRawClass(requiredType));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
+		return new BeanObjectProvider<T>() {
+			@Override
+			public T getObject() throws BeansException {
+				T resolved = resolveBean(requiredType, null, false);
+				if (resolved == null) {
+					throw new NoSuchBeanDefinitionException(requiredType);
+				}
+				return resolved;
+			}
+			@Override
+			public T getObject(Object... args) throws BeansException {
+				T resolved = resolveBean(requiredType, args, false);
+				if (resolved == null) {
+					throw new NoSuchBeanDefinitionException(requiredType);
+				}
+				return resolved;
+			}
+			@Override
+			@Nullable
+			public T getIfAvailable() throws BeansException {
+				return resolveBean(requiredType, null, false);
+			}
+			@Override
+			@Nullable
+			public T getIfUnique() throws BeansException {
+				return resolveBean(requiredType, null, true);
+			}
+			@Override
+			public Stream<T> stream() {
+				return Arrays.stream(getBeanNamesForType(requiredType))
+						.map(name -> (T) getBean(name))
+						.filter(bean -> !(bean instanceof NullBean));
+			}
+		};
+	}
+
+	@Nullable
+	private <T> T resolveBean(ResolvableType requiredType, @Nullable Object[] args, boolean nonUniqueAsNull) {
+		NamedBeanHolder<T> namedBean = resolveNamedBean(requiredType, args, nonUniqueAsNull);
 		if (namedBean != null) {
 			return namedBean.getBeanInstance();
 		}
 		BeanFactory parent = getParentBeanFactory();
-		if (parent != null) {
-			return (args != null ? parent.getBean(requiredType, args) : parent.getBean(requiredType));
+		if (parent instanceof DefaultListableBeanFactory) {
+			return ((DefaultListableBeanFactory) parent).resolveBean(requiredType, args, nonUniqueAsNull);
 		}
-		throw new NoSuchBeanDefinitionException(requiredType);
+		else if (parent != null) {
+			ObjectProvider<T> parentProvider = parent.getBeanProvider(requiredType);
+			if (args != null) {
+				return parentProvider.getObject(args);
+			}
+			else {
+				return (nonUniqueAsNull ? parentProvider.getIfUnique() : parentProvider.getIfAvailable());
+			}
+		}
+		return null;
 	}
 
 
@@ -978,7 +1042,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType) throws BeansException {
-		NamedBeanHolder<T> namedBean = resolveNamedBean(requiredType, (Object[]) null);
+		NamedBeanHolder<T> namedBean = resolveNamedBean(ResolvableType.forRawClass(requiredType), null, false);
 		if (namedBean != null) {
 			return namedBean;
 		}
@@ -991,8 +1055,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType, @Nullable Object... args) throws BeansException {
+	private <T> NamedBeanHolder<T> resolveNamedBean(
+			ResolvableType requiredType, @Nullable Object[] args, boolean nonUniqueAsNull) throws BeansException {
+
 		Assert.notNull(requiredType, "Required type must not be null");
+		Class<?> clazz = requiredType.getRawClass();
+		Assert.notNull(clazz, "Required type must have a raw Class");
 		String[] candidateNames = getBeanNamesForType(requiredType);
 
 		if (candidateNames.length > 1) {
@@ -1009,7 +1077,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (candidateNames.length == 1) {
 			String beanName = candidateNames[0];
-			return new NamedBeanHolder<>(beanName, getBean(beanName, requiredType, args));
+			return new NamedBeanHolder<>(beanName, (T) getBean(beanName, clazz, args));
 		}
 		else if (candidateNames.length > 1) {
 			Map<String, Object> candidates = new LinkedHashMap<>(candidateNames.length);
@@ -1022,18 +1090,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					candidates.put(beanName, getType(beanName));
 				}
 			}
-			String candidateName = determinePrimaryCandidate(candidates, requiredType);
+			String candidateName = determinePrimaryCandidate(candidates, clazz);
 			if (candidateName == null) {
-				candidateName = determineHighestPriorityCandidate(candidates, requiredType);
+				candidateName = determineHighestPriorityCandidate(candidates, clazz);
 			}
 			if (candidateName != null) {
 				Object beanInstance = candidates.get(candidateName);
 				if (beanInstance == null || beanInstance instanceof Class) {
-					beanInstance = getBean(candidateName, requiredType, args);
+					beanInstance = getBean(candidateName, clazz, args);
 				}
 				return new NamedBeanHolder<>(candidateName, (T) beanInstance);
 			}
-			throw new NoUniqueBeanDefinitionException(requiredType, candidates.keySet());
+			if (!nonUniqueAsNull) {
+				throw new NoUniqueBeanDefinitionException(requiredType, candidates.keySet());
+			}
 		}
 
 		return null;
@@ -1110,7 +1180,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 				if (autowiredBeanName == null) {
 					if (isRequired(descriptor) || !indicatesMultipleBeans(type)) {
-						return descriptor.resolveNotUnique(type, matchingBeans);
+						return descriptor.resolveNotUnique(descriptor.getResolvableType(), matchingBeans);
 					}
 					else {
 						// In case of an optional Collection/Map, silently ignore a non-unique case:
@@ -1156,7 +1226,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) {
 
 		Class<?> type = descriptor.getDependencyType();
-		if (type.isArray()) {
+
+		if (descriptor.isStreamAccess()) {
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type,
+					new MultiElementDescriptor(descriptor));
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.addAll(matchingBeans.keySet());
+			}
+			return matchingBeans.values().stream();
+		}
+		else if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
 			ResolvableType resolvableType = descriptor.getResolvableType();
 			Class<?> resolvedArrayType = resolvableType.resolve();
@@ -1645,10 +1724,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 
+	private interface BeanObjectProvider<T> extends ObjectProvider<T>, Serializable {
+	}
+
+
 	/**
 	 * Serializable ObjectFactory/ObjectProvider for lazy resolution of a dependency.
 	 */
-	private class DependencyObjectProvider implements ObjectProvider<Object>, Serializable {
+	private class DependencyObjectProvider implements BeanObjectProvider<Object> {
 
 		private final DependencyDescriptor descriptor;
 
@@ -1724,7 +1807,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				@Override
 				@Nullable
-				public Object resolveNotUnique(Class<?> type, Map<String, Object> matchingBeans) {
+				public Object resolveNotUnique(ResolvableType type, Map<String, Object> matchingBeans) {
 					return null;
 				}
 			};
@@ -1743,6 +1826,27 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else {
 				return doResolveDependency(this.descriptor, this.beanName, null, null);
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Stream<Object> stream() {
+			DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
+				@Override
+				public boolean isStreamAccess() {
+					return true;
+				}
+			};
+			Object result = doResolveDependency(descriptorToUse, this.beanName, null, null);
+			if (result instanceof Stream) {
+				return (Stream<Object>) result;
+			}
+			else if (result instanceof Collection) {
+				return ((Collection<Object>) result).stream();
+			}
+			else {
+				return (result != null ? Stream.of(result) : Stream.empty());
 			}
 		}
 	}

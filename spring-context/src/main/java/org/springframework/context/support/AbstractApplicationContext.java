@@ -35,6 +35,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -1083,7 +1084,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
-	public <T> T getBean(String name, @Nullable Class<T> requiredType) throws BeansException {
+	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBean(name, requiredType);
 	}
@@ -1104,6 +1105,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBean(requiredType, args);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBeanProvider(requiredType);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBeanProvider(requiredType);
 	}
 
 	@Override
@@ -1130,7 +1143,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, @Nullable Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
 		assertBeanFactoryActive();
 		return getBeanFactory().isTypeMatch(name, typeToMatch);
 	}

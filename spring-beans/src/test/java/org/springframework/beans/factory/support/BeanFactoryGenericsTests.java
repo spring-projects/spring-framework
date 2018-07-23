@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -37,6 +38,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -160,7 +163,7 @@ public class BeanFactoryGenericsTests {
 	}
 
 	@Test
-	public void testGenericListOfArraysProperty() throws MalformedURLException {
+	public void testGenericListOfArraysProperty() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
@@ -863,6 +866,66 @@ public class BeanFactoryGenericsTests {
 		assertEquals("store1", doubleStoreNames[0]);
 		assertEquals(1, floatStoreNames.length);
 		assertEquals("store2", floatStoreNames[0]);
+
+		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(ResolvableType.forClass(NumberStore.class));
+		ObjectProvider<NumberStore<Double>> doubleStoreProvider = bf.getBeanProvider(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
+		ObjectProvider<NumberStore<Float>> floatStoreProvider = bf.getBeanProvider(ResolvableType.forClassWithGenerics(NumberStore.class, Float.class));
+		try {
+			numberStoreProvider.getObject();
+			fail("Should have thrown NoUniqueBeanDefinitionException");
+		}
+		catch (NoUniqueBeanDefinitionException ex) {
+			// expected
+		}
+		try {
+			numberStoreProvider.getIfAvailable();
+			fail("Should have thrown NoUniqueBeanDefinitionException");
+		}
+		catch (NoUniqueBeanDefinitionException ex) {
+			// expected
+		}
+		assertNull(numberStoreProvider.getIfUnique());
+		assertSame(bf.getBean("store1"), doubleStoreProvider.getObject());
+		assertSame(bf.getBean("store1"), doubleStoreProvider.getIfAvailable());
+		assertSame(bf.getBean("store1"), doubleStoreProvider.getIfUnique());
+		assertSame(bf.getBean("store2"), floatStoreProvider.getObject());
+		assertSame(bf.getBean("store2"), floatStoreProvider.getIfAvailable());
+		assertSame(bf.getBean("store2"), floatStoreProvider.getIfUnique());
+
+		Set<Object> resolved = new HashSet<>();
+		for (NumberStore<?> instance : numberStoreProvider) {
+			resolved.add(instance);
+		}
+		assertEquals(2, resolved.size());
+		assertTrue(resolved.contains(bf.getBean("store1")));
+		assertTrue(resolved.contains(bf.getBean("store2")));
+
+		resolved = numberStoreProvider.stream().collect(Collectors.toSet());
+		assertEquals(2, resolved.size());
+		assertTrue(resolved.contains(bf.getBean("store1")));
+		assertTrue(resolved.contains(bf.getBean("store2")));
+
+		resolved = new HashSet<>();
+		for (NumberStore<Double> instance : doubleStoreProvider) {
+			resolved.add(instance);
+		}
+		assertEquals(1, resolved.size());
+		assertTrue(resolved.contains(bf.getBean("store1")));
+
+		resolved = doubleStoreProvider.stream().collect(Collectors.toSet());
+		assertEquals(1, resolved.size());
+		assertTrue(resolved.contains(bf.getBean("store1")));
+
+		resolved = new HashSet<>();
+		for (NumberStore<Float> instance : floatStoreProvider) {
+			resolved.add(instance);
+		}
+		assertEquals(1, resolved.size());
+		assertTrue(resolved.contains(bf.getBean("store2")));
+
+		resolved = floatStoreProvider.stream().collect(Collectors.toSet());
+		assertEquals(1, resolved.size());
+		assertTrue(resolved.contains(bf.getBean("store2")));
 	}
 
 

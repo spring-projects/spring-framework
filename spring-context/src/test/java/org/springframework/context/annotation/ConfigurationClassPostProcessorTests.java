@@ -802,6 +802,40 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void testCollectionArgumentOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class, TestBean.class);
+		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(1, bean.testBeans.size());
+		assertSame(ctx.getBean(TestBean.class), bean.testBeans.get(0));
+	}
+
+	@Test
+	public void testEmptyCollectionArgumentOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class);
+		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertTrue(bean.testBeans.isEmpty());
+	}
+
+	@Test
+	public void testMapArgumentOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class, DummyRunnable.class);
+		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(1, bean.testBeans.size());
+		assertSame(ctx.getBean(Runnable.class), bean.testBeans.values().iterator().next());
+	}
+
+	@Test
+	public void testEmptyMapArgumentOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class);
+		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertTrue(bean.testBeans.isEmpty());
+	}
+
+	@Test
 	public void testCollectionInjectionFromSameConfigurationClass() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionInjectionConfiguration.class);
 		CollectionInjectionConfiguration bean = ctx.getBean(CollectionInjectionConfiguration.class);
@@ -1561,6 +1595,43 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public FooImpl foo() {
 			return new FooImpl();
+		}
+	}
+
+	public static class DummyRunnable implements Runnable {
+
+		@Override
+		public void run() {
+			/* no-op */
+		}
+	}
+
+	@Configuration
+	static class CollectionArgumentConfiguration {
+
+		List<TestBean> testBeans;
+
+		@Bean(autowireCandidate = false)
+		public TestBean thing(List<TestBean> testBeans) {
+			this.testBeans = testBeans;
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	public static class MapArgumentConfiguration {
+
+		Map<String, Runnable> testBeans;
+
+		@Bean(autowireCandidate = false)
+		Runnable testBean(Map<String, Runnable> testBeans) {
+			this.testBeans = testBeans;
+			return () -> {};
+		}
+
+		// Unrelated, not to be considered as a factory method
+		private boolean testBean(boolean param) {
+			return param;
 		}
 	}
 

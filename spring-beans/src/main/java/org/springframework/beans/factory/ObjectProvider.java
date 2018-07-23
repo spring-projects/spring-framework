@@ -16,8 +16,10 @@
 
 package org.springframework.beans.factory;
 
+import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.springframework.beans.BeansException;
 import org.springframework.lang.Nullable;
@@ -26,11 +28,15 @@ import org.springframework.lang.Nullable;
  * A variant of {@link ObjectFactory} designed specifically for injection points,
  * allowing for programmatic optionality and lenient not-unique handling.
  *
+ * <p>As of 5.1, this interface extends {@link Iterable} and provides {@link Stream}
+ * support. It can be therefore be used in {@code for} loops, provides {@link #forEach}
+ * iteration and allows for collection-style {@link #stream} access.
+ *
  * @author Juergen Hoeller
  * @since 4.3
  * @param <T> the object type
  */
-public interface ObjectProvider<T> extends ObjectFactory<T> {
+public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object
@@ -128,6 +134,29 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 		if (dependency != null) {
 			dependencyConsumer.accept(dependency);
 		}
+	}
+
+	/**
+	 * Return an {@link Iterator} over resolved object instances.
+	 * <p>The default implementation delegates to {@link #stream()}.
+	 * @since 5.1
+	 * @see #stream()
+	 */
+	@Override
+	default Iterator<T> iterator() {
+		return stream().iterator();
+	}
+
+	/**
+	 * Return a sequential {@link Stream} over resolved object instances.
+	 * <p>The default implementation returns a stream of one element or an
+	 * empty stream if not available, resolved via {@link #getIfAvailable()}.
+	 * @since 5.1
+	 * @see #iterator()
+	 */
+	default Stream<T> stream() {
+		T instance = getIfAvailable();
+		return (instance != null ? Stream.of(instance) : Stream.empty());
 	}
 
 }
