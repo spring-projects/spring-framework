@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -118,8 +119,9 @@ public class OkHttp3ClientHttpRequestFactory
 	public void destroy() throws IOException {
 		if (this.defaultClient) {
 			// Clean up the client if we created it in the constructor
-			if (this.client.cache() != null) {
-				this.client.cache().close();
+			Cache cache = this.client.cache();
+			if (cache != null) {
+				cache.close();
 			}
 			this.client.dispatcher().executorService().shutdown();
 		}

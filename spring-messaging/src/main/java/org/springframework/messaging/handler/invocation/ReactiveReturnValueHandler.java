@@ -22,11 +22,12 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.messaging.support.MonoToListenableFutureAdapter;
+import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * Support for single-value reactive types (like {@code Mono} or {@code Single}) as a
- * return value type.
+ * Support for single-value reactive types (like {@code Mono} or {@code Single})
+ * as a return value type.
  *
  * @author Sebastien Deleuze
  * @since 5.1
@@ -53,12 +54,13 @@ public class ReactiveReturnValueHandler extends AbstractAsyncReturnValueHandler 
 	@Override
 	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
 		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(returnType.getParameterType(), returnValue);
-		return !adapter.isMultiValue() && !adapter.isNoValue();
+		return (adapter != null && !adapter.isMultiValue() && !adapter.isNoValue());
 	}
 
 	@Override
 	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
 		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(returnType.getParameterType(), returnValue);
+		Assert.state(adapter != null, () -> "No ReactiveAdapter found for " + returnType.getParameterType());
 		return new MonoToListenableFutureAdapter<>(Mono.from(adapter.toPublisher(returnValue)));
 	}
 
