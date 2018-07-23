@@ -31,12 +31,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxProcessor;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.HandlerMethod;
@@ -337,6 +343,61 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
+	public void monoSuccess() {
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
+
+		ReactiveController controller = new ReactiveController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		Message<?> message = createMessage("/app1/mono");
+		this.messageHandler.handleMessage(message);
+
+		assertNotNull(controller.mono);
+		controller.mono.onNext("foo");
+		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
+		assertEquals("foo", this.payloadCaptor.getValue());
+	}
+
+	@Test
+	public void monoFailure() {
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
+
+		ReactiveController controller = new ReactiveController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		Message<?> message = createMessage("/app1/mono");
+		this.messageHandler.handleMessage(message);
+
+		controller.mono.onError(new IllegalStateException());
+		assertTrue(controller.exceptionCaught);
+	}
+
+	@Test
+	public void fluxNotHandled() {
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
+
+		ReactiveController controller = new ReactiveController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		Message<?> message = createMessage("/app1/flux");
+		this.messageHandler.handleMessage(message);
+
+		assertNotNull(controller.flux);
+		controller.flux.onNext("foo");
+
+		verify(this.converter, never()).toMessage(any(), any(MessageHeaders.class));
+	}
+
+	@Test
 	public void placeholder() throws Exception {
 		Message<?> message = createMessage("/pre/myValue");
 		this.messageHandler.setEmbeddedValueResolver(value -> ("/${myProperty}".equals(value) ? "/myValue" : value));
@@ -534,6 +595,33 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		public CompletableFuture<String> handleCompletableFuture() {
 			this.future = new CompletableFuture<>();
 			return this.future;
+		}
+
+		@MessageExceptionHandler(IllegalStateException.class)
+		public void handleValidationException() {
+			this.exceptionCaught = true;
+		}
+	}
+
+	@Controller
+	private static class ReactiveController {
+
+		private MonoProcessor<String> mono;
+
+		private FluxProcessor<String, String> flux;
+
+		private boolean exceptionCaught = false;
+
+		@MessageMapping("mono")
+		public Mono<String> handleMono() {
+			this.mono = MonoProcessor.create();
+			return this.mono;
+		}
+
+		@MessageMapping("flux")
+		public Flux<String> handleFlux() {
+			this.flux = EmitterProcessor.create();
+			return this.flux;
 		}
 
 		@MessageExceptionHandler(IllegalStateException.class)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.tcp.reactor;
+package org.springframework.messaging.support;
 
 import reactor.core.publisher.Mono;
 
@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
  * @since 5.0
  * @param <T> the object type
  */
-class MonoToListenableFutureAdapter<T> extends AbstractMonoToListenableFutureAdapter<T, T> {
+public class MonoToListenableFutureAdapter<T> extends AbstractMonoToListenableFutureAdapter<T, T> {
 
 	public MonoToListenableFutureAdapter(Mono<T> mono) {
 		super(mono);

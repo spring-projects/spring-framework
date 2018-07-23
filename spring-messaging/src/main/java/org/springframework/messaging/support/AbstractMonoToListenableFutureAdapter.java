@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.tcp.reactor;
+package org.springframework.messaging.support;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
