@@ -1835,7 +1835,7 @@ public class DefaultListableBeanFactoryTests {
 	private RootBeanDefinition createConstructorDependencyBeanDefinition(int age) {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorDependency.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		bd.getConstructorArgumentValues().addGenericArgumentValue(String.valueOf(age));
+		bd.getConstructorArgumentValues().addGenericArgumentValue(age);
 		return bd;
 	}
 
