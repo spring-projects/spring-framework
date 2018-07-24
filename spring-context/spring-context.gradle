@@ -12,7 +12,7 @@ dependencies {
 	optional("javax.ejb:javax.ejb-api:3.2")
 	optional("javax.enterprise.concurrent:javax.enterprise.concurrent-api:1.0")
 	optional("javax.inject:javax.inject:1")
-	optional("javax.interceptor:javax.interceptor-api:1.2.1")
+	optional("javax.interceptor:javax.interceptor-api:1.2.2")
 	optional("javax.money:money-api:1.0.3")
 	optional("javax.validation:validation-api:1.1.0.Final")
 	optional("javax.xml.ws:jaxws-api:2.3.0")
@@ -30,5 +30,5 @@ dependencies {
 	testCompile("javax.inject:javax.inject-tck:1")
 	testRuntime("javax.xml.bind:jaxb-api:2.3.0")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
-	testRuntime("org.javamoney:moneta:1.2.1")
+	testRuntime("org.javamoney:moneta:1.3")
 }
