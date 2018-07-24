@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.AfterAdvice;
+import org.springframework.aop.MethodSignatureException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -81,6 +82,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 					(method.getParameterCount() == 1 || method.getParameterCount() == 4) &&
 					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterCount() - 1])
 				) {
+				checkMethodSignature(method);
 				// Have an exception handler
 				this.exceptionHandlerMap.put(method.getParameterTypes()[method.getParameterCount() - 1], method);
 				if (logger.isDebugEnabled()) {
@@ -148,6 +150,17 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		}
 		catch (InvocationTargetException targetEx) {
 			throw targetEx.getTargetException();
+		}
+	}
+
+	private void checkMethodSignature(Method method) {
+		if (method.getParameterCount() == 1) {
+			return;
+		}
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		if (!parameterTypes[0].isAssignableFrom(Method.class) || !parameterTypes[1].isAssignableFrom(Object[].class)) {
+			throw new MethodSignatureException("Method signature is illegal,the signature of method that owns 4 params "
+					+ "must be (Method method, Object[] args, Object target, Exception e)");
 		}
 	}
 

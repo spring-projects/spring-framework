@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.BeforeAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.util.Assert;
 
@@ -32,7 +33,7 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  */
 @SuppressWarnings("serial")
-public class MethodBeforeAdviceInterceptor implements MethodInterceptor, Serializable {
+public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeAdvice, Serializable {
 
 	private MethodBeforeAdvice advice;
 
