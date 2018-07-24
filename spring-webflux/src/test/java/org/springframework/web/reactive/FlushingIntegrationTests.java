@@ -37,7 +37,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static org.junit.Assert.*;
 
 /**
+ * Integration tests for server response flushing behavior.
+ *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
@@ -83,7 +86,8 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		}
 		catch (AssertionError err) {
 			String os = System.getProperty("os.name").toLowerCase();
-			if (os.contains("windows") && err.getMessage().startsWith("VerifySubscriber timed out")) {
+			if (os.contains("windows") && err.getMessage() != null &&
+					err.getMessage().startsWith("VerifySubscriber timed out")) {
 				// TODO: Reactor usually times out on Windows ...
 				err.printStackTrace();
 				return;
