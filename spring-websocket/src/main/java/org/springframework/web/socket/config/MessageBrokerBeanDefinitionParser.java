@@ -163,7 +163,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
-		Map<String, Object> scopeMap = Collections.<String, Object>singletonMap("websocket", new SimpSessionScope());
+		Map<String, Object> scopeMap = Collections.singletonMap("websocket", new SimpSessionScope());
 		RootBeanDefinition scopeConfigurer = new RootBeanDefinition(CustomScopeConfigurer.class);
 		scopeConfigurer.getPropertyValues().add("scopes", scopeMap);
 		registerBeanDefByName("webSocketScopeConfigurer", scopeConfigurer, context, source);
@@ -444,6 +444,12 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			// Should not happen
 			throw new IllegalStateException("Neither <simple-broker> nor <stomp-broker-relay> elements found.");
 		}
+
+		if (brokerElement.hasAttribute("preserve-publish-order")) {
+			String preservePublishOrder = brokerElement.getAttribute("preserve-publish-order");
+			brokerDef.getPropertyValues().add("preservePublishOrder", preservePublishOrder);
+		}
+
 		registerBeanDef(brokerDef, context, source);
 		return brokerDef;
 	}

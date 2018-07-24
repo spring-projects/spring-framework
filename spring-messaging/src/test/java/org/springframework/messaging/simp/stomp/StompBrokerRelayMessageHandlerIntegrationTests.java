@@ -102,12 +102,14 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	private void createAndStartRelay() throws InterruptedException {
-		this.relay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
-				this.responseChannel, new StubMessageChannel(), Arrays.asList("/queue/", "/topic/"));
+		StubMessageChannel channel = new StubMessageChannel();
+		List<String> prefixes = Arrays.asList("/queue/", "/topic/");
+		this.relay = new StompBrokerRelayMessageHandler(channel, this.responseChannel, channel, prefixes);
 		this.relay.setRelayPort(this.port);
 		this.relay.setApplicationEventPublisher(this.eventPublisher);
 		this.relay.setSystemHeartbeatReceiveInterval(0);
 		this.relay.setSystemHeartbeatSendInterval(0);
+		this.relay.setPreservePublishOrder(true);
 
 		this.relay.start();
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);

@@ -44,7 +44,9 @@ public interface ExecutorChannelInterceptor extends ChannelInterceptor {
 	 * @return the input message, or a new instance, or {@code null}
 	 */
 	@Nullable
-	Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler);
+	default Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler) {
+		return message;
+	}
 
 	/**
 	 * Invoked inside the {@link Runnable} submitted to the Executor after calling
@@ -57,6 +59,8 @@ public interface ExecutorChannelInterceptor extends ChannelInterceptor {
 	 * @param handler the target handler that handled the message
 	 * @param ex any exception that may been raised by the handler
 	 */
-	void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, @Nullable Exception ex);
+	default void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler,
+			@Nullable Exception ex) {
+	}
 
 }

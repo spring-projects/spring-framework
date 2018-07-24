@@ -898,6 +898,22 @@
                     ]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="preserve-publish-order" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Whether the client must receive messages in the order of publication.
+
+	By default messages sent to the clientOutboundChannel may
+	not be processed in the same order because the channel is backed by a
+	ThreadPoolExecutor that in turn does not guarantee processing in order.
+
+	When this flag is set to true messages within the same session
+	will be sent to the clientOutboundChannel one at a time in
+	order to preserve the order of publication. Enable this only if needed
+	since there is some performance overhead to keep messages in order.
+                    ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="user-destination-prefix" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[

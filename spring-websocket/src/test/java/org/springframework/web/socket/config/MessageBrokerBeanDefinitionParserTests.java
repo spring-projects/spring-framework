@@ -208,18 +208,19 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals("my-selector", registry.getSelectorHeaderName());
 		assertNotNull(brokerMessageHandler.getTaskScheduler());
 		assertArrayEquals(new long[] {15000, 15000}, brokerMessageHandler.getHeartbeatValue());
+		assertTrue(brokerMessageHandler.isPreservePublishOrder());
 
 		List<Class<? extends MessageHandler>> subscriberTypes =
-				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
+				Arrays.asList(SimpAnnotationMethodMessageHandler.class,
 						UserDestinationMessageHandler.class, SimpleBrokerMessageHandler.class);
 		testChannel("clientInboundChannel", subscriberTypes, 2);
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Collections.singletonList(SubProtocolWebSocketHandler.class);
-		testChannel("clientOutboundChannel", subscriberTypes, 1);
+		testChannel("clientOutboundChannel", subscriberTypes, 2);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
-		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(
+		subscriberTypes = Arrays.asList(
 				SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
 		testChannel("brokerChannel", subscriberTypes, 1);
 		try {
@@ -278,6 +279,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(5000, messageBroker.getSystemHeartbeatReceiveInterval());
 		assertEquals(5000, messageBroker.getSystemHeartbeatSendInterval());
 		assertThat(messageBroker.getDestinationPrefixes(), Matchers.containsInAnyOrder("/topic","/queue"));
+		assertTrue(messageBroker.isPreservePublishOrder());
 
 		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(
 				SimpAnnotationMethodMessageHandler.class, UserDestinationMessageHandler.class,
@@ -286,7 +288,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Collections.singletonList(SubProtocolWebSocketHandler.class);
-		testChannel("clientOutboundChannel", subscriberTypes, 1);
+		testChannel("clientOutboundChannel", subscriberTypes, 2);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
 		subscriberTypes = Arrays.asList(StompBrokerRelayMessageHandler.class, UserDestinationMessageHandler.class);

@@ -157,7 +157,7 @@ public class MessageBrokerConfigurationTests {
 	public void clientOutboundChannelUsedBySimpleBroker() {
 		ApplicationContext context = loadConfig(SimpleBrokerConfig.class);
 
-		TestChannel channel = context.getBean("clientOutboundChannel", TestChannel.class);
+		TestChannel outboundChannel = context.getBean("clientOutboundChannel", TestChannel.class);
 		SimpleBrokerMessageHandler broker = context.getBean(SimpleBrokerMessageHandler.class);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
@@ -167,6 +167,7 @@ public class MessageBrokerConfigurationTests {
 		Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 
 		// subscribe
+		broker.handleMessage(createConnectMessage("sess1", new long[] {0,0}));
 		broker.handleMessage(message);
 
 		headers = StompHeaderAccessor.create(StompCommand.SEND);
@@ -177,7 +178,7 @@ public class MessageBrokerConfigurationTests {
 		// message
 		broker.handleMessage(message);
 
-		message = channel.messages.get(0);
+		message = outboundChannel.messages.get(1);
 		headers = StompHeaderAccessor.wrap(message);
 
 		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
@@ -192,7 +193,7 @@ public class MessageBrokerConfigurationTests {
 		AbstractSubscribableChannel channel = context.getBean(
 				"clientOutboundChannel", AbstractSubscribableChannel.class);
 
-		assertEquals(3, channel.getInterceptors().size());
+		assertEquals(4, channel.getInterceptors().size());
 
 		ThreadPoolTaskExecutor taskExecutor = context.getBean(
 				"clientOutboundChannelExecutor", ThreadPoolTaskExecutor.class);
@@ -200,6 +201,10 @@ public class MessageBrokerConfigurationTests {
 		assertEquals(21, taskExecutor.getCorePoolSize());
 		assertEquals(22, taskExecutor.getMaxPoolSize());
 		assertEquals(23, taskExecutor.getKeepAliveSeconds());
+
+		SimpleBrokerMessageHandler broker =
+				context.getBean("simpleBrokerMessageHandler", SimpleBrokerMessageHandler.class);
+		assertTrue(broker.isPreservePublishOrder());
 	}
 
 	@Test
@@ -479,6 +484,7 @@ public class MessageBrokerConfigurationTests {
 		TestChannel outChannel = context.getBean("clientOutboundChannel", TestChannel.class);
 		MessageChannel brokerChannel = context.getBean("brokerChannel", MessageChannel.class);
 
+		inChannel.send(createConnectMessage("sess1", new long[] {0,0}));
 
 		// 1. Subscribe to user destination
 
@@ -497,13 +503,14 @@ public class MessageBrokerConfigurationTests {
 		message = MessageBuilder.createMessage("123".getBytes(), headers.getMessageHeaders());
 		inChannel.send(message);
 
-		assertEquals(1, outChannel.messages.size());
-		Message<?> outputMessage = outChannel.messages.remove(0);
+		assertEquals(2, outChannel.messages.size());
+		Message<?> outputMessage = outChannel.messages.remove(1);
 		headers = StompHeaderAccessor.wrap(outputMessage);
 
 		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
 		assertEquals(expectLeadingSlash ? "/queue.q1-usersess1" : "queue.q1-usersess1", headers.getDestination());
 		assertEquals("123", new String((byte[]) outputMessage.getPayload()));
+		outChannel.messages.clear();
 
 
 		// 3. Send message via broker channel
@@ -525,6 +532,13 @@ public class MessageBrokerConfigurationTests {
 
 	private AnnotationConfigApplicationContext loadConfig(Class<?> configClass) {
 		return new AnnotationConfigApplicationContext(configClass);
+	}
+
+	private Message<String> createConnectMessage(String sessionId, long[] heartbeat) {
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT);
+		accessor.setSessionId(sessionId);
+		accessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, heartbeat);
+		return MessageBuilder.createMessage("", accessor.getMessageHeaders());
 	}
 
 
@@ -635,6 +649,7 @@ public class MessageBrokerConfigurationTests {
 					.corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
 			registry.setPathMatcher(new AntPathMatcher(".")).enableSimpleBroker("/topic", "/queue");
 			registry.setCacheLimit(8192);
+			registry.setPreservePublishOrder(true);
 		}
 	}
 

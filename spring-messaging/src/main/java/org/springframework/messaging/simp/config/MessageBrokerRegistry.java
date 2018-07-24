@@ -54,6 +54,8 @@ public class MessageBrokerRegistry {
 	@Nullable
 	private String userDestinationPrefix;
 
+	private boolean preservePublishOrder;
+
 	@Nullable
 	private PathMatcher pathMatcher;
 
@@ -161,6 +163,30 @@ public class MessageBrokerRegistry {
 	}
 
 	/**
+	 * Whether the client must receive messages in the order of publication.
+	 * <p>By default messages sent to the {@code "clientOutboundChannel"} may
+	 * not be processed in the same order because the channel is backed by a
+	 * ThreadPoolExecutor that in turn does not guarantee processing in order.
+	 * <p>When this flag is set to {@code true} messages within the same session
+	 * will be sent to the {@code "clientOutboundChannel"} one at a time in
+	 * order to preserve the order of publication. Enable this only if needed
+	 * since there is some performance overhead to keep messages in order.
+	 * @param preservePublishOrder whether to publish in order
+	 * @since 5.1
+	 */
+	public void setPreservePublishOrder(boolean preservePublishOrder) {
+		this.preservePublishOrder = preservePublishOrder;
+	}
+
+	/**
+	 * Whether to ensure messages are received in the order of publication.
+	 * @since 5.1
+	 */
+	protected boolean isPreservePublishOrder() {
+		return this.preservePublishOrder;
+	}
+
+	/**
 	 * Configure the PathMatcher to use to match the destinations of incoming
 	 * messages to {@code @MessageMapping} and {@code @SubscribeMapping} methods.
 	 * <p>By default {@link org.springframework.util.AntPathMatcher} is configured.
@@ -209,6 +235,7 @@ public class MessageBrokerRegistry {
 			SimpleBrokerMessageHandler handler = this.simpleBrokerRegistration.getMessageHandler(brokerChannel);
 			handler.setPathMatcher(this.pathMatcher);
 			handler.setCacheLimit(this.cacheLimit);
+			handler.setPreservePublishOrder(this.preservePublishOrder);
 			return handler;
 		}
 		return null;
@@ -217,7 +244,9 @@ public class MessageBrokerRegistry {
 	@Nullable
 	protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
 		if (this.brokerRelayRegistration != null) {
-			return this.brokerRelayRegistration.getMessageHandler(brokerChannel);
+			StompBrokerRelayMessageHandler relay = this.brokerRelayRegistration.getMessageHandler(brokerChannel);
+			relay.setPreservePublishOrder(this.preservePublishOrder);
+			return relay;
 		}
 		return null;
 	}

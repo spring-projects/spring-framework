@@ -578,6 +578,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		private final StompHeaderAccessor connectHeaders;
 
+		private final MessageChannel outboundChannel;
+
 		@Nullable
 		private volatile TcpConnection<byte[]> tcpConnection;
 
@@ -594,6 +596,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			this.sessionId = sessionId;
 			this.connectHeaders = connectHeaders;
 			this.isRemoteClientSession = isClientSession;
+			this.outboundChannel = getClientOutboundChannelForSession(sessionId);
 		}
 
 		public String getSessionId() {
@@ -660,6 +663,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					accessor.setUser(user);
 				}
 				accessor.setMessage(errorText);
+				accessor.setLeaveMutable(true);
 				Message<?> errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 				handleInboundMessage(errorMessage);
 			}
@@ -667,11 +671,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		protected void handleInboundMessage(Message<?> message) {
 			if (this.isRemoteClientSession) {
-				MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, null);
-				if (accessor != null) {
-					accessor.setImmutable();
-				}
-				StompBrokerRelayMessageHandler.this.getClientOutboundChannel().send(message);
+				this.outboundChannel.send(message);
 			}
 		}
 
