@@ -1229,7 +1229,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (descriptor.isStreamAccess()) {
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type,
-					new MultiElementDescriptor(descriptor));
+					new MultiElementDescriptor(descriptor, false));
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
@@ -1247,7 +1247,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType,
-					new MultiElementDescriptor(descriptor));
+					new MultiElementDescriptor(descriptor, true));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1267,7 +1267,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, elementType,
-					new MultiElementDescriptor(descriptor));
+					new MultiElementDescriptor(descriptor, true));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1292,7 +1292,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType,
-					new MultiElementDescriptor(descriptor));
+					new MultiElementDescriptor(descriptor, true));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1716,10 +1716,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * A dependency descriptor marker for multiple elements.
 	 */
-	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
+	private static class MultiElementDescriptor extends DependencyDescriptor {
 
-		public MultiElementDescriptor(DependencyDescriptor original) {
+		public MultiElementDescriptor(DependencyDescriptor original, boolean nested) {
 			super(original);
+			if (nested) {
+				increaseNestingLevel();
+			}
 		}
 	}
 

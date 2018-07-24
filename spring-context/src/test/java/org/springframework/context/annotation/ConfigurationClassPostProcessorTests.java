@@ -802,6 +802,23 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void testVarargOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class, TestBean.class);
+		VarargConfiguration bean = ctx.getBean(VarargConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(1, bean.testBeans.length);
+		assertSame(ctx.getBean(TestBean.class), bean.testBeans[0]);
+	}
+
+	@Test
+	public void testEmptyVarargOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class);
+		VarargConfiguration bean = ctx.getBean(VarargConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(0, bean.testBeans.length);
+	}
+
+	@Test
 	public void testCollectionArgumentOnBeanMethod() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class, TestBean.class);
 		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
@@ -1603,6 +1620,18 @@ public class ConfigurationClassPostProcessorTests {
 		@Override
 		public void run() {
 			/* no-op */
+		}
+	}
+
+	@Configuration
+	static class VarargConfiguration {
+
+		TestBean[] testBeans;
+
+		@Bean(autowireCandidate = false)
+		public TestBean thing(TestBean... testBeans) {
+			this.testBeans = testBeans;
+			return new TestBean();
 		}
 	}
 

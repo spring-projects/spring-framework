@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.ConstructorProperties;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -824,9 +825,12 @@ class ConstructorResolver {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			if (fallback) {
-				// Single constructor or factory method -> let's return an
-				// empty collection for a non-null collection parameter.
-				if (CollectionFactory.isApproximableCollectionType(paramType)) {
+				// Single constructor or factory method -> let's return an empty array/collection
+				// for e.g. a vararg or a non-null List/Set/Map parameter.
+				if (paramType.isArray()) {
+					return Array.newInstance(paramType.getComponentType(), 0);
+				}
+				else if (CollectionFactory.isApproximableCollectionType(paramType)) {
 					return CollectionFactory.createCollection(paramType, 0);
 				}
 				else if (CollectionFactory.isApproximableMapType(paramType)) {
