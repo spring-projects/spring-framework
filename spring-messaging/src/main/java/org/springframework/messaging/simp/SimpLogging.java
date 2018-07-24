@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.util.log.LogUtils;
+import org.springframework.core.log.LogDelegateFactory;
 
 /**
  * Holds the shared logger named "org.springframework.web.SimpLogging" to use
@@ -35,6 +36,7 @@ import org.springframework.util.log.LogUtils;
  *
  * @author Rossen Stoyanchev
  * @since 5.1
+ * @see LogDelegateFactory
  */
 public abstract class SimpLogging {
 
@@ -62,7 +64,7 @@ public abstract class SimpLogging {
 	 * @return the resulting composite logger
 	 */
 	public static Log forLog(Log primaryLogger) {
-		return LogUtils.getCompositeLog(primaryLogger, fallbackLogger);
+		return LogDelegateFactory.getCompositeLog(primaryLogger, fallbackLogger);
 	}
 
 }

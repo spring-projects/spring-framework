@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.util.log;
+
+package org.springframework.core.log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,13 +24,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Utilities to assist with logging. Mainly for internal use within the framework
- * with Appache Commons Logging.
+ * Factory for common {@link Log} delegates with Spring's logging conventions.
+ *
+ * <p>Mainly for internal use within the framework with Apache Commons Logging,
+ * typically in the form of the {@code spring-jcl} bridge but also compatible
+ * with other Commons Logging bridges.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.1
+ * @see org.apache.commons.logging.LogFactory
  */
-public abstract class LogUtils {
+public final class LogDelegateFactory {
+
+	private LogDelegateFactory() {
+	}
+
 
 	/**
 	 * Create a composite logger that delegates to a primary or falls back on a

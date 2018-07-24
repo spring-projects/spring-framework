@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.util.log;
+
+package org.springframework.core.log;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -22,16 +23,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.NoOpLog;
 
 /**
- * Implementation of {@link Log} that wraps a list of loggers and delegates to
- * the first one for which logging is enabled at the given level.
+ * Implementation of {@link Log} that wraps a list of loggers and delegates
+ * to the first one for which logging is enabled at the given level.
  *
  * @author Rossen Stoyanchev
  * @since 5.1
- * @see LogUtils#getCompositeLog
+ * @see LogDelegateFactory#getCompositeLog
  */
-class CompositeLog implements Log {
+final class CompositeLog implements Log {
 
-	private static final Log noOpLog = new NoOpLog();
+	private static final Log NO_OP_LOG = new NoOpLog();
 
 
 	private final Log fatalLogger;
@@ -62,38 +63,38 @@ class CompositeLog implements Log {
 	}
 
 	private static Log initLogger(List<Log> loggers, Predicate<Log> predicate) {
-		return loggers.stream().filter(predicate).findFirst().orElse(noOpLog);
+		return loggers.stream().filter(predicate).findFirst().orElse(NO_OP_LOG);
 	}
 
 
 	@Override
 	public boolean isFatalEnabled() {
-		return this.fatalLogger != noOpLog;
+		return this.fatalLogger != NO_OP_LOG;
 	}
 
 	@Override
 	public boolean isErrorEnabled() {
-		return this.errorLogger != noOpLog;
+		return this.errorLogger != NO_OP_LOG;
 	}
 
 	@Override
 	public boolean isWarnEnabled() {
-		return this.warnLogger != noOpLog;
+		return this.warnLogger != NO_OP_LOG;
 	}
 
 	@Override
 	public boolean isInfoEnabled() {
-		return this.infoLogger != noOpLog;
+		return this.infoLogger != NO_OP_LOG;
 	}
 
 	@Override
 	public boolean isDebugEnabled() {
-		return this.debugLogger != noOpLog;
+		return this.debugLogger != NO_OP_LOG;
 	}
 
 	@Override
 	public boolean isTraceEnabled() {
-		return this.traceLogger != noOpLog;
+		return this.traceLogger != NO_OP_LOG;
 	}
 
 	@Override
@@ -155,4 +156,5 @@ class CompositeLog implements Log {
 	public void trace(Object message, Throwable ex) {
 		this.traceLogger.trace(message, ex);
 	}
+
 }

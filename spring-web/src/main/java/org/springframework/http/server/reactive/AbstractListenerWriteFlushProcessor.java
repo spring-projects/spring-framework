@@ -25,9 +25,9 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.log.LogUtils;
 
 /**
  * An alternative to {@link AbstractListenerWriteProcessor} but instead writing
@@ -44,12 +44,12 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	/**
 	 * Special logger for debugging Reactive Streams signals.
-	 * @see LogUtils#getHiddenLog(Class)
+	 * @see LogDelegateFactory#getHiddenLog(Class)
 	 * @see AbstractListenerReadPublisher#rsReadLogger
 	 * @see AbstractListenerWriteProcessor#rsWriteLogger
 	 * @see WriteResultPublisher#rsWriteResultLogger
 	 */
-	protected static final Log rsWriteFlushLogger = LogUtils.getHiddenLog(AbstractListenerWriteFlushProcessor.class);
+	protected static final Log rsWriteFlushLogger = LogDelegateFactory.getHiddenLog(AbstractListenerWriteFlushProcessor.class);
 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);

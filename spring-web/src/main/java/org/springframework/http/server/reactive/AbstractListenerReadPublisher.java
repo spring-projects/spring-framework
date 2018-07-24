@@ -26,9 +26,9 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Operators;
 
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.log.LogUtils;
 
 /**
  * Abstract base class for {@code Publisher} implementations that bridge between
@@ -49,12 +49,12 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	/**
 	 * Special logger for debugging Reactive Streams signals.
-	 * @see LogUtils#getHiddenLog(Class)
+	 * @see LogDelegateFactory#getHiddenLog(Class)
 	 * @see AbstractListenerWriteProcessor#rsWriteLogger
 	 * @see AbstractListenerWriteFlushProcessor#rsWriteFlushLogger
 	 * @see WriteResultPublisher#rsWriteResultLogger
 	 */
-	protected static Log rsReadLogger = LogUtils.getHiddenLog(AbstractListenerReadPublisher.class);
+	protected static Log rsReadLogger = LogDelegateFactory.getHiddenLog(AbstractListenerReadPublisher.class);
 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
