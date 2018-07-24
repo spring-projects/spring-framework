@@ -39,6 +39,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * where "Forwarded" and "X-Forwarded-*" headers are eliminated, and not used.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
  */
@@ -71,7 +72,6 @@ public class ForwardedHeaderFilter implements WebFilter {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-
 		ServerHttpRequest request = exchange.getRequest();
 		if (!hasForwardedHeaders(request)) {
 			return chain.filter(exchange);
@@ -117,8 +117,8 @@ public class ForwardedHeaderFilter implements WebFilter {
 			int endIndex = prefix.length();
 			while (endIndex > 1 && prefix.charAt(endIndex - 1) == '/') {
 				endIndex--;
-			};
-			prefix = endIndex != prefix.length() ? prefix.substring(0, endIndex) : prefix;
+			}
+			prefix = (endIndex != prefix.length() ? prefix.substring(0, endIndex) : prefix);
 		}
 		return prefix;
 	}
