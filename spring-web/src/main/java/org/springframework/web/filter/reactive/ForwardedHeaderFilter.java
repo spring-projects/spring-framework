@@ -44,7 +44,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class ForwardedHeaderFilter implements WebFilter {
 
-	private static final Set<String> FORWARDED_HEADER_NAMES = new LinkedHashSet<>(5);
+	static final Set<String> FORWARDED_HEADER_NAMES = new LinkedHashSet<>(5);
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
@@ -72,54 +72,58 @@ public class ForwardedHeaderFilter implements WebFilter {
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-		if (shouldNotFilter(exchange.getRequest())) {
+		ServerHttpRequest request = exchange.getRequest();
+		if (!hasForwardedHeaders(request)) {
 			return chain.filter(exchange);
 		}
 
 		ServerWebExchange mutatedExchange;
-
 		if (this.removeOnly) {
-			mutatedExchange = exchange.mutate().request(builder ->
-					builder.headers(headers -> {
-						FORWARDED_HEADER_NAMES.forEach(headers::remove);
-					}))
-					.build();
+			mutatedExchange = exchange.mutate().request(this::removeForwardedHeaders).build();
 		}
 		else {
-			URI uri = UriComponentsBuilder.fromHttpRequest(exchange.getRequest()).build().toUri();
-			String prefix = getForwardedPrefix(exchange.getRequest().getHeaders());
-
-			mutatedExchange = exchange.mutate().request(builder -> {
-				builder.uri(uri);
-				if (prefix != null) {
-					builder.path(prefix + uri.getPath());
-					builder.contextPath(prefix);
-				}
-			}).build();
+			mutatedExchange = exchange.mutate()
+					.request(builder -> {
+						URI uri = UriComponentsBuilder.fromHttpRequest(request).build().toUri();
+						builder.uri(uri);
+						String prefix = getForwardedPrefix(request);
+						if (prefix != null) {
+							builder.path(prefix + uri.getPath());
+							builder.contextPath(prefix);
+						}
+					})
+					.build();
 		}
 
 		return chain.filter(mutatedExchange);
 	}
 
-	private boolean shouldNotFilter(ServerHttpRequest request) {
+	private boolean hasForwardedHeaders(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
 		for (String headerName : FORWARDED_HEADER_NAMES) {
 			if (headers.containsKey(headerName)) {
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	@Nullable
-	private static String getForwardedPrefix(HttpHeaders headers) {
+	private static String getForwardedPrefix(ServerHttpRequest request) {
+		HttpHeaders headers = request.getHeaders();
 		String prefix = headers.getFirst("X-Forwarded-Prefix");
 		if (prefix != null) {
-			while (prefix.endsWith("/")) {
-				prefix = prefix.substring(0, prefix.length() - 1);
-			}
+			int endIndex = prefix.length();
+			while (endIndex > 1 && prefix.charAt(endIndex - 1) == '/') {
+				endIndex--;
+			};
+			prefix = endIndex != prefix.length() ? prefix.substring(0, endIndex) : prefix;
 		}
 		return prefix;
+	}
+
+	private ServerHttpRequest.Builder removeForwardedHeaders(ServerHttpRequest.Builder builder) {
+		return builder.headers(map -> FORWARDED_HEADER_NAMES.forEach(map::remove));
 	}
 
 }
