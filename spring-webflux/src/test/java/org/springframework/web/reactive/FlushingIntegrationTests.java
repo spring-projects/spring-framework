@@ -36,6 +36,7 @@ import static org.junit.Assert.*;
 
 /**
  * Integration tests for server response flushing behavior.
+ *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -160,4 +161,5 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 			return response.bufferFactory().wrap(bytes);
 		}
 	}
+
 }

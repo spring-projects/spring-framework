@@ -38,11 +38,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests with server-side {@link WebSocketHandler}s.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
@@ -191,6 +191,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			return session.send(Mono.just(message));
 		}
 	}
+
 
 	private static class SessionClosingHandler implements WebSocketHandler {
 
