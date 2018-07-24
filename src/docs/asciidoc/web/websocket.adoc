@@ -1296,18 +1296,53 @@ See <<websocket-stomp-handle-send>>.
 [[websocket-stomp-subscribe-mapping]]
 ==== `@SubscribeMapping`
 
-`@SubscribeMapping` is similar to `@MessageMapping` but also narrows the mapping to
-subscription messages only. Methods with `@SubscribeMapping` support the same
-<<websocket-stomp-message-mapping,method arguments>> as `@MessageMapping` methods do.
-The main difference is that for the return value, in the absence of `@SendTo` and
-`@SendToUser`, a message is sent directly as a reply to the subscription, via the
-"clientOutboundChannel" channel. Effectively in this case the subscription is used as
-a one-time, request-reply message exchange with the subscription never stored.
-This is useful for loading data on startup and for initializing a front-end UI.
+`@SubscribeMapping` is similar to `@MessageMapping` but narrows the mapping to
+subscription messages only. It supports the same
+<<websocket-stomp-message-mapping,method arguments>> as `@MessageMapping` does. However
+for the return value, by default a message is sent directly to the client via
+"clientOutboundChannel" in response to the subscription, and not to the broker via
+"brokerChannel" as a broadcast to matching subscriptions. Adding `@SendTo` or
+`@SendToUser` overrides this behavior and sends to the broker instead.
 
-If an `@SubscribeMapping` method is annotated with `@SendTo` and `@SendToUser` the return
-value is sent to the `"brokerChannel"` as usual, sending a message subscribers of the
-specified destination(s).
+When is this useful? Let's assume the broker is mapped to "/topic" and "/queue" while
+application controllers are mapped to "/app". In this setup, the broker *stores* all
+subscriptions to "/topic" and "/queue" that are intended for *repeated* broadcasts, and
+there is no need for the application to get involved. A client could also also subscribe to
+some "/app" destination and a controller could return a value in response to that
+subscription without involving the broker, effectively a *one-off*, *request-reply* exchange,
+without storing or using the subscription again. One case for this is populating a UI
+with initial data on startup.
+
+When is this not useful? Do not try to map broker and controllers to the same destination
+prefix unless you want both to process messages, including subscriptions, independently
+for some reason. Inbound messages are handled in parallel. There are no guarantees whether
+broker or controller will process a given message first. If the goal is to be notified
+when a subscription is stored and ready for broadcasts, then a client should ask for a
+receipt if the server supports it (simple broker does not). For example with the Java
+<<websocket-stomp-client>>:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Autowired
+	private TaskScheduler messageBrokerTaskScheduler;
+
+	// During initialization..
+	stompClient.setTaskScheduler(this.messageBrokerTaskScheduler);
+
+	// When subscribing..
+	StompHeaders headers = new StompHeaders();
+	headers.setDestination("/topic/...");
+	headers.setReceipt("r1");
+	FrameHandler handler = ...;
+	stompSession.subscribe(headers, handler).addReceiptTask(() -> {
+		// Subscription ready...
+	});
+----
+
+A server side option is <<websocket-stomp-interceptors,to register>> an
+`ExecutorChannelInterceptor` on the `brokerChannel` and implement the `afterMessageHandled`
+method that is invoked after messages, including subscriptions, have been handled.
 
 
 [[websocket-stomp-exception-handler]]
@@ -1968,9 +2003,8 @@ Note that this incurs a small performance overhead, so enable it only if require
 
 
 
-
 [[websocket-stomp-appplication-context-events]]
-=== Events and Interception
+=== Events
 
 Several `ApplicationContext` events (listed below) are published and can be
 received by implementing Spring's `ApplicationListener` interface.
@@ -2010,10 +2044,15 @@ will typically notice the broker is not responding within 10 seconds. Clients ne
 implement their own reconnect logic.
 ====
 
-The above events reflect points in the lifecycle of a STOMP connection. They're not meant
-to provide notification for every message sent from the client. Instead an application
-can register a `ChannelInterceptor` to intercept every incoming and outgoing STOMP message.
-For example to intercept inbound messages:
+
+
+[[websocket-stomp-interceptors]]
+=== Interception
+
+<<websocket-stomp-appplication-context-events>> provide notifications for the lifecycle
+of a STOMP connection and not for every client message. Applications can also register a
+`ChannelInterceptor` to intercept any message, and in any part of the processing chain.
+For example to intercept inbound messages from clients:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2035,7 +2074,7 @@ to access information about the message.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class MyChannelInterceptor extends ChannelInterceptorAdapter {
+	public class MyChannelInterceptor implements ChannelInterceptor {
 
 		@Override
 		public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -2046,6 +2085,12 @@ to access information about the message.
 		}
 	}
 ----
+
+Applications may also implement `ExecutorChannelInterceptor` which is a sub-interface
+of `ChannelInterceptor` with callbacks in the thread in which the messages are handled.
+While a `ChannelInterceptor` is invoked once for per message sent to a channel, the
+`ExecutorChannelInterceptor` provides hooks in the thread of each `MessageHandler`
+subscribed to messages from the channel.
 
 Note that just like with the `SesionDisconnectEvent` above, a DISCONNECT message
 may have been sent from the client, or it may also be automatically generated when
