@@ -144,7 +144,12 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		else {
 			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
 			if (emitter == null) {
-				// Not streaming..
+				// Not streaming: write headers without committing response..
+				outputMessage.getHeaders().forEach((headerName, headerValues) -> {
+					for (String headerValue : headerValues) {
+						response.addHeader(headerName, headerValue);
+					}
+				});
 				return;
 			}
 		}

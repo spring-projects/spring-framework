@@ -43,17 +43,10 @@ import org.springframework.web.context.request.async.StandardServletAsyncWebRequ
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.web.method.ResolvableMethod.*;
 
 /**
  * Unit tests for ResponseBodyEmitterReturnValueHandler.
@@ -291,6 +284,21 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertEquals("foobarbaz", this.response.getContentAsString());
 	}
 
+	@Test // SPR-17076
+	public void responseEntityFluxWithCustomHeader() throws Exception {
+
+		EmitterProcessor<SimpleBean> processor = EmitterProcessor.create();
+		ResponseEntity<Flux<SimpleBean>> entity = ResponseEntity.ok().header("x-foo", "bar").body(processor);
+		ResolvableType bodyType = forClassWithGenerics(Flux.class, SimpleBean.class);
+		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);
+		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);
+
+		assertTrue(this.request.isAsyncStarted());
+		assertEquals(200, this.response.getStatus());
+		assertEquals("bar", this.response.getHeader("x-foo"));
+		assertFalse(this.response.isCommitted());
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class TestController {
@@ -313,6 +321,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		private ResponseEntity<Flux<String>> h9() { return null; }
 
+		private ResponseEntity<Flux<SimpleBean>> h10() { return null; }
 	}
 
 
