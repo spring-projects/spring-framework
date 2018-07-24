@@ -214,59 +214,58 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
-
-		List<MediaType> mediaTypesToUse;
-
+		MediaType selectedMediaType = null;
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		if (contentType != null && contentType.isConcrete()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found 'Content-Type:" + contentType + "' in response");
 			}
-			mediaTypesToUse = Collections.singletonList(contentType);
+			selectedMediaType = contentType;
 		}
 		else {
 			HttpServletRequest request = inputMessage.getServletRequest();
-			List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(request);
-			List<MediaType> producibleMediaTypes = getProducibleMediaTypes(request, valueType, targetType);
+			List<MediaType> acceptableTypes = getAcceptableMediaTypes(request);
+			List<MediaType> producibleTypes = getProducibleMediaTypes(request, valueType, targetType);
 
-			if (body != null && producibleMediaTypes.isEmpty()) {
+			if (body != null && producibleTypes.isEmpty()) {
 				throw new HttpMessageNotWritableException(
 						"No converter found for return value of type: " + valueType);
 			}
-			mediaTypesToUse = new ArrayList<>();
-			for (MediaType requestedType : requestedMediaTypes) {
-				for (MediaType producibleType : producibleMediaTypes) {
+			List<MediaType> mediaTypesToUse = new ArrayList<>();
+			for (MediaType requestedType : acceptableTypes) {
+				for (MediaType producibleType : producibleTypes) {
 					if (requestedType.isCompatibleWith(producibleType)) {
 						mediaTypesToUse.add(getMostSpecificMediaType(requestedType, producibleType));
 					}
 				}
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("No match for " + requestedMediaTypes + ", supported: " + producibleMediaTypes);
-			}
 			if (mediaTypesToUse.isEmpty()) {
 				if (body != null) {
-					throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
+					throw new HttpMediaTypeNotAcceptableException(producibleTypes);
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("No match for " + acceptableTypes + ", supported: " + producibleTypes);
 				}
 				return;
 			}
+
 			MediaType.sortBySpecificityAndQuality(mediaTypesToUse);
-		}
 
-		MediaType selectedMediaType = null;
-		for (MediaType mediaType : mediaTypesToUse) {
-			if (mediaType.isConcrete()) {
-				selectedMediaType = mediaType;
-				break;
+			for (MediaType mediaType : mediaTypesToUse) {
+				if (mediaType.isConcrete()) {
+					selectedMediaType = mediaType;
+					break;
+				}
+				else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION)) {
+					selectedMediaType = MediaType.APPLICATION_OCTET_STREAM;
+					break;
+				}
 			}
-			else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION)) {
-				selectedMediaType = MediaType.APPLICATION_OCTET_STREAM;
-				break;
-			}
-		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Using '" + selectedMediaType + "' given " + mediaTypesToUse);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using '" + selectedMediaType + "', given " +
+						acceptableTypes + " and supported " + producibleTypes);
+			}
 		}
 
 		if (selectedMediaType != null) {

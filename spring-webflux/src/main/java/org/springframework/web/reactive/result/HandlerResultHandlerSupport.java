@@ -143,28 +143,30 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 		List<MediaType> result = new ArrayList<>(compatibleMediaTypes);
 		MediaType.sortBySpecificityAndQuality(result);
 
+		MediaType selected = null;
 		for (MediaType mediaType : result) {
 			if (mediaType.isConcrete()) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(exchange.getLogPrefix() + "Using '" + mediaType + "' given " + acceptableTypes);
-				}
-				return mediaType;
+				selected = mediaType;
+				break;
 			}
 			else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION_ALL)) {
-				mediaType = MediaType.APPLICATION_OCTET_STREAM;
-				if (logger.isDebugEnabled()) {
-					logger.debug(exchange.getLogPrefix() + "Using '" + mediaType + "' given " + acceptableTypes);
-				}
-				return mediaType;
+				selected = MediaType.APPLICATION_OCTET_STREAM;
+				break;
 			}
 		}
 
-		if (logger.isDebugEnabled()) {
+		if (selected != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using '" + selected + "' given " +
+						acceptableTypes + " and supported " + producibleTypes);
+			}
+		}
+		else if (logger.isDebugEnabled()) {
 			logger.debug(exchange.getLogPrefix() +
 					"No match for " + acceptableTypes + ", supported: " + producibleTypes);
 		}
 
-		return null;
+		return selected;
 	}
 
 	private List<MediaType> getAcceptableTypes(ServerWebExchange exchange) {
