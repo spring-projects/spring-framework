@@ -47,6 +47,8 @@ import org.springframework.util.Assert;
  */
 public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicationListener {
 
+	private int order = Ordered.LOWEST_PRECEDENCE;
+
 	/* Primary lookup that holds all users and their sessions */
 	private final Map<String, LocalSimpUser> users = new ConcurrentHashMap<>();
 
@@ -56,9 +58,13 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	private final Object sessionLock = new Object();
 
 
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
 	@Override
 	public int getOrder() {
-		return Ordered.LOWEST_PRECEDENCE;
+		return this.order;
 	}
 
 
