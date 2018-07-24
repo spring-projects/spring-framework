@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for SimpleBrokerMessageHandler.
+ * Unit tests for {@link SimpleBrokerMessageHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -141,7 +141,6 @@ public class SimpleBrokerMessageHandlerTests {
 
 	@Test
 	public void connect() {
-
 		String id = "sess1";
 
 		Message<String> connectMessage = startSession(id);
@@ -157,9 +156,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 	@Test
 	public void heartbeatValueWithAndWithoutTaskScheduler() {
-
 		assertNull(this.messageHandler.getHeartbeatValue());
-
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 
 		assertNotNull(this.messageHandler.getHeartbeatValue());
@@ -175,7 +172,6 @@ public class SimpleBrokerMessageHandlerTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void startAndStopWithHeartbeatValue() {
-
 		ScheduledFuture future = mock(ScheduledFuture.class);
 		when(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), eq(15000L))).thenReturn(future);
 
@@ -195,7 +191,6 @@ public class SimpleBrokerMessageHandlerTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void startWithOneZeroHeartbeatValue() {
-
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 		this.messageHandler.setHeartbeatValue(new long[] {0, 10000});
 		this.messageHandler.start();
@@ -205,7 +200,6 @@ public class SimpleBrokerMessageHandlerTests {
 
 	@Test
 	public void readInactivity() throws Exception {
-
 		this.messageHandler.setHeartbeatValue(new long[] {0, 1});
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 		this.messageHandler.start();
@@ -237,7 +231,6 @@ public class SimpleBrokerMessageHandlerTests {
 
 	@Test
 	public void writeInactivity() throws Exception {
-
 		this.messageHandler.setHeartbeatValue(new long[] {1, 0});
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 		this.messageHandler.start();
@@ -269,7 +262,6 @@ public class SimpleBrokerMessageHandlerTests {
 
 	@Test
 	public void readWriteIntervalCalculation() throws Exception {
-
 		this.messageHandler.setHeartbeatValue(new long[] {1, 1});
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 		this.messageHandler.start();
@@ -293,6 +285,7 @@ public class SimpleBrokerMessageHandlerTests {
 		assertEquals(SimpMessageType.CONNECT_ACK,
 				messages.get(0).getHeaders().get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER));
 	}
+
 
 	private Message<String> startSession(String id) {
 		this.messageHandler.start();

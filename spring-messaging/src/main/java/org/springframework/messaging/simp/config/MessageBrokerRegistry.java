@@ -54,13 +54,13 @@ public class MessageBrokerRegistry {
 	@Nullable
 	private String userDestinationPrefix;
 
-	private boolean preservePublishOrder;
-
 	@Nullable
 	private PathMatcher pathMatcher;
 
 	@Nullable
 	private Integer cacheLimit;
+
+	private boolean preservePublishOrder;
 
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
