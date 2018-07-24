@@ -18,6 +18,7 @@ package org.springframework.http.converter.protobuf;
 
 import java.io.IOException;
 
+import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Before;
@@ -36,10 +37,14 @@ import static org.mockito.Mockito.*;
  * Test suite for {@link ProtobufJsonFormatHttpMessageConverter}.
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
+@SuppressWarnings("deprecation")
 public class ProtobufJsonFormatHttpMessageConverterTests {
 
 	private ProtobufHttpMessageConverter converter;
+
+	private ExtensionRegistry extensionRegistry;
 
 	private ExtensionRegistryInitializer registryInitializer;
 
@@ -49,6 +54,7 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 	@Before
 	public void setup() {
 		this.registryInitializer = mock(ExtensionRegistryInitializer.class);
+		this.extensionRegistry = mock(ExtensionRegistry.class);
 		this.converter = new ProtobufJsonFormatHttpMessageConverter(
 				JsonFormat.parser(), JsonFormat.printer(), this.registryInitializer);
 		this.testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
@@ -61,8 +67,15 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 	}
 
 	@Test
-	public void extensionRegistryNull() {
-		new ProtobufHttpMessageConverter(null);
+	public void extensionRegistryInitializerNull() {
+		ProtobufHttpMessageConverter converter = new ProtobufHttpMessageConverter((ExtensionRegistryInitializer)null);
+		assertNotNull(converter);
+	}
+
+	@Test
+	public void extensionRegistryInitializer() {
+		ProtobufHttpMessageConverter converter = new ProtobufHttpMessageConverter((ExtensionRegistry)null);
+		assertNotNull(converter);
 	}
 
 	@Test

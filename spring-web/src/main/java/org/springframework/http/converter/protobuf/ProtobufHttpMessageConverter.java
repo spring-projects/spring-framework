@@ -77,6 +77,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
  * @author Alex Antonov
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 4.1
  * @see FormatFactory
  * @see JsonFormat
@@ -107,7 +108,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
-	private final ExtensionRegistry extensionRegistry = ExtensionRegistry.newInstance();
+	final ExtensionRegistry extensionRegistry;
 
 	@Nullable
 	private final ProtobufFormatSupport protobufFormatSupport;
@@ -117,20 +118,34 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 * Construct a new {@code ProtobufHttpMessageConverter}.
 	 */
 	public ProtobufHttpMessageConverter() {
-		this(null);
+		this(null, null);
 	}
 
 	/**
 	 * Construct a new {@code ProtobufHttpMessageConverter} with an
 	 * initializer that allows the registration of message extensions.
 	 * @param registryInitializer an initializer for message extensions
+	 * @deprecated as of Spring Framework 5.1, use {@link #ProtobufHttpMessageConverter(ExtensionRegistry)} instead
 	 */
+	@Deprecated
 	public ProtobufHttpMessageConverter(@Nullable ExtensionRegistryInitializer registryInitializer) {
-		this(null, registryInitializer);
+		this(null, null);
+		if (registryInitializer != null) {
+			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
+		}
+	}
+
+	/**
+	 * Construct a new {@code ProtobufHttpMessageConverter} with a registry that specifies
+	 * protocol message extensions.
+	 * @param extensionRegistry the registry to populate
+	 */
+	public ProtobufHttpMessageConverter(ExtensionRegistry extensionRegistry) {
+		this(null, extensionRegistry);
 	}
 
 	ProtobufHttpMessageConverter(@Nullable ProtobufFormatSupport formatSupport,
-			@Nullable ExtensionRegistryInitializer registryInitializer) {
+			@Nullable ExtensionRegistry extensionRegistry) {
 
 		if (formatSupport != null) {
 			this.protobufFormatSupport = formatSupport;
@@ -148,9 +163,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		setSupportedMediaTypes(Arrays.asList(this.protobufFormatSupport != null ?
 				this.protobufFormatSupport.supportedMediaTypes() : new MediaType[] {PROTOBUF, TEXT_PLAIN}));
 
-		if (registryInitializer != null) {
-			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
-		}
+		this.extensionRegistry = (extensionRegistry == null ? ExtensionRegistry.newInstance() : extensionRegistry);
 	}
 
 

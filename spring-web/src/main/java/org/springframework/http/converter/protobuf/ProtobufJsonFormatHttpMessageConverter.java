@@ -16,6 +16,7 @@
 
 package org.springframework.http.converter.protobuf;
 
+import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.util.JsonFormat;
 
 import org.springframework.lang.Nullable;
@@ -32,6 +33,7 @@ import org.springframework.lang.Nullable;
  * with 3.3 or higher recommended.
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 5.0
  * @see JsonFormat#parser()
  * @see JsonFormat#printer()
@@ -44,7 +46,7 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 	 * {@link JsonFormat.Parser} and {@link JsonFormat.Printer} configuration.
 	 */
 	public ProtobufJsonFormatHttpMessageConverter() {
-		this(null,  null, null);
+		this(null,  null, (ExtensionRegistry)null);
 	}
 
 	/**
@@ -56,7 +58,22 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 	public ProtobufJsonFormatHttpMessageConverter(
 			@Nullable JsonFormat.Parser parser, @Nullable JsonFormat.Printer printer) {
 
-		this(parser, printer, null);
+		this(parser, printer, (ExtensionRegistry)null);
+	}
+
+	/**
+	 * Construct a new {@code ProtobufJsonFormatHttpMessageConverter} with the given
+	 * {@link JsonFormat.Parser} and {@link JsonFormat.Printer} configuration, also
+	 * accepting a registry that specifies protocol message extensions.
+	 * @param parser the JSON parser configuration
+	 * @param printer the JSON printer configuration
+	 * @param extensionRegistry the registry to populate
+	 * @since 5.1
+	 */
+	public ProtobufJsonFormatHttpMessageConverter(@Nullable JsonFormat.Parser parser,
+			@Nullable JsonFormat.Printer printer, @Nullable ExtensionRegistry extensionRegistry) {
+
+		super(new ProtobufJavaUtilSupport(parser, printer), extensionRegistry);
 	}
 
 	/**
@@ -66,11 +83,17 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 	 * @param parser the JSON parser configuration
 	 * @param printer the JSON printer configuration
 	 * @param registryInitializer an initializer for message extensions
+	 * @deprecated as of Spring Framework 5.1, use
+	 * {@link #ProtobufJsonFormatHttpMessageConverter(JsonFormat.Parser, JsonFormat.Printer, ExtensionRegistry)} instead
 	 */
+	@Deprecated
 	public ProtobufJsonFormatHttpMessageConverter(@Nullable JsonFormat.Parser parser,
 			@Nullable JsonFormat.Printer printer, @Nullable ExtensionRegistryInitializer registryInitializer) {
 
-		super(new ProtobufJavaUtilSupport(parser, printer), registryInitializer);
+		super(new ProtobufJavaUtilSupport(parser, printer), null);
+		if (registryInitializer != null) {
+			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
+		}
 	}
 
 }
