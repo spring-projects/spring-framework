@@ -91,6 +91,7 @@ public class ForwardedHeaderFilter implements WebFilter {
 							builder.path(prefix + uri.getPath());
 							builder.contextPath(prefix);
 						}
+						removeForwardedHeaders(builder);
 					})
 					.build();
 		}

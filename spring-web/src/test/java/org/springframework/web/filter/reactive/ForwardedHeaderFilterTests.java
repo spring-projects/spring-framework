@@ -74,6 +74,7 @@ public class ForwardedHeaderFilterTests {
 		this.filter.filter(getExchange(headers), this.filterChain).block(Duration.ZERO);
 
 		assertEquals(new URI("https://84.198.58.199/path"), this.filterChain.uri);
+		this.filterChain.assertForwardedHeadersRemoved();
 	}
 
 	@Test
@@ -83,6 +84,7 @@ public class ForwardedHeaderFilterTests {
 		this.filter.filter(getExchange(headers), this.filterChain).block(Duration.ZERO);
 
 		assertEquals(new URI("https://84.198.58.199/path"), this.filterChain.uri);
+		this.filterChain.assertForwardedHeadersRemoved();
 	}
 
 	@Test
@@ -93,6 +95,7 @@ public class ForwardedHeaderFilterTests {
 
 		assertEquals(new URI("http://example.com/prefix/path"), this.filterChain.uri);
 		assertEquals("/prefix/path", this.filterChain.requestPathValue);
+		this.filterChain.assertForwardedHeadersRemoved();
 	}
 
 	@Test
@@ -103,6 +106,7 @@ public class ForwardedHeaderFilterTests {
 
 		assertEquals(new URI("http://example.com/prefix/path"), this.filterChain.uri);
 		assertEquals("/prefix/path", this.filterChain.requestPathValue);
+		this.filterChain.assertForwardedHeadersRemoved();
 	}
 
 	private MockServerWebExchange getExchange(HttpHeaders headers) {
