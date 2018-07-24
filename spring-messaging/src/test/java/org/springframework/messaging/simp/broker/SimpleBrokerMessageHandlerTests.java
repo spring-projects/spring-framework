@@ -77,8 +77,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 
 	@Test
-	public void subcribePublish() {
-
+	public void subscribePublish() {
 		startSession("sess1");
 		startSession("sess2");
 
@@ -103,8 +102,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void subcribeDisconnectPublish() {
-
+	public void subscribeDisconnectPublish() {
 		String sess1 = "sess1";
 		String sess2 = "sess2";
 
@@ -308,9 +306,9 @@ public class SimpleBrokerMessageHandlerTests {
 		return connectMessage;
 	}
 
-	private Message<String> createSubscriptionMessage(String sessionId, String subcriptionId, String destination) {
+	private Message<String> createSubscriptionMessage(String sessionId, String subscriptionId, String destination) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.SUBSCRIBE);
-		headers.setSubscriptionId(subcriptionId);
+		headers.setSubscriptionId(subscriptionId);
 		headers.setDestination(destination);
 		headers.setSessionId(sessionId);
 		return MessageBuilder.createMessage("", headers.getMessageHeaders());
@@ -330,11 +328,11 @@ public class SimpleBrokerMessageHandlerTests {
 		return MessageBuilder.createMessage(payload, headers.getMessageHeaders());
 	}
 
-	private boolean messageCaptured(String sessionId, String subcriptionId, String destination) {
+	private boolean messageCaptured(String sessionId, String subscriptionId, String destination) {
 		for (Message<?> message : this.messageCaptor.getAllValues()) {
 			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 			if (sessionId.equals(headers.getSessionId())) {
-				if (subcriptionId.equals(headers.getSubscriptionId())) {
+				if (subscriptionId.equals(headers.getSubscriptionId())) {
 					if (destination.equals(headers.getDestination())) {
 						return true;
 					}

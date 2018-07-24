@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,13 @@ import org.springframework.messaging.MessageHandler;
  * asynchronous sending of a {@link org.springframework.messaging.Message} to
  * a specific subscriber through an {@link java.util.concurrent.Executor}.
  * Supported on {@link org.springframework.messaging.MessageChannel}
- * implementations that can be configured with an Executor.
+ * implementations that can be configured with an {@code Executor}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
+ * @see Message
+ * @see MessageChannel
+ * @see MessageHandler
  */
 public interface ExecutorChannelInterceptor extends ChannelInterceptor {
 

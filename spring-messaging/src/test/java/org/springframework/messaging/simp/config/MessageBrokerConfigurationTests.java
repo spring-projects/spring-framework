@@ -117,12 +117,10 @@ public class MessageBrokerConfigurationTests {
 
 		AbstractSubscribableChannel channel = context.getBean(
 				"clientInboundChannel", AbstractSubscribableChannel.class);
-
 		assertEquals(3, channel.getInterceptors().size());
 
 		CustomThreadPoolTaskExecutor taskExecutor = context.getBean(
 				"clientInboundChannelExecutor", CustomThreadPoolTaskExecutor.class);
-
 		assertEquals(11, taskExecutor.getCorePoolSize());
 		assertEquals(12, taskExecutor.getMaxPoolSize());
 		assertEquals(13, taskExecutor.getKeepAliveSeconds());
@@ -511,7 +509,6 @@ public class MessageBrokerConfigurationTests {
 		assertEquals(expectLeadingSlash ? "/queue.q1-usersess1" : "queue.q1-usersess1", headers.getDestination());
 		assertEquals("123", new String((byte[]) outputMessage.getPayload()));
 		outChannel.messages.clear();
-
 
 		// 3. Send message via broker channel
 

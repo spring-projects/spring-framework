@@ -210,8 +210,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertArrayEquals(new long[] {15000, 15000}, brokerMessageHandler.getHeartbeatValue());
 		assertTrue(brokerMessageHandler.isPreservePublishOrder());
 
-		List<Class<? extends MessageHandler>> subscriberTypes =
-				Arrays.asList(SimpAnnotationMethodMessageHandler.class,
+		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(SimpAnnotationMethodMessageHandler.class,
 						UserDestinationMessageHandler.class, SimpleBrokerMessageHandler.class);
 		testChannel("clientInboundChannel", subscriberTypes, 2);
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
@@ -220,8 +219,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testChannel("clientOutboundChannel", subscriberTypes, 2);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
-		subscriberTypes = Arrays.asList(
-				SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
+		subscriberTypes = Arrays.asList(SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
 		testChannel("brokerChannel", subscriberTypes, 1);
 		try {
 			this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class);
@@ -281,9 +279,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(messageBroker.getDestinationPrefixes(), Matchers.containsInAnyOrder("/topic","/queue"));
 		assertTrue(messageBroker.isPreservePublishOrder());
 
-		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(
-				SimpAnnotationMethodMessageHandler.class, UserDestinationMessageHandler.class,
-				StompBrokerRelayMessageHandler.class);
+		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(SimpAnnotationMethodMessageHandler.class,
+				UserDestinationMessageHandler.class, StompBrokerRelayMessageHandler.class);
 		testChannel("clientInboundChannel", subscriberTypes, 2);
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 
@@ -382,9 +379,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertSame(this.appContext.getBean("myValidator"), validator);
 		assertThat(validator, Matchers.instanceOf(TestValidator.class));
 
-		List<Class<? extends MessageHandler>> subscriberTypes =
-				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
-						UserDestinationMessageHandler.class, SimpleBrokerMessageHandler.class);
+		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(SimpAnnotationMethodMessageHandler.class,
+				UserDestinationMessageHandler.class, SimpleBrokerMessageHandler.class);
 
 		testChannel("clientInboundChannel", subscriberTypes, 3);
 		testExecutor("clientInboundChannel", 100, 200, 600);
@@ -394,16 +390,13 @@ public class MessageBrokerBeanDefinitionParserTests {
 		testChannel("clientOutboundChannel", subscriberTypes, 3);
 		testExecutor("clientOutboundChannel", 101, 201, 601);
 
-		subscriberTypes = Arrays.<Class<? extends MessageHandler>>asList(SimpleBrokerMessageHandler.class,
-				UserDestinationMessageHandler.class);
+		subscriberTypes = Arrays.asList(SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
 
 		testChannel("brokerChannel", subscriberTypes, 1);
 		testExecutor("brokerChannel", 102, 202, 602);
 	}
 
-	// SPR-11623
-
-	@Test
+	@Test  // SPR-11623
 	public void customChannelsWithDefaultExecutor() {
 		loadBeanDefinitions("websocket-config-broker-customchannels-default-executor.xml");
 

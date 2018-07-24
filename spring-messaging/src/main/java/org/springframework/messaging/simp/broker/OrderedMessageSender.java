@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.broker;
 
 import java.util.Queue;
@@ -21,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -31,8 +33,8 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Submit messages to an ExecutorSubscribableChannel, one at a time. The channel
- * must have been configured with {@link #configureOutboundChannel}.
+ * Submit messages to an {@link ExecutorSubscribableChannel}, one at a time.
+ * The channel must have been configured with {@link #configureOutboundChannel}.
  *
  * @author Rossen Stoyanchev
  * @since 5.1
@@ -69,7 +71,6 @@ class OrderedMessageSender implements MessageChannel {
 	}
 
 	private void trySend() {
-
 		// Take sendInProgress flag only if queue is not empty
 		if (this.messages.isEmpty()) {
 			return;
@@ -141,7 +142,9 @@ class OrderedMessageSender implements MessageChannel {
 	private static class CallbackInterceptor implements ExecutorChannelInterceptor {
 
 		@Override
-		public void afterMessageHandled(Message<?> msg, MessageChannel ch, MessageHandler handler, Exception ex) {
+		public void afterMessageHandled(
+				Message<?> msg, MessageChannel ch, MessageHandler handler, @Nullable Exception ex) {
+
 			Runnable task = (Runnable) msg.getHeaders().get(OrderedMessageSender.COMPLETION_TASK_HEADER);
 			if (task != null) {
 				task.run();
