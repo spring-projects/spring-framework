@@ -49,9 +49,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for {@link StompBrokerRelayMessageHandler} running against ActiveMQ.
@@ -79,7 +77,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
 		this.port = SocketUtils.findAvailableTcpPort(61613);
 		this.responseChannel = new ExecutorSubscribableChannel();
@@ -114,7 +112,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void stop() throws Exception {
 		try {
 			logger.debug("STOMP broker relay stats: " + this.relay.getStatsInfo());
 			this.relay.stop();
@@ -168,7 +166,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	@Test(expected = MessageDeliveryException.class)
 	public void messageDeliveryExceptionIfSystemSessionForwardFails() throws Exception {
-
 		logger.debug("Starting test messageDeliveryExceptionIfSystemSessionForwardFails()");
 
 		stopActiveMqBrokerAndAwait();
@@ -179,8 +176,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	@Test
-	public void brokerBecomingUnvailableTriggersErrorFrame() throws Exception {
-		logger.debug("Starting test brokerBecomingUnvailableTriggersErrorFrame()");
+	public void brokerBecomingUnavailableTriggersErrorFrame() throws Exception {
+		logger.debug("Starting test brokerBecomingUnavailableTriggersErrorFrame()");
 
 		String sess1 = "sess1";
 		MessageExchange connect = MessageExchangeBuilder.connect(sess1).build();
