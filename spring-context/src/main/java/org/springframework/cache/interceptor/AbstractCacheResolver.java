@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * invocation context.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public abstract class AbstractCacheResolver implements CacheResolver, InitializingBean {
@@ -83,18 +84,16 @@ public abstract class AbstractCacheResolver implements CacheResolver, Initializi
 		if (cacheNames == null) {
 			return Collections.emptyList();
 		}
-		else {
-			Collection<Cache> result = new ArrayList<>();
-			for (String cacheName : cacheNames) {
-				Cache cache = getCacheManager().getCache(cacheName);
-				if (cache == null) {
-					throw new IllegalArgumentException("Cannot find cache named '" +
-							cacheName + "' for " + context.getOperation());
-				}
-				result.add(cache);
+		Collection<Cache> result = new ArrayList<>(cacheNames.size());
+		for (String cacheName : cacheNames) {
+			Cache cache = getCacheManager().getCache(cacheName);
+			if (cache == null) {
+				throw new IllegalArgumentException("Cannot find cache named '" +
+						cacheName + "' for " + context.getOperation());
 			}
-			return result;
+			result.add(cache);
 		}
+		return result;
 	}
 
 	/**

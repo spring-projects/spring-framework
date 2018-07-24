@@ -586,16 +586,16 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	private class CacheOperationContexts {
 
-		private final MultiValueMap<Class<? extends CacheOperation>, CacheOperationContext> contexts =
-				new LinkedMultiValueMap<>();
+		private final MultiValueMap<Class<? extends CacheOperation>, CacheOperationContext> contexts;
 
 		private final boolean sync;
 
 		public CacheOperationContexts(Collection<? extends CacheOperation> operations, Method method,
 				Object[] args, Object target, Class<?> targetClass) {
 
-			for (CacheOperation operation : operations) {
-				this.contexts.add(operation.getClass(), getOperationContext(operation, method, args, target, targetClass));
+			this.contexts = new LinkedMultiValueMap<>(operations.size());
+			for (CacheOperation op : operations) {
+				this.contexts.add(op.getClass(), getOperationContext(op, method, args, target, targetClass));
 			}
 			this.sync = determineSyncFlag(method);
 		}
@@ -623,18 +623,22 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			}
 			if (syncEnabled) {
 				if (this.contexts.size() > 1) {
-					throw new IllegalStateException("@Cacheable(sync=true) cannot be combined with other cache operations on '" + method + "'");
+					throw new IllegalStateException(
+							"@Cacheable(sync=true) cannot be combined with other cache operations on '" + method + "'");
 				}
 				if (cacheOperationContexts.size() > 1) {
-					throw new IllegalStateException("Only one @Cacheable(sync=true) entry is allowed on '" + method + "'");
+					throw new IllegalStateException(
+							"Only one @Cacheable(sync=true) entry is allowed on '" + method + "'");
 				}
 				CacheOperationContext cacheOperationContext = cacheOperationContexts.iterator().next();
 				CacheableOperation operation = (CacheableOperation) cacheOperationContext.getOperation();
 				if (cacheOperationContext.getCaches().size() > 1) {
-					throw new IllegalStateException("@Cacheable(sync=true) only allows a single cache on '" + operation + "'");
+					throw new IllegalStateException(
+							"@Cacheable(sync=true) only allows a single cache on '" + operation + "'");
 				}
 				if (StringUtils.hasText(operation.getUnless())) {
-					throw new IllegalStateException("@Cacheable(sync=true) does not support unless attribute on '" + operation + "'");
+					throw new IllegalStateException(
+							"@Cacheable(sync=true) does not support unless attribute on '" + operation + "'");
 				}
 				return true;
 			}
