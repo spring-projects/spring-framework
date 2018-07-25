@@ -3965,7 +3965,7 @@ you would any other bean.
 ====
 As with ``BeanPostProcessor``s , you typically do not want to configure
 ``BeanFactoryPostProcessor``s for lazy initialization. If no other bean references a
-`Bean(Factory)PostProcessor`, that post-processor will not get instantiated at all.
+`Bean(Factory)PostProcessor`, that post-processor will not get instantiated at all, this is not the behavior you want.
 Thus, marking it for lazy initialization will be ignored, and the
 `Bean(Factory)PostProcessor` will be instantiated eagerly even if you set the
 `default-lazy-init` attribute to `true` on the declaration of your `<beans />` element.
