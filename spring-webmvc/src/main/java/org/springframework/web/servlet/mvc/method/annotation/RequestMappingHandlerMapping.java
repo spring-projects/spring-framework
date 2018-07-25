@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
+	/**
+	 * Return the configured {@link ContentNegotiationManager}.
+	 */
+	public ContentNegotiationManager getContentNegotiationManager() {
+		return this.contentNegotiationManager;
+	}
+
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
@@ -150,13 +157,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Return the configured {@link ContentNegotiationManager}.
-	 */
-	public ContentNegotiationManager getContentNegotiationManager() {
-		return this.contentNegotiationManager;
-	}
-
-	/**
 	 * Return the file extensions to use for suffix pattern matching.
 	 */
 	public List<String> getFileExtensions() {
@@ -166,7 +166,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * {@inheritDoc}
-	 * Expects a handler to have a type-level @{@link Controller} annotation.
+	 * <p>Expects a handler to have either a type-level @{@link Controller}
+	 * annotation or a type-level @{@link RequestMapping} annotation.
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
