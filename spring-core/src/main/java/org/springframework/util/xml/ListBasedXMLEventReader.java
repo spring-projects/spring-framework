@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.util.xml;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import javax.xml.stream.events.XMLEvent;
@@ -25,7 +25,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@code XMLEventReader} based on a list of {@link XMLEvent}s.
+ * Implementation of {@code XMLEventReader} based on a {@link List}
+ * of {@link XMLEvent} elements.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -38,8 +39,8 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 
 
 	public ListBasedXMLEventReader(List<XMLEvent> events) {
-		Assert.notNull(events, "'events' must not be null");
-		this.events = Collections.unmodifiableList(events);
+		Assert.notNull(events, "XMLEvent List must not be null");
+		this.events = new ArrayList<>(events);
 	}
 
 
