@@ -257,19 +257,6 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void protobufDecoderOverride() {
-		ProtobufDecoder decoder = new ProtobufDecoder(ExtensionRegistry.newInstance());
-		this.configurer.defaultCodecs().protobufDecoder(decoder);
-
-		assertSame(decoder, this.configurer.getReaders().stream()
-				.filter(writer -> writer instanceof DecoderHttpMessageReader)
-				.map(writer -> ((DecoderHttpMessageReader<?>) writer).getDecoder())
-				.filter(e -> ProtobufDecoder.class.equals(e.getClass()))
-				.findFirst()
-				.filter(e -> e == decoder).orElse(null));
-	}
-
-	@Test
 	public void jackson2EncoderOverride() {
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 		this.configurer.defaultCodecs().jackson2JsonEncoder(encoder);
@@ -283,7 +270,20 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void protobufWriterOverride() {
+	public void protobufDecoderOverride() {
+		ProtobufDecoder decoder = new ProtobufDecoder(ExtensionRegistry.newInstance());
+		this.configurer.defaultCodecs().protobufDecoder(decoder);
+
+		assertSame(decoder, this.configurer.getReaders().stream()
+				.filter(writer -> writer instanceof DecoderHttpMessageReader)
+				.map(writer -> ((DecoderHttpMessageReader<?>) writer).getDecoder())
+				.filter(e -> ProtobufDecoder.class.equals(e.getClass()))
+				.findFirst()
+				.filter(e -> e == decoder).orElse(null));
+	}
+
+	@Test
+	public void protobufEncoderOverride() {
 		ProtobufEncoder encoder = new ProtobufEncoder();
 		this.configurer.defaultCodecs().protobufEncoder(encoder);
 
