@@ -89,7 +89,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		}
 		ReactiveAdapter adapter = getAdapter(result);
 		return adapter != null && !adapter.isNoValue() &&
-				isSupportedType(result.getReturnType().getGeneric().resolve(Object.class));
+				isSupportedType(result.getReturnType().getGeneric().toClass());
 	}
 
 	@Nullable

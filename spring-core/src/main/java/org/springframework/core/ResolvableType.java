@@ -230,6 +230,18 @@ public class ResolvableType implements Serializable {
 	}
 
 	/**
+	 * Return this type as a resolved {@code Class}, falling back to
+	 * {@link java.lang.Object} if no specific class can be resolved.
+	 * @return the resolved {@link Class} or the {@code Object} fallback
+	 * @since 5.1
+	 * @see #getRawClass()
+	 * @see #resolve(Class)
+	 */
+	public Class<?> toClass() {
+		return resolve(Object.class);
+	}
+
+	/**
 	 * Determine whether the given object is an instance of this {@code ResolvableType}.
 	 * @param obj the object to check
 	 * @since 4.2
@@ -328,7 +340,7 @@ public class ResolvableType implements Serializable {
 		if (ourResolved == null) {
 			ourResolved = resolve(Object.class);
 		}
-		Class<?> otherResolved = other.resolve(Object.class);
+		Class<?> otherResolved = other.toClass();
 
 		// We need an exact type match for generics
 		// List<CharSequence> is not assignable from List<String>

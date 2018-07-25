@@ -157,7 +157,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 			if (adapter.isNoValue()) {
 				return true;
 			}
-			type = result.getReturnType().getGeneric().resolve(Object.class);
+			type = result.getReturnType().getGeneric().toClass();
 		}
 
 		return (type != null &&

@@ -123,7 +123,7 @@ class ReactiveTypeHandler {
 		Assert.state(adapter != null, "Unexpected return value: " + returnValue);
 
 		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
-		Class<?> elementClass = elementType.resolve(Object.class);
+		Class<?> elementClass = elementType.toClass();
 
 		Collection<MediaType> mediaTypes = getMediaTypes(request);
 		Optional<MediaType> mediaType = mediaTypes.stream().filter(MimeType::isConcrete).findFirst();

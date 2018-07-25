@@ -212,7 +212,7 @@ public final class Conventions {
 				ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
 				if (adapter != null && !adapter.getDescriptor().isNoValue()) {
 					reactiveSuffix = ClassUtils.getShortName(valueClass);
-					valueClass = ResolvableType.forMethodReturnType(method).getGeneric().resolve(Object.class);
+					valueClass = ResolvableType.forMethodReturnType(method).getGeneric().toClass();
 				}
 			}
 		}

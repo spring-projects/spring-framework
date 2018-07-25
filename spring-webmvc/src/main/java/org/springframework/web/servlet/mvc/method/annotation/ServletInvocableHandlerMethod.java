@@ -271,7 +271,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 				return this.returnValue.getClass();
 			}
 			if (!ResolvableType.NONE.equals(this.returnType)) {
-				return this.returnType.resolve(Object.class);
+				return this.returnType.toClass();
 			}
 			return super.getParameterType();
 		}

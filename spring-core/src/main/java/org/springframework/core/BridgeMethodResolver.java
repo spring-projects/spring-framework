@@ -159,12 +159,12 @@ public final class BridgeMethodResolver {
 			Class<?> candidateParameter = candidateParameters[i];
 			if (candidateParameter.isArray()) {
 				// An array type: compare the component type.
-				if (!candidateParameter.getComponentType().equals(genericParameter.getComponentType().resolve(Object.class))) {
+				if (!candidateParameter.getComponentType().equals(genericParameter.getComponentType().toClass())) {
 					return false;
 				}
 			}
 			// A non-array type: compare the type itself.
-			if (!candidateParameter.equals(genericParameter.resolve(Object.class))) {
+			if (!candidateParameter.equals(genericParameter.toClass())) {
 				return false;
 			}
 		}

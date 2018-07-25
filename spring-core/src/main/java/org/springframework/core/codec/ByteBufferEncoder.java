@@ -44,7 +44,7 @@ public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.resolve(Object.class);
+		Class<?> clazz = elementType.toClass();
 		return super.canEncode(elementType, mimeType) && ByteBuffer.class.isAssignableFrom(clazz);
 	}
 

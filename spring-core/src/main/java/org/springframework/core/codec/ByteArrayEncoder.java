@@ -43,7 +43,7 @@ public class ByteArrayEncoder extends AbstractEncoder<byte[]> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.resolve(Object.class);
+		Class<?> clazz = elementType.toClass();
 		return super.canEncode(elementType, mimeType) && byte[].class.isAssignableFrom(clazz);
 	}
 

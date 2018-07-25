@@ -68,7 +68,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		JavaType javaType = getObjectMapper().getTypeFactory().constructType(elementType.getType());
 		// Skip String: CharSequenceDecoder + "*/*" comes after
-		return (!CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
+		return (!CharSequence.class.isAssignableFrom(elementType.toClass()) &&
 				getObjectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));
 	}
 

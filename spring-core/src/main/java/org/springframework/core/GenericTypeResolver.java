@@ -229,7 +229,7 @@ public final class GenericTypeResolver {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> map) {
-		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).resolve(Object.class);
+		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).toClass();
 	}
 
 	/**

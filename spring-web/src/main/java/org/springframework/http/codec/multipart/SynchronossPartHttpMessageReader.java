@@ -86,7 +86,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return Part.class.equals(elementType.resolve(Object.class)) &&
+		return Part.class.equals(elementType.toClass()) &&
 				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
 	}
 

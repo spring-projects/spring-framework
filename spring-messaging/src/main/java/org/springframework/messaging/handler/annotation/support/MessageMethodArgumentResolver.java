@@ -97,7 +97,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	private Class<?> getPayloadType(MethodParameter parameter) {
 		Type genericParamType = parameter.getGenericParameterType();
 		ResolvableType resolvableType = ResolvableType.forType(genericParamType).as(Message.class);
-		return resolvableType.getGeneric().resolve(Object.class);
+		return resolvableType.getGeneric().toClass();
 	}
 
 	/**
