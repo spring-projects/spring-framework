@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +39,7 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
@@ -93,11 +95,25 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Override
 	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+		assertWebMvcNotEnabled(applicationContext);
 	}
 
 	@Nullable
 	public final ApplicationContext getApplicationContext() {
 		return this.applicationContext;
+	}
+
+	private static void assertWebMvcNotEnabled(@Nullable ApplicationContext applicationContext) {
+		try {
+			if (applicationContext != null) {
+				Assert.isNull(applicationContext.getType("mvcContentNegotiationManager"),
+						"The Java/XML config for Spring MVC and Spring WebFlux cannot both be enabled, " +
+								"e.g. via @EnableWebMvc and @EnableWebFlux, in the same application.");
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Expected...
+		}
 	}
 
 
