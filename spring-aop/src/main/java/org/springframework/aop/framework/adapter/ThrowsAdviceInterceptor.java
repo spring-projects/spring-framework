@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,8 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see MethodBeforeAdviceInterceptor
+ * @see AfterReturningAdviceInterceptor
  */
 public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 
@@ -66,9 +68,8 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 
 	/**
 	 * Create a new ThrowsAdviceInterceptor for the given ThrowsAdvice.
-	 * @param throwsAdvice the advice object that defines the exception
-	 * handler methods (usually a {@link org.springframework.aop.ThrowsAdvice}
-	 * implementation)
+	 * @param throwsAdvice the advice object that defines the exception handler methods
+	 * (usually a {@link org.springframework.aop.ThrowsAdvice} implementation)
 	 */
 	public ThrowsAdviceInterceptor(Object throwsAdvice) {
 		Assert.notNull(throwsAdvice, "Advice must not be null");
@@ -76,14 +77,17 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 
 		Method[] methods = throwsAdvice.getClass().getMethods();
 		for (Method method : methods) {
-			if (method.getName().equals(AFTER_THROWING) &&
-					(method.getParameterTypes().length == 1 || method.getParameterTypes().length == 4) &&
-					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterTypes().length - 1])
-				) {
-				// Have an exception handler
-				this.exceptionHandlerMap.put(method.getParameterTypes()[method.getParameterTypes().length - 1], method);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found exception handler method: " + method);
+			if (method.getName().equals(AFTER_THROWING)) {
+				Class<?>[] paramTypes = method.getParameterTypes();
+				if (paramTypes.length == 1 || paramTypes.length == 4) {
+					Class<?> throwableParam = paramTypes[paramTypes.length - 1];
+					if (Throwable.class.isAssignableFrom(throwableParam)) {
+						// An exception handler to register...
+						this.exceptionHandlerMap.put(throwableParam, method);
+						if (logger.isDebugEnabled()) {
+							logger.debug("Found exception handler method on throws advice: " + method);
+						}
+					}
 				}
 			}
 		}
@@ -94,14 +98,33 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		}
 	}
 
+
+	/**
+	 * Return the number of handler methods in this advice.
+	 */
 	public int getHandlerMethodCount() {
 		return this.exceptionHandlerMap.size();
 	}
 
+
+	@Override
+	public Object invoke(MethodInvocation mi) throws Throwable {
+		try {
+			return mi.proceed();
+		}
+		catch (Throwable ex) {
+			Method handlerMethod = getExceptionHandler(ex);
+			if (handlerMethod != null) {
+				invokeHandlerMethod(mi, ex, handlerMethod);
+			}
+			throw ex;
+		}
+	}
+
 	/**
-	 * Determine the exception handle method. Can return null if not found.
+	 * Determine the exception handle method for the given exception.
 	 * @param exception the exception thrown
-	 * @return a handler for the given exception type
+	 * @return a handler for the given exception type, or {@code null} if none found
 	 */
 	private Method getExceptionHandler(Throwable exception) {
 		Class<?> exceptionClass = exception.getClass();
@@ -119,24 +142,10 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		return handler;
 	}
 
-	@Override
-	public Object invoke(MethodInvocation mi) throws Throwable {
-		try {
-			return mi.proceed();
-		}
-		catch (Throwable ex) {
-			Method handlerMethod = getExceptionHandler(ex);
-			if (handlerMethod != null) {
-				invokeHandlerMethod(mi, ex, handlerMethod);
-			}
-			throw ex;
-		}
-	}
-
 	private void invokeHandlerMethod(MethodInvocation mi, Throwable ex, Method method) throws Throwable {
 		Object[] handlerArgs;
 		if (method.getParameterTypes().length == 1) {
-			handlerArgs = new Object[] { ex };
+			handlerArgs = new Object[] {ex};
 		}
 		else {
 			handlerArgs = new Object[] {mi.getMethod(), mi.getArguments(), mi.getThis(), ex};
