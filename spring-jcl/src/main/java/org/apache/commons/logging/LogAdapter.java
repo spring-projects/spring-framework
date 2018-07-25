@@ -28,18 +28,18 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
 
 /**
- * Spring's common JCL delegate behind {@link LogFactory} and {@link LogFactoryService}.
+ * Spring's common JCL adapter behind {@link LogFactory} and {@link LogFactoryService}.
  * Detects the presence of Log4j 2.x / SLF4J, falling back to {@code java.util.logging}.
  *
  * @author Juergen Hoeller
  * @since 5.1
  */
-final class LogDelegate {
+final class LogAdapter {
 
 	private static LogApi logApi = LogApi.JUL;
 
 	static {
-		ClassLoader cl = LogDelegate.class.getClassLoader();
+		ClassLoader cl = LogAdapter.class.getClassLoader();
 		try {
 			// Try Log4j 2.x API
 			cl.loadClass("org.apache.logging.log4j.spi.ExtendedLogger");
@@ -65,7 +65,7 @@ final class LogDelegate {
 	}
 
 
-	private LogDelegate() {
+	private LogAdapter() {
 	}
 
 
@@ -76,19 +76,19 @@ final class LogDelegate {
 	public static Log createLog(String name) {
 		switch (logApi) {
 			case LOG4J:
-				return Log4jDelegate.createLog(name);
+				return Log4jAdapter.createLog(name);
 			case SLF4J_LAL:
-				return Slf4jDelegate.createLocationAwareLog(name);
+				return Slf4jAdapter.createLocationAwareLog(name);
 			case SLF4J:
-				return Slf4jDelegate.createLog(name);
+				return Slf4jAdapter.createLog(name);
 			default:
-				// Defensively use lazy-initializing delegate class here as well since the
+				// Defensively use lazy-initializing adapter class here as well since the
 				// java.logging module is not present by default on JDK 9. We are requiring
 				// its presence if neither Log4j nor SLF4J is available; however, in the
 				// case of Log4j or SLF4J, we are trying to prevent early initialization
 				// of the JavaUtilLog adapter - e.g. by a JVM in debug mode - when eagerly
 				// trying to parse the bytecode for all the cases of this switch clause.
-				return JavaUtilDelegate.createLog(name);
+				return JavaUtilAdapter.createLog(name);
 		}
 	}
 
@@ -96,7 +96,7 @@ final class LogDelegate {
 	private enum LogApi {LOG4J, SLF4J_LAL, SLF4J, JUL}
 
 
-	private static class Log4jDelegate {
+	private static class Log4jAdapter {
 
 		public static Log createLog(String name) {
 			return new Log4jLog(name);
@@ -104,7 +104,7 @@ final class LogDelegate {
 	}
 
 
-	private static class Slf4jDelegate {
+	private static class Slf4jAdapter {
 
 		public static Log createLocationAwareLog(String name) {
 			Logger logger = LoggerFactory.getLogger(name);
@@ -118,7 +118,7 @@ final class LogDelegate {
 	}
 
 
-	private static class JavaUtilDelegate {
+	private static class JavaUtilAdapter {
 
 		public static Log createLog(String name) {
 			return new JavaUtilLog(name);
@@ -353,7 +353,7 @@ final class LogDelegate {
 		}
 
 		protected Object readResolve() {
-			return Slf4jDelegate.createLog(this.name);
+			return Slf4jAdapter.createLog(this.name);
 		}
 	}
 
@@ -449,7 +449,7 @@ final class LogDelegate {
 
 		@Override
 		protected Object readResolve() {
-			return Slf4jDelegate.createLocationAwareLog(this.name);
+			return Slf4jAdapter.createLocationAwareLog(this.name);
 		}
 	}
 

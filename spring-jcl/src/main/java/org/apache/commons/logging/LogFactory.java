@@ -64,7 +64,7 @@ public abstract class LogFactory {
 	 * @param name logical name of the <code>Log</code> instance to be returned
 	 */
 	public static Log getLog(String name) {
-		return LogDelegate.createLog(name);
+		return LogAdapter.createLog(name);
 	}
 
 

@@ -37,7 +37,7 @@ public class LogFactoryService extends LogFactory {
 
 	@Override
 	public Log getInstance(String name) {
-		return LogDelegate.createLog(name);
+		return LogAdapter.createLog(name);
 	}
 
 
