@@ -119,12 +119,13 @@ public interface CodecConfigurer {
 		void protobufDecoder(Decoder<?> decoder);
 
 		/**
-		 * Override the default Protobuf {@code HttpMessageReader}.
-		 * @param decoder the decoder instance to use
+		 * Override the default Protobuf {@code Encoder}.
+		 * @param encoder the encoder instance to use
 		 * @since 5.1
+		 * @see org.springframework.http.codec.protobuf.ProtobufEncoder
 		 * @see org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter
 		 */
-		void protobufWriter(HttpMessageWriter<?> decoder);
+		void protobufEncoder(Encoder<?> encoder);
 
 		/**
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.

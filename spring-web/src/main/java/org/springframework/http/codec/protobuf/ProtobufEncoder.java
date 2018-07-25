@@ -33,6 +33,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageEncoder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -58,17 +59,20 @@ public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessage
 
 	private static final List<MediaType> streamingMediaTypes = MIME_TYPES
 			.stream()
-			.map(mimeType -> new MediaType(mimeType.getType(), mimeType.getSubtype(), Collections.singletonMap(DELIMITED_KEY, DELIMITED_VALUE)))
+			.map(mimeType -> new MediaType(mimeType.getType(), mimeType.getSubtype(),
+					Collections.singletonMap(DELIMITED_KEY, DELIMITED_VALUE)))
 			.collect(Collectors.toList());
 
+
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		return Message.class.isAssignableFrom(elementType.getRawClass()) && supportsMimeType(mimeType);
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		return Message.class.isAssignableFrom(elementType.toClass()) && supportsMimeType(mimeType);
 	}
 
 	@Override
-	public Flux<DataBuffer> encode(Publisher<? extends Message> inputStream,
-			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+	public Flux<DataBuffer> encode(Publisher<? extends Message> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		return Flux
 				.from(inputStream)
 				.map(message -> encodeMessage(message, bufferFactory, !(inputStream instanceof Mono)));
@@ -100,4 +104,5 @@ public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessage
 	public List<MimeType> getEncodableMimeTypes() {
 		return getMimeTypes();
 	}
+
 }

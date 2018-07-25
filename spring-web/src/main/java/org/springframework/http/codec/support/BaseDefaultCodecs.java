@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec.support;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.json.Jackson2SmileDecoder;
 import org.springframework.http.codec.json.Jackson2SmileEncoder;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
+import org.springframework.http.codec.protobuf.ProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
@@ -53,6 +55,7 @@ import org.springframework.util.ClassUtils;
  * as a base for client and server specific variants.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 
@@ -78,13 +81,13 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	private Decoder<?> jackson2JsonDecoder;
 
 	@Nullable
-	private Decoder<?> protobufDecoder;
-
-	@Nullable
 	private Encoder<?> jackson2JsonEncoder;
 
 	@Nullable
-	private HttpMessageWriter<?> protobufWriter;
+	private Decoder<?> protobufDecoder;
+
+	@Nullable
+	private Encoder<?> protobufEncoder;
 
 	private boolean enableLoggingRequestDetails = false;
 
@@ -107,8 +110,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	}
 
 	@Override
-	public void protobufWriter(HttpMessageWriter<?> writer) {
-		this.protobufWriter = writer;
+	public void protobufEncoder(Encoder<?> encoder) {
+		this.protobufEncoder = encoder;
 	}
 
 	@Override
@@ -205,6 +208,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	 * or for multipart requests only ("true"). Generally the two sets are the
 	 * same except for the multipart writer itself.
 	 */
+	@SuppressWarnings("unchecked")
 	final List<HttpMessageWriter<?>> getTypedWriters(boolean forMultipart) {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
@@ -220,7 +224,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 			extendTypedWriters(writers);
 		}
 		if (protobufPresent) {
-			writers.add(getProtobufWriter());
+			writers.add(new ProtobufHttpMessageWriter((Encoder) getProtobufEncoder()));
 		}
 		return writers;
 	}
@@ -277,23 +281,22 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	}
 
 
-	// Accessors for use in sub-classes...
+	// Accessors for use in subclasses...
 
 	protected Decoder<?> getJackson2JsonDecoder() {
 		return (this.jackson2JsonDecoder != null ? this.jackson2JsonDecoder : new Jackson2JsonDecoder());
-	}
-
-	protected Decoder<?> getProtobufDecoder() {
-		return (this.protobufDecoder != null ? this.protobufDecoder : new ProtobufDecoder());
 	}
 
 	protected Encoder<?> getJackson2JsonEncoder() {
 		return (this.jackson2JsonEncoder != null ? this.jackson2JsonEncoder : new Jackson2JsonEncoder());
 	}
 
-	protected HttpMessageWriter<?> getProtobufWriter() {
-		return (this.protobufWriter != null ? this.protobufWriter : new ProtobufHttpMessageWriter());
+	protected Decoder<?> getProtobufDecoder() {
+		return (this.protobufDecoder != null ? this.protobufDecoder : new ProtobufDecoder());
+	}
+
+	protected Encoder<?> getProtobufEncoder() {
+		return (this.protobufEncoder != null ? this.protobufEncoder : new ProtobufEncoder());
 	}
 
 }
-

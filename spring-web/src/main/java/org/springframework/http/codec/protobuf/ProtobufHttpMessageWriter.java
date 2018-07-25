@@ -19,7 +19,7 @@ package org.springframework.http.codec.protobuf;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
@@ -29,11 +29,13 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageEncoder;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * {@code HttpMessageWriter} that can write a protobuf {@link Message} and adds
@@ -49,18 +51,25 @@ import org.springframework.lang.Nullable;
  */
 public class ProtobufHttpMessageWriter extends EncoderHttpMessageWriter<Message> {
 
-	private static final ConcurrentHashMap<Class<?>, Method> methodCache = new ConcurrentHashMap<>();
-
 	private static final String X_PROTOBUF_SCHEMA_HEADER = "X-Protobuf-Schema";
 
 	private static final String X_PROTOBUF_MESSAGE_HEADER = "X-Protobuf-Message";
 
+	private static final ConcurrentMap<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
+
+	/**
+	 * Create a new {@code ProtobufHttpMessageWriter} with a default {@link ProtobufEncoder}.
+	 */
 	public ProtobufHttpMessageWriter() {
 		super(new ProtobufEncoder());
 	}
 
-	public ProtobufHttpMessageWriter(ProtobufEncoder encoder) {
+	/**
+	 * Create a new {@code ProtobufHttpMessageWriter} with the given encoder.
+	 * @param encoder the Protobuf message encoder to use
+	 */
+	public ProtobufHttpMessageWriter(Encoder<Message> encoder) {
 		super(encoder);
 	}
 
@@ -71,7 +80,7 @@ public class ProtobufHttpMessageWriter extends EncoderHttpMessageWriter<Message>
 			@Nullable MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		try {
-			Message.Builder builder = getMessageBuilder(elementType.getRawClass());
+			Message.Builder builder = getMessageBuilder(elementType.toClass());
 			Descriptors.Descriptor descriptor = builder.getDescriptorForType();
 			message.getHeaders().add(X_PROTOBUF_SCHEMA_HEADER, descriptor.getFile().getName());
 			message.getHeaders().add(X_PROTOBUF_MESSAGE_HEADER, descriptor.getFullName());

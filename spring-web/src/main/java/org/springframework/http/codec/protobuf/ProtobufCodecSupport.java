@@ -48,4 +48,5 @@ public abstract class ProtobufCodecSupport {
 	protected List<MimeType> getMimeTypes() {
 		return MIME_TYPES;
 	}
+
 }
