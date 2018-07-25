@@ -47,11 +47,15 @@ import org.springframework.util.StringValueResolver;
  */
 public class DefaultFormattingConversionService extends FormattingConversionService {
 
-	private static final boolean jsr354Present = ClassUtils.isPresent(
-			"javax.money.MonetaryAmount", DefaultFormattingConversionService.class.getClassLoader());
+	private static final boolean jsr354Present;
 
-	private static final boolean jodaTimePresent = ClassUtils.isPresent(
-			"org.joda.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
+	private static final boolean jodaTimePresent;
+
+	static {
+		ClassLoader classLoader = DefaultFormattingConversionService.class.getClassLoader();
+		jsr354Present = ClassUtils.isPresent("javax.money.MonetaryAmount", classLoader);
+		jodaTimePresent = ClassUtils.isPresent("org.joda.time.LocalDate", classLoader);
+	}
 
 
 	/**

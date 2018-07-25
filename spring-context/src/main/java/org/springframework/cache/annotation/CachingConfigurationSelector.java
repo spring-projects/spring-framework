@@ -50,11 +50,15 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 			"org.springframework.cache.aspectj.AspectJJCacheConfiguration";
 
 
-	private static final boolean jsr107Present = ClassUtils.isPresent(
-			"javax.cache.Cache", CachingConfigurationSelector.class.getClassLoader());
+	private static final boolean jsr107Present;
 
-	private static final boolean jcacheImplPresent = ClassUtils.isPresent(
-			PROXY_JCACHE_CONFIGURATION_CLASS, CachingConfigurationSelector.class.getClassLoader());
+	private static final boolean jcacheImplPresent;
+
+	static {
+		ClassLoader classLoader = CachingConfigurationSelector.class.getClassLoader();
+		jsr107Present = ClassUtils.isPresent("javax.cache.Cache", classLoader);
+		jcacheImplPresent = ClassUtils.isPresent(PROXY_JCACHE_CONFIGURATION_CLASS, classLoader);
+	}
 
 
 	/**

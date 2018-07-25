@@ -63,21 +63,21 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	private static final Mono<Map<String, Object>> EMPTY_ATTRIBUTES = Mono.just(Collections.emptyMap());
 
 
-	private static final boolean tomcatPresent = ClassUtils.isPresent(
-			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler",
-			HandshakeWebSocketService.class.getClassLoader());
+	private static final boolean tomcatPresent;
 
-	private static final boolean jettyPresent = ClassUtils.isPresent(
-			"org.eclipse.jetty.websocket.server.WebSocketServerFactory",
-			HandshakeWebSocketService.class.getClassLoader());
+	private static final boolean jettyPresent;
 
-	private static final boolean undertowPresent = ClassUtils.isPresent(
-			"io.undertow.websockets.WebSocketProtocolHandshakeHandler",
-			HandshakeWebSocketService.class.getClassLoader());
+	private static final boolean undertowPresent;
 
-	private static final boolean reactorNettyPresent = ClassUtils.isPresent(
-			"reactor.netty.http.server.HttpServerResponse",
-			HandshakeWebSocketService.class.getClassLoader());
+	private static final boolean reactorNettyPresent;
+
+	static {
+		ClassLoader classLoader = HandshakeWebSocketService.class.getClassLoader();
+		tomcatPresent = ClassUtils.isPresent("org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
+		jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
+		undertowPresent = ClassUtils.isPresent("io.undertow.websockets.WebSocketProtocolHandshakeHandler", classLoader);
+		reactorNettyPresent = ClassUtils.isPresent("reactor.netty.http.server.HttpServerResponse", classLoader);
+	}
 
 
 	protected static final Log logger = LogFactory.getLog(HandshakeWebSocketService.class);

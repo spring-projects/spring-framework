@@ -111,11 +111,15 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final int DEFAULT_MAPPING_ORDER = 1;
 
-	private static final boolean jackson2Present = ClassUtils.isPresent(
-			"com.fasterxml.jackson.databind.ObjectMapper", MessageBrokerBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jackson2Present;
 
-	private static final boolean javaxValidationPresent =
-			ClassUtils.isPresent("javax.validation.Validator", MessageBrokerBeanDefinitionParser.class.getClassLoader());
+	private static final boolean javaxValidationPresent;
+
+	static {
+		ClassLoader classLoader = MessageBrokerBeanDefinitionParser.class.getClassLoader();
+		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader);
+		javaxValidationPresent = ClassUtils.isPresent("javax.validation.Validator", classLoader);
+	}
 
 
 	@Override

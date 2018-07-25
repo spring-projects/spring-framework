@@ -160,39 +160,34 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	public static final String CONTENT_NEGOTIATION_MANAGER_BEAN_NAME = "mvcContentNegotiationManager";
 
 
-	private static final boolean javaxValidationPresent =
-			ClassUtils.isPresent("javax.validation.Validator",
-					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+	private static final boolean javaxValidationPresent;
 
-	private static boolean romePresent =
-			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
-					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+	private static boolean romePresent;
 
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder",
-					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jaxb2Present;
 
-	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					AnnotationDrivenBeanDefinitionParser.class.getClassLoader()) &&
-			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jackson2Present;
 
-	private static final boolean jackson2XmlPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
-					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jackson2XmlPresent;
 
-	private static final boolean jackson2SmilePresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
-					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jackson2SmilePresent;
 
-	private static final boolean jackson2CborPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory",
-					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jackson2CborPresent;
 
-	private static final boolean gsonPresent =
-			ClassUtils.isPresent("com.google.gson.Gson",
-					AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+	private static final boolean gsonPresent;
+
+	static {
+		ClassLoader classLoader = AnnotationDrivenBeanDefinitionParser.class.getClassLoader();
+		javaxValidationPresent = ClassUtils.isPresent("javax.validation.Validator", classLoader);
+		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
+		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
+		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
+		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+	}
 
 
 	@Override

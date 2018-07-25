@@ -172,39 +172,34 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
-	private static boolean romePresent =
-			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
-					WebMvcConfigurationSupport.class.getClassLoader());
+	private static boolean romePresent;
 
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder",
-					WebMvcConfigurationSupport.class.getClassLoader());
+	private static final boolean jaxb2Present;
 
-	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					WebMvcConfigurationSupport.class.getClassLoader()) &&
-			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-					WebMvcConfigurationSupport.class.getClassLoader());
+	private static final boolean jackson2Present;
 
-	private static final boolean jackson2XmlPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
-					WebMvcConfigurationSupport.class.getClassLoader());
+	private static final boolean jackson2XmlPresent;
 
-	private static final boolean jackson2SmilePresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
-					WebMvcConfigurationSupport.class.getClassLoader());
+	private static final boolean jackson2SmilePresent;
 
-	private static final boolean jackson2CborPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory",
-					WebMvcConfigurationSupport.class.getClassLoader());
+	private static final boolean jackson2CborPresent;
 
-	private static final boolean gsonPresent =
-			ClassUtils.isPresent("com.google.gson.Gson",
-					WebMvcConfigurationSupport.class.getClassLoader());
+	private static final boolean gsonPresent;
 
-	private static final boolean jsonbPresent =
-			ClassUtils.isPresent("javax.json.bind.Jsonb",
-					WebMvcConfigurationSupport.class.getClassLoader());
+	private static final boolean jsonbPresent;
+
+	static {
+		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
+		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
+		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
+		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
+		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+	}
 
 
 	@Nullable

@@ -127,39 +127,35 @@ import org.springframework.web.util.UriTemplateHandler;
  */
 public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
 
-	private static boolean romePresent =
-			ClassUtils.isPresent("com.rometools.rome.feed.WireFeed",
-					RestTemplate.class.getClassLoader());
+	private static boolean romePresent;
 
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder",
-					RestTemplate.class.getClassLoader());
+	private static final boolean jaxb2Present;
 
-	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					RestTemplate.class.getClassLoader()) &&
-			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-					RestTemplate.class.getClassLoader());
+	private static final boolean jackson2Present;
 
-	private static final boolean jackson2XmlPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper",
-					RestTemplate.class.getClassLoader());
+	private static final boolean jackson2XmlPresent;
 
-	private static final boolean jackson2SmilePresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
-					RestTemplate.class.getClassLoader());
+	private static final boolean jackson2SmilePresent;
 
-	private static final boolean jackson2CborPresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory",
-					RestTemplate.class.getClassLoader());
+	private static final boolean jackson2CborPresent;
 
-	private static final boolean gsonPresent =
-			ClassUtils.isPresent("com.google.gson.Gson",
-					RestTemplate.class.getClassLoader());
+	private static final boolean gsonPresent;
 
-	private static final boolean jsonbPresent =
-			ClassUtils.isPresent("javax.json.bind.Jsonb",
-					RestTemplate.class.getClassLoader());
+	private static final boolean jsonbPresent;
+
+	static {
+		ClassLoader classLoader = RestTemplate.class.getClassLoader();
+		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
+		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		jackson2Present =
+				ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
+		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
+		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+	}
 
 
 	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();

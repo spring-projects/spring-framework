@@ -118,12 +118,16 @@ public abstract class AnnotationConfigUtils {
 	public static final String EVENT_LISTENER_FACTORY_BEAN_NAME =
 			"org.springframework.context.event.internalEventListenerFactory";
 
-	private static final boolean jsr250Present =
-			ClassUtils.isPresent("javax.annotation.Resource", AnnotationConfigUtils.class.getClassLoader());
+	private static final boolean jsr250Present;
 
-	private static final boolean jpaPresent =
-			ClassUtils.isPresent("javax.persistence.EntityManagerFactory", AnnotationConfigUtils.class.getClassLoader()) &&
-			ClassUtils.isPresent(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, AnnotationConfigUtils.class.getClassLoader());
+	private static final boolean jpaPresent;
+
+	static {
+		ClassLoader classLoader = AnnotationConfigUtils.class.getClassLoader();
+		jsr250Present = ClassUtils.isPresent("javax.annotation.Resource", classLoader);
+		jpaPresent = ClassUtils.isPresent("javax.persistence.EntityManagerFactory", classLoader) &&
+				ClassUtils.isPresent(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, classLoader);
+	}
 
 
 	/**

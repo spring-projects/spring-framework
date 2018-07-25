@@ -61,12 +61,16 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	private static final String JCACHE_ASPECT_CLASS_NAME =
 			"org.springframework.cache.aspectj.JCacheCacheAspect";
 
-	private static final boolean jsr107Present = ClassUtils.isPresent(
-			"javax.cache.Cache", AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jsr107Present;
 
-	private static final boolean jcacheImplPresent = ClassUtils.isPresent(
-			"org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource",
-			AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jcacheImplPresent;
+
+	static {
+		ClassLoader classLoader = AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader();
+		jsr107Present = ClassUtils.isPresent("javax.cache.Cache", classLoader);
+		jcacheImplPresent = ClassUtils.isPresent(
+				"org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource", classLoader);
+	}
 
 
 	/**

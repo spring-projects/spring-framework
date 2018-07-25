@@ -56,23 +56,22 @@ import org.springframework.util.ClassUtils;
  */
 class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 
-	private static final ClassLoader classLoader = BaseCodecConfigurer.class.getClassLoader();
+	static final boolean jackson2Present;
 
-	static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					BaseCodecConfigurer.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							classLoader);
+	private static final boolean jackson2SmilePresent;
 
-	private static final boolean jackson2SmilePresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
-					classLoader);
+	private static final boolean jaxb2Present;
 
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+	private static final boolean protobufPresent;
 
-	private static final boolean protobufPresent =
-			ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
+	static {
+		ClassLoader classLoader = BaseCodecConfigurer.class.getClassLoader();
+		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		protobufPresent = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
+	}
 
 
 	@Nullable
