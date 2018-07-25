@@ -158,9 +158,10 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 			return;
 		}
 		Class<?>[] parameterTypes = method.getParameterTypes();
+		// check param order
 		if (!parameterTypes[0].isAssignableFrom(Method.class) || !parameterTypes[1].isAssignableFrom(Object[].class)) {
 			throw new MethodSignatureException("Method signature is illegal,the signature of method that owns 4 params "
-					+ "must be (Method method, Object[] args, Object target, Exception e)");
+					+ "must be (Method method, Object[] args, Object target, ThrowableSubclass e)");
 		}
 	}
 
