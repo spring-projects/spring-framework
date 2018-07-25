@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,19 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 
 	/**
-	 * Set the {@link RequestedContentTypeResolver} to use to determine requested media types.
-	 * If not set, the default constructor is used.
+	 * Set the {@link RequestedContentTypeResolver} to use to determine requested
+	 * media types. If not set, the default constructor is used.
 	 */
 	public void setContentTypeResolver(RequestedContentTypeResolver contentTypeResolver) {
 		Assert.notNull(contentTypeResolver, "'contentTypeResolver' must not be null");
 		this.contentTypeResolver = contentTypeResolver;
+	}
+
+	/**
+	 * Return the configured {@link RequestedContentTypeResolver}.
+	 */
+	public RequestedContentTypeResolver getContentTypeResolver() {
+		return this.contentTypeResolver;
 	}
 
 	@Override
@@ -79,13 +86,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		super.afterPropertiesSet();
 	}
 
-
-	/**
-	 * Return the configured {@link RequestedContentTypeResolver}.
-	 */
-	public RequestedContentTypeResolver getContentTypeResolver() {
-		return this.contentTypeResolver;
-	}
 
 	/**
 	 * {@inheritDoc}

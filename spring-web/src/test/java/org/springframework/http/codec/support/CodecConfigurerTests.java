@@ -54,7 +54,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
- * Unit tests for {@link BaseCodecConfigurer}.
+ * Unit tests for {@link BaseDefaultCodecs}.
+ *
  * @author Rossen Stoyanchev
  */
 public class CodecConfigurerTests {
@@ -294,7 +295,6 @@ public class CodecConfigurerTests {
 		}
 
 		private static class TestDefaultCodecs extends BaseDefaultCodecs {
-
 		}
 	}
 

@@ -624,9 +624,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Return a {@link FormattingConversionService} for use with annotated
-	 * controller methods and the {@code spring:eval} JSP tag.
-	 * Also see {@link #addFormatters} as an alternative to overriding this method.
+	 * Return a {@link FormattingConversionService} for use with annotated controllers.
+	 * <p>See {@link #addFormatters} as an alternative to overriding this method.
 	 */
 	@Bean
 	public FormattingConversionService mvcConversionService() {
@@ -636,7 +635,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
+	 * Override this method to add custom {@link Converter} and/or {@link Formatter}
+	 * delegates to the common {@link FormattingConversionService}.
+	 * @see #mvcConversionService()
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
 	}

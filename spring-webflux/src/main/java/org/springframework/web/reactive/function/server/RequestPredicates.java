@@ -76,8 +76,9 @@ public abstract class RequestPredicates {
 
 
 	/**
-	 * Return a {@code RequestPredicate} that tests against the given HTTP method.
-	 * @param httpMethod the HTTP method to match to
+	 * Return a {@code RequestPredicate} that matches if the request's
+	 * HTTP method is equal to the given method.
+	 * @param httpMethod the HTTP method to match against
 	 * @return a predicate that tests against the given HTTP method
 	 */
 	public static RequestPredicate method(HttpMethod httpMethod) {
@@ -85,7 +86,8 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the request path against the given path pattern.
+	 * Return a {@code RequestPredicate} that tests the request path
+	 * against the given path pattern.
 	 * @param pattern the pattern to match to
 	 * @return a predicate that tests against the given path pattern
 	 */
@@ -95,20 +97,22 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * Return a function that creates new path-matching {@code RequestPredicates} from pattern
-	 * Strings using the given {@link PathPatternParser}. This method can be used to specify a
-	 * non-default, customized {@code PathPatternParser} when resolving path patterns.
+	 * Return a function that creates new path-matching {@code RequestPredicates}
+	 * from pattern Strings using the given {@link PathPatternParser}.
+	 * <p>This method can be used to specify a non-default, customized
+	 * {@code PathPatternParser} when resolving path patterns.
 	 * @param patternParser the parser used to parse patterns given to the returned function
-	 * @return a function that resolves patterns Strings into path-matching
-	 * {@code RequestPredicate}s
+	 * @return a function that resolves a pattern String into a path-matching
+	 * {@code RequestPredicates} instance
 	 */
 	public static Function<String, RequestPredicate> pathPredicates(PathPatternParser patternParser) {
-		Assert.notNull(patternParser, "'patternParser' must not be null");
+		Assert.notNull(patternParser, "PathPatternParser must not be null");
 		return pattern -> new PathPatternPredicate(patternParser.parse(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the request's headers against the given headers predicate.
+	 * Return a {@code RequestPredicate} that tests the request's headers
+	 * against the given headers predicate.
 	 * @param headersPredicate a predicate that tests against the request headers
 	 * @return a predicate that tests against the given header predicate
 	 */
@@ -290,12 +294,12 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's query parameter of the given name
-	 * has the given value
+	 * has the given value.
 	 * @param name the name of the query parameter to test against
 	 * @param value the value of the query parameter to test against
 	 * @return a predicate that matches if the query parameter has the given value
-	 * @see ServerRequest#queryParam(String)
 	 * @since 5.0.7
+	 * @see ServerRequest#queryParam(String)
 	 */
 	public static RequestPredicate queryParam(String name, String value) {
 		return queryParam(name, new Predicate<String>() {
@@ -303,7 +307,6 @@ public abstract class RequestPredicates {
 			public boolean test(String s) {
 				return s.equals(value);
 			}
-
 			@Override
 			public String toString() {
 				return String.format("== %s", value);
@@ -326,9 +329,8 @@ public abstract class RequestPredicates {
 
 	private static void traceMatch(String prefix, Object desired, @Nullable Object actual, boolean match) {
 		if (logger.isTraceEnabled()) {
-			String message = String.format("%s \"%s\" %s against value \"%s\"",
-					prefix, desired, match ? "matches" : "does not match", actual);
-			logger.trace(message);
+			logger.trace(String.format("%s \"%s\" %s against value \"%s\"",
+					prefix, desired, match ? "matches" : "does not match", actual));
 		}
 	}
 
@@ -472,6 +474,10 @@ public abstract class RequestPredicates {
 	}
 
 
+	/**
+	 * {@link RequestPredicate} for where both {@code left} and {@code right} predicates
+	 * must match.
+	 */
 	static class AndRequestPredicate implements RequestPredicate {
 
 		private final RequestPredicate left;
@@ -502,6 +508,10 @@ public abstract class RequestPredicates {
 	}
 
 
+	/**
+	 * {@link RequestPredicate} for where either {@code left} or {@code right} predicates
+	 * may match.
+	 */
 	static class OrRequestPredicate implements RequestPredicate {
 
 		private final RequestPredicate left;

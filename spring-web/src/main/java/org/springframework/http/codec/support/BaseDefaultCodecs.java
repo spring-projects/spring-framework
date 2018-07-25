@@ -233,7 +233,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	}
 
 
-	// Accessors for use in sub-classes...
+	// Accessors for use in subclasses...
 
 	protected Decoder<?> getJackson2JsonDecoder() {
 		return (this.jackson2JsonDecoder != null ? this.jackson2JsonDecoder : new Jackson2JsonDecoder());
