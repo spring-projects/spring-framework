@@ -303,7 +303,7 @@ public class ContextLoader {
 
 			if (logger.isInfoEnabled()) {
 				long elapsedTime = System.currentTimeMillis() - startTime;
-				logger.info("Root WebApplicationContext: initialization completed in " + elapsedTime + " ms");
+				logger.info("Root WebApplicationContext initialized in " + elapsedTime + " ms");
 			}
 
 			return this.context;

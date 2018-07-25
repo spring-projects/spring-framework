@@ -585,7 +585,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.active.set(true);
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Refreshing " + this);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Refreshing " + this);
+			}
+			else {
+				logger.debug("Refreshing " + getDisplayName());
+			}
 		}
 
 		// Initialize any placeholder property sources in the context environment
@@ -732,8 +737,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.messageSource = dms;
 			beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
-						"': using default [" + this.messageSource + "]");
+				logger.trace("No '" + MESSAGE_SOURCE_BEAN_NAME + "' bean, using [" + this.messageSource + "]");
 			}
 		}
 	}
@@ -756,9 +760,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
 			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Unable to locate ApplicationEventMulticaster with name '" +
-						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
-						"': using default [" + this.applicationEventMulticaster + "]");
+				logger.trace("No '" + APPLICATION_EVENT_MULTICASTER_BEAN_NAME + "' bean, using " +
+						"[" + this.applicationEventMulticaster.getClass().getSimpleName() + "]");
 			}
 		}
 	}
@@ -783,9 +786,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.lifecycleProcessor = defaultProcessor;
 			beanFactory.registerSingleton(LIFECYCLE_PROCESSOR_BEAN_NAME, this.lifecycleProcessor);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Unable to locate LifecycleProcessor with name '" +
-						LIFECYCLE_PROCESSOR_BEAN_NAME +
-						"': using default [" + this.lifecycleProcessor + "]");
+				logger.trace("No '" + LIFECYCLE_PROCESSOR_BEAN_NAME + "' bean, using " +
+						"[" + this.lifecycleProcessor.getClass().getSimpleName() + "]");
 			}
 		}
 	}
@@ -1384,14 +1386,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getDisplayName());
-		sb.append(": startup date [").append(new Date(getStartupDate()));
-		sb.append("]; ");
+		sb.append(", started on ").append(new Date(getStartupDate()));
 		ApplicationContext parent = getParent();
-		if (parent == null) {
-			sb.append("root of context hierarchy");
-		}
-		else {
-			sb.append("parent: ").append(parent.getDisplayName());
+		if (parent != null) {
+			sb.append(", parent: ").append(parent.getDisplayName());
 		}
 		return sb.toString();
 	}

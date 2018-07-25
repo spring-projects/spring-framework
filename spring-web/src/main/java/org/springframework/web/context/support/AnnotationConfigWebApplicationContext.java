@@ -230,7 +230,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 				try {
 					Class<?> clazz = ClassUtils.forName(configLocation, getClassLoader());
 					if (logger.isTraceEnabled()) {
-						logger.trace("Successfully resolved class for [" + configLocation + "]");
+						logger.trace("Registering [" + configLocation + "]");
 					}
 					reader.register(clazz);
 				}

@@ -516,9 +516,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	@Override
 	protected final void initServletBean() throws ServletException {
-		getServletContext().log("Initializing Spring FrameworkServlet '" + getServletName() + "'");
+		getServletContext().log("Initializing Spring " + getClass().getSimpleName() + " '" + getServletName() + "'");
 		if (logger.isInfoEnabled()) {
-			logger.info("FrameworkServlet '" + getServletName() + "': initialization started");
+			logger.info("Initializing Servlet '" + getServletName() + "'");
 		}
 		long startTime = System.currentTimeMillis();
 
@@ -540,9 +540,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 
 		if (logger.isInfoEnabled()) {
-			long elapsedTime = System.currentTimeMillis() - startTime;
-			logger.info("FrameworkServlet '" + getServletName() + "': initialization completed in " +
-					elapsedTime + " ms");
+			logger.info("Completed initialization in " + (System.currentTimeMillis() - startTime) + " ms");
 		}
 	}
 
@@ -600,10 +598,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// Publish the context as a servlet context attribute.
 			String attrName = getServletContextAttributeName();
 			getServletContext().setAttribute(attrName, wac);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Published WebApplicationContext of servlet '" + getServletName() +
-						"' as ServletContext attribute [" + attrName + "]");
-			}
 		}
 
 		return wac;
@@ -650,11 +644,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	protected WebApplicationContext createWebApplicationContext(@Nullable ApplicationContext parent) {
 		Class<?> contextClass = getContextClass();
-		if (logger.isTraceEnabled()) {
-			logger.trace("Servlet '" + getServletName() +
-					"' will create custom WebApplicationContext context of class '" +
-					contextClass.getName() + "'" + ", parent context [" + parent + "]");
-		}
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException(
 					"Fatal initialization error in servlet with name '" + getServletName() +
@@ -1071,9 +1060,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		if (requestAttributes != null) {
 			RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 		}
-		if (logger.isTraceEnabled()) {
-			logger.trace("Bound request context to thread: " + request);
-		}
 	}
 
 	private void resetContextHolders(HttpServletRequest request,
@@ -1081,9 +1067,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		LocaleContextHolder.setLocaleContext(prevLocaleContext, this.threadContextInheritable);
 		RequestContextHolder.setRequestAttributes(previousAttributes, this.threadContextInheritable);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Cleared thread-bound request context: " + request);
-		}
 	}
 
 	private void logResult(HttpServletRequest request, HttpServletResponse response,
