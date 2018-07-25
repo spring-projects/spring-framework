@@ -49,7 +49,6 @@ package org.springframework.test.web.servlet;
 @FunctionalInterface
 public interface ResultMatcher {
 
-
 	/**
 	 * Assert the result of an executed request.
 	 * @param result the result of the executed request

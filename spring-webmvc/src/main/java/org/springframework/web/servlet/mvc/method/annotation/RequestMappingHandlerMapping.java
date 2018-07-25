@@ -123,12 +123,27 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * The configured path prefixes as a read-only, possibly empty map.
+	 * @since 5.1
+	 */
+	public Map<String, Predicate<Class<?>>> getPathPrefixes() {
+		return this.pathPrefixes;
+	}
+
+	/**
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
 	 * If not set, the default constructor is used.
 	 */
 	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 		Assert.notNull(contentNegotiationManager, "ContentNegotiationManager must not be null");
 		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	/**
+	 * Return the configured {@link ContentNegotiationManager}.
+	 */
+	public ContentNegotiationManager getContentNegotiationManager() {
+		return this.contentNegotiationManager;
 	}
 
 	@Override
@@ -169,21 +184,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	public boolean useTrailingSlashMatch() {
 		return this.useTrailingSlashMatch;
-	}
-
-	/**
-	 * The configured path prefixes as a read-only, possibly empty map.
-	 * @since 5.1
-	 */
-	public Map<String, Predicate<Class<?>>> getPathPrefixes() {
-		return this.pathPrefixes;
-	}
-
-	/**
-	 * Return the configured {@link ContentNegotiationManager}.
-	 */
-	public ContentNegotiationManager getContentNegotiationManager() {
-		return this.contentNegotiationManager;
 	}
 
 	/**

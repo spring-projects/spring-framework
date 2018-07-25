@@ -99,7 +99,7 @@ public class UnsupportedMediaTypeException extends NestedRuntimeException {
 	 * Return the body type in the context of which this exception was generated.
 	 * This is applicable when the exception was raised as a result trying to
 	 * encode from or decode to a specific Java type.
-	 * @return the body type, or {@code null}
+	 * @return the body type, or {@code null} if not available
 	 * @since 5.1
 	 */
 	@Nullable

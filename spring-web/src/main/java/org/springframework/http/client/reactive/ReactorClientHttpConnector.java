@@ -28,6 +28,7 @@ import reactor.netty.http.client.HttpClientRequest;
 import reactor.netty.http.client.HttpClientResponse;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
 
 /**
  * Reactor-Netty implementation of {@link ClientHttpConnector}.
@@ -56,6 +57,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	 * @since 5.1
 	 */
 	public ReactorClientHttpConnector(HttpClient httpClient) {
+		Assert.notNull(httpClient, "HttpClient is required");
 		this.httpClient = httpClient;
 	}
 

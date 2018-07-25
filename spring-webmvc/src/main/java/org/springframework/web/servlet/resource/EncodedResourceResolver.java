@@ -149,7 +149,9 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 					}
 				}
 				catch (IOException ex) {
-					logger.trace("No " + coding + " resource for [" + resource.getFilename() + "]", ex);
+					if (logger.isTraceEnabled()) {
+						logger.trace("No " + coding + " resource for [" + resource.getFilename() + "]", ex);
+					}
 				}
 			}
 		}
@@ -187,7 +189,6 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		private final String coding;
 
 		private final Resource encoded;
-
 
 		EncodedResource(Resource original, String coding, String extension) throws IOException {
 			this.original = original;

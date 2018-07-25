@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
@@ -25,6 +26,7 @@ import reactor.netty.http.websocket.WebsocketInbound;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -57,6 +59,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	 * @since 5.1
 	 */
 	public ReactorNettyWebSocketClient(HttpClient httpClient) {
+		Assert.notNull(httpClient, "HttpClient is required");
 		this.httpClient = httpClient;
 	}
 

@@ -27,7 +27,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -47,8 +46,6 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 
 	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Publisher<DataBuffer> content) {
-		Assert.notNull(reactiveResponse, "reactiveResponse should not be null");
-		Assert.notNull(content, "content should not be null");
 		this.reactiveResponse = reactiveResponse;
 		this.content = Flux.from(content);
 	}

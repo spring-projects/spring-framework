@@ -83,8 +83,8 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 	 * @param parser the JSON parser configuration
 	 * @param printer the JSON printer configuration
 	 * @param registryInitializer an initializer for message extensions
-	 * @deprecated as of Spring Framework 5.1, use
-	 * {@link #ProtobufJsonFormatHttpMessageConverter(JsonFormat.Parser, JsonFormat.Printer, ExtensionRegistry)} instead
+	 * @deprecated as of 5.1, in favor of
+	 * {@link #ProtobufJsonFormatHttpMessageConverter(JsonFormat.Parser, JsonFormat.Printer, ExtensionRegistry)}
 	 */
 	@Deprecated
 	public ProtobufJsonFormatHttpMessageConverter(@Nullable JsonFormat.Parser parser,

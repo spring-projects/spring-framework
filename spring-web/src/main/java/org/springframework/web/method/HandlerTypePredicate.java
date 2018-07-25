@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.method;
 
 import java.lang.annotation.Annotation;
@@ -93,9 +94,11 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 	}
 
 	private boolean hasSelectors() {
-		return !this.basePackages.isEmpty() || !this.assignableTypes.isEmpty() || !this.annotations.isEmpty();
+		return (!this.basePackages.isEmpty() || !this.assignableTypes.isEmpty() || !this.annotations.isEmpty());
 	}
 
+
+	// Static factory methods
 
 	/**
 	 * {@code Predicate} that applies to any handlers.
@@ -157,7 +160,6 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 		private final List<Class<?>> assignableTypes = new ArrayList<>();
 
 		private final List<Class<? extends Annotation>> annotations = new ArrayList<>();
-
 
 		/**
 		 * Match handlers declared under a base package, e.g. "org.example".

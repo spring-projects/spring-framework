@@ -29,6 +29,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
 
 /**
  * Jetty ReactiveStreams HttpClient implementation of {@link ClientHttpConnector}.
@@ -60,6 +61,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector, SmartLifec
 	 * Create a Jetty {@link ClientHttpConnector} with the given {@link HttpClient}.
 	 */
 	public JettyClientHttpConnector(HttpClient httpClient) {
+		Assert.notNull(httpClient, "HttpClient is required");
 		this.httpClient = httpClient;
 	}
 
@@ -67,6 +69,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector, SmartLifec
 	public void setBufferFactory(DataBufferFactory bufferFactory) {
 		this.bufferFactory = bufferFactory;
 	}
+
 
 	@Override
 	public int getPhase() {
@@ -109,6 +112,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector, SmartLifec
 		stop();
 		callback.run();
 	}
+
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,

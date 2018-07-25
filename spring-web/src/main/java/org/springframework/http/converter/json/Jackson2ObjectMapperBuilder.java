@@ -458,8 +458,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.annotation.PropertyAccessor
 	 * @see com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
 	 */
-	public Jackson2ObjectMapperBuilder visibility(PropertyAccessor accessor,
-			JsonAutoDetect.Visibility visibility) {
+	public Jackson2ObjectMapperBuilder visibility(PropertyAccessor accessor, JsonAutoDetect.Visibility visibility) {
 		this.visibilities.put(accessor, visibility);
 		return this;
 	}

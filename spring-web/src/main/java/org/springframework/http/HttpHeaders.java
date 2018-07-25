@@ -758,8 +758,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see <a href="https://tools.ietf.org/html/rfc6750">RFC 6750</a>
 	 */
 	public void setBearerAuth(String token) {
-		Assert.notNull(token, "Token must not be null");
-
 		set(AUTHORIZATION, "Bearer " + token);
 	}
 

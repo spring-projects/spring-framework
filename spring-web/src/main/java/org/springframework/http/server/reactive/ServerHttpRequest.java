@@ -39,8 +39,8 @@ import org.springframework.util.MultiValueMap;
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
 
 	/**
-	 * Return an id that represents the underlying connection, if available, or
-	 * the request, for the purpose of correlating log messages.
+	 * Return an id that represents the underlying connection, if available,
+	 * or the request for the purpose of correlating log messages.
 	 * @since 5.1
 	 * @see org.springframework.web.server.ServerWebExchange#getLogPrefix()
 	 */

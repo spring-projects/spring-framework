@@ -55,10 +55,10 @@ import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.core.ResolvableType.forClass;
 
 /**
  * Unit tests for {@link BaseDefaultCodecs}.
+ *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
@@ -285,8 +285,7 @@ public class CodecConfigurerTests {
 	@Test
 	public void protobufWriterOverride() {
 		ProtobufEncoder encoder = new ProtobufEncoder();
-		ProtobufHttpMessageWriter messageWriter = new ProtobufHttpMessageWriter(encoder);
-		this.configurer.defaultCodecs().protobufWriter(messageWriter);
+		this.configurer.defaultCodecs().protobufEncoder(encoder);
 
 		assertSame(encoder, this.configurer.getWriters().stream()
 				.filter(writer -> writer instanceof EncoderHttpMessageWriter)
@@ -311,14 +310,14 @@ public class CodecConfigurerTests {
 
 	private void assertStringDecoder(Decoder<?> decoder, boolean textOnly) {
 		assertEquals(StringDecoder.class, decoder.getClass());
-		assertTrue(decoder.canDecode(forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
-		assertEquals(!textOnly, decoder.canDecode(forClass(String.class), MediaType.TEXT_EVENT_STREAM));
+		assertTrue(decoder.canDecode(ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
+		assertEquals(!textOnly, decoder.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_EVENT_STREAM));
 	}
 
 	private void assertStringEncoder(Encoder<?> encoder, boolean textOnly) {
 		assertEquals(CharSequenceEncoder.class, encoder.getClass());
-		assertTrue(encoder.canEncode(forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
-		assertEquals(!textOnly, encoder.canEncode(forClass(String.class), MediaType.TEXT_EVENT_STREAM));
+		assertTrue(encoder.canEncode(ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
+		assertEquals(!textOnly, encoder.canEncode(ResolvableType.forClass(String.class), MediaType.TEXT_EVENT_STREAM));
 	}
 
 
@@ -330,7 +329,6 @@ public class CodecConfigurerTests {
 		}
 
 		private static class TestDefaultCodecs extends BaseDefaultCodecs {
-
 		}
 	}
 

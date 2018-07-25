@@ -59,8 +59,8 @@ public abstract class HttpLogging {
 
 	/**
 	 * Wrap the given primary logger with a composite logger that delegates to
-	 * it or to the fallback logger "org.springframework.web.HttpLogging", if
-	 * the primary is not enabled.
+	 * it or to the fallback logger "org.springframework.web.HttpLogging",
+	 * if the primary is not enabled.
 	 * @param primaryLogger the primary logger to use
 	 * @return the resulting composite logger
 	 */

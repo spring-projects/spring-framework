@@ -289,7 +289,7 @@ public interface ServerRequest {
 	ServerWebExchange exchange();
 
 
-	// Static methods
+	// Static builder methods
 
 	/**
 	 * Create a new {@code ServerRequest} based on the given {@code ServerWebExchange} and

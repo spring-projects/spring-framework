@@ -81,6 +81,7 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
+
 	@Nullable
 	protected Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;

@@ -122,6 +122,7 @@ public final class ResponseCookie extends HttpCookie {
 		return this.sameSite;
 	}
 
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {

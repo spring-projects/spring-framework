@@ -80,8 +80,8 @@ public abstract class RequestPredicates {
 
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if the request's HTTP method is equal to the
-	 * given method.
+	 * Return a {@code RequestPredicate} that matches if the request's
+	 * HTTP method is equal to the given method.
 	 * @param httpMethod the HTTP method to match against
 	 * @return a predicate that tests against the given HTTP method
 	 */
@@ -90,8 +90,8 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if the request's HTTP method is equal to one
-	 * the of the given methods.
+	 * Return a {@code RequestPredicate} that matches if the request's
+	 * HTTP method is equal to one the of the given methods.
 	 * @param httpMethods the HTTP methods to match against
 	 * @return a predicate that tests against the given HTTP methods
 	 * @since 5.1
@@ -101,7 +101,8 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the request path against the given path pattern.
+	 * Return a {@code RequestPredicate} that tests the request path
+	 * against the given path pattern.
 	 * @param pattern the pattern to match to
 	 * @return a predicate that tests against the given path pattern
 	 */
@@ -111,20 +112,22 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * Return a function that creates new path-matching {@code RequestPredicates} from pattern
-	 * Strings using the given {@link PathPatternParser}. This method can be used to specify a
-	 * non-default, customized {@code PathPatternParser} when resolving path patterns.
+	 * Return a function that creates new path-matching {@code RequestPredicates}
+	 * from pattern Strings using the given {@link PathPatternParser}.
+	 * <p>This method can be used to specify a non-default, customized
+	 * {@code PathPatternParser} when resolving path patterns.
 	 * @param patternParser the parser used to parse patterns given to the returned function
-	 * @return a function that resolves patterns Strings into path-matching
-	 * {@code RequestPredicate}s
+	 * @return a function that resolves a pattern String into a path-matching
+	 * {@code RequestPredicates} instance
 	 */
 	public static Function<String, RequestPredicate> pathPredicates(PathPatternParser patternParser) {
-		Assert.notNull(patternParser, "'patternParser' must not be null");
+		Assert.notNull(patternParser, "PathPatternParser must not be null");
 		return pattern -> new PathPatternPredicate(patternParser.parse(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the request's headers against the given headers predicate.
+	 * Return a {@code RequestPredicate} that tests the request's headers
+	 * against the given headers predicate.
 	 * @param headersPredicate a predicate that tests against the request headers
 	 * @return a predicate that tests against the given header predicate
 	 */

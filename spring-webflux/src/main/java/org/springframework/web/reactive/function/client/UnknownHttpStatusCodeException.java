@@ -30,8 +30,10 @@ public class UnknownHttpStatusCodeException extends WebClientResponseException {
 
 	private static final long serialVersionUID = 2407169540168185007L;
 
-	public UnknownHttpStatusCodeException(int statusCode, HttpHeaders headers,
-			byte[] responseBody, Charset responseCharset) {
+
+	public UnknownHttpStatusCodeException(
+			int statusCode, HttpHeaders headers, byte[] responseBody, Charset responseCharset) {
+
 		super("Unknown status code [" + statusCode + "]", statusCode, "",
 				headers, responseBody, responseCharset);
 	}

@@ -69,10 +69,6 @@ public class FormContentFilter extends OncePerRequestFilter {
 		this.formConverter = converter;
 	}
 
-	public FormHttpMessageConverter getFormConverter() {
-		return this.formConverter;
-	}
-
 	/**
 	 * The default character set to use for reading form data.
 	 * This is a shortcut for:<br>

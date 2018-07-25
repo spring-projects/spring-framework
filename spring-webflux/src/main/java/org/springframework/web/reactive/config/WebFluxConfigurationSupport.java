@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -95,25 +94,16 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Override
 	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
-		assertWebMvcNotEnabled(applicationContext);
+		if (applicationContext != null) {
+				Assert.state(!applicationContext.containsBean("mvcContentNegotiationManager"),
+						"The Java/XML config for Spring MVC and Spring WebFlux cannot both be enabled, " +
+						"e.g. via @EnableWebMvc and @EnableWebFlux, in the same application.");
+		}
 	}
 
 	@Nullable
 	public final ApplicationContext getApplicationContext() {
 		return this.applicationContext;
-	}
-
-	private static void assertWebMvcNotEnabled(@Nullable ApplicationContext applicationContext) {
-		try {
-			if (applicationContext != null) {
-				Assert.isNull(applicationContext.getType("mvcContentNegotiationManager"),
-						"The Java/XML config for Spring MVC and Spring WebFlux cannot both be enabled, " +
-								"e.g. via @EnableWebMvc and @EnableWebFlux, in the same application.");
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Expected...
-		}
 	}
 
 
@@ -349,7 +339,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override to add custom {@link Converter}s and {@link Formatter Converter}s and {@link Formatters}.
+	 * Override to add custom {@link Converter}s and {@link Formatter Formatter}s.
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
 	}

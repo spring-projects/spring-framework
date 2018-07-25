@@ -129,11 +129,6 @@ public abstract class AbstractBrokerMessageHandler
 		return this.destinationPrefixes;
 	}
 
-	@Override
-	public void setApplicationEventPublisher(@Nullable ApplicationEventPublisher publisher) {
-		this.eventPublisher = publisher;
-	}
-
 	/**
 	 * Whether the client must receive messages in the order of publication.
 	 * <p>By default messages sent to the {@code "clientOutboundChannel"} may
@@ -157,6 +152,11 @@ public abstract class AbstractBrokerMessageHandler
 	 */
 	public boolean isPreservePublishOrder() {
 		return this.preservePublishOrder;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(@Nullable ApplicationEventPublisher publisher) {
+		this.eventPublisher = publisher;
 	}
 
 	@Nullable

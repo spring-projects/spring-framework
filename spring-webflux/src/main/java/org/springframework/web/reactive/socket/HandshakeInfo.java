@@ -134,7 +134,7 @@ public class HandshakeInfo {
 
 	/**
 	 * A log prefix used in the handshake to correlate log messages, if any.
-	 * @return a log prefix, or {@code null}
+	 * @return a log prefix, or {@code null} if not specified
 	 * @since 5.1
 	 */
 	@Nullable

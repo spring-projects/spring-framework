@@ -98,14 +98,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder method(HttpMethod method) {
-		Assert.notNull(method, "'method' must not be null");
+		Assert.notNull(method, "HttpMethod must not be null");
 		this.methodName = method.name();
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder uri(URI uri) {
-		Assert.notNull(uri, "'uri' must not be null");
+		Assert.notNull(uri, "URI must not be null");
 		this.uri = uri;
 		return this;
 	}

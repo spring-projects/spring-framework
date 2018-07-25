@@ -222,17 +222,13 @@ public class SubProtocolWebSocketHandler
 	}
 
 	/**
-	 * Set the maximum time allowed in milliseconds after the WebSocket
-	 * connection is established and before the first sub-protocol message is
-	 * received.
-	 *
+	 * Set the maximum time allowed in milliseconds after the WebSocket connection
+	 * is established and before the first sub-protocol message is received.
 	 * <p>This handler is for WebSocket connections that use a sub-protocol.
 	 * Therefore, we expect the client to send at least one sub-protocol message
 	 * in the beginning, or else we assume the connection isn't doing well, e.g.
 	 * proxy issue, slow network, and can be closed.
-	 *
 	 * <p>By default this is set to {@code 60,000} (1 minute).
-	 *
 	 * @param timeToFirstMessage the maximum time allowed in milliseconds
 	 * @since 5.1
 	 * @see #checkSessions()
