@@ -155,17 +155,14 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				return;
 			}
 
-			int semicolonIndex = uriVarValue.indexOf(';');
-			if (semicolonIndex != -1 && semicolonIndex != 0) {
-				uriVariables.put(uriVarKey, uriVarValue.substring(0, semicolonIndex));
-			}
-
 			String matrixVariables;
-			if (semicolonIndex == -1 || semicolonIndex == 0 || equalsIndex < semicolonIndex) {
-				matrixVariables = uriVarValue;
+			int semicolonIndex = uriVarValue.indexOf(';');
+			if (semicolonIndex > 0) {
+				uriVariables.put(uriVarKey, uriVarValue.substring(0, semicolonIndex));
+				matrixVariables = uriVarValue.substring(semicolonIndex + 1);
 			}
 			else {
-				matrixVariables = uriVarValue.substring(semicolonIndex + 1);
+				matrixVariables = uriVarValue;
 			}
 
 			MultiValueMap<String, String> vars = WebUtils.parseMatrixVariables(matrixVariables);
