@@ -240,13 +240,33 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Configure the {@link ServerCodecConfigurer} to set on the
-	 * {@link ServerWebExchange WebServerExchange}.
+	 * Whether a {@code WebSessionManager} is configured or not, either
+	 * detected from an {@code ApplicationContext} or explicitly configured via
+	 * {@link #sessionManager(WebSessionManager)}.
+	 * @since 5.0.9
+	 */
+	public boolean hasSessionManager() {
+		return this.sessionManager != null;
+	}
+
+	/**
+	 * Configure the {@link ServerCodecConfigurer} to set on the {@code WebServerExchange}.
 	 * @param codecConfigurer the codec configurer
 	 */
 	public WebHttpHandlerBuilder codecConfigurer(ServerCodecConfigurer codecConfigurer) {
 		this.codecConfigurer = codecConfigurer;
 		return this;
+	}
+
+
+	/**
+	 * Whether a {@code ServerCodecConfigurer} is configured or not, either
+	 * detected from an {@code ApplicationContext} or explicitly configured via
+	 * {@link #codecConfigurer(ServerCodecConfigurer)}.
+	 * @since 5.0.9
+	 */
+	public boolean hasCodecConfigurer() {
+		return this.codecConfigurer != null;
 	}
 
 	/**
@@ -257,6 +277,16 @@ public final class WebHttpHandlerBuilder {
 	public WebHttpHandlerBuilder localeContextResolver(LocaleContextResolver localeContextResolver) {
 		this.localeContextResolver = localeContextResolver;
 		return this;
+	}
+
+	/**
+	 * Whether a {@code LocaleContextResolver} is configured or not, either
+	 * detected from an {@code ApplicationContext} or explicitly configured via
+	 * {@link #localeContextResolver(LocaleContextResolver)}.
+	 * @since 5.0.9
+	 */
+	public boolean hasLocaleContextResolver() {
+		return this.localeContextResolver != null;
 	}
 
 
