@@ -161,7 +161,7 @@ public abstract class AbstractFactoryBean<T>
 	}
 
 	/**
-	 * Determine an 'eager singleton' instance, exposed in case of a
+	 * Determine an 'early singleton' instance, exposed in case of a
 	 * circular reference. Not called in a non-circular scenario.
 	 */
 	@SuppressWarnings("unchecked")
