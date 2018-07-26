@@ -84,13 +84,13 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 
 	/**
 	 * Determine which classes should be imported based on the given {@code AdviceMode}.
-	 * <p>Returning {@code null} from this method indicates that the {@code AdviceMode} could
-	 * not be handled or was unknown and that an {@code IllegalArgumentException} should
-	 * be thrown.
+	 * <p>Returning {@code null} from this method indicates that the {@code AdviceMode}
+	 * could not be handled or was unknown and that an {@code IllegalArgumentException}
+	 * should be thrown.
 	 * @param adviceMode the value of the {@linkplain #getAdviceModeAttributeName()
 	 * advice mode attribute} for the annotation specified via generics.
-	 * @return array containing classes to import; empty array if none, {@code null} if
-	 * the given {@code AdviceMode} is unknown.
+	 * @return array containing classes to import (empty array if none;
+	 * {@code null} if the given {@code AdviceMode} is unknown)
 	 */
 	@Nullable
 	protected abstract String[] selectImports(AdviceMode adviceMode);
