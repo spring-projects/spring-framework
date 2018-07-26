@@ -72,6 +72,7 @@ public abstract class BeanUtils {
 
 
 	/**
+	 * test
 	 * Convenience method to instantiate a class using its no-arg constructor.
 	 * @param clazz class to instantiate
 	 * @return the new instance
