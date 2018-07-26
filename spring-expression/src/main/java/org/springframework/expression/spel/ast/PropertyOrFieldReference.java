@@ -322,8 +322,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				}
 			}
 		}
-		List<PropertyAccessor> resolvers = new ArrayList<>();
-		resolvers.addAll(specificAccessors);
+		List<PropertyAccessor> resolvers = new ArrayList<>(specificAccessors);
 		generalAccessors.removeAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
 		return resolvers;
