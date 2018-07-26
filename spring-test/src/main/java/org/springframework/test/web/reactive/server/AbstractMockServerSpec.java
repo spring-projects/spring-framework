@@ -86,7 +86,7 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 		if (!CollectionUtils.isEmpty(this.filters)) {
 			builder.filters(theFilters -> theFilters.addAll(0, this.filters));
 		}
-		if (this.sessionManager != null) {
+		if (!builder.hasSessionManager() && this.sessionManager != null) {
 			builder.sessionManager(this.sessionManager);
 		}
 		if (!CollectionUtils.isEmpty(this.configurers)) {
