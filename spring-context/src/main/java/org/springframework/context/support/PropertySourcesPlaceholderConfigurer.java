@@ -202,7 +202,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	 * @since 4.0
 	 */
 	public PropertySources getAppliedPropertySources() throws IllegalStateException {
-		Assert.state(this.appliedPropertySources != null, "PropertySources have not get been applied");
+		Assert.state(this.appliedPropertySources != null, "PropertySources have not yet been applied");
 		return this.appliedPropertySources;
 	}
 
