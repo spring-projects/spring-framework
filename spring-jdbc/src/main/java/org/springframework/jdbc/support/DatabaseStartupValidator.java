@@ -135,7 +135,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
 					}
-					if (logger.isWarnEnabled()) {
+					if (logger.isInfoEnabled()) {
 						float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;
 						if (rest > this.interval) {
 							logger.info("Database has not started up yet - retrying in " + this.interval +
