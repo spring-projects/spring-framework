@@ -717,7 +717,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				@Override
 				public void run() {
 					try {
-						Thread.sleep(TimeUnit.SECONDS.toMillis(startupDelay));
+						TimeUnit.SECONDS.sleep(startupDelay);
 					}
 					catch (InterruptedException ex) {
 						Thread.currentThread().interrupt();

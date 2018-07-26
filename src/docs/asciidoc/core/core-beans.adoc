@@ -8441,12 +8441,12 @@ simple class that extends Spring's `ApplicationEvent` base class:
 	public class BlackListEvent extends ApplicationEvent {
 
 		private final String address;
-		private final String test;
+		private final String content;
 
-		public BlackListEvent(Object source, String address, String test) {
+		public BlackListEvent(Object source, String address, String content) {
 			super(source);
 			this.address = address;
-			this.test = test;
+			this.content = content;
 		}
 
 		// accessor and other methods...
@@ -8474,10 +8474,9 @@ example demonstrates such a class:
 			this.publisher = publisher;
 		}
 
-		public void sendEmail(String address, String text) {
+		public void sendEmail(String address, String content) {
 			if (blackList.contains(address)) {
-				BlackListEvent event = new BlackListEvent(this, address, text);
-				publisher.publishEvent(event);
+				publisher.publishEvent(new BlackListEvent(this, address, content));
 				return;
 			}
 			// send email...
