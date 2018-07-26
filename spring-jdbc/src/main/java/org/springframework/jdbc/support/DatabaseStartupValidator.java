@@ -104,8 +104,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		DataSource dataSource = this.dataSource;
-		if (dataSource == null) {
+		if (this.dataSource == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
 		if (this.validationQuery == null) {
@@ -122,10 +121,10 @@ public class DatabaseStartupValidator implements InitializingBean {
 				Connection con = null;
 				Statement stmt = null;
 				try {
-					con = dataSource.getConnection();
+					con = this.dataSource.getConnection();
 					if (con == null) {
 						throw new CannotGetJdbcConnectionException("Failed to execute validation query: " +
-								"DataSource returned null from getConnection(): " + dataSource);
+								"DataSource returned null from getConnection(): " + this.dataSource);
 					}
 					stmt = con.createStatement();
 					stmt.execute(this.validationQuery);
@@ -150,7 +149,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 				}
 
 				if (!validated) {
-					Thread.sleep(TimeUnit.SECONDS.toMillis(this.interval));
+					TimeUnit.SECONDS.sleep(this.interval);
 				}
 			}
 
