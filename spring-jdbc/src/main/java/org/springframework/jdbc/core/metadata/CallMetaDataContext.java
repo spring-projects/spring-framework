@@ -362,8 +362,7 @@ public class CallMetaDataContext {
 		}
 		setOutParameterNames(outParamNames);
 
-		List<SqlParameter> workParams = new ArrayList<>();
-		workParams.addAll(declaredReturnParams);
+		List<SqlParameter> workParams = new ArrayList<>(declaredReturnParams);
 		if (!provider.isProcedureColumnMetaDataUsed()) {
 			workParams.addAll(declaredParams.values());
 			return workParams;
