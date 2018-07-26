@@ -26,9 +26,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Selects which implementation of {@link AbstractCachingConfiguration} should be used
- * based on the value of {@link EnableCaching#mode} on the importing {@code @Configuration}
- * class.
+ * Selects which implementation of {@link AbstractCachingConfiguration} should
+ * be used based on the value of {@link EnableCaching#mode} on the importing
+ * {@code @Configuration} class.
  *
  * <p>Detects the presence of JSR-107 and enables JCache support accordingly.
  *
@@ -58,9 +58,9 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 
 
 	/**
-	 * {@inheritDoc}
-	 * @return {@link ProxyCachingConfiguration} or {@code AspectJCacheConfiguration} for
-	 * {@code PROXY} and {@code ASPECTJ} values of {@link EnableCaching#mode()}, respectively
+	 * Returns {@link ProxyCachingConfiguration} or {@code AspectJCachingConfiguration}
+	 * for {@code PROXY} and {@code ASPECTJ} values of {@link EnableCaching#mode()},
+	 * respectively. Potentially includes corresponding JCache configuration as well.
 	 */
 	@Override
 	public String[] selectImports(AdviceMode adviceMode) {
@@ -79,7 +79,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 * <p>Take care of adding the necessary JSR-107 import if it is available.
 	 */
 	private String[] getProxyImports() {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<String>(3);
 		result.add(AutoProxyRegistrar.class.getName());
 		result.add(ProxyCachingConfiguration.class.getName());
 		if (jsr107Present && jcacheImplPresent) {
@@ -93,7 +93,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 * <p>Take care of adding the necessary JSR-107 import if it is available.
 	 */
 	private String[] getAspectJImports() {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<String>(2);
 		result.add(CACHE_ASPECT_CONFIGURATION_CLASS_NAME);
 		if (jsr107Present && jcacheImplPresent) {
 			result.add(JCACHE_ASPECT_CONFIGURATION_CLASS_NAME);
