@@ -284,6 +284,10 @@ public class RequestMappingInfoHandlerMappingTests {
 		matrixVariables = getMatrixVariables(exchange, "foo");
 		uriVariables = getUriTemplateVariables(exchange);
 
+		// Unlike Spring MVC, WebFlux currently does not support APIs like
+		// "/foo/{ids}" and URL "/foo/id=1;id=2;id=3" where the whole path
+		// segment is a sequence of name-value pairs.
+
 		assertNotNull(matrixVariables);
 		assertEquals(1, matrixVariables.size());
 		assertEquals("c", matrixVariables.getFirst("b"));
