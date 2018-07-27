@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 				}
 				catch (FileNotFoundException ex) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Couldn't find XML schema [" + systemId + "]: " + resource, ex);
+						logger.debug("Could not find XML schema [" + systemId + "]: " + resource, ex);
 					}
 				}
 			}
@@ -134,9 +134,11 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * Load the specified schema mappings lazily.
 	 */
 	private Map<String, String> getSchemaMappings() {
-		if (this.schemaMappings == null) {
+		Map<String, String> schemaMappings = this.schemaMappings;
+		if (schemaMappings == null) {
 			synchronized (this) {
-				if (this.schemaMappings == null) {
+				schemaMappings = this.schemaMappings;
+				if (schemaMappings == null) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
 					}
@@ -146,7 +148,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Loaded schema mappings: " + mappings);
 						}
-						Map<String, String> schemaMappings = new ConcurrentHashMap<String, String>(mappings.size());
+						schemaMappings = new ConcurrentHashMap<String, String>(mappings.size());
 						CollectionUtils.mergePropertiesIntoMap(mappings, schemaMappings);
 						this.schemaMappings = schemaMappings;
 					}
@@ -157,7 +159,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 				}
 			}
 		}
-		return this.schemaMappings;
+		return schemaMappings;
 	}
 
 

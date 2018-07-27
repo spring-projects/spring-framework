@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,16 +147,21 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * Load the specified NamespaceHandler mappings lazily.
 	 */
 	private Map<String, Object> getHandlerMappings() {
-		if (this.handlerMappings == null) {
+		Map<String, Object> handlerMappings = this.handlerMappings;
+		if (handlerMappings == null) {
 			synchronized (this) {
-				if (this.handlerMappings == null) {
+				handlerMappings = this.handlerMappings;
+				if (handlerMappings == null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Loading NamespaceHandler mappings from [" + this.handlerMappingsLocation + "]");
+					}
 					try {
 						Properties mappings =
 								PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
 						if (logger.isDebugEnabled()) {
 							logger.debug("Loaded NamespaceHandler mappings: " + mappings);
 						}
-						Map<String, Object> handlerMappings = new ConcurrentHashMap<String, Object>(mappings.size());
+						handlerMappings = new ConcurrentHashMap<String, Object>(mappings.size());
 						CollectionUtils.mergePropertiesIntoMap(mappings, handlerMappings);
 						this.handlerMappings = handlerMappings;
 					}
@@ -167,7 +172,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				}
 			}
 		}
-		return this.handlerMappings;
+		return handlerMappings;
 	}
 
 
