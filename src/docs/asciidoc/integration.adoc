@@ -950,14 +950,18 @@ plugging in third-party or custom solutions here.
 
 The Spring Framework provides two choices for making calls to REST endpoints:
 
-* <<rest-resttemplate>> -- the original Spring REST client with an API similar to other
-template classes in Spring such as `JdbcTemplate`, `JmsTemplate` and others.
-`RestTemplate` has a synchronous API and relies on blocking I/O which is okay for
-client scenarios with low concurrency.
-* <<web-reactive.adoc#webflux-client,WebClient>> -- reactive client with a functional,
-fluent API from the `spring-webflux` module. It relies on non-blocking I/O which allows it
-to support high concurrency more efficiently (i.e. using a small number of threads) than the
-`RestTemplate`. `WebClient` is a natural fit for streaming scenarios.
+* <<rest-resttemplate>> -- the original Spring REST client with a synchronous, template
+method API.
+* <<web-reactive.adoc#webflux-client,WebClient>> -- non-blocking, reactive alternative
+that supports both sync and async, as well as streaming scenarios.
+
+[NOTE]
+====
+As of 5.0, the non-blocking, reactive `WebClient` offers a modern alternative to the
+`RestTemplate` with efficient support for both sync and async, as well as streaming
+scenarios. The `RestTemplate` will be deprecated in a future version and will not have
+major new features gong forward.
+====
 
 
 [[rest-resttemplate]]
