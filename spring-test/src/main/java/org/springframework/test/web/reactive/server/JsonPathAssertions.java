@@ -176,4 +176,11 @@ public class JsonPathAssertions {
 		return this.bodySpec;
 	}
 
+
+	@Override
+	public boolean equals(Object obj) {
+		throw new AssertionError("Object#equals is disabled " +
+				"to avoid being used in error instead of JsonPathAssertions#isEqualTo(String).");
+	}
+
 }

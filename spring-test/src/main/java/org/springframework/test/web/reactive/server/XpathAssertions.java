@@ -163,7 +163,6 @@ public class XpathAssertions {
 		});
 	}
 
-
 	private WebTestClient.BodyContentSpec assertWith(CheckedExceptionTask task) {
 		try {
 			task.run();
@@ -187,6 +186,13 @@ public class XpathAssertions {
 				.map(MimeType::getCharset)
 				.orElse(StandardCharsets.UTF_8)
 				.name();
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		throw new AssertionError("Object#equals is disabled " +
+				"to avoid being used in error instead of XPathAssertions#isEqualTo(String).");
 	}
 
 
