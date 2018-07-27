@@ -503,8 +503,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						throw ex;
 					}
 					// Probably a class name with a placeholder: let's ignore it for type matching purposes.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -513,8 +513,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						throw ex;
 					}
 					// Probably some metadata with a placeholder: let's ignore it for type matching purposes.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -541,8 +541,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// Shouldn't happen - probably a result of circular reference resolution...
-				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to check manually registered singleton with name '" + beanName + "'", ex);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Failed to check manually registered singleton with name '" + beanName + "'", ex);
 				}
 			}
 		}
@@ -586,8 +586,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					BeanCreationException bce = (BeanCreationException) rootCause;
 					String exBeanName = bce.getBeanName();
 					if (exBeanName != null && isCurrentlyInCreation(exBeanName)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring match to currently created bean '" + exBeanName + "': " +
+						if (logger.isTraceEnabled()) {
+							logger.trace("Ignoring match to currently created bean '" + exBeanName + "': " +
 									ex.getMessage());
 						}
 						onSuppressedException(ex);
@@ -790,8 +790,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void preInstantiateSingletons() throws BeansException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Pre-instantiating singletons in " + this);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Pre-instantiating singletons in " + this);
 		}
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.

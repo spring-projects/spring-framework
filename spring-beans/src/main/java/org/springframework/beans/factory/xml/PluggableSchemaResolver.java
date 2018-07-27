@@ -119,14 +119,14 @@ public class PluggableSchemaResolver implements EntityResolver {
 					InputSource source = new InputSource(resource.getInputStream());
 					source.setPublicId(publicId);
 					source.setSystemId(systemId);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found XML schema [" + systemId + "] in classpath: " + resourceLocation);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Found XML schema [" + systemId + "] in classpath: " + resourceLocation);
 					}
 					return source;
 				}
 				catch (FileNotFoundException ex) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Couldn't find XML schema [" + systemId + "]: " + resource, ex);
+						logger.debug("Could not find XML schema [" + systemId + "]: " + resource, ex);
 					}
 				}
 			}
@@ -143,14 +143,14 @@ public class PluggableSchemaResolver implements EntityResolver {
 			synchronized (this) {
 				schemaMappings = this.schemaMappings;
 				if (schemaMappings == null) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
 					}
 					try {
 						Properties mappings =
 								PropertiesLoaderUtils.loadAllProperties(this.schemaMappingsLocation, this.classLoader);
-						if (logger.isDebugEnabled()) {
-							logger.debug("Loaded schema mappings: " + mappings);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Loaded schema mappings: " + mappings);
 						}
 						Map<String, String> mappingsToUse = new ConcurrentHashMap<>(mappings.size());
 						CollectionUtils.mergePropertiesIntoMap(mappings, mappingsToUse);

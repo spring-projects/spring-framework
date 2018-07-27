@@ -247,6 +247,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public int loadBeanDefinitions(EncodedResource encodedResource, @Nullable String prefix)
 			throws BeanDefinitionStoreException {
 
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loading properties bean definitions from " + encodedResource);
+		}
+
 		Properties props = new Properties();
 		try {
 			try (InputStream is = encodedResource.getResource().getInputStream()) {
@@ -257,7 +261,12 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					getPropertiesPersister().load(props, is);
 				}
 			}
-			return registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
+
+			int count = registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loaded " + count + " bean definitions from " + encodedResource);
+			}
+			return count;
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException("Could not parse properties from " + encodedResource.getResource(), ex);
@@ -368,8 +377,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				}
 				if (sepIdx != -1) {
 					String beanName = nameAndProperty.substring(0, sepIdx);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found bean name '" + beanName + "'");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Found bean name '" + beanName + "'");
 					}
 					if (!getRegistry().containsBeanDefinition(beanName)) {
 						// If we haven't already registered it...
@@ -468,8 +477,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			}
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering bean definition for bean name '" + beanName + "' with " + pvs);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Registering bean definition for bean name '" + beanName + "' with " + pvs);
 		}
 
 		// Just use default parent if we're not dealing with the parent itself,

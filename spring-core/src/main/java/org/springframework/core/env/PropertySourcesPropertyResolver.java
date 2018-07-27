@@ -92,8 +92,8 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 				}
 			}
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Could not find key '" + key + "' in any property source");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Could not find key '" + key + "' in any property source");
 		}
 		return null;
 	}
