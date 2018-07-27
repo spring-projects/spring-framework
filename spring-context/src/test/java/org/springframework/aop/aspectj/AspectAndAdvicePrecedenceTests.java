@@ -49,9 +49,9 @@ public class AspectAndAdvicePrecedenceTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		highPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("highPrecedenceAspect");
 		lowPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("lowPrecedenceAspect");
 		highPrecedenceSpringAdvice = (SimpleSpringBeforeAdvice) ctx.getBean("highPrecedenceSpringAdvice");
@@ -59,7 +59,6 @@ public class AspectAndAdvicePrecedenceTests {
 		testBean = (ITestBean) ctx.getBean("testBean");
 	}
 
-	// ========== end of test case set up, start of tests proper ===================
 
 	@Test
 	public void testAdviceOrder() {

@@ -40,7 +40,7 @@ public class AtAspectJAnnotationBindingTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 		testBean = (AnnotatedTestBean) ctx.getBean("testBean");
 	}
@@ -84,7 +84,7 @@ class ResourceArrayFactoryBean implements FactoryBean<Object> {
 
 	@Override
 	@TestAnnotation("some value")
-	public Object getObject() throws Exception {
+	public Object getObject() {
 		return new Resource[0];
 	}
 

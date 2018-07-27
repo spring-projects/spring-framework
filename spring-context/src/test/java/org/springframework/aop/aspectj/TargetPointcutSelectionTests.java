@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.aop.aspectj;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,11 +46,9 @@ public class TargetPointcutSelectionTests {
 
 
 	@Before
-	@SuppressWarnings("resource")
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-
 		testImpl1 = (TestInterface) ctx.getBean("testImpl1");
 		testImpl2 = (TestInterface) ctx.getBean("testImpl2");
 		testAspectForTestImpl1 = (TestAspect) ctx.getBean("testAspectForTestImpl1");
