@@ -822,12 +822,16 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 			// We must always proxy equals, to direct calls to this.
 			if (AopUtils.isEqualsMethod(method)) {
-				logger.debug("Found 'equals' method: " + method);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found 'equals' method: " + method);
+				}
 				return INVOKE_EQUALS;
 			}
 			// We must always calculate hashCode based on the proxy.
 			if (AopUtils.isHashCodeMethod(method)) {
-				logger.debug("Found 'hashCode' method: " + method);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found 'hashCode' method: " + method);
+				}
 				return INVOKE_HASHCODE;
 			}
 			Class<?> targetClass = this.advised.getTargetClass();

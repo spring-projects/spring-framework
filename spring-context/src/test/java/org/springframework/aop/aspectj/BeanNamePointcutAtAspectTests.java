@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,7 @@ public class BeanNamePointcutAtAspectTests {
 
 
 	@org.junit.Before
-	@SuppressWarnings("resource")
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
@@ -54,6 +53,7 @@ public class BeanNamePointcutAtAspectTests {
 		testBean1 = (ITestBean) ctx.getBean("testBean1");
 		testBean3 = (ITestBean) ctx.getBean("testBean3");
 	}
+
 
 	@Test
 	public void testMatchingBeanName() {

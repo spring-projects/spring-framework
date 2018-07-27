@@ -105,7 +105,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private boolean namespaceAware = false;
 
-	private Class<?> documentReaderClass = DefaultBeanDefinitionDocumentReader.class;
+	private Class<? extends BeanDefinitionDocumentReader> documentReaderClass =
+			DefaultBeanDefinitionDocumentReader.class;
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
@@ -313,7 +314,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
 		Assert.notNull(encodedResource, "EncodedResource must not be null");
 		if (logger.isInfoEnabled()) {
-			logger.info("Loading XML bean definitions from " + encodedResource.getResource());
+			logger.info("Loading XML bean definitions from " + encodedResource);
 		}
 
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
@@ -429,9 +430,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				getValidationModeForResource(resource), isNamespaceAware());
 	}
 
-
 	/**
-	 * Gets the validation mode for the specified {@link Resource}. If no explicit
+	 * Get the validation mode for the specified {@link Resource}. If no explicit
 	 * validation mode has been configured then the validation mode is
 	 * {@link #detectValidationMode detected}.
 	 * <p>Override this method if you would like full control over the validation
@@ -453,7 +453,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Detects which kind of validation to perform on the XML file identified
+	 * Detect which kind of validation to perform on the XML file identified
 	 * by the supplied {@link Resource}. If the file has a {@code DOCTYPE}
 	 * definition then DTD validation is used otherwise XSD validation is assumed.
 	 * <p>Override this method if you would like to customize resolution
@@ -515,7 +515,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see #setDocumentReaderClass
 	 */
 	protected BeanDefinitionDocumentReader createBeanDefinitionDocumentReader() {
-		return BeanDefinitionDocumentReader.class.cast(BeanUtils.instantiateClass(this.documentReaderClass));
+		return BeanUtils.instantiateClass(this.documentReaderClass);
 	}
 
 	/**

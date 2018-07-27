@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,29 +30,28 @@ public class PropertiesBeanDefinitionReaderTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-	private final PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(
-			beanFactory);
+	private final PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(this.beanFactory);
 
 
 	@Test
 	public void withSimpleConstructorArg() {
 		this.reader.loadBeanDefinitions(new ClassPathResource("simpleConstructorArg.properties", getClass()));
-		TestBean bean = (TestBean)this.beanFactory.getBean("testBean");
+		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertEquals("Rob Harrop", bean.getName());
 	}
 
 	@Test
-	public void withConstructorArgRef() throws Exception {
+	public void withConstructorArgRef() {
 		this.reader.loadBeanDefinitions(new ClassPathResource("refConstructorArg.properties", getClass()));
-		TestBean rob = (TestBean)this.beanFactory.getBean("rob");
-		TestBean sally = (TestBean)this.beanFactory.getBean("sally");
+		TestBean rob = (TestBean) this.beanFactory.getBean("rob");
+		TestBean sally = (TestBean) this.beanFactory.getBean("sally");
 		assertEquals(sally, rob.getSpouse());
 	}
 
 	@Test
-	public void withMultipleConstructorsArgs() throws Exception {
+	public void withMultipleConstructorsArgs() {
 		this.reader.loadBeanDefinitions(new ClassPathResource("multiConstructorArgs.properties", getClass()));
-		TestBean bean = (TestBean)this.beanFactory.getBean("testBean");
+		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertEquals("Rob Harrop", bean.getName());
 		assertEquals(23, bean.getAge());
 	}
