@@ -152,9 +152,8 @@ public class PluggableSchemaResolver implements EntityResolver {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Loaded schema mappings: " + mappings);
 						}
-						Map<String, String> mappingsToUse = new ConcurrentHashMap<>(mappings.size());
-						CollectionUtils.mergePropertiesIntoMap(mappings, mappingsToUse);
-						schemaMappings = mappingsToUse;
+						schemaMappings = new ConcurrentHashMap<>(mappings.size());
+						CollectionUtils.mergePropertiesIntoMap(mappings, schemaMappings);
 						this.schemaMappings = schemaMappings;
 					}
 					catch (IOException ex) {
