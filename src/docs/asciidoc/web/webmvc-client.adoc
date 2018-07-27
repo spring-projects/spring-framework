@@ -18,7 +18,7 @@ libraries.
 As of 5.0, the non-blocking, reactive `WebClient` offers a modern alternative to the
 `RestTemplate` with efficient support for both sync and async, as well as streaming
 scenarios. The `RestTemplate` will be deprecated in a future version and will not have
-major new features gong forward.
+major new features added going forward.
 ====
 
 See <<integration.adoc#rest-client-access,RestTemplate>> for details.
