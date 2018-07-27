@@ -195,6 +195,11 @@ public class XpathAssertions {
 				"to avoid being used in error instead of XPathAssertions#isEqualTo(String).");
 	}
 
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
 
 	/**
 	 * Lets us be able to use lambda expressions that could throw checked exceptions, since

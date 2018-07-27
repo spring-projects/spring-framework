@@ -183,4 +183,9 @@ public class JsonPathAssertions {
 				"to avoid being used in error instead of JsonPathAssertions#isEqualTo(String).");
 	}
 
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
 }
