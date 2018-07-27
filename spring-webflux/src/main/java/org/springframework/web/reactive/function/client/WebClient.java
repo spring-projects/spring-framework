@@ -43,21 +43,18 @@ import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * A non-blocking, reactive client for performing HTTP requests with Reactive
- * Streams back pressure. Provides a higher level, common API over HTTP client
- * libraries. Reactor Netty is used by default but other clients may be plugged
- * in with a {@link ClientHttpConnector}.
+ * Non-blocking, reactive client to perform HTTP requests, exposing a fluent,
+ * reactive API over underlying HTTP client libraries such as Reactor Netty.
  *
- * <p>Use one of the static factory methods {@link #create()} or
- * {@link #create(String)} or obtain a {@link WebClient#builder()} to create an
- * instance.
+ * <p>Use static factory methods {@link #create()} or {@link #create(String)},
+ * or {@link WebClient#builder()} to prepare an instance.
  *
- * <p>For examples with a response body, see the Javadoc for:
+ * <p>For examples with a response body see:
  * <ul>
  * <li>{@link RequestHeadersSpec#retrieve() retrieve()}
  * <li>{@link RequestHeadersSpec#exchange() exchange()}
  * </ul>
- * For examples with a request body see:
+ * <p>For examples with a request body see:
  * <ul>
  * <li>{@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)}
  * <li>{@link RequestBodySpec#syncBody(Object) syncBody(Object)}
