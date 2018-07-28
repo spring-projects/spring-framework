@@ -280,8 +280,8 @@ public class ModelAndView {
 
 	/**
 	 * Add an attribute to the model.
-	 * @param attributeName name of the object to add to the model
-	 * @param attributeValue object to add to the model (never {@code null})
+	 * @param attributeName name of the object to add to the model (never {@code null})
+	 * @param attributeValue object to add to the model (can be {@code null})
 	 * @see ModelMap#addAttribute(String, Object)
 	 * @see #getModelMap()
 	 */
