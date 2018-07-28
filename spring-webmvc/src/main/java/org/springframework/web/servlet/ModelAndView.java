@@ -19,6 +19,7 @@ package org.springframework.web.servlet;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
@@ -285,7 +286,7 @@ public class ModelAndView {
 	 * @see ModelMap#addAttribute(String, Object)
 	 * @see #getModelMap()
 	 */
-	public ModelAndView addObject(String attributeName, Object attributeValue) {
+	public ModelAndView addObject(@NonNull String attributeName, @Nullable Object attributeValue) {
 		getModelMap().addAttribute(attributeName, attributeValue);
 		return this;
 	}
@@ -296,7 +297,7 @@ public class ModelAndView {
 	 * @see ModelMap#addAttribute(Object)
 	 * @see #getModelMap()
 	 */
-	public ModelAndView addObject(Object attributeValue) {
+	public ModelAndView addObject(@NonNull Object attributeValue) {
 		getModelMap().addAttribute(attributeValue);
 		return this;
 	}
