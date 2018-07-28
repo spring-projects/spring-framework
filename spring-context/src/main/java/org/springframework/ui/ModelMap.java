@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.core.Conventions;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -51,7 +52,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * under the supplied name.
 	 * @see #addAttribute(String, Object)
 	 */
-	public ModelMap(String attributeName, Object attributeValue) {
+	public ModelMap(@NonNull String attributeName, @Nullable Object attributeValue) {
 		addAttribute(attributeName, attributeValue);
 	}
 
@@ -61,7 +62,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * object.
 	 * @see #addAttribute(Object)
 	 */
-	public ModelMap(Object attributeValue) {
+	public ModelMap(@NonNull Object attributeValue) {
 		addAttribute(attributeValue);
 	}
 
@@ -71,7 +72,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * @param attributeName the name of the model attribute (never {@code null})
 	 * @param attributeValue the model attribute value (can be {@code null})
 	 */
-	public ModelMap addAttribute(String attributeName, @Nullable Object attributeValue) {
+	public ModelMap addAttribute(@NonNull String attributeName, @Nullable Object attributeValue) {
 		Assert.notNull(attributeName, "Model attribute name must not be null");
 		put(attributeName, attributeValue);
 		return this;
@@ -86,7 +87,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * than for empty collections as is already done by JSTL tags.</i>
 	 * @param attributeValue the model attribute value (never {@code null})
 	 */
-	public ModelMap addAttribute(Object attributeValue) {
+	public ModelMap addAttribute(@NonNull Object attributeValue) {
 		Assert.notNull(attributeValue, "Model object must not be null");
 		if (attributeValue instanceof Collection && ((Collection<?>) attributeValue).isEmpty()) {
 			return this;
