@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
 /**
@@ -77,10 +79,13 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	public static final String DISABLED_ATTRIBUTE = "disabled";
 
 
+	@Nullable
 	private TagWriter tagWriter;
 
+	@Nullable
 	private String name;
 
+	@Nullable
 	private String value;
 
 	private boolean disabled;
@@ -97,6 +102,7 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	 * Set the value of the '{@code name}' attribute.
 	 */
 	@Override
+	@Nullable
 	public String getName() {
 		return this.name;
 	}
@@ -104,13 +110,14 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	/**
 	 * Set the value of the '{@code value}' attribute.
 	 */
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = value;
 	}
 
 	/**
 	 * Get the value of the '{@code value}' attribute.
 	 */
+	@Nullable
 	public String getValue() {
 		return this.value;
 	}
@@ -150,13 +157,13 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	 * when the value is written.
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
-		String valueToUse = (getValue() != null) ? getValue() : getDefaultValue();
+		String valueToUse = (getValue() != null ? getValue() : getDefaultValue());
 		tagWriter.writeAttribute("value", processFieldValue(getName(), valueToUse, getType()));
 	}
 
 	/**
 	 * Return the default value.
-	 * @return The default value if none supplied.
+	 * @return the default value if none supplied
 	 */
 	protected String getDefaultValue() {
 		return "Submit";
@@ -176,6 +183,7 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	 */
 	@Override
 	public int doEndTag() throws JspException {
+		Assert.state(this.tagWriter != null, "No TagWriter set");
 		this.tagWriter.endTag();
 		return EVAL_PAGE;
 	}
