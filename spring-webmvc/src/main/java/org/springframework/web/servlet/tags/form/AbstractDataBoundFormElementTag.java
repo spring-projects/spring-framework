@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,7 +229,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	protected final String processFieldValue(String name, String value, String type) {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
-		if (processor != null && (request instanceof HttpServletRequest)) {
+		if (processor != null && request instanceof HttpServletRequest) {
 			value = processor.processFormFieldValue((HttpServletRequest) request, name, value, type);
 		}
 		return value;

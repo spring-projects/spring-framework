@@ -100,7 +100,7 @@ class OptionWriter {
 
 
 	/**
-	 * Creates a new {@code OptionWriter} for the supplied {@code objectSource}.
+	 * Create a new {@code OptionWriter} for the supplied {@code objectSource}.
 	 * @param optionSource the source of the {@code options} (never {@code null})
 	 * @param bindStatus the {@link BindStatus} for the bound value (never {@code null})
 	 * @param valueProperty the name of the property used to render {@code option} values
@@ -145,7 +145,7 @@ class OptionWriter {
 	}
 
 	/**
-	 * Renders the inner '{@code option}' tags using the {@link #optionSource}.
+	 * Render the inner '{@code option}' tags using the {@link #optionSource}.
 	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
 	 */
 	private void renderFromArray(TagWriter tagWriter) throws JspException {
@@ -153,7 +153,7 @@ class OptionWriter {
 	}
 
 	/**
-	 * Renders the inner '{@code option}' tags using the supplied
+	 * Render the inner '{@code option}' tags using the supplied
 	 * {@link Map} as the source.
 	 * @see #renderOption(TagWriter, Object, Object, Object)
 	 */
@@ -173,7 +173,7 @@ class OptionWriter {
 	}
 
 	/**
-	 * Renders the inner '{@code option}' tags using the {@link #optionSource}.
+	 * Render the inner '{@code option}' tags using the {@link #optionSource}.
 	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
 	 */
 	private void renderFromCollection(TagWriter tagWriter) throws JspException {
@@ -181,7 +181,7 @@ class OptionWriter {
 	}
 
 	/**
-	 * Renders the inner '{@code option}' tags using the {@link #optionSource}.
+	 * Render the inner '{@code option}' tags using the {@link #optionSource}.
 	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
 	 */
 	private void renderFromEnum(TagWriter tagWriter) throws JspException {
@@ -189,7 +189,7 @@ class OptionWriter {
 	}
 
 	/**
-	 * Renders the inner '{@code option}' tags using the supplied {@link Collection} of
+	 * Render the inner '{@code option}' tags using the supplied {@link Collection} of
 	 * objects as the source. The value of the {@link #valueProperty} field is used
 	 * when rendering the '{@code value}' of the '{@code option}' and the value of the
 	 * {@link #labelProperty} property is used when rendering the label.
@@ -213,7 +213,7 @@ class OptionWriter {
 	}
 
 	/**
-	 * Renders an HTML '{@code option}' with the supplied value and label. Marks the
+	 * Render an HTML '{@code option}' with the supplied value and label. Marks the
 	 * value as 'selected' if either the item itself or its value match the bound value.
 	 */
 	private void renderOption(TagWriter tagWriter, Object item, Object value, Object label) throws JspException {
@@ -239,7 +239,7 @@ class OptionWriter {
 	}
 
 	/**
-	 * Determines the display value of the supplied {@code Object},
+	 * Determine the display value of the supplied {@code Object},
 	 * HTML-escaped as required.
 	 */
 	private String getDisplayString(Object value) {
@@ -249,7 +249,7 @@ class OptionWriter {
 
 	/**
 	 * Process the option value before it is written.
-	 * The default implementation simply returns the same value unchanged.
+	 * <p>The default implementation simply returns the same value unchanged.
 	 */
 	protected String processOptionValue(String resolvedValue) {
 		return resolvedValue;
@@ -257,7 +257,7 @@ class OptionWriter {
 
 	/**
 	 * Determine whether the supplied values matched the selected value.
-	 * Delegates to {@link SelectedValueComparator#isSelected}.
+	 * <p>Delegates to {@link SelectedValueComparator#isSelected}.
 	 */
 	private boolean isOptionSelected(Object resolvedValue) {
 		return SelectedValueComparator.isSelected(this.bindStatus, resolvedValue);
@@ -271,7 +271,7 @@ class OptionWriter {
 	}
 
 	/**
-	 * Writes default attributes configured to the supplied {@link TagWriter}.
+	 * Write default attributes configured to the supplied {@link TagWriter}.
 	 */
 	protected void writeCommonAttributes(TagWriter tagWriter) throws JspException {
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,13 +109,13 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	 * when the value is written.
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
-		String valueToUse = (getValue() != null) ? getValue() : getDefaultValue();
+		String valueToUse = (getValue() != null ? getValue() : getDefaultValue());
 		tagWriter.writeAttribute("value", processFieldValue(getName(), valueToUse, getType()));
 	}
 
 	/**
 	 * Return the default value.
-	 * @return The default value if none supplied.
+	 * @return the default value if none supplied
 	 */
 	protected String getDefaultValue() {
 		return "Submit";

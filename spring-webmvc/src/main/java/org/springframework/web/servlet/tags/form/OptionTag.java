@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,8 +215,8 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Returns the value of the label for this '{@code option}' element.
-	 * If the {@link #setLabel label} property is set then the resolved value
+	 * Return the value of the label for this '{@code option}' element.
+	 * <p>If the {@link #setLabel label} property is set then the resolved value
 	 * of that property is used, otherwise the value of the {@code resolvedValue}
 	 * argument is used.
 	 */

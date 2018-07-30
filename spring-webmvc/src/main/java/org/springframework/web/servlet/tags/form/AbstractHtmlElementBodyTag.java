@@ -57,7 +57,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	 * If {@link #shouldRender rendering}, flush any buffered
 	 * {@link BodyContent} or, if no {@link BodyContent} is supplied,
 	 * {@link #renderDefaultContent render the default content}.
-	 * @return Tag#EVAL_PAGE
+	 * @return a {@link javax.servlet.jsp.tagext.Tag#EVAL_PAGE} result
 	 */
 	@Override
 	public int doEndTag() throws JspException {
@@ -79,7 +79,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	 * override this to add additional content to the output.
 	 */
 	protected void renderFromBodyContent(BodyContent bodyContent, TagWriter tagWriter) throws JspException {
-		flushBufferedBodyContent(this.bodyContent);
+		flushBufferedBodyContent(bodyContent);
 	}
 
 	/**
