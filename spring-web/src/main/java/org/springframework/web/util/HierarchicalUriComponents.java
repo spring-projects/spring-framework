@@ -55,53 +55,45 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	private static final String PATH_DELIMITER_STRING = "/";
 
+	private static final MultiValueMap<String, String> EMPTY_QUERY_PARAMS =
+			CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
+
 
 	/**
 	 * Represents an empty path.
 	 */
 	static final PathComponent NULL_PATH_COMPONENT = new PathComponent() {
-
 		@Override
 		public String getPath() {
 			return "";
 		}
-
 		@Override
 		public List<String> getPathSegments() {
 			return Collections.emptyList();
 		}
-
 		@Override
 		public PathComponent encode(BiFunction<String, Type, String> encoder) {
 			return this;
 		}
-
 		@Override
 		public void verify() {
 		}
-
 		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables, @Nullable UnaryOperator<String> encoder) {
 			return this;
 		}
-
 		@Override
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
 		}
-
 		@Override
 		public boolean equals(Object other) {
 			return (this == other);
 		}
-
 		@Override
 		public int hashCode() {
 			return getClass().hashCode();
 		}
 	};
-
-	private static final MultiValueMap<String, String> EMPTY_QUERY_PARAMS =
-			CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(0));
 
 
 	@Nullable

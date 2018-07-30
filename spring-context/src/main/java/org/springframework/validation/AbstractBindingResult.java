@@ -52,9 +52,9 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	private final List<ObjectError> errors = new LinkedList<>();
 
-	private final Map<String, Class<?>> fieldTypes = new HashMap<>(0);
+	private final Map<String, Class<?>> fieldTypes = new HashMap<>();
 
-	private final Map<String, Object> fieldValues = new HashMap<>(0);
+	private final Map<String, Object> fieldValues = new HashMap<>();
 
 	private final Set<String> suppressedFields = new HashSet<>();
 
