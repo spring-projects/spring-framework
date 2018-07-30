@@ -55,7 +55,7 @@ class HtmlCharacterEntityReferences {
 
 	private final String[] characterToEntityReferenceMap = new String[3000];
 
-	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(252);
+	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(512);
 
 
 	/**

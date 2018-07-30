@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
  */
 final class DefaultPathContainer implements PathContainer {
 
-	private static final MultiValueMap<String, String> EMPTY_MAP = new LinkedMultiValueMap<>(0);
+	private static final MultiValueMap<String, String> EMPTY_MAP = new LinkedMultiValueMap<>();
 
 	private static final PathContainer EMPTY_PATH = new DefaultPathContainer("", Collections.emptyList());
 

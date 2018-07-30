@@ -317,7 +317,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (handler == null) {
 			return null;
 		}
-		Map<String, MessageHandler> subscriptions = new HashMap<>(1);
+		Map<String, MessageHandler> subscriptions = new HashMap<>(4);
 		String destination = getBrokerRegistry().getUserDestinationBroadcast();
 		if (destination != null) {
 			subscriptions.put(destination, userDestinationMessageHandler());

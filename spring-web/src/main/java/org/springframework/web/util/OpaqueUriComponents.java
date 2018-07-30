@@ -38,7 +38,7 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 final class OpaqueUriComponents extends UriComponents {
 
-	private static final MultiValueMap<String, String> QUERY_PARAMS_NONE = new LinkedMultiValueMap<>(0);
+	private static final MultiValueMap<String, String> QUERY_PARAMS_NONE = new LinkedMultiValueMap<>();
 
 	@Nullable
 	private final String ssp;

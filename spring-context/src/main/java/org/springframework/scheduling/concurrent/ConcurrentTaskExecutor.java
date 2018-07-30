@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,17 +230,21 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	protected static class ManagedTaskBuilder {
 
 		public static Runnable buildManagedTask(Runnable task, String identityName) {
-			Map<String, String> properties = new HashMap<>(2);
+			Map<String, String> properties;
 			if (task instanceof SchedulingAwareRunnable) {
+				properties = new HashMap<>(4);
 				properties.put(ManagedTask.LONGRUNNING_HINT,
 						Boolean.toString(((SchedulingAwareRunnable) task).isLongLived()));
+			}
+			else {
+				properties = new HashMap<>(2);
 			}
 			properties.put(ManagedTask.IDENTITY_NAME, identityName);
 			return ManagedExecutors.managedTask(task, properties, null);
 		}
 
 		public static <T> Callable<T> buildManagedTask(Callable<T> task, String identityName) {
-			Map<String, String> properties = new HashMap<>(1);
+			Map<String, String> properties = new HashMap<>(2);
 			properties.put(ManagedTask.IDENTITY_NAME, identityName);
 			return ManagedExecutors.managedTask(task, properties, null);
 		}

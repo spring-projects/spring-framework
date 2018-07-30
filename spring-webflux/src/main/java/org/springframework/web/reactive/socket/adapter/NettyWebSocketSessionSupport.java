@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.adapter;
 
 import java.util.HashMap;
@@ -49,14 +50,14 @@ public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketS
 	protected static final int DEFAULT_FRAME_MAX_SIZE = 64 * 1024;
 
 
-	private static final Map<Class<?>, WebSocketMessage.Type> MESSAGE_TYPES;
+	private static final Map<Class<?>, WebSocketMessage.Type> messageTypes;
 
 	static {
-		MESSAGE_TYPES = new HashMap<>(4);
-		MESSAGE_TYPES.put(TextWebSocketFrame.class, WebSocketMessage.Type.TEXT);
-		MESSAGE_TYPES.put(BinaryWebSocketFrame.class, WebSocketMessage.Type.BINARY);
-		MESSAGE_TYPES.put(PingWebSocketFrame.class, WebSocketMessage.Type.PING);
-		MESSAGE_TYPES.put(PongWebSocketFrame.class, WebSocketMessage.Type.PONG);
+		messageTypes = new HashMap<>(8);
+		messageTypes.put(TextWebSocketFrame.class, WebSocketMessage.Type.TEXT);
+		messageTypes.put(BinaryWebSocketFrame.class, WebSocketMessage.Type.BINARY);
+		messageTypes.put(PingWebSocketFrame.class, WebSocketMessage.Type.PING);
+		messageTypes.put(PongWebSocketFrame.class, WebSocketMessage.Type.PONG);
 	}
 
 
@@ -73,7 +74,7 @@ public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketS
 
 	protected WebSocketMessage toMessage(WebSocketFrame frame) {
 		DataBuffer payload = bufferFactory().wrap(frame.content());
-		return new WebSocketMessage(MESSAGE_TYPES.get(frame.getClass()), payload);
+		return new WebSocketMessage(messageTypes.get(frame.getClass()), payload);
 	}
 
 	protected WebSocketFrame toFrame(WebSocketMessage message) {
