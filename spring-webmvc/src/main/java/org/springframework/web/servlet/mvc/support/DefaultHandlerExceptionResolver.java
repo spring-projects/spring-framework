@@ -124,7 +124,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * </tr>
  * <tr class="rowColor">
  * <td><p>NoHandlerFoundException</p></td>
- * <td><p>400 (SC_NOT_FOUND)</p></td>
+ * <td><p>404 (SC_NOT_FOUND)</p></td>
  * </tr>
  * <tr class="altColor">
  * <td><p>AsyncRequestTimeoutException</p></td>
