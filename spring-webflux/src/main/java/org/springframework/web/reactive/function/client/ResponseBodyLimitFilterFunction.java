@@ -36,7 +36,7 @@ public class ResponseBodyLimitFilterFunction implements ExchangeFilterFunction {
 	public ResponseBodyLimitFilterFunction(long bodyByteLimit) {
 		if (bodyByteLimit < 0) {
 			throw new IllegalArgumentException(
-					"Response body limit should be non-negative, but " + bodyByteLimit + "given"
+					"Response body limit should be non-negative, but '" + bodyByteLimit + "' given"
 			);
 		}
 
