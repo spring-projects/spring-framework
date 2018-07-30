@@ -246,6 +246,9 @@ public class InputTag extends AbstractHtmlInputElementTag {
 
 	public static final String AUTOCOMPLETE_ATTRIBUTE = "autocomplete";
 
+	@Deprecated
+	public static final String READONLY_ATTRIBUTE = "readonly";
+
 
 	@Nullable
 	private String size;
@@ -381,7 +384,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		String type = null;
 		Map<String, Object> attributes = getDynamicAttributes();
 		if (attributes != null) {
-			type = (String) getDynamicAttributes().get("type");
+			type = (String) attributes.get("type");
 		}
 		if (type == null) {
 			type = getType();
