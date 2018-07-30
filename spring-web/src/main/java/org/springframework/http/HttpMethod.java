@@ -35,7 +35,7 @@ public enum HttpMethod {
 	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
 
 
-	private static final Map<String, HttpMethod> mappings = new HashMap<>(8);
+	private static final Map<String, HttpMethod> mappings = new HashMap<>(8, 1);
 
 	static {
 		for (HttpMethod httpMethod : values()) {
