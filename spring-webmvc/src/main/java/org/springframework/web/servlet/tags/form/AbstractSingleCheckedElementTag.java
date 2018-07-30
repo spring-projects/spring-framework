@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class to provide common methods for implementing
- * databinding-aware JSP tags for rendering a <i>single</i>
- * HTML '{@code input}' element with a '{@code type}'
- * of '{@code checkbox}' or '{@code radio}'.
+ * Abstract base class to provide common methods for implementing databinding-aware
+ * JSP tags for rendering a <i>single</i> HTML '{@code input}' element with a
+ * '{@code type}' of '{@code checkbox}' or '{@code radio}'.
  *
  * @author Juergen Hoeller
  * @since 2.5.2

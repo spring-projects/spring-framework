@@ -381,7 +381,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		String type = null;
 		Map<String, Object> attributes = getDynamicAttributes();
 		if (attributes != null) {
-			type = (String) getDynamicAttributes().get("type");
+			type = (String) attributes.get("type");
 		}
 		if (type == null) {
 			type = getType();
