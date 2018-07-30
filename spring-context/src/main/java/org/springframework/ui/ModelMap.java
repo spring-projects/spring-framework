@@ -51,7 +51,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * under the supplied name.
 	 * @see #addAttribute(String, Object)
 	 */
-	public ModelMap(String attributeName, Object attributeValue) {
+	public ModelMap(String attributeName, @Nullable Object attributeValue) {
 		addAttribute(attributeName, attributeValue);
 	}
 

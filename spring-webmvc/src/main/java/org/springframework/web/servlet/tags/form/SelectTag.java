@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import javax.servlet.jsp.JspException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.support.BindStatus;
@@ -255,39 +256,45 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * The {@link Collection}, {@link Map} or array of objects used to generate the inner
-	 * '{@code option}' tags.
+	 * The {@link Collection}, {@link Map} or array of objects used to generate
+	 * the inner '{@code option}' tags.
 	 */
+	@Nullable
 	private Object items;
 
 	/**
 	 * The name of the property mapped to the '{@code value}' attribute
 	 * of the '{@code option}' tag.
 	 */
+	@Nullable
 	private String itemValue;
 
 	/**
 	 * The name of the property mapped to the inner text of the
 	 * '{@code option}' tag.
 	 */
+	@Nullable
 	private String itemLabel;
 
 	/**
 	 * The value of the HTML '{@code size}' attribute rendered
 	 * on the final '{@code select}' element.
 	 */
+	@Nullable
 	private String size;
 
 	/**
 	 * Indicates whether or not the '{@code select}' tag allows
 	 * multiple-selections.
 	 */
+	@Nullable
 	private Object multiple;
 
 	/**
 	 * The {@link TagWriter} instance that the output is being written.
 	 * <p>Only used in conjunction with nested {@link OptionTag OptionTags}.
 	 */
+	@Nullable
 	private TagWriter tagWriter;
 
 
@@ -299,7 +306,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * <p>Typically a runtime expression.
 	 * @param items the items that comprise the options of this selection
 	 */
-	public void setItems(Object items) {
+	public void setItems(@Nullable Object items) {
 		this.items = (items != null ? items : EMPTY);
 	}
 
@@ -307,6 +314,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Get the value of the '{@code items}' attribute.
 	 * <p>May be a runtime expression.
 	 */
+	@Nullable
 	protected Object getItems() {
 		return this.items;
 	}
@@ -326,6 +334,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Get the value of the '{@code itemValue}' attribute.
 	 * <p>May be a runtime expression.
 	 */
+	@Nullable
 	protected String getItemValue() {
 		return this.itemValue;
 	}
@@ -343,6 +352,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Get the value of the '{@code itemLabel}' attribute.
 	 * <p>May be a runtime expression.
 	 */
+	@Nullable
 	protected String getItemLabel() {
 		return this.itemLabel;
 	}
@@ -358,6 +368,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code size}' attribute.
 	 */
+	@Nullable
 	protected String getSize() {
 		return this.size;
 	}
@@ -374,6 +385,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Get the value of the HTML '{@code multiple}' attribute rendered
 	 * on the final '{@code select}' element.
 	 */
+	@Nullable
 	protected Object getMultiple() {
 		return this.multiple;
 	}

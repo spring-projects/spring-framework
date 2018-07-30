@@ -18,6 +18,9 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 /**
  * Abstract base class to provide common methods for implementing
  * databinding-aware JSP tags for rendering a <i>single</i>
@@ -33,11 +36,13 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	/**
 	 * The value of the '{@code value}' attribute.
 	 */
+	@Nullable
 	private Object value;
 
 	/**
 	 * The value of the '{@code label}' attribute.
 	 */
+	@Nullable
 	private Object label;
 
 
@@ -52,6 +57,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	/**
 	 * Get the value of the '{@code value}' attribute.
 	 */
+	@Nullable
 	protected Object getValue() {
 		return this.value;
 	}
@@ -67,6 +73,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	/**
 	 * Get the value of the '{@code label}' attribute.
 	 */
+	@Nullable
 	protected Object getLabel() {
 		return this.label;
 	}
@@ -89,6 +96,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 
 		Object resolvedLabel = evaluate("label", getLabel());
 		if (resolvedLabel != null) {
+			Assert.state(id != null, "Label id is required");
 			tagWriter.startTag("label");
 			tagWriter.writeAttribute("for", id);
 			tagWriter.appendValue(convertToDisplayString(resolvedLabel));

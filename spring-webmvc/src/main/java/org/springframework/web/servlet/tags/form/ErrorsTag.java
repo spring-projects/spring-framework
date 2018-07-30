@@ -23,6 +23,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTag;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -209,6 +210,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * Stores any value that existed in the 'errors messages' before the tag was started.
 	 */
+	@Nullable
 	private Object oldMessages;
 
 	private boolean errorMessagesWereExposed;
@@ -270,6 +272,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * is not a validate attribute for the '{@code span}' element.
 	 */
 	@Override
+	@Nullable
 	protected String getName() throws JspException {
 		return null;
 	}
