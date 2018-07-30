@@ -147,7 +147,7 @@ class DefaultMvcResult implements MvcResult {
 					" was not set during the specified timeToWait=" + timeToWait);
 		}
 		Object result = this.asyncResult.get();
-		Assert.state(result != RESULT_NONE, "Async result for handler [" + this.handler + "] was not set");
+		Assert.state(result != RESULT_NONE, () -> "Async result for handler [" + this.handler + "] was not set");
 		return this.asyncResult.get();
 	}
 

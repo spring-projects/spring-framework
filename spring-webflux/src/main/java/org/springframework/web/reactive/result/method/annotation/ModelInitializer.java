@@ -139,7 +139,7 @@ class ModelInitializer {
 				.ofNullable(AnnotatedElementUtils.findMergedAnnotation(param.getAnnotatedElement(), ModelAttribute.class))
 				.filter(ann -> StringUtils.hasText(ann.value()))
 				.map(ModelAttribute::value)
-				.orElse(Conventions.getVariableNameForParameter(param));
+				.orElseGet(() -> Conventions.getVariableNameForParameter(param));
 	}
 
 	/** Find {@code @ModelAttribute} arguments also listed as {@code @SessionAttributes}. */

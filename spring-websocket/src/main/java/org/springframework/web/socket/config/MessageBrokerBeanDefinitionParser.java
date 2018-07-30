@@ -159,7 +159,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			List<String> paths = Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute, ","));
 			for (String path : paths) {
 				path = path.trim();
-				Assert.state(StringUtils.hasText(path), "Invalid <stomp-endpoint> path attribute: " + pathAttribute);
+				Assert.state(StringUtils.hasText(path), () -> "Invalid <stomp-endpoint> path attribute: " + pathAttribute);
 				if (DomUtils.getChildElementByTagName(endpointElem, "sockjs") != null) {
 					path = path.endsWith("/") ? path + "**" : path + "/**";
 				}
