@@ -156,7 +156,7 @@ class DefaultMvcResult implements MvcResult {
 	 */
 	private boolean awaitAsyncDispatch(long timeout) {
 		Assert.state(this.asyncDispatchLatch != null,
-				"The asyncDispatch CountDownLatch was not set by the TestDispatcherServlet.\n");
+				"The asyncDispatch CountDownLatch was not set by the TestDispatcherServlet.");
 		try {
 			return this.asyncDispatchLatch.await(timeout, TimeUnit.MILLISECONDS);
 		}

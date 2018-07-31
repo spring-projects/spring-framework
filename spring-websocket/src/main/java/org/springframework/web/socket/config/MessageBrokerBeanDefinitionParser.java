@@ -173,7 +173,6 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private RuntimeBeanReference registerUserRegistry(Element element, ParserContext context, @Nullable Object source) {
-
 		Element relayElement = DomUtils.getChildElementByTagName(element, "stomp-broker-relay");
 		boolean multiServer = (relayElement != null && relayElement.hasAttribute("user-registry-broadcast"));
 
@@ -191,8 +190,8 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private ManagedMap<String, Object> registerHandlerMapping(Element element,
-			ParserContext context, @Nullable Object source) {
+	private ManagedMap<String, Object> registerHandlerMapping(
+			Element element, ParserContext context, @Nullable Object source) {
 
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(WebSocketHandlerMapping.class);
 
@@ -320,13 +319,13 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return result;
 	}
 
-	private RuntimeBeanReference registerRequestHandler(Element element, RuntimeBeanReference subProtoHandler,
-			ParserContext cxt, @Nullable Object source) {
+	private RuntimeBeanReference registerRequestHandler(
+			Element element, RuntimeBeanReference subProtoHandler, ParserContext ctx, @Nullable Object source) {
 
 		RootBeanDefinition beanDef;
 
 		RuntimeBeanReference sockJsService = WebSocketNamespaceUtils.registerSockJsService(
-				element, SCHEDULER_BEAN_NAME, cxt, source);
+				element, SCHEDULER_BEAN_NAME, ctx, source);
 
 		if (sockJsService != null) {
 			ConstructorArgumentValues cargs = new ConstructorArgumentValues();
@@ -335,12 +334,12 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			beanDef = new RootBeanDefinition(SockJsHttpRequestHandler.class, cargs, null);
 
 			// Register alias for backwards compatibility with 4.1
-			cxt.getRegistry().registerAlias(SCHEDULER_BEAN_NAME, SOCKJS_SCHEDULER_BEAN_NAME);
+			ctx.getRegistry().registerAlias(SCHEDULER_BEAN_NAME, SOCKJS_SCHEDULER_BEAN_NAME);
 		}
 		else {
-			RuntimeBeanReference handler = WebSocketNamespaceUtils.registerHandshakeHandler(element, cxt, source);
+			RuntimeBeanReference handler = WebSocketNamespaceUtils.registerHandshakeHandler(element, ctx, source);
 			Element interceptElem = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, cxt);
+			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, ctx);
 			String allowedOrigins = element.getAttribute("allowed-origins");
 			List<String> origins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOrigins, ","));
 			interceptors.add(new OriginHandshakeInterceptor(origins));
@@ -350,7 +349,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			beanDef = new RootBeanDefinition(WebSocketHttpRequestHandler.class, cargs, null);
 			beanDef.getPropertyValues().add("handshakeInterceptors", interceptors);
 		}
-		return new RuntimeBeanReference(registerBeanDef(beanDef, cxt, source));
+		return new RuntimeBeanReference(registerBeanDef(beanDef, ctx, source));
 	}
 
 	private RootBeanDefinition registerMessageBroker(Element brokerElement,
@@ -668,7 +667,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 		private final List<WebSocketHandlerDecoratorFactory> factories;
 
-		private DecoratingFactoryBean(WebSocketHandler handler, List<WebSocketHandlerDecoratorFactory> factories) {
+		public DecoratingFactoryBean(WebSocketHandler handler, List<WebSocketHandlerDecoratorFactory> factories) {
 			this.handler = handler;
 			this.factories = factories;
 		}
