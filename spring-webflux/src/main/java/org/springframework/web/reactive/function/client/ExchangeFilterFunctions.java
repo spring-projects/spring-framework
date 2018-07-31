@@ -94,7 +94,7 @@ public abstract class ExchangeFilterFunctions {
 		return ExchangeFilterFunction.ofRequestProcessor(request ->
 				credentialsFunction.apply(request)
 						.map(credentials -> Mono.just(insertAuthorizationHeader(request, credentials)))
-						.orElse(Mono.just(request)));
+						.orElseGet(() -> Mono.just(request)));
 	}
 
 	private static void checkIllegalCharacters(String username, String password) {

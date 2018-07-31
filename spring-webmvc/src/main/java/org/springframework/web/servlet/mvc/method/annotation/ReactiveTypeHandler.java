@@ -120,7 +120,7 @@ class ReactiveTypeHandler {
 
 		Assert.notNull(returnValue, "Expected return value");
 		ReactiveAdapter adapter = this.reactiveRegistry.getAdapter(returnValue.getClass());
-		Assert.state(adapter != null, "Unexpected return value: " + returnValue);
+		Assert.state(adapter != null, () -> "Unexpected return value: " + returnValue);
 
 		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
 		Class<?> elementClass = elementType.toClass();

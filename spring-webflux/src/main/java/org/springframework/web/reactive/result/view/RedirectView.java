@@ -244,7 +244,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		while (found) {
 			String name = matcher.group(1);
 			Object value = (model.containsKey(name) ? model.get(name) : uriVariables.get(name));
-			Assert.notNull(value, "No value for URI variable '" + name + "'");
+			Assert.notNull(value, () -> "No value for URI variable '" + name + "'");
 			result.append(targetUrl.substring(endLastMatch, matcher.start()));
 			result.append(encodeUriVariable(value.toString()));
 			endLastMatch = matcher.end();

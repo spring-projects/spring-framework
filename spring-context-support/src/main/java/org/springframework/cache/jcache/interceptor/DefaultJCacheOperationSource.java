@@ -172,7 +172,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 
 	@Override
 	protected <T> T getBean(Class<T> type) {
-		Assert.state(this.beanFactory != null, "BeanFactory required for resolution of [" + type + "]");
+		Assert.state(this.beanFactory != null, () -> "BeanFactory required for resolution of [" + type + "]");
 		try {
 			return this.beanFactory.getBean(type);
 		}
