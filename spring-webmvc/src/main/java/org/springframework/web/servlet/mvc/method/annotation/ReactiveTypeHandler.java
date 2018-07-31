@@ -111,8 +111,8 @@ class ReactiveTypeHandler {
 	/**
 	 * Process the given reactive return value and decide whether to adapt it
 	 * to a {@link ResponseBodyEmitter} or a {@link DeferredResult}.
-	 * @return an emitter for streaming or {@code null} if handled internally
-	 * with a {@link DeferredResult}.
+	 * @return an emitter for streaming, or {@code null} if handled internally
+	 * with a {@link DeferredResult}
 	 */
 	@Nullable
 	public ResponseBodyEmitter handleValue(Object returnValue, MethodParameter returnType,
@@ -120,7 +120,7 @@ class ReactiveTypeHandler {
 
 		Assert.notNull(returnValue, "Expected return value");
 		ReactiveAdapter adapter = this.reactiveRegistry.getAdapter(returnValue.getClass());
-		Assert.state(adapter != null, "Unexpected return value: " + returnValue);
+		Assert.state(adapter != null, () -> "Unexpected return value: " + returnValue);
 
 		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
 		Class<?> elementClass = elementType.resolve(Object.class);

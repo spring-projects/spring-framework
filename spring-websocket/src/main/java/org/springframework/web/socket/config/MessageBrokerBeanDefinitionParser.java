@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,6 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
 	public BeanDefinition parse(Element element, ParserContext context) {
-
 		Object source = context.extractSource(element);
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
 		context.pushContainingComponent(compDefinition);
@@ -151,19 +150,18 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		for (Element endpointElem : DomUtils.getChildElementsByTagName(element, "stomp-endpoint")) {
 			RuntimeBeanReference requestHandler = registerRequestHandler(endpointElem, stompHandler, context, source);
 			String pathAttribute = endpointElem.getAttribute("path");
-			Assert.state(StringUtils.hasText(pathAttribute), "Invalid <stomp-endpoint> (no path mapping)");
-			List<String> paths = Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute, ","));
-			for (String path : paths) {
+			Assert.hasText(pathAttribute, "Invalid <stomp-endpoint> (no path mapping)");
+			for (String path : StringUtils.tokenizeToStringArray(pathAttribute, ",")) {
 				path = path.trim();
-				Assert.state(StringUtils.hasText(path), "Invalid <stomp-endpoint> path attribute: " + pathAttribute);
+				Assert.hasText(path, () -> "Invalid <stomp-endpoint> path attribute: " + pathAttribute);
 				if (DomUtils.getChildElementByTagName(endpointElem, "sockjs") != null) {
-					path = path.endsWith("/") ? path + "**" : path + "/**";
+					path = (path.endsWith("/") ? path + "**" : path + "/**");
 				}
 				urlMap.put(path, requestHandler);
 			}
 		}
 
-		Map<String, Object> scopeMap = Collections.<String, Object>singletonMap("websocket", new SimpSessionScope());
+		Map<String, Object> scopeMap = Collections.singletonMap("websocket", new SimpSessionScope());
 		RootBeanDefinition scopeConfigurer = new RootBeanDefinition(CustomScopeConfigurer.class);
 		scopeConfigurer.getPropertyValues().add("scopes", scopeMap);
 		registerBeanDefByName("webSocketScopeConfigurer", scopeConfigurer, context, source);
@@ -243,6 +241,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				}
 			}
 		}
+
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		if (executor != null) {
 			executor.getPropertyValues().add("threadNamePrefix", name + "-");
@@ -250,6 +249,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			registerBeanDefByName(executorName, executor, context, source);
 			cargs.addIndexedArgumentValue(0, new RuntimeBeanReference(executorName));
 		}
+
 		RootBeanDefinition channelDef = new RootBeanDefinition(ExecutorSubscribableChannel.class, cargs, null);
 		ManagedList<? super Object> interceptors = new ManagedList<>();
 		if (element != null) {
@@ -441,6 +441,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			// Should not happen
 			throw new IllegalStateException("Neither <simple-broker> nor <stomp-broker-relay> elements found.");
 		}
+
 		registerBeanDef(brokerDef, context, source);
 		return brokerDef;
 	}
@@ -660,12 +661,12 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		context.registerComponent(new BeanComponentDefinition(beanDef, name));
 	}
 
+
 	private static class DecoratingFactoryBean implements FactoryBean<WebSocketHandler> {
 
 		private final WebSocketHandler handler;
 
 		private final List<WebSocketHandlerDecoratorFactory> factories;
-
 
 		private DecoratingFactoryBean(WebSocketHandler handler, List<WebSocketHandlerDecoratorFactory> factories) {
 			this.handler = handler;
@@ -673,7 +674,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		@Override
-		public WebSocketHandler getObject() throws Exception {
+		public WebSocketHandler getObject() {
 			WebSocketHandler result = this.handler;
 			for (WebSocketHandlerDecoratorFactory factory : this.factories) {
 				result = factory.decorate(result);

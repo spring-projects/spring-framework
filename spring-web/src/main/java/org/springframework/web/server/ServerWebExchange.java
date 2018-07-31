@@ -80,7 +80,7 @@ public interface ServerWebExchange {
 	@SuppressWarnings("unchecked")
 	default <T> T getRequiredAttribute(String name) {
 		T value = getAttribute(name);
-		Assert.notNull(value, "Required attribute '" + name + "' is missing.");
+		Assert.notNull(value, () -> "Required attribute '" + name + "' is missing.");
 		return value;
 	}
 
