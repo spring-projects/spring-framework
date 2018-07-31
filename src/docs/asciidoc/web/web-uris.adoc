@@ -152,7 +152,7 @@ URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.buildAndExpand("New York", "foo+bar")
 			.toUri();
 
-	// Result is "/hotel%20list/New%20York?foo%2Bbar"
+	// Result is "/hotel%20list/New%20York?q=foo%2Bbar"
 ----
 
 The above can be shortened by going directly to URI (which implies encoding):
