@@ -136,20 +136,22 @@ class DefaultMvcResult implements MvcResult {
 					" was not set during the specified timeToWait=" + timeToWait);
 		}
 		Object result = this.asyncResult.get();
-		Assert.state(result != RESULT_NONE, "Async result for handler [" + this.handler + "] was not set");
+		if (result == RESULT_NONE) {
+			throw new IllegalStateException("Async result for handler [" + this.handler + "] was not set");
+		}
 		return this.asyncResult.get();
 	}
 
 	/**
-	 * True if is there a latch was not set, or the latch count reached 0.
+	 * True if the latch count reached 0 within the specified timeout.
 	 */
 	private boolean awaitAsyncDispatch(long timeout) {
 		Assert.state(this.asyncDispatchLatch != null,
-				"The asynDispatch CountDownLatch was not set by the TestDispatcherServlet.\n");
+				"The asyncDispatch CountDownLatch was not set by the TestDispatcherServlet.");
 		try {
 			return this.asyncDispatchLatch.await(timeout, TimeUnit.MILLISECONDS);
 		}
-		catch (InterruptedException e) {
+		catch (InterruptedException ex) {
 			return false;
 		}
 	}
