@@ -22,6 +22,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -919,6 +920,29 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
+	 * Determine if the {@link Annotation} with the supplied name is defined in the
+	 * {@code java.lang.annotation} or {@code org.springframework.lang} package.
+	 * @param annotatedElement the potential annotation type to check
+	 * @return {@code true} if the annotation is in the {@code java.lang.annotation}
+	 * or {@code org.springframework.lang} package
+	 * @since 5.1
+	 */
+	static boolean hasPlainJavaAnnotationsOnly(@Nullable Object annotatedElement) {
+		Class<?> clazz;
+		if (annotatedElement instanceof Class) {
+			clazz = (Class<?>) annotatedElement;
+		}
+		else if (annotatedElement instanceof Member) {
+			clazz = ((Member) annotatedElement).getDeclaringClass();
+		}
+		else {
+			return false;
+		}
+		String name = clazz.getName();
+		return (name.startsWith("java") || name.startsWith("org.springframework.lang."));
+	}
+
+	/**
 	 * Determine if the supplied {@link Annotation} is defined in the core JDK
 	 * {@code java.lang.annotation} package.
 	 * @param annotation the annotation to check
@@ -1509,7 +1533,7 @@ public abstract class AnnotationUtils {
 
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> A synthesizeAnnotation(A annotation, @Nullable Object annotatedElement) {
-		if (annotation instanceof SynthesizedAnnotation) {
+		if (annotation instanceof SynthesizedAnnotation || hasPlainJavaAnnotationsOnly(annotatedElement)) {
 			return annotation;
 		}
 
@@ -1585,7 +1609,7 @@ public abstract class AnnotationUtils {
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 */
 	public static <A extends Annotation> A synthesizeAnnotation(Class<A> annotationType) {
-		return synthesizeAnnotation(Collections.<String, Object> emptyMap(), annotationType, null);
+		return synthesizeAnnotation(Collections.emptyMap(), annotationType, null);
 	}
 
 	/**
@@ -1604,8 +1628,10 @@ public abstract class AnnotationUtils {
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
-	static Annotation[] synthesizeAnnotationArray(
-			Annotation[] annotations, @Nullable Object annotatedElement) {
+	static Annotation[] synthesizeAnnotationArray(Annotation[] annotations, @Nullable Object annotatedElement) {
+		if (hasPlainJavaAnnotationsOnly(annotatedElement)) {
+			return annotations;
+		}
 
 		Annotation[] synthesized = (Annotation[]) Array.newInstance(
 				annotations.getClass().getComponentType(), annotations.length);
@@ -1634,7 +1660,9 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	static <A extends Annotation> A[] synthesizeAnnotationArray(@Nullable Map<String, Object>[] maps, Class<A> annotationType) {
+	static <A extends Annotation> A[] synthesizeAnnotationArray(
+			@Nullable Map<String, Object>[] maps, Class<A> annotationType) {
+
 		if (maps == null) {
 			return null;
 		}
@@ -1716,6 +1744,10 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	private static boolean isSynthesizable(Class<? extends Annotation> annotationType) {
+		if (hasPlainJavaAnnotationsOnly(annotationType)) {
+			return false;
+		}
+
 		Boolean synthesizable = synthesizableCache.get(annotationType);
 		if (synthesizable != null) {
 			return synthesizable;
@@ -1764,7 +1796,7 @@ public abstract class AnnotationUtils {
 	 */
 	static List<String> getAttributeAliasNames(Method attribute) {
 		AliasDescriptor descriptor = AliasDescriptor.from(attribute);
-		return (descriptor != null ? descriptor.getAttributeAliasNames() : Collections.<String> emptyList());
+		return (descriptor != null ? descriptor.getAttributeAliasNames() : Collections.emptyList());
 	}
 
 	/**

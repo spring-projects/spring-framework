@@ -1226,7 +1226,7 @@ public abstract class AnnotatedElementUtils {
 		if (AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType)) {
 			return false;
 		}
-		if (currentAnnotationType == Nullable.class || currentAnnotationType.getName().startsWith("java")) {
+		if (AnnotationUtils.hasPlainJavaAnnotationsOnly(currentAnnotationType)) {
 			// @Nullable and standard Java annotations are only meant to have standard Java meta-annotations
 			// -> not worth searching otherwise.
 			return ((annotationType != null && annotationType.getName().startsWith("java")) ||
