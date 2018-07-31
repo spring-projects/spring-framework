@@ -111,8 +111,8 @@ class ReactiveTypeHandler {
 	/**
 	 * Process the given reactive return value and decide whether to adapt it
 	 * to a {@link ResponseBodyEmitter} or a {@link DeferredResult}.
-	 * @return an emitter for streaming or {@code null} if handled internally
-	 * with a {@link DeferredResult}.
+	 * @return an emitter for streaming, or {@code null} if handled internally
+	 * with a {@link DeferredResult}
 	 */
 	@Nullable
 	public ResponseBodyEmitter handleValue(Object returnValue, MethodParameter returnType,

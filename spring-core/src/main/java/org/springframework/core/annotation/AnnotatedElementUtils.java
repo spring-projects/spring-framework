@@ -444,11 +444,11 @@ public abstract class AnnotatedElementUtils {
 	 * @return the set of all merged repeatable {@code Annotations} found,
 	 * or an empty set if none were found
 	 * @throws IllegalArgumentException if the {@code element} or {@code annotationType}
+	 * is {@code null}, or if the container type cannot be resolved
 	 * @since 4.3
 	 * @see #getMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getAllMergedAnnotations(AnnotatedElement, Class)
 	 * @see #getMergedRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * is {@code null}, or if the container type cannot be resolved
 	 */
 	public static <A extends Annotation> Set<A> getMergedRepeatableAnnotations(AnnotatedElement element,
 			Class<A> annotationType) {
