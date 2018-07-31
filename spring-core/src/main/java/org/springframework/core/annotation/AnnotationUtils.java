@@ -1584,7 +1584,7 @@ public abstract class AnnotationUtils {
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 */
 	public static <A extends Annotation> A synthesizeAnnotation(Class<A> annotationType) {
-		return synthesizeAnnotation(Collections.<String, Object> emptyMap(), annotationType, null);
+		return synthesizeAnnotation(Collections.emptyMap(), annotationType, null);
 	}
 
 	/**
@@ -1603,9 +1603,7 @@ public abstract class AnnotationUtils {
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
-	static Annotation[] synthesizeAnnotationArray(
-			Annotation[] annotations, @Nullable Object annotatedElement) {
-
+	static Annotation[] synthesizeAnnotationArray(Annotation[] annotations, @Nullable Object annotatedElement) {
 		Annotation[] synthesized = (Annotation[]) Array.newInstance(
 				annotations.getClass().getComponentType(), annotations.length);
 		for (int i = 0; i < annotations.length; i++) {
@@ -1633,7 +1631,9 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	static <A extends Annotation> A[] synthesizeAnnotationArray(@Nullable Map<String, Object>[] maps, Class<A> annotationType) {
+	static <A extends Annotation> A[] synthesizeAnnotationArray(
+			@Nullable Map<String, Object>[] maps, Class<A> annotationType) {
+
 		if (maps == null) {
 			return null;
 		}
@@ -1715,6 +1715,10 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	private static boolean isSynthesizable(Class<? extends Annotation> annotationType) {
+		if (isInJavaLangAnnotationPackage(annotationType)) {
+			return false;
+		}
+
 		Boolean synthesizable = synthesizableCache.get(annotationType);
 		if (synthesizable != null) {
 			return synthesizable;

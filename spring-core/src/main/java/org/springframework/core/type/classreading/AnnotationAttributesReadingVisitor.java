@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 	public void visitEnd() {
 		super.visitEnd();
 
-		Class<?> annotationClass = this.attributes.annotationType();
+		Class<? extends Annotation> annotationClass = this.attributes.annotationType();
 		if (annotationClass != null) {
 			List<AnnotationAttributes> attributeList = this.attributesMap.get(this.annotationType);
 			if (attributeList == null) {
@@ -73,20 +73,22 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 			else {
 				attributeList.add(0, this.attributes);
 			}
-			Set<Annotation> visited = new LinkedHashSet<>();
-			Annotation[] metaAnnotations = AnnotationUtils.getAnnotations(annotationClass);
-			if (!ObjectUtils.isEmpty(metaAnnotations)) {
-				for (Annotation metaAnnotation : metaAnnotations) {
-					if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
-						recursivelyCollectMetaAnnotations(visited, metaAnnotation);
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationClass.getName())) {
+				Set<Annotation> visited = new LinkedHashSet<>();
+				Annotation[] metaAnnotations = AnnotationUtils.getAnnotations(annotationClass);
+				if (!ObjectUtils.isEmpty(metaAnnotations)) {
+					for (Annotation metaAnnotation : metaAnnotations) {
+						if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
+							recursivelyCollectMetaAnnotations(visited, metaAnnotation);
+						}
 					}
 				}
+				Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
+				for (Annotation ann : visited) {
+					metaAnnotationTypeNames.add(ann.annotationType().getName());
+				}
+				this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 			}
-			Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
-			for (Annotation ann : visited) {
-				metaAnnotationTypeNames.add(ann.annotationType().getName());
-			}
-			this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 		}
 	}
 
