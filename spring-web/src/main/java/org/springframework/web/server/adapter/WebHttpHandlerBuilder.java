@@ -42,20 +42,18 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
- * This builder has two purposes.
+ * This builder has two purposes:
  *
- * <p>One is to assemble a processing chain that consists of a target
- * {@link WebHandler}, then decorated with a set of {@link WebFilter}'s, then
- * further decorated with a set of {@link WebExceptionHandler}'s.
+ * <p>One is to assemble a processing chain that consists of a target {@link WebHandler},
+ * then decorated with a set of {@link WebFilter WebFilters}, then further decorated with
+ * a set of {@link WebExceptionHandler WebExceptionHandlers}.
  *
- * <p>The second purpose is to adapt the resulting processing chain to an
- * {@link HttpHandler} -- the lowest level reactive HTTP handling abstraction,
- * which can then be used with any of the supported runtimes. The adaptation
- * is done with the help of {@link HttpWebHandlerAdapter}.
+ * <p>The second purpose is to adapt the resulting processing chain to an {@link HttpHandler}:
+ * the lowest-level reactive HTTP handling abstraction which can then be used with any of the
+ * supported runtimes. The adaptation is done with the help of {@link HttpWebHandlerAdapter}.
  *
- * <p>The processing chain can be assembled manually via builder methods, or
- * detected from Spring configuration via
- * {@link #applicationContext(ApplicationContext)}, or a mix of both.
+ * <p>The processing chain can be assembled manually via builder methods, or detected from
+ * a Spring {@link ApplicationContext} via {@link #applicationContext}, or a mix of both.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -240,13 +238,12 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Whether a {@code WebSessionManager} is configured or not, either
-	 * detected from an {@code ApplicationContext} or explicitly configured via
-	 * {@link #sessionManager(WebSessionManager)}.
+	 * Whether a {@code WebSessionManager} is configured or not, either detected from an
+	 * {@code ApplicationContext} or explicitly configured via {@link #sessionManager}.
 	 * @since 5.0.9
 	 */
 	public boolean hasSessionManager() {
-		return this.sessionManager != null;
+		return (this.sessionManager != null);
 	}
 
 	/**
@@ -260,13 +257,12 @@ public final class WebHttpHandlerBuilder {
 
 
 	/**
-	 * Whether a {@code ServerCodecConfigurer} is configured or not, either
-	 * detected from an {@code ApplicationContext} or explicitly configured via
-	 * {@link #codecConfigurer(ServerCodecConfigurer)}.
+	 * Whether a {@code ServerCodecConfigurer} is configured or not, either detected from an
+	 * {@code ApplicationContext} or explicitly configured via {@link #codecConfigurer}.
 	 * @since 5.0.9
 	 */
 	public boolean hasCodecConfigurer() {
-		return this.codecConfigurer != null;
+		return (this.codecConfigurer != null);
 	}
 
 	/**
@@ -280,13 +276,12 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Whether a {@code LocaleContextResolver} is configured or not, either
-	 * detected from an {@code ApplicationContext} or explicitly configured via
-	 * {@link #localeContextResolver(LocaleContextResolver)}.
+	 * Whether a {@code LocaleContextResolver} is configured or not, either detected from an
+	 * {@code ApplicationContext} or explicitly configured via {@link #localeContextResolver}.
 	 * @since 5.0.9
 	 */
 	public boolean hasLocaleContextResolver() {
-		return this.localeContextResolver != null;
+		return (this.localeContextResolver != null);
 	}
 
 
