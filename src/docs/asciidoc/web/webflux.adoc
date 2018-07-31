@@ -712,6 +712,76 @@ a heartbeat and ignore.
 
 
 
+[[webflux-logging]]
+=== Logging
+[.small]#<<web.adoc#mvc-logging,Same in Spring MVC>>#
+
+DEBUG level logging in Spring WebFlux is designed to be compact, minimal, and
+human-friendly. It focuses on high value bits of information that are useful over and
+over again vs others that are useful only when debugging a specific issue.
+
+TRACE level logging generally follows the same principles as DEBUG (and for example also
+should not be a firehose) but can be used for debugging any issue. In addition some log
+messages may show a different level of detail at TRACE vs DEBUG.
+
+Good logging comes from the experience of using the logs. If you spot anything that does
+not meet the stated goals, please let us know.
+
+
+[[webflux-logging-id]]
+==== Log Id
+
+In WebFlux, a single request may be executed over multiple threads and the thread id
+is not useful for correlating log messages that belong to a specific request. This is why
+WebFlux log messages are prefixed with a request specific id by default.
+
+On the server side the log id is stored in the `ServerWebExchange` attribute
+{api-spring-framework}/web/server/ServerWebExchange.html#LOG_ID_ATTRIBUTE[LOG_ID_ATTRIBUTE]
+while a fully formatted prefix based on that id is available via
+`ServerWebExchange#getLogPrefix()`. On the `WebClient` side, the log id is stored in the
+`ClientRequest` attribute
+{api-spring-framework}/web/reactive/function/client/ClientRequest.html#LOG_ID_ATTRIBUTE[LOG_ID_ATTRIBUTE]
+while a fully formatted prefix is available via `ClientRequest#logPrefix()`.
+
+
+[[webflux-logging-sensitive-data]]
+==== Sensitive Data
+[.small]#<<web.adoc#mvc-logging-sensitive-data,Same in Spring MVC>>#
+
+DEBUG and TRACE logging may log sensitive information. This is why form parameters and
+headers are masked by default and their logging in full must be enabled explicitly.
+
+For server side requests:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebFlux
+class MyConfig implements WebFluxConfigurer {
+
+	@Override
+	public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+		configurer.defaultCodecs().enableLoggingRequestDetails(true);
+	}
+}
+----
+
+For client side requests:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+Consumer<ClientCodecConfigurer> consumer = configurer ->
+		configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+WebClient webClient = WebClient.builder()
+		.exchangeStrategies(ExchangeStrategies.builder().codecs(consumer).build())
+		.build();
+----
+
+
+
 
 [[webflux-dispatcher-handler]]
 == DispatcherHandler

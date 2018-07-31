@@ -1036,6 +1036,63 @@ Once the Servlet 3.0 configuration is in place, simply add a bean of type
 
 
 
+[[mvc-logging]]
+=== Logging
+[.small]#<<web-reactive.adoc#webflux-logging,Same in Spring WebFlux>>#
+
+DEBUG level logging in Spring MVC is designed to be compact, minimal, and
+human-friendly. It focuses on high value bits of information that are useful over and
+over again vs others that are useful only when debugging a specific issue.
+
+TRACE level logging generally follows the same principles as DEBUG (and for example also
+should not be a firehose) but can be used for debugging any issue. In addition some log
+messages may show a different level of detail at TRACE vs DEBUG.
+
+Good logging comes from the experience of using the logs. If you spot anything that does
+not meet the stated goals, please let us know.
+
+
+[[mvc-logging-sensitive-data]]
+==== Sensitive Data
+[.small]#<<web-reactive.adoc#webflux-logging-sensitive-data,Same in Spring WebFlux>>#
+
+DEBUG and TRACE logging may log sensitive information. This is why request parameters and
+headers are masked by default and their logging in full must be enabled explicitly
+through the `enableLoggingRequestDetails` property on `DispatcherServlet`.
+
+For example if using Java config:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public class MyInitializer
+		extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+	@Override
+	protected Class<?>[] getRootConfigClasses() {
+		return ... ;
+	}
+
+	@Override
+	protected Class<?>[] getServletConfigClasses() {
+		return ... ;
+	}
+
+	@Override
+	protected String[] getServletMappings() {
+		return ... ;
+	}
+
+	@Override
+	protected void customizeRegistration(Dynamic registration) {
+		registration.setInitParameter("enableLoggingRequestDetails", "true");
+	}
+
+}
+----
+
+
+
 
 [[filters]]
 == Filters
