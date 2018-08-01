@@ -74,20 +74,27 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 				attributeList.add(0, this.attributes);
 			}
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationClass.getName())) {
-				Set<Annotation> visited = new LinkedHashSet<>();
-				Annotation[] metaAnnotations = AnnotationUtils.getAnnotations(annotationClass);
-				if (!ObjectUtils.isEmpty(metaAnnotations)) {
-					for (Annotation metaAnnotation : metaAnnotations) {
-						if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
+				try {
+					Annotation[] metaAnnotations = annotationClass.getAnnotations();
+					if (!ObjectUtils.isEmpty(metaAnnotations)) {
+						Set<Annotation> visited = new LinkedHashSet<>();
+						for (Annotation metaAnnotation : metaAnnotations) {
 							recursivelyCollectMetaAnnotations(visited, metaAnnotation);
+						}
+						if (!visited.isEmpty()) {
+							Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
+							for (Annotation ann : visited) {
+								metaAnnotationTypeNames.add(ann.annotationType().getName());
+							}
+							this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 						}
 					}
 				}
-				Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
-				for (Annotation ann : visited) {
-					metaAnnotationTypeNames.add(ann.annotationType().getName());
+				catch (Throwable ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to introspect meta-annotations on " + annotationClass + ": " + ex);
+					}
 				}
-				this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 			}
 		}
 	}
