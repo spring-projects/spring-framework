@@ -122,7 +122,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 		@Override
 		public void addMapping(Element element, ManagedMap<String, Object> urlMap, ParserContext context) {
 			String pathAttribute = element.getAttribute("path");
-			List<String> mappings = Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute, ","));
+			String[] mappings = StringUtils.tokenizeToStringArray(pathAttribute, ",");
 			RuntimeBeanReference handlerReference = new RuntimeBeanReference(element.getAttribute("handler"));
 
 			ConstructorArgumentValues cargs = new ConstructorArgumentValues();
@@ -153,7 +153,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 		@Override
 		public void addMapping(Element element, ManagedMap<String, Object> urlMap, ParserContext context) {
 			String pathAttribute = element.getAttribute("path");
-			List<String> mappings = Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute, ","));
+			String[] mappings = StringUtils.tokenizeToStringArray(pathAttribute, ",");
 			RuntimeBeanReference handlerReference = new RuntimeBeanReference(element.getAttribute("handler"));
 
 			ConstructorArgumentValues cargs = new ConstructorArgumentValues();

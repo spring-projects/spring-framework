@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
@@ -81,8 +82,8 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 	protected boolean isBinderMethodApplicable(HandlerMethod binderMethod, WebDataBinder binder) {
 		InitBinder ann = binderMethod.getMethodAnnotation(InitBinder.class);
 		Assert.state(ann != null, "No InitBinder annotation");
-		Collection<String> names = Arrays.asList(ann.value());
-		return (names.isEmpty() || names.contains(binder.getObjectName()));
+		String[] names = ann.value();
+		return ObjectUtils.isEmpty(names) || Arrays.asList(names).contains(binder.getObjectName());
 	}
 
 }

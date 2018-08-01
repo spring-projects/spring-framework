@@ -229,12 +229,13 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	@Override
 	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 		Assert.notNull(mergedConfig, "mergedConfig must not be null");
-		List<SmartContextLoader> candidates = Arrays.asList(getXmlLoader(), getAnnotationConfigLoader());
 
 		Assert.state(!(mergedConfig.hasLocations() && mergedConfig.hasClasses()), () -> String.format(
 				"Neither %s nor %s supports loading an ApplicationContext from %s: " +
 				"declare either 'locations' or 'classes' but not both.", name(getXmlLoader()),
 				name(getAnnotationConfigLoader()), mergedConfig));
+
+		SmartContextLoader[] candidates = {getXmlLoader(), getAnnotationConfigLoader()};
 
 		for (SmartContextLoader loader : candidates) {
 			// Determine if each loader can load a context from the mergedConfig. If it
