@@ -30,12 +30,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
- * ASM visitor which looks for the annotations defined on a class or method, including
- * tracking meta-annotations.
+ * ASM visitor which looks for annotations defined on a class or method,
+ * including meta-annotations.
  *
- * <p>As of Spring 3.1.1, this visitor is fully recursive, taking into account any nested
- * annotations or nested annotation arrays. These annotations are in turn read into
- * {@link AnnotationAttributes} map structures.
+ * <p>This visitor is fully recursive, taking into account any nested
+ * annotations or nested annotation arrays.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -74,21 +73,21 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 				attributeList.add(0, this.attributes);
 			}
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationClass.getName())) {
-				Set<Annotation> visited = new LinkedHashSet<>();
 				try {
 					Annotation[] metaAnnotations = annotationClass.getAnnotations();
 					if (!ObjectUtils.isEmpty(metaAnnotations)) {
+						Set<Annotation> visited = new LinkedHashSet<>();
 						for (Annotation metaAnnotation : metaAnnotations) {
-							if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
-								recursivelyCollectMetaAnnotations(visited, metaAnnotation);
+							recursivelyCollectMetaAnnotations(visited, metaAnnotation);
+						}
+						if (!visited.isEmpty()) {
+							Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
+							for (Annotation ann : visited) {
+								metaAnnotationTypeNames.add(ann.annotationType().getName());
 							}
+							this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 						}
 					}
-					Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
-					for (Annotation ann : visited) {
-						metaAnnotationTypeNames.add(ann.annotationType().getName());
-					}
-					this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 				}
 				catch (Throwable ex) {
 					if (logger.isDebugEnabled()) {
