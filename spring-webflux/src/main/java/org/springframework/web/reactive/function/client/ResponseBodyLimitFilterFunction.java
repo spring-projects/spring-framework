@@ -25,15 +25,18 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 
 /**
  * {@link ClientHttpRequestInterceptor} to limit response body.
+ * Filter will throw {@link TooLargeResponseBodyException} on response body exceed or truncate body to specified limit
+ * depending on `throwOnExceed` parameter.
  *
  * @author Sergey Galkin
  * @since 5.1
  */
 public class ResponseBodyLimitFilterFunction implements ExchangeFilterFunction {
 
-	private final long bodyByteLimit;
+	private final int bodyByteLimit;
+	private final boolean throwOnExceed;
 
-	public ResponseBodyLimitFilterFunction(long bodyByteLimit) {
+	public ResponseBodyLimitFilterFunction(int bodyByteLimit, boolean throwOnExceed) {
 		if (bodyByteLimit < 0) {
 			throw new IllegalArgumentException(
 					"Response body limit should be non-negative, but '" + bodyByteLimit + "' given"
@@ -41,17 +44,45 @@ public class ResponseBodyLimitFilterFunction implements ExchangeFilterFunction {
 		}
 
 		this.bodyByteLimit = bodyByteLimit;
+		this.throwOnExceed = throwOnExceed;
 	}
 
 	@Override
 	public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
-		return next.exchange(request).flatMap(this::filter);
+		if (this.throwOnExceed) {
+			return next.exchange(request).flatMap(this::throwOnExceed);
+		}
+
+		return next.exchange(request).flatMap(this::truncateOnExceed);
 	}
 
-	private Mono<ClientResponse> filter(ClientResponse response) {
+	private Mono<ClientResponse> throwOnExceed(ClientResponse response) {
 		Flux<DataBuffer> buffers = response.body(
-				(message, ctx) -> DataBufferUtils.takeUntilByteCount(message.getBody(), this.bodyByteLimit)
+				(message, ctx) -> DataBufferUtils
+						.takeUntilByteCount(message.getBody(), this.bodyByteLimit + 1)
 		);
+
+		Mono<DataBuffer> buffer = DataBufferUtils
+				.join(buffers)
+				.map(buf -> {
+					if (buf.readableByteCount() > this.bodyByteLimit) {
+						byte[] truncatedBody = new byte[this.bodyByteLimit];
+						buf.read(truncatedBody, 0, this.bodyByteLimit);
+						DataBufferUtils.release(buf);
+						throw new TooLargeResponseBodyException(truncatedBody);
+					}
+					return buf;
+				});
+
+		return Mono.just(ClientResponse.create(response.statusCode()).body(Flux.from(buffer)).build());
+	}
+
+	private Mono<ClientResponse> truncateOnExceed(ClientResponse response) {
+		Flux<DataBuffer> buffers = response.body(
+				(message, ctx) -> DataBufferUtils
+						.takeUntilByteCount(message.getBody(), this.bodyByteLimit)
+		);
+
 		return Mono.just(ClientResponse.create(response.statusCode()).body(buffers).build());
 	}
 }

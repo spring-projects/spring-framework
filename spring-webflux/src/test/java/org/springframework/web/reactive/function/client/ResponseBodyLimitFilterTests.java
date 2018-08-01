@@ -6,6 +6,6 @@ public class ResponseBodyLimitFilterTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void negativeLimit() {
-		new ResponseBodyLimitFilterFunction(-1);
+		new ResponseBodyLimitFilterFunction(-1, false);
 	}
 }
