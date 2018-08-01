@@ -10,7 +10,6 @@ import java.time.Duration;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -21,12 +20,7 @@ public class ResponseBodyLimitFilterIntegrationTests {
 	private static final String EXACT_BODY = Strings.repeat("1", BODY_BYTES_LIMIT);
 	private static final String BIG_BODY = Strings.repeat("1", BODY_BYTES_LIMIT * 1000);
 
-	private MockWebServer server;
-
-	@Before
-	public void setup() {
-		this.server = new MockWebServer();
-	}
+	private final MockWebServer server = new MockWebServer();
 
 	@After
 	public void shutdown() throws IOException {
@@ -34,7 +28,7 @@ public class ResponseBodyLimitFilterIntegrationTests {
 	}
 
 	@Test
-	public void responseSizeBelowLimit_throwOnExceedConfigured() {
+	public void responseSizeBelowLimitThrowOnExceedConfigured() {
 		enqueueResponse(EXACT_BODY);
 
 		Mono<String> result = runWithFilter(new ResponseBodyLimitFilterFunction(BODY_BYTES_LIMIT, true));
@@ -46,7 +40,7 @@ public class ResponseBodyLimitFilterIntegrationTests {
 	}
 
 	@Test
-	public void responseSizeBelowLimit_noThrowOnExceedConfigured() {
+	public void responseSizeBelowLimitNoThrowOnExceedConfigured() {
 		enqueueResponse(EXACT_BODY);
 
 		Mono<String> result = runWithFilter(new ResponseBodyLimitFilterFunction(BODY_BYTES_LIMIT, false));
@@ -58,7 +52,7 @@ public class ResponseBodyLimitFilterIntegrationTests {
 	}
 
 	@Test
-	public void responseSizeAboveLimit_throwOnExceedConfigured() {
+	public void responseSizeAboveLimitThrowOnExceedConfigured() {
 		enqueueResponse(BIG_BODY);
 
 		Mono<String> result = runWithFilter(new ResponseBodyLimitFilterFunction(BODY_BYTES_LIMIT, true));
@@ -69,7 +63,7 @@ public class ResponseBodyLimitFilterIntegrationTests {
 	}
 
 	@Test
-	public void responseSizeAboveLimit_noThrowOnExceedConfigured() {
+	public void responseSizeAboveLimitNoThrowOnExceedConfigured() {
 		enqueueResponse(BIG_BODY);
 
 		Mono<String> result = runWithFilter(new ResponseBodyLimitFilterFunction(BODY_BYTES_LIMIT, false));
