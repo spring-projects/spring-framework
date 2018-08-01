@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.SimpleSessionStatus;
@@ -78,8 +79,8 @@ class InitBinderBindingContext extends BindingContext {
 				.filter(binderMethod -> {
 					InitBinder ann = binderMethod.getMethodAnnotation(InitBinder.class);
 					Assert.state(ann != null, "No InitBinder annotation");
-					Collection<String> names = Arrays.asList(ann.value());
-					return (names.isEmpty() || names.contains(dataBinder.getObjectName()));
+					String[] names = ann.value();
+					return ObjectUtils.isEmpty(names) || Arrays.asList(names).contains(dataBinder.getObjectName());
 				})
 				.forEach(method -> invokeBinderMethod(dataBinder, exchange, method));
 
