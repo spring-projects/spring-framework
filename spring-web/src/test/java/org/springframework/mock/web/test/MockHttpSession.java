@@ -47,6 +47,9 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
 
+	/**
+	 * The session cookie name.
+	 */
 	public static final String SESSION_COOKIE_NAME = "JSESSION";
 
 
@@ -180,7 +183,7 @@ public class MockHttpSession implements HttpSession {
 			Object oldValue = this.attributes.put(name, value);
 			if (value != oldValue) {
 				if (oldValue instanceof HttpSessionBindingListener) {
-					((HttpSessionBindingListener) value).valueUnbound(new HttpSessionBindingEvent(this, name, oldValue));
+					((HttpSessionBindingListener) oldValue).valueUnbound(new HttpSessionBindingEvent(this, name, oldValue));
 				}
 				if (value instanceof HttpSessionBindingListener) {
 					((HttpSessionBindingListener) value).valueBound(new HttpSessionBindingEvent(this, name, value));
