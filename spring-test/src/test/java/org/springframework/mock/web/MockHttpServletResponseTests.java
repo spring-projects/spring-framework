@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -320,6 +320,37 @@ public class MockHttpServletResponseTests {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Server Error");
 		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
+	}
+
+	@Test
+	public void setCookieHeaderValid() {
+		response.addHeader(HttpHeaders.SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
+		Cookie cookie = response.getCookie("SESSION");
+		assertNotNull(cookie);
+		assertTrue(cookie instanceof MockCookie);
+		assertEquals("SESSION", cookie.getName());
+		assertEquals("123", cookie.getValue());
+		assertEquals("/", cookie.getPath());
+		assertTrue(cookie.getSecure());
+		assertTrue(cookie.isHttpOnly());
+		assertEquals("Lax", ((MockCookie) cookie).getSameSite());
+	}
+
+	@Test
+	public void addMockCookie() {
+		MockCookie mockCookie = new MockCookie("SESSION", "123");
+		mockCookie.setPath("/");
+		mockCookie.setDomain("example.com");
+		mockCookie.setMaxAge(0);
+		mockCookie.setSecure(true);
+		mockCookie.setHttpOnly(true);
+		mockCookie.setSameSite("Lax");
+
+		response.addCookie(mockCookie);
+
+		assertEquals("SESSION=123; Path=/; Domain=example.com; Max-Age=0; " +
+				"Expires=Thu, 1 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Lax",
+				response.getHeader(HttpHeaders.SET_COOKIE));
 	}
 
 }
