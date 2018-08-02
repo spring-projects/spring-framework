@@ -166,14 +166,6 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 		return this.adaptedExecutor.submitListenable(task);
 	}
 
-	/**
-	 * This task executor prefers short-lived work units.
-	 */
-	@Override
-	public boolean prefersShortLivedTasks() {
-		return true;
-	}
-
 
 	private static TaskExecutorAdapter getAdaptedExecutor(Executor concurrentExecutor) {
 		if (managedExecutorServiceClass != null && managedExecutorServiceClass.isInstance(concurrentExecutor)) {

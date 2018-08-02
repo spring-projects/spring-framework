@@ -298,11 +298,6 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
-	@Override
-	public boolean prefersShortLivedTasks() {
-		return true;
-	}
-
 
 	// TaskScheduler implementation
 

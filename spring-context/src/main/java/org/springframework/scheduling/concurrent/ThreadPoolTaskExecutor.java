@@ -381,12 +381,4 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 	}
 
-	/**
-	 * This task executor prefers short-lived work units.
-	 */
-	@Override
-	public boolean prefersShortLivedTasks() {
-		return true;
-	}
-
 }
