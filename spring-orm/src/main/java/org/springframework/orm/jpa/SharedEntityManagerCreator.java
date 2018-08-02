@@ -126,7 +126,7 @@ public abstract class SharedEntityManagerCreator {
 
 	/**
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
-	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
+	 * @param emf the EntityManagerFactory to obtain EntityManagers from as needed
 	 * @param properties the properties to be passed into the
 	 * {@code createEntityManager} call (may be {@code null})
 	 * @param entityManagerInterfaces the interfaces to be implemented by the
@@ -141,7 +141,7 @@ public abstract class SharedEntityManagerCreator {
 
 	/**
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
-	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
+	 * @param emf the EntityManagerFactory to obtain EntityManagers from as needed
 	 * @param properties the properties to be passed into the
 	 * {@code createEntityManager} call (may be {@code null})
 	 * @param synchronizedWithTransaction whether to automatically join ongoing
@@ -187,6 +187,7 @@ public abstract class SharedEntityManagerCreator {
 
 		public SharedEntityManagerInvocationHandler(
 				EntityManagerFactory target, Map<?, ?> properties, boolean synchronizedWithTransaction) {
+
 			this.targetFactory = target;
 			this.properties = properties;
 			this.synchronizedWithTransaction = synchronizedWithTransaction;
@@ -339,11 +340,11 @@ public abstract class SharedEntityManagerCreator {
 
 		private final Query target;
 
-		private EntityManager em;
+		private EntityManager entityManager;
 
-		public DeferredQueryInvocationHandler(Query target, EntityManager em) {
+		public DeferredQueryInvocationHandler(Query target, EntityManager entityManager) {
 			this.target = target;
-			this.em = em;
+			this.entityManager = entityManager;
 		}
 
 		@Override
@@ -381,8 +382,8 @@ public abstract class SharedEntityManagerCreator {
 				if (queryTerminatingMethods.contains(method.getName())) {
 					// Actual execution of the query: close the EntityManager right
 					// afterwards, since that was the only reason we kept it open.
-					EntityManagerFactoryUtils.closeEntityManager(this.em);
-					this.em = null;
+					EntityManagerFactoryUtils.closeEntityManager(this.entityManager);
+					this.entityManager = null;
 				}
 			}
 		}
