@@ -53,11 +53,13 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 		this.binderMethods = (binderMethods != null ? binderMethods : Collections.emptyList());
 	}
 
+
 	/**
 	 * Initialize a WebDataBinder with {@code @InitBinder} methods.
 	 * <p>If the {@code @InitBinder} annotation specifies attributes names,
 	 * it is invoked only if the names include the target object name.
-	 * @throws Exception if one of the invoked @{@link InitBinder} methods fail.
+	 * @throws Exception if one of the invoked @{@link InitBinder} methods fails
+	 * @see #isBinderMethodApplicable
 	 */
 	@Override
 	public void initBinder(WebDataBinder dataBinder, NativeWebRequest request) throws Exception {
@@ -66,19 +68,19 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 				Object returnValue = binderMethod.invokeForRequest(request, null, dataBinder);
 				if (returnValue != null) {
 					throw new IllegalStateException(
-							"@InitBinder methods should return void: " + binderMethod);
+							"@InitBinder methods must not return a value (should be void): " + binderMethod);
 				}
 			}
 		}
 	}
 
 	/**
-	 * Whether the given {@code @InitBinder} method should be used to initialize
-	 * the given WebDataBinder instance. By default we check the attributes
-	 * names of the annotation, if present.
+	 * Determine whether the given {@code @InitBinder} method should be used
+	 * to initialize the given {@link WebDataBinder} instance. By default we
+	 * check the specified attribute names in the annotation value, if any.
 	 */
-	protected boolean isBinderMethodApplicable(HandlerMethod binderMethod, WebDataBinder dataBinder) {
-		InitBinder ann = binderMethod.getMethodAnnotation(InitBinder.class);
+	protected boolean isBinderMethodApplicable(HandlerMethod initBinderMethod, WebDataBinder dataBinder) {
+		InitBinder ann = initBinderMethod.getMethodAnnotation(InitBinder.class);
 		Assert.state(ann != null, "No InitBinder annotation");
 		String[] names = ann.value();
 		return (ObjectUtils.isEmpty(names) || ObjectUtils.containsElement(names, dataBinder.getObjectName()));
