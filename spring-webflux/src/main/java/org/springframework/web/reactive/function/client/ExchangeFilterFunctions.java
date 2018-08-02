@@ -25,11 +25,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.reactive.function.BodyExtractors;
 
 /**
  * Static factory methods providing access to built-in implementations of
@@ -50,6 +54,21 @@ public abstract class ExchangeFilterFunctions {
 	public static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
 			ExchangeFilterFunctions.class.getName() + ".basicAuthenticationCredentials";
 
+	/**
+	 * Consume up to the specified number of bytes from the response body and
+	 * cancel if any more data arrives. Internally delegates to
+	 * {@link DataBufferUtils#takeUntilByteCount}.
+	 * @return the filter to limit the response size with
+	 * @since 5.1
+	 */
+	public static ExchangeFilterFunction limitResponseSize(long maxByteCount) {
+		return (request, next) ->
+				next.exchange(request).map(response -> {
+					Flux<DataBuffer> body = response.body(BodyExtractors.toDataBuffers());
+					body = DataBufferUtils.takeUntilByteCount(body, maxByteCount);
+					return ClientResponse.from(response).body(body).build();
+				});
+	}
 
 	/**
 	 * Return a filter for HTTP Basic Authentication that adds an authorization
