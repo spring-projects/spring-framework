@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
@@ -44,7 +42,6 @@ class InitBinderBindingContext extends BindingContext {
 
 	private final List<SyncInvocableHandlerMethod> binderMethods;
 
-	/* Simple BindingContext to help with the invoking @InitBinder methods */
 	private final BindingContext binderMethodContext;
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
@@ -72,32 +69,28 @@ class InitBinderBindingContext extends BindingContext {
 
 
 	@Override
-	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder dataBinder,
-			ServerWebExchange exchange) {
-
+	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder dataBinder, ServerWebExchange exchange) {
 		this.binderMethods.stream()
 				.filter(binderMethod -> {
 					InitBinder ann = binderMethod.getMethodAnnotation(InitBinder.class);
 					Assert.state(ann != null, "No InitBinder annotation");
 					String[] names = ann.value();
-					return ObjectUtils.isEmpty(names) || Arrays.asList(names).contains(dataBinder.getObjectName());
+					return (ObjectUtils.isEmpty(names) ||
+							ObjectUtils.containsElement(names, dataBinder.getObjectName()));
 				})
 				.forEach(method -> invokeBinderMethod(dataBinder, exchange, method));
 
 		return dataBinder;
 	}
 
-	private void invokeBinderMethod(WebExchangeDataBinder dataBinder,
-			ServerWebExchange exchange, SyncInvocableHandlerMethod binderMethod) {
+	private void invokeBinderMethod(WebExchangeDataBinder dataBinder, ServerWebExchange exchange,
+			SyncInvocableHandlerMethod binderMethod) {
 
-		HandlerResult result = binderMethod.invokeForHandlerResult(
-				exchange, this.binderMethodContext, dataBinder);
-
+		HandlerResult result = binderMethod.invokeForHandlerResult(exchange, this.binderMethodContext, dataBinder);
 		if (result != null && result.getReturnValue() != null) {
 			throw new IllegalStateException(
 					"@InitBinder methods should return void: " + binderMethod);
 		}
-
 		// Should not happen (no Model argument resolution) ...
 		if (!this.binderMethodContext.getModel().asMap().isEmpty()) {
 			throw new IllegalStateException(

@@ -40,10 +40,10 @@ import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 
 /**
- * Parses the configuration for the {@code <websocket:handlers/>} namespace
- * element. Registers a Spring MVC {@code SimpleUrlHandlerMapping} to map HTTP
- * WebSocket handshake (or SockJS) requests to
- * {@link org.springframework.web.socket.WebSocketHandler WebSocketHandler org.springframework.web.socket.WebSocketHandler WebSocketHandlers}.
+ * Parses the configuration for the {@code <websocket:handlers/>} namespace element.
+ * Registers a Spring MVC {@code SimpleUrlHandlerMapping} to map HTTP WebSocket
+ * handshake (or SockJS) requests to
+ * {@link org.springframework.web.socket.WebSocketHandler WebSocketHandlers}.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
@@ -58,10 +58,10 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
 	@Nullable
-	public BeanDefinition parse(Element element, ParserContext cxt) {
-		Object source = cxt.extractSource(element);
+	public BeanDefinition parse(Element element, ParserContext context) {
+		Object source = context.extractSource(element);
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
-		cxt.pushContainingComponent(compDefinition);
+		context.pushContainingComponent(compDefinition);
 
 		String orderAttribute = element.getAttribute("order");
 		int order = orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);
@@ -70,19 +70,19 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.setSource(source);
 		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		handlerMappingDef.getPropertyValues().add("order", order);
-		String handlerMappingName = cxt.getReaderContext().registerWithGeneratedName(handlerMappingDef);
+		String handlerMappingName = context.getReaderContext().registerWithGeneratedName(handlerMappingDef);
 
 		RuntimeBeanReference sockJsService = WebSocketNamespaceUtils.registerSockJsService(
-				element, SOCK_JS_SCHEDULER_NAME, cxt, source);
+				element, SOCK_JS_SCHEDULER_NAME, context, source);
 
 		HandlerMappingStrategy strategy;
 		if (sockJsService != null) {
 			strategy = new SockJsHandlerMappingStrategy(sockJsService);
 		}
 		else {
-			RuntimeBeanReference handler = WebSocketNamespaceUtils.registerHandshakeHandler(element, cxt, source);
+			RuntimeBeanReference handler = WebSocketNamespaceUtils.registerHandshakeHandler(element, context, source);
 			Element interceptElem = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, cxt);
+			ManagedList<Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, context);
 			String allowedOrigins = element.getAttribute("allowed-origins");
 			List<String> origins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOrigins, ","));
 			interceptors.add(new OriginHandshakeInterceptor(origins));
@@ -92,12 +92,12 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedMap<String, Object> urlMap = new ManagedMap<>();
 		urlMap.setSource(source);
 		for (Element mappingElement : DomUtils.getChildElementsByTagName(element, "mapping")) {
-			strategy.addMapping(mappingElement, urlMap, cxt);
+			strategy.addMapping(mappingElement, urlMap, context);
 		}
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
 
-		cxt.registerComponent(new BeanComponentDefinition(handlerMappingDef, handlerMappingName));
-		cxt.popAndRegisterContainingComponent();
+		context.registerComponent(new BeanComponentDefinition(handlerMappingDef, handlerMappingName));
+		context.popAndRegisterContainingComponent();
 		return null;
 	}
 

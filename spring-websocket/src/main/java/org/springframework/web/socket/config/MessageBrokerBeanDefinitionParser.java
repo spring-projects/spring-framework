@@ -254,7 +254,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		RootBeanDefinition channelDef = new RootBeanDefinition(ExecutorSubscribableChannel.class, cargs, null);
-		ManagedList<? super Object> interceptors = new ManagedList<>();
+		ManagedList<Object> interceptors = new ManagedList<>();
 		if (element != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "interceptors");
 			interceptors.addAll(WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context));
@@ -346,7 +346,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		else {
 			RuntimeBeanReference handler = WebSocketNamespaceUtils.registerHandshakeHandler(element, ctx, source);
 			Element interceptElem = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, ctx);
+			ManagedList<Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, ctx);
 			String allowedOrigins = element.getAttribute("allowed-origins");
 			List<String> origins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOrigins, ","));
 			interceptors.add(new OriginHandshakeInterceptor(origins));
@@ -477,7 +477,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			Element element, ParserContext context, @Nullable Object source) {
 
 		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
-		ManagedList<? super Object> converters = new ManagedList<>();
+		ManagedList<Object> converters = new ManagedList<>();
 		if (convertersElement != null) {
 			converters.setSource(source);
 			for (Element beanElement : DomUtils.getChildElementsByTagName(convertersElement, "bean", "ref")) {
@@ -567,7 +567,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Nullable
 	private RuntimeBeanReference getValidator(
-			Element messageBrokerElement, @Nullable Object source, ParserContext parserContext) {
+			Element messageBrokerElement, @Nullable Object source, ParserContext context) {
 
 		if (messageBrokerElement.hasAttribute("validator")) {
 			return new RuntimeBeanReference(messageBrokerElement.getAttribute("validator"));
@@ -577,8 +577,8 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 					"org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean");
 			validatorDef.setSource(source);
 			validatorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			String validatorName = parserContext.getReaderContext().registerWithGeneratedName(validatorDef);
-			parserContext.registerComponent(new BeanComponentDefinition(validatorDef, validatorName));
+			String validatorName = context.getReaderContext().registerWithGeneratedName(validatorDef);
+			context.registerComponent(new BeanComponentDefinition(validatorDef, validatorName));
 			return new RuntimeBeanReference(validatorName);
 		}
 		else {
@@ -586,11 +586,11 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private ManagedList<Object> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
+	private ManagedList<Object> extractBeanSubElements(Element parentElement, ParserContext context) {
 		ManagedList<Object> list = new ManagedList<>();
-		list.setSource(parserContext.extractSource(parentElement));
+		list.setSource(context.extractSource(parentElement));
 		for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
-			Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+			Object object = context.getDelegate().parsePropertySubElement(beanElement, null);
 			list.add(object);
 		}
 		return list;
