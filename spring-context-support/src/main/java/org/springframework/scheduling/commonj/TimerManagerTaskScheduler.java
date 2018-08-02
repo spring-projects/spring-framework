@@ -40,7 +40,10 @@ import org.springframework.util.ErrorHandler;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 3.0
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler}
  */
+@Deprecated
 public class TimerManagerTaskScheduler extends TimerManagerAccessor implements TaskScheduler {
 
 	@Nullable

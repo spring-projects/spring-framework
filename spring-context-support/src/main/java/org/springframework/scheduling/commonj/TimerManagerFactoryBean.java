@@ -51,7 +51,10 @@ import org.springframework.lang.Nullable;
  * @see ScheduledTimerListener
  * @see commonj.timers.TimerManager
  * @see commonj.timers.TimerListener
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler}
  */
+@Deprecated
 public class TimerManagerFactoryBean extends TimerManagerAccessor
 		implements FactoryBean<TimerManager>, InitializingBean, DisposableBean, Lifecycle {
 
