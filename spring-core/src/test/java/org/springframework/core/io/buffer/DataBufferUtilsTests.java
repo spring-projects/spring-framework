@@ -226,19 +226,32 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void takeUntilByteCount() {
-		DataBuffer foo = stringBuffer("foo");
-		DataBuffer bar = stringBuffer("bar");
-		DataBuffer baz = stringBuffer("baz");
-		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
-		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(flux, 5L);
+
+		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(
+				Flux.just(stringBuffer("foo"), stringBuffer("bar")), 5L);
 
 		StepVerifier.create(result)
 				.consumeNextWith(stringConsumer("foo"))
 				.consumeNextWith(stringConsumer("ba"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
+	}
 
-		release(baz);
+	@Test
+	public void takeUntilByteCountExact() {
+
+		DataBuffer extraBuffer = stringBuffer("baz");
+
+		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(
+				Flux.just(stringBuffer("foo"), stringBuffer("bar"), extraBuffer), 6L);
+
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+
+		release(extraBuffer);
 	}
 
 	@Test
