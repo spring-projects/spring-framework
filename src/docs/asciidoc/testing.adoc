@@ -5590,8 +5590,6 @@ server-side logic but without running a server. Here is an example:
 	this.restTemplate = new RestTemplate(new MockMvcClientHttpRequestFactory(mockMvc));
 
 	// Test code that uses the above RestTemplate ...
-
-	mockServer.verify();
 ----
 
 [[spring-mvc-test-client-static-imports]]
