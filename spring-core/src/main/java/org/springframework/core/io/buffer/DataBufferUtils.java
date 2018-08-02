@@ -396,14 +396,11 @@ public abstract class DataBufferUtils {
 		AtomicLong countDown = new AtomicLong(maxByteCount);
 
 		return Flux.from(publisher)
-				.takeWhile(buffer -> {
-					int delta = -buffer.readableByteCount();
-					return countDown.getAndAdd(delta) >= 0;
-				})
 				.map(buffer -> {
-					long count = countDown.get();
+					long count = countDown.addAndGet(-buffer.readableByteCount());
 					return count >= 0 ? buffer : buffer.slice(0, buffer.readableByteCount() + (int) count);
-				});
+				})
+				.takeUntil(buffer -> countDown.get() <= 0);
 	}
 
 	/**
