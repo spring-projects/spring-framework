@@ -245,7 +245,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		RootBeanDefinition channelDef = new RootBeanDefinition(ExecutorSubscribableChannel.class, argValues, null);
-		ManagedList<? super Object> interceptors = new ManagedList<Object>();
+		ManagedList<Object> interceptors = new ManagedList<Object>();
 		if (element != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "interceptors");
 			interceptors.addAll(WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context));
@@ -333,7 +333,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		else {
 			RuntimeBeanReference handshakeHandler = WebSocketNamespaceUtils.registerHandshakeHandler(element, context, source);
 			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
+			ManagedList<Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
 			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
 			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
 			interceptors.add(new OriginHandshakeInterceptor(allowedOrigins));
@@ -458,7 +458,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private RuntimeBeanReference registerMessageConverter(Element element, ParserContext context, Object source) {
 		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
-		ManagedList<? super Object> converters = new ManagedList<Object>();
+		ManagedList<Object> converters = new ManagedList<Object>();
 		if (convertersElement != null) {
 			converters.setSource(source);
 			for (Element beanElement : DomUtils.getChildElementsByTagName(convertersElement, "bean", "ref")) {

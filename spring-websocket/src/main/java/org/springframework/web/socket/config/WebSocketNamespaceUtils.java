@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-class WebSocketNamespaceUtils {
+abstract class WebSocketNamespaceUtils {
 
 	public static RuntimeBeanReference registerHandshakeHandler(Element element, ParserContext context, Object source) {
 		RuntimeBeanReference handlerRef;
@@ -61,8 +61,8 @@ class WebSocketNamespaceUtils {
 		return handlerRef;
 	}
 
-	public static RuntimeBeanReference registerSockJsService(Element element, String schedulerName,
-			ParserContext context, Object source) {
+	public static RuntimeBeanReference registerSockJsService(
+			Element element, String schedulerName, ParserContext context, Object source) {
 
 		Element sockJsElement = DomUtils.getChildElementByTagName(element, "sockjs");
 
@@ -99,13 +99,13 @@ class WebSocketNamespaceUtils {
 				sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1, transportHandler);
 			}
 
-			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
-			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
-			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
-			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
-			sockJsServiceDef.getPropertyValues().add("allowedOrigins", allowedOrigins);
+			Element interceptElem = DomUtils.getChildElementByTagName(element, "handshake-interceptors");
+			ManagedList<Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, context);
+			String allowedOrigins = element.getAttribute("allowed-origins");
+			List<String> origins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOrigins, ","));
+			sockJsServiceDef.getPropertyValues().add("allowedOrigins", origins);
 			RootBeanDefinition originHandshakeInterceptor = new RootBeanDefinition(OriginHandshakeInterceptor.class);
-			originHandshakeInterceptor.getPropertyValues().add("allowedOrigins", allowedOrigins);
+			originHandshakeInterceptor.getPropertyValues().add("allowedOrigins", origins);
 			interceptors.add(originHandshakeInterceptor);
 			sockJsServiceDef.getPropertyValues().add("handshakeInterceptors", interceptors);
 
@@ -170,8 +170,8 @@ class WebSocketNamespaceUtils {
 		return new RuntimeBeanReference(schedulerName);
 	}
 
-	public static ManagedList<? super Object> parseBeanSubElements(Element parentElement, ParserContext context) {
-		ManagedList<? super Object> beans = new ManagedList<Object>();
+	public static ManagedList<Object> parseBeanSubElements(Element parentElement, ParserContext context) {
+		ManagedList<Object> beans = new ManagedList<Object>();
 		if (parentElement != null) {
 			beans.setSource(context.extractSource(parentElement));
 			for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
