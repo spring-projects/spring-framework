@@ -508,6 +508,12 @@ The table below lists the components that `WebHttpHandlerBuilder` detects:
 | 0..1
 | The resolver for `LocaleContext` exposed through a method on `ServerWebExchange`.
   `AcceptHeaderLocaleContextResolver` by default.
+
+| "forwardedHeaderTransformer"
+| `ForwardedHeaderTransformer`
+| 0..1
+| For processing Forwarded type headers, either extracting and removing, or removing them only.
+  Not used by default.
 |===
 
 
@@ -553,6 +559,39 @@ parsing multipart data in full. By contrast `@RequestBody` can be used to decode
 content to `Flux<Part>` without collecting to a `MultiValueMap`.
 
 
+[[webflux-forwarded-headers]]
+==== Forwarded Headers
+[.small]#<<web.adoc#filters-forwarded-headers,Same in Spring MVC>>#
+
+As a request goes through proxies such as load balancers the host, port, and
+scheme may change and that makes it a challenge to create links that point to the correct
+host, port, and scheme from a client perspective.
+
+https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
+that proxies can use to provide information about the original request. There are other
+non-standard headers too including "X-Forwarded-Host", "X-Forwarded-Port",
+"X-Forwarded-Proto", "X-Forwarded-Ssl", and "X-Forwarded-Prefix".
+
+`ForwardedHeaderTransformer` is a component that modifies the host, port, and scheme of
+the request, based on Forwarded headers, and then removes those headers. Simply declare
+it as a bean with the name "forwardedHeaderTransformer" and it will be
+<<webflux-web-handler-api-special-beans, detected>> and used.
+
+There are security considerations for forwarded headers since an application can't know
+if the headers were added by a proxy as intended, or with a malicious client. This is why
+a proxy at the boundary of trust should be configured to remove untrusted Forwarded coming
+from the outside. You can also configure the `ForwardedHeaderTransformer` with
+`removeOnly=true` in which case it will remove but not use the headers.
+
+[NOTE]
+====
+In 5.1 `ForwardedHeaderFilter` was deprecated and superceded by
+`ForwardedHeaderTransformer` so forwarded headers can be processed earlier, before the
+exchange is created. If the filter is configured anyway, it is taken out of the list of
+filters, and `ForwardedHeaderTransformer` is used instead.
+====
+
+
 
 [[webflux-filters]]
 === Filters
@@ -565,34 +604,6 @@ as declaring it as a Spring bean, and optionally expressing precedence via `@Ord
 the bean declaration or by implementing `Ordered`.
 
 The following describe the available `WebFilter` implementations:
-
-
-[[webflux-filters-forwarded-headers]]
-==== Forwarded Headers
-[.small]#<<web.adoc#filters-forwarded-headers,Same in Spring MVC>>#
-
-As a request goes through proxies such as load balancers the host, port, and
-scheme may change presenting a challenge for applications that need to create links
-to resources since the links should reflect the host, port, and scheme of the
-original request as seen from a client perspective.
-
-https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
-for proxies to use to provide information about the original request. There are also
-other non-standard headers in use such as "X-Forwarded-Host", "X-Forwarded-Port",
-and "X-Forwarded-Proto".
-
-`ForwardedHeaderFilter` detects, extracts, and uses information from the "Forwarded"
-header, or from "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto".
-It wraps the request in order to overlay its host, port, and scheme and also "hides"
-the forwarded headers for subsequent processing.
-
-Note that there are security considerations when using forwarded headers as explained
-in Section 8 of RFC 7239. At the application level it is difficult to determine whether
-forwarded headers can be trusted or not. This is why the network upstream should be
-configured correctly to filter out untrusted forwarded headers from the outside.
-
-Applications that don't have a proxy and don't need to use forwarded headers can
-configure the `ForwardedHeaderFilter` to remove and ignore such headers.
 
 
 [[webflux-filters-cors]]

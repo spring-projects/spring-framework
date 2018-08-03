@@ -93,6 +93,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	private LocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
 
 	@Nullable
+	private ForwardedHeaderTransformer forwardedHeaderTransformer;
+
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	/** Whether to log potentially sensitive info (form data at DEBUG, headers at TRACE). */
@@ -170,6 +173,27 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	/**
+	 * Enable processing of forwarded headers, either extracting and removing,
+	 * or remove only.
+	 * <p>By default this is not set.
+	 * @param transformer the transformer to use
+	 * @since 5.1
+	 */
+	public void setForwardedHeaderTransformer(ForwardedHeaderTransformer transformer) {
+		Assert.notNull(transformer, "ForwardedHeaderTransformer is required");
+		this.forwardedHeaderTransformer = transformer;
+	}
+
+	/**
+	 * Return the configured {@link ForwardedHeaderTransformer}.
+	 * @since 5.1
+	 */
+	@Nullable
+	public ForwardedHeaderTransformer getForwardedHeaderTransformer() {
+		return this.forwardedHeaderTransformer;
+	}
+
+	/**
 	 * Configure the {@code ApplicationContext} associated with the web application,
 	 * if it was initialized with one via
 	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
@@ -207,6 +231,10 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+
+		if (this.forwardedHeaderTransformer != null) {
+			request = this.forwardedHeaderTransformer.apply(request);
+		}
 
 		ServerWebExchange exchange = createExchange(request, response);
 		logExchange(exchange);

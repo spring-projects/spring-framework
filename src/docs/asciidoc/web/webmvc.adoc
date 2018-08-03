@@ -1116,32 +1116,27 @@ available through the `ServletRequest.getParameter{asterisk}()` family of method
 
 
 
-[[webflux-filters-forwarded-headers]]
+[[filters-forwarded-headers]]
 === Forwarded Headers
-[.small]#<<web-reactive.adoc#webflux-filters-forwarded-headers,Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-forwarded-headers,Same in Spring WebFlux>>#
 
 As a request goes through proxies such as load balancers the host, port, and
-scheme may change presenting a challenge for applications that need to create links
-to resources since the links should reflect the host, port, and scheme of the
-original request as seen from a client perspective.
+scheme may change and that makes it a challenge to create links that point to the correct
+host, port, and scheme from a client perspective.
 
 https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
-for proxies to use to provide information about the original request. There are also
-other non-standard headers in use such as "X-Forwarded-Host", "X-Forwarded-Port",
-and "X-Forwarded-Proto".
+that proxies can use to provide information about the original request. There are other
+non-standard headers too including "X-Forwarded-Host", "X-Forwarded-Port",
+"X-Forwarded-Proto", "X-Forwarded-Ssl", and "X-Forwarded-Prefix".
 
-`ForwardedHeaderFilter` detects, extracts, and uses information from the "Forwarded"
-header, or from "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto".
-It wraps the request in order to overlay its host, port, and scheme and also "hides"
-the forwarded headers for subsequent processing.
+`ForwardedHeaderFilter` is a Servlet filter that modifies the host, port, and scheme of
+the request, based on Forwarded headers, and then removes those headers.
 
-Note that there are security considerations when using forwarded headers as explained
-in Section 8 of RFC 7239. At the application level it is difficult to determine whether
-forwarded headers can be trusted or not. This is why the network upstream should be
-configured correctly to filter out untrusted forwarded headers from the outside.
-
-Applications that don't have a proxy and don't need to use forwarded headers can
-configure the `ForwardedHeaderFilter` to remove and ignore such headers.
+There are security considerations for forwarded headers since an application can't know
+if the headers were added by a proxy as intended, or with a malicious client. This is why
+a proxy at the boundary of trust should be configured to remove untrusted Forwarded coming
+from the outside. You can also configure the `ForwardedHeaderFilter` with
+`removeOnly=true` in which case it will remove but not use the headers.
 
 
 

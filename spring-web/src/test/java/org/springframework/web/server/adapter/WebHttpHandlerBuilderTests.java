@@ -17,6 +17,7 @@
 package org.springframework.web.server.adapter;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -31,6 +32,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.web.filter.reactive.ForwardedHeaderFilter;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
@@ -60,6 +62,17 @@ public class WebHttpHandlerBuilderTests {
 		httpHandler.handle(request, response).block(ofMillis(5000));
 
 		assertEquals("FilterB::FilterA", response.getBodyAsString().block(ofMillis(5000)));
+	}
+
+	@Test
+	public void forwardedHeaderFilter() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(ForwardedHeaderFilterConfig.class);
+		context.refresh();
+
+		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
+		builder.filters(filters -> assertEquals(Collections.emptyList(), filters));
+		assertTrue(builder.hasForwardedHeaderTransformer());
 	}
 
 	@Test  // SPR-15074
@@ -166,6 +179,20 @@ public class WebHttpHandlerBuilderTests {
 		}
 	}
 
+	@Configuration
+	@SuppressWarnings({"unused", "deprecation"})
+	static class ForwardedHeaderFilterConfig {
+
+		@Bean
+		public ForwardedHeaderFilter forwardedHeaderFilter() {
+			return new ForwardedHeaderFilter();
+		}
+
+		@Bean
+		public WebHandler webHandler() {
+			return exchange -> Mono.error(new Exception());
+		}
+	}
 
 	@Configuration
 	@SuppressWarnings("unused")

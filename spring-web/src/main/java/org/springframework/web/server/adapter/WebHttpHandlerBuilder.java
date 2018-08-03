@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +75,9 @@ public final class WebHttpHandlerBuilder {
 	/** Well-known name for the LocaleContextResolver in the bean factory. */
 	public static final String LOCALE_CONTEXT_RESOLVER_BEAN_NAME = "localeContextResolver";
 
+	/** Well-known name for the ForwardedHeaderTransformer in the bean factory. */
+	public static final String FORWARDED_HEADER_TRANSFORMER_BEAN_NAME = "forwardedHeaderTransformer";
+
 
 	private final WebHandler webHandler;
 
@@ -92,6 +96,9 @@ public final class WebHttpHandlerBuilder {
 
 	@Nullable
 	private LocaleContextResolver localeContextResolver;
+
+	@Nullable
+	private ForwardedHeaderTransformer forwardedHeaderTransformer;
 
 
 	/**
@@ -114,6 +121,7 @@ public final class WebHttpHandlerBuilder {
 		this.sessionManager = other.sessionManager;
 		this.codecConfigurer = other.codecConfigurer;
 		this.localeContextResolver = other.localeContextResolver;
+		this.forwardedHeaderTransformer = other.forwardedHeaderTransformer;
 	}
 
 
@@ -181,6 +189,22 @@ public final class WebHttpHandlerBuilder {
 			// Fall back on default
 		}
 
+		try {
+			builder.localeContextResolver(
+					context.getBean(LOCALE_CONTEXT_RESOLVER_BEAN_NAME, LocaleContextResolver.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
+		try {
+			builder.forwardedHeaderTransformer(
+					context.getBean(FORWARDED_HEADER_TRANSFORMER_BEAN_NAME, ForwardedHeaderTransformer.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
 		return builder;
 	}
 
@@ -192,6 +216,7 @@ public final class WebHttpHandlerBuilder {
 	public WebHttpHandlerBuilder filter(WebFilter... filters) {
 		if (!ObjectUtils.isEmpty(filters)) {
 			this.filters.addAll(Arrays.asList(filters));
+			updateFilters();
 		}
 		return this;
 	}
@@ -202,7 +227,27 @@ public final class WebHttpHandlerBuilder {
 	 */
 	public WebHttpHandlerBuilder filters(Consumer<List<WebFilter>> consumer) {
 		consumer.accept(this.filters);
+		updateFilters();
 		return this;
+	}
+
+	private void updateFilters() {
+
+		if (this.filters.isEmpty()) {
+			return;
+		}
+
+		List<WebFilter> filtersToUse = this.filters.stream()
+				.peek(filter -> {
+					if (filter instanceof ForwardedHeaderTransformer && this.forwardedHeaderTransformer == null) {
+						this.forwardedHeaderTransformer = (ForwardedHeaderTransformer) filter;
+					}
+				})
+				.filter(filter -> !(filter instanceof ForwardedHeaderTransformer))
+				.collect(Collectors.toList());
+
+		this.filters.clear();
+		this.filters.addAll(filtersToUse);
 	}
 
 	/**
@@ -284,11 +329,33 @@ public final class WebHttpHandlerBuilder {
 		return (this.localeContextResolver != null);
 	}
 
+	/**
+	 * Configure the {@link ForwardedHeaderTransformer} for extracting and/or
+	 * removing forwarded headers.
+	 * @param transformer the transformer
+	 * @since 5.1
+	 */
+	public WebHttpHandlerBuilder forwardedHeaderTransformer(ForwardedHeaderTransformer transformer) {
+		this.forwardedHeaderTransformer = transformer;
+		return this;
+	}
+
+	/**
+	 * Whether a {@code ForwardedHeaderTransformer} is configured or not, either
+	 * detected from an {@code ApplicationContext} or explicitly configured via
+	 * {@link #forwardedHeaderTransformer(ForwardedHeaderTransformer)}.
+	 * @since 5.1
+	 */
+	public boolean hasForwardedHeaderTransformer() {
+		return (this.forwardedHeaderTransformer != null);
+	}
+
 
 	/**
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
+
 		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
 
@@ -301,6 +368,9 @@ public final class WebHttpHandlerBuilder {
 		}
 		if (this.localeContextResolver != null) {
 			adapted.setLocaleContextResolver(this.localeContextResolver);
+		}
+		if (this.forwardedHeaderTransformer != null) {
+			adapted.setForwardedHeaderTransformer(this.forwardedHeaderTransformer);
 		}
 		if (this.applicationContext != null) {
 			adapted.setApplicationContext(this.applicationContext);
