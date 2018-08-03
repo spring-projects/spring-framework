@@ -241,6 +241,9 @@ public class AbstractMockWebServerTestCase {
 				else if (request.getPath().equals("/status/notfound")) {
 					return new MockResponse().setResponseCode(404);
 				}
+				else if (request.getPath().equals("/status/badrequest")) {
+					return new MockResponse().setResponseCode(400);
+				}
 				else if (request.getPath().equals("/status/server")) {
 					return new MockResponse().setResponseCode(500);
 				}

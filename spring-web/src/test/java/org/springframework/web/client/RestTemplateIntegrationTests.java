@@ -181,6 +181,18 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	}
 
 	@Test
+	public void badRequest() {
+		try {
+			template.execute(baseUrl + "/status/badrequest", HttpMethod.GET, null, null);
+			fail("HttpClientErrorException.BadRequest expected");
+		}
+		catch (HttpClientErrorException.BadRequest ex) {
+			assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+			assertEquals("400 Client Error", ex.getMessage());
+		}
+	}
+
+	@Test
 	public void serverError() {
 		try {
 			template.execute(baseUrl + "/status/server", HttpMethod.GET, null, null);
