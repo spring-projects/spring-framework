@@ -37,13 +37,10 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined
- * in the context prior to the expression being evaluated or within the expression itself
- * using a lambda function definition. For example: Lambda function definition in an
- * expression: "(#max = {|x,y|$x>$y?$x:$y};max(2,3))" Calling context defined function:
- * "#isEven(37)". Functions may also be static java methods, registered in the context
- * prior to invocation of the expression.
+ * in the context prior to the expression being evaluated. Functions may also be static
+ * Java methods, registered in the context prior to invocation of the expression.
  *
- * <p>Functions are very simplistic, the arguments are not part of the definition
+ * <p>Functions are very simplistic. The arguments are not part of the definition
  * (right now), so the names must be unique.
  *
  * @author Andy Clement
@@ -73,7 +70,7 @@ public class FunctionReference extends SpelNodeImpl {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, this.name);
 		}
 		if (!(value.getValue() instanceof Method)) {
-			// Two possibilities: a lambda function or a Java static method registered as a function
+			// Possibly a static Java method registered as a function
 			throw new SpelEvaluationException(
 					SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, this.name, value.getClass());
 		}
@@ -166,7 +163,7 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 		return arguments;
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		Method method = this.method;
@@ -185,8 +182,8 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 		return true;
 	}
-	
-	@Override 
+
+	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		Method method = this.method;
 		Assert.state(method != null, "No method handle");

@@ -261,7 +261,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
-	public void recordFieldValue(String field, Class<?> type, Object value) {
+	public void recordFieldValue(String field, Class<?> type, @Nullable Object value) {
 		this.bindingResult.recordFieldValue(field, type, value);
 	}
 

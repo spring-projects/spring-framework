@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class CciTemplate implements CciOperations {
 	/**
 	 * Construct a new CciTemplate, given a ConnectionFactory to obtain Connections from.
 	 * Note: This will trigger eager initialization of the exception translator.
-	 * @param connectionFactory JCA ConnectionFactory to obtain Connections from
+	 * @param connectionFactory the JCA ConnectionFactory to obtain Connections from
 	 */
 	public CciTemplate(ConnectionFactory connectionFactory) {
 		setConnectionFactory(connectionFactory);
@@ -103,7 +103,7 @@ public class CciTemplate implements CciOperations {
 	/**
 	 * Construct a new CciTemplate, given a ConnectionFactory to obtain Connections from.
 	 * Note: This will trigger eager initialization of the exception translator.
-	 * @param connectionFactory JCA ConnectionFactory to obtain Connections from
+	 * @param connectionFactory the JCA ConnectionFactory to obtain Connections from
 	 * @param connectionSpec the CCI ConnectionSpec to obtain Connections for
 	 * (may be {@code null})
 	 */

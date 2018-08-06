@@ -412,9 +412,9 @@ public interface ServerResponse {
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.
 		 * The model attributes are mapped under a
 		 * {@linkplain org.springframework.core.Conventions#getVariableName generated name}.
-		 * <p><emphasis>Note: Empty {@link Collection Collections} are not added to
+		 * <p><em>Note: Empty {@link Collection Collections} are not added to
 		 * the model when using this method because we cannot correctly determine
-		 * the true convention name.</emphasis>
+		 * the true convention name.</em>
 		 * @param name the name of the template to be rendered
 		 * @param modelAttributes the modelAttributes used to render the template
 		 * @return the built response
@@ -437,13 +437,13 @@ public interface ServerResponse {
 	interface Context {
 
 		/**
-		 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
+		 * Return the {@link HttpMessageWriter HttpMessageWriters} to be used for response body conversion.
 		 * @return the list of message writers
 		 */
 		List<HttpMessageWriter<?>> messageWriters();
 
 		/**
-		 * Return the  {@link ViewResolver}s to be used for view name resolution.
+		 * Return the  {@link ViewResolver ViewResolvers} to be used for view name resolution.
 		 * @return the list of view resolvers
 		 */
 		List<ViewResolver> viewResolvers();

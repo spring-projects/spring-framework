@@ -36,10 +36,10 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see commonj.timers.TimerListener
- * @see commonj.timers.TimerManager#schedule(commonj.timers.TimerListener, long, long)
- * @see commonj.timers.TimerManager#scheduleAtFixedRate(commonj.timers.TimerListener, long, long)
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler}
  */
+@Deprecated
 public class ScheduledTimerListener {
 
 	@Nullable

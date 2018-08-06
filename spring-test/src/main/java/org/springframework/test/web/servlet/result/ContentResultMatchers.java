@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,9 @@ import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.servlet.ResultMatcher;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Factory for response content assertions.
@@ -148,7 +149,7 @@ public class ContentResultMatchers {
 	 * are "similar" - i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this matcher requires the <a
-	 * href="http://xmlunit.sourceforge.net/">XMLUnit<a/> library.
+	 * href="http://xmlunit.sourceforge.net/">XMLUnit</a> library.
 	 * @param xmlContent the expected XML content
 	 * @see MockMvcResultMatchers#xpath(String, Object...)
 	 * @see MockMvcResultMatchers#xpath(String, Map, Object...)
@@ -156,7 +157,7 @@ public class ContentResultMatchers {
 	public ResultMatcher xml(final String xmlContent) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
-			xmlHelper.assertXmlEqual(xmlContent, content);
+			this.xmlHelper.assertXmlEqual(xmlContent, content);
 		};
 	}
 
@@ -167,7 +168,7 @@ public class ContentResultMatchers {
 	public ResultMatcher node(final Matcher<? super Node> matcher) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
-			xmlHelper.assertNode(content, matcher);
+			this.xmlHelper.assertNode(content, matcher);
 		};
 	}
 
@@ -179,7 +180,7 @@ public class ContentResultMatchers {
 	public ResultMatcher source(final Matcher<? super Source> matcher) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
-			xmlHelper.assertSource(content, matcher);
+			this.xmlHelper.assertSource(content, matcher);
 		};
 	}
 
@@ -204,7 +205,7 @@ public class ContentResultMatchers {
 	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
 	 * </ul>
 	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param jsonContent the expected JSON content
 	 * @param strict enables strict checking
 	 * @since 4.2
@@ -212,7 +213,7 @@ public class ContentResultMatchers {
 	public ResultMatcher json(final String jsonContent, final boolean strict) {
 		return result -> {
 			String content = result.getResponse().getContentAsString();
-			jsonHelper.assertJsonEqual(jsonContent, content, strict);
+			this.jsonHelper.assertJsonEqual(jsonContent, content, strict);
 		};
 	}
 

@@ -62,10 +62,10 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
-	/** Default maximum number of entries for the destination cache: 1024 */
+	/** Default maximum number of entries for the destination cache: 1024. */
 	public static final int DEFAULT_CACHE_LIMIT = 1024;
 
-	/** Static evaluation context to reuse */
+	/** Static evaluation context to reuse. */
 	private static EvaluationContext messageEvalContext =
 			SimpleEvaluationContext.forPropertyAccessors(new SimpMessageHeaderPropertyAccessor()).build();
 
@@ -248,15 +248,15 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	/**
 	 * A cache for destinations previously resolved via
-	 * {@link DefaultSubscriptionRegistry#findSubscriptionsInternal(String, Message)}
+	 * {@link DefaultSubscriptionRegistry#findSubscriptionsInternal(String, Message)}.
 	 */
 	private class DestinationCache {
 
-		/** Map from destination -> <sessionId, subscriptionId> for fast look-ups */
+		/** Map from destination to {@code <sessionId, subscriptionId>} for fast look-ups. */
 		private final Map<String, LinkedMultiValueMap<String, String>> accessCache =
 				new ConcurrentHashMap<>(DEFAULT_CACHE_LIMIT);
 
-		/** Map from destination -> <sessionId, subscriptionId> with locking */
+		/** Map from destination to {@code <sessionId, subscriptionId>} with locking. */
 		@SuppressWarnings("serial")
 		private final Map<String, LinkedMultiValueMap<String, String>> updateCache =
 				new LinkedHashMap<String, LinkedMultiValueMap<String, String>>(DEFAULT_CACHE_LIMIT, 0.75f, true) {

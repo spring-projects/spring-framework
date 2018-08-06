@@ -54,12 +54,12 @@ import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.KotlinDetector;
+import org.springframework.http.HttpLogging;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -103,7 +103,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	private static volatile boolean kotlinWarningLogged = false;
 
-	private final Log logger = LogFactory.getLog(getClass());
+	private final Log logger = HttpLogging.forLogName(getClass());
 
 	private final Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 
@@ -310,7 +310,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Add mix-in annotations to use for augmenting specified class or interface.
-	 * @param mixIns Map of entries with target classes (or interface) whose annotations
+	 * @param mixIns a Map of entries with target classes (or interface) whose annotations
 	 * to effectively override as key and mix-in classes (or interface) whose
 	 * annotations are to be "added" to target's annotations as value.
 	 * @since 4.1.2
@@ -339,8 +339,8 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Configure a custom serializer for the given type.
-	 * @see #serializers(JsonSerializer...)
 	 * @since 4.1.2
+	 * @see #serializers(JsonSerializer...)
 	 */
 	public Jackson2ObjectMapperBuilder serializerByType(Class<?> type, JsonSerializer<?> serializer) {
 		this.serializers.put(type, serializer);
@@ -458,8 +458,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.annotation.PropertyAccessor
 	 * @see com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
 	 */
-	public Jackson2ObjectMapperBuilder visibility(PropertyAccessor accessor,
-			JsonAutoDetect.Visibility visibility) {
+	public Jackson2ObjectMapperBuilder visibility(PropertyAccessor accessor, JsonAutoDetect.Visibility visibility) {
 		this.visibilities.put(accessor, visibility);
 		return this;
 	}

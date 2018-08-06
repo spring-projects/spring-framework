@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ public class SpelExpression implements Expression {
 	public Object getValue(Object rootObject) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
-				return this.compiledAst.getValue(rootObject, evaluationContext);
+				return this.compiledAst.getValue(rootObject, this.evaluationContext);
 			}
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted

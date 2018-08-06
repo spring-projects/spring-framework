@@ -74,7 +74,6 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private static final String XFRAME_OPTIONS_HEADER = "X-Frame-Options";
 
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final TaskScheduler taskScheduler;
@@ -98,6 +97,10 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	private boolean suppressCors = false;
 
 	protected final Set<String> allowedOrigins = new LinkedHashSet<>();
+
+	private final SockJsRequestHandler infoHandler = new InfoHandler();
+
+	private final SockJsRequestHandler iframeHandler = new IframeHandler();
 
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
@@ -286,6 +289,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
+	 * Return if automatic addition of CORS headers has been disabled.
 	 * @since 4.1.2
 	 * @see #setSuppressCors(boolean)
 	 */
@@ -298,9 +302,9 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * designed for browsers. There is nothing preventing other types of client
 	 * to modify the {@code Origin} header value.
 	 * <p>When SockJS is enabled and origins are restricted, transport types
-	 * that do not allow to check request origin (JSONP and Iframe based
-	 * transports) are disabled. As a consequence, IE 6 to 9 are not supported
-	 * when origins are restricted.
+	 * that do not allow to check request origin (Iframe based transports)
+	 * are disabled. As a consequence, IE 6 to 9 are not supported when origins
+	 * are restricted.
 	 * <p>Each provided allowed origin must have a scheme, and optionally a port
 	 * (e.g. "http://example.org", "http://example.org:9090"). An allowed origin
 	 * string may also be "*" in which case all origins are allowed.
@@ -315,6 +319,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
+	 * Return configure allowed {@code Origin} header values.
 	 * @since 4.1.2
 	 * @see #setAllowedOrigins
 	 */
@@ -537,7 +542,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 
-	private final SockJsRequestHandler infoHandler = new SockJsRequestHandler() {
+	private class InfoHandler implements SockJsRequestHandler {
 
 		private static final String INFO_CONTENT =
 				"{\"entropy\":%s,\"origins\":[\"*:*\"],\"cookie_needed\":%s,\"websocket\":%s}";
@@ -567,25 +572,25 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	};
 
 
-	private final SockJsRequestHandler iframeHandler = new SockJsRequestHandler() {
+	private class IframeHandler implements SockJsRequestHandler {
 
 		private static final String IFRAME_CONTENT =
 				"<!DOCTYPE html>\n" +
-		        "<html>\n" +
-		        "<head>\n" +
-		        "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n" +
-		        "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
-		        "  <script>\n" +
-		        "    document.domain = document.domain;\n" +
-		        "    _sockjs_onload = function(){SockJS.bootstrap_iframe();};\n" +
-		        "  </script>\n" +
-		        "  <script src=\"%s\"></script>\n" +
-		        "</head>\n" +
-		        "<body>\n" +
-		        "  <h2>Don't panic!</h2>\n" +
-		        "  <p>This is a SockJS hidden iframe. It's used for cross domain magic.</p>\n" +
-		        "</body>\n" +
-		        "</html>";
+				"<html>\n" +
+				"<head>\n" +
+				"  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n" +
+				"  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
+				"  <script>\n" +
+				"    document.domain = document.domain;\n" +
+				"    _sockjs_onload = function(){SockJS.bootstrap_iframe();};\n" +
+				"  </script>\n" +
+				"  <script src=\"%s\"></script>\n" +
+				"</head>\n" +
+				"<body>\n" +
+				"  <h2>Don't panic!</h2>\n" +
+				"  <p>This is a SockJS hidden iframe. It's used for cross domain magic.</p>\n" +
+				"</body>\n" +
+				"</html>";
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {

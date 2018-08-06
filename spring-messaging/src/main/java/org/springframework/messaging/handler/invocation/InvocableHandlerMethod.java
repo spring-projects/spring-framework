@@ -33,7 +33,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Provides a method for invoking the handler method for a given message after resolving its
- * method argument values through registered {@link HandlerMethodArgumentResolver}s.
+ * method argument values through registered {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
  *
  * <p>Use {@link #setMessageMethodArgumentResolvers} to customize the list of argument resolvers.
  *
@@ -77,7 +77,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Set {@link HandlerMethodArgumentResolver}s to use to use for resolving method argument values.
+	 * Set {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} to use to use for resolving method argument values.
 	 */
 	public void setMessageMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
 		this.argumentResolvers = argumentResolvers;
@@ -95,7 +95,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Invoke the method after resolving its argument values in the context of the given message.
-	 * <p>Argument values are commonly resolved through {@link HandlerMethodArgumentResolver}s.
+	 * <p>Argument values are commonly resolved through {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 * The {@code providedArgs} parameter however may supply argument values to be used directly,
 	 * i.e. without argument resolution.
 	 * @param message the current message being processed
@@ -282,7 +282,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return this.returnValue.getClass();
 			}
 			if (!ResolvableType.NONE.equals(this.returnType)) {
-				return this.returnType.resolve(Object.class);
+				return this.returnType.toClass();
 			}
 			return super.getParameterType();
 		}

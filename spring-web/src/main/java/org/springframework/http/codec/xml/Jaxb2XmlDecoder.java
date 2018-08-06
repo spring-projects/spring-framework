@@ -40,6 +40,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -104,7 +105,13 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		QName typeName = toQName(outputClass);
 		Flux<List<XMLEvent>> splitEvents = split(xmlEventFlux, typeName);
 
-		return splitEvents.map(events -> unmarshal(events, outputClass));
+		return splitEvents.map(events -> {
+			Object value = unmarshal(events, outputClass);
+			if (logger.isDebugEnabled()) {
+				logger.debug(Hints.getLogPrefix(hints) + "Decoded [" + value + "]");
+			}
+			return value;
+		});
 	}
 
 	@Override
@@ -173,7 +180,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	}
 
 	/**
-	 * Split a flux of {@link XMLEvent}s into a flux of XMLEvent lists, one list
+	 * Split a flux of {@link XMLEvent XMLEvents} into a flux of XMLEvent lists, one list
 	 * for each branch of the tree that starts with the given qualified name.
 	 * That is, given the XMLEvents shown {@linkplain XmlEventDecoder here},
 	 * and the {@code desiredName} "{@code child}", this method returns a flux

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
- * Context information for use by {@link Condition}s.
+ * Context information for use by {@link Condition Conditions}.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
@@ -33,13 +34,17 @@ public interface ConditionContext {
 	/**
 	 * Return the {@link BeanDefinitionRegistry} that will hold the bean definition
 	 * should the condition match.
+	 * @throws IllegalStateException if no registry is available (which is unusual:
+	 * only the case with a plain {@link ClassPathScanningCandidateComponentProvider})
 	 */
 	BeanDefinitionRegistry getRegistry();
 
 	/**
 	 * Return the {@link ConfigurableListableBeanFactory} that will hold the bean
-	 * definition should the condition match.
+	 * definition should the condition match, or {@code null} if the bean factory is
+	 * not available (or not downcastable to {@code ConfigurableListableBeanFactory}).
 	 */
+	@Nullable
 	ConfigurableListableBeanFactory getBeanFactory();
 
 	/**
@@ -53,8 +58,11 @@ public interface ConditionContext {
 	ResourceLoader getResourceLoader();
 
 	/**
-	 * Return the {@link ClassLoader} that should be used to load additional classes.
+	 * Return the {@link ClassLoader} that should be used to load additional classes
+	 * (only {@code null} if even the system ClassLoader isn't accessible).
+	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
 	 */
+	@Nullable
 	ClassLoader getClassLoader();
 
 }

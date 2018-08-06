@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
+ * @param <T> the result type
  * @see StoredProcedure
  */
 public class SqlFunction<T> extends MappingSqlQuery<T> {
@@ -68,8 +69,8 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	/**
 	 * Create a new SqlFunction object with SQL, but without parameters.
 	 * Must add parameters or settle with none.
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
+	 * @param ds the DataSource to obtain connections from
+	 * @param sql the SQL to execute
 	 */
 	public SqlFunction(DataSource ds, String sql) {
 		setRowsExpected(1);
@@ -79,9 +80,9 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 
 	/**
 	 * Create a new SqlFunction object with SQL and parameters.
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
-	 * @param types SQL types of the parameters, as defined in the
+	 * @param ds the DataSource to obtain connections from
+	 * @param sql the SQL to execute
+	 * @param types the SQL types of the parameters, as defined in the
 	 * {@code java.sql.Types} class
 	 * @see java.sql.Types
 	 */
@@ -94,9 +95,9 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 
 	/**
 	 * Create a new SqlFunction object with SQL, parameters and a result type.
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
-	 * @param types SQL types of the parameters, as defined in the
+	 * @param ds the DataSource to obtain connections from
+	 * @param sql the SQL to execute
+	 * @param types the SQL types of the parameters, as defined in the
 	 * {@code java.sql.Types} class
 	 * @param resultType the type that the result object is required to match
 	 * @see #setResultType(Class)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,13 +56,14 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @author Keith Donald
  * @since 1.0.2
+ * @param <T> the bean type
  * @see #setSingleton
  * @see #createInstance()
  */
 public abstract class AbstractFactoryBean<T>
 		implements FactoryBean<T>, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean singleton = true;
@@ -160,7 +161,7 @@ public abstract class AbstractFactoryBean<T>
 	}
 
 	/**
-	 * Determine an 'eager singleton' instance, exposed in case of a
+	 * Determine an 'early singleton' instance, exposed in case of a
 	 * circular reference. Not called in a non-circular scenario.
 	 */
 	@SuppressWarnings("unchecked")
@@ -225,7 +226,7 @@ public abstract class AbstractFactoryBean<T>
 	 * FactoryBean is supposed to implement, for use with an 'early singleton
 	 * proxy' that will be exposed in case of a circular reference.
 	 * <p>The default implementation returns this FactoryBean's object type,
-	 * provided that it is an interface, or {@code null} else. The latter
+	 * provided that it is an interface, or {@code null} otherwise. The latter
 	 * indicates that early singleton access is not supported by this FactoryBean.
 	 * This will lead to a FactoryBeanNotInitializedException getting thrown.
 	 * @return the interfaces to use for 'early singletons',

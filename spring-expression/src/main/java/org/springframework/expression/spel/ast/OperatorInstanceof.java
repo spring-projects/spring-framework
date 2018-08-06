@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class OperatorInstanceof extends Operator {
 
 	@Nullable
 	private Class<?> type;
-	
+
 
 	public OperatorInstanceof(int pos, SpelNodeImpl... operands) {
 		super("instanceof", pos, operands);
@@ -76,7 +76,7 @@ public class OperatorInstanceof extends Operator {
 		}
 		this.type = rightClass;
 		if (rightOperand instanceof TypeReference) {
-			// Can only generate bytecode where the right operand is a direct type reference, 
+			// Can only generate bytecode where the right operand is a direct type reference,
 			// not if it is indirect (for example when right operand is a variable reference)
 			this.exitTypeDescriptor = "Z";
 		}
@@ -87,7 +87,7 @@ public class OperatorInstanceof extends Operator {
 	public boolean isCompilable() {
 		return (this.exitTypeDescriptor != null && getLeftOperand().isCompilable());
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		getLeftOperand().generateCode(mv, cf);
@@ -98,7 +98,7 @@ public class OperatorInstanceof extends Operator {
 			// in case it had side effects
 			mv.visitInsn(POP);
 			mv.visitInsn(ICONST_0); // value of false
-		} 
+		}
 		else {
 			mv.visitTypeInsn(INSTANCEOF, Type.getInternalName(this.type));
 		}

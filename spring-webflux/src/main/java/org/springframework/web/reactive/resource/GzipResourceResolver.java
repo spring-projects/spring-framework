@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,9 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @deprecated as of 5.1, in favor of using {@link EncodedResourceResolver}
  */
+@Deprecated
 public class GzipResourceResolver extends AbstractResourceResolver {
 
 	@Override
@@ -57,7 +59,8 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 							}
 						}
 						catch (IOException ex) {
-							logger.trace("No gzipped resource for [" + resource.getFilename() + "]", ex);
+							String logPrefix = exchange != null ? exchange.getLogPrefix() : "";
+							logger.trace(logPrefix + "No gzip resource for [" + resource.getFilename() + "]", ex);
 						}
 					}
 					return resource;
@@ -77,6 +80,9 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 	}
 
 
+	/**
+	 * A gzipped {@link HttpResource}.
+	 */
 	static final class GzippedResource extends AbstractResource implements HttpResource {
 
 		private final Resource original;
@@ -156,14 +162,10 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 
 		@Override
 		public HttpHeaders getResponseHeaders() {
-			HttpHeaders headers;
-			if(this.original instanceof HttpResource) {
-				headers = ((HttpResource) this.original).getResponseHeaders();
-			}
-			else {
-				headers = new HttpHeaders();
-			}
+			HttpHeaders headers = (this.original instanceof HttpResource ?
+					((HttpResource) this.original).getResponseHeaders() : new HttpHeaders());
 			headers.add(HttpHeaders.CONTENT_ENCODING, "gzip");
+			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT_ENCODING);
 			return headers;
 		}
 	}

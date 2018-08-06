@@ -211,8 +211,9 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 			}
 			// factoryMethod
 			else if (FACTORY_METHOD.equals(property)) {
-				if (newValue != null)
+				if (newValue != null) {
 					bd.setFactoryMethodName(newValue.toString());
+				}
 			}
 			// initMethod
 			else if (INIT_METHOD.equals(property)) {

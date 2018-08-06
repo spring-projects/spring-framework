@@ -1,6 +1,5 @@
 /**
- * Spring's form tag library for JSP 2.0+.
- * Supports JSP view implementations for Spring's web MVC framework.
+ * Spring's form tag library for JSP views in Spring's Web MVC framework.
  * For more details on each tag, see the list of tags below with links to
  * individual tag classes, or check the {@code spring-form.tld} file:
  *
@@ -22,4 +21,9 @@
  * <li>{@link org.springframework.web.servlet.tags.form.TextareaTag The textarea tag}
  * </ul>
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.web.servlet.tags.form;
+
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

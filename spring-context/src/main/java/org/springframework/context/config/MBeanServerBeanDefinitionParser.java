@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,11 +49,15 @@ class MBeanServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String AGENT_ID_ATTRIBUTE = "agent-id";
 
 
-	private static final boolean weblogicPresent = ClassUtils.isPresent(
-			"weblogic.management.Helper", MBeanServerBeanDefinitionParser.class.getClassLoader());
+	private static final boolean weblogicPresent;
 
-	private static final boolean webspherePresent = ClassUtils.isPresent(
-			"com.ibm.websphere.management.AdminServiceFactory", MBeanServerBeanDefinitionParser.class.getClassLoader());
+	private static final boolean webspherePresent;
+
+	static {
+		ClassLoader classLoader = MBeanServerBeanDefinitionParser.class.getClassLoader();
+		weblogicPresent = ClassUtils.isPresent("weblogic.management.Helper", classLoader);
+		webspherePresent = ClassUtils.isPresent("com.ibm.websphere.management.AdminServiceFactory", classLoader);
+	}
 
 
 	@Override

@@ -31,8 +31,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * Static factory methods for {@link RequestMatcher} classes. Typically used to
@@ -68,7 +69,7 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert the request URI string with the given Hamcrest matcher.
-	 * @param matcher String matcher for the expected URI
+	 * @param matcher the String matcher for the expected URI
 	 * @return the request matcher
 	 */
 	public static RequestMatcher requestTo(final Matcher<String> matcher) {

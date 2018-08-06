@@ -20,7 +20,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -98,14 +98,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder method(HttpMethod method) {
-		Assert.notNull(method, "'method' must not be null");
+		Assert.notNull(method, "HttpMethod must not be null");
 		this.methodName = method.name();
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder uri(URI uri) {
-		Assert.notNull(uri, "'uri' must not be null");
+		Assert.notNull(uri, "URI must not be null");
 		this.uri = uri;
 		return this;
 	}
@@ -178,7 +178,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest build() {
-		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(
+		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(this.exchange.getRequest().getId(),
 				this.methodName, this.uri, this.headers, this.cookies, this.body);
 		ServerWebExchange exchange = new DelegatingServerWebExchange(
 				serverHttpRequest, this.exchange, this.messageReaders);
@@ -189,6 +189,8 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	private static class BuiltServerHttpRequest implements ServerHttpRequest {
 
 		private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
+
+		private final String id;
 
 		private final String method;
 
@@ -204,9 +206,10 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Flux<DataBuffer> body;
 
-		public BuiltServerHttpRequest(String method, URI uri, HttpHeaders headers,
+		public BuiltServerHttpRequest(String id, String method, URI uri, HttpHeaders headers,
 				MultiValueMap<String, HttpCookie> cookies, Flux<DataBuffer> body) {
 
+			this.id = id;
 			this.method = method;
 			this.uri = uri;
 			this.path = RequestPath.parse(uri, null);
@@ -233,12 +236,17 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 						value = UriUtils.decode(value, StandardCharsets.UTF_8);
 					}
 					else {
-						value = StringUtils.hasLength(eq) ? "" : null;
+						value = (StringUtils.hasLength(eq) ? "" : null);
 					}
 					queryParams.add(name, value);
 				}
 			}
 			return queryParams;
+		}
+
+		@Override
+		public String getId() {
+			return this.id;
 		}
 
 		@Override
@@ -320,7 +328,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 							.filter(reader -> reader.canRead(FORM_DATA_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
 							.findFirst()
 							.orElseThrow(() -> new IllegalStateException("No form data HttpMessageReader.")))
-							.readMono(FORM_DATA_TYPE, request, Collections.emptyMap())
+							.readMono(FORM_DATA_TYPE, request, Hints.none())
 							.switchIfEmpty(EMPTY_FORM_DATA)
 							.cache();
 				}
@@ -342,7 +350,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 							.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
 							.findFirst()
 							.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
-							.readMono(MULTIPART_DATA_TYPE, request, Collections.emptyMap())
+							.readMono(MULTIPART_DATA_TYPE, request, Hints.none())
 							.switchIfEmpty(EMPTY_MULTIPART_DATA)
 							.cache();
 				}
@@ -428,6 +436,11 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		@Override
 		public void addUrlTransformer(Function<String, String> transformer) {
 			this.delegate.addUrlTransformer(transformer);
+		}
+
+		@Override
+		public String getLogPrefix() {
+			return this.delegate.getLogPrefix();
 		}
 	}
 }

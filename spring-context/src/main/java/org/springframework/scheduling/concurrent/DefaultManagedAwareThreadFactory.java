@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,8 +103,8 @@ public class DefaultManagedAwareThreadFactory extends CustomizableThreadFactory 
 				this.threadFactory = this.jndiLocator.lookup(this.jndiName, ThreadFactory.class);
 			}
 			catch (NamingException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to retrieve [" + this.jndiName + "] from JNDI", ex);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Failed to retrieve [" + this.jndiName + "] from JNDI", ex);
 				}
 				logger.info("Could not find default managed thread factory in JNDI - " +
 						"proceeding with default local thread factory");

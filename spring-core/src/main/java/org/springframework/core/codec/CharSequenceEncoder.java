@@ -41,8 +41,11 @@ import org.springframework.util.MimeTypeUtils;
  * @since 5.0
  * @see StringDecoder
  */
-public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
+public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 
+	/**
+	 * The default charset used by the encoder.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
@@ -53,7 +56,7 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.resolve(Object.class);
+		Class<?> clazz = elementType.toClass();
 		return super.canEncode(elementType, mimeType) && CharSequence.class.isAssignableFrom(clazz);
 	}
 
@@ -65,6 +68,10 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		Charset charset = getCharset(mimeType);
 
 		return Flux.from(inputStream).map(charSequence -> {
+			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
+				String logPrefix = Hints.getLogPrefix(hints);
+				logger.debug(logPrefix + "Writing '" + charSequence + "'");
+			}
 			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
 			ByteBuffer byteBuffer = charset.encode(charBuffer);
 			return bufferFactory.wrap(byteBuffer);
@@ -77,14 +84,9 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 			charset = mimeType.getCharset();
 		}
 		else {
-			 charset = DEFAULT_CHARSET;
+			charset = DEFAULT_CHARSET;
 		}
 		return charset;
-	}
-
-	@Override
-	public Long getContentLength(CharSequence data, @Nullable MimeType mimeType) {
-		return (long) data.toString().getBytes(getCharset(mimeType)).length;
 	}
 
 	/**

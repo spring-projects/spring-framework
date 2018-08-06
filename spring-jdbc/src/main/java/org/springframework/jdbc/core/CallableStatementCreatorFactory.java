@@ -110,7 +110,7 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameter mapper.
-	 * @param inParamMapper ParameterMapper implementation that will return a Map of parameters
+	 * @param inParamMapper the ParameterMapper implementation that will return a Map of parameters
 	 */
 	public CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return new CallableStatementCreatorImpl(inParamMapper);
@@ -130,7 +130,7 @@ public class CallableStatementCreatorFactory {
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.
-		 * @param inParamMapper ParameterMapper implementation for mapping input parameters
+		 * @param inParamMapper the ParameterMapper implementation for mapping input parameters
 		 */
 		public CallableStatementCreatorImpl(ParameterMapper inParamMapper) {
 			this.inParameterMapper = inParamMapper;

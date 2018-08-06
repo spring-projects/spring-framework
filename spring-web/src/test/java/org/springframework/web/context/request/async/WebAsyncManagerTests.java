@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class WebAsyncManagerTests {
 		verifyDefaultAsyncScenario();
 		verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest, task);
 		verify(interceptor).preProcess(this.asyncWebRequest, task);
-		verify(interceptor).postProcess(this.asyncWebRequest, task, new Integer(concurrentResult));
+		verify(interceptor).postProcess(this.asyncWebRequest, task, concurrentResult);
 	}
 
 	@Test
@@ -161,9 +161,9 @@ public class WebAsyncManagerTests {
 
 		assertFalse(this.asyncManager.hasConcurrentResult());
 
-		verify(this.asyncWebRequest).addTimeoutHandler((Runnable) notNull());
-		verify(this.asyncWebRequest).addErrorHandler((Consumer<Throwable>) notNull());
-		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addTimeoutHandler(notNull());
+		verify(this.asyncWebRequest).addErrorHandler(notNull());
+		verify(this.asyncWebRequest).addCompletionHandler(notNull());
 	}
 
 	@Test
@@ -303,9 +303,9 @@ public class WebAsyncManagerTests {
 
 		assertFalse(this.asyncManager.hasConcurrentResult());
 
-		verify(this.asyncWebRequest).addTimeoutHandler((Runnable) notNull());
-		verify(this.asyncWebRequest).addErrorHandler((Consumer<Throwable>) notNull());
-		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addTimeoutHandler(notNull());
+		verify(this.asyncWebRequest).addErrorHandler(notNull());
+		verify(this.asyncWebRequest).addCompletionHandler(notNull());
 	}
 
 	@Test
@@ -353,7 +353,7 @@ public class WebAsyncManagerTests {
 	@Test
 	public void startDeferredResultProcessingNullInput() throws Exception {
 		try {
-			this.asyncManager.startDeferredResultProcessing((DeferredResult<?>) null);
+			this.asyncManager.startDeferredResultProcessing(null);
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
@@ -368,9 +368,9 @@ public class WebAsyncManagerTests {
 
 	@SuppressWarnings("unchecked")
 	private void verifyDefaultAsyncScenario() {
-		verify(this.asyncWebRequest).addTimeoutHandler((Runnable) notNull());
-		verify(this.asyncWebRequest).addErrorHandler((Consumer<Throwable>) notNull());
-		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addTimeoutHandler(notNull());
+		verify(this.asyncWebRequest).addErrorHandler(notNull());
+		verify(this.asyncWebRequest).addCompletionHandler(notNull());
 		verify(this.asyncWebRequest).startAsync();
 		verify(this.asyncWebRequest).dispatch();
 	}

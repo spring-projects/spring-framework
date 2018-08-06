@@ -56,43 +56,125 @@ import org.springframework.util.StringUtils;
 public abstract class WebUtils {
 
 	/**
-	 * Standard Servlet 2.3+ spec request attributes for include URI and paths.
-	 * <p>If included via a RequestDispatcher, the current resource will see the
-	 * originating request. Its own URI and paths are exposed as request attributes.
+	 * Standard Servlet 2.3+ spec request attribute for include request URI.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating request. Its own request URI is exposed as a request attribute.
 	 */
 	public static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for include context path.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating context path. Its own context path is exposed as a request attribute.
+	 */
 	public static final String INCLUDE_CONTEXT_PATH_ATTRIBUTE = "javax.servlet.include.context_path";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for include servlet path.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating servlet path. Its own servlet path is exposed as a request attribute.
+	 */
 	public static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for include path info.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating path info. Its own path info is exposed as a request attribute.
+	 */
 	public static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for include query string.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating query string. Its own query string is exposed as a request attribute.
+	 */
 	public static final String INCLUDE_QUERY_STRING_ATTRIBUTE = "javax.servlet.include.query_string";
 
 	/**
-	 * Standard Servlet 2.4+ spec request attributes for forward URI and paths.
+	 * Standard Servlet 2.4+ spec request attribute for forward request URI.
 	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
-	 * own URI and paths. The originating URI and paths are exposed as request attributes.
+	 * own request URI. The originating request URI is exposed as a request attribute.
 	 */
 	public static final String FORWARD_REQUEST_URI_ATTRIBUTE = "javax.servlet.forward.request_uri";
+
+	/**
+	 * Standard Servlet 2.4+ spec request attribute for forward context path.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own context path. The originating context path is exposed as a request attribute.
+	 */
 	public static final String FORWARD_CONTEXT_PATH_ATTRIBUTE = "javax.servlet.forward.context_path";
+
+	/**
+	 * Standard Servlet 2.4+ spec request attribute for forward servlet path.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own servlet path. The originating servlet path is exposed as a request attribute.
+	 */
 	public static final String FORWARD_SERVLET_PATH_ATTRIBUTE = "javax.servlet.forward.servlet_path";
+
+	/**
+	 * Standard Servlet 2.4+ spec request attribute for forward path info.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own path ingo. The originating path info is exposed as a request attribute.
+	 */
 	public static final String FORWARD_PATH_INFO_ATTRIBUTE = "javax.servlet.forward.path_info";
+
+	/**
+	 * Standard Servlet 2.4+ spec request attribute for forward query string.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own query string. The originating query string is exposed as a request attribute.
+	 */
 	public static final String FORWARD_QUERY_STRING_ATTRIBUTE = "javax.servlet.forward.query_string";
 
 	/**
-	 * Standard Servlet 2.3+ spec request attributes for error pages.
+	 * Standard Servlet 2.3+ spec request attribute for error page status code.
 	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
 	 * to them directly rather than through the servlet container's error page
 	 * resolution mechanism.
 	 */
 	public static final String ERROR_STATUS_CODE_ATTRIBUTE = "javax.servlet.error.status_code";
-	public static final String ERROR_EXCEPTION_TYPE_ATTRIBUTE = "javax.servlet.error.exception_type";
-	public static final String ERROR_MESSAGE_ATTRIBUTE = "javax.servlet.error.message";
-	public static final String ERROR_EXCEPTION_ATTRIBUTE = "javax.servlet.error.exception";
-	public static final String ERROR_REQUEST_URI_ATTRIBUTE = "javax.servlet.error.request_uri";
-	public static final String ERROR_SERVLET_NAME_ATTRIBUTE = "javax.servlet.error.servlet_name";
-
 
 	/**
-	 * Prefix of the charset clause in a content type String: ";charset="
+	 * Standard Servlet 2.3+ spec request attribute for error page exception type.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_EXCEPTION_TYPE_ATTRIBUTE = "javax.servlet.error.exception_type";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for error page message.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_MESSAGE_ATTRIBUTE = "javax.servlet.error.message";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for error page exception.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_EXCEPTION_ATTRIBUTE = "javax.servlet.error.exception";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for error page request URI.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_REQUEST_URI_ATTRIBUTE = "javax.servlet.error.request_uri";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for error page servlet name.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_SERVLET_NAME_ATTRIBUTE = "javax.servlet.error.servlet_name";
+
+	/**
+	 * Prefix of the charset clause in a content type String: ";charset=".
 	 */
 	public static final String CONTENT_TYPE_CHARSET_PREFIX = ";charset=";
 
@@ -128,13 +210,13 @@ public abstract class WebUtils {
 	 */
 	public static final String WEB_APP_ROOT_KEY_PARAM = "webAppRootKey";
 
-	/** Default web app root key: "webapp.root" */
+	/** Default web app root key: "webapp.root". */
 	public static final String DEFAULT_WEB_APP_ROOT_KEY = "webapp.root";
 
-	/** Name suffixes in case of image buttons */
+	/** Name suffixes in case of image buttons. */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
 
-	/** Key for the mutex session attribute */
+	/** Key for the mutex session attribute. */
 	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
 
 
@@ -595,7 +677,7 @@ public abstract class WebUtils {
 	 * Maps single values to String and multiple values to String array.
 	 * <p>For example, with a prefix of "spring_", "spring_param1" and
 	 * "spring_param2" result in a Map with "param1" and "param2" as keys.
-	 * @param request HTTP request in which to look for parameters
+	 * @param request the HTTP request in which to look for parameters
 	 * @param prefix the beginning of parameter names
 	 * (if this is null or the empty string, all parameters will match)
 	 * @return map containing request parameters <b>without the prefix</b>,
@@ -695,7 +777,7 @@ public abstract class WebUtils {
 	/**
 	 * Check if the request is a same-origin one, based on {@code Origin}, {@code Host},
 	 * {@code Forwarded}, {@code X-Forwarded-Proto}, {@code X-Forwarded-Host} and
-	 * @code X-Forwarded-Port} headers.
+	 * {@code X-Forwarded-Port} headers.
 	 *
 	 * <p><strong>Note:</strong> as of 5.1 this method ignores
 	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the

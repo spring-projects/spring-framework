@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -46,6 +47,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
 	/**
+	 * Create a new {@link RequestHeaderMethodArgumentResolver} instance.
 	 * @param beanFactory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
@@ -82,12 +84,11 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new ServletRequestBindingException("Missing request header '" + name +
-				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
+		throw new MissingRequestHeaderException(name, parameter);
 	}
 
 
-	private static class RequestHeaderNamedValueInfo extends NamedValueInfo {
+	private static final class RequestHeaderNamedValueInfo extends NamedValueInfo {
 
 		private RequestHeaderNamedValueInfo(RequestHeader annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

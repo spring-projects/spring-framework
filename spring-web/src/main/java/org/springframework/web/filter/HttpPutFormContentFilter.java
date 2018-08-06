@@ -58,7 +58,10 @@ import org.springframework.util.StringUtils;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
+ * @deprecated as of 5.1 in favor of {@link FormContentFilter} which is the same
+ * but also handles DELETE.
  */
+@Deprecated
 public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 	private FormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
@@ -66,7 +69,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 	/**
 	 * Set the converter to use for parsing form content.
-	 * <p>By default this is an instnace of {@link AllEncompassingFormHttpMessageConverter}.
+	 * <p>By default this is an instance of {@link AllEncompassingFormHttpMessageConverter}.
 	 */
 	public void setFormConverter(FormHttpMessageConverter converter) {
 		Assert.notNull(converter, "FormHttpMessageConverter is required.");

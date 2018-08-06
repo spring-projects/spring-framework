@@ -53,7 +53,7 @@ import org.springframework.util.MimeTypeUtils;
  * @since 5.0
  * @see CharSequenceEncoder
  */
-public class StringDecoder extends AbstractDataBufferDecoder<String> {
+public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	private static final DataBuffer END_FRAME = new DefaultDataBufferFactory().wrap(new byte[0]);
 
@@ -205,7 +205,11 @@ public class StringDecoder extends AbstractDataBufferDecoder<String> {
 		Charset charset = getCharset(mimeType);
 		CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
 		DataBufferUtils.release(dataBuffer);
-		return charBuffer.toString();
+		String value = charBuffer.toString();
+		if (logger.isDebugEnabled()) {
+			logger.debug(Hints.getLogPrefix(hints) + "Decoded '" + value + "'");
+		}
+		return value;
 	}
 
 	private static Charset getCharset(@Nullable MimeType mimeType) {

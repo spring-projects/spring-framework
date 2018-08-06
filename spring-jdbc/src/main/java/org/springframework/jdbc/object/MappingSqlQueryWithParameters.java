@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jdbc.object;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -46,21 +45,22 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Thomas Risberg
  * @author Jean-Pierre Pawlak
+ * @param <T> the result type
  * @see org.springframework.jdbc.object.MappingSqlQuery
  * @see org.springframework.jdbc.object.SqlQuery
  */
 public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 
 	/**
-	 * Constructor to allow use as a JavaBean
+	 * Constructor to allow use as a JavaBean.
 	 */
 	public MappingSqlQueryWithParameters() {
 	}
 
 	/**
 	 * Convenient constructor with DataSource and SQL string.
-	 * @param ds DataSource to use to get connections
-	 * @param sql SQL to run
+	 * @param ds the DataSource to use to get connections
+	 * @param sql the SQL to run
 	 */
 	public MappingSqlQueryWithParameters(DataSource ds, String sql) {
 		super(ds, sql);
@@ -79,7 +79,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 	/**
 	 * Subclasses must implement this method to convert each row
 	 * of the ResultSet into an object of the result type.
-	 * @param rs ResultSet we're working through
+	 * @param rs the ResultSet we're working through
 	 * @param rowNum row number (from 0) we're up to
 	 * @param parameters to the query (passed to the execute() method).
 	 * Subclasses are rarely interested in these.

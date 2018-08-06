@@ -63,7 +63,7 @@ import org.springframework.web.servlet.View;
 public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		implements Ordered, InitializingBean, DisposableBean {
 
-	/** The default basename if no other basename is supplied */
+	/** The default basename if no other basename is supplied. */
 	public static final String DEFAULT_BASENAME = "views";
 
 

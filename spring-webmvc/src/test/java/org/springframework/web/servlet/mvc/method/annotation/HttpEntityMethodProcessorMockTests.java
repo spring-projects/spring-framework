@@ -531,7 +531,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		then(resourceRegionMessageConverter).should(times(1)).write(
 				anyCollection(), eq(APPLICATION_OCTET_STREAM),
-				argThat(outputMessage -> outputMessage.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES) == "bytes"));
+				argThat(outputMessage -> "bytes".equals(outputMessage.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES))));
 		assertEquals(206, servletResponse.getStatus());
 	}
 
@@ -568,8 +568,24 @@ public class HttpEntityMethodProcessorMockTests {
 		assertThat(servletResponse.getHeader(HttpHeaders.ACCEPT_RANGES), Matchers.isEmptyOrNullString());
 	}
 
+	@Test //SPR-16921
+	public void disableRangeSupportIfContentRangePresent() throws Exception {
+		ResponseEntity<Resource> returnValue = ResponseEntity
+				.status(HttpStatus.PARTIAL_CONTENT)
+				.header(HttpHeaders.RANGE, "bytes=0-5")
+				.body(new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8)));
+
+		given(resourceRegionMessageConverter.canWrite(any(), eq(null))).willReturn(true);
+		given(resourceRegionMessageConverter.canWrite(any(), eq(APPLICATION_OCTET_STREAM))).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
+
+		then(resourceRegionMessageConverter).should(never()).write(anyCollection(), any(), any());
+		assertEquals(206, servletResponse.getStatus());
+	}
+
 	@Test  //SPR-14767
-	public void shouldHandleValidatorHeadersInPutResponses() throws Exception {
+	public void shouldHandleValidatorHeadersInputResponses() throws Exception {
 		servletRequest.setMethod("PUT");
 		String etagValue = "\"some-etag\"";
 		ResponseEntity<String> returnValue = ResponseEntity.ok().header(HttpHeaders.ETAG, etagValue).body("body");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Profiles;
 
 /**
  * Indicates that a component is eligible for registration when one or more
@@ -47,9 +48,14 @@ import org.springframework.core.env.ConfigurableEnvironment;
  *
  * <p>If a {@code @Configuration} class is marked with {@code @Profile}, all of the
  * {@code @Bean} methods and {@link Import @Import} annotations associated with that class
- * will be bypassed unless one or more of the specified profiles are active. This is
- * analogous to the behavior in Spring XML: if the {@code profile} attribute of the
- * {@code beans} element is supplied e.g., {@code <beans profile="p1,p2">}, the
+ * will be bypassed unless one or more of the specified profiles are active. A profile
+ * string may contain a simple profile name (for example {@code "p1"}) or a profile
+ * expression. A profile expression allows for more complicated profile logic to be
+ * expressed, for example {@code "p1 & p2"}. See {@link Profiles#of(String...)} for more
+ * details about supported formats.
+ *
+ * <p>This is analogous to the behavior in Spring XML: if the {@code profile} attribute of
+ * the {@code beans} element is supplied e.g., {@code <beans profile="p1,p2">}, the
  * {@code beans} element will not be parsed unless at least profile 'p1' or 'p2' has been
  * activated. Likewise, if a {@code @Component} or {@code @Configuration} class is marked
  * with {@code @Profile({"p1", "p2"})}, that class will not be registered or processed unless

@@ -23,9 +23,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -155,7 +156,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			metadata.invokeDestroyMethods(bean, beanName);
 		}
 		catch (InvocationTargetException ex) {
-			String msg = "Invocation of destroy method failed on bean with name '" + beanName + "'";
+			String msg = "Destroy method on bean with name '" + beanName + "' threw an exception";
 			if (logger.isDebugEnabled()) {
 				logger.warn(msg, ex.getTargetException());
 			}
@@ -164,7 +165,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			}
 		}
 		catch (Throwable ex) {
-			logger.error("Failed to invoke destroy method on bean with name '" + beanName + "'", ex);
+			logger.warn("Failed to invoke destroy method on bean with name '" + beanName + "'", ex);
 		}
 	}
 
@@ -196,23 +197,23 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
 		final boolean debug = logger.isDebugEnabled();
-		LinkedList<LifecycleElement> initMethods = new LinkedList<>();
-		LinkedList<LifecycleElement> destroyMethods = new LinkedList<>();
+		List<LifecycleElement> initMethods = new ArrayList<>();
+		List<LifecycleElement> destroyMethods = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<LifecycleElement> currInitMethods = new LinkedList<>();
-			final LinkedList<LifecycleElement> currDestroyMethods = new LinkedList<>();
+			final List<LifecycleElement> currInitMethods = new ArrayList<>();
+			final List<LifecycleElement> currDestroyMethods = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-				if (initAnnotationType != null && method.isAnnotationPresent(initAnnotationType)) {
+				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
 					LifecycleElement element = new LifecycleElement(method);
 					currInitMethods.add(element);
 					if (debug) {
 						logger.debug("Found init method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
-				if (destroyAnnotationType != null && method.isAnnotationPresent(destroyAnnotationType)) {
+				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
 					currDestroyMethods.add(new LifecycleElement(method));
 					if (debug) {
 						logger.debug("Found destroy method on class [" + clazz.getName() + "]: " + method);

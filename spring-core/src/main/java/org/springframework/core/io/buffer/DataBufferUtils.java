@@ -46,7 +46,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Utility class for working with {@link DataBuffer}s.
+ * Utility class for working with {@link DataBuffer DataBuffers}.
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
@@ -289,7 +289,7 @@ public abstract class DataBufferUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Write the given stream of {@link DataBuffer}s to the given {@code OutputStream}. Does
+	 * Write the given stream of {@link DataBuffer DataBuffers} to the given {@code OutputStream}. Does
 	 * <strong>not</strong> close the output stream when the flux is terminated, and does
 	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
 	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a
@@ -309,7 +309,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Write the given stream of {@link DataBuffer}s to the given {@code WritableByteChannel}. Does
+	 * Write the given stream of {@link DataBuffer DataBuffers} to the given {@code WritableByteChannel}. Does
 	 * <strong>not</strong> close the channel when the flux is terminated, and does
 	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
 	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a
@@ -344,7 +344,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Write the given stream of {@link DataBuffer}s to the given {@code AsynchronousFileChannel}.
+	 * Write the given stream of {@link DataBuffer DataBuffers} to the given {@code AsynchronousFileChannel}.
 	 * Does <strong>not</strong> close the channel when the flux is terminated, and does
 	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
 	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a
@@ -393,25 +393,14 @@ public abstract class DataBufferUtils {
 	public static Flux<DataBuffer> takeUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
-		AtomicLong byteCountDown = new AtomicLong(maxByteCount);
+		AtomicLong countDown = new AtomicLong(maxByteCount);
 
-		return Flux.from(publisher).
-				takeWhile(dataBuffer -> {
-					int delta = -dataBuffer.readableByteCount();
-					long currentCount = byteCountDown.getAndAdd(delta);
-					return currentCount >= 0;
-				}).
-				map(dataBuffer -> {
-					long currentCount = byteCountDown.get();
-					if (currentCount >= 0) {
-						return dataBuffer;
-					}
-					else {
-						// last buffer
-						int size = (int) (currentCount + dataBuffer.readableByteCount());
-						return dataBuffer.slice(0, size);
-					}
-				});
+		return Flux.from(publisher)
+				.map(buffer -> {
+					long count = countDown.addAndGet(-buffer.readableByteCount());
+					return count >= 0 ? buffer : buffer.slice(0, buffer.readableByteCount() + (int) count);
+				})
+				.takeUntil(buffer -> countDown.get() <= 0);
 	}
 
 	/**
@@ -427,26 +416,23 @@ public abstract class DataBufferUtils {
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
 		AtomicLong byteCountDown = new AtomicLong(maxByteCount);
 
-		return Flux.from(publisher).
-				skipUntil(dataBuffer -> {
-					int delta = -dataBuffer.readableByteCount();
-					long currentCount = byteCountDown.addAndGet(delta);
-					if(currentCount < 0) {
-						return true;
-					} else {
-						DataBufferUtils.release(dataBuffer);
+		return Flux.from(publisher)
+				.skipUntil(buffer -> {
+					int delta = -buffer.readableByteCount();
+					if (byteCountDown.addAndGet(delta) >= 0) {
+						DataBufferUtils.release(buffer);
 						return false;
 					}
-				}).
-				map(dataBuffer -> {
-					long currentCount = byteCountDown.get();
-					// slice first buffer, then let others flow through
-					if (currentCount < 0) {
-						int skip = (int) (currentCount + dataBuffer.readableByteCount());
+					return true;
+				})
+				.map(buffer -> {
+					long count = byteCountDown.get();
+					if (count < 0) {
+						int skipCount = buffer.readableByteCount() + (int) count;
 						byteCountDown.set(0);
-						return dataBuffer.slice(skip, dataBuffer.readableByteCount() - skip);
+						return buffer.slice(skipCount, buffer.readableByteCount() - skipCount);
 					}
-					return dataBuffer;
+					return buffer;
 				});
 	}
 

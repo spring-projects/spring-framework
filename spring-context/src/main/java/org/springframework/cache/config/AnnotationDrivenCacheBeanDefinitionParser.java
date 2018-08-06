@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,12 +61,16 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	private static final String JCACHE_ASPECT_CLASS_NAME =
 			"org.springframework.cache.aspectj.JCacheCacheAspect";
 
-	private static final boolean jsr107Present = ClassUtils.isPresent(
-			"javax.cache.Cache", AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jsr107Present;
 
-	private static final boolean jcacheImplPresent = ClassUtils.isPresent(
-			"org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource",
-			AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jcacheImplPresent;
+
+	static {
+		ClassLoader classLoader = AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader();
+		jsr107Present = ClassUtils.isPresent("javax.cache.Cache", classLoader);
+		jcacheImplPresent = ClassUtils.isPresent(
+				"org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource", classLoader);
+	}
 
 
 	/**
@@ -112,21 +116,21 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	 */
 	private static void parseCacheResolution(Element element, BeanDefinition def, boolean setBoth) {
 		String name = element.getAttribute("cache-resolver");
-		if (StringUtils.hasText(name)) {
+		boolean hasText = StringUtils.hasText(name);
+		if (hasText) {
 			def.getPropertyValues().add("cacheResolver", new RuntimeBeanReference(name.trim()));
 		}
-		if (!StringUtils.hasText(name) || setBoth) {
+		if (!hasText || setBoth) {
 			def.getPropertyValues().add("cacheManager",
 					new RuntimeBeanReference(CacheNamespaceHandler.extractCacheManager(element)));
 		}
 	}
 
-	private static BeanDefinition parseErrorHandler(Element element, BeanDefinition def) {
+	private static void parseErrorHandler(Element element, BeanDefinition def) {
 		String name = element.getAttribute("error-handler");
 		if (StringUtils.hasText(name)) {
 			def.getPropertyValues().add("errorHandler", new RuntimeBeanReference(name.trim()));
 		}
-		return def;
 	}
 
 
@@ -175,12 +179,12 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 		}
 
 		/**
-		 * Registers a
+		 * Registers a cache aspect.
 		 * <pre class="code">
-		 * <bean id="cacheAspect" class="org.springframework.cache.aspectj.AnnotationCacheAspect" factory-method="aspectOf">
-		 *   <property name="cacheManager" ref="cacheManager"/>
-		 *   <property name="keyGenerator" ref="keyGenerator"/>
-		 * </bean>
+		 * &lt;bean id="cacheAspect" class="org.springframework.cache.aspectj.AnnotationCacheAspect" factory-method="aspectOf"&gt;
+		 *   &lt;property name="cacheManager" ref="cacheManager"/&gt;
+		 *   &lt;property name="keyGenerator" ref="keyGenerator"/&gt;
+		 * &lt;/bean&gt;
 		 * </pre>
 		 */
 		private static void registerCacheAspect(Element element, ParserContext parserContext) {

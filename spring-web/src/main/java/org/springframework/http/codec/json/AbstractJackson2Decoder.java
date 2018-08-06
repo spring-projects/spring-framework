@@ -36,6 +36,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -67,7 +68,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		JavaType javaType = getObjectMapper().getTypeFactory().constructType(elementType.getType());
 		// Skip String: CharSequenceDecoder + "*/*" comes after
-		return (!CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
+		return (!CharSequence.class.isAssignableFrom(elementType.toClass()) &&
 				getObjectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));
 	}
 
@@ -110,7 +111,11 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 		return tokens.map(tokenBuffer -> {
 			try {
-				return reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+				if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
+					logger.debug(Hints.getLogPrefix(hints) +"Decoded [" + value + "]");
+				}
+				return value;
 			}
 			catch (InvalidDefinitionException ex) {
 				throw new CodecException("Type definition error: " + ex.getType(), ex);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 
 	@Before
 	public void setupClient() {
-		 this.template = new RestTemplate(this.clientHttpRequestFactory);
+		this.template = new RestTemplate(this.clientHttpRequestFactory);
 	}
 
 
@@ -177,6 +177,18 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
 			assertNotNull(ex.getStatusText());
 			assertNotNull(ex.getResponseBodyAsString());
+		}
+	}
+
+	@Test
+	public void badRequest() {
+		try {
+			template.execute(baseUrl + "/status/badrequest", HttpMethod.GET, null, null);
+			fail("HttpClientErrorException.BadRequest expected");
+		}
+		catch (HttpClientErrorException.BadRequest ex) {
+			assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+			assertEquals("400 Client Error", ex.getMessage());
 		}
 	}
 

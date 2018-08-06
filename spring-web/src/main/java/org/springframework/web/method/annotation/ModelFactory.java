@@ -155,18 +155,11 @@ public final class ModelFactory {
 	private ModelMethod getNextModelMethod(ModelAndViewContainer container) {
 		for (ModelMethod modelMethod : this.modelMethods) {
 			if (modelMethod.checkDependencies(container)) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Selected @ModelAttribute method " + modelMethod);
-				}
 				this.modelMethods.remove(modelMethod);
 				return modelMethod;
 			}
 		}
 		ModelMethod modelMethod = this.modelMethods.get(0);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Selected @ModelAttribute method (not present: " +
-					modelMethod.getUnresolvedDependencies(container)+ ") " + modelMethod);
-		}
 		this.modelMethods.remove(modelMethod);
 		return modelMethod;
 	}
@@ -257,7 +250,8 @@ public final class ModelFactory {
 	}
 
 	/**
-	 * Derive the model attribute name for the given return value based on:
+	 * Derive the model attribute name for the given return value. Results will be
+	 * based on:
 	 * <ol>
 	 * <li>the method {@code ModelAttribute} annotation value
 	 * <li>the declared return type if it is more specific than {@code Object}

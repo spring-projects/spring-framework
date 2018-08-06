@@ -29,6 +29,7 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.asm.Type;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -136,8 +137,8 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @since 2.0
  */
-public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter implements
-		BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean, Ordered {
+public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
+		implements BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean, Ordered {
 
 	/**
 	 * The {@link org.springframework.core.io.Resource}-style prefix that denotes
@@ -147,12 +148,21 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 */
 	public static final String INLINE_SCRIPT_PREFIX = "inline:";
 
+	/**
+	 * The {@code refreshCheckDelay} attribute.
+	 */
 	public static final String REFRESH_CHECK_DELAY_ATTRIBUTE = Conventions.getQualifiedAttributeName(
 			ScriptFactoryPostProcessor.class, "refreshCheckDelay");
 
+	/**
+	 * The {@code proxyTargetClass} attribute.
+	 */
 	public static final String PROXY_TARGET_CLASS_ATTRIBUTE = Conventions.getQualifiedAttributeName(
 			ScriptFactoryPostProcessor.class, "proxyTargetClass");
 
+	/**
+	 * The {@code language} attribute.
+	 */
 	public static final String LANGUAGE_ATTRIBUTE = Conventions.getQualifiedAttributeName(
 			ScriptFactoryPostProcessor.class, "language");
 
@@ -161,7 +171,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	private static final String SCRIPTED_OBJECT_NAME_PREFIX = "scriptedObject.";
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private long defaultRefreshCheckDelay = -1;
@@ -178,7 +188,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	final DefaultListableBeanFactory scriptBeanFactory = new DefaultListableBeanFactory();
 
-	/** Map from bean name String to ScriptSource object */
+	/** Map from bean name String to ScriptSource object. */
 	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<>();
 
 
@@ -275,8 +285,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			if (ex instanceof BeanCreationException &&
 					((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Could not determine scripted object type for bean '" + beanName + "': "
-							+ ex.getMessage());
+					logger.trace("Could not determine scripted object type for bean '" + beanName + "': " +
+							ex.getMessage());
 				}
 			}
 			else {
@@ -287,6 +297,11 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		}
 
 		return null;
+	}
+
+	@Override
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		return pvs;
 	}
 
 	@Override

@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,10 +108,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	protected static final Object[] PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS = new Object[0];
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Default is global AdvisorAdapterRegistry */
+	/** Default is global AdvisorAdapterRegistry. */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
 	/**
@@ -121,7 +120,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	private boolean freezeProxy = false;
 
-	/** Default is no common interceptors */
+	/** Default is no common interceptors. */
 	private String[] interceptorNames = new String[0];
 
 	private boolean applyCommonInterceptorsFirst = true;
@@ -230,12 +229,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	@Override
 	@Nullable
-	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
+	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) {
 		return null;
 	}
 
 	@Override
-	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
+	public Object getEarlyBeanReference(Object bean, String beanName) {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
 		if (!this.earlyProxyReferences.contains(cacheKey)) {
 			this.earlyProxyReferences.add(cacheKey);
@@ -244,7 +243,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
 		if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
@@ -280,9 +279,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		return pvs;
 	}
 
@@ -297,7 +294,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	@Override
-	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) throws BeansException {
+	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
 			if (!this.earlyProxyReferences.contains(cacheKey)) {
@@ -561,7 +558,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * Subclasses may choose to implement this: for example,
 	 * to change the interfaces exposed.
 	 * <p>The default implementation is empty.
-	 * @param proxyFactory ProxyFactory that is already configured with
+	 * @param proxyFactory a ProxyFactory that is already configured with
 	 * TargetSource and interfaces and will be used to create the proxy
 	 * immediately after this method returns
 	 */

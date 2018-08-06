@@ -84,7 +84,7 @@ public class JsonPathResultMatchers {
 	 * @see #value(Object)
 	 */
 	public <T> ResultMatcher value(Matcher<T> matcher) {
-		return result -> jsonPathHelper.assertValue(getContent(result), matcher);
+		return result -> this.jsonPathHelper.assertValue(getContent(result), matcher);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class JsonPathResultMatchers {
 	 * @see #value(Object)
 	 */
 	public <T> ResultMatcher value(Matcher<T> matcher, Class<T> targetType) {
-		return result -> jsonPathHelper.assertValue(getContent(result), matcher, targetType);
+		return result -> this.jsonPathHelper.assertValue(getContent(result), matcher, targetType);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class JsonPathResultMatchers {
 	 * @see #value(Matcher, Class)
 	 */
 	public ResultMatcher value(Object expectedValue) {
-		return result -> jsonPathHelper.assertValue(getContent(result), expectedValue);
+		return result -> this.jsonPathHelper.assertValue(getContent(result), expectedValue);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class JsonPathResultMatchers {
 	 * <em>empty</em>.
 	 */
 	public ResultMatcher exists() {
-		return result -> jsonPathHelper.exists(getContent(result));
+		return result -> this.jsonPathHelper.exists(getContent(result));
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class JsonPathResultMatchers {
 	 * <em>empty</em>.
 	 */
 	public ResultMatcher doesNotExist() {
-		return result -> jsonPathHelper.doesNotExist(getContent(result));
+		return result -> this.jsonPathHelper.doesNotExist(getContent(result));
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class JsonPathResultMatchers {
 	 * @see #doesNotExist()
 	 */
 	public ResultMatcher isEmpty() {
-		return result -> jsonPathHelper.assertValueIsEmpty(getContent(result));
+		return result -> this.jsonPathHelper.assertValueIsEmpty(getContent(result));
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class JsonPathResultMatchers {
 	 * @see #doesNotExist()
 	 */
 	public ResultMatcher isNotEmpty() {
-		return result -> jsonPathHelper.assertValueIsNotEmpty(getContent(result));
+		return result -> this.jsonPathHelper.assertValueIsNotEmpty(getContent(result));
 	}
 
 	/**
@@ -173,7 +173,7 @@ public class JsonPathResultMatchers {
 	 * @see #isNotEmpty()
 	 */
 	public ResultMatcher hasJsonPath() {
-		return result -> jsonPathHelper.hasJsonPath(getContent(result));
+		return result -> this.jsonPathHelper.hasJsonPath(getContent(result));
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class JsonPathResultMatchers {
 	 * @see #isEmpty()
 	 */
 	public ResultMatcher doesNotHaveJsonPath() {
-		return result -> jsonPathHelper.doesNotHaveJsonPath(getContent(result));
+		return result -> this.jsonPathHelper.doesNotHaveJsonPath(getContent(result));
 	}
 
 	/**
@@ -197,7 +197,7 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isString() {
-		return result -> jsonPathHelper.assertValueIsString(getContent(result));
+		return result -> this.jsonPathHelper.assertValueIsString(getContent(result));
 	}
 
 	/**
@@ -206,7 +206,7 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isBoolean() {
-		return result -> jsonPathHelper.assertValueIsBoolean(getContent(result));
+		return result -> this.jsonPathHelper.assertValueIsBoolean(getContent(result));
 	}
 
 	/**
@@ -215,7 +215,7 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isNumber() {
-		return result -> jsonPathHelper.assertValueIsNumber(getContent(result));
+		return result -> this.jsonPathHelper.assertValueIsNumber(getContent(result));
 	}
 
 	/**
@@ -223,7 +223,7 @@ public class JsonPathResultMatchers {
 	 * assert that the result is an array.
 	 */
 	public ResultMatcher isArray() {
-		return result -> jsonPathHelper.assertValueIsArray(getContent(result));
+		return result -> this.jsonPathHelper.assertValueIsArray(getContent(result));
 	}
 
 	/**
@@ -232,7 +232,7 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isMap() {
-		return result -> jsonPathHelper.assertValueIsMap(getContent(result));
+		return result -> this.jsonPathHelper.assertValueIsMap(getContent(result));
 	}
 
 	private String getContent(MvcResult result) throws UnsupportedEncodingException {

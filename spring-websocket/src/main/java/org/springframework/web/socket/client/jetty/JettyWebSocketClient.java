@@ -154,7 +154,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 		final JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
 		Callable<WebSocketSession> connectTask = () -> {
-			Future<Session> future = client.connect(listener, uri, request);
+			Future<Session> future = this.client.connect(listener, uri, request);
 			future.get();
 			return wsSession;
 		};
@@ -170,8 +170,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 	}
 
 	/**
-	 * @return the user to make available through {@link WebSocketSession#getPrincipal()};
-	 * 	by default this method returns {@code null}
+	 * Return the user to make available through {@link WebSocketSession#getPrincipal()}.
+	 * By default this method returns {@code null}
 	 */
 	@Nullable
 	protected Principal getUser() {

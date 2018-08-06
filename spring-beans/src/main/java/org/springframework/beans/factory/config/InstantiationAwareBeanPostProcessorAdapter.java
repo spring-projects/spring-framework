@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public abstract class InstantiationAwareBeanPostProcessorAdapter implements Smar
 
 	@Override
 	@Nullable
-	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
+	public Class<?> predictBeanType(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
@@ -68,6 +68,14 @@ public abstract class InstantiationAwareBeanPostProcessorAdapter implements Smar
 		return true;
 	}
 
+	@Override
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
+			throws BeansException {
+
+		return null;
+	}
+
+	@Deprecated
 	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {

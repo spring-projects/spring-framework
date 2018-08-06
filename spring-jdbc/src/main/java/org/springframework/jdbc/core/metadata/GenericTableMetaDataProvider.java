@@ -43,37 +43,37 @@ import org.springframework.lang.Nullable;
  */
 public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected static final Log logger = LogFactory.getLog(TableMetaDataProvider.class);
 
-	/** indicator whether column meta-data should be used */
+	/** indicator whether column meta-data should be used. */
 	private boolean tableColumnMetaDataUsed = false;
 
-	/** the version of the database */
+	/** the version of the database. */
 	@Nullable
 	private String databaseVersion;
 
-	/** the name of the user currently connected */
+	/** the name of the user currently connected. */
 	@Nullable
 	private String userName;
 
-	/** indicates whether the identifiers are uppercased */
+	/** indicates whether the identifiers are uppercased. */
 	private boolean storesUpperCaseIdentifiers = true;
 
-	/** indicates whether the identifiers are lowercased */
+	/** indicates whether the identifiers are lowercased. */
 	private boolean storesLowerCaseIdentifiers = false;
 
-	/** indicates whether generated keys retrieval is supported */
+	/** indicates whether generated keys retrieval is supported. */
 	private boolean getGeneratedKeysSupported = true;
 
-	/** indicates whether the use of a String[] for generated keys is supported */
+	/** indicates whether the use of a String[] for generated keys is supported. */
 	private boolean generatedKeysColumnNameArraySupported = true;
 
-	/** database products we know not supporting the use of a String[] for generated keys */
+	/** database products we know not supporting the use of a String[] for generated keys. */
 	private List<String> productsNotSupportingGeneratedKeysColumnNameArray =
 			Arrays.asList("Apache Derby", "HSQL Database Engine");
 
-	/** Collection of TableParameterMetaData objects */
+	/** Collection of TableParameterMetaData objects. */
 	private List<TableParameterMetaData> tableParameterMetaData = new ArrayList<>();
 
 
@@ -338,8 +338,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 
 		if (tableMeta.isEmpty()) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Unable to locate table meta-data for '" + tableName + "': column names must be provided");
+			if (logger.isInfoEnabled()) {
+				logger.info("Unable to locate table meta-data for '" + tableName + "': column names must be provided");
 			}
 		}
 		else {
@@ -381,7 +381,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	/**
-	 * Method supporting the meta-data processing for a table's columns
+	 * Method supporting the meta-data processing for a table's columns.
 	 */
 	private void processTableColumns(DatabaseMetaData databaseMetaData, TableMetaData tmd) {
 		ResultSet tableColumns = null;

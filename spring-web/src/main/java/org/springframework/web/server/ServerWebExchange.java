@@ -44,6 +44,16 @@ import org.springframework.util.MultiValueMap;
 public interface ServerWebExchange {
 
 	/**
+	 * Name of {@link #getAttributes() attribute} whose value can be used to
+	 * correlate log messages for this exchange. Use {@link #getLogPrefix()} to
+	 * obtain a consistently formatted prefix based on this attribute.
+	 * @since 5.1
+	 * @see #getLogPrefix()
+	 */
+	String LOG_ID_ATTRIBUTE = ServerWebExchange.class.getName() + ".LOG_ID";
+
+
+	/**
 	 * Return the current HTTP request.
 	 */
 	ServerHttpRequest getRequest();
@@ -80,7 +90,7 @@ public interface ServerWebExchange {
 	@SuppressWarnings("unchecked")
 	default <T> T getRequiredAttribute(String name) {
 		T value = getAttribute(name);
-		Assert.notNull(value, "Required attribute '" + name + "' is missing.");
+		Assert.notNull(value, () -> "Required attribute '" + name + "' is missing.");
 		return value;
 	}
 
@@ -207,6 +217,17 @@ public interface ServerWebExchange {
 	 * @param transformer a URL transformation function to add
 	 */
 	void addUrlTransformer(Function<String, String> transformer);
+
+	/**
+	 * Return a log message prefix to use to correlate messages for this exchange.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
+	 * along with some extra formatting so that the prefix can be conveniently
+	 * prepended with no further formatting no separators required.
+	 * @return the log message prefix or an empty String if the
+	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * @since 5.1
+	 */
+	String getLogPrefix();
 
 	/**
 	 * Return a builder to mutate properties of this exchange by wrapping it

@@ -31,6 +31,7 @@ import java.util.function.Consumer;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.codec.Hints;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -52,6 +53,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 5.0
+ * @param <T> a self reference to the builder type
  */
 class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
@@ -235,6 +237,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 				}
 				@Override
 				public Map<String, Object> hints() {
+					hints.put(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix());
 					return hints;
 				}
 			});

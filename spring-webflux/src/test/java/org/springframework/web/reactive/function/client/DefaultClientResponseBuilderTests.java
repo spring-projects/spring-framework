@@ -68,7 +68,7 @@ public class DefaultClientResponseBuilderTests {
 	}
 
 	@Test
-	public void from() throws Exception {
+	public void from() {
 		Flux<DataBuffer> otherBody = Flux.just("foo", "bar")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
 				.map(dataBufferFactory::wrap);

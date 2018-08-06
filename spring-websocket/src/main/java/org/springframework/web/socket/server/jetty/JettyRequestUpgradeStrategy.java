@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,15 +115,15 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 			this.running = true;
 			try {
 				if (this.factory == null) {
-					this.factory = new WebSocketServerFactory(servletContext, this.policy);
+					this.factory = new WebSocketServerFactory(this.servletContext, this.policy);
 				}
 				this.factory.setCreator((request, response) -> {
-                    WebSocketHandlerContainer container = containerHolder.get();
-                    Assert.state(container != null, "Expected WebSocketHandlerContainer");
-                    response.setAcceptedSubProtocol(container.getSelectedProtocol());
-                    response.setExtensions(container.getExtensionConfigs());
-                    return container.getHandler();
-                });
+					WebSocketHandlerContainer container = containerHolder.get();
+					Assert.state(container != null, "Expected WebSocketHandlerContainer");
+					response.setAcceptedSubProtocol(container.getSelectedProtocol());
+					response.setExtensions(container.getExtensionConfigs());
+					return container.getHandler();
+				});
 				this.factory.start();
 			}
 			catch (Throwable ex) {

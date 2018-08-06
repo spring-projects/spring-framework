@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.H
+ * limitations under the License.
  */
 
 package org.springframework.http.codec.xml;
@@ -31,6 +31,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractSingleValueEncoder;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.EncodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
@@ -59,7 +60,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		if (super.canEncode(elementType, mimeType)) {
-			Class<?> outputClass = elementType.resolve(Object.class);
+			Class<?> outputClass = elementType.toClass();
 			return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
 					outputClass.isAnnotationPresent(XmlType.class));
 		}
@@ -73,6 +74,9 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		try {
+			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
+				logger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
+			}
 			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
 			OutputStream outputStream = buffer.asOutputStream();
 			Class<?> clazz = ClassUtils.getUserClass(value);

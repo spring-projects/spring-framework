@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -45,7 +45,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	private final ConfigurableListableBeanFactory beanFactory;
 
 	@Nullable
-	private String[] cachedAdvisorBeanNames;
+	private volatile String[] cachedAdvisorBeanNames;
 
 
 	/**
@@ -66,22 +66,19 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	 */
 	public List<Advisor> findAdvisorBeans() {
 		// Determine list of advisor bean names, if not cached already.
-		String[] advisorNames = null;
-		synchronized (this) {
-			advisorNames = this.cachedAdvisorBeanNames;
-			if (advisorNames == null) {
-				// Do not initialize FactoryBeans here: We need to leave all regular beans
-				// uninitialized to let the auto-proxy creator apply to them!
-				advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
-						this.beanFactory, Advisor.class, true, false);
-				this.cachedAdvisorBeanNames = advisorNames;
-			}
+		String[] advisorNames = this.cachedAdvisorBeanNames;
+		if (advisorNames == null) {
+			// Do not initialize FactoryBeans here: We need to leave all regular beans
+			// uninitialized to let the auto-proxy creator apply to them!
+			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+					this.beanFactory, Advisor.class, true, false);
+			this.cachedAdvisorBeanNames = advisorNames;
 		}
 		if (advisorNames.length == 0) {
-			return new LinkedList<>();
+			return new ArrayList<>();
 		}
 
-		List<Advisor> advisors = new LinkedList<>();
+		List<Advisor> advisors = new ArrayList<>();
 		for (String name : advisorNames) {
 			if (isEligibleBean(name)) {
 				if (this.beanFactory.isCurrentlyInCreation(name)) {

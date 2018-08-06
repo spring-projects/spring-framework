@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,7 +226,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	@Override
 	public String getDescription() {
 		StringBuilder builder = new StringBuilder("class path resource [");
-		String pathToUse = path;
+		String pathToUse = this.path;
 		if (this.clazz != null && !pathToUse.startsWith("/")) {
 			builder.append(ClassUtils.classPackageAsResourcePath(this.clazz));
 			builder.append('/');
@@ -244,17 +244,17 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * This implementation compares the underlying class path locations.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj instanceof ClassPathResource) {
-			ClassPathResource otherRes = (ClassPathResource) obj;
-			return (this.path.equals(otherRes.path) &&
-					ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
-					ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
+		if (!(other instanceof ClassPathResource)) {
+			return false;
 		}
-		return false;
+		ClassPathResource otherRes = (ClassPathResource) other;
+		return (this.path.equals(otherRes.path) &&
+				ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
+				ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
 	}
 
 	/**

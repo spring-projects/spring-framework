@@ -401,8 +401,8 @@ The 3 possible behaviors are:
    transport is disabled since it does not allow to check the origin of a request.
    As a consequence, IE6 and IE7 are not supported when this mode is enabled.
  * Allow a specified list of origins: each provided _allowed origin_ must start with `http://`
-   or `https://`. In this mode, when SockJS is enabled, both IFrame and JSONP based
-   transports are disabled. As a consequence, IE6 through IE9 are not supported when this
+   or `https://`. In this mode, when SockJS is enabled, IFrame transport is disabled.
+   As a consequence, IE6 through IE9 are not supported when this
    mode is enabled.
  * Allow all origins: to enable this mode, you should provide `{asterisk}` as the allowed origin
    value. In this mode, all transports are available.
@@ -1214,22 +1214,17 @@ methods as described next.
 [[websocket-stomp-message-mapping]]
 ==== `@MessageMapping`
 
-The `@MessageMapping` annotation can be used on methods to route messages based on their
+`@MessageMapping` can be used to annotate methods to route messages based on their
 destination. It is supported at the method level as well as at the type level. At type
 level `@MessageMapping` is used to express shared mappings across all methods in a
 controller.
 
-By default destination mappings are expected to be Ant-style, path patterns, e.g. "/foo*",
-"/foo/**". The patterns include support for template variables, e.g. "/foo/{id}", that can
-be referenced with `@DestinationVariable` method arguments.
+The mapping values are Ant-style path patterns by default, e.g. "/foo*", "/foo/**"
+including support for template variables, e.g. "/foo/{id}", that can be referenced via
+`@DestinationVariable` method arguments. Applications can also switch to a dot-separated
+destination convention for mappings, as explained in <<websocket-stomp-destination-separator>>.
 
-[TIP]
-====
-Applications can choose to switch to a dot-separated destination convention.
-See <<websocket-stomp-destination-separator>>.
-====
-
-`@MessageMapping` methods can have flexible signatures with the following arguments:
+*Supported Method Arguments*
 
 [cols="1,2", options="header"]
 |===
@@ -1271,47 +1266,83 @@ Values will be converted to the declared method argument type as necessary.
 
 |===
 
-When an `@MessageMapping` method returns a value, by default the value is serialized to
-a payload through a configured `MessageConverter`, and then sent as a `Message` to the
-`"brokerChannel"` from where it is broadcast to subscribers. The destination of the
-outbound message is the same as that of the inbound message but prefixed with `"/topic"`.
+*Return Values*
 
-You can use the `@SendTo` method annotation to customize the destination to send
-the payload to. `@SendTo` can also be used at the class level to share a default target
-destination to send messages to. `@SendToUser` is an variant for sending messages only to
-the user associated with a message. See <<websocket-stomp-user-destination>> for details.
+By default, the return value from an `@MessageMapping` method is serialized to a payload
+through a matching `MessageConverter`, and sent as a `Message` to the `"brokerChannel"`
+from where it is broadcast to subscribers. The destination of the outbound message is the
+same as that of the inbound message but prefixed with `"/topic"`.
 
-The return value from an `@MessageMapping` method may be wrapped with `ListenableFuture`,
-`CompletableFuture`, or `CompletionStage` in order to produce the payload asynchronously.
+The `@SendTo` and `@SendToUser` annotations can be used to customize the destination of
+the output message. `@SendTo` is used to simply customize target destination, or to
+specify multiple destinations. `@SendToUser` is used to direct the output message only
+to the user associated with the input message, see <<websocket-stomp-user-destination>>.
 
-As an alternative to returning a payload from an `@MessageMapping` method you can also
-send messages using the `SimpMessagingTemplate`, which is also how return values are
-handled under the covers. See <<websocket-stomp-handle-send>>.
+`@SendTo` and `@SendToUser` may both be used at the same time on the same method, and both
+are supported at the class level in which case they act as a default for methods in the
+class. However keep in mind that _any_ method-level `@SendTo` or `@SendToUser` annotations
+override _any_ such annotations at the class level.
+
+Messages may be handled asynchronously and a `@MessageMapping` method may return
+`ListenableFuture`, `CompletableFuture`, or `CompletionStage`.
+
+Note that `@SendTo` and `@SendToUser` are merely a convenience that amounts to using the
+`SimpMessagingTemplate` to send messages. If necessary, for more advanced scenarios,
+`@MessageMapping` methods can fall back on using the `SimpMessagingTemplate` directly.
+This can be done instead of, or possibly in addition to returning a value.
+See <<websocket-stomp-handle-send>>.
 
 
 [[websocket-stomp-subscribe-mapping]]
 ==== `@SubscribeMapping`
 
-The `@SubscribeMapping` annotation is used in combination with `@MessageMapping` in order
-to narrow the mapping to subscription messages. In such scenarios, the `@MessageMapping`
-annotation specifies the destination while `@SubscribeMapping` indicates interest in
-subscription messages only.
+`@SubscribeMapping` is similar to `@MessageMapping` but narrows the mapping to
+subscription messages only. It supports the same
+<<websocket-stomp-message-mapping,method arguments>> as `@MessageMapping` does. However
+for the return value, by default a message is sent directly to the client via
+"clientOutboundChannel" in response to the subscription, and not to the broker via
+"brokerChannel" as a broadcast to matching subscriptions. Adding `@SendTo` or
+`@SendToUser` overrides this behavior and sends to the broker instead.
 
-An `@SubscribeMapping` method is generally no different from any `@MessageMapping`
-method with respect to mapping and input arguments. For example you can combine it with a
-type-level `@MessageMapping` to express a shared destination prefix, and you can use the
-same <<websocket-stomp-message-mapping,method arguments>> as any @MessageMapping` method.
+When is this useful? Let's assume the broker is mapped to "/topic" and "/queue" while
+application controllers are mapped to "/app". In this setup, the broker *stores* all
+subscriptions to "/topic" and "/queue" that are intended for *repeated* broadcasts, and
+there is no need for the application to get involved. A client could also also subscribe to
+some "/app" destination and a controller could return a value in response to that
+subscription without involving the broker, effectively a *one-off*, *request-reply* exchange,
+without storing or using the subscription again. One case for this is populating a UI
+with initial data on startup.
 
-The key difference with `@SubscribeMapping` is that the return value of the method is
-serialized as a payload and sent, not to the "brokerChannel" but to the
-"clientOutboundChannel", effectively replying directly to the client rather than
-broadcasting through the broker. This is useful for implementing one-off, request-reply
-message exchanges, and never holding on to the subscription. A common scenario for this
-pattern is application initialization when data must be loaded and presented.
+When is this not useful? Do not try to map broker and controllers to the same destination
+prefix unless you want both to process messages, including subscriptions, independently
+for some reason. Inbound messages are handled in parallel. There are no guarantees whether
+broker or controller will process a given message first. If the goal is to be notified
+when a subscription is stored and ready for broadcasts, then a client should ask for a
+receipt if the server supports it (simple broker does not). For example with the Java
+<<websocket-stomp-client>>:
 
-A `@SubscribeMapping` method can also be annotated with `@SendTo` in which case the
-return value is sent to the `"brokerChannel"` with the explicitly specified target
-destination.
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Autowired
+	private TaskScheduler messageBrokerTaskScheduler;
+
+	// During initialization..
+	stompClient.setTaskScheduler(this.messageBrokerTaskScheduler);
+
+	// When subscribing..
+	StompHeaders headers = new StompHeaders();
+	headers.setDestination("/topic/...");
+	headers.setReceipt("r1");
+	FrameHandler handler = ...;
+	stompSession.subscribe(headers, handler).addReceiptTask(() -> {
+		// Subscription ready...
+	});
+----
+
+A server side option is <<websocket-stomp-interceptors,to register>> an
+`ExecutorChannelInterceptor` on the `brokerChannel` and implement the `afterMessageHandled`
+method that is invoked after messages, including subscriptions, have been handled.
 
 
 [[websocket-stomp-exception-handler]]
@@ -1396,6 +1427,37 @@ to Ant-style destination patterns.
 Applications can also use dot-separated destinations (vs slash).
 See <<websocket-stomp-destination-separator>>.
 ====
+
+If configured with a task scheduler, the simple broker supports
+https://stomp.github.io/stomp-specification-1.2.html#Heart-beating[STOMP heartbeats].
+For that you can declare your own scheduler, or use the one that's automatically
+declared and used internally:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+	private TaskScheduler messageBrokerTaskScheduler;
+
+	@Autowired
+	public void setMessageBrokerTaskScheduler(TaskScheduler taskScheduler) {
+		this.messageBrokerTaskScheduler = taskScheduler;
+	}
+
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry registry) {
+
+		registry.enableSimpleBroker("/queue/", "/topic/")
+				.setHeartbeatValue(new long[] {10000, 20000})
+				.setTaskScheduler(this.messageBrokerTaskScheduler);
+
+		// ...
+	}
+}
+----
 
 
 
@@ -1888,8 +1950,61 @@ of the `message-broker` element in XML.
 
 
 
+[[websocket-stomp-ordered-messages]]
+=== Order of Messages
+
+Messages from the broker are published to the "clientOutboundChannel" from where they are
+written to WebSocket sessions. As the channel is backed by a `ThreadPoolExecutor` messages
+are processed in different threads, and the resulting sequence received by the client may
+not match the exact order of publication.
+
+If this is an issue, enable the following flag:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class MyConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		protected void configureMessageBroker(MessageBrokerRegistry registry) {
+			// ...
+			registry.setPreservePublishOrder(true);
+		}
+
+	}
+----
+
+The same in XML:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<websocket:message-broker preserve-publish-order="true">
+			<!-- ... -->
+		</websocket:message-broker>
+
+	</beans>
+----
+
+When the flag is set, messages within the same client session are published to the
+"clientOutboundChannel" one at a time, so that the order of publication is guaranteed.
+Note that this incurs a small performance overhead, so enable it only if required.
+
+
+
 [[websocket-stomp-appplication-context-events]]
-=== Events and Interception
+=== Events
 
 Several `ApplicationContext` events (listed below) are published and can be
 received by implementing Spring's `ApplicationListener` interface.
@@ -1929,9 +2044,15 @@ will typically notice the broker is not responding within 10 seconds. Clients ne
 implement their own reconnect logic.
 ====
 
-Furthermore, an application can directly intercept every incoming and outgoing message by
-registering a `ChannelInterceptor` on the respective message channel. For example
-to intercept inbound messages:
+
+
+[[websocket-stomp-interceptors]]
+=== Interception
+
+<<websocket-stomp-appplication-context-events>> provide notifications for the lifecycle
+of a STOMP connection and not for every client message. Applications can also register a
+`ChannelInterceptor` to intercept any message, and in any part of the processing chain.
+For example to intercept inbound messages from clients:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1947,14 +2068,13 @@ to intercept inbound messages:
 	}
 ----
 
-A custom `ChannelInterceptor` can extend the empty method base class
-`ChannelInterceptorAdapter` and use `StompHeaderAccessor` or `SimpMessageHeaderAccessor`
+A custom `ChannelInterceptor` can use `StompHeaderAccessor` or `SimpMessageHeaderAccessor`
 to access information about the message.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class MyChannelInterceptor extends ChannelInterceptorAdapter {
+	public class MyChannelInterceptor implements ChannelInterceptor {
 
 		@Override
 		public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -1965,6 +2085,18 @@ to access information about the message.
 		}
 	}
 ----
+
+Applications may also implement `ExecutorChannelInterceptor` which is a sub-interface
+of `ChannelInterceptor` with callbacks in the thread in which the messages are handled.
+While a `ChannelInterceptor` is invoked once for per message sent to a channel, the
+`ExecutorChannelInterceptor` provides hooks in the thread of each `MessageHandler`
+subscribed to messages from the channel.
+
+Note that just like with the `SesionDisconnectEvent` above, a DISCONNECT message
+may have been sent from the client, or it may also be automatically generated when
+the WebSocket session is closed. In some cases an interceptor may intercept this
+message more than once per session. Components should be idempotent with regard to
+multiple disconnect events.
 
 
 

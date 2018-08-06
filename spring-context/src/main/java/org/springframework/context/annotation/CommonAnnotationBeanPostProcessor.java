@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +48,6 @@ import javax.xml.ws.WebServiceRef;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
@@ -300,19 +300,22 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+	public void resetBeanDefinition(String beanName) {
+		this.injectionMetadataCache.remove(beanName);
+	}
+
+	@Override
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		return null;
 	}
 
 	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
 		return true;
 	}
 
 	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
-
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		InjectionMetadata metadata = findResourceMetadata(beanName, bean.getClass(), pvs);
 		try {
 			metadata.inject(bean, beanName, pvs);
@@ -321,6 +324,14 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			throw new BeanCreationException(beanName, "Injection of resource dependencies failed", ex);
 		}
 		return pvs;
+	}
+
+	@Deprecated
+	@Override
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
+
+		return postProcessProperties(pvs, bean, beanName);
 	}
 
 
@@ -345,12 +356,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
+		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<>();
+			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
 				if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
@@ -369,7 +379,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					if (Modifier.isStatic(field.getModifiers())) {
 						throw new IllegalStateException("@Resource annotation is not supported on static fields");
 					}
-					if (!ignoredResourceTypes.contains(field.getType().getName())) {
+					if (!this.ignoredResourceTypes.contains(field.getType().getName())) {
 						currElements.add(new ResourceElement(field, field, null));
 					}
 				}
@@ -409,7 +419,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 						if (paramTypes.length != 1) {
 							throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
 						}
-						if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
+						if (!this.ignoredResourceTypes.contains(paramTypes[0].getName())) {
 							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 							currElements.add(new ResourceElement(method, bridgedMethod, pd));
 						}
@@ -468,9 +478,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * @param element the descriptor for the annotated field/method
 	 * @param requestingBeanName the name of the requesting bean
 	 * @return the resource object (never {@code null})
-	 * @throws BeansException if we failed to obtain the target resource
+	 * @throws NoSuchBeanDefinitionException if no corresponding target resource found
 	 */
-	protected Object getResource(LookupElement element, @Nullable String requestingBeanName) throws BeansException {
+	protected Object getResource(LookupElement element, @Nullable String requestingBeanName)
+			throws NoSuchBeanDefinitionException {
+
 		if (StringUtils.hasLength(element.mappedName)) {
 			return this.jndiFactory.getBean(element.mappedName, element.lookupType);
 		}
@@ -491,10 +503,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * @param element the descriptor for the annotated field/method
 	 * @param requestingBeanName the name of the requesting bean
 	 * @return the resource object (never {@code null})
-	 * @throws BeansException if we failed to obtain the target resource
+	 * @throws NoSuchBeanDefinitionException if no corresponding target resource found
 	 */
 	protected Object autowireResource(BeanFactory factory, LookupElement element, @Nullable String requestingBeanName)
-			throws BeansException {
+			throws NoSuchBeanDefinitionException {
 
 		Object resource;
 		Set<String> autowiredBeanNames;

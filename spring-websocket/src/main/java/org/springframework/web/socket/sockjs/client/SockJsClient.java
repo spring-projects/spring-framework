@@ -127,12 +127,10 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * of each call to {@link SockJsClient#doHandshake(WebSocketHandler, WebSocketHttpHeaders, URI)}
 	 * and also used with other HTTP requests issued as part of that SockJS
 	 * connection, e.g. the initial info request, XHR send or receive requests.
-	 *
 	 * <p>By default if this property is not set, all handshake headers are also
 	 * used for other HTTP requests. Set it if you want only a subset of handshake
 	 * headers (e.g. auth headers) to be used for other HTTP requests.
-	 *
-	 * @param httpHeaderNames HTTP header names
+	 * @param httpHeaderNames the HTTP header names
 	 */
 	public void setHttpHeaderNames(@Nullable String... httpHeaderNames) {
 		this.httpHeaderNames = httpHeaderNames;

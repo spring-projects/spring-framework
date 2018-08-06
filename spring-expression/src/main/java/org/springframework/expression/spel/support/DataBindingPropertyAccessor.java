@@ -37,7 +37,7 @@ import java.lang.reflect.Method;
  * @see StandardEvaluationContext
  * @see ReflectivePropertyAccessor
  */
-public class DataBindingPropertyAccessor extends ReflectivePropertyAccessor {
+public final class DataBindingPropertyAccessor extends ReflectivePropertyAccessor {
 
 	/**
 	 * Create a new property accessor for reading and possibly also writing.

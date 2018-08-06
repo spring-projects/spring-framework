@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
@@ -51,7 +51,7 @@ public class StompEncoder  {
 
 	private static final byte COLON = ':';
 
-	private static final Log logger = LogFactory.getLog(StompEncoder.class);
+	private static final Log logger = SimpLogging.forLogName(StompEncoder.class);
 
 	private static final int HEADER_KEY_CACHE_LIMIT = 32;
 
@@ -75,7 +75,7 @@ public class StompEncoder  {
 
 
 	/**
-	 * Encodes the given STOMP {@code message} into a {@code byte[]}
+	 * Encodes the given STOMP {@code message} into a {@code byte[]}.
 	 * @param message the message to encode
 	 * @return the encoded message
 	 */

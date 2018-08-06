@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,13 +52,12 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
-		Map<String, Object> mapOfColValues = createColumnMap(columnCount);
+		Map<String, Object> mapOfColumnValues = createColumnMap(columnCount);
 		for (int i = 1; i <= columnCount; i++) {
-			String key = getColumnKey(JdbcUtils.lookupColumnName(rsmd, i));
-			Object obj = getColumnValue(rs, i);
-			mapOfColValues.put(key, obj);
+			String column = JdbcUtils.lookupColumnName(rsmd, i);
+			mapOfColumnValues.putIfAbsent(getColumnKey(column), getColumnValue(rs, i));
 		}
-		return mapOfColValues;
+		return mapOfColumnValues;
 	}
 
 	/**

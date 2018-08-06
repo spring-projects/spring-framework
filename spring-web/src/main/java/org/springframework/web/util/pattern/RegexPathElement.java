@@ -75,7 +75,7 @@ class RegexPathElement extends PathElement {
 				patternBuilder.append(".*");
 				int pos = matcher.start();
 				if (pos < 1 || text.charAt(pos-1) != '.') {
-					// To be compatible with the AntPathMatcher comparator, 
+					// To be compatible with the AntPathMatcher comparator,
 					// '.*' is not considered a wildcard usage
 					this.wildcardCount++;
 				}
@@ -129,13 +129,13 @@ class RegexPathElement extends PathElement {
 
 	@Override
 	public boolean matches(int pathIndex, MatchingContext matchingContext) {
-		String textToMatch = matchingContext.pathElementValue(pathIndex);		
+		String textToMatch = matchingContext.pathElementValue(pathIndex);
 		Matcher matcher = this.pattern.matcher(textToMatch);
 		boolean matches = matcher.matches();
 
 		if (matches) {
 			if (isNoMorePattern()) {
-				if (matchingContext.determineRemainingPath && 
+				if (matchingContext.determineRemainingPath &&
 					(this.variableNames.isEmpty() ? true : textToMatch.length() > 0)) {
 					matchingContext.remainingPathIndex = pathIndex + 1;
 					matches = true;
@@ -143,12 +143,13 @@ class RegexPathElement extends PathElement {
 				else {
 					// No more pattern, is there more data?
 					// If pattern is capturing variables there must be some actual data to bind to them
-					matches = (pathIndex + 1) >= matchingContext.pathLength &&
-							  (this.variableNames.isEmpty() || textToMatch.length() > 0);
+					matches = (pathIndex + 1) >= matchingContext.pathLength
+							&& (this.variableNames.isEmpty() || textToMatch.length() > 0);
 					if (!matches && matchingContext.isMatchOptionalTrailingSeparator()) {
-						matches = (this.variableNames.isEmpty() || textToMatch.length() > 0) &&
-							      (pathIndex + 2) >= matchingContext.pathLength &&
-							      matchingContext.isSeparator(pathIndex + 1);
+						matches = (this.variableNames.isEmpty()
+								|| textToMatch.length() > 0)
+								&& (pathIndex + 2) >= matchingContext.pathLength
+								&& matchingContext.isSeparator(pathIndex + 1);
 					}
 				}
 			}
@@ -176,7 +177,7 @@ class RegexPathElement extends PathElement {
 		}
 		return matches;
 	}
-	
+
 	@Override
 	public int getNormalizedLength() {
 		int varsLength = 0;

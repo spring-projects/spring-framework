@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public abstract class MappingCommAreaOperation extends MappingRecordOperation {
 
 	/**
 	 * Create a new MappingCommAreaQuery.
-	 * @param connectionFactory ConnectionFactory to use to obtain connections
+	 * @param connectionFactory the ConnectionFactory to use to obtain connections
 	 * @param interactionSpec specification to configure the interaction
 	 */
 	public MappingCommAreaOperation(ConnectionFactory connectionFactory, InteractionSpec interactionSpec) {

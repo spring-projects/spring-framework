@@ -431,7 +431,7 @@ public class ResolvableTypeTests {
 			interfaces.add(interfaceType.toString());
 		}
 		assertThat(interfaces.toString(), equalTo(
-				  "["
+				"["
 				+ "java.io.Serializable, "
 				+ "java.lang.Cloneable, "
 				+ "java.util.List<java.lang.CharSequence>, "
@@ -619,7 +619,7 @@ public class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"));
 		assertThat(type.getType().toString(), equalTo("T[]"));
 		assertThat(type.isArray(), equalTo(true));
-		assertThat(type.resolve(Object.class), equalTo((Class) Object.class));
+		assertThat(type.toClass(), equalTo((Class) Object.class));
 	}
 
 	@Test
@@ -1246,8 +1246,6 @@ public class ResolvableTypeTests {
 		testSerialization(ResolvableType.forMethodReturnType(Methods.class.getMethod("charSequenceReturn")));
 		testSerialization(ResolvableType.forConstructorParameter(Constructors.class.getConstructor(List.class), 0));
 		testSerialization(ResolvableType.forField(Fields.class.getField("charSequenceList")).getGeneric());
-		testSerialization(ResolvableType.forField(Fields.class.getField("charSequenceList")).asCollection());
-		testSerialization(ResolvableType.forClass(ExtendsMap.class).getSuperType());
 		ResolvableType deserializedNone = testSerialization(ResolvableType.NONE);
 		assertThat(deserializedNone, sameInstance(ResolvableType.NONE));
 	}

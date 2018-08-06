@@ -581,6 +581,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
+		public int hashCode() {
+			return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector);
+		}
+
+		@Override
 		public String toString() {
 			return super.toString() + " [selector=" + this.selector + ", noLocal=" + this.noLocal +
 					", subscription=" + this.subscription + ", durable=" + this.durable + "]";

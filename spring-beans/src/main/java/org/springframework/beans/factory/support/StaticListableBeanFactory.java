@@ -18,9 +18,11 @@ package org.springframework.beans.factory.support;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -60,7 +63,7 @@ import org.springframework.util.StringUtils;
  */
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
-	/** Map from bean name to bean instance */
+	/** Map from bean name to bean instance. */
 	private final Map<String, Object> beans;
 
 
@@ -176,6 +179,73 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 					"StaticListableBeanFactory does not support explicit bean creation arguments");
 		}
 		return getBean(requiredType);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) throws BeansException {
+		return getBeanProvider(ResolvableType.forRawClass(requiredType));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
+		return new ObjectProvider<T>() {
+			@Override
+			public T getObject() throws BeansException {
+				String[] beanNames = getBeanNamesForType(requiredType);
+				if (beanNames.length == 1) {
+					return (T) getBean(beanNames[0], requiredType);
+				}
+				else if (beanNames.length > 1) {
+					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+				}
+				else {
+					throw new NoSuchBeanDefinitionException(requiredType);
+				}
+			}
+			@Override
+			public T getObject(Object... args) throws BeansException {
+				String[] beanNames = getBeanNamesForType(requiredType);
+				if (beanNames.length == 1) {
+					return (T) getBean(beanNames[0], args);
+				}
+				else if (beanNames.length > 1) {
+					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+				}
+				else {
+					throw new NoSuchBeanDefinitionException(requiredType);
+				}
+			}
+			@Override
+			@Nullable
+			public T getIfAvailable() throws BeansException {
+				String[] beanNames = getBeanNamesForType(requiredType);
+				if (beanNames.length == 1) {
+					return (T) getBean(beanNames[0]);
+				}
+				else if (beanNames.length > 1) {
+					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+				}
+				else {
+					return null;
+				}
+			}
+			@Override
+			@Nullable
+			public T getIfUnique() throws BeansException {
+				String[] beanNames = getBeanNamesForType(requiredType);
+				if (beanNames.length == 1) {
+					return (T) getBean(beanNames[0]);
+				}
+				else {
+					return null;
+				}
+			}
+			@Override
+			public Stream<T> stream() {
+				return Arrays.stream(getBeanNamesForType(requiredType)).map(name -> (T) getBean(name));
+			}
+		};
 	}
 
 	@Override

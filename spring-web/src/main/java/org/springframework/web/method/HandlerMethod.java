@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.web.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +29,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpStatus;
@@ -53,7 +57,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 public class HandlerMethod {
 
-	/** Logger that is available to subclasses */
+	/** Logger that is available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Object bean;
@@ -77,6 +81,9 @@ public class HandlerMethod {
 
 	@Nullable
 	private HandlerMethod resolvedFromHandlerMethod;
+
+	@Nullable
+	private volatile List<Annotation[][]> interfaceParameterAnnotations;
 
 
 	/**
@@ -320,8 +327,43 @@ public class HandlerMethod {
 	 * @since 4.3
 	 */
 	public String getShortLogMessage() {
-		int args = this.method.getParameterCount();
-		return getBeanType().getName() + "#" + this.method.getName() + "[" + args + " args]";
+		return getBeanType().getName() + "#" + this.method.getName() +
+				"[" + this.method.getParameterCount() + " args]";
+	}
+
+
+	private List<Annotation[][]> getInterfaceParameterAnnotations() {
+		List<Annotation[][]> parameterAnnotations = this.interfaceParameterAnnotations;
+		if (parameterAnnotations == null) {
+			parameterAnnotations = new ArrayList<>();
+			for (Class<?> ifc : this.method.getDeclaringClass().getInterfaces()) {
+				for (Method candidate : ifc.getMethods()) {
+					if (isOverrideFor(candidate)) {
+						parameterAnnotations.add(candidate.getParameterAnnotations());
+					}
+				}
+			}
+			this.interfaceParameterAnnotations = parameterAnnotations;
+		}
+		return parameterAnnotations;
+	}
+
+	private boolean isOverrideFor(Method candidate) {
+		if (!candidate.getName().equals(this.method.getName()) ||
+				candidate.getParameterCount() != this.method.getParameterCount()) {
+			return false;
+		}
+		Class<?>[] paramTypes = this.method.getParameterTypes();
+		if (Arrays.equals(candidate.getParameterTypes(), paramTypes)) {
+			return true;
+		}
+		for (int i = 0; i < paramTypes.length; i++) {
+			if (paramTypes[i] !=
+					ResolvableType.forMethodParameter(candidate, i, this.method.getDeclaringClass()).resolve()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 
@@ -353,6 +395,9 @@ public class HandlerMethod {
 	 */
 	protected class HandlerMethodParameter extends SynthesizingMethodParameter {
 
+		@Nullable
+		private volatile Annotation[] combinedAnnotations;
+
 		public HandlerMethodParameter(int index) {
 			super(HandlerMethod.this.bridgedMethod, index);
 		}
@@ -374,6 +419,36 @@ public class HandlerMethod {
 		@Override
 		public <T extends Annotation> boolean hasMethodAnnotation(Class<T> annotationType) {
 			return HandlerMethod.this.hasMethodAnnotation(annotationType);
+		}
+
+		@Override
+		public Annotation[] getParameterAnnotations() {
+			Annotation[] anns = this.combinedAnnotations;
+			if (anns == null) {
+				anns = super.getParameterAnnotations();
+				for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {
+					Annotation[] paramAnns = ifcAnns[getParameterIndex()];
+					if (paramAnns.length > 0) {
+						List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
+						merged.addAll(Arrays.asList(anns));
+						for (Annotation paramAnn : paramAnns) {
+							boolean existingType = false;
+							for (Annotation ann : anns) {
+								if (ann.annotationType() == paramAnn.annotationType()) {
+									existingType = true;
+									break;
+								}
+							}
+							if (!existingType) {
+								merged.add(paramAnn);
+							}
+						}
+						anns = merged.toArray(new Annotation[0]);
+					}
+				}
+				this.combinedAnnotations = anns;
+			}
+			return anns;
 		}
 
 		@Override

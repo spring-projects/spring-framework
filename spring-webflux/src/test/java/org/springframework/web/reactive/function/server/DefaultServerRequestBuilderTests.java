@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function.server;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -38,16 +37,11 @@ import static org.junit.Assert.*;
  */
 public class DefaultServerRequestBuilderTests {
 
-	private DataBufferFactory dataBufferFactory;
+	private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
-	@Before
-	public void createBufferFactory() {
-		this.dataBufferFactory = new DefaultDataBufferFactory();
-	}
 
 	@Test
-	public void from() throws Exception {
-
+	public void from() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("http://example.com")
 				.header("foo", "bar")
 				.build();

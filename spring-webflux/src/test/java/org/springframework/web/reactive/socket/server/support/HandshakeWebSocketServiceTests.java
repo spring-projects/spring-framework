@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.server.support;
 
 import java.util.Arrays;
@@ -42,10 +43,8 @@ import static org.mockito.Mockito.*;
  */
 public class HandshakeWebSocketServiceTests {
 
-
 	@Test
 	public void sessionAttributePredicate() {
-
 		MockWebSession session = new MockWebSession();
 		session.getAttributes().put("a1", "v1");
 		session.getAttributes().put("a2", "v2");
@@ -85,7 +84,6 @@ public class HandshakeWebSocketServiceTests {
 	private static class TestRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		HandshakeInfo handshakeInfo;
-
 
 		@Override
 		public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,

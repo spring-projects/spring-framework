@@ -25,6 +25,7 @@ import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyInvocationContext;
 
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -34,14 +35,17 @@ import org.springframework.util.CollectionUtils;
  * so that only relevant parameters are handled.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  */
 class KeyGeneratorAdapter implements KeyGenerator {
 
 	private final JCacheOperationSource cacheOperationSource;
 
+	@Nullable
 	private KeyGenerator keyGenerator;
 
+	@Nullable
 	private CacheKeyGenerator cacheKeyGenerator;
 
 
@@ -72,7 +76,11 @@ class KeyGeneratorAdapter implements KeyGenerator {
 	 * or a {@link CacheKeyGenerator}.
 	 */
 	public Object getTarget() {
-		return (this.keyGenerator != null ? this.keyGenerator : this.cacheKeyGenerator);
+		if (this.cacheKeyGenerator != null) {
+			return this.cacheKeyGenerator;
+		}
+		Assert.state(this.keyGenerator != null, "No key generator");
+		return this.keyGenerator;
 	}
 
 	@Override
@@ -87,6 +95,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 			return this.cacheKeyGenerator.generateCacheKey(invocationContext);
 		}
 		else {
+			Assert.state(this.keyGenerator != null, "No key generator");
 			return doGenerate(this.keyGenerator, invocationContext);
 		}
 	}

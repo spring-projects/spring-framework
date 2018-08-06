@@ -55,7 +55,7 @@ import org.springframework.web.servlet.ViewResolver;
  * or {@code Accept} header.
  *
  * <p>The {@code ContentNegotiatingViewResolver} does not resolve views itself, but delegates to
- * other {@link ViewResolver}s. By default, these other view resolvers are picked up automatically
+ * other {@link ViewResolver ViewResolvers}. By default, these other view resolvers are picked up automatically
  * from the application context, though they can also be set explicitly by using the
  * {@link #setViewResolvers viewResolvers} property. <strong>Note</strong> that in order for this
  * view resolver to work properly, the {@link #setOrder order} property needs to be set to a higher
@@ -202,10 +202,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			}
 
 		}
-		if (this.viewResolvers.isEmpty()) {
-			logger.warn("Did not find any ViewResolvers to delegate to; please configure them using the " +
-					"'viewResolvers' property on the ContentNegotiatingViewResolver");
-		}
 		AnnotationAwareOrderComparator.sort(this.viewResolvers);
 		this.cnmFactoryBean.setServletContext(servletContext);
 	}
@@ -214,6 +210,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	public void afterPropertiesSet() {
 		if (this.contentNegotiationManager == null) {
 			this.contentNegotiationManager = this.cnmFactoryBean.build();
+		}
+		if (this.viewResolvers == null || this.viewResolvers.isEmpty()) {
+			logger.warn("No ViewResolvers configured");
 		}
 	}
 
@@ -231,14 +230,18 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 				return bestView;
 			}
 		}
+
+		String mediaTypeInfo = logger.isDebugEnabled() && requestedMediaTypes != null ?
+				" given " + requestedMediaTypes.toString() : "";
+
 		if (this.useNotAcceptableStatusCode) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No acceptable view found; returning 406 (Not Acceptable) status code");
+				logger.debug("Using 406 NOT_ACCEPTABLE" + mediaTypeInfo);
 			}
 			return NOT_ACCEPTABLE_VIEW;
 		}
 		else {
-			logger.debug("No acceptable view found; returning null");
+			logger.debug("View remains unresolved" + mediaTypeInfo);
 			return null;
 		}
 	}
@@ -265,13 +268,12 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			}
 			List<MediaType> selectedMediaTypes = new ArrayList<>(compatibleMediaTypes);
 			MediaType.sortBySpecificityAndQuality(selectedMediaTypes);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Requested media types are " + selectedMediaTypes + " based on Accept header types " +
-						"and producible media types " + producibleMediaTypes + ")");
-			}
 			return selectedMediaTypes;
 		}
 		catch (HttpMediaTypeNotAcceptableException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(ex.getMessage());
+			}
 			return null;
 		}
 	}
@@ -332,9 +334,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			if (candidateView instanceof SmartView) {
 				SmartView smartView = (SmartView) candidateView;
 				if (smartView.isRedirectView()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Returning redirect view [" + candidateView + "]");
-					}
 					return candidateView;
 				}
 			}
@@ -345,8 +344,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 					MediaType candidateContentType = MediaType.parseMediaType(candidateView.getContentType());
 					if (mediaType.isCompatibleWith(candidateContentType)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Returning [" + candidateView + "] based on requested media type '" +
-									mediaType + "'");
+							logger.debug("Selected '" + mediaType + "' given " + requestedMediaTypes);
 						}
 						attrs.setAttribute(View.SELECTED_CONTENT_TYPE, mediaType, RequestAttributes.SCOPE_REQUEST);
 						return candidateView;

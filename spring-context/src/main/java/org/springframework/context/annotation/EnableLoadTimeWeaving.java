@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,15 +44,14 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * The example above is equivalent to the following Spring XML configuration:
  *
  * <pre class="code">
- * {@code
- * <beans>
+ * &lt;beans&gt;
  *
- *     <context:load-time-weaver/>
+ *     &lt;context:load-time-weaver/&gt;
  *
- *     <!-- application-specific <bean> definitions -->
+ *     &lt;!-- application-specific &lt;bean&gt; definitions --&gt;
  *
- * </beans>
- * }</pre>
+ * &lt;/beans&gt;
+ * </pre>
  *
  * <h2>The {@code LoadTimeWeaverAware} interface</h2>
  * Any bean that implements the {@link
@@ -85,13 +84,12 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * <p>The example above can be compared to the following Spring XML configuration:
  *
  * <pre class="code">
- * {@code
- * <beans>
+ * &lt;beans&gt;
  *
- *     <context:load-time-weaver weaverClass="com.acme.MyLoadTimeWeaver"/>
+ *     &lt;context:load-time-weaver weaverClass="com.acme.MyLoadTimeWeaver"/&gt;
  *
- * </beans>
- * }</pre>
+ * &lt;/beans&gt;
+ * </pre>
  *
  * <p>The code example differs from the XML example in that it actually instantiates the
  * {@code MyLoadTimeWeaver} type, meaning that it can also configure the instance, e.g.
@@ -115,13 +113,12 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * <p>The example above can be compared to the following Spring XML configuration:
  *
  * <pre class="code">
- * {@code
- * <beans>
+ * &lt;beans&gt;
  *
- *     <context:load-time-weaver aspectj-weaving="on"/>
+ *     &lt;context:load-time-weaver aspectj-weaving="on"/&gt;
  *
- * </beans>
- * }</pre>
+ * &lt;/beans&gt;
+ * </pre>
  *
  * <p>The two examples are equivalent with one significant exception: in the XML case,
  * the functionality of {@code <context:spring-configured>} is implicitly enabled when
@@ -147,6 +144,9 @@ public @interface EnableLoadTimeWeaving {
 	AspectJWeaving aspectjWeaving() default AspectJWeaving.AUTODETECT;
 
 
+	/**
+	 * AspectJ weaving enablement options.
+	 */
 	enum AspectJWeaving {
 
 		/**

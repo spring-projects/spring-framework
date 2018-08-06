@@ -136,7 +136,7 @@ public class ResourceHandlerRegistry {
 	}
 
 	/**
-	 * Specify the order to use for resource handling relative to other {@link HandlerMapping}s
+	 * Specify the order to use for resource handling relative to other {@link HandlerMapping HandlerMappings}
 	 * configured in the Spring MVC application context.
 	 * <p>The default value used is {@code Integer.MAX_VALUE-1}.
 	 */
@@ -178,7 +178,7 @@ public class ResourceHandlerRegistry {
 		}
 
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setOrder(order);
+		handlerMapping.setOrder(this.order);
 		handlerMapping.setUrlMap(urlMap);
 		return handlerMapping;
 	}

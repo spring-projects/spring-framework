@@ -69,19 +69,12 @@ public class CachingResourceTransformer implements ResourceTransformer {
 
 		Resource cachedResource = this.cache.get(resource, Resource.class);
 		if (cachedResource != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Found match: " + cachedResource);
-			}
+			logger.trace(exchange.getLogPrefix() + "Resource resolved from cache");
 			return Mono.just(cachedResource);
 		}
 
 		return transformerChain.transform(exchange, resource)
-				.doOnNext(transformed -> {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Putting transformed resource in cache: " + transformed);
-					}
-					this.cache.put(resource, transformed);
-				});
+				.doOnNext(transformed -> this.cache.put(resource, transformed));
 	}
 
 }

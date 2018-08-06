@@ -1,16 +1,10 @@
 description = "Spring TestContext Framework"
 
-apply plugin: "io.spring.dependency-management"
-
 dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
-	resolutionStrategy {
-		cacheChangingModulesFor 0, 'seconds'
-	}
-	applyMavenExclusions = false
 }
 
 dependencies {
@@ -42,17 +36,17 @@ dependencies {
 	optional("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
 		exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 	}
-	optional("net.sourceforge.htmlunit:htmlunit:2.30") {
+	optional("net.sourceforge.htmlunit:htmlunit:2.32") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:htmlunit-driver:2.30.0") {
+	optional("org.seleniumhq.selenium:htmlunit-driver:2.32.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:selenium-java:3.11.0") {
+	optional("org.seleniumhq.selenium:selenium-java:3.14.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
-	optional("org.xmlunit:xmlunit-matchers:2.5.1")
+	optional("org.xmlunit:xmlunit-matchers:2.6.0")
 	optional("org.skyscreamer:jsonassert:1.5.0")
 	optional("com.jayway.jsonpath:json-path:2.4.0")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -63,24 +57,24 @@ dependencies {
 	testCompile("javax.annotation:javax.annotation-api:1.3.2")
 	testCompile("javax.cache:cache-api:1.1.0")
 	testCompile("javax.ejb:javax.ejb-api:3.2")
-	testCompile("javax.interceptor:javax.interceptor-api:1.2.1")
+	testCompile("javax.interceptor:javax.interceptor-api:1.2.2")
 	testCompile("javax.mail:javax.mail-api:1.6.1")
 	testCompile("org.hibernate:hibernate-core:5.2.17.Final")
-	testCompile("org.hibernate:hibernate-validator:6.0.10.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.11.Final")
 	// Enable use of the JUnit Platform Runner
 	testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
 	testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
 	testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
-	testCompile("com.rometools:rome:1.9.0")
+	testCompile("com.rometools:rome:1.11.0")
 	testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
-	testCompile("org.apache.tiles:tiles-core:${tiles3Version}")
-	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}")
+	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
+	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-	testCompile("org.apache.httpcomponents:httpclient:4.5.5") {
+	testCompile("org.apache.httpcomponents:httpclient:4.5.6") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	testCompile('io.projectreactor.ipc:reactor-netty')
+	testCompile('io.projectreactor.netty:reactor-netty')
 	testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 	// Pull in the latest JUnit 5 Launcher API and the Vintage engine as well
 	// so that we can run JUnit 4 tests in IntelliJ IDEA.
@@ -88,8 +82,8 @@ dependencies {
 	testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 	testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
-	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
-	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
+	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
+	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
 }
 
 task testNG(type: Test) {

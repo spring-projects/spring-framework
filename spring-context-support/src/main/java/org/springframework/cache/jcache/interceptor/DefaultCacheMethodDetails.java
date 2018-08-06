@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ package org.springframework.cache.jcache.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.cache.annotation.CacheMethodDetails;
-
-import static java.util.Arrays.*;
 
 /**
  * The default {@link CacheMethodDetails} implementation.
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <A> the annotation type
  */
 class DefaultCacheMethodDetails<A extends Annotation> implements CacheMethodDetails<A> {
 
@@ -45,7 +45,7 @@ class DefaultCacheMethodDetails<A extends Annotation> implements CacheMethodDeta
 	public DefaultCacheMethodDetails(Method method, A cacheAnnotation, String cacheName) {
 		this.method = method;
 		this.annotations = Collections.unmodifiableSet(
-				new LinkedHashSet<>(asList(method.getAnnotations())));
+				new LinkedHashSet<>(Arrays.asList(method.getAnnotations())));
 		this.cacheAnnotation = cacheAnnotation;
 		this.cacheName = cacheName;
 	}

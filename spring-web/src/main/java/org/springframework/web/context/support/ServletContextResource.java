@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.core.io.AbstractFileResolvingResource;
@@ -237,15 +236,15 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 * This implementation compares the underlying ServletContext resource locations.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj instanceof ServletContextResource) {
-			ServletContextResource otherRes = (ServletContextResource) obj;
-			return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
+		if (!(other instanceof ServletContextResource)) {
+			return false;
 		}
-		return false;
+		ServletContextResource otherRes = (ServletContextResource) other;
+		return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
 	}
 
 	/**

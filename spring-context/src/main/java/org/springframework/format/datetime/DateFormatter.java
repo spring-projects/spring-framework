@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ public class DateFormatter implements Formatter<Date> {
 	 * <li>'L' = Long</li>
 	 * <li>'F' = Full</li>
 	 * <li>'-' = Omitted</li>
-	 * <ul>
+	 * </ul>
 	 * This method mimics the styles supported by Joda-Time.
 	 * @param stylePattern two characters from the set {"S", "M", "L", "F", "-"}
 	 * @since 3.2

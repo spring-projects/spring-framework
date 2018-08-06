@@ -50,12 +50,13 @@ import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 
-import static org.springframework.core.MethodIntrospector.*;
+import static org.springframework.core.MethodIntrospector.selectMethods;
 
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
  * resolving, initializing, and caching annotated methods declared in
- * {@code @Controller} and {@code @ControllerAdvice} components:
+ * {@code @Controller} and {@code @ControllerAdvice} components. Assists with
+ * the following annotations:
  * <ul>
  * <li>{@code @InitBinder}
  * <li>{@code @ModelAttribute}
@@ -205,10 +206,6 @@ class ControllerMethodResolver {
 
 	private void initControllerAdviceCaches(ApplicationContext applicationContext) {
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Looking for @ControllerAdvice: " + applicationContext);
-		}
-
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(applicationContext);
 		AnnotationAwareOrderComparator.sort(beans);
 
@@ -218,24 +215,28 @@ class ControllerMethodResolver {
 				Set<Method> attrMethods = selectMethods(beanType, ATTRIBUTE_METHODS);
 				if (!attrMethods.isEmpty()) {
 					this.modelAttributeAdviceCache.put(bean, attrMethods);
-					if (logger.isInfoEnabled()) {
-						logger.info("Detected @ModelAttribute methods in " + bean);
-					}
 				}
 				Set<Method> binderMethods = selectMethods(beanType, BINDER_METHODS);
 				if (!binderMethods.isEmpty()) {
 					this.initBinderAdviceCache.put(bean, binderMethods);
-					if (logger.isInfoEnabled()) {
-						logger.info("Detected @InitBinder methods in " + bean);
-					}
 				}
 				ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
 				if (resolver.hasExceptionMappings()) {
 					this.exceptionHandlerAdviceCache.put(bean, resolver);
-					if (logger.isInfoEnabled()) {
-						logger.info("Detected @ExceptionHandler methods in " + bean);
-					}
 				}
+			}
+		}
+
+		if (logger.isDebugEnabled()) {
+			int modelSize = this.modelAttributeAdviceCache.size();
+			int binderSize = this.initBinderAdviceCache.size();
+			int handlerSize = this.exceptionHandlerAdviceCache.size();
+			if (modelSize == 0 && binderSize == 0 && handlerSize == 0) {
+				logger.debug("ControllerAdvice beans: none");
+			}
+			else {
+				logger.debug("ControllerAdvice beans: " + modelSize + " @ModelAttribute, " + binderSize +
+						" @InitBinder, " + handlerSize + " @ExceptionHandler");
 			}
 		}
 	}

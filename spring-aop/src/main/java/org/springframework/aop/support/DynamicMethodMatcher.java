@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ package org.springframework.aop.support;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodMatcher;
-import org.springframework.lang.Nullable;
 
 /**
  * Convenient abstract superclass for dynamic method matchers,
  * which do care about arguments at runtime.
+ *
+ * @author Rod Johnson
  */
 public abstract class DynamicMethodMatcher implements MethodMatcher {
 
@@ -37,7 +38,7 @@ public abstract class DynamicMethodMatcher implements MethodMatcher {
 	 * always returns true.
 	 */
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
 		return true;
 	}
 

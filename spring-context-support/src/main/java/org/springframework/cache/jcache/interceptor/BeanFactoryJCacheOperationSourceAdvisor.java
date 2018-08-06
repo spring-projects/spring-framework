@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cache.jcache.interceptor;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
+import org.springframework.lang.Nullable;
 
 /**
  * Advisor driven by a {@link JCacheOperationSource}, used to include a
@@ -30,6 +31,7 @@ import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
 @SuppressWarnings("serial")
 public class BeanFactoryJCacheOperationSourceAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
+	@Nullable
 	private JCacheOperationSource cacheOperationSource;
 
 	private final JCacheOperationSourcePointcut pointcut = new JCacheOperationSourcePointcut() {
@@ -38,6 +40,7 @@ public class BeanFactoryJCacheOperationSourceAdvisor extends AbstractBeanFactory
 			return cacheOperationSource;
 		}
 	};
+
 
 	/**
 	 * Set the cache operation attribute source which is used to find cache

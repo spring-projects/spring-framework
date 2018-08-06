@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +37,6 @@ import javax.persistence.PersistenceUnit;
 import javax.persistence.SynchronizationType;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
@@ -311,12 +312,12 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	public void setOrder(int order) {
-	  this.order = order;
+		this.order = order;
 	}
 
 	@Override
 	public int getOrder() {
-	  return this.order;
+		return this.order;
 	}
 
 	@Override
@@ -334,19 +335,22 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+	public void resetBeanDefinition(String beanName) {
+		this.injectionMetadataCache.remove(beanName);
+	}
+
+	@Override
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		return null;
 	}
 
 	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
 		return true;
 	}
 
 	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
-
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		InjectionMetadata metadata = findPersistenceMetadata(beanName, bean.getClass(), pvs);
 		try {
 			metadata.inject(bean, beanName, pvs);
@@ -357,18 +361,26 @@ public class PersistenceAnnotationBeanPostProcessor
 		return pvs;
 	}
 
+	@Deprecated
 	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
+
+		return postProcessProperties(pvs, bean, beanName);
+	}
+
+	@Override
+	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
 	@Override
-	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
 	@Override
-	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
+	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		EntityManager emToClose = this.extendedEntityManagersToClose.remove(bean);
 		EntityManagerFactoryUtils.closeEntityManager(emToClose);
 	}
@@ -400,7 +412,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	private InjectionMetadata buildPersistenceMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
+		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {

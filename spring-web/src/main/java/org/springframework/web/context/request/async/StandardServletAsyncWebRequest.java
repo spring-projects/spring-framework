@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -36,7 +35,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  *
  * <p>The servlet and all filters involved in an async request must have async
  * support enabled using the Servlet API or by adding an
- * {@code <async-supported>true</async-supported>} element to servlet and filter
+ * <code>&ltasync-supported&gttrue&lt/async-supported&gt</code> element to servlet and filter
  * declarations in {@code web.xml}.
  *
  * @author Rossen Stoyanchev

@@ -72,7 +72,7 @@ import org.springframework.lang.Nullable;
  */
 public class AntPathMatcher implements PathMatcher {
 
-	/** Default path separator: "/" */
+	/** Default path separator: "/". */
 	public static final String DEFAULT_PATH_SEPARATOR = "/";
 
 	private static final int CACHE_TURNOFF_THRESHOLD = 65536;
@@ -750,8 +750,8 @@ public class AntPathMatcher implements PathMatcher {
 				return -1;
 			}
 
-			boolean pattern1EqualsPath = pattern1.equals(path);
-			boolean pattern2EqualsPath = pattern2.equals(path);
+			boolean pattern1EqualsPath = pattern1.equals(this.path);
+			boolean pattern2EqualsPath = pattern2.equals(this.path);
 			if (pattern1EqualsPath && pattern2EqualsPath) {
 				return 0;
 			}

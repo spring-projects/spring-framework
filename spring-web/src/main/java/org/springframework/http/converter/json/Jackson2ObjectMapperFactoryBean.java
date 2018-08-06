@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,7 +261,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Add mix-in annotations to use for augmenting specified class or interface.
-	 * @param mixIns Map of entries with target classes (or interface) whose annotations
+	 * @param mixIns a Map of entries with target classes (or interface) whose annotations
 	 * to effectively override as key and mix-in classes (or interface) whose
 	 * annotations are to be "added" to target's annotations as value.
 	 * @since 4.1.2

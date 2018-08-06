@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
-	 * @param defaultMessage String to return if the lookup fails
+	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
 	public String getMessage(String code, String defaultMessage) {
@@ -254,7 +254,7 @@ public class RequestContext {
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
 	 * @param args arguments for the message, or {@code null} if none
-	 * @param defaultMessage String to return if the lookup fails
+	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage) {
@@ -265,7 +265,7 @@ public class RequestContext {
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
-	 * @param defaultMessage String to return if the lookup fails
+	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable List<?> args, String defaultMessage) {
@@ -276,8 +276,8 @@ public class RequestContext {
 	 * Retrieve the message for the given code.
 	 * @param code code of the message
 	 * @param args arguments for the message, or {@code null} if none
-	 * @param defaultMessage String to return if the lookup fails
-	 * @param htmlEscape HTML escape the message?
+	 * @param defaultMessage the String to return if the lookup fails
+	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, boolean htmlEscape) {
@@ -324,7 +324,7 @@ public class RequestContext {
 	 * Retrieve the message for the given code.
 	 * @param code code of the message
 	 * @param args arguments for the message, or {@code null} if none
-	 * @param htmlEscape HTML escape the message?
+	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -346,7 +346,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance).
 	 * @param resolvable the MessageSourceResolvable
-	 * @param htmlEscape HTML escape the message?
+	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */

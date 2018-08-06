@@ -78,7 +78,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * <p>Defaults to the class's transaction attribute if no method attribute is found.
 	 * @param method the method for the current invocation (never {@code null})
 	 * @param targetClass the target class for this invocation (may be {@code null})
-	 * @return TransactionAttribute for this method, or {@code null} if the method
+	 * @return a TransactionAttribute for this method, or {@code null} if the method
 	 * is not transactional
 	 */
 	@Override

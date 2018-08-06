@@ -22,6 +22,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -39,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -588,8 +590,7 @@ public abstract class AnnotationUtils {
 			Set<Method> annotatedMethods = getAnnotatedMethodsInBaseType(ifc);
 			if (!annotatedMethods.isEmpty()) {
 				for (Method annotatedMethod : annotatedMethods) {
-					if (annotatedMethod.getName().equals(method.getName()) &&
-							Arrays.equals(annotatedMethod.getParameterTypes(), method.getParameterTypes())) {
+					if (isOverride(method, annotatedMethod)) {
 						A annotation = getAnnotation(annotatedMethod, annotationType);
 						if (annotation != null) {
 							return annotation;
@@ -643,6 +644,23 @@ public abstract class AnnotationUtils {
 		if (anns.length == 1) {
 			Class<?> annType = anns[0].annotationType();
 			return (annType != Nullable.class && annType != Deprecated.class);
+		}
+		return true;
+	}
+
+	private static boolean isOverride(Method method, Method candidate) {
+		if (!candidate.getName().equals(method.getName()) ||
+				candidate.getParameterCount() != method.getParameterCount()) {
+			return false;
+		}
+		Class<?>[] paramTypes = method.getParameterTypes();
+		if (Arrays.equals(candidate.getParameterTypes(), paramTypes)) {
+			return true;
+		}
+		for (int i = 0; i < paramTypes.length; i++) {
+			if (paramTypes[i] != ResolvableType.forMethodParameter(candidate, i, method.getDeclaringClass()).resolve()) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -899,6 +917,29 @@ public abstract class AnnotationUtils {
 		}
 		metaPresentCache.put(cacheKey, metaPresent);
 		return metaPresent;
+	}
+
+	/**
+	 * Determine if the {@link Annotation} with the supplied name is defined in the
+	 * {@code java.lang.annotation} or {@code org.springframework.lang} package.
+	 * @param annotatedElement the potential annotation type to check
+	 * @return {@code true} if the annotation is in the {@code java.lang.annotation}
+	 * or {@code org.springframework.lang} package
+	 * @since 5.1
+	 */
+	static boolean hasPlainJavaAnnotationsOnly(@Nullable Object annotatedElement) {
+		Class<?> clazz;
+		if (annotatedElement instanceof Class) {
+			clazz = (Class<?>) annotatedElement;
+		}
+		else if (annotatedElement instanceof Member) {
+			clazz = ((Member) annotatedElement).getDeclaringClass();
+		}
+		else {
+			return false;
+		}
+		String name = clazz.getName();
+		return (name.startsWith("java") || name.startsWith("org.springframework.lang."));
 	}
 
 	/**
@@ -1327,11 +1368,12 @@ public abstract class AnnotationUtils {
 		}
 
 		// Replace any remaining placeholders with actual default values
-		for (String attributeName : attributes.keySet()) {
+		for (Map.Entry<String, Object> attributeEntry : attributes.entrySet()) {
+			String attributeName = attributeEntry.getKey();
 			if (valuesAlreadyReplaced.contains(attributeName)) {
 				continue;
 			}
-			Object value = attributes.get(attributeName);
+			Object value = attributeEntry.getValue();
 			if (value instanceof DefaultValueHolder) {
 				value = ((DefaultValueHolder) value).defaultValue;
 				attributes.put(attributeName,
@@ -1491,7 +1533,7 @@ public abstract class AnnotationUtils {
 
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> A synthesizeAnnotation(A annotation, @Nullable Object annotatedElement) {
-		if (annotation instanceof SynthesizedAnnotation) {
+		if (annotation instanceof SynthesizedAnnotation || hasPlainJavaAnnotationsOnly(annotatedElement)) {
 			return annotation;
 		}
 
@@ -1567,7 +1609,7 @@ public abstract class AnnotationUtils {
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 */
 	public static <A extends Annotation> A synthesizeAnnotation(Class<A> annotationType) {
-		return synthesizeAnnotation(Collections.<String, Object> emptyMap(), annotationType, null);
+		return synthesizeAnnotation(Collections.emptyMap(), annotationType, null);
 	}
 
 	/**
@@ -1586,8 +1628,10 @@ public abstract class AnnotationUtils {
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
-	static Annotation[] synthesizeAnnotationArray(
-			Annotation[] annotations, @Nullable Object annotatedElement) {
+	static Annotation[] synthesizeAnnotationArray(Annotation[] annotations, @Nullable Object annotatedElement) {
+		if (hasPlainJavaAnnotationsOnly(annotatedElement)) {
+			return annotations;
+		}
 
 		Annotation[] synthesized = (Annotation[]) Array.newInstance(
 				annotations.getClass().getComponentType(), annotations.length);
@@ -1616,7 +1660,9 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	static <A extends Annotation> A[] synthesizeAnnotationArray(@Nullable Map<String, Object>[] maps, Class<A> annotationType) {
+	static <A extends Annotation> A[] synthesizeAnnotationArray(
+			@Nullable Map<String, Object>[] maps, Class<A> annotationType) {
+
 		if (maps == null) {
 			return null;
 		}
@@ -1698,6 +1744,10 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	private static boolean isSynthesizable(Class<? extends Annotation> annotationType) {
+		if (hasPlainJavaAnnotationsOnly(annotationType)) {
+			return false;
+		}
+
 		Boolean synthesizable = synthesizableCache.get(annotationType);
 		if (synthesizable != null) {
 			return synthesizable;
@@ -1746,7 +1796,7 @@ public abstract class AnnotationUtils {
 	 */
 	static List<String> getAttributeAliasNames(Method attribute) {
 		AliasDescriptor descriptor = AliasDescriptor.from(attribute);
-		return (descriptor != null ? descriptor.getAttributeAliasNames() : Collections.<String> emptyList());
+		return (descriptor != null ? descriptor.getAttributeAliasNames() : Collections.emptyList());
 	}
 
 	/**
@@ -1833,8 +1883,8 @@ public abstract class AnnotationUtils {
 	/**
 	 * Determine if the supplied method is an "annotationType" method.
 	 * @return {@code true} if the method is an "annotationType" method
-	 * @see Annotation#annotationType()
 	 * @since 4.2
+	 * @see Annotation#annotationType()
 	 */
 	static boolean isAnnotationTypeMethod(@Nullable Method method) {
 		return (method != null && method.getName().equals("annotationType") && method.getParameterCount() == 0);
@@ -2047,7 +2097,7 @@ public abstract class AnnotationUtils {
 	 * @see #getAttributeAliasNames
 	 * @see #getAttributeOverrideName
 	 */
-	private static class AliasDescriptor {
+	private static final class AliasDescriptor {
 
 		private final Method sourceAttribute;
 

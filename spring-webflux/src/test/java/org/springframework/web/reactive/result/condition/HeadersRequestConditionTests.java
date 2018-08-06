@@ -37,7 +37,7 @@ public class HeadersRequestConditionTests {
 	public void headerEquals() {
 		assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("foo"));
 		assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("FOO"));
-		assertFalse(new HeadersRequestCondition("foo").equals(new HeadersRequestCondition("bar")));
+		assertNotEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("bar"));
 		assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("foo=bar"));
 		assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("FOO=bar"));
 	}
@@ -46,7 +46,7 @@ public class HeadersRequestConditionTests {
 	public void headerPresent() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", ""));
 		HeadersRequestCondition condition = new HeadersRequestCondition("accept");
-	
+
 		assertNotNull(condition.getMatchingCondition(exchange));
 	}
 

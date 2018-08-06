@@ -61,7 +61,7 @@ public interface View {
 	/**
 	 * Render the view based on the given {@link HandlerResult}. Implementations
 	 * can access and use the model or only a specific attribute in it.
-	 * @param model Map with name Strings as keys and corresponding model
+	 * @param model a Map with name Strings as keys and corresponding model
 	 * objects as values (Map can also be {@code null} in case of empty model)
 	 * @param contentType the content type selected to render with which should
 	 * match one of the {@link #getSupportedMediaTypes() supported media types}.

@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -64,10 +65,10 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.Matchers.containsString;
+import static java.nio.charset.StandardCharsets.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
+import static org.springframework.http.codec.json.Jackson2CodecSupport.*;
 
 /**
  * @author Arjen Poutsma
@@ -99,12 +100,10 @@ public class BodyInsertersTests {
 			public List<HttpMessageWriter<?>> messageWriters() {
 				return messageWriters;
 			}
-
 			@Override
 			public Optional<ServerHttpRequest> serverRequest() {
 				return Optional.empty();
 			}
-
 			@Override
 			public Map<String, Object> hints() {
 				return hints;
@@ -115,7 +114,7 @@ public class BodyInsertersTests {
 
 
 	@Test
-	public void ofString() throws Exception {
+	public void ofString() {
 		String body = "foo";
 		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
 
@@ -131,7 +130,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofObject() throws Exception {
+	public void ofObject() {
 		User body = new User("foo", "bar");
 		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
 		MockServerHttpResponse response = new MockServerHttpResponse();
@@ -145,7 +144,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofObjectWithHints() throws Exception {
+	public void ofObjectWithHints() {
 		User body = new User("foo", "bar");
 		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
 		this.hints.put(JSON_VIEW_HINT, SafeToSerialize.class);
@@ -160,7 +159,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofPublisher() throws Exception {
+	public void ofPublisher() {
 		Flux<String> body = Flux.just("foo");
 		BodyInserter<Flux<String>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromPublisher(body, String.class);
 
@@ -177,7 +176,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofResource() throws Exception {
+	public void ofResource() throws IOException {
 		Resource body = new ClassPathResource("response.txt", getClass());
 		BodyInserter<Resource, ReactiveHttpOutputMessage> inserter = BodyInserters.fromResource(body);
 
@@ -199,7 +198,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofResourceRange() throws Exception {
+	public void ofResourceRange() throws IOException {
 		final int rangeStart = 10;
 		Resource body = new ClassPathResource("response.txt", getClass());
 		BodyInserter<Resource, ReactiveHttpOutputMessage> inserter = BodyInserters.fromResource(body);
@@ -242,7 +241,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofServerSentEventFlux() throws Exception {
+	public void ofServerSentEventFlux() {
 		ServerSentEvent<String> event = ServerSentEvent.builder("foo").build();
 		Flux<ServerSentEvent<String>> body = Flux.just(event);
 		BodyInserter<Flux<ServerSentEvent<String>>, ServerHttpResponse> inserter =
@@ -254,7 +253,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void fromFormDataMap() throws Exception {
+	public void fromFormDataMap() {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
@@ -282,7 +281,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void fromFormDataWith() throws Exception {
+	public void fromFormDataWith() {
 		BodyInserter<MultiValueMap<String, String>, ClientHttpRequest>
 				inserter = BodyInserters.fromFormData("name 1", "value 1")
 				.with("name 2", "value 2+1")
@@ -307,7 +306,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void fromMultipartData() throws Exception {
+	public void fromMultipartData() {
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 		map.set("name 3", "value 3");
 
@@ -322,7 +321,7 @@ public class BodyInsertersTests {
 
 	}
 
-	@Test // SPR-16350
+	@Test  // SPR-16350
 	public void fromMultipartDataWithMultipleValues() {
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 		map.put("name", Arrays.asList("value1", "value2"));
@@ -340,10 +339,12 @@ public class BodyInsertersTests {
 					String content = new String(resultBytes, StandardCharsets.UTF_8);
 					assertThat(content, containsString("Content-Disposition: form-data; name=\"name\"\r\n" +
 							"Content-Type: text/plain;charset=UTF-8\r\n" +
+							"Content-Length: 6\r\n" +
 							"\r\n" +
 							"value1"));
 					assertThat(content, containsString("Content-Disposition: form-data; name=\"name\"\r\n" +
 							"Content-Type: text/plain;charset=UTF-8\r\n" +
+							"Content-Length: 6\r\n" +
 							"\r\n" +
 							"value2"));
 				})
@@ -352,7 +353,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofDataBuffers() throws Exception {
+	public void ofDataBuffers() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));

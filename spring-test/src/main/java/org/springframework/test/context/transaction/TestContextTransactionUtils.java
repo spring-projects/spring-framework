@@ -77,6 +77,7 @@ public abstract class TestContextTransactionUtils {
 	 * <li>Attempt to look up the <em>primary</em> {@code DataSource} by type.
 	 * <li>Attempt to look up the {@code DataSource} by type and the
 	 * {@linkplain #DEFAULT_DATA_SOURCE_NAME default data source name}.
+	 * </ol>
 	 * @param testContext the test context for which the {@code DataSource}
 	 * should be retrieved; never {@code null}
 	 * @param name the name of the {@code DataSource} to retrieve
@@ -148,6 +149,7 @@ public abstract class TestContextTransactionUtils {
 	 * <li>Attempt to look up the transaction manager by type and the
 	 * {@linkplain #DEFAULT_TRANSACTION_MANAGER_NAME default transaction manager
 	 * name}.
+	 * </ol>
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved; never {@code null}
 	 * @param name the name of the transaction manager to retrieve

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * <p>To find out about specific transaction characteristics, consider using
 	 * TransactionSynchronizationManager's {@code isSynchronizationActive()}
 	 * and/or {@code isActualTransactionActive()} methods.
-	 * @return TransactionInfo bound to this thread, or {@code null} if none
+	 * @return the TransactionInfo bound to this thread, or {@code null} if none
 	 * @see TransactionInfo#hasTransaction()
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isSynchronizationActive()
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isActualTransactionActive()
@@ -507,9 +507,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		else {
 			// The TransactionInfo.hasTransaction() method will return false. We created it only
 			// to preserve the integrity of the ThreadLocal stack maintained in this class.
-			if (logger.isTraceEnabled())
+			if (logger.isTraceEnabled()) {
 				logger.trace("Don't need to create transaction for [" + joinpointIdentification +
 						"]: This method isn't transactional.");
+			}
 		}
 
 		// We always bind the TransactionInfo to the thread, even if we didn't create

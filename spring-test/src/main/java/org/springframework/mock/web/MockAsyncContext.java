@@ -94,7 +94,7 @@ public class MockAsyncContext implements AsyncContext {
 	@Override
 	public void dispatch() {
 		dispatch(this.request.getRequestURI());
- 	}
+	}
 
 	@Override
 	public void dispatch(String path) {
@@ -116,7 +116,7 @@ public class MockAsyncContext implements AsyncContext {
 
 	@Override
 	public void complete() {
-		MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+		MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(this.request, MockHttpServletRequest.class);
 		if (mockRequest != null) {
 			mockRequest.setAsyncStarted(false);
 		}
@@ -154,6 +154,17 @@ public class MockAsyncContext implements AsyncContext {
 		return BeanUtils.instantiateClass(clazz);
 	}
 
+	/**
+	 * By default this is set to 10000 (10 seconds) even though the Servlet API
+	 * specifies a default async request timeout of 30 seconds. Keep in mind the
+	 * timeout could further be impacted by global configuration through the MVC
+	 * Java config or the XML namespace, as well as be overridden per request on
+	 * {@link org.springframework.web.context.request.async.DeferredResult DeferredResult}
+	 * or on
+	 * {@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter SseEmitter}.
+	 * @param timeout the timeout value to use.
+	 * @see AsyncContext#setTimeout(long)
+	 */
 	@Override
 	public void setTimeout(long timeout) {
 		this.timeout = timeout;

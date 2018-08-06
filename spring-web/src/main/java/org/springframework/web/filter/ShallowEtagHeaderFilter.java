@@ -128,23 +128,13 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			String requestETag = request.getHeader(HEADER_IF_NONE_MATCH);
 			if (requestETag != null && ("*".equals(requestETag) || responseETag.equals(requestETag) ||
 					responseETag.replaceFirst("^W/", "").equals(requestETag.replaceFirst("^W/", "")))) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
-				}
 				rawResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			}
 			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("ETag [" + responseETag + "] not equal to If-None-Match [" + requestETag +
-							"], sending normal response");
-				}
 				responseWrapper.copyBodyToResponse();
 			}
 		}
 		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
-			}
 			responseWrapper.copyBodyToResponse();
 		}
 	}

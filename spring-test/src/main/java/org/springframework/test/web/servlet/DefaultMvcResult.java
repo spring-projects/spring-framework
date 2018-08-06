@@ -138,15 +138,16 @@ class DefaultMvcResult implements MvcResult {
 
 	@Override
 	public Object getAsyncResult(long timeToWait) {
-		if (this.mockRequest.getAsyncContext() != null) {
-			timeToWait = (timeToWait == -1 ? this.mockRequest.getAsyncContext().getTimeout() : timeToWait);
+		if (this.mockRequest.getAsyncContext() != null && timeToWait == -1) {
+			long requestTimeout = this.mockRequest.getAsyncContext().getTimeout();
+			timeToWait = requestTimeout == -1 ? Long.MAX_VALUE : requestTimeout;
 		}
 		if (!awaitAsyncDispatch(timeToWait)) {
 			throw new IllegalStateException("Async result for handler [" + this.handler + "]" +
 					" was not set during the specified timeToWait=" + timeToWait);
 		}
 		Object result = this.asyncResult.get();
-		Assert.state(result != RESULT_NONE, "Async result for handler [" + this.handler + "] was not set");
+		Assert.state(result != RESULT_NONE, () -> "Async result for handler [" + this.handler + "] was not set");
 		return this.asyncResult.get();
 	}
 
@@ -155,11 +156,11 @@ class DefaultMvcResult implements MvcResult {
 	 */
 	private boolean awaitAsyncDispatch(long timeout) {
 		Assert.state(this.asyncDispatchLatch != null,
-				"The asyncDispatch CountDownLatch was not set by the TestDispatcherServlet.\n");
+				"The asyncDispatch CountDownLatch was not set by the TestDispatcherServlet.");
 		try {
 			return this.asyncDispatchLatch.await(timeout, TimeUnit.MILLISECONDS);
 		}
-		catch (InterruptedException e) {
+		catch (InterruptedException ex) {
 			return false;
 		}
 	}

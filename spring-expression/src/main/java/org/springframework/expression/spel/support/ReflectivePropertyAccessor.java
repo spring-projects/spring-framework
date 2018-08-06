@@ -81,6 +81,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private final Map<PropertyCacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<>(64);
 
+	private final Map<Class<?>, Method[]> sortedMethodsCache = new ConcurrentHashMap<>(64);
+
 	@Nullable
 	private volatile InvokerPair lastReadInvokerPair;
 
@@ -325,6 +327,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
+	 * Get the last read invoker pair.
 	 * @deprecated as of 4.3.15 since it is not used within the framework anymore
 	 */
 	@Deprecated
@@ -382,10 +385,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	@Nullable
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-				 "get", clazz, mustBeStatic, 0, ANY_TYPES);
+				"get", clazz, mustBeStatic, 0, ANY_TYPES);
 		if (method == null) {
 			method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-					 "is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
+					"is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
 		}
 		return method;
 	}
@@ -403,7 +406,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	private Method findMethodForProperty(String[] methodSuffixes, String prefix, Class<?> clazz,
 			boolean mustBeStatic, int numberOfParams, Set<Class<?>> requiredReturnTypes) {
 
-		Method[] methods = getSortedClassMethods(clazz);
+		Method[] methods = getSortedMethods(clazz);
 		for (String methodSuffix : methodSuffixes) {
 			for (Method method : methods) {
 				if (isCandidateForProperty(method, clazz) && method.getName().equals(prefix + methodSuffix) &&
@@ -431,12 +434,14 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Return class methods ordered with non bridge methods appearing higher.
+	 * Return class methods ordered with non-bridge methods appearing higher.
 	 */
-	private Method[] getSortedClassMethods(Class<?> clazz) {
-		Method[] methods = clazz.getMethods();
-		Arrays.sort(methods, (o1, o2) -> (o1.isBridge() == o2.isBridge() ? 0 : (o1.isBridge() ? 1 : -1)));
-		return methods;
+	private Method[] getSortedMethods(Class<?> clazz) {
+		return this.sortedMethodsCache.computeIfAbsent(clazz, key -> {
+			Method[] methods = key.getMethods();
+			Arrays.sort(methods, (o1, o2) -> (o1.isBridge() == o2.isBridge() ? 0 : (o1.isBridge() ? 1 : -1)));
+			return methods;
+		});
 	}
 
 	/**
@@ -635,6 +640,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	public static class OptimalPropertyAccessor implements CompilablePropertyAccessor {
 
+		/**
+		 * The member being accessed.
+		 */
 		public final Member member;
 
 		private final TypeDescriptor typeDescriptor;

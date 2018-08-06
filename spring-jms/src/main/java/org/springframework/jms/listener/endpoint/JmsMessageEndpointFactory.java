@@ -64,7 +64,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 	 * Return the JMS MessageListener for this endpoint.
 	 */
 	protected MessageListener getMessageListener() {
-		Assert.state(messageListener != null, "No MessageListener set");
+		Assert.state(this.messageListener != null, "No MessageListener set");
 		return this.messageListener;
 	}
 

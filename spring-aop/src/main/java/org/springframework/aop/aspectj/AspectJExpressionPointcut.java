@@ -290,7 +290,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
+	public boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions) {
 		obtainPointcutExpression();
 		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
@@ -313,13 +313,12 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			// we say this is not a match as in Spring there will never be a different
 			// runtime subtype.
 			RuntimeTestWalker walker = getRuntimeTestWalker(shadowMatch);
-			return (!walker.testsSubtypeSensitiveVars() ||
-					(targetClass != null && walker.testTargetInstanceOfResidue(targetClass)));
+			return (!walker.testsSubtypeSensitiveVars() || walker.testTargetInstanceOfResidue(targetClass));
 		}
 	}
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
 		return matches(method, targetClass, false);
 	}
 
@@ -329,7 +328,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
+	public boolean matches(Method method, Class<?> targetClass, Object... args) {
 		obtainPointcutExpression();
 		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
@@ -426,17 +425,23 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		invocation.setUserAttribute(resolveExpression(), jpm);
 	}
 
-	private ShadowMatch getTargetShadowMatch(Method method, @Nullable Class<?> targetClass) {
+	private ShadowMatch getTargetShadowMatch(Method method, Class<?> targetClass) {
 		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-		if (targetClass != null && targetMethod.getDeclaringClass().isInterface()) {
+		if (targetMethod.getDeclaringClass().isInterface()) {
 			// Try to build the most specific interface possible for inherited methods to be
 			// considered for sub-interface matches as well, in particular for proxy classes.
 			// Note: AspectJ is only going to take Method.getDeclaringClass() into account.
 			Set<Class<?>> ifcs = ClassUtils.getAllInterfacesForClassAsSet(targetClass);
 			if (ifcs.size() > 1) {
-				Class<?> compositeInterface = ClassUtils.createCompositeInterface(
-						ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
-				targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
+				try {
+					Class<?> compositeInterface = ClassUtils.createCompositeInterface(
+							ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
+					targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
+				}
+				catch (IllegalArgumentException ex) {
+					// Implemented interfaces probably expose conflicting method signatures...
+					// Proceed with original target method.
+				}
 			}
 		}
 		return getShadowMatch(targetMethod, method);
@@ -561,6 +566,19 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return sb.toString();
 	}
 
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization, just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		// pointcutExpression will be initialized lazily by checkReadyToMatch()
+		this.shadowMatchCache = new ConcurrentHashMap<>(32);
+	}
+
 
 	/**
 	 * Handler for the Spring-specific {@code bean()} pointcut designator
@@ -654,20 +672,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			return BeanFactoryAnnotationUtils.isQualifierMatch(
 					this.expressionPattern::matches, advisedBeanName, beanFactory);
 		}
-	}
-
-
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-		// Rely on default serialization, just initialize state after deserialization.
-		ois.defaultReadObject();
-
-		// Initialize transient fields.
-		// pointcutExpression will be initialized lazily by checkReadyToMatch()
-		this.shadowMatchCache = new ConcurrentHashMap<>(32);
 	}
 
 

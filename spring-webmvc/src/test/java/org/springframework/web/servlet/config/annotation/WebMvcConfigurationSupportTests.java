@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,8 +67,8 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
@@ -85,13 +86,9 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static com.fasterxml.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static com.fasterxml.jackson.databind.DeserializationFeature.*;
+import static com.fasterxml.jackson.databind.MapperFeature.*;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for {@link WebMvcConfigurationSupport} (imported via
@@ -123,14 +120,22 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void emptyViewControllerHandlerMapping() {
+	public void emptyHandlerMappings() {
 		ApplicationContext context = initContext(WebConfig.class);
-		String name = "viewControllerHandlerMapping";
-		AbstractHandlerMapping handlerMapping = context.getBean(name, AbstractHandlerMapping.class);
 
-		assertNotNull(handlerMapping);
-		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
-		assertTrue(handlerMapping.getClass().getName().endsWith("EmptyHandlerMapping"));
+		Map<String, HandlerMapping> handlerMappings = context.getBeansOfType(HandlerMapping.class);
+		assertFalse(handlerMappings.containsKey("viewControllerHandlerMapping"));
+		assertFalse(handlerMappings.containsKey("resourceHandlerMapping"));
+		assertFalse(handlerMappings.containsKey("defaultServletHandlerMapping"));
+
+		Object nullBean = context.getBean("viewControllerHandlerMapping");
+		assertTrue(nullBean.equals(null));
+
+		nullBean = context.getBean("resourceHandlerMapping");
+		assertTrue(nullBean.equals(null));
+
+		nullBean = context.getBean("defaultServletHandlerMapping");
+		assertTrue(nullBean.equals(null));
 	}
 
 	@Test
@@ -147,27 +152,6 @@ public class WebMvcConfigurationSupportTests {
 		assertEquals(3, chain.getInterceptors().length);
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
 		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[2].getClass());
-	}
-
-	@Test
-	public void emptyResourceHandlerMapping() {
-		ApplicationContext context = initContext(WebConfig.class);
-		AbstractHandlerMapping handlerMapping = context.getBean("resourceHandlerMapping", AbstractHandlerMapping.class);
-
-		assertNotNull(handlerMapping);
-		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
-		assertTrue(handlerMapping.getClass().getName().endsWith("EmptyHandlerMapping"));
-	}
-
-	@Test
-	public void emptyDefaultServletHandlerMapping() {
-		ApplicationContext context = initContext(WebConfig.class);
-		String name = "defaultServletHandlerMapping";
-		AbstractHandlerMapping handlerMapping = context.getBean(name, AbstractHandlerMapping.class);
-
-		assertNotNull(handlerMapping);
-		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
-		assertTrue(handlerMapping.getClass().getName().endsWith("EmptyHandlerMapping"));
 	}
 
 	@Test

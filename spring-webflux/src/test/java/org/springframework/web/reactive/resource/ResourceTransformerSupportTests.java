@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.resource;
 
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +31,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@code ResourceTransformerSupport}.
@@ -41,7 +41,10 @@ import static org.junit.Assert.assertEquals;
  */
 public class ResourceTransformerSupportTests {
 
-	private ResourceTransformerChain transformerChain;
+	private static final Duration TIMEOUT = Duration.ofSeconds(5);
+
+
+	private ResourceTransformerChain chain;
 
 	private TestResourceTransformerSupport transformer;
 
@@ -52,17 +55,22 @@ public class ResourceTransformerSupportTests {
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 		PathResourceResolver pathResolver = new PathResourceResolver();
 		pathResolver.setAllowedLocations(new ClassPathResource("test/", getClass()));
-		List<ResourceResolver> resolvers = Arrays.asList(versionResolver, pathResolver);
-		this.transformerChain = new DefaultResourceTransformerChain(new DefaultResourceResolverChain(resolvers), null);
 
+		List<ResourceResolver> resolvers = new ArrayList<>();
+		resolvers.add(versionResolver);
+		resolvers.add(pathResolver);
+		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
+
+		this.chain = new DefaultResourceTransformerChain(resolverChain, Collections.emptyList());
 		this.transformer = new TestResourceTransformerSupport();
-		this.transformer.setResourceUrlProvider(createResourceUrlProvider(resolvers));
+		this.transformer.setResourceUrlProvider(createUrlProvider(resolvers));
 	}
 
-	private ResourceUrlProvider createResourceUrlProvider(List<ResourceResolver> resolvers) {
+	private ResourceUrlProvider createUrlProvider(List<ResourceResolver> resolvers) {
 		ResourceWebHandler handler = new ResourceWebHandler();
 		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
 		handler.setResourceResolvers(resolvers);
+
 		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
 		urlProvider.registerHandlers(Collections.singletonMap("/resources/**", handler));
 		return urlProvider;
@@ -70,44 +78,43 @@ public class ResourceTransformerSupportTests {
 
 
 	@Test
-	public void resolveUrlPath() throws Exception {
+	public void resolveUrlPath() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/resources/main.css"));
 		String resourcePath = "/resources/bar.css";
-		Resource css = new ClassPathResource("test/main.css", getClass());
-		String actual = this.transformer.resolveUrlPath(
-				resourcePath, exchange, css, this.transformerChain).block(Duration.ofSeconds(5));
+		Resource resource = getResource("main.css");
+		String actual = this.transformer.resolveUrlPath(resourcePath, exchange, resource, this.chain).block(TIMEOUT);
 
 		assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 		assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
 
 	@Test
-	public void resolveUrlPathWithRelativePath() throws Exception {
-		Resource css = new ClassPathResource("test/main.css", getClass());
+	public void resolveUrlPathWithRelativePath() {
+		Resource resource = getResource("main.css");
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
-		String actual = this.transformer.resolveUrlPath(
-				"bar.css", exchange, css, this.transformerChain).block(Duration.ofSeconds(5));
+		String actual = this.transformer.resolveUrlPath("bar.css", exchange, resource, this.chain).block(TIMEOUT);
 
 		assertEquals("bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
 
 	@Test
-	public void resolveUrlPathWithRelativePathInParentDirectory() throws Exception {
-		Resource imagePng = new ClassPathResource("test/images/image.png", getClass());
+	public void resolveUrlPathWithRelativePathInParentDirectory() {
+		Resource resource = getResource("images/image.png");
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
-		String actual = this.transformer.resolveUrlPath(
-				"../bar.css", exchange, imagePng, this.transformerChain).block(Duration.ofSeconds(5));
+		String actual = this.transformer.resolveUrlPath("../bar.css", exchange, resource, this.chain).block(TIMEOUT);
 
 		assertEquals("../bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
+	}
+
+	private Resource getResource(String filePath) {
+		return new ClassPathResource("test/" + filePath, getClass());
 	}
 
 
 	private static class TestResourceTransformerSupport extends ResourceTransformerSupport {
 
 		@Override
-		public Mono<Resource> transform(ServerWebExchange exchange, Resource resource,
-				ResourceTransformerChain chain) {
-
+		public Mono<Resource> transform(ServerWebExchange ex, Resource res, ResourceTransformerChain chain) {
 			return Mono.error(new IllegalStateException("Should never be called"));
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * Create a BeanFactoryAspectInstanceFactory. AspectJ will be called to
 	 * introspect to create AJType metadata using the type returned for the
 	 * given bean name from the BeanFactory.
-	 * @param beanFactory BeanFactory to obtain instance(s) from
+	 * @param beanFactory the BeanFactory to obtain instance(s) from
 	 * @param name name of the bean
 	 */
 	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name) {
@@ -66,7 +66,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * Create a BeanFactoryAspectInstanceFactory, providing a type that AspectJ should
 	 * introspect to create AJType metadata. Use if the BeanFactory may consider the type
 	 * to be a subclass (as when using CGLIB), and the information should relate to a superclass.
-	 * @param beanFactory BeanFactory to obtain instance(s) from
+	 * @param beanFactory the BeanFactory to obtain instance(s) from
 	 * @param name the name of the bean
 	 * @param type the type that should be introspected by AspectJ
 	 * ({@code null} indicates resolution through {@link BeanFactory#getType} via the bean name)

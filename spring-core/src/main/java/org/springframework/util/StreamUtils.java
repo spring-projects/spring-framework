@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,9 @@ import org.springframework.lang.Nullable;
  */
 public abstract class StreamUtils {
 
+	/**
+	 * The default buffer size used why copying bytes.
+	 */
 	public static final int BUFFER_SIZE = 4096;
 
 	private static final byte[] EMPTY_CONTENT = new byte[0];
@@ -257,7 +260,7 @@ public abstract class StreamUtils {
 		@Override
 		public void write(byte[] b, int off, int let) throws IOException {
 			// It is critical that we override this method for performance
-			out.write(b, off, let);
+			this.out.write(b, off, let);
 		}
 
 		@Override

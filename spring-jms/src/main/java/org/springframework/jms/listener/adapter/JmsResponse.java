@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ import org.springframework.util.Assert;
  *
  * @author Stephane Nicoll
  * @since 4.2
+ * @param <T> the type of the response
  * @see org.springframework.jms.annotation.JmsListener
  * @see org.springframework.messaging.handler.annotation.SendTo
- * @param <T> the type of the response
  */
 public class JmsResponse<T> {
 
@@ -61,7 +61,7 @@ public class JmsResponse<T> {
 
 
 	/**
-	 * Create a new instance
+	 * Create a new {@link JmsResponse} instance.
 	 * @param response the content of the result
 	 * @param destination the destination
 	 */

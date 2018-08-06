@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.StringUtils;
 
 /**
- * A base {@link HeaderMapper} implementation
+ * A base {@link HeaderMapper} implementation.
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <T> type of the instance to and from which headers will be mapped
  */
 public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 
@@ -96,8 +97,8 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 			return null;
 		}
 		if (!type.isAssignableFrom(value.getClass())) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Skipping header '" + name + "'expected type [" + type + "], but got [" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Skipping header '" + name + "': expected type [" + type + "], but got [" +
 						value.getClass() + "]");
 			}
 			return null;

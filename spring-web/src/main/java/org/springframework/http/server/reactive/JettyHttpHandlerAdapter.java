@@ -43,19 +43,21 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 
 	@Override
-	protected ServerHttpResponse createResponse(HttpServletResponse response,
-			AsyncContext context) throws IOException {
+	protected ServletServerHttpResponse createResponse(HttpServletResponse response,
+			AsyncContext context, ServletServerHttpRequest request) throws IOException {
 
-		return new JettyServerHttpResponse(response, context, getDataBufferFactory(), getBufferSize());
+		return new JettyServerHttpResponse(
+				response, context, getDataBufferFactory(), getBufferSize(), request);
 	}
 
 
 	private static final class JettyServerHttpResponse extends ServletServerHttpResponse {
 
-		public JettyServerHttpResponse(HttpServletResponse response, AsyncContext context,
-				DataBufferFactory factory, int bufferSize) throws IOException {
+		public JettyServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
+				DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request)
+				throws IOException {
 
-			super(response, context, factory, bufferSize);
+			super(response, asyncContext, bufferFactory, bufferSize, request);
 		}
 
 		@Override

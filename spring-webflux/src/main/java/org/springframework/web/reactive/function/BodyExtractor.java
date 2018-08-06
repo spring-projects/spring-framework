@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public interface BodyExtractor<T, M extends ReactiveHttpInputMessage> {
 	interface Context {
 
 		/**
-		 * Return the {@link HttpMessageReader}s to be used for body extraction.
+		 * Return the {@link HttpMessageReader HttpMessageReaders} to be used for body extraction.
 		 * @return the stream of message readers
 		 */
 		List<HttpMessageReader<?>> messageReaders();

@@ -306,32 +306,31 @@ libraries, refer to their respective documentation.
 
 
 [[webflux-reactive-spring-web]]
-== Reactive Spring Web
+== Reactive Core
 
-The `spring-web` module provides low level infrastructure and HTTP abstractions -- client
-and server, to build reactive web applications. All public APIs are built around Reactive
-Streams with Reactor as a backing implementation.
+The `spring-web` module contains abstractions and infrastructure to build reactive web
+applications. For server side processing this is organized in two distinct levels:
 
-Server support is organized in two layers:
+* <<webflux-httphandler,HttpHandler>> -- basic, common API for HTTP request handling with
+non-blocking I/O and (Reactive Streams) back pressure, along with adapters for each
+supported server.
+* <<webflux-web-handler-api>> -- slightly higher level, but still general purpose API for
+server request handling, which underlies higher level programming models such as annotated
+controllers and functional endpoints.
 
-* <<webflux-httphandler,HttpHandler>> and server adapters -- the most basic, common API
-for HTTP request handling with Reactive Streams back pressure.
-* <<webflux-web-handler-api>> -- slightly higher level but still general
-purpose server web API with filter chain style processing.
+The reactive core also includes <<webflux-codecs>> for client and server side use.
 
 
 
 [[webflux-httphandler]]
 === HttpHandler
 
-Every HTTP server has some API for HTTP request handling.
 {api-spring-framework}/http/server/reactive/HttpHandler.html[HttpHandler]
-is a simple contract with one method to handle a request and response.
-It is intentionally minimal. Its main purpose is to provide a common, Reactive Streams
-based API for HTTP request handling over different servers.
+is a simple contract with a single method to handle a request and response. It is
+intentionally minimal as its main purpose is to provide an abstraction over different
+server APIs for HTTP request handling.
 
-The `spring-web` module contains adapters for every supported server. The table below shows
-the server APIs are used and where Reactive Streams support comes from:
+Supported server APIs:
 
 [cols="1,2,2", options="header"]
 |===
@@ -358,15 +357,14 @@ the server APIs are used and where Reactive Streams support comes from:
 | spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
 |===
 
-Here are required dependencies,
-https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spring-Framework[supported versions],
-and code snippets for each server:
+Server dependencies (and
+https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spring-Framework[supported versions]):
 
 |===
 |Server name|Group id|Artifact name
 
 |Reactor Netty
-|io.projectreactor.ipc
+|io.projectreactor.netty
 |reactor-netty
 
 |Undertow
@@ -382,7 +380,9 @@ and code snippets for each server:
 |jetty-server, jetty-servlet
 |===
 
-Reactor Netty:
+Code snippets to adapt `HttpHandler` to each server API:
+
+*Reactor Netty*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -391,7 +391,7 @@ ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
 HttpServer.create(host, port).newHandler(adapter).block();
 ----
 
-Undertow:
+*Undertow*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -401,7 +401,7 @@ Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adap
 server.start();
 ----
 
-Tomcat:
+*Tomcat*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -418,7 +418,7 @@ server.setPort(port);
 server.start();
 ----
 
-Jetty:
+*Jetty*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -437,13 +437,12 @@ server.addConnector(connector);
 server.start();
 ----
 
-[NOTE]
-====
-To deploy as a WAR to a Servlet 3.1+ container, wrap `HttpHandler` with
-`ServletHttpHandlerAdapter` and register that as a `Servlet`.
-This can be automated through the use of
-{api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[AbstractReactiveWebInitializer].
-====
+*Servlet 3.1+ Container*
+
+To deploy as a WAR to any Servlet 3.1+ container, simply extend and include
+{api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[AbstractReactiveWebInitializer]
+in the WAR, which wraps an `HttpHandler` with `ServletHttpHandlerAdapter` and registers
+that as a `Servlet`.
 
 
 
@@ -451,9 +450,9 @@ This can be automated through the use of
 === WebHandler API
 
 The WebHandler API is a general purpose, server, web API for processing requests through a
-chain of {api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler's],
-{api-spring-framework}/web/server/WebFilter.html[WebFilter's], and a target
-{api-spring-framework}/web/server/WebHandler.html[WebHandler]. The chain can be assembled
+chain of {api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler],
+{api-spring-framework}/web/server/WebFilter.html[WebFilter], and a target
+{api-spring-framework}/web/server/WebHandler.html[WebHandler] components. The chain can be assembled
 with `WebHttpHandlerBuilder` either by adding components to the builder or by having them
 detected from a Spring `ApplicationContext`. The builder returns an
 <<webflux-httphandler>> that can then be used to run on any of the supported servers.
@@ -509,6 +508,12 @@ The table below lists the components that `WebHttpHandlerBuilder` detects:
 | 0..1
 | The resolver for `LocaleContext` exposed through a method on `ServerWebExchange`.
   `AcceptHeaderLocaleContextResolver` by default.
+
+| "forwardedHeaderTransformer"
+| `ForwardedHeaderTransformer`
+| 0..1
+| For processing Forwarded type headers, either extracting and removing, or removing them only.
+  Not used by default.
 |===
 
 
@@ -554,36 +559,121 @@ parsing multipart data in full. By contrast `@RequestBody` can be used to decode
 content to `Flux<Part>` without collecting to a `MultiValueMap`.
 
 
+[[webflux-forwarded-headers]]
+==== Forwarded Headers
+[.small]#<<web.adoc#filters-forwarded-headers,Same in Spring MVC>>#
+
+As a request goes through proxies such as load balancers the host, port, and
+scheme may change and that makes it a challenge to create links that point to the correct
+host, port, and scheme from a client perspective.
+
+https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
+that proxies can use to provide information about the original request. There are other
+non-standard headers too including "X-Forwarded-Host", "X-Forwarded-Port",
+"X-Forwarded-Proto", "X-Forwarded-Ssl", and "X-Forwarded-Prefix".
+
+`ForwardedHeaderTransformer` is a component that modifies the host, port, and scheme of
+the request, based on Forwarded headers, and then removes those headers. Simply declare
+it as a bean with the name "forwardedHeaderTransformer" and it will be
+<<webflux-web-handler-api-special-beans, detected>> and used.
+
+There are security considerations for forwarded headers since an application can't know
+if the headers were added by a proxy as intended, or with a malicious client. This is why
+a proxy at the boundary of trust should be configured to remove untrusted Forwarded coming
+from the outside. You can also configure the `ForwardedHeaderTransformer` with
+`removeOnly=true` in which case it will remove but not use the headers.
+
+[NOTE]
+====
+In 5.1 `ForwardedHeaderFilter` was deprecated and superceded by
+`ForwardedHeaderTransformer` so forwarded headers can be processed earlier, before the
+exchange is created. If the filter is configured anyway, it is taken out of the list of
+filters, and `ForwardedHeaderTransformer` is used instead.
+====
+
+
+
+[[webflux-filters]]
+=== Filters
+[.small]#<<web.adoc#filters,Same in Spring MVC>>#
+
+In the <<webflux-web-handler-api>>, a `WebFilter` can be used to apply interception-style
+logic before and after the rest of the processing chain of filters and the target
+`WebHandler`. When using the <<webflux-config>>, registering a `WebFilter` is as simple
+as declaring it as a Spring bean, and optionally expressing precedence via `@Order` on
+the bean declaration or by implementing `Ordered`.
+
+The following describe the available `WebFilter` implementations:
+
+
+[[webflux-filters-cors]]
+==== CORS
+[.small]#<<web.adoc#filters-cors,Same in Spring MVC>>#
+
+Spring WebFlux provides fine-grained support for CORS configuration through annotations on
+controllers. However when used with Spring Security it is advisable to rely on the built-in
+`CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
+
+See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
+
+
+
+[[webflux-exception-handler]]
+=== Exceptions
+[.small]#<<web.adoc#mvc-ann-customer-servlet-container-error-page,Same in Spring MVC>>#
+
+In the <<webflux-web-handler-api>>, a `WebExceptionHandler` can be used to to handle
+exceptions from the chain of ``WebFilter``'s and the target `WebHandler`. When using the
+<<webflux-config>>, registering a `WebExceptionHandler` is as simple as declaring it as a
+Spring bean, and optionally expressing precedence via `@Order` on the bean declaration or
+by implementing `Ordered`.
+
+Below are the available `WebExceptionHandler` implementations:
+
+[cols="1,2", options="header"]
+|===
+| Exception Handler | Description
+
+| `ResponseStatusExceptionHandler`
+| Provides handling for exceptions of type
+  {api-spring-framework}/web/server/ResponseStatusException.html[ResponseStatusException]
+  by setting the response to the HTTP status code of the exception.
+
+| `WebFluxResponseStatusExceptionHandler`
+| Extension of `ResponseStatusExceptionHandler` that can also determine the HTTP status
+  code an `@ResponseStatus` annotation on any exception.
+
+  This handler is declared in the <<webflux-config>>.
+
+|===
+
+
 
 [[webflux-codecs]]
-=== Message Codecs
+=== Codecs
 [.small]#<<integration.adoc#rest-message-conversion,Same in Spring MVC>>#
 
-The `spring-web` module defines the
 {api-spring-framework}/http/codec/HttpMessageReader.html[HttpMessageReader] and
-{api-spring-framework}/http/codec/HttpMessageWriter.html[HttpMessageWriter] contracts
-for encoding and decoding the body of HTTP requests and responses via Rective Streams
-``Publisher``'s. These contacts are used on the client side, e.g. in the `WebClient`,
-and on the server side, e.g. in annotated controllers and functional endpoints.
+{api-spring-framework}/http/codec/HttpMessageWriter.html[HttpMessageWriter] are contracts
+for encoding and decoding HTTP request and response content via non-blocking I/O with
+(Rective Streams) back pressure.
 
-The `spring-core` module defines the
 {api-spring-framework}/core/codec/Encoder.html[Encoder] and
-{api-spring-framework}/core/codec/Decoder.html[Decoder] contracts that are independent of
-HTTP and rely on the {api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer]
-contract that abstracts different byte buffer representations such as the Netty `ByteBuf`
-and `java.nio.ByteBuffer` (see <<core#databuffers, Data Buffers and Codecs>>).
-An `Encoder` can be wrapped with `EncoderHttpMessageWriter` to be used as an
-`HttpMessageWriter` while a `Decoder` can be wrapped with `DecoderHttpMessageReader` to
-be used as an `HttpMessageReader`.
+{api-spring-framework}/core/codec/Decoder.html[Decoder] are contracts for encoding and
+decoding content, independent of HTTP. They can be wrapped with `EncoderHttpMessageWriter`
+or `DecoderHttpMessageReader` and used for web processing.
 
-The `spring-core` module contains basic `Encoder` and `Decoder` implementations for
-`byte[]`, `ByteBuffer`, `DataBuffer`, `Resource`, and `String`. The `spring-web` module
-adds ``Encoder``'s and ``Decoder``'s for Jackson JSON, Jackson Smile, and JAXB2.
-The `spring-web` module also contains some web-specific readers and writers for
-server-sent events, form data, and multipart requests.
+All codecs are for client or server side use. All build on
+{api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer] which abstracts byte
+buffer representations such as the Netty `ByteBuf` or `java.nio.ByteBuffer` (see
+<<core#databuffers, Data Buffers and Codecs>> for more details). `ClientCodecConfigurer`
+and `ServerCodecConfigurer` are typically used to configure and customize the codecs to
+use in an application.
 
-To configure or customize the readers and writers to use, applications will typically use
-`ClientCodecConfigurer` or `ServerCodecConfigurer`.
+The `spring-core` module has encoders and decoders for `byte[]`, `ByteBuffer`, `DataBuffer`,
+`Resource`, and `String`. The `spring-web` module adds encoders and decoders for Jackson
+JSON, Jackson Smile, JAXB2, Protocol Buffers, along with other web-specific HTTP message
+readers and writers for form data, multipart requests, and server-sent events.
 
 
 [[webflux-codecs-jackson]]
@@ -633,87 +723,73 @@ a heartbeat and ignore.
 
 
 
-[[webflux-filters]]
-=== Filters
-[.small]#<<web.adoc#filters,Same in Spring MVC>>#
+[[webflux-logging]]
+=== Logging
+[.small]#<<web.adoc#mvc-logging,Same in Spring MVC>>#
 
-In the <<webflux-web-handler-api>>, a `WebFilter` can be used to apply interception-style
-logic before and after the rest of the processing chain of filters and the target
-`WebHandler`. When using the <<webflux-config>>, registering a `WebFilter` is as simple
-as declaring it as a Spring bean, and optionally expressing precedence via `@Order` on
-the bean declaration or by implementing `Ordered`.
+DEBUG level logging in Spring WebFlux is designed to be compact, minimal, and
+human-friendly. It focuses on high value bits of information that are useful over and
+over again vs others that are useful only when debugging a specific issue.
 
-The following describe the available `WebFilter` implementations:
+TRACE level logging generally follows the same principles as DEBUG (and for example also
+should not be a firehose) but can be used for debugging any issue. In addition some log
+messages may show a different level of detail at TRACE vs DEBUG.
 
-
-[[webflux-filters-forwarded-headers]]
-==== Forwarded Headers
-[.small]#<<web.adoc#filters-forwarded-headers,Same in Spring MVC>>#
-
-As a request goes through proxies such as load balancers the host, port, and
-scheme may change presenting a challenge for applications that need to create links
-to resources since the links should reflect the host, port, and scheme of the
-original request as seen from a client perspective.
-
-https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
-for proxies to use to provide information about the original request. There are also
-other non-standard headers in use such as "X-Forwarded-Host", "X-Forwarded-Port",
-and "X-Forwarded-Proto".
-
-`ForwardedHeaderFilter` detects, extracts, and uses information from the "Forwarded"
-header, or from "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto".
-It wraps the request in order to overlay its host, port, and scheme and also "hides"
-the forwarded headers for subsequent processing.
-
-Note that there are security considerations when using forwarded headers as explained
-in Section 8 of RFC 7239. At the application level it is difficult to determine whether
-forwarded headers can be trusted or not. This is why the network upstream should be
-configured correctly to filter out untrusted forwarded headers from the outside.
-
-Applications that don't have a proxy and don't need to use forwarded headers can
-configure the `ForwardedHeaderFilter` to remove and ignore such headers.
+Good logging comes from the experience of using the logs. If you spot anything that does
+not meet the stated goals, please let us know.
 
 
-[[webflux-filters-cors]]
-==== CORS
-[.small]#<<web.adoc#filters-cors,Same in Spring MVC>>#
+[[webflux-logging-id]]
+==== Log Id
 
-Spring WebFlux provides fine-grained support for CORS configuration through annotations on
-controllers. However when used with Spring Security it is advisable to rely on the built-in
-`CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
+In WebFlux, a single request may be executed over multiple threads and the thread id
+is not useful for correlating log messages that belong to a specific request. This is why
+WebFlux log messages are prefixed with a request specific id by default.
 
-See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
+On the server side the log id is stored in the `ServerWebExchange` attribute
+{api-spring-framework}/web/server/ServerWebExchange.html#LOG_ID_ATTRIBUTE[LOG_ID_ATTRIBUTE]
+while a fully formatted prefix based on that id is available via
+`ServerWebExchange#getLogPrefix()`. On the `WebClient` side, the log id is stored in the
+`ClientRequest` attribute
+{api-spring-framework}/web/reactive/function/client/ClientRequest.html#LOG_ID_ATTRIBUTE[LOG_ID_ATTRIBUTE]
+while a fully formatted prefix is available via `ClientRequest#logPrefix()`.
 
 
+[[webflux-logging-sensitive-data]]
+==== Sensitive Data
+[.small]#<<web.adoc#mvc-logging-sensitive-data,Same in Spring MVC>>#
 
-[[webflux-exception-handler]]
-=== Exceptions
-[.small]#<<web.adoc#mvc-ann-customer-servlet-container-error-page,Same in Spring MVC>>#
+DEBUG and TRACE logging may log sensitive information. This is why form parameters and
+headers are masked by default and their logging in full must be enabled explicitly.
 
-In the <<webflux-web-handler-api>>, a `WebExceptionHandler` can be used to to handle
-exceptions from the chain of ``WebFilter``'s and the target `WebHandler`. When using the
-<<webflux-config>>, registering a `WebExceptionHandler` is as simple as declaring it as a
-Spring bean, and optionally expressing precedence via `@Order` on the bean declaration or
-by implementing `Ordered`.
+For server side requests:
 
-Below are the available `WebExceptionHandler` implementations:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebFlux
+class MyConfig implements WebFluxConfigurer {
 
-[cols="1,2", options="header"]
-|===
-| Exception Handler | Description
+	@Override
+	public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+		configurer.defaultCodecs().enableLoggingRequestDetails(true);
+	}
+}
+----
 
-| `ResponseStatusExceptionHandler`
-| Provides handling for exceptions of type
-  {api-spring-framework}/web/server/ResponseStatusException.html[ResponseStatusException]
-  by setting the response to the HTTP status code of the exception.
+For client side requests:
 
-| `WebFluxResponseStatusExceptionHandler`
-| Extension of `ResponseStatusExceptionHandler` that can also determine the HTTP status
-  code an `@ResponseStatus` annotation on any exception.
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+Consumer<ClientCodecConfigurer> consumer = configurer ->
+		configurer.defaultCodecs().enableLoggingRequestDetails(true);
 
-  This handler is declared in the <<webflux-config>>.
-
-|===
+WebClient webClient = WebClient.builder()
+		.exchangeStrategies(ExchangeStrategies.builder().codecs(consumer).build())
+		.build();
+----
 
 
 
@@ -1304,6 +1380,41 @@ Spring WebFlux also supports custom request mapping attributes with custom reque
 logic. This is a more advanced option that requires sub-classing
 `RequestMappingHandlerMapping` and overriding the `getCustomMethodCondition` method where
 you can check the custom attribute and return your own `RequestCondition`.
+
+
+[[webflux-ann-requestmapping-registration]]
+==== Explicit Registrations
+[.small]#<<web.adoc#mvc-ann-requestmapping-registration,Same in Spring MVC>>#
+
+Handler methods can be registered programmatically which can be used for dynamic
+registrations, or for advanced cases such as different instances of the same handler
+under different URLs. Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class MyConfig {
+
+	@Autowired
+	public void setHandlerMapping(RequestMappingHandlerMapping mapping, UserHandler handler) <1>
+			throws NoSuchMethodException {
+
+		RequestMappingInfo info = RequestMappingInfo
+				.paths("/user/{id}").methods(RequestMethod.GET).build(); <2>
+
+		Method method = UserHandler.class.getMethod("getUser", Long.class); <3>
+
+		mapping.registerMapping(info, handler, method); <4>
+	}
+
+}
+----
+
+<1> Inject target handler(s) and the handler mapping for controllers.
+<2> Prepare the request mapping meta data.
+<3> Get the handler method.
+<4> Add the registration.
 
 
 
@@ -2497,6 +2608,11 @@ Javadoc for more details.
 
 
 
+include::webflux-functional.adoc[leveloffset=+1]
+
+
+
+
 [[webflux-uri-building]]
 == URI Links
 [.small]#<<web.adoc#mvc-uri-building,Same in Spring MVC>>#
@@ -2505,11 +2621,6 @@ This section describes various options available in the Spring Framework to prep
 
 
 include::web-uris.adoc[leveloffset=+2]
-
-
-
-
-include::webflux-functional.adoc[leveloffset=+1]
 
 
 
@@ -2536,6 +2647,124 @@ reference documentation including:
 
 
 include::webflux-view.adoc[leveloffset=+1]
+
+
+
+
+[[webflux-caching]]
+== HTTP Caching
+[.small]#<<web.adoc#mvc-caching,Same in Spring MVC>>#
+
+HTTP caching can significantly improve the performance of a web application. HTTP caching
+revolves around the "Cache-Control" response header and subsequently conditional request
+headers such as "Last-Modified" and "ETag". "Cache-Control" advises private (e.g. browser)
+and public (e.g. proxy) caches how to cache and re-use responses. An "ETag" header is used
+to make a conditional request that may result in a 304 (NOT_MODIFIED) without a body,
+if the content has not changed. "ETag" can be seen as a more sophisticated successor to
+the `Last-Modified` header.
+
+This section describes HTTP caching related options available in Spring Web MVC.
+
+
+
+[[webflux-caching-cachecontrol]]
+=== `CacheControl`
+[.small]#<<web.adoc#mvc-caching-cachecontrol,Same in Spring MVC>>#
+
+{api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
+configuring settings related to the "Cache-Control" header and is accepted as an argument
+in a number of places:
+
+* <<webflux-caching-etag-lastmodified>>
+* <<webflux-caching-static-resources>>
+
+While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all possible
+directives for the "Cache-Control" response header, the `CacheControl` type takes a
+use case oriented approach focusing on the common scenarios:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// Cache for an hour - "Cache-Control: max-age=3600"
+	CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
+
+	// Prevent caching - "Cache-Control: no-store"
+	CacheControl ccNoStore = CacheControl.noStore();
+
+	// Cache for ten days in public and private caches,
+	// public caches should not transform the response
+	// "Cache-Control: max-age=864000, public, no-transform"
+	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
+----
+
+
+
+[[webflux-caching-etag-lastmodified]]
+=== Controllers
+[.small]#<<web.adoc#mvc-caching-etag-lastmodified,Same in Spring MVC>>#
+
+Controllers can add explicit support for HTTP caching. This is recommended since the
+lastModified or ETag value for a resource needs to be calculated before it can be compared
+against conditional request headers. A controller can add an ETag and "Cache-Control"
+settings to a `ResponseEntity`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/book/{id}")
+	public ResponseEntity<Book> showBook(@PathVariable Long id) {
+
+		Book book = findBook(id);
+		String version = book.getVersion();
+
+		return ResponseEntity
+				.ok()
+				.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+				.eTag(version) // lastModified is also available
+				.body(book);
+	}
+----
+
+This will send an 304 (NOT_MODIFIED) response with an empty body, if the comparison
+to the conditional request headers indicates the content has not changed. Otherwise the
+"ETag" and "Cache-Control" headers will be added to the response.
+
+The check against conditional request headers can also be made in the controller:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping
+	public String myHandleMethod(ServerWebExchange exchange, Model model) {
+
+		long eTag = ... <1>
+
+		if (exchange.checkNotModified(eTag)) {
+			return null; <2>
+		}
+
+		model.addAttribute(...); <3>
+		return "myViewName";
+	}
+----
+
+<1> Application-specific calculation.
+<2> Response has been set to 304 (NOT_MODIFIED), no further processing.
+<3> Continue with request processing.
+
+There are 3 variants for checking conditional requests against eTag values, lastModified
+values, or both. For conditional "GET" and "HEAD" requests, the response may be set to
+304 (NOT_MODIFIED). For conditional "POST", "PUT", and "DELETE", the response would be set
+to 409 (PRECONDITION_FAILED) instead to prevent concurrent modification.
+
+
+
+[[webflux-caching-static-resources]]
+=== Static resources
+[.small]#<<web.adoc#mvc-caching-static-resources,Same in Spring MVC>>#
+
+Static resources should be served with a "Cache-Control" and conditional response headers
+for optimal performance. See section on configuring <<webflux-config-static-resources>>.
 
 
 
@@ -2866,7 +3095,7 @@ evaluated and if present a `304` status code is returned.
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("/public", "classpath:/static/")
-				.setCachePeriod(31556926);
+				.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
 		}
 
 	}
@@ -2910,9 +3139,12 @@ so it can be injected into others.
 
 Unlike Spring MVC at present in WebFlux there is no way to transparently rewrite static
 resource URLs since there are no view technologies that can make use of a non-blocking chain
-of resolvers and transformers (e.g. resources on Amazon S3). When serving only local
-resources the workaround is to use `ResourceUrlProvider` directly (e.g. through a custom
-tag) and block for 0 seconds.
+of resolvers and transformers. When serving only local resources the workaround is to use
+`ResourceUrlProvider` directly (e.g. through a custom tag) and block.
+
+Note that when using both `EncodedResourceResolver` (e.g. Gzip, Brotli encoded) and
+`VersionedResourceResolver`, they must be registered in that order to ensure content
+based versions are always computed reliably based on the unencoded file.
 
 http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
 and automatically registered when `"org.webjars:webjars-locator"` is present on the
@@ -2926,16 +3158,8 @@ match to incoming URLs without versions -- e.g. `"/jquery/jquery.min.js"` to
 === Path Matching
 [.small]#<<web.adoc#mvc-config-path-matching,Same in Spring MVC>>#
 
-Spring WebFlux uses parsed representation of path patterns -- i.e. `PathPattern`, and also
-the incoming  request path -- i.e. `RequestPath`, which eliminates the need to indicate
-whether to decode the request path, or remove semicolon content, since `PathPattern`
-can now access decoded path segment values and match safely.
-
-Spring WebFlux also does not support suffix pattern matching so effectively there are only two
-minor options to customize related to path matching -- whether to match trailing slashes
-(`true` by default) and whether the match is case-sensitive (`false`).
-
-To customize those options:
+Customize options related to path matching. For details on the individual options, see the
+{api-spring-framework}/web/reactive/config/PathMatchConfigurer.html[PathMatchConfigurer] Javadoc.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2946,11 +3170,28 @@ To customize those options:
 
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
-			// ...
+			configurer
+				.setUseCaseSensitiveMatch(true)
+				.setUseTrailingSlashMatch(false)
+				.addPathPrefix("/api",
+						HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
 	}
 ----
+
+[TIP]
+====
+Spring WebFlux relies on a parsed representation of the request path called
+`RequestPath` for access to decoded path segment values, with semicolon content removed
+(i.e. path/matrix variables). That means, unlike Spring MVC, there is no need to indicate
+neither whether to decode the request path, nor whether to remove semicolon content for
+path matching purposes.
+
+Spring WebFlux also does not support suffix pattern matching, unlike Spring MVC, where we
+also <<web.adoc#mvc-ann-requestmapping-suffix-pattern-match,recommend>> moving away from
+reliance on it.
+====
 
 
 

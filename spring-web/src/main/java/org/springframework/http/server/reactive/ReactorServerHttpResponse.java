@@ -16,7 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -25,7 +25,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.server.HttpServerResponse;
+import reactor.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -70,15 +70,12 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> publisher) {
-		Publisher<ByteBuf> body = toByteBufs(publisher);
-		return this.response.send(body).then();
+		return this.response.send(toByteBufs(publisher)).then();
 	}
 
 	@Override
 	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> publisher) {
-		Publisher<Publisher<ByteBuf>> body = Flux.from(publisher)
-				.map(ReactorServerHttpResponse::toByteBufs);
-		return this.response.sendGroups(body).then();
+		return this.response.sendGroups(Flux.from(publisher).map(this::toByteBufs)).then();
 	}
 
 	@Override
@@ -112,11 +109,11 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 	}
 
 	@Override
-	public Mono<Void> writeWith(File file, long position, long count) {
-		return doCommit(() -> this.response.sendFile(file.toPath(), position, count).then());
+	public Mono<Void> writeWith(Path file, long position, long count) {
+		return doCommit(() -> this.response.sendFile(file, position, count).then());
 	}
 
-	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
+	private Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
 		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
 	}
 

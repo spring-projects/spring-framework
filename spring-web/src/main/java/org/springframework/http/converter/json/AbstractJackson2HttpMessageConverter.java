@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,9 +65,13 @@ import org.springframework.util.TypeUtils;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 4.1
+ * @see MappingJackson2HttpMessageConverter
  */
 public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
+	/**
+	 * The default charset used by the converter.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
@@ -189,8 +193,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return;
 		}
 
-		boolean debugLevel = (cause instanceof JsonMappingException &&
-				cause.getMessage().startsWith("Can not find"));
+		// Do not log warning for serializer not found (note: different message wording on Jackson 2.9)
+		boolean debugLevel = (cause instanceof JsonMappingException && cause.getMessage().startsWith("Cannot find"));
 
 		if (debugLevel ? logger.isDebugEnabled() : logger.isWarnEnabled()) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
@@ -238,7 +242,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
 		}
 		catch (JsonProcessingException ex) {
-			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex);
+			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex, inputMessage);
 		}
 	}
 

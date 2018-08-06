@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Simple pass-through decoder for {@link DataBuffer}s.
+ * Simple pass-through decoder for {@link DataBuffer DataBuffers}.
  * <p><strong>Note</strong> that the "decoded" buffers returned by instances of this class should
  * be released after usage by calling
  * {@link org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)}.
@@ -62,6 +62,9 @@ public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 	protected DataBuffer decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		if (logger.isDebugEnabled()) {
+			logger.debug(Hints.getLogPrefix(hints) + "Read " + buffer.readableByteCount() + " bytes");
+		}
 		return buffer;
 	}
 

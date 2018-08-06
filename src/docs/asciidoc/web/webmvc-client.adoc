@@ -9,17 +9,19 @@ This section describes options for client-side access to REST endpoints.
 [[webmvc-resttemplate]]
 == RestTemplate
 
-`RestTemplate` is the original Spring REST client that follows a similar approach to other
-template classes in the Spring Framework (e.g. `JdbcTemplate`, `JmsTemplate`, etc.) by
-providing a list of parameterizable methods to perform HTTP requests.
+`RestTemplate` is a synchronous client to perform HTTP requests. It is the original
+Spring REST client, exposing a simple, template method API over underlying HTTP client
+libraries.
 
-`RestTemplate` has a synchronous API and relies on blocking I/O. This is okay for
-client scenarios with low concurrency. In a server environment or when orchestrating a
-sequence of remote calls, prefer using the `WebClient` which provides a more efficient
-execution model including seamless support for streaming.
+[NOTE]
+====
+As of 5.0, the non-blocking, reactive `WebClient` offers a modern alternative to the
+`RestTemplate` with efficient support for both sync and async, as well as streaming
+scenarios. The `RestTemplate` will be deprecated in a future version and will not have
+major new features added going forward.
+====
 
-See <<integration.adoc#rest-client-access,RestTemplate>> for more details on using the
-`RestTemplate`.
+See <<integration.adoc#rest-client-access,RestTemplate>> for details.
 
 
 
@@ -27,9 +29,8 @@ See <<integration.adoc#rest-client-access,RestTemplate>> for more details on usi
 [[webmvc-webclient]]
 == WebClient
 
-`WebClient` is a reactive client that provides an alternative to the `RestTemplate`. It
-exposes a functional, fluent API and relies on non-blocking I/O which allows it to support
-high concurrency more efficiently (i.e. using a small number of threads) than the
-`RestTemplate`. `WebClient` is a natural fit for streaming scenarios.
+`WebClient` is a non-blocking, reactive client to perform HTTP requests. It was
+introduced in 5.0 and offers a modern alternative to the `RestTemplate` with efficient
+support for both synchronous and asynchronous, as well as streaming scenarios.
 
-See <<web-reactive.adoc#webflux-client,WebClient>> for more details on using the `WebClient`.
+See <<web-reactive.adoc#webflux-client,WebClient>> for more details.

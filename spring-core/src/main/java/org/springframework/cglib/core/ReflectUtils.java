@@ -493,15 +493,18 @@ public class ReflectUtils {
 		Class c = null;
 		if (contextClass != null && privateLookupInMethod != null && lookupDefineClassMethod != null) {
 			try {
-				MethodHandles.Lookup lookup =
-						(MethodHandles.Lookup) privateLookupInMethod.invoke(null, contextClass, MethodHandles.lookup());
+				MethodHandles.Lookup lookup = (MethodHandles.Lookup)
+						privateLookupInMethod.invoke(null, contextClass, MethodHandles.lookup());
 				c = (Class) lookupDefineClassMethod.invoke(lookup, b);
 			}
 			catch (InvocationTargetException ex) {
-				if (!(ex.getTargetException() instanceof IllegalArgumentException)) {
-					throw new CodeGenerationException(ex.getTargetException());
+				Throwable target = ex.getTargetException();
+				if (target.getClass() != LinkageError.class && target.getClass() != IllegalArgumentException.class) {
+					throw new CodeGenerationException(target);
 				}
-				// in case of IllegalArgumentException: fall through to defineClass
+				// in case of plain LinkageError (class already defined)
+				// or IllegalArgumentException (class in different package):
+				// fall through to traditional ClassLoader.defineClass below
 			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);

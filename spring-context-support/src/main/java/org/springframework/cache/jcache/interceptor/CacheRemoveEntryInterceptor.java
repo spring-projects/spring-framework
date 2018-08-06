@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,14 @@ class CacheRemoveEntryInterceptor extends AbstractKeyCacheInterceptor<CacheRemov
 		super(errorHandler);
 	}
 
+
 	@Override
-	protected Object invoke(CacheOperationInvocationContext<CacheRemoveOperation> context,
-			CacheOperationInvoker invoker) {
+	protected Object invoke(
+			CacheOperationInvocationContext<CacheRemoveOperation> context, CacheOperationInvoker invoker) {
+
 		CacheRemoveOperation operation = context.getOperation();
 
-		final boolean earlyRemove = operation.isEarlyRemove();
-
+		boolean earlyRemove = operation.isEarlyRemove();
 		if (earlyRemove) {
 			removeValue(context);
 		}
@@ -54,12 +55,12 @@ class CacheRemoveEntryInterceptor extends AbstractKeyCacheInterceptor<CacheRemov
 			}
 			return result;
 		}
-		catch (CacheOperationInvoker.ThrowableWrapper t) {
-			Throwable ex = t.getOriginal();
+		catch (CacheOperationInvoker.ThrowableWrapper wrapperException) {
+			Throwable ex = wrapperException.getOriginal();
 			if (!earlyRemove && operation.getExceptionTypeFilter().match(ex.getClass())) {
 				removeValue(context);
 			}
-			throw t;
+			throw wrapperException;
 		}
 	}
 

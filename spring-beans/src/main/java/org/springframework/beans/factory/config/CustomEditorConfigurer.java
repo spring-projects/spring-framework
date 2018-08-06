@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,10 @@ import org.springframework.util.ClassUtils;
  *
  * <p>
  * Note, that you shouldn't register {@link PropertyEditor} bean instances via
- * the {@code customEditors} property as {@link PropertyEditor}s are stateful
+ * the {@code customEditors} property as {@link PropertyEditor PropertyEditors} are stateful
  * and the instances will then have to be synchronized for every editing
  * attempt. In case you need control over the instantiation process of
- * {@link PropertyEditor}s, use a {@link PropertyEditorRegistrar} to register
+ * {@link PropertyEditor PropertyEditors}, use a {@link PropertyEditorRegistrar} to register
  * them.
  *
  * <p>

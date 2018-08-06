@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,9 @@ import org.springframework.web.server.ServerWebInputException;
 public class CookieValueMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
 	/**
-	 * @param factory a bean factory to use for resolving  ${...}
-	 * placeholder and #{...} SpEL expressions in default values;
+	 * Create a new {@link CookieValueMethodArgumentResolver} instance.
+	 * @param factory a bean factory to use for resolving {@code ${...}}
+	 * placeholder and {@code #{...}} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
 	 */
@@ -81,7 +82,7 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueSyncArg
 	}
 
 
-	private static class CookieValueNamedValueInfo extends NamedValueInfo {
+	private static final class CookieValueNamedValueInfo extends NamedValueInfo {
 
 		private CookieValueNamedValueInfo(CookieValue annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

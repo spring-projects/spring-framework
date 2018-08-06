@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
 
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
 
@@ -228,15 +228,19 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * The 'value' attribute of the rendered HTML {@code <option>} tag.
 	 */
+	@Nullable
 	private Object value;
 
 	/**
 	 * The text body of the rendered HTML {@code <option>} tag.
 	 */
+	@Nullable
 	private String label;
 
+	@Nullable
 	private Object oldValue;
 
+	@Nullable
 	private Object oldDisplayValue;
 
 	private boolean disabled;
@@ -252,6 +256,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * Get the 'value' attribute of the rendered HTML {@code <option>} tag.
 	 */
+	@Nullable
 	protected Object getValue() {
 		return this.value;
 	}
@@ -275,13 +280,13 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * <p>May be a runtime expression.
 	 */
 	public void setLabel(String label) {
-		Assert.notNull(label, "'label' must not be null");
 		this.label = label;
 	}
 
 	/**
 	 * Get the text body of the rendered HTML {@code <option>} tag.
 	 */
+	@Nullable
 	protected String getLabel() {
 		return this.label;
 	}
@@ -365,8 +370,8 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Returns the value of the label for this '{@code option}' element.
-	 * If the {@link #setLabel label} property is set then the resolved value
+	 * Return the value of the label for this '{@code option}' element.
+	 * <p>If the {@link #setLabel label} property is set then the resolved value
 	 * of that property is used, otherwise the value of the {@code resolvedValue}
 	 * argument is used.
 	 */
@@ -388,6 +393,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		return SelectedValueComparator.isSelected(getBindStatus(), resolvedValue);
 	}
 
+	@Nullable
 	private Object resolveValue() throws JspException {
 		return evaluate(VALUE_VARIABLE_NAME, getValue());
 	}

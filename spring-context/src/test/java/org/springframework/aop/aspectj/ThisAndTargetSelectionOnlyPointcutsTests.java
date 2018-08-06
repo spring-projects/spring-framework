@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,18 +39,16 @@ public class ThisAndTargetSelectionOnlyPointcutsTests {
 	private Counter thisAsInterfaceAndTargetAsInterfaceCounter;
 	private Counter thisAsInterfaceAndTargetAsClassCounter;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testBean = (TestInterface) ctx.getBean("testBean");
-
 		thisAsClassCounter = (Counter) ctx.getBean("thisAsClassCounter");
 		thisAsInterfaceCounter = (Counter) ctx.getBean("thisAsInterfaceCounter");
 		targetAsClassCounter = (Counter) ctx.getBean("targetAsClassCounter");
 		targetAsInterfaceCounter = (Counter) ctx.getBean("targetAsInterfaceCounter");
-
 		thisAsClassAndTargetAsClassCounter = (Counter) ctx.getBean("thisAsClassAndTargetAsClassCounter");
 		thisAsInterfaceAndTargetAsInterfaceCounter = (Counter) ctx.getBean("thisAsInterfaceAndTargetAsInterfaceCounter");
 		thisAsInterfaceAndTargetAsClassCounter = (Counter) ctx.getBean("thisAsInterfaceAndTargetAsClassCounter");
@@ -59,11 +57,11 @@ public class ThisAndTargetSelectionOnlyPointcutsTests {
 		thisAsInterfaceCounter.reset();
 		targetAsClassCounter.reset();
 		targetAsInterfaceCounter.reset();
-
 		thisAsClassAndTargetAsClassCounter.reset();
 		thisAsInterfaceAndTargetAsInterfaceCounter.reset();
 		thisAsInterfaceAndTargetAsClassCounter.reset();
 	}
+
 
 	@Test
 	public void testThisAsClassDoesNotMatch() {

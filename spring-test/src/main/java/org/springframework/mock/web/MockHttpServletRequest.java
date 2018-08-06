@@ -102,7 +102,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			new BufferedReader(new StringReader(""));
 
 	/**
-	 * Date formats as specified in the HTTP RFC
+	 * Date formats as specified in the HTTP RFC.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
 	private static final String[] DATE_FORMATS = new String[] {
@@ -178,6 +178,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Nullable
 	private String contentType;
 
+	@Nullable
+	private ServletInputStream inputStream;
+
+	@Nullable
+	private BufferedReader reader;
+
 	private final Map<String, String[]> parameters = new LinkedHashMap<>(16);
 
 	private String protocol = DEFAULT_PROTOCOL;
@@ -192,7 +198,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String remoteHost = DEFAULT_REMOTE_HOST;
 
-	/** List of locales in descending order */
+	/** List of locales in descending order. */
 	private final List<Locale> locales = new LinkedList<>();
 
 	private boolean secure = false;
@@ -492,12 +498,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public ServletInputStream getInputStream() {
-		if (this.content != null) {
-			return new DelegatingServletInputStream(new ByteArrayInputStream(this.content));
+		if (this.inputStream != null) {
+			return this.inputStream;
 		}
-		else {
-			return EMPTY_SERVLET_INPUT_STREAM;
+		else if (this.reader != null) {
+			throw new IllegalStateException(
+					"Cannot call getInputStream() after getReader() has already been called for the current request")			;
 		}
+
+		this.inputStream = (this.content != null ?
+				new DelegatingServletInputStream(new ByteArrayInputStream(this.content)) :
+				EMPTY_SERVLET_INPUT_STREAM);
+		return this.inputStream;
 	}
 
 	/**
@@ -695,16 +707,25 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public BufferedReader getReader() throws UnsupportedEncodingException {
+		if (this.reader != null) {
+			return this.reader;
+		}
+		else if (this.inputStream != null) {
+			throw new IllegalStateException(
+					"Cannot call getReader() after getInputStream() has already been called for the current request")			;
+		}
+
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
 					new InputStreamReader(sourceStream, this.characterEncoding) :
 					new InputStreamReader(sourceStream);
-			return new BufferedReader(sourceReader);
+			this.reader = new BufferedReader(sourceReader);
 		}
 		else {
-			return EMPTY_BUFFERED_READER;
+			this.reader = EMPTY_BUFFERED_READER;
 		}
+		return this.reader;
 	}
 
 	public void setRemoteAddr(String remoteAddr) {
@@ -764,8 +785,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Set the list of preferred locales, in descending order, effectively replacing
 	 * any existing locales.
-	 * @see #addPreferredLocale
 	 * @since 3.2
+	 * @see #addPreferredLocale
 	 */
 	public void setPreferredLocales(List<Locale> locales) {
 		Assert.notEmpty(locales, "Locale list must not be empty");
@@ -1264,7 +1285,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public String changeSessionId() {
 		Assert.isTrue(this.session != null, "The request does not have a session");
 		if (this.session instanceof MockHttpSession) {
-			return ((MockHttpSession) session).changeSessionId();
+			return ((MockHttpSession) this.session).changeSessionId();
 		}
 		return this.session.getId();
 	}

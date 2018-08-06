@@ -100,8 +100,8 @@ public class RequestContextFilter extends OncePerRequestFilter {
 		}
 		finally {
 			resetContextHolders();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Cleared thread-bound request context: " + request);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Cleared thread-bound request context: " + request);
 			}
 			attributes.requestCompleted();
 		}
@@ -110,8 +110,8 @@ public class RequestContextFilter extends OncePerRequestFilter {
 	private void initContextHolders(HttpServletRequest request, ServletRequestAttributes requestAttributes) {
 		LocaleContextHolder.setLocale(request.getLocale(), this.threadContextInheritable);
 		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bound request context to thread: " + request);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Bound request context to thread: " + request);
 		}
 	}
 

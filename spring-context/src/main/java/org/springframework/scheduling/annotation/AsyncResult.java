@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.util.concurrent.SuccessCallback;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 3.0
+ * @param <V> the value type
  * @see Async
  * @see #forValue(Object)
  * @see #forExecutionException(Throwable)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
+
+import org.springframework.web.util.UriComponents.UriTemplateVariables;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
@@ -35,16 +39,43 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 /**
+ * Unit tests for {@link UriComponents}.
+ *
  * @author Arjen Poutsma
  * @author Phillip Webb
+ * @author Rossen Stoyanchev
  */
 public class UriComponentsTests {
 
 	@Test
-	public void encode() {
-		UriComponents uriComponents = UriComponentsBuilder.fromPath("/hotel list").build();
-		UriComponents encoded = uriComponents.encode();
-		assertEquals("/hotel%20list", encoded.getPath());
+	public void expandAndEncode() {
+
+		UriComponents uri = UriComponentsBuilder
+				.fromPath("/hotel list/{city} specials").queryParam("q", "{value}").build()
+				.expand("Z\u00fcrich", "a+b").encode();
+
+		assertEquals("/hotel%20list/Z%C3%BCrich%20specials?q=a+b", uri.toString());
+	}
+
+	@Test
+	public void encodeAndExpand() {
+
+		UriComponents uri = UriComponentsBuilder
+				.fromPath("/hotel list/{city} specials").queryParam("q", "{value}").encode().build()
+				.expand("Z\u00fcrich", "a+b");
+
+		assertEquals("/hotel%20list/Z%C3%BCrich%20specials?q=a%2Bb", uri.toString());
+	}
+
+	@Test
+	public void encodeAndExpandPartially() {
+
+		UriComponents uri = UriComponentsBuilder
+				.fromPath("/hotel list/{city} specials").queryParam("q", "{value}").encode()
+				.uriVariables(Collections.singletonMap("city", "Z\u00fcrich"))
+				.build();
+
+		assertEquals("/hotel%20list/Z%C3%BCrich%20specials?q=a%2Bb", uri.expand("a+b").toString());
 	}
 
 	@Test
@@ -86,9 +117,7 @@ public class UriComponentsTests {
 		assertEquals("http://example.com/1 2 3 4", uriComponents.toUriString());
 	}
 
-	// SPR-13311
-
-	@Test
+	@Test // SPR-13311
 	public void expandWithRegexVar() {
 		String template = "/myurl/{name:[a-z]{1,5}}/show";
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(template).build();
@@ -96,9 +125,7 @@ public class UriComponentsTests {
 		assertEquals("/myurl/test/show", uriComponents.getPath());
 	}
 
-	// SPR-12123
-
-	@Test
+	@Test // SPR-12123
 	public void port() {
 		UriComponents uri1 = fromUriString("http://example.com:8080/bar").build();
 		UriComponents uri2 = fromUriString("http://example.com/bar").port(8080).build();
@@ -158,7 +185,7 @@ public class UriComponentsTests {
 	}
 
 	@Test
-	public void equalsHierarchicalUriComponents() throws Exception {
+	public void equalsHierarchicalUriComponents() {
 		String url = "http://example.com";
 		UriComponents uric1 = UriComponentsBuilder.fromUriString(url).path("/{foo}").query("bar={baz}").build();
 		UriComponents uric2 = UriComponentsBuilder.fromUriString(url).path("/{foo}").query("bar={baz}").build();
@@ -170,7 +197,7 @@ public class UriComponentsTests {
 	}
 
 	@Test
-	public void equalsOpaqueUriComponents() throws Exception {
+	public void equalsOpaqueUriComponents() {
 		String baseUrl = "http:example.com";
 		UriComponents uric1 = UriComponentsBuilder.fromUriString(baseUrl + "/foo/bar").build();
 		UriComponents uric2 = UriComponentsBuilder.fromUriString(baseUrl + "/foo/bar").build();

@@ -272,7 +272,7 @@ class ConfigurationClassParser {
 				processPropertySource(propertySource);
 			}
 			else {
-				logger.warn("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() +
+				logger.info("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() +
 						"]. Reason: Environment must implement ConfigurableEnvironment");
 			}
 		}
@@ -553,16 +553,15 @@ class ConfigurationClassParser {
 		for (DeferredImportSelectorHolder deferredImport : deferredImports) {
 			Class<? extends Group> group = deferredImport.getImportSelector().getImportGroup();
 			DeferredImportSelectorGrouping grouping = groupings.computeIfAbsent(
-					(group == null ? deferredImport : group),
-					(key) -> new DeferredImportSelectorGrouping(createGroup(group)));
+					(group != null ? group : deferredImport),
+					key -> new DeferredImportSelectorGrouping(createGroup(group)));
 			grouping.add(deferredImport);
 			configurationClasses.put(deferredImport.getConfigurationClass().getMetadata(),
 					deferredImport.getConfigurationClass());
 		}
 		for (DeferredImportSelectorGrouping grouping : groupings.values()) {
-			grouping.getImports().forEach((entry) -> {
-				ConfigurationClass configurationClass = configurationClasses.get(
-						entry.getMetadata());
+			grouping.getImports().forEach(entry -> {
+				ConfigurationClass configurationClass = configurationClasses.get(entry.getMetadata());
 				try {
 					processImports(configurationClass, asSourceClass(configurationClass),
 							asSourceClasses(entry.getImportClassName()), false);
@@ -573,15 +572,14 @@ class ConfigurationClassParser {
 				catch (Throwable ex) {
 					throw new BeanDefinitionStoreException(
 							"Failed to process import candidates for configuration class [" +
-									configurationClass.getMetadata().getClassName() + "]", ex);
+							configurationClass.getMetadata().getClassName() + "]", ex);
 				}
 			});
 		}
 	}
 
 	private Group createGroup(@Nullable Class<? extends Group> type) {
-		Class<? extends Group> effectiveType = (type != null ? type
-				: DefaultDeferredImportSelectorGroup.class);
+		Class<? extends Group> effectiveType = (type != null ? type : DefaultDeferredImportSelectorGroup.class);
 		Group group = BeanUtils.instantiateClass(effectiveType);
 		ParserStrategyUtils.invokeAwareMethods(group,
 				ConfigurationClassParser.this.environment,
@@ -705,7 +703,7 @@ class ConfigurationClassParser {
 	}
 
 	/**
-	 * Factory method to obtain {@link SourceClass}s from class names.
+	 * Factory method to obtain {@link SourceClass SourceClasss} from class names.
 	 */
 	private Collection<SourceClass> asSourceClasses(String... classNames) throws IOException {
 		List<SourceClass> annotatedClasses = new ArrayList<>(classNames.length);

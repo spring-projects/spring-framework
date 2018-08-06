@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	public static final int NO_CONCURRENCY = 0;
 
 
-	/** Transient to optimize serialization */
+	/** Transient to optimize serialization. */
 	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private transient Object monitor = new Object();

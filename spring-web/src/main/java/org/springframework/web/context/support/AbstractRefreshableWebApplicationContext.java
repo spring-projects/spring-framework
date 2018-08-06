@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,19 +81,19 @@ import org.springframework.web.context.ServletContextAware;
 public abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableConfigApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
 
-	/** Servlet context that this context runs in */
+	/** Servlet context that this context runs in. */
 	@Nullable
 	private ServletContext servletContext;
 
-	/** Servlet config that this context runs in, if any */
+	/** Servlet config that this context runs in, if any. */
 	@Nullable
 	private ServletConfig servletConfig;
 
-	/** Namespace of this context, or {@code null} if root */
+	/** Namespace of this context, or {@code null} if root. */
 	@Nullable
 	private String namespace;
 
-	/** the ThemeSource for this ApplicationContext */
+	/** the ThemeSource for this ApplicationContext. */
 	@Nullable
 	private ThemeSource themeSource;
 

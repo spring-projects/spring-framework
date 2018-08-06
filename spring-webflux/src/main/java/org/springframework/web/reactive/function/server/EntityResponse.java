@@ -43,6 +43,7 @@ import org.springframework.web.reactive.function.BodyInserters;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 5.0
+ * @param <T> the entity type
  */
 public interface EntityResponse<T> extends ServerResponse {
 
@@ -100,6 +101,8 @@ public interface EntityResponse<T> extends ServerResponse {
 
 	/**
 	 * Defines a builder for {@code EntityResponse}.
+	 *
+	 * @param <T> a self reference to the builder type
 	 */
 	interface Builder<T> {
 

@@ -28,32 +28,58 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link Resource} implementation for {@code java.io.File} handles.
+ * {@link Resource} implementation for {@code java.io.File} and
+ * {@code java.nio.file.Path} handles with a file system target.
  * Supports resolution as a {@code File} and also as a {@code URL}.
  * Implements the extended {@link WritableResource} interface.
  *
- * <p>Note: As of Spring Framework 5.0, this {@link Resource} implementation
- * uses NIO.2 API for read/write interactions. Nevertheless, in contrast to
- * {@link PathResource}, it primarily manages a {@code java.io.File} handle.
+ * <p>Note: As of Spring Framework 5.0, this {@link Resource} implementation uses
+ * NIO.2 API for read/write interactions. As of 5.1, it may be constructed with a
+ * {@link java.nio.file.Path} handle in which case it will perform all file system
+ * interactions via NIO.2, only resorting to {@link File} on {@link #getFile()}.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
- * @see PathResource
+ * @see #FileSystemResource(File)
+ * @see #FileSystemResource(Path)
  * @see java.io.File
  * @see java.nio.file.Files
  */
 public class FileSystemResource extends AbstractResource implements WritableResource {
 
-	private final File file;
-
 	private final String path;
 
+	@Nullable
+	private final File file;
+
+	private final Path filePath;
+
+
+	/**
+	 * Create a new {@code FileSystemResource} from a file path.
+	 * <p>Note: When building relative resources via {@link #createRelative},
+	 * it makes a difference whether the specified resource base path here
+	 * ends with a slash or not. In the case of "C:/dir1/", relative paths
+	 * will be built underneath that root: e.g. relative path "dir2" ->
+	 * "C:/dir1/dir2". In the case of "C:/dir1", relative paths will apply
+	 * at the same directory level: relative path "dir2" -> "C:/dir2".
+	 * @param path a file path
+	 * @see #FileSystemResource(Path)
+	 */
+	public FileSystemResource(String path) {
+		Assert.notNull(path, "Path must not be null");
+		this.path = StringUtils.cleanPath(path);
+		this.file = new File(path);
+		this.filePath = this.file.toPath();
+	}
 
 	/**
 	 * Create a new {@code FileSystemResource} from a {@link File} handle.
@@ -65,27 +91,31 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * to append a trailing slash to the root path: "C:/dir1/", which
 	 * indicates this directory as root for all relative paths.
 	 * @param file a File handle
+	 * @see #FileSystemResource(Path)
+	 * @see #getFile()
 	 */
 	public FileSystemResource(File file) {
 		Assert.notNull(file, "File must not be null");
-		this.file = file;
 		this.path = StringUtils.cleanPath(file.getPath());
+		this.file = file;
+		this.filePath = file.toPath();
 	}
 
 	/**
-	 * Create a new {@code FileSystemResource} from a file path.
-	 * <p>Note: When building relative resources via {@link #createRelative},
-	 * it makes a difference whether the specified resource base path here
-	 * ends with a slash or not. In the case of "C:/dir1/", relative paths
-	 * will be built underneath that root: e.g. relative path "dir2" ->
-	 * "C:/dir1/dir2". In the case of "C:/dir1", relative paths will apply
-	 * at the same directory level: relative path "dir2" -> "C:/dir2".
-	 * @param path a file path
+	 * Create a new {@code FileSystemResource} from a {@link Path} handle.
+	 * <p>In contrast to {@link PathResource}, this variant strictly follows the
+	 * general {@link FileSystemResource} conventions, in particular in terms of
+	 * path cleaning and {@link #createRelative(String)} handling.
+	 * @param filePath a Path handle to a file
+	 * @since 5.1
+	 * @see #FileSystemResource(File)
+	 * @see PathResource
 	 */
-	public FileSystemResource(String path) {
-		Assert.notNull(path, "Path must not be null");
-		this.file = new File(path);
-		this.path = StringUtils.cleanPath(path);
+	public FileSystemResource(Path filePath) {
+		Assert.notNull(filePath, "Path must not be null");
+		this.filePath = filePath;
+		this.file = null;
+		this.path = StringUtils.cleanPath(filePath.toString());
 	}
 
 
@@ -102,7 +132,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public boolean exists() {
-		return this.file.exists();
+		return (this.file != null ? this.file.exists() : Files.exists(this.filePath));
 	}
 
 	/**
@@ -113,7 +143,8 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public boolean isReadable() {
-		return (this.file.canRead() && !this.file.isDirectory());
+		return (this.file != null ? this.file.canRead() && !this.file.isDirectory() :
+				Files.isReadable(this.filePath) && !Files.isDirectory(this.filePath));
 	}
 
 	/**
@@ -123,7 +154,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	@Override
 	public InputStream getInputStream() throws IOException {
 		try {
-			return Files.newInputStream(this.file.toPath());
+			return Files.newInputStream(this.filePath);
 		}
 		catch (NoSuchFileException ex) {
 			throw new FileNotFoundException(ex.getMessage());
@@ -138,7 +169,8 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public boolean isWritable() {
-		return (this.file.canWrite() && !this.file.isDirectory());
+		return (this.file != null ? this.file.canWrite() && !this.file.isDirectory() :
+				Files.isWritable(this.filePath) && !Files.isDirectory(this.filePath));
 	}
 
 	/**
@@ -147,7 +179,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public OutputStream getOutputStream() throws IOException {
-		return Files.newOutputStream(this.file.toPath());
+		return Files.newOutputStream(this.filePath);
 	}
 
 	/**
@@ -156,7 +188,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public URL getURL() throws IOException {
-		return this.file.toURI().toURL();
+		return (this.file != null ? this.file.toURI().toURL() : this.filePath.toUri().toURL());
 	}
 
 	/**
@@ -165,7 +197,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public URI getURI() throws IOException {
-		return this.file.toURI();
+		return (this.file != null ? this.file.toURI() : this.filePath.toUri());
 	}
 
 	/**
@@ -181,7 +213,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public File getFile() {
-		return this.file;
+		return (this.file != null ? this.file : this.filePath.toFile());
 	}
 
 	/**
@@ -191,7 +223,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
 		try {
-			return FileChannel.open(this.file.toPath(), StandardOpenOption.READ);
+			return FileChannel.open(this.filePath, StandardOpenOption.READ);
 		}
 		catch (NoSuchFileException ex) {
 			throw new FileNotFoundException(ex.getMessage());
@@ -204,7 +236,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public WritableByteChannel writableChannel() throws IOException {
-		return FileChannel.open(this.file.toPath(), StandardOpenOption.WRITE);
+		return FileChannel.open(this.filePath, StandardOpenOption.WRITE);
 	}
 
 	/**
@@ -212,7 +244,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public long contentLength() throws IOException {
-		return this.file.length();
+		return (this.file != null ? this.file.length() : Files.size(this.filePath));
 	}
 
 	/**
@@ -232,7 +264,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public String getFilename() {
-		return this.file.getName();
+		return (this.file != null ? this.file.getName() : this.filePath.getFileName().toString());
 	}
 
 	/**
@@ -242,7 +274,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public String getDescription() {
-		return "file [" + this.file.getAbsolutePath() + "]";
+		return "file [" + (this.file != null ? this.file.getAbsolutePath() : this.filePath.toAbsolutePath()) + "]";
 	}
 
 
@@ -250,9 +282,9 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * This implementation compares the underlying File references.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof FileSystemResource && this.path.equals(((FileSystemResource) obj).path)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof FileSystemResource &&
+				this.path.equals(((FileSystemResource) other).path)));
 	}
 
 	/**

@@ -16,7 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,7 +63,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-import static org.springframework.context.annotation.AnnotationConfigUtils.*;
+import static org.springframework.context.annotation.AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR;
 
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
@@ -74,10 +73,10 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  * {@code <context:component-scan/>}. Otherwise, may be declared manually as
  * with any other BeanFactoryPostProcessor.
  *
- * <p>This post processor is {@link Ordered#HIGHEST_PRECEDENCE} as it is important
- * that any {@link Bean} methods declared in Configuration classes have their
- * respective bean definitions registered before any other BeanFactoryPostProcessor
- * executes.
+ * <p>This post processor is priority-ordered as it is important that any
+ * {@link Bean} methods declared in {@code @Configuration} classes have
+ * their corresponding bean definitions registered before any other
+ * {@link BeanFactoryPostProcessor} executes.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -377,8 +376,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
 							beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
 				}
-				else if (logger.isWarnEnabled() && beanFactory.containsSingleton(beanName)) {
-					logger.warn("Cannot enhance @Configuration bean definition '" + beanName +
+				else if (logger.isInfoEnabled() && beanFactory.containsSingleton(beanName)) {
+					logger.info("Cannot enhance @Configuration bean definition '" + beanName +
 							"' since its singleton instance has been created too early. The typical cause " +
 							"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
 							"return type: Consider declaring such methods as 'static'.");
@@ -402,8 +401,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				if (configClass != null) {
 					Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
 					if (configClass != enhancedClass) {
-						if (logger.isDebugEnabled()) {
-							logger.debug(String.format("Replacing bean definition '%s' existing class '%s' with " +
+						if (logger.isTraceEnabled()) {
+							logger.trace(String.format("Replacing bean definition '%s' existing class '%s' with " +
 									"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
 						}
 						beanDef.setBeanClass(enhancedClass);
@@ -426,11 +425,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		@Override
-		public PropertyValues postProcessPropertyValues(
-				PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
+		public PropertyValues postProcessProperties(@Nullable PropertyValues pvs, Object bean, String beanName) {
 			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
-			// postProcessPropertyValues method attempts to autowire other configuration beans.
+			// postProcessProperties method attempts to autowire other configuration beans.
 			if (bean instanceof EnhancedConfiguration) {
 				((EnhancedConfiguration) bean).setBeanFactory(this.beanFactory);
 			}

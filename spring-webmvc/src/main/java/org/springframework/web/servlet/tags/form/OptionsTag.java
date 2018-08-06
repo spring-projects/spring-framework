@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -196,18 +197,21 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
 	 * objects used to generate the inner '{@code option}' tags.
 	 */
+	@Nullable
 	private Object items;
 
 	/**
 	 * The name of the property mapped to the '{@code value}' attribute
 	 * of the '{@code option}' tag.
 	 */
+	@Nullable
 	private String itemValue;
 
 	/**
 	 * The name of the property mapped to the inner text of the
 	 * '{@code option}' tag.
 	 */
+	@Nullable
 	private String itemLabel;
 
 	private boolean disabled;
@@ -229,6 +233,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * of objects used to generate the inner '{@code option}' tags.
 	 * <p>Typically a runtime expression.
 	 */
+	@Nullable
 	protected Object getItems() {
 		return this.items;
 	}
@@ -248,6 +253,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * Return the name of the property mapped to the '{@code value}'
 	 * attribute of the '{@code option}' tag.
 	 */
+	@Nullable
 	protected String getItemValue() {
 		return this.itemValue;
 	}
@@ -265,6 +271,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * Get the name of the property mapped to the label (inner text) of the
 	 * '{@code option}' tag.
 	 */
+	@Nullable
 	protected String getItemLabel() {
 		return this.itemLabel;
 	}
@@ -342,9 +349,12 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 */
 	private class OptionsWriter extends OptionWriter {
 
+		@Nullable
 		private final String selectName;
 
-		public OptionsWriter(String selectName, Object optionSource, String valueProperty, String labelProperty) {
+		public OptionsWriter(@Nullable String selectName, Object optionSource,
+				@Nullable String valueProperty, @Nullable String labelProperty) {
+
 			super(optionSource, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
 			this.selectName = selectName;
 		}
@@ -364,7 +374,6 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		protected String processOptionValue(String value) {
 			return processFieldValue(this.selectName, value, "option");
 		}
-
 	}
 
 }

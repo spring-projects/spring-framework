@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -151,7 +150,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		try {
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
 					ClassUtils.forName("javax.inject.Inject", AutowiredAnnotationBeanPostProcessor.class.getClassLoader()));
-			logger.info("JSR-330 'javax.inject.Inject' annotation found and supported for autowiring");
+			logger.trace("JSR-330 'javax.inject.Inject' annotation found and supported for autowiring");
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
@@ -235,6 +234,12 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	@Override
+	public void resetBeanDefinition(String beanName) {
+		this.lookupMethodsChecked.remove(beanName);
+		this.injectionMetadataCache.remove(beanName);
+	}
+
+	@Override
 	@Nullable
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
 			throws BeanCreationException {
@@ -245,10 +250,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				ReflectionUtils.doWithMethods(beanClass, method -> {
 					Lookup lookup = method.getAnnotation(Lookup.class);
 					if (lookup != null) {
-						Assert.state(beanFactory != null, "No BeanFactory available");
+						Assert.state(this.beanFactory != null, "No BeanFactory available");
 						LookupOverride override = new LookupOverride(method, lookup.value());
 						try {
-							RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
+							RootBeanDefinition mbd = (RootBeanDefinition) this.beanFactory.getMergedBeanDefinition(beanName);
 							mbd.getMethodOverrides().addOverride(override);
 						}
 						catch (NoSuchBeanDefinitionException ex) {
@@ -365,9 +370,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeanCreationException {
-
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
 		try {
 			metadata.inject(bean, beanName, pvs);
@@ -379,6 +382,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			throw new BeanCreationException(beanName, "Injection of autowired dependencies failed", ex);
 		}
 		return pvs;
+	}
+
+	@Deprecated
+	@Override
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
+
+		return postProcessProperties(pvs, bean, beanName);
 	}
 
 	/**
@@ -424,11 +435,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
+		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<>();
+			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
 				AnnotationAttributes ann = findAutowiredAnnotation(field);
@@ -541,7 +552,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private Object resolvedCachedArgument(@Nullable String beanName, @Nullable Object cachedArgument) {
 		if (cachedArgument instanceof DependencyDescriptor) {
 			DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
-			Assert.state(beanFactory != null, "No BeanFactory available");
+			Assert.state(this.beanFactory != null, "No BeanFactory available");
 			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
 		}
 		else {

@@ -157,8 +157,8 @@ public abstract class ExtendedEntityManagerCreator {
 	 * transactions (according to the JPA 2.1 SynchronizationType rules)
 	 * @return a container-managed EntityManager that expects container-driven lifecycle
 	 * management but may opt out of automatic transaction synchronization
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 * @since 4.0
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public static EntityManager createContainerManagedEntityManager(
 			EntityManagerFactory emf, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction) {
@@ -242,7 +242,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * InvocationHandler for extended EntityManagers as defined in the JPA spec.
 	 */
 	@SuppressWarnings("serial")
-	private static class ExtendedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
+	private static final class ExtendedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
 
 		private static final Log logger = LogFactory.getLog(ExtendedEntityManagerInvocationHandler.class);
 
@@ -491,10 +491,10 @@ public abstract class ExtendedEntityManagerCreator {
 		}
 
 		private RuntimeException convertException(RuntimeException ex) {
-			DataAccessException daex = (this.exceptionTranslator != null) ?
+			DataAccessException dae = (this.exceptionTranslator != null) ?
 					this.exceptionTranslator.translateExceptionIfPossible(ex) :
 					EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
-			return (daex != null ? daex : ex);
+			return (dae != null ? dae : ex);
 		}
 	}
 

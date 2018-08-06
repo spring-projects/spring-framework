@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,20 +90,20 @@ public interface TableMetaDataProvider {
 	/**
 	 * Are we using the meta-data for the table columns?
 	 */
- 	boolean isTableColumnMetaDataUsed();
+	boolean isTableColumnMetaDataUsed();
 
 	/**
 	 * Does this database support the JDBC 3.0 feature of retrieving generated keys:
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 */
- 	boolean isGetGeneratedKeysSupported();
+	boolean isGetGeneratedKeysSupported();
 
 	/**
 	 * Does this database support a simple query to retrieve the generated key when
 	 * the JDBC 3.0 feature of retrieving generated keys is not supported?
 	 * @see #isGetGeneratedKeysSupported()
 	 */
- 	boolean isGetGeneratedKeysSimulated();
+	boolean isGetGeneratedKeysSimulated();
 
 	/**
 	 * Get the simple query to retrieve a generated key.
@@ -115,11 +115,11 @@ public interface TableMetaDataProvider {
 	 * Does this database support a column name String array for retrieving generated keys:
 	 * {@link java.sql.Connection#createStruct(String, Object[])}?
 	 */
- 	boolean isGeneratedKeysColumnNameArraySupported();
+	boolean isGeneratedKeysColumnNameArraySupported();
 
 	/**
 	 * Get the table parameter meta-data that is currently used.
-	 * @return List of {@link TableParameterMetaData}
+	 * @return a List of {@link TableParameterMetaData}
 	 */
 	List<TableParameterMetaData> getTableParameterMetaData();
 

@@ -45,7 +45,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
@@ -132,12 +132,16 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
-			}
 			prepareResponse(ex, response);
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
+
+				// Print debug message, when warn logger is not enabled..
+				if (logger.isDebugEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
+					logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
+				}
+
+				// warnLogger with full stack trace (requires explicit config)..
 				logException(ex, request);
 			}
 			return result;
@@ -200,7 +204,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @return the log message to use
 	 */
 	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
-		return "Resolved exception caused by Handler execution: " + ex;
+		return "Resolved [" + ex + "]";
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Decoder for {@link ByteBuffer}s.
+ * Decoder for {@link ByteBuffer ByteBuffers}.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
@@ -52,10 +52,14 @@ public class ByteBufferDecoder extends AbstractDataBufferDecoder<ByteBuffer> {
 	protected ByteBuffer decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		ByteBuffer copy = ByteBuffer.allocate(dataBuffer.readableByteCount());
+		int byteCount = dataBuffer.readableByteCount();
+		ByteBuffer copy = ByteBuffer.allocate(byteCount);
 		copy.put(dataBuffer.asByteBuffer());
 		copy.flip();
 		DataBufferUtils.release(dataBuffer);
+		if (logger.isDebugEnabled()) {
+			logger.debug(Hints.getLogPrefix(hints) + "Read " + byteCount + " bytes");
+		}
 		return copy;
 	}
 

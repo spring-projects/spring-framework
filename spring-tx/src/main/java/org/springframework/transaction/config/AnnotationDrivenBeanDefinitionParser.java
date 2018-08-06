@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser
@@ -64,6 +65,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		if ("aspectj".equals(mode)) {
 			// mode="aspectj"
 			registerTransactionAspect(element, parserContext);
+			if (ClassUtils.isPresent("javax.transaction.Transactional", getClass().getClassLoader())) {
+				registerJtaTransactionAspect(element, parserContext);
+			}
 		}
 		else {
 			// mode="proxy"
@@ -75,6 +79,18 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private void registerTransactionAspect(Element element, ParserContext parserContext) {
 		String txAspectBeanName = TransactionManagementConfigUtils.TRANSACTION_ASPECT_BEAN_NAME;
 		String txAspectClassName = TransactionManagementConfigUtils.TRANSACTION_ASPECT_CLASS_NAME;
+		if (!parserContext.getRegistry().containsBeanDefinition(txAspectBeanName)) {
+			RootBeanDefinition def = new RootBeanDefinition();
+			def.setBeanClassName(txAspectClassName);
+			def.setFactoryMethodName("aspectOf");
+			registerTransactionManager(element, def);
+			parserContext.registerBeanComponent(new BeanComponentDefinition(def, txAspectBeanName));
+		}
+	}
+
+	private void registerJtaTransactionAspect(Element element, ParserContext parserContext) {
+		String txAspectBeanName = TransactionManagementConfigUtils.JTA_TRANSACTION_ASPECT_BEAN_NAME;
+		String txAspectClassName = TransactionManagementConfigUtils.JTA_TRANSACTION_ASPECT_CLASS_NAME;
 		if (!parserContext.getRegistry().containsBeanDefinition(txAspectBeanName)) {
 			RootBeanDefinition def = new RootBeanDefinition();
 			def.setBeanClassName(txAspectClassName);

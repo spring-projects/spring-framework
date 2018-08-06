@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Resolves method parameters by delegating to a list of registered {@link HandlerMethodArgumentResolver}s.
+ * Resolves method parameters by delegating to a list of registered {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
  * Previously resolved method parameters are cached for faster lookups.
  *
  * @author Rossen Stoyanchev
@@ -57,7 +57,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	}
 
 	/**
-	 * Add the given {@link HandlerMethodArgumentResolver}s.
+	 * Add the given {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 * @since 4.3
 	 */
 	public HandlerMethodArgumentResolverComposite addResolvers(@Nullable HandlerMethodArgumentResolver... resolvers) {
@@ -70,7 +70,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	}
 
 	/**
-	 * Add the given {@link HandlerMethodArgumentResolver}s.
+	 * Add the given {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 */
 	public HandlerMethodArgumentResolverComposite addResolvers(
 			@Nullable List<? extends HandlerMethodArgumentResolver> resolvers) {
@@ -109,7 +109,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	}
 
 	/**
-	 * Iterate over registered {@link HandlerMethodArgumentResolver}s and invoke the one that supports it.
+	 * Iterate over registered {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} and invoke the one that supports it.
 	 * @throws IllegalStateException if no suitable {@link HandlerMethodArgumentResolver} is found.
 	 */
 	@Override
@@ -132,10 +132,6 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
 			for (HandlerMethodArgumentResolver methodArgumentResolver : this.argumentResolvers) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Testing if argument resolver [" + methodArgumentResolver + "] supports [" +
-							parameter.getGenericParameterType() + "]");
-				}
 				if (methodArgumentResolver.supportsParameter(parameter)) {
 					result = methodArgumentResolver;
 					this.argumentResolverCache.put(parameter, result);

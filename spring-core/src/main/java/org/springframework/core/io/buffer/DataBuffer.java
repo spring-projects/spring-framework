@@ -57,22 +57,22 @@ public interface DataBuffer {
 	DataBufferFactory factory();
 
 	/**
-	 * Return the index of the first byte in this buffer that matches the given
-	 * predicate.
+	 * Return the index of the first byte in this buffer that matches
+	 * the given predicate.
 	 * @param predicate the predicate to match
 	 * @param fromIndex the index to start the search from
-	 * @return the index of the first byte that matches {@code predicate}; or {@code -1}
-	 * if none match
+	 * @return the index of the first byte that matches {@code predicate};
+	 * or {@code -1} if none match
 	 */
 	int indexOf(IntPredicate predicate, int fromIndex);
 
 	/**
-	 * Return the index of the last byte in this buffer that matches the given
-	 * predicate.
+	 * Return the index of the last byte in this buffer that matches
+	 * the given predicate.
 	 * @param predicate the predicate to match
 	 * @param fromIndex the index to start the search from
-	 * @return the index of the last byte that matches {@code predicate}; or {@code -1}
-	 * if none match
+	 * @return the index of the last byte that matches {@code predicate};
+	 * or {@code -1} if none match
 	 */
 	int lastIndexOf(IntPredicate predicate, int fromIndex);
 
@@ -97,9 +97,10 @@ public interface DataBuffer {
 	int capacity();
 
 	/**
-	 * Sets the number of bytes that this buffer can contain. If the new capacity is lower than
-	 * the current capacity, the contents of this buffer will be truncated. If the new capacity
-	 * is higher than the current capacity, it will be expanded.
+	 * Set the number of bytes that this buffer can contain.
+	 * <p>If the new capacity is lower than the current capacity, the contents
+	 * of this buffer will be truncated. If the new capacity is higher than
+	 * the current capacity, it will be expanded.
 	 * @param capacity the new capacity
 	 * @return this buffer
 	 */
@@ -116,8 +117,8 @@ public interface DataBuffer {
 	 * Set the position from which this buffer will read.
 	 * @param readPosition the new read position
 	 * @return this buffer
-	 * @throws IndexOutOfBoundsException if {@code readPosition} is smaller than 0 or greater than
-	 * {@link #writePosition()}
+	 * @throws IndexOutOfBoundsException if {@code readPosition} is smaller than 0
+	 * or greater than {@link #writePosition()}
 	 * @since 5.0.1
 	 */
 	DataBuffer readPosition(int readPosition);

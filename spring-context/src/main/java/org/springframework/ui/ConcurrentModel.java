@@ -81,14 +81,13 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	/**
 	 * Add the supplied attribute to this {@code Map} using a
 	 * {@link org.springframework.core.Conventions#getVariableName generated name}.
-	 * <p><emphasis>Note: Empty {@link Collection Collections} are not added to
+	 * <p><i>Note: Empty {@link Collection Collections} are not added to
 	 * the model when using this method because we cannot correctly determine
 	 * the true convention name. View code should check for {@code null} rather
-	 * than for empty collections as is already done by JSTL tags.</emphasis>
-	 * @param attributeValue the model attribute value (never {@code null} for {@code ConcurrentModel},
-	 * with the {@code Nullable} declaration inherited from {@link Model#addAttribute(String, Object)})
+	 * than for empty collections as is already done by JSTL tags.</i>
+	 * @param attributeValue the model attribute value (never {@code null})
 	 */
-	public ConcurrentModel addAttribute(@Nullable Object attributeValue) {
+	public ConcurrentModel addAttribute(Object attributeValue) {
 		Assert.notNull(attributeValue, "Model attribute value must not be null");
 		if (attributeValue instanceof Collection && ((Collection<?>) attributeValue).isEmpty()) {
 			return this;

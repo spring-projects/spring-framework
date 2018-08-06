@@ -23,10 +23,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.filter.HttpPutFormContentFilter;
+import org.springframework.web.filter.FormContentFilter;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test for issues related to form content.
@@ -39,7 +39,7 @@ public class FormContentTests {
 	public void formContentIsNotDuplicated() throws Exception {
 
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new Spr15753Controller())
-				.addFilter(new HttpPutFormContentFilter())
+				.addFilter(new FormContentFilter())
 				.build();
 
 		mockMvc.perform(put("/").content("d1=a&d2=s").contentType(MediaType.APPLICATION_FORM_URLENCODED))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,8 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 		if (context == null) {
 			return;
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for @MessageExceptionHandler mappings: " + context);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Looking for @MessageExceptionHandler mappings: " + context);
 		}
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(context);
 		AnnotationAwareOrderComparator.sort(beans);
@@ -76,7 +76,9 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 				AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(type);
 				if (resolver.hasExceptionMappings()) {
 					registerExceptionHandlerAdvice(bean, resolver);
-					logger.info("Detected @MessageExceptionHandler methods in " + bean);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Detected @MessageExceptionHandler methods in " + bean);
+					}
 				}
 			}
 		}
@@ -86,7 +88,7 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 	/**
 	 * Adapt ControllerAdviceBean to MessagingAdviceBean.
 	 */
-	private static class MessagingControllerAdviceBean implements MessagingAdviceBean {
+	private static final class MessagingControllerAdviceBean implements MessagingAdviceBean {
 
 		private final ControllerAdviceBean adviceBean;
 

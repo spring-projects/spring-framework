@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,14 @@
 
 package org.springframework.transaction.annotation;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.sql.DataSource;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -49,6 +43,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for the @EnableTransactionManagement annotation.
@@ -122,7 +119,7 @@ public class EnableTransactionManagementIntegrationTests {
 			// this test is a bit fragile, but gets the job done, proving that an
 			// attempt was made to look up the AJ aspect. It's due to classpath issues
 			// in .integration-tests that it's not found.
-			assertTrue(ex.getMessage().contains("AspectJTransactionManagementConfiguration"));
+			assertTrue(ex.getMessage().contains("AspectJJtaTransactionManagementConfiguration"));
 		}
 	}
 

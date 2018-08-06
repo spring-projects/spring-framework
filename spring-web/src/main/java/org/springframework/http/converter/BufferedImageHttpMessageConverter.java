@@ -172,7 +172,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 			imageInputStream = createImageInputStream(inputMessage.getBody());
 			MediaType contentType = inputMessage.getHeaders().getContentType();
 			if (contentType == null) {
-				throw new HttpMessageNotReadableException("No Content-Type header");
+				throw new HttpMessageNotReadableException("No Content-Type header", inputMessage);
 			}
 			Iterator<ImageReader> imageReaders = ImageIO.getImageReadersByMIMEType(contentType.toString());
 			if (imageReaders.hasNext()) {
@@ -184,7 +184,8 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 			}
 			else {
 				throw new HttpMessageNotReadableException(
-						"Could not find javax.imageio.ImageReader for Content-Type [" + contentType + "]");
+						"Could not find javax.imageio.ImageReader for Content-Type [" + contentType + "]",
+						inputMessage);
 			}
 		}
 		finally {
@@ -204,7 +205,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 	private ImageInputStream createImageInputStream(InputStream is) throws IOException {
 		if (this.cacheDir != null) {
-			return new FileCacheImageInputStream(is, cacheDir);
+			return new FileCacheImageInputStream(is, this.cacheDir);
 		}
 		else {
 			return new MemoryCacheImageInputStream(is);

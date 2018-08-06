@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.context.annotation.configuration;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -41,8 +42,29 @@ import static org.junit.Assert.*;
  * correctly into the resulting BeanDefinition
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class BeanAnnotationAttributePropagationTests {
+
+	@Test
+	public void autowireMetadataIsPropagated() {
+		@Configuration class Config {
+			@Bean(autowire=Autowire.BY_TYPE) Object foo() { return null; }
+		}
+
+		assertEquals("autowire mode was not propagated",
+				AbstractBeanDefinition.AUTOWIRE_BY_TYPE, beanDef(Config.class).getAutowireMode());
+	}
+
+	@Test
+	public void autowireCandidateMetadataIsPropagated() {
+		@Configuration class Config {
+			@Bean(autowireCandidate=false) Object foo() { return null; }
+		}
+
+		assertFalse("autowire candidate flag was not propagated",
+				beanDef(Config.class).isAutowireCandidate());
+	}
 
 	@Test
 	public void initMethodMetadataIsPropagated() {
@@ -138,7 +160,7 @@ public class BeanAnnotationAttributePropagationTests {
 
 	@Test
 	public void eagerConfigurationProducesEagerBeanDefinitions() {
-		@Lazy(false) @Configuration class Config { // will probably never happen, doesn't make much sense
+		@Lazy(false) @Configuration class Config {  // will probably never happen, doesn't make much sense
 			@Bean Object foo() { return null; }
 		}
 

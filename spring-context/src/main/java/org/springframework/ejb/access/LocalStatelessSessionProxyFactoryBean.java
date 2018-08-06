@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,14 +52,14 @@ import org.springframework.util.ClassUtils;
 public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInterceptor
 		implements FactoryBean<Object>, BeanClassLoaderAware {
 
-	/** The business interface of the EJB we're proxying */
+	/** The business interface of the EJB we're proxying. */
 	@Nullable
 	private Class<?> businessInterface;
 
 	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	/** EJBLocalObject */
+	/** EJBLocalObject. */
 	@Nullable
 	private Object proxy;
 

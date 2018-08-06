@@ -157,7 +157,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 			if (adapter.isNoValue()) {
 				return true;
 			}
-			type = result.getReturnType().getGeneric().resolve(Object.class);
+			type = result.getReturnType().getGeneric().toClass();
 		}
 
 		return (type != null &&
@@ -286,7 +286,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		return Optional.ofNullable(returnType.getMethodAnnotation(ModelAttribute.class))
 				.filter(ann -> StringUtils.hasText(ann.value()))
 				.map(ModelAttribute::value)
-				.orElse(Conventions.getVariableNameForParameter(returnType));
+				.orElseGet(() -> Conventions.getVariableNameForParameter(returnType));
 	}
 
 	private void updateBindingContext(BindingContext context, ServerWebExchange exchange) {

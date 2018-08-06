@@ -45,6 +45,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
+import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -69,7 +70,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p><b>NOTE: Hibernate access code can also be coded against the native Hibernate
  * {@link Session}. Hence, for newly started projects, consider adopting the standard
- * Hibernate style of coding against {@link SessionFactory#getCurrentSession()}.</b>
+ * Hibernate style of coding against {@link SessionFactory#getCurrentSession()}.
  * Alternatively, use {@link #execute(HibernateCallback)} with Java 8 lambda code blocks
  * against the callback-provided {@code Session} which results in elegant code as well,
  * decoupled from the Hibernate Session lifecycle. The remaining operations on this
@@ -1117,8 +1118,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			criteria.setMaxResults(getMaxResults());
 		}
 
-		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(obtainSessionFactory());
+		ResourceHolderSupport sessionHolder =
+				(ResourceHolderSupport) TransactionSynchronizationManager.getResource(obtainSessionFactory());
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
@@ -1146,8 +1147,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			queryObject.setMaxResults(getMaxResults());
 		}
 
-		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(obtainSessionFactory());
+		ResourceHolderSupport sessionHolder =
+				(ResourceHolderSupport) TransactionSynchronizationManager.getResource(obtainSessionFactory());
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			queryObject.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}

@@ -31,12 +31,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * Central dispatcher for HTTP request handlers/controllers. Dispatches to
@@ -146,10 +145,6 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
-		if (logger.isDebugEnabled()) {
-			ServerHttpRequest request = exchange.getRequest();
-			logger.debug("Processing " + request.getMethodValue() + " request for [" + request.getURI() + "]");
-		}
 		if (this.handlerMappings == null) {
 			return Mono.error(HANDLER_NOT_FOUND_EXCEPTION);
 		}

@@ -69,13 +69,13 @@ public class ResponseBodyEmitter {
 	@Nullable
 	private Handler handler;
 
-	/** Store send data before handler is initialized */
+	/** Store send data before handler is initialized. */
 	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<>(8);
 
-	/** Store complete invocation before handler is initialized */
+	/** Store complete invocation before handler is initialized. */
 	private boolean complete;
 
-	/** Store completeWithError invocation before handler is initialized */
+	/** Store completeWithError invocation before handler is initialized. */
 	@Nullable
 	private Throwable failure;
 

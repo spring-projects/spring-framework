@@ -378,53 +378,59 @@ public class StringUtilsTests {
 		assertEquals("../mypath/myfile", StringUtils.cleanPath("mypath/../../mypath/myfile"));
 		assertEquals("/../mypath/myfile", StringUtils.cleanPath("/../mypath/myfile"));
 		assertEquals("/mypath/myfile", StringUtils.cleanPath("/a/:b/../../mypath/myfile"));
-		assertEquals("file:///c:/path/to/the%20file.txt", StringUtils.cleanPath("file:///c:/some/../path/to/the%20file.txt"));
+		assertEquals("/", StringUtils.cleanPath("/"));
+		assertEquals("/", StringUtils.cleanPath("/mypath/../"));
+		assertEquals("", StringUtils.cleanPath("mypath/.."));
+		assertEquals("", StringUtils.cleanPath("mypath/../."));
+		assertEquals("./", StringUtils.cleanPath("mypath/../"));
+		assertEquals("./", StringUtils.cleanPath("././"));
+		assertEquals("./", StringUtils.cleanPath("./"));
+		assertEquals("../", StringUtils.cleanPath("../"));
+		assertEquals("../", StringUtils.cleanPath("./../"));
+		assertEquals("../", StringUtils.cleanPath(".././"));
+		assertEquals("file:/", StringUtils.cleanPath("file:/"));
+		assertEquals("file:/", StringUtils.cleanPath("file:/mypath/../"));
+		assertEquals("file:", StringUtils.cleanPath("file:mypath/.."));
+		assertEquals("file:", StringUtils.cleanPath("file:mypath/../."));
+		assertEquals("file:./", StringUtils.cleanPath("file:mypath/../"));
+		assertEquals("file:./", StringUtils.cleanPath("file:././"));
+		assertEquals("file:./", StringUtils.cleanPath("file:./"));
+		assertEquals("file:../", StringUtils.cleanPath("file:../"));
+		assertEquals("file:../", StringUtils.cleanPath("file:./../"));
+		assertEquals("file:../", StringUtils.cleanPath("file:.././"));
+		assertEquals("file:///c:/path/the%20file.txt", StringUtils.cleanPath("file:///c:/some/../path/the%20file.txt"));
 	}
 
 	@Test
 	public void testPathEquals() {
 		assertTrue("Must be true for the same strings",
-				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
-						"/dummy1/dummy2/dummy3"));
+				StringUtils.pathEquals("/dummy1/dummy2/dummy3", "/dummy1/dummy2/dummy3"));
 		assertTrue("Must be true for the same win strings",
-				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
-						"C:\\dummy1\\dummy2\\dummy3"));
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3", "C:\\dummy1\\dummy2\\dummy3"));
 		assertTrue("Must be true for one top path on 1",
-				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3",
-						"/dummy1/dummy2/dummy3"));
+				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3", "/dummy1/dummy2/dummy3"));
 		assertTrue("Must be true for one win top path on 2",
-				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
-						"C:\\dummy1\\bin\\..\\dummy2\\dummy3"));
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3", "C:\\dummy1\\bin\\..\\dummy2\\dummy3"));
 		assertTrue("Must be true for two top paths on 1",
-				StringUtils.pathEquals("/dummy1/bin/../dummy2/bin/../dummy3",
-						"/dummy1/dummy2/dummy3"));
+				StringUtils.pathEquals("/dummy1/bin/../dummy2/bin/../dummy3", "/dummy1/dummy2/dummy3"));
 		assertTrue("Must be true for two win top paths on 2",
-				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
-						"C:\\dummy1\\bin\\..\\dummy2\\bin\\..\\dummy3"));
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3", "C:\\dummy1\\bin\\..\\dummy2\\bin\\..\\dummy3"));
 		assertTrue("Must be true for double top paths on 1",
-				StringUtils.pathEquals("/dummy1/bin/tmp/../../dummy2/dummy3",
-						"/dummy1/dummy2/dummy3"));
+				StringUtils.pathEquals("/dummy1/bin/tmp/../../dummy2/dummy3", "/dummy1/dummy2/dummy3"));
 		assertTrue("Must be true for double top paths on 2 with similarity",
-				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
-						"/dummy1/dum/dum/../../dummy2/dummy3"));
+				StringUtils.pathEquals("/dummy1/dummy2/dummy3", "/dummy1/dum/dum/../../dummy2/dummy3"));
 		assertTrue("Must be true for current paths",
-				StringUtils.pathEquals("./dummy1/dummy2/dummy3",
-						"dummy1/dum/./dum/../../dummy2/dummy3"));
+				StringUtils.pathEquals("./dummy1/dummy2/dummy3", "dummy1/dum/./dum/../../dummy2/dummy3"));
 		assertFalse("Must be false for relative/absolute paths",
-				StringUtils.pathEquals("./dummy1/dummy2/dummy3",
-						"/dummy1/dum/./dum/../../dummy2/dummy3"));
+				StringUtils.pathEquals("./dummy1/dummy2/dummy3", "/dummy1/dum/./dum/../../dummy2/dummy3"));
 		assertFalse("Must be false for different strings",
-				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
-						"/dummy1/dummy4/dummy3"));
+				StringUtils.pathEquals("/dummy1/dummy2/dummy3", "/dummy1/dummy4/dummy3"));
 		assertFalse("Must be false for one false path on 1",
-				StringUtils.pathEquals("/dummy1/bin/tmp/../dummy2/dummy3",
-						"/dummy1/dummy2/dummy3"));
+				StringUtils.pathEquals("/dummy1/bin/tmp/../dummy2/dummy3", "/dummy1/dummy2/dummy3"));
 		assertFalse("Must be false for one false win top path on 2",
-				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
-						"C:\\dummy1\\bin\\tmp\\..\\dummy2\\dummy3"));
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3", "C:\\dummy1\\bin\\tmp\\..\\dummy2\\dummy3"));
 		assertFalse("Must be false for top path on 1 + difference",
-				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3",
-						"/dummy1/dummy2/dummy4"));
+				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3", "/dummy1/dummy2/dummy4"));
 	}
 
 	@Test
@@ -728,9 +734,35 @@ public class StringUtilsTests {
 		assertEquals("Variant containing country code not extracted correctly", variant, locale.getVariant());
 	}
 
-	@Test  // SPR-14718
+	@Test  // SPR-14718, SPR-7598
 	public void testParseJava7Variant() {
-		assertEquals("sr_#LATN", StringUtils.parseLocaleString("sr_#LATN").toString());
+		assertEquals("sr__#LATN", StringUtils.parseLocaleString("sr__#LATN").toString());
+	}
+
+	@Test  // SPR-16651
+	public void testAvailableLocalesWithLocaleString() {
+		for (Locale locale : Locale.getAvailableLocales()) {
+			Locale parsedLocale = StringUtils.parseLocaleString(locale.toString());
+			if (parsedLocale == null) {
+				assertEquals("", locale.getLanguage());
+			}
+			else {
+				assertEquals(parsedLocale.toString(), locale.toString());
+			}
+		}
+	}
+
+	@Test  // SPR-16651
+	public void testAvailableLocalesWithLanguageTag() {
+		for (Locale locale : Locale.getAvailableLocales()) {
+			Locale parsedLocale = StringUtils.parseLocale(locale.toLanguageTag());
+			if (parsedLocale == null) {
+				assertEquals("", locale.getLanguage());
+			}
+			else {
+				assertEquals(parsedLocale.toLanguageTag(), locale.toLanguageTag());
+			}
+		}
 	}
 
 }

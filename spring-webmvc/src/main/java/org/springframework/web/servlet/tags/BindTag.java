@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * </tr>
  * </tbody>
  * </table>
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setPath
@@ -131,14 +131,14 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	 * Default is to not ignore.
 	 */
 	public void setIgnoreNestedPath(boolean ignoreNestedPath) {
-	  this.ignoreNestedPath = ignoreNestedPath;
+		this.ignoreNestedPath = ignoreNestedPath;
 	}
 
 	/**
 	 * Return whether to ignore a nested path, if any.
 	 */
 	public boolean isIgnoreNestedPath() {
-	  return this.ignoreNestedPath;
+		return this.ignoreNestedPath;
 	}
 
 
@@ -146,7 +146,7 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	protected final int doStartTagInternal() throws Exception {
 		String resolvedPath = getPath();
 		if (!isIgnoreNestedPath()) {
-			String nestedPath = (String) pageContext.getAttribute(
+			String nestedPath = (String) this.pageContext.getAttribute(
 					NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 			// only prepend if not already an absolute path
 			if (nestedPath != null && !resolvedPath.startsWith(nestedPath) &&
@@ -163,13 +163,13 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 		}
 
 		// Save previous status values, for re-exposure at the end of this tag.
-		this.previousPageStatus = pageContext.getAttribute(STATUS_VARIABLE_NAME, PageContext.PAGE_SCOPE);
-		this.previousRequestStatus = pageContext.getAttribute(STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		this.previousPageStatus = this.pageContext.getAttribute(STATUS_VARIABLE_NAME, PageContext.PAGE_SCOPE);
+		this.previousRequestStatus = this.pageContext.getAttribute(STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 
 		// Expose this tag's status object as PageContext attribute,
 		// making it available for JSP EL.
-		pageContext.removeAttribute(STATUS_VARIABLE_NAME, PageContext.PAGE_SCOPE);
-		pageContext.setAttribute(STATUS_VARIABLE_NAME, this.status, PageContext.REQUEST_SCOPE);
+		this.pageContext.removeAttribute(STATUS_VARIABLE_NAME, PageContext.PAGE_SCOPE);
+		this.pageContext.setAttribute(STATUS_VARIABLE_NAME, this.status, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
 	}
@@ -178,13 +178,13 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	public int doEndTag() {
 		// Reset previous status values.
 		if (this.previousPageStatus != null) {
-			pageContext.setAttribute(STATUS_VARIABLE_NAME, this.previousPageStatus, PageContext.PAGE_SCOPE);
+			this.pageContext.setAttribute(STATUS_VARIABLE_NAME, this.previousPageStatus, PageContext.PAGE_SCOPE);
 		}
 		if (this.previousRequestStatus != null) {
-			pageContext.setAttribute(STATUS_VARIABLE_NAME, this.previousRequestStatus, PageContext.REQUEST_SCOPE);
+			this.pageContext.setAttribute(STATUS_VARIABLE_NAME, this.previousRequestStatus, PageContext.REQUEST_SCOPE);
 		}
 		else {
-			pageContext.removeAttribute(STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+			this.pageContext.removeAttribute(STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
 		return EVAL_PAGE;
 	}

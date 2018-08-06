@@ -237,6 +237,11 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		public <T> T getNativeRequest() {
 			return (T) this.originalRequest;
 		}
+
+		@Override
+		public String getId() {
+			return this.originalRequest.getId();
+		}
 	}
 
 }

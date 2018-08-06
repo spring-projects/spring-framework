@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import java.util.ListIterator;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @param <E> the element type
  */
 @SuppressWarnings("serial")
 public class AutoPopulatingList<E> implements List<E>, Serializable {
@@ -243,6 +244,8 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	/**
 	 * Factory interface for creating elements for an index-based access
 	 * data structure such as a {@link java.util.List}.
+	 *
+	 * @param <E> the element type
 	 */
 	@FunctionalInterface
 	public interface ElementFactory<E> {

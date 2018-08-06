@@ -35,7 +35,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.i18n.FixedLocaleContextResolver;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze

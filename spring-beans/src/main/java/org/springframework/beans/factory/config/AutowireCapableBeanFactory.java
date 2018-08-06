@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * <p>Note: This is intended for creating a fresh instance, populating annotated
 	 * fields and methods as well as applying all standard bean initialization callbacks.
-	 * It does <i>not</> imply traditional by-name or by-type autowiring of properties;
+	 * It does <i>not</i> imply traditional by-name or by-type autowiring of properties;
 	 * use {@link #createBean(Class, int, boolean)} for those purposes.
 	 * @param beanClass the class of the bean to create
 	 * @return the new bean instance

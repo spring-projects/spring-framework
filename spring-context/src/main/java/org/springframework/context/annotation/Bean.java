@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,6 +250,14 @@ public @interface Bean {
 	 * @see Autowire#BY_TYPE
 	 */
 	Autowire autowire() default Autowire.NO;
+
+	/**
+	 * Is this bean a candidate for getting autowired into some other bean?
+	 * <p>Default is {@code true}; set this to {@code false} for internal delegates
+	 * that are not meant to get in the way of beans of the same type in other places.
+	 * @since 5.1
+	 */
+	boolean autowireCandidate() default true;
 
 	/**
 	 * The optional name of a method to call on the bean instance during initialization.

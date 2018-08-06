@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		converter = new Jaxb2CollectionHttpMessageConverter<Collection<Object>>();
 		rootElementListType = new ParameterizedTypeReference<List<RootElement>>() {}.getType();
 		rootElementSetType = new ParameterizedTypeReference<Set<RootElement>>() {}.getType();
@@ -72,7 +72,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 
 	@Test
-	public void canRead() throws Exception {
+	public void canRead() {
 		assertTrue(converter.canRead(rootElementListType, null, null));
 		assertTrue(converter.canRead(rootElementSetType, null, null));
 		assertTrue(converter.canRead(typeSetType, null, null));

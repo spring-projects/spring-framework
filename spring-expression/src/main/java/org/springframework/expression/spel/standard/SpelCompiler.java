@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Andy Clement
  * @since 4.1
  */
-public class SpelCompiler implements Opcodes {
+public final class SpelCompiler implements Opcodes {
 
 	private static final Log logger = LogFactory.getLog(SpelCompiler.class);
 
@@ -256,12 +256,12 @@ public class SpelCompiler implements Opcodes {
 		}
 
 		int getClassesDefinedCount() {
-			return classesDefinedCount;
+			return this.classesDefinedCount;
 		}
 
 		public Class<?> defineClass(String name, byte[] bytes) {
 			Class<?> clazz = super.defineClass(name, bytes, 0, bytes.length);
-			classesDefinedCount++;
+			this.classesDefinedCount++;
 			return clazz;
 		}
 	}

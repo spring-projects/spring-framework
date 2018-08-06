@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -612,6 +612,32 @@ public class DispatcherServletTests {
 		NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/foo", headers);
 		assertTrue(!ex.getMessage().contains("bar"));
 		assertTrue(!ex.toString().contains("bar"));
+	}
+
+	@Test // SPR-17100
+	public void shouldHandleFailure() throws ServletException, IOException {
+
+		IllegalStateException ex = new IllegalStateException("dummy");
+		@SuppressWarnings("serial")
+		FrameworkServlet servlet = new FrameworkServlet() {
+			@Override
+			protected void doService(HttpServletRequest request, HttpServletResponse response) {
+				throw ex;
+			}
+		};
+		servlet.setShouldHandleFailure(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/error");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+
+		assertEquals(500, response.getStatus());
+		assertEquals(500, request.getAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE));
+		assertEquals(ex.getClass(), request.getAttribute(WebUtils.ERROR_EXCEPTION_TYPE_ATTRIBUTE));
+		assertEquals(ex.getMessage(), request.getAttribute(WebUtils.ERROR_MESSAGE_ATTRIBUTE));
+		assertEquals(ex, request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE));
+		assertEquals(request.getRequestURI(), request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE));
 	}
 
 	@Test

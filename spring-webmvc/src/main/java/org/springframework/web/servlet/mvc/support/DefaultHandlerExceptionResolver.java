@@ -124,7 +124,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * </tr>
  * <tr class="rowColor">
  * <td><p>NoHandlerFoundException</p></td>
- * <td><p>400 (SC_NOT_FOUND)</p></td>
+ * <td><p>404 (SC_NOT_FOUND)</p></td>
  * </tr>
  * <tr class="altColor">
  * <td><p>AsyncRequestTimeoutException</p></td>
@@ -228,9 +228,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 						(AsyncRequestTimeoutException) ex, request, response, handler);
 			}
 		}
-		catch (Exception handlerException) {
+		catch (Exception handlerEx) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Handling of [" + ex.getClass().getName() + "] resulted in exception", handlerException);
+				logger.warn("Failure while trying to resolve exception [" + ex.getClass().getName() + "]", handlerEx);
 			}
 		}
 		return null;
@@ -463,7 +463,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
- 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();
 	}
 
@@ -541,8 +541,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		if (!response.isCommitted()) {
 			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 		}
-		else if (logger.isDebugEnabled()) {
-			logger.debug("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
+		else {
+			logger.warn("Async request timed out");
 		}
 		return new ModelAndView();
 	}

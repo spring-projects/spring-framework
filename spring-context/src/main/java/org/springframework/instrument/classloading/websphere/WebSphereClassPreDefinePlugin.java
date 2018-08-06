@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ class WebSphereClassPreDefinePlugin implements InvocationHandler {
 			throws Exception {
 
 		// NB: WebSphere passes className as "." without class while the transformer expects a VM "/" format
-		byte[] result = transformer.transform(classLoader, className.replace('.', '/'), null, null, classfileBuffer);
+		byte[] result = this.transformer.transform(classLoader, className.replace('.', '/'), null, null, classfileBuffer);
 		return (result != null ? result : classfileBuffer);
 	}
 

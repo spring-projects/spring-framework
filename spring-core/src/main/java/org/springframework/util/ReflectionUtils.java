@@ -57,6 +57,27 @@ public abstract class ReflectionUtils {
 
 	private static final Field[] NO_FIELDS = {};
 
+	/**
+	 * Pre-built FieldFilter that matches all non-static, non-final fields.
+	 */
+	public static final FieldFilter COPYABLE_FIELDS =
+			field -> !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()));
+
+
+	/**
+	 * Pre-built MethodFilter that matches all non-bridge methods.
+	 */
+	public static final MethodFilter NON_BRIDGED_METHODS =
+			(method -> !method.isBridge());
+
+
+	/**
+	 * Pre-built MethodFilter that matches all non-bridge non-synthetic methods
+	 * which are not declared on {@code java.lang.Object}.
+	 */
+	public static final MethodFilter USER_DECLARED_METHODS =
+			(method -> (!method.isBridge() && !method.isSynthetic() && method.getDeclaringClass() != Object.class));
+
 
 	/**
 	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
@@ -511,8 +532,8 @@ public abstract class ReflectionUtils {
 	 * on Java 8 based interfaces that the given class implements).
 	 * @param clazz the class to introspect
 	 * @param mc the callback to invoke for each method
-	 * @since 4.2
 	 * @throws IllegalStateException if introspection fails
+	 * @since 4.2
 	 * @see #doWithMethods
 	 */
 	public static void doWithLocalMethods(Class<?> clazz, MethodCallback mc) {
@@ -682,8 +703,8 @@ public abstract class ReflectionUtils {
 	 * Invoke the given callback on all locally declared fields in the given class.
 	 * @param clazz the target class to analyze
 	 * @param fc the callback to invoke for each field
-	 * @since 4.2
 	 * @throws IllegalStateException if introspection fails
+	 * @since 4.2
 	 * @see #doWithFields
 	 */
 	public static void doWithLocalFields(Class<?> clazz, FieldCallback fc) {
@@ -846,26 +867,5 @@ public abstract class ReflectionUtils {
 		boolean matches(Field field);
 	}
 
-
-	/**
-	 * Pre-built FieldFilter that matches all non-static, non-final fields.
-	 */
-	public static final FieldFilter COPYABLE_FIELDS =
-			field -> !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()));
-
-
-	/**
-	 * Pre-built MethodFilter that matches all non-bridge methods.
-	 */
-	public static final MethodFilter NON_BRIDGED_METHODS =
-			(method -> !method.isBridge());
-
-
-	/**
-	 * Pre-built MethodFilter that matches all non-bridge non-synthetic methods
-	 * which are not declared on {@code java.lang.Object}.
-	 */
-	public static final MethodFilter USER_DECLARED_METHODS =
-			(method -> (!method.isBridge() && !method.isSynthetic() && method.getDeclaringClass() != Object.class));
 
 }

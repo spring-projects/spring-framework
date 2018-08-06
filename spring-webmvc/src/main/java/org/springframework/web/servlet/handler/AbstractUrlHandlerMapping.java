@@ -22,7 +22,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -142,12 +141,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
 		}
-		if (handler != null && logger.isDebugEnabled()) {
-			logger.debug("Mapping [" + lookupPath + "] to " + handler);
-		}
-		else if (handler == null && logger.isTraceEnabled()) {
-			logger.trace("No handler mapping found for [" + lookupPath + "]");
-		}
 		return handler;
 	}
 
@@ -158,7 +151,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * both "/test" and "/team". For details, see the AntPathMatcher class.
 	 * <p>Looks for the most exact pattern, where most exact is defined as
 	 * the longest path pattern.
-	 * @param urlPath URL the bean is mapped to
+	 * @param urlPath the URL the bean is mapped to
 	 * @param request current HTTP request (to expose the path within the mapping to)
 	 * @return the associated handler instance, or {@code null} if not found
 	 * @see #exposePathWithinMapping
@@ -195,8 +188,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
 			matchingPatterns.sort(patternComparator);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Matching patterns for request [" + urlPath + "] are " + matchingPatterns);
+			if (logger.isTraceEnabled() && matchingPatterns.size() > 1) {
+				logger.trace("Matching patterns " + matchingPatterns);
 			}
 			bestMatch = matchingPatterns.get(0);
 		}
@@ -229,8 +222,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 					uriTemplateVariables.putAll(decodedVars);
 				}
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("URI Template variables for request [" + urlPath + "] are " + uriTemplateVariables);
+			if (logger.isTraceEnabled() && uriTemplateVariables.size() > 0) {
+				logger.trace("URI variables " + uriTemplateVariables);
 			}
 			return buildPathExposingHandler(handler, bestMatch, pathWithinMapping, uriTemplateVariables);
 		}
@@ -356,28 +349,28 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 		else {
 			if (urlPath.equals("/")) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Root mapping to " + getHandlerDescription(handler));
+				if (logger.isTraceEnabled()) {
+					logger.trace("Root mapping to " + getHandlerDescription(handler));
 				}
 				setRootHandler(resolvedHandler);
 			}
 			else if (urlPath.equals("/*")) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Default mapping to " + getHandlerDescription(handler));
+				if (logger.isTraceEnabled()) {
+					logger.trace("Default mapping to " + getHandlerDescription(handler));
 				}
 				setDefaultHandler(resolvedHandler);
 			}
 			else {
 				this.handlerMap.put(urlPath, resolvedHandler);
-				if (logger.isInfoEnabled()) {
-					logger.info("Mapped URL path [" + urlPath + "] onto " + getHandlerDescription(handler));
+				if (logger.isTraceEnabled()) {
+					logger.trace("Mapped [" + urlPath + "] onto " + getHandlerDescription(handler));
 				}
 			}
 		}
 	}
 
 	private String getHandlerDescription(Object handler) {
-		return "handler " + (handler instanceof String ? "'" + handler + "'" : "of type [" + handler.getClass() + "]");
+		return (handler instanceof String ? "'" + handler + "'" : handler.toString());
 	}
 
 

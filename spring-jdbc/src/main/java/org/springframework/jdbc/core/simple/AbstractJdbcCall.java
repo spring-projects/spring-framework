@@ -50,19 +50,19 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractJdbcCall {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Lower-level class used to execute SQL */
+	/** Lower-level class used to execute SQL. */
 	private final JdbcTemplate jdbcTemplate;
 
-	/** Context used to retrieve and manage database meta-data */
+	/** Context used to retrieve and manage database meta-data. */
 	private final CallMetaDataContext callMetaDataContext = new CallMetaDataContext();
 
-	/** List of SqlParameter objects */
+	/** List of SqlParameter objects. */
 	private final List<SqlParameter> declaredParameters = new ArrayList<>();
 
-	/** List of RefCursor/ResultSet RowMapper objects */
+	/** List of RefCursor/ResultSet RowMapper objects. */
 	private final Map<String, RowMapper<?>> declaredRowMappers = new LinkedHashMap<>();
 
 	/**
@@ -71,7 +71,7 @@ public abstract class AbstractJdbcCall {
 	 */
 	private volatile boolean compiled = false;
 
-	/** The generated string used for call statement */
+	/** The generated string used for call statement. */
 	@Nullable
 	private String callString;
 
@@ -231,7 +231,7 @@ public abstract class AbstractJdbcCall {
 	}
 
 	/**
-	 * Get the {@link CallableStatementCreatorFactory} being used
+	 * Get the {@link CallableStatementCreatorFactory} being used.
 	 */
 	protected CallableStatementCreatorFactory getCallableStatementFactory() {
 		Assert.state(this.callableStatementFactory != null, "No CallableStatementCreatorFactory available");
@@ -365,7 +365,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Delegate method that executes the call using the passed-in {@link SqlParameterSource}.
 	 * @param parameterSource parameter names and values to be used in call
-	 * @return Map of out parameters
+	 * @return a Map of out parameters
 	 */
 	protected Map<String, Object> doExecute(SqlParameterSource parameterSource) {
 		checkCompiled();
@@ -377,7 +377,7 @@ public abstract class AbstractJdbcCall {
 	 * Delegate method that executes the call using the passed-in array of parameters.
 	 * @param args array of parameter values. The order of values must match the order
 	 * declared for the stored procedure.
-	 * @return Map of out parameters
+	 * @return a Map of out parameters
 	 */
 	protected Map<String, Object> doExecute(Object... args) {
 		checkCompiled();
@@ -387,8 +387,8 @@ public abstract class AbstractJdbcCall {
 
 	/**
 	 * Delegate method that executes the call using the passed-in Map of parameters.
-	 * @param args Map of parameter name and values
-	 * @return Map of out parameters
+	 * @param args a Map of parameter name and values
+	 * @return a Map of out parameters
 	 */
 	protected Map<String, Object> doExecute(Map<String, ?> args) {
 		checkCompiled();
@@ -435,7 +435,7 @@ public abstract class AbstractJdbcCall {
 	 * Match the provided in parameter values with registered parameters and
 	 * parameters defined via meta-data processing.
 	 * @param parameterSource the parameter vakues provided as a {@link SqlParameterSource}
-	 * @return Map with parameter names and values
+	 * @return a Map with parameter names and values
 	 */
 	protected Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(parameterSource);
@@ -445,7 +445,7 @@ public abstract class AbstractJdbcCall {
 	 * Match the provided in parameter values with registered parameters and
 	 * parameters defined via meta-data processing.
 	 * @param args the parameter values provided as an array
-	 * @return Map with parameter names and values
+	 * @return a Map with parameter names and values
 	 */
 	private Map<String, ?> matchInParameterValuesWithCallParameters(Object[] args) {
 		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(args);
@@ -455,7 +455,7 @@ public abstract class AbstractJdbcCall {
 	 * Match the provided in parameter values with registered parameters and
 	 * parameters defined via meta-data processing.
 	 * @param args the parameter values provided in a Map
-	 * @return Map with parameter names and values
+	 * @return a Map with parameter names and values
 	 */
 	protected Map<String, ?> matchInParameterValuesWithCallParameters(Map<String, ?> args) {
 		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(args);

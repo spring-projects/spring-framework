@@ -145,7 +145,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 */
 	@Override
 	public ConsumesRequestCondition combine(ConsumesRequestCondition other) {
-		return !other.expressions.isEmpty() ? other : this;
+		return (!other.expressions.isEmpty() ? other : this);
 	}
 
 	/**
@@ -166,9 +166,9 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 		if (isEmpty()) {
 			return this;
 		}
-		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>(expressions);
+		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
 		result.removeIf(expression -> !expression.match(exchange));
-		return (result.isEmpty()) ? null : new ConsumesRequestCondition(result);
+		return (!result.isEmpty() ? new ConsumesRequestCondition(result) : null);
 	}
 
 	/**

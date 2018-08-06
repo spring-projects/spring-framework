@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	@Nullable
 	Object rootObject;
 
-	/** Map with cached nested Accessors: nested path -> Accessor instance */
+	/** Map with cached nested Accessors: nested path -> Accessor instance. */
 	@Nullable
 	private Map<String, AbstractNestablePropertyAccessor> nestedPropertyAccessors;
 
@@ -971,6 +971,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 
+	/**
+	 * A handler for a specific property.
+	 */
 	protected abstract static class PropertyHandler {
 
 		private final Class<?> propertyType;
@@ -1026,6 +1029,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 
+	/**
+	 * Holder class used to store property tokens.
+	 */
 	protected static class PropertyTokenHolder {
 
 		public PropertyTokenHolder(String name) {

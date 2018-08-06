@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.converter.protobuf;
 
 import java.io.IOException;
 
+import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Before;
@@ -36,10 +37,14 @@ import static org.mockito.Mockito.*;
  * Test suite for {@link ProtobufJsonFormatHttpMessageConverter}.
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
+@SuppressWarnings("deprecation")
 public class ProtobufJsonFormatHttpMessageConverterTests {
 
 	private ProtobufHttpMessageConverter converter;
+
+	private ExtensionRegistry extensionRegistry;
 
 	private ExtensionRegistryInitializer registryInitializer;
 
@@ -49,6 +54,7 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 	@Before
 	public void setup() {
 		this.registryInitializer = mock(ExtensionRegistryInitializer.class);
+		this.extensionRegistry = mock(ExtensionRegistry.class);
 		this.converter = new ProtobufJsonFormatHttpMessageConverter(
 				JsonFormat.parser(), JsonFormat.printer(), this.registryInitializer);
 		this.testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
@@ -57,12 +63,19 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 
 	@Test
 	public void extensionRegistryInitialized() {
-	    verify(this.registryInitializer, times(1)).initializeExtensionRegistry(any());
+		verify(this.registryInitializer, times(1)).initializeExtensionRegistry(any());
 	}
 
 	@Test
-	public void extensionRegistryNull() {
-		new ProtobufHttpMessageConverter(null);
+	public void extensionRegistryInitializerNull() {
+		ProtobufHttpMessageConverter converter = new ProtobufHttpMessageConverter((ExtensionRegistryInitializer)null);
+		assertNotNull(converter);
+	}
+
+	@Test
+	public void extensionRegistryInitializer() {
+		ProtobufHttpMessageConverter converter = new ProtobufHttpMessageConverter((ExtensionRegistry)null);
+		assertNotNull(converter);
 	}
 
 	@Test

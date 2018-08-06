@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,56 +76,56 @@ import org.springframework.web.util.UriUtils;
  * <caption>Attribute Summary</caption>
  * <thead>
  * <tr>
- * <th class="colFirst">Attribute</th>
- * <th class="colOne">Required?</th>
- * <th class="colOne">Runtime Expression?</th>
- * <th class="colLast">Description</th>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
  * </tr>
  * </thead>
  * <tbody>
- * <tr class="altColor">
- * <td>value</p></td>
- * <td>true</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>value</td>
+ * <td>true</td>
+ * <td>true</td>
  * <td>The URL to build. This value can include template {placeholders} that are
  * replaced with the URL encoded value of the named parameter. Parameters
- * must be defined using the param tag inside the body of this tag.</p></td>
+ * must be defined using the param tag inside the body of this tag.</td>
  * </tr>
- * <tr class="rowColor">
- * <td>context</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>context</td>
+ * <td>false</td>
+ * <td>true</td>
  * <td>Specifies a remote application context path.
- * The default is the current application context path.</p></td>
+ * The default is the current application context path.</td>
  * </tr>
- * <tr class="altColor">
- * <td>var</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>var</td>
+ * <td>false</td>
+ * <td>true</td>
  * <td>The name of the variable to export the URL value to.
- * If not specified the URL is written as output.</p></td>
+ * If not specified the URL is written as output.</td>
  * </tr>
- * <tr class="rowColor">
- * <td>scope</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>scope</td>
+ * <td>false</td>
+ * <td>true</td>
  * <td>The scope for the var. 'application', 'session', 'request' and 'page'
  * scopes are supported. Defaults to page scope. This attribute has no
- * effect unless the var attribute is also defined.</p></td>
+ * effect unless the var attribute is also defined.</td>
  * </tr>
- * <tr class="altColor">
- * <td>htmlEscape</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>htmlEscape</td>
+ * <td>false</td>
+ * <td>true</td>
  * <td>Set HTML escaping for this tag, as a boolean value. Overrides the
- * default HTML escaping setting for the current page.</p></td>
+ * default HTML escaping setting for the current page.</td>
  * </tr>
- * <tr class="rowColor">
- * <td>javaScriptEscape</p></td>
- * <td>false</p></td>
- * <td>true</p></td>
+ * <tr>
+ * <td>javaScriptEscape</td>
+ * <td>false</td>
+ * <td>true</td>
  * <td>Set JavaScript escaping for this tag, as a boolean value.
- * Default is false.</p></td>
+ * Default is false.</td>
  * </tr>
  * </tbody>
  * </table>
@@ -166,7 +166,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 
 	/**
-	 * Sets the value of the URL
+	 * Sets the value of the URL.
 	 */
 	public void setValue(String value) {
 		if (value.contains(URL_TYPE_ABSOLUTE)) {
@@ -245,7 +245,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		if (this.var == null) {
 			// print the url to the writer
 			try {
-				pageContext.getOut().print(url);
+				this.pageContext.getOut().print(url);
 			}
 			catch (IOException ex) {
 				throw new JspException(ex);
@@ -253,7 +253,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		}
 		else {
 			// store the url as a variable
-			pageContext.setAttribute(var, url, scope);
+			this.pageContext.setAttribute(this.var, url, this.scope);
 		}
 		return EVAL_PAGE;
 	}
@@ -265,8 +265,8 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 */
 	String createUrl() throws JspException {
 		Assert.state(this.value != null, "No value set");
-		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
-		HttpServletResponse response = (HttpServletResponse) pageContext.getResponse();
+		HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
+		HttpServletResponse response = (HttpServletResponse) this.pageContext.getResponse();
 
 		StringBuilder url = new StringBuilder();
 		if (this.type == UrlType.CONTEXT_RELATIVE) {
@@ -317,7 +317,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	protected String createQueryString(List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
 			throws JspException {
 
-		String encoding = pageContext.getResponse().getCharacterEncoding();
+		String encoding = this.pageContext.getResponse().getCharacterEncoding();
 		StringBuilder qs = new StringBuilder();
 		for (Param param : params) {
 			if (!usedParams.contains(param.getName()) && StringUtils.hasLength(param.getName())) {
@@ -354,7 +354,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	protected String replaceUriTemplateParams(String uri, List<Param> params, Set<String> usedParams)
 			throws JspException {
 
-		String encoding = pageContext.getResponse().getCharacterEncoding();
+		String encoding = this.pageContext.getResponse().getCharacterEncoding();
 		for (Param param : params) {
 			String template = URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 			if (uri.contains(template)) {

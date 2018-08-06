@@ -26,7 +26,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 
 /**
- * {@link WebHandler} decorator that invokes a chain of {@link WebFilter}s
+ * {@link WebHandler} decorator that invokes a chain of {@link WebFilter WebHandler} decorator that invokes a chain of {@link WebFilters}
  * before the delegate {@link WebHandler}.
  *
  * @author Rossen Stoyanchev

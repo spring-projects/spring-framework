@@ -236,6 +236,10 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			return this.standardXmlBeanDefinitionReader.loadBeanDefinitions(encodedResource);
 		}
 
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loading Groovy bean definitions from " + encodedResource);
+		}
+
 		Closure beans = new Closure(this) {
 			@Override
 			public Object call(Object[] args) {
@@ -265,7 +269,12 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			throw new BeanDefinitionParsingException(new Problem("Error evaluating Groovy script: " + ex.getMessage(),
 					new Location(encodedResource.getResource()), null, ex));
 		}
-		return getRegistry().getBeanDefinitionCount() - countBefore;
+
+		int count = getRegistry().getBeanDefinitionCount() - countBefore;
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loaded " + count + " bean definitions from " + encodedResource);
+		}
+		return count;
 	}
 
 
@@ -371,9 +380,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		}
 		else if ("ref".equals(name)) {
 			String refName;
-			if (args[0] == null)
+			if (args[0] == null) {
 				throw new IllegalArgumentException("Argument to ref() is not a valid bean or was not found");
-
+			}
 			if (args[0] instanceof RuntimeBeanReference) {
 				refName = ((RuntimeBeanReference) args[0]).getBeanName();
 			}
@@ -489,11 +498,11 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				Map.Entry factoryBeanEntry = (Map.Entry) ((Map) args[0]).entrySet().iterator().next();
 				// If we have a closure body, that will be the last argument.
 				// In between are the constructor args
-				int constructorArgsTest = hasClosureArgument?2:1;
+				int constructorArgsTest = (hasClosureArgument ? 2 : 1);
 				// If we have more than this number of args, we have constructor args
 				if (args.length > constructorArgsTest){
 					// factory-method requires args
-					int endOfConstructArgs = (hasClosureArgument? args.length - 1 : args.length);
+					int endOfConstructArgs = (hasClosureArgument ? args.length - 1 : args.length);
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, null,
 							resolveConstructorArguments(args, 1, endOfConstructArgs));
 				}
@@ -511,7 +520,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		}
 		else {
 			List constructorArgs = resolveConstructorArguments(args, 0, hasClosureArgument ? args.length - 1 : args.length);
-			currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, null, constructorArgs);
+			this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, null, constructorArgs);
 		}
 
 		if (hasClosureArgument) {
@@ -545,8 +554,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Checks whether there are any {@link RuntimeBeanReference}s inside the {@link Map}
-	 * and converts it to a {@link ManagedMap} if necessary.
+	 * Checks whether there are any {@link RuntimeBeanReference RuntimeBeanReferences}
+	 * inside the {@link Map} and converts it to a {@link ManagedMap} if necessary.
 	 * @param map the original Map
 	 * @return either the original map or a managed copy of it
 	 */
@@ -567,8 +576,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Checks whether there are any {@link RuntimeBeanReference}s inside the {@link List}
-	 * and converts it to a {@link ManagedList} if necessary.
+	 * Checks whether there are any {@link RuntimeBeanReference RuntimeBeanReferences}
+	 * inside the {@link List} and converts it to a {@link ManagedList} if necessary.
 	 * @param list the original List
 	 * @return either the original list or a managed copy of it
 	 */
@@ -630,7 +639,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	/**
 	 * This method overrides property retrieval in the scope of the
-	 * {@code GroovyBeanDefinitionReader} to either:
+	 * {@code GroovyBeanDefinitionReader}. A property retrieval will either:
 	 * <ul>
 	 * <li>Retrieve a variable from the bean builder's binding if it exists
 	 * <li>Retrieve a RuntimeBeanReference for a specific bean if it exists

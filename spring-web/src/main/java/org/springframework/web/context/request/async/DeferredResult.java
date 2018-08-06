@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Juergen Hoeller
  * @author Rob Winch
  * @since 3.2
+ * @param <T> the result type
  */
 public class DeferredResult<T> {
 
@@ -209,7 +210,7 @@ public class DeferredResult<T> {
 			resultHandler.handleResult(resultToHandle);
 		}
 		catch (Throwable ex) {
-			logger.debug("Failed to handle existing result", ex);
+			logger.debug("Failed to process async result", ex);
 		}
 	}
 

@@ -94,22 +94,22 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 	private boolean reconnectOnException = false;
 
-	/** The target Connection */
+	/** The target Connection. */
 	@Nullable
 	private Connection connection;
 
-	/** A hint whether to create a queue or topic connection */
+	/** A hint whether to create a queue or topic connection. */
 	@Nullable
 	private Boolean pubSubMode;
 
-	/** An internal aggregator allowing for per-connection ExceptionListeners */
+	/** An internal aggregator allowing for per-connection ExceptionListeners. */
 	@Nullable
 	private AggregatedExceptionListener aggregatedExceptionListener;
 
-	/** Whether the shared Connection has been started */
+	/** Whether the shared Connection has been started. */
 	private int startedCount = 0;
 
-	/** Synchronization monitor for the shared Connection */
+	/** Synchronization monitor for the shared Connection. */
 	private final Object connectionMonitor = new Object();
 
 
@@ -345,8 +345,8 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			if (this.startedCount > 0) {
 				this.connection.start();
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Established shared JMS Connection: " + this.connection);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Established shared JMS Connection: " + this.connection);
 			}
 		}
 	}
@@ -357,7 +357,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 */
 	@Override
 	public void onException(JMSException ex) {
-		logger.warn("Encountered a JMSException - resetting the underlying JMS Connection", ex);
+		logger.info("Encountered a JMSException - resetting the underlying JMS Connection", ex);
 		resetConnection();
 	}
 

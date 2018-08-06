@@ -18,6 +18,7 @@ package org.springframework.web.reactive.config;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import reactor.core.publisher.Mono;
 
@@ -37,6 +38,7 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
@@ -92,6 +94,11 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Override
 	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+		if (applicationContext != null) {
+				Assert.state(!applicationContext.containsBean("mvcContentNegotiationManager"),
+						"The Java/XML config for Spring MVC and Spring WebFlux cannot both be enabled, " +
+						"e.g. via @EnableWebMvc and @EnableWebFlux, in the same application.");
+		}
 	}
 
 	@Nullable
@@ -120,13 +127,18 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
 		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
-		Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
 		if (useTrailingSlashMatch != null) {
 			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
+		Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
 		if (useCaseSensitiveMatch != null) {
 			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 		}
+		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
+		if (pathPrefixes != null) {
+			mapping.setPathPrefixes(pathPrefixes);
+		}
+
 		return mapping;
 	}
 
@@ -316,6 +328,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		return initializer;
 	}
 
+	/**
+	 * Return a {@link FormattingConversionService} for use with annotated controllers.
+	 * <p>See {@link #addFormatters} as an alternative to overriding this method.
+	 */
 	@Bean
 	public FormattingConversionService webFluxConversionService() {
 		FormattingConversionService service = new DefaultFormattingConversionService();
@@ -324,7 +340,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override to add custom {@link Converter}s and {@link Formatter}s.
+	 * Override this method to add custom {@link Converter} and/or {@link Formatter}
+	 * delegates to the common {@link FormattingConversionService}.
+	 * @see #webFluxConversionService()
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
 	}

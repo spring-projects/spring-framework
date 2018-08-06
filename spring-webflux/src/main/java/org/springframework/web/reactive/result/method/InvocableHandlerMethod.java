@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
@@ -128,42 +128,49 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param exchange the current exchange
 	 * @param bindingContext the binding context to use
 	 * @param providedArgs optional list of argument values to match by type
-	 * @return Mono with a {@link HandlerResult}.
+	 * @return a Mono with a {@link HandlerResult}.
 	 */
-	public Mono<HandlerResult> invoke(ServerWebExchange exchange, BindingContext bindingContext,
-			Object... providedArgs) {
+	public Mono<HandlerResult> invoke(
+			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		return resolveArguments(exchange, bindingContext, providedArgs).flatMap(args -> {
+			Object value;
 			try {
-				Object value = doInvoke(args);
-
-				HttpStatus status = getResponseStatus();
-				if (status != null) {
-					exchange.getResponse().setStatusCode(status);
-				}
-
-				MethodParameter returnType = getReturnType();
-				ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(returnType.getParameterType());
-				boolean asyncVoid = isAsyncVoidReturnType(returnType, adapter);
-				if ((value == null || asyncVoid) && isResponseHandled(args, exchange)) {
-					logger.debug("Response fully handled in controller method");
-					return asyncVoid ? Mono.from(adapter.toPublisher(value)) : Mono.empty();
-				}
-
-				HandlerResult result = new HandlerResult(this, value, returnType, bindingContext);
-				return Mono.just(result);
+				ReflectionUtils.makeAccessible(getBridgedMethod());
+				value = getBridgedMethod().invoke(getBean(), args);
+			}
+			catch (IllegalArgumentException ex) {
+				assertTargetBean(getBridgedMethod(), getBean(), args);
+				String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+				throw new IllegalStateException(formatInvokeError(text, args), ex);
 			}
 			catch (InvocationTargetException ex) {
 				return Mono.error(ex.getTargetException());
 			}
 			catch (Throwable ex) {
-				return Mono.error(new IllegalStateException(getInvocationErrorMessage(args)));
+				// Unlikely to ever get here, but it must be handled...
+				return Mono.error(new IllegalStateException(formatInvokeError("Invocation failure", args), ex));
 			}
+
+			HttpStatus status = getResponseStatus();
+			if (status != null) {
+				exchange.getResponse().setStatusCode(status);
+			}
+
+			MethodParameter returnType = getReturnType();
+			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(returnType.getParameterType());
+			boolean asyncVoid = isAsyncVoidReturnType(returnType, adapter);
+			if ((value == null || asyncVoid) && isResponseHandled(args, exchange)) {
+				return (asyncVoid ? Mono.from(adapter.toPublisher(value)) : Mono.empty());
+			}
+
+			HandlerResult result = new HandlerResult(this, value, returnType, bindingContext);
+			return Mono.just(result);
 		});
 	}
 
-	private Mono<Object[]> resolveArguments(ServerWebExchange exchange, BindingContext bindingContext,
-			Object... providedArgs) {
+	private Mono<Object[]> resolveArguments(
+			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
 			return EMPTY_ARGS;
@@ -175,7 +182,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						return findProvidedArgument(param, providedArgs)
 								.map(Mono::just)
 								.orElseGet(() -> {
-									HandlerMethodArgumentResolver resolver = findResolver(param);
+									HandlerMethodArgumentResolver resolver = findResolver(exchange, param);
 									return resolveArg(resolver, param, bindingContext, exchange);
 								});
 
@@ -200,11 +207,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				.findFirst();
 	}
 
-	private HandlerMethodArgumentResolver findResolver(MethodParameter param) {
+	private HandlerMethodArgumentResolver findResolver(ServerWebExchange exchange, MethodParameter param) {
 		return this.resolvers.stream()
 				.filter(r -> r.supportsParameter(param))
-				.findFirst()
-				.orElseThrow(() -> getArgumentError("No suitable resolver for", param, null));
+				.findFirst().orElseThrow(() ->
+						new IllegalStateException(formatArgumentError(param, "No suitable resolver")));
 	}
 
 	private Mono<Object> resolveArg(HandlerMethodArgumentResolver resolver, MethodParameter parameter,
@@ -213,49 +220,62 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		try {
 			return resolver.resolveArgument(parameter, bindingContext, exchange)
 					.defaultIfEmpty(NO_ARG_VALUE)
-					.doOnError(cause -> {
-						if (logger.isDebugEnabled()) {
-							logger.debug(getDetailedErrorMessage("Failed to resolve", parameter), cause);
-						}
-					});
+					.doOnError(cause -> logArgumentErrorIfNecessary(exchange, parameter, cause));
 		}
 		catch (Exception ex) {
-			throw getArgumentError("Failed to resolve", parameter, ex);
+			logArgumentErrorIfNecessary(exchange, parameter, ex);
+			return Mono.error(ex);
 		}
 	}
 
-	private IllegalStateException getArgumentError(String text, MethodParameter parameter, @Nullable Throwable ex) {
-		return new IllegalStateException(getDetailedErrorMessage(text, parameter), ex);
-	}
+	private void logArgumentErrorIfNecessary(
+			ServerWebExchange exchange, MethodParameter parameter, Throwable cause) {
 
-	private String getDetailedErrorMessage(String text, MethodParameter param) {
-		return text + " argument " + param.getParameterIndex() + " of type '" +
-				param.getParameterType().getName() + "' on " + getBridgedMethod().toGenericString();
-	}
-
-	@Nullable
-	private Object doInvoke(Object[] args) throws Exception {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
-					"' with arguments " + Arrays.toString(args));
+		// Leave stack trace for later, if error is not handled..
+		String message = cause.getMessage();
+		if (!message.contains(parameter.getExecutable().toGenericString())) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, message));
+			}
 		}
-		ReflectionUtils.makeAccessible(getBridgedMethod());
-		Object returnValue = getBridgedMethod().invoke(getBean(), args);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Method [" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
-					"] returned [" + returnValue + "]");
-		}
-		return returnValue;
 	}
 
-	private String getInvocationErrorMessage(Object[] args) {
-		String argumentDetails = IntStream.range(0, args.length)
+	private static String formatArgumentError(MethodParameter param, String message) {
+		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
+				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
+	}
+
+	/**
+	 * Assert that the target bean class is an instance of the class where the given
+	 * method is declared. In some cases the actual controller instance at request-
+	 * processing time may be a JDK dynamic proxy (lazy initialization, prototype
+	 * beans, and others). {@code @Controller}'s that require proxying should prefer
+	 * class-based proxy mechanisms.
+	 */
+	private void assertTargetBean(Method method, Object targetBean, Object[] args) {
+		Class<?> methodDeclaringClass = method.getDeclaringClass();
+		Class<?> targetBeanClass = targetBean.getClass();
+		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
+			String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
+					"' is not an instance of the actual controller bean class '" +
+					targetBeanClass.getName() + "'. If the controller requires proxying " +
+					"(e.g. due to @Transactional), please use class-based proxying.";
+			throw new IllegalStateException(formatInvokeError(text, args));
+		}
+	}
+
+	private String formatInvokeError(String text, Object[] args) {
+
+		String formattedArgs = IntStream.range(0, args.length)
 				.mapToObj(i -> (args[i] != null ?
-						"[" + i + "][type=" + args[i].getClass().getName() + "][value=" + args[i] + "]" :
-						"[" + i + "][null]"))
-				.collect(Collectors.joining(",", " ", " "));
-		return "Failed to invoke handler method with resolved arguments:" + argumentDetails +
-				"on " + getBridgedMethod().toGenericString();
+						"[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
+						"[" + i + "] [null]"))
+				.collect(Collectors.joining(",\n", " ", " "));
+
+		return text + "\n" +
+				"Controller [" + getBeanType().getName() + "]\n" +
+				"Method [" + getBridgedMethod().toGenericString() + "]\n" +
+				"with argument values:\n" + formattedArgs;
 	}
 
 	private boolean isAsyncVoidReturnType(MethodParameter returnType,

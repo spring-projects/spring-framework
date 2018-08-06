@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,8 @@ import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Test the effect of exceptions at different stages of request processing by
@@ -72,7 +70,7 @@ public class DispatcherHandlerErrorTests {
 
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(TestConfig.class);
 		ctx.refresh();
@@ -81,20 +79,21 @@ public class DispatcherHandlerErrorTests {
 
 
 	@Test
-	public void noHandler() throws Exception {
+	public void noHandler() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/does-not-exist"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(ResponseStatusException.class));
-					assertThat(error.getMessage(), is("Response status 404 with reason \"No matching handler\""));
+					assertThat(error.getMessage(),
+							is("404 NOT_FOUND \"No matching handler\""));
 				})
 				.verify();
 	}
 
 	@Test
-	public void controllerReturnsMonoError() throws Exception {
+	public void controllerReturnsMonoError() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/error-signal"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
@@ -104,7 +103,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void controllerThrowsException() throws Exception {
+	public void controllerThrowsException() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/raise-exception"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
@@ -114,7 +113,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void unknownReturnType() throws Exception {
+	public void unknownReturnType() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/unknown-return-type"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
@@ -127,7 +126,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void responseBodyMessageConversionError() throws Exception {
+	public void responseBodyMessageConversionError() {
 		ServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.post("/request-body").accept(APPLICATION_JSON).body("body"));
 
@@ -139,10 +138,10 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void requestBodyError() throws Exception {
+	public void requestBodyError() {
 		ServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.post("/request-body").body(Mono.error(EXCEPTION)));
-		
+
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
@@ -151,7 +150,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void webExceptionHandler() throws Exception {
+	public void webExceptionHandler() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/unknown-argument-type"));
 
 		List<WebExceptionHandler> handlers = Collections.singletonList(new ServerError500ExceptionHandler());
@@ -201,12 +200,12 @@ public class DispatcherHandlerErrorTests {
 		}
 
 		@RequestMapping("/raise-exception")
-		public void raiseException() throws Exception {
+		public void raiseException() {
 			throw EXCEPTION;
 		}
 
 		@RequestMapping("/unknown-return-type")
-		public Foo unknownReturnType() throws Exception {
+		public Foo unknownReturnType() {
 			return new Foo();
 		}
 

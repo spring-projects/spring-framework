@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 package org.springframework.messaging.tcp.reactor;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelPipeline;
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.NettyInbound;
-import reactor.ipc.netty.NettyOutbound;
-import reactor.ipc.netty.NettyPipeline;
+import reactor.netty.NettyInbound;
+import reactor.netty.NettyOutbound;
 
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MonoToListenableFutureAdapter;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.util.concurrent.ListenableFuture;
 
@@ -33,6 +32,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <P> the type of payload for outbound messages
  */
 public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
@@ -66,20 +66,13 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
-		// TODO: workaround for https://github.com/reactor/reactor-netty/issues/22
-		ChannelPipeline pipeline = this.inbound.context().channel().pipeline();
-		String name = NettyPipeline.OnChannelReadIdle;
-		if (pipeline.context(name) != null) {
-			pipeline.remove(name);
-		}
-
-		this.inbound.onReadIdle(inactivityDuration, runnable);
+		this.inbound.withConnection(conn -> conn.onReadIdle(inactivityDuration, runnable));
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
-		this.outbound.onWriteIdle(inactivityDuration, runnable);
+		this.inbound.withConnection(conn -> conn.onWriteIdle(inactivityDuration, runnable));
 	}
 
 	@Override

@@ -59,7 +59,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 /**
  * A base class for resolving method argument values by reading from the body of
- * a request with {@link HttpMessageConverter}s.
+ * a request with {@link HttpMessageConverter HttpMessageConverters}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -197,9 +197,6 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 						(converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
 				if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) :
 						(targetClass != null && converter.canRead(targetClass, contentType))) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
-					}
 					if (message.hasBody()) {
 						HttpInputMessage msgToUse =
 								getAdvice().beforeBodyRead(message, parameter, targetType, converterType);
@@ -215,7 +212,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			}
 		}
 		catch (IOException ex) {
-			throw new HttpMessageNotReadableException("I/O error while reading input message", ex);
+			throw new HttpMessageNotReadableException("I/O error while reading input message", ex, inputMessage);
 		}
 
 		if (body == NO_VALUE) {
@@ -224,6 +221,11 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 				return null;
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Read \"" + contentType + "\" to " +
+					"[" + (body instanceof String ? "\"" + body + "\"" : body) + "]");
 		}
 
 		return body;

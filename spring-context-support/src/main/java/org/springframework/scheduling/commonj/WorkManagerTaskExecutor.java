@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,10 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskExecutor}
  */
+@Deprecated
 public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, WorkManager, InitializingBean {
 
@@ -193,14 +196,6 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
 		execute(future);
 		return future;
-	}
-
-	/**
-	 * This task executor prefers short-lived work units.
-	 */
-	@Override
-	public boolean prefersShortLivedTasks() {
-		return true;
 	}
 
 

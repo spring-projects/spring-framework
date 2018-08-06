@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -72,7 +71,10 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see #setRequiredAnnotationType
  * @see Required
+ * @deprecated as of 5.1, in favor of using constructor injection for required settings
+ * (or a custom {@link org.springframework.beans.factory.InitializingBean} implementation)
  */
+@Deprecated
 public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
 
@@ -93,7 +95,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	private ConfigurableListableBeanFactory beanFactory;
 
 	/**
-	 * Cache for validated bean names, skipping re-validation for the same bean
+	 * Cache for validated bean names, skipping re-validation for the same bean.
 	 */
 	private final Set<String> validatedBeanNames = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
@@ -142,7 +144,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
 	@Override
 	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
 
 		if (!this.validatedBeanNames.contains(beanName)) {
 			if (!shouldSkip(this.beanFactory, beanName)) {

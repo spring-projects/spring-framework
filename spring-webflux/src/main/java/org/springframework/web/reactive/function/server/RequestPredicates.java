@@ -22,6 +22,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -79,8 +80,9 @@ public abstract class RequestPredicates {
 
 
 	/**
-	 * Return a {@code RequestPredicate} that tests against the given HTTP method.
-	 * @param httpMethod the HTTP method to match to
+	 * Return a {@code RequestPredicate} that matches if the request's
+	 * HTTP method is equal to the given method.
+	 * @param httpMethod the HTTP method to match against
 	 * @return a predicate that tests against the given HTTP method
 	 */
 	public static RequestPredicate method(HttpMethod httpMethod) {
@@ -88,7 +90,19 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the request path against the given path pattern.
+	 * Return a {@code RequestPredicate} that matches if the request's
+	 * HTTP method is equal to one the of the given methods.
+	 * @param httpMethods the HTTP methods to match against
+	 * @return a predicate that tests against the given HTTP methods
+	 * @since 5.1
+	 */
+	public static RequestPredicate methods(HttpMethod... httpMethods) {
+		return new HttpMethodPredicate(httpMethods);
+	}
+
+	/**
+	 * Return a {@code RequestPredicate} that tests the request path
+	 * against the given path pattern.
 	 * @param pattern the pattern to match to
 	 * @return a predicate that tests against the given path pattern
 	 */
@@ -98,20 +112,22 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * Return a function that creates new path-matching {@code RequestPredicates} from pattern
-	 * Strings using the given {@link PathPatternParser}. This method can be used to specify a
-	 * non-default, customized {@code PathPatternParser} when resolving path patterns.
+	 * Return a function that creates new path-matching {@code RequestPredicates}
+	 * from pattern Strings using the given {@link PathPatternParser}.
+	 * <p>This method can be used to specify a non-default, customized
+	 * {@code PathPatternParser} when resolving path patterns.
 	 * @param patternParser the parser used to parse patterns given to the returned function
-	 * @return a function that resolves patterns Strings into path-matching
-	 * {@code RequestPredicate}s
+	 * @return a function that resolves a pattern String into a path-matching
+	 * {@code RequestPredicates} instance
 	 */
 	public static Function<String, RequestPredicate> pathPredicates(PathPatternParser patternParser) {
-		Assert.notNull(patternParser, "'patternParser' must not be null");
+		Assert.notNull(patternParser, "PathPatternParser must not be null");
 		return pattern -> new PathPatternPredicate(patternParser.parse(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the request's headers against the given headers predicate.
+	 * Return a {@code RequestPredicate} that tests the request's headers
+	 * against the given headers predicate.
 	 * @param headersPredicate a predicate that tests against the request headers
 	 * @return a predicate that tests against the given header predicate
 	 */
@@ -293,7 +309,7 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's query parameter of the given name
-	 * has the given value
+	 * has the given value.
 	 * @param name the name of the query parameter to test against
 	 * @param value the value of the query parameter to test against
 	 * @return a predicate that matches if the query parameter has the given value
@@ -328,32 +344,42 @@ public abstract class RequestPredicates {
 
 	private static void traceMatch(String prefix, Object desired, @Nullable Object actual, boolean match) {
 		if (logger.isTraceEnabled()) {
-			String message = String.format("%s \"%s\" %s against value \"%s\"",
-					prefix, desired, match ? "matches" : "does not match", actual);
-			logger.trace(message);
+			logger.trace(String.format("%s \"%s\" %s against value \"%s\"",
+					prefix, desired, match ? "matches" : "does not match", actual));
 		}
 	}
 
 
 	private static class HttpMethodPredicate implements RequestPredicate {
 
-		private final HttpMethod httpMethod;
+		private final Set<HttpMethod> httpMethods;
 
 		public HttpMethodPredicate(HttpMethod httpMethod) {
 			Assert.notNull(httpMethod, "HttpMethod must not be null");
-			this.httpMethod = httpMethod;
+			this.httpMethods = EnumSet.of(httpMethod);
+		}
+
+		public HttpMethodPredicate(HttpMethod... httpMethods) {
+			Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
+
+			this.httpMethods = EnumSet.copyOf(Arrays.asList(httpMethods));
 		}
 
 		@Override
 		public boolean test(ServerRequest request) {
-			boolean match = this.httpMethod == request.method();
-			traceMatch("Method", this.httpMethod, request.method(), match);
+			boolean match = this.httpMethods.contains(request.method());
+			traceMatch("Method", this.httpMethods, request.method(), match);
 			return match;
 		}
 
 		@Override
 		public String toString() {
-			return this.httpMethod.toString();
+			if (this.httpMethods.size() == 1) {
+				return this.httpMethods.iterator().next().toString();
+			}
+			else {
+				return this.httpMethods.toString();
+			}
 		}
 	}
 
@@ -474,6 +500,10 @@ public abstract class RequestPredicates {
 	}
 
 
+	/**
+	 * {@link RequestPredicate} for where both {@code left} and {@code right} predicates
+	 * must match.
+	 */
 	static class AndRequestPredicate implements RequestPredicate {
 
 		private final RequestPredicate left;
@@ -504,6 +534,10 @@ public abstract class RequestPredicates {
 	}
 
 
+	/**
+	 * {@link RequestPredicate} for where either {@code left} or {@code right} predicates
+	 * may match.
+	 */
 	static class OrRequestPredicate implements RequestPredicate {
 
 		private final RequestPredicate left;

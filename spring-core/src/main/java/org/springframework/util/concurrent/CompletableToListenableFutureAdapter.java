@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 4.2
+ * @param <T> the result type returned by this Future's {@code get} method
  */
 public class CompletableToListenableFutureAdapter<T> implements ListenableFuture<T> {
 
@@ -52,10 +53,10 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 		this.completableFuture = completableFuture;
 		this.completableFuture.whenComplete((result, ex) -> {
 			if (ex != null) {
-				callbacks.failure(ex);
+				this.callbacks.failure(ex);
 			}
 			else {
-				callbacks.success(result);
+				this.callbacks.success(result);
 			}
 		});
 	}

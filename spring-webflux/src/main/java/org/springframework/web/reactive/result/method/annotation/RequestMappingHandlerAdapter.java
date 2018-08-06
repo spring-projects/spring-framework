@@ -214,7 +214,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		if (invocable != null) {
 			try {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
+					logger.debug(exchange.getLogPrefix() + "Using @ExceptionHandler " + invocable);
 				}
 				bindingContext.getModel().asMap().clear();
 				Throwable cause = exception.getCause();
@@ -227,7 +227,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 			}
 			catch (Throwable invocationEx) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Failed to invoke: " + invocable.getMethod(), invocationEx);
+					logger.warn(exchange.getLogPrefix() + "Failure in @ExceptionHandler " + invocable, invocationEx);
 				}
 			}
 		}

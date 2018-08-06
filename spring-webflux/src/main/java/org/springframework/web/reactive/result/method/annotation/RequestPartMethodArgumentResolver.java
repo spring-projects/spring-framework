@@ -51,24 +51,20 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
-
-	public RequestPartMethodArgumentResolver(List<HttpMessageReader<?>> readers,
-			ReactiveAdapterRegistry registry) {
-
+	public RequestPartMethodArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
 		super(readers, registry);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(RequestPart.class) ||
-				checkParameterType(parameter, Part.class::isAssignableFrom);
+		return (parameter.hasParameterAnnotation(RequestPart.class) ||
+				checkParameterType(parameter, Part.class::isAssignableFrom));
 	}
 
-
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
 		boolean isRequired = (requestPart == null || requestPart.required());
@@ -78,9 +74,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 				.flatMapMany(map -> {
 					List<Part> list = map.get(name);
 					if (CollectionUtils.isEmpty(list)) {
-						return isRequired ?
-								Flux.error(getMissingPartException(name, parameter)) :
-								Flux.empty();
+						return (isRequired ? Flux.error(getMissingPartException(name, parameter)) : Flux.empty());
 					}
 					return Flux.fromIterable(list);
 				});
@@ -105,7 +99,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 			// Mono<Part> or Flux<Part>
 			MethodParameter elementType = parameter.nested();
 			if (Part.class.isAssignableFrom(elementType.getNestedParameterType())) {
-				parts = adapter.isMultiValue() ? parts : parts.take(1);
+				parts = (adapter.isMultiValue() ? parts : parts.take(1));
 				return Mono.just(adapter.fromPublisher(parts));
 			}
 			// We have to decode the content for each part, one at a time
@@ -144,6 +138,9 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 		return parts.flatMap(part -> {
 			ServerHttpRequest partRequest = new PartServerHttpRequest(exchange.getRequest(), part);
 			ServerWebExchange partExchange = exchange.mutate().request(partRequest).build();
+			if (logger.isDebugEnabled()) {
+				logger.debug(exchange.getLogPrefix() + "Decoding part '" + part.name() + "'");
+			}
 			return readBody(elementType, isRequired, bindingContext, partExchange);
 		});
 	}

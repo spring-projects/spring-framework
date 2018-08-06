@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -312,7 +312,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Populate the given DocumentDefaultsDefinition instance with the default lazy-init,
 	 * autowire, dependency check settings, init-method, destroy-method and merge settings.
-	 * Support nested 'beans' element use cases by falling back to <literal>parentDefaults</literal>
+	 * Support nested 'beans' element use cases by falling back to {@code parentDefaults}
 	 * in case the defaults are not explicitly set locally.
 	 * @param defaults the defaults to populate
 	 * @param parentDefaults the parent BeanDefinitionParserDelegate (if any) defaults to fall back to
@@ -424,8 +424,8 @@ public class BeanDefinitionParserDelegate {
 		String beanName = id;
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
 			beanName = aliases.remove(0);
-			if (logger.isDebugEnabled()) {
-				logger.debug("No XML 'id' specified - using '" + beanName +
+			if (logger.isTraceEnabled()) {
+				logger.trace("No XML 'id' specified - using '" + beanName +
 						"' as bean name and " + aliases + " as aliases");
 			}
 		}
@@ -454,8 +454,8 @@ public class BeanDefinitionParserDelegate {
 							aliases.add(beanClassName);
 						}
 					}
-					if (logger.isDebugEnabled()) {
-						logger.debug("Neither XML 'id' nor 'name' specified - " +
+					if (logger.isTraceEnabled()) {
+						logger.trace("Neither XML 'id' nor 'name' specified - " +
 								"using generated bean name [" + beanName + "]");
 					}
 				}
@@ -900,9 +900,9 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable String propertyName) {
-		String elementName = (propertyName != null) ?
-						"<property> element for property '" + propertyName + "'" :
-						"<constructor-arg> element";
+		String elementName = (propertyName != null ?
+				"<property> element for property '" + propertyName + "'" :
+				"<constructor-arg> element");
 
 		// Should only have one child element: ref, value, list, etc.
 		NodeList nl = ele.getChildNodes();
@@ -1429,8 +1429,8 @@ public class BeanDefinitionParserDelegate {
 		}
 		String id = ele.getNodeName() + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR +
 				ObjectUtils.getIdentityHexString(innerDefinition);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Using generated bean name [" + id +
+		if (logger.isTraceEnabled()) {
+			logger.trace("Using generated bean name [" + id +
 					"] for nested custom element '" + ele.getNodeName() + "'");
 		}
 		return new BeanDefinitionHolder(innerDefinition, id);

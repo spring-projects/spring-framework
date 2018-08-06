@@ -15,12 +15,17 @@
 		</property>
 		<property name="jpaPropertyMap">
 			<props>
+				<prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
 				<prop key="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</prop>
 			</props>
 		</property>
 		<property name="bootstrapExecutor">
 			<bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
 		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
 	</bean>
 
 	<bean id="sessionFactory" factory-bean="entityManagerFactory" factory-method="getSessionFactory"/>

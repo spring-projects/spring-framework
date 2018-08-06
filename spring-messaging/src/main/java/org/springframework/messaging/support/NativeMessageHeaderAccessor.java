@@ -49,6 +49,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
+	/**
+	 * The header name used to store native headers.
+	 */
 	public static final String NATIVE_HEADERS = "nativeHeaders";
 
 

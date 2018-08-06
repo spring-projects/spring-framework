@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 	public void readServerSentEvents() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(
 				"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
-			 	"id:c43\nevent:bar\nretry:456\ndata:baz\n\n");
+				"id:c43\nevent:bar\nretry:456\ndata:baz\n\n");
 
 		Flux<ServerSentEvent> events = this.messageReader
 				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),

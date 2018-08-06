@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import org.springframework.context.annotation.AdviceModeImportSelector;
 import org.springframework.lang.Nullable;
 
 /**
- * Selects which implementation of {@link AbstractAsyncConfiguration} should be used based
- * on the value of {@link EnableAsync#mode} on the importing {@code @Configuration} class.
+ * Selects which implementation of {@link AbstractAsyncConfiguration} should
+ * be used based on the value of {@link EnableAsync#mode} on the importing
+ * {@code @Configuration} class.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see EnableAsync
  * @see ProxyAsyncConfiguration
@@ -34,19 +36,20 @@ public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableA
 	private static final String ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME =
 			"org.springframework.scheduling.aspectj.AspectJAsyncConfiguration";
 
+
 	/**
-	 * {@inheritDoc}
-	 * @return {@link ProxyAsyncConfiguration} or {@code AspectJAsyncConfiguration} for
-	 * {@code PROXY} and {@code ASPECTJ} values of {@link EnableAsync#mode()}, respectively
+	 * Returns {@link ProxyAsyncConfiguration} or {@code AspectJAsyncConfiguration}
+	 * for {@code PROXY} and {@code ASPECTJ} values of {@link EnableAsync#mode()},
+	 * respectively.
 	 */
 	@Override
 	@Nullable
 	public String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
 			case PROXY:
-				return new String[] { ProxyAsyncConfiguration.class.getName() };
+				return new String[] {ProxyAsyncConfiguration.class.getName()};
 			case ASPECTJ:
-				return new String[] { ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME };
+				return new String[] {ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME};
 			default:
 				return null;
 		}

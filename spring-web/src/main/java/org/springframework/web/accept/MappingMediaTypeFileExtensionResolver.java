@@ -18,7 +18,6 @@ package org.springframework.web.accept;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 
 	private final MultiValueMap<MediaType, String> fileExtensions = new LinkedMultiValueMap<>();
 
-	private final List<String> allFileExtensions = new LinkedList<>();
+	private final List<String> allFileExtensions = new ArrayList<>();
 
 
 	/**

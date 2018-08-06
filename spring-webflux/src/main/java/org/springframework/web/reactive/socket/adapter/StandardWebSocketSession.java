@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 /**
  * Spring {@link WebSocketSession} adapter for a standard Java (JSR 356)
  * {@link javax.websocket.Session}.
- * 
+ *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -101,8 +101,8 @@ public class StandardWebSocketSession extends AbstractListenerWebSocketSession<S
 			CloseReason.CloseCode code = CloseCodes.getCloseCode(status.getCode());
 			getDelegate().close(new CloseReason(code, status.getReason()));
 		}
-		catch (IOException e) {
-			return Mono.error(e);
+		catch (IOException ex) {
+			return Mono.error(ex);
 		}
 		return Mono.empty();
 	}

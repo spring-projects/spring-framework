@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -34,14 +36,35 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0
+ * @param <T> the element type
  */
 public abstract class AbstractDecoder<T> implements Decoder<T> {
+
+	protected Log logger = LogFactory.getLog(getClass());
 
 	private final List<MimeType> decodableMimeTypes;
 
 
 	protected AbstractDecoder(MimeType... supportedMimeTypes) {
 		this.decodableMimeTypes = Arrays.asList(supportedMimeTypes);
+	}
+
+
+	/**
+	 * Set an alternative logger to use than the one based on the class name.
+	 * @param logger the logger to use
+	 * @since 5.1
+	 */
+	public void setLogger(Log logger) {
+		this.logger = logger;
+	}
+
+	/**
+	 * Return the currently configured Logger.
+	 * @since 5.1
+	 */
+	public Log getLogger() {
+		return logger;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class CookieWebSessionIdResolverTests {
 
 
 	@Test
-	public void setSessionId() throws Exception {
+	public void setSessionId() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.org/path").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		this.resolver.setSessionId(exchange, "123");
@@ -44,6 +44,24 @@ public class CookieWebSessionIdResolverTests {
 		assertEquals(1, cookies.size());
 		ResponseCookie cookie = cookies.getFirst(this.resolver.getCookieName());
 		assertNotNull(cookie);
-		assertEquals("SESSION=123; Path=/; Secure; HttpOnly", cookie.toString());
+		assertEquals("SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax", cookie.toString());
 	}
+
+	@Test
+	public void cookieInitializer() {
+		this.resolver.addCookieInitializer(builder -> builder.domain("example.org"));
+		this.resolver.addCookieInitializer(builder -> builder.sameSite("Strict"));
+		this.resolver.addCookieInitializer(builder -> builder.secure(false));
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.org/path").build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		this.resolver.setSessionId(exchange, "123");
+
+		MultiValueMap<String, ResponseCookie> cookies = exchange.getResponse().getCookies();
+		assertEquals(1, cookies.size());
+		ResponseCookie cookie = cookies.getFirst(this.resolver.getCookieName());
+		assertNotNull(cookie);
+		assertEquals("SESSION=123; Path=/; Domain=example.org; HttpOnly; SameSite=Strict", cookie.toString());
+	}
+
 }

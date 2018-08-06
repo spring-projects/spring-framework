@@ -1036,6 +1036,63 @@ Once the Servlet 3.0 configuration is in place, simply add a bean of type
 
 
 
+[[mvc-logging]]
+=== Logging
+[.small]#<<web-reactive.adoc#webflux-logging,Same in Spring WebFlux>>#
+
+DEBUG level logging in Spring MVC is designed to be compact, minimal, and
+human-friendly. It focuses on high value bits of information that are useful over and
+over again vs others that are useful only when debugging a specific issue.
+
+TRACE level logging generally follows the same principles as DEBUG (and for example also
+should not be a firehose) but can be used for debugging any issue. In addition some log
+messages may show a different level of detail at TRACE vs DEBUG.
+
+Good logging comes from the experience of using the logs. If you spot anything that does
+not meet the stated goals, please let us know.
+
+
+[[mvc-logging-sensitive-data]]
+==== Sensitive Data
+[.small]#<<web-reactive.adoc#webflux-logging-sensitive-data,Same in Spring WebFlux>>#
+
+DEBUG and TRACE logging may log sensitive information. This is why request parameters and
+headers are masked by default and their logging in full must be enabled explicitly
+through the `enableLoggingRequestDetails` property on `DispatcherServlet`.
+
+For example if using Java config:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public class MyInitializer
+		extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+	@Override
+	protected Class<?>[] getRootConfigClasses() {
+		return ... ;
+	}
+
+	@Override
+	protected Class<?>[] getServletConfigClasses() {
+		return ... ;
+	}
+
+	@Override
+	protected String[] getServletMappings() {
+		return ... ;
+	}
+
+	@Override
+	protected void customizeRegistration(Dynamic registration) {
+		registration.setInitParameter("enableLoggingRequestDetails", "true");
+	}
+
+}
+----
+
+
+
 
 [[filters]]
 == Filters
@@ -1046,56 +1103,58 @@ The `spring-web` module provides some useful filters.
 
 
 [[filters-http-put]]
-=== HTTP PUT Form
+=== Form Data
 
 Browsers can only submit form data via HTTP GET or HTTP POST but non-browser clients can also
-use HTTP PUT and PATCH. The Servlet API requires `ServletRequest.getParameter{asterisk}()`
+use HTTP PUT, PATCH, and DELETE. The Servlet API requires `ServletRequest.getParameter{asterisk}()`
 methods to support form field access only for HTTP POST.
 
-The `spring-web` module provides `HttpPutFormContentFilter` that intercepts HTTP PUT and
-PATCH requests with content type `application/x-www-form-urlencoded`, reads the form data from
+The `spring-web` module provides `FormContentFilter` that intercepts HTTP PUT, PATCH, and DELETE
+requests with content type `application/x-www-form-urlencoded`, reads the form data from
 the body of the request, and wraps the `ServletRequest` in order to make the form data
 available through the `ServletRequest.getParameter{asterisk}()` family of methods.
 
 
 
-[[webflux-filters-forwarded-headers]]
+[[filters-forwarded-headers]]
 === Forwarded Headers
-[.small]#<<web-reactive.adoc#webflux-filters-forwarded-headers,Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-forwarded-headers,Same in Spring WebFlux>>#
 
 As a request goes through proxies such as load balancers the host, port, and
-scheme may change presenting a challenge for applications that need to create links
-to resources since the links should reflect the host, port, and scheme of the
-original request as seen from a client perspective.
+scheme may change and that makes it a challenge to create links that point to the correct
+host, port, and scheme from a client perspective.
 
 https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
-for proxies to use to provide information about the original request. There are also
-other non-standard headers in use such as "X-Forwarded-Host", "X-Forwarded-Port",
-and "X-Forwarded-Proto".
+that proxies can use to provide information about the original request. There are other
+non-standard headers too including "X-Forwarded-Host", "X-Forwarded-Port",
+"X-Forwarded-Proto", "X-Forwarded-Ssl", and "X-Forwarded-Prefix".
 
-`ForwardedHeaderFilter` detects, extracts, and uses information from the "Forwarded"
-header, or from "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto".
-It wraps the request in order to overlay its host, port, and scheme and also "hides"
-the forwarded headers for subsequent processing.
+`ForwardedHeaderFilter` is a Servlet filter that modifies the host, port, and scheme of
+the request, based on Forwarded headers, and then removes those headers.
 
-Note that there are security considerations when using forwarded headers as explained
-in Section 8 of RFC 7239. At the application level it is difficult to determine whether
-forwarded headers can be trusted or not. This is why the network upstream should be
-configured correctly to filter out untrusted forwarded headers from the outside.
-
-Applications that don't have a proxy and don't need to use forwarded headers can
-configure the `ForwardedHeaderFilter` to remove and ignore such headers.
+There are security considerations for forwarded headers since an application can't know
+if the headers were added by a proxy as intended, or with a malicious client. This is why
+a proxy at the boundary of trust should be configured to remove untrusted Forwarded coming
+from the outside. You can also configure the `ForwardedHeaderFilter` with
+`removeOnly=true` in which case it will remove but not use the headers.
 
 
 
 [[filters-shallow-etag]]
 === Shallow ETag
 
-There is a `ShallowEtagHeaderFilter`. It is called shallow because it doesn't have any
-knowledge of the content. Instead it relies on buffering actual content written to the
-response and computing the ETag value at the end.
+The `ShallowEtagHeaderFilter` filter creates a "shallow" ETag by caching the content
+written to the response, and computing an MD5 hash from it. The next time a client sends,
+it does the same, but also compares the computed value against the `If-None-Match` request
+header and if the two are equal, it returns a 304 (NOT_MODIFIED).
 
-See <<mvc-httpcaching-shallowetag>> for more details.
+This strategy saves network bandwidth but not CPU, as the full response must be computed
+for each request. Other strategies at the controller level, described above, can avoid the
+computation. See <<mvc-caching>>.
+
+This filter has a `writeWeakETag` parameter that configures the filter to write Weak ETags,
+like this: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"`, as defined in
+https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3].
 
 
 
@@ -1564,6 +1623,41 @@ logic. This is a more advanced option that requires sub-classing
 you can check the custom attribute and return your own `RequestCondition`.
 
 
+[[mvc-ann-requestmapping-registration]]
+==== Explicit Registrations
+[.small]#<<web-reactive.adoc#webflux-ann-requestmapping-registration,Same in Spring WebFlux>>#
+
+Handler methods can be registered programmatically which can be used for dynamic
+registrations, or for advanced cases such as different instances of the same handler
+under different URLs. Below is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class MyConfig {
+
+	@Autowired
+	public void setHandlerMapping(RequestMappingHandlerMapping mapping, UserHandler handler) <1>
+			throws NoSuchMethodException {
+
+		RequestMappingInfo info = RequestMappingInfo
+				.paths("/user/{id}").methods(RequestMethod.GET).build(); <2>
+
+		Method method = UserHandler.class.getMethod("getUser", Long.class); <3>
+
+		mapping.registerMapping(info, handler, method); <4>
+	}
+
+}
+----
+
+<1> Inject target handler(s) and the handler mapping for controllers.
+<2> Prepare the request mapping meta data.
+<3> Get the handler method.
+<4> Add the registration.
+
+
 
 [[mvc-ann-methods]]
 === Handler Methods
@@ -1789,7 +1883,7 @@ supported for all return values, see below for more details.
   `ResponseEntity`. See <<mvc-ann-async>> and <<mvc-ann-async-http-streaming>>.
 
 | Reactive types -- Reactor, RxJava, or others via `ReactiveAdapterRegistry`
-| Alternative to ``DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
+| Alternative to `DeferredResult` with multi-value streams (e.g. `Flux`, `Observable`)
   collected to a `List`.
 
   For streaming scenarios -- e.g. `text/event-stream`, `application/json+stream` --
@@ -1899,7 +1993,7 @@ To get all matrix variables, use a `MultiValueMap`:
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public void findPet(
 			@MatrixVariable MultiValueMap<String, String> matrixVars,
-			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
+			@MatrixVariable(pathVar="petId") MultiValueMap<String, String> petMatrixVars) {
 
 		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
 		// petMatrixVars: ["q" : 22, "s" : 23]
@@ -2645,30 +2739,6 @@ to the model:
 	}
 ----
 
-[[mvc-ann-jsonp]]
-===== Jackson JSONP
-
-In order to enable http://en.wikipedia.org/wiki/JSONP[JSONP] support for `@ResponseBody`
-and `ResponseEntity` methods, declare an `@ControllerAdvice` bean that extends
-`AbstractJsonpResponseBodyAdvice` as shown below where the constructor argument indicates
-the JSONP query parameter name(s):
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@ControllerAdvice
-	public class JsonpAdvice extends AbstractJsonpResponseBodyAdvice {
-
-		public JsonpAdvice() {
-			super("callback");
-		}
-	}
-----
-
-For controllers relying on view resolution, JSONP is automatically enabled when the
-request has a query parameter named `jsonp` or `callback`. Those names can be
-customized through `jsonpParameterNames` property.
-
 
 
 [[mvc-ann-modelattrib-methods]]
@@ -3099,7 +3169,7 @@ Javadoc for more details.
 == URI Links
 [.small]#<<web-reactive.adoc#webflux-uri-building,Same in Spring WebFlux>>#
 
-This section describes various options available in the Spring Framework to prepare URIs.
+This section describes various options available in the Spring Framework to work with URI's.
 
 
 
@@ -3254,26 +3324,8 @@ such headers.
 [[mvc-links-to-controllers-from-views]]
 === Links in views
 
-You can also build links to annotated controllers from views such as JSP, Thymeleaf,
-FreeMarker. This can be done using the `fromMappingName` method in `MvcUriComponentsBuilder`
-which refers to mappings by name.
-
-Every `@RequestMapping` is assigned a default name based on the capital letters of the
-class and the full method name. For example, the method `getFoo` in class `FooController`
-is assigned the name "FC#getFoo". This strategy can be replaced or customized by creating
-an instance of `HandlerMethodMappingNamingStrategy` and plugging it into your
-`RequestMappingHandlerMapping`. The default strategy implementation also looks at the
-name attribute on `@RequestMapping` and uses that if present. That means if the default
-mapping name assigned conflicts with another (e.g. overloaded methods) you can assign
-a name explicitly on the `@RequestMapping`.
-
-[NOTE]
-====
-The assigned request mapping names are logged at TRACE level on startup.
-====
-
-The Spring JSP tag library provides a function called `mvcUrl` that can be used to
-prepare links to controller methods based on this mechanism.
+In views such as Thymeleaf, FreeMarker, JSP you can build links to annotated controllers
+by referring to the implicitly or explicitly assigned name for each request mapping.
 
 For example given:
 
@@ -3298,10 +3350,16 @@ You can prepare a link from a JSP as follows:
 <a href="${s:mvcUrl('PAC#getAddress').arg(0,'US').buildAndExpand('123')}">Get Address</a>
 ----
 
-The above example relies on the `mvcUrl` JSP function declared in the Spring tag library
-(i.e. META-INF/spring.tld). For more advanced cases (e.g. a custom base URL as explained
-in the previous section), it is easy to define your own function, or use a custom tag file,
-in order to use a specific instance of `MvcUriComponentsBuilder` with a custom base URL.
+The above example relies on the `mvcUrl` function declared in the Spring tag library
+(i.e. META-INF/spring.tld), but it is easy to define your own function, or prepare a
+similar one for other templating technologies.
+
+Here is how this works. On startup every `@RequestMapping` is assigned a default name
+through a `HandlerMethodMappingNamingStrategy` whose default implementation uses the
+capital letters of the class and the method name, e.g. the `getFoo` method in
+`FooController` becomes "FC#getFoo". If there is a name clash you can use
+`@RequestMapping(name="..")` to assign an explicit name, or implement your own
+`HandlerMethodMappingNamingStrategy`.
 
 
 
@@ -3623,14 +3681,13 @@ Spring MVC supports Reactor and RxJava through the
 `spring-core` which allows it to adapt from multiple reactive libraries.
 ====
 
-When streaming to the response via reactive types, Spring MVC supports reactive back
-pressure, but still needs to use blocking I/O to perform actual writes. This is done
-through the <<mvc-ann-async-configuration-spring-mvc,configured>> MVC `TaskExecutor` on
-a separate thread in order to avoid blocking the upstream source (e.g. a `Flux` returned
-from the `WebClient`). By default a `SyncTaskExecutor` is used which is not suitable for
-production. https://jira.spring.io/browse/SPR-16203[SPR-16203] will provide better
-defaults in Spring Framework 5.1. In the mean time please configure the executor through
-the <<mvc-ann-async-configuration-spring-mvc,MVC config>>.
+For streaming to the response, reactive back pressure is supported, but writes to the
+response are still blocking, and are executed on a separate thread through the
+<<mvc-ann-async-configuration-spring-mvc,configured>> `TaskExecutor` in order to avoid
+blocking the upstream source (e.g. a `Flux` returned from the `WebClient`).
+By default `SimpleAsyncTaskExecutor` is used for the blocking writes but that is not
+suitable under load. If you plan to stream with a reactive type, please use the
+<<mvc-ann-async-configuration-spring-mvc,MVC config>> to configure a task executor.
 
 
 
@@ -3725,47 +3782,36 @@ http://hdiv.org/[HDIV] is another web security framework that integrates with Sp
 
 [[mvc-caching]]
 == HTTP Caching
+[.small]#<<web-reactive.adoc#webflux-caching,Same in Spring WebFlux>>#
 
-A good HTTP caching strategy can significantly improve the performance of a web application
-and the experience of its clients. The `'Cache-Control'` HTTP response header is mostly
-responsible for this, along with conditional headers such as `'Last-Modified'` and `'ETag'`.
+HTTP caching can significantly improve the performance of a web application. HTTP caching
+revolves around the "Cache-Control" response header and subsequently conditional request
+headers such as "Last-Modified" and "ETag". "Cache-Control" advises private (e.g. browser)
+and public (e.g. proxy) caches how to cache and re-use responses. An "ETag" header is used
+to make a conditional request that may result in a 304 (NOT_MODIFIED) without a body,
+if the content has not changed. "ETag" can be seen as a more sophisticated successor to
+the `Last-Modified` header.
 
-The `'Cache-Control'` HTTP response header advises private caches (e.g. browsers) and
-public caches (e.g. proxies) on how they can cache HTTP responses for further reuse.
-
-An http://en.wikipedia.org/wiki/HTTP_ETag[ETag] (entity tag) is an HTTP response header
-returned by an HTTP/1.1 compliant web server used to determine change in content at a
-given URL. It can be considered to be the more sophisticated successor to the
-`Last-Modified` header. When a server returns a representation with an ETag header, the
-client can use this header in subsequent GETs, in an `If-None-Match` header. If the
-content has not changed, the server returns `304: Not Modified`.
-
-This section describes the different choices available to configure HTTP caching in a
-Spring Web MVC application.
+This section describes HTTP caching related options available in Spring Web MVC.
 
 
 
 [[mvc-caching-cachecontrol]]
-=== Cache-Control
+=== `CacheControl`
+[.small]#<<web-reactive.adoc#webflux-caching-cachecontrol,Same in Spring WebFlux>>#
 
-Spring Web MVC supports many use cases and ways to configure "Cache-Control" headers for
-an application. While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234 Section 5.2.2]
-completely describes that header and its possible directives, there are several ways to
-address the most common cases.
+{api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
+configuring settings related to the "Cache-Control" header and is accepted as an argument
+in a number of places:
 
-Spring Web MVC uses a configuration convention in several of its APIs:
-`setCachePeriod(int seconds)`:
+* {api-spring-framework}/web/servlet/mvc/WebContentInterceptor.html[`WebContentInterceptor`]
+* {api-spring-framework}/web/servlet/support/WebContentGenerator.html[`WebContentGenerator`]
+* <<mvc-caching-etag-lastmodified>>
+* <<mvc-caching-static-resources>>
 
-* A `-1` value won't generate a `'Cache-Control'` response header.
-* A `0` value will prevent caching using the `'Cache-Control: no-store'` directive.
-* An `n > 0` value will cache the given response for `n` seconds using the
-`'Cache-Control: max-age=n'` directive.
-
-The {api-spring-framework}/http/CacheControl.html[`CacheControl`] builder
-class simply describes the available "Cache-Control" directives and makes it easier to
-build your own HTTP caching strategy. Once built, a `CacheControl` instance can then be
-accepted as an argument in several Spring Web MVC APIs.
-
+While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all possible
+directives for the "Cache-Control" response header, the `CacheControl` type takes a
+use case oriented approach focusing on the common scenarios:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3779,65 +3825,27 @@ accepted as an argument in several Spring Web MVC APIs.
 	// Cache for ten days in public and private caches,
 	// public caches should not transform the response
 	// "Cache-Control: max-age=864000, public, no-transform"
-	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS)
-										.noTransform().cachePublic();
+	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
 ----
 
+`WebContentGenerator` also accept a simpler `cachePeriod` property, in seconds, that
+works as follows:
 
-
-[[mvc-caching-static-resources]]
-=== Static resources
-
-Static resources should be served with appropriate `'Cache-Control'` and conditional
-headers for optimal performance.
-<<mvc-config-static-resources,Configuring a `ResourceHttpRequestHandler`>> for serving
-static resources not only natively writes `'Last-Modified'` headers by reading a file's
-metadata, but also `'Cache-Control'` headers if properly configured.
-
-You can set the `cachePeriod` attribute on a `ResourceHttpRequestHandler` or use
-a `CacheControl` instance, which supports more specific directives:
-
-[source,java,indent=0]
-[subs="verbatim"]
-----
-	@Configuration
-	@EnableWebMvc
-	public class WebConfig implements WebMvcConfigurer {
-
-		@Override
-		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-			registry.addResourceHandler("/resources/**")
-					.addResourceLocations("/public-resources/")
-					.setCacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePublic());
-		}
-
-	}
-----
-
-And in XML:
-
-[source,xml,indent=0]
-[subs="verbatim"]
-----
-	<mvc:resources mapping="/resources/**" location="/public-resources/">
-		<mvc:cache-control max-age="3600" cache-public="true"/>
-	</mvc:resources>
-----
+* A `-1` value won't generate a "Cache-Control" response header.
+* A `0` value will prevent caching using the `'Cache-Control: no-store'` directive.
+* An `n > 0` value will cache the given response for `n` seconds using the
+`'Cache-Control: max-age=n'` directive.
 
 
 
 [[mvc-caching-etag-lastmodified]]
-=== @Controller caching
+=== Controllers
+[.small]#<<web-reactive.adoc#webflux-caching-etag-lastmodified,Same in Spring WebFlux>>#
 
-Controllers can support `'Cache-Control'`, `'ETag'`, and/or `'If-Modified-Since'` HTTP requests;
-this is indeed recommended if a `'Cache-Control'` header is to be set on the response.
-This involves calculating a lastModified `long` and/or an Etag value for a given request,
-comparing it against the `'If-Modified-Since'` request header value, and potentially returning
-a response with status code 304 (Not Modified).
-
-As described in <<mvc-ann-httpentity>>, controllers can interact with the request/response using
-`HttpEntity` types. Controllers returning `ResponseEntity` can include HTTP caching information
-in responses like this:
+Controllers can add explicit support for HTTP caching. This is recommended since the
+lastModified or ETag value for a resource needs to be calculated before it can be compared
+against conditional request headers. A controller can add an ETag and "Cache-Control"
+settings to a `ResponseEntity`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3849,19 +3857,18 @@ in responses like this:
 		String version = book.getVersion();
 
 		return ResponseEntity
-					.ok()
-					.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
-					.eTag(version) // lastModified is also available
-					.body(book);
+				.ok()
+				.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+				.eTag(version) // lastModified is also available
+				.body(book);
 	}
 ----
 
-Doing this will not only include `'ETag'` and `'Cache-Control'` headers in the response, it will **also convert the
-response to an `HTTP 304 Not Modified` response with an empty body** if the conditional headers sent by the client
-match the caching information set by the Controller.
+This will send an 304 (NOT_MODIFIED) response with an empty body, if the comparison
+to the conditional request headers indicates the content has not changed. Otherwise the
+"ETag" and "Cache-Control" headers will be added to the response.
 
-An `@RequestMapping` method may also wish to support the same behavior.
-This can be achieved as follows:
+The check against conditional request headers can also be made in the controller:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3869,59 +3876,42 @@ This can be achieved as follows:
 	@RequestMapping
 	public String myHandleMethod(WebRequest webRequest, Model model) {
 
-		long lastModified = // 1. application-specific calculation
+		long eTag = ... <1>
 
-		if (request.checkNotModified(lastModified)) {
-			// 2. shortcut exit - no further processing necessary
-			return null;
+		if (request.checkNotModified(eTag)) {
+			return null; <2>
 		}
 
-		// 3. or otherwise further request processing, actually preparing content
-		model.addAttribute(...);
+		model.addAttribute(...); <3>
 		return "myViewName";
 	}
 ----
 
-There are two key elements here: calling `request.checkNotModified(lastModified)` and
-returning `null`. The former sets the appropriate response status and headers
-before it returns `true`.
-The latter, in combination with the former, causes Spring MVC to do no further
-processing of the request.
+<1> Application-specific calculation.
+<2> Response has been set to 304 (NOT_MODIFIED), no further processing.
+<3> Continue with request processing.
 
-Note that there are 3 variants for this:
+There are 3 variants for checking conditional requests against eTag values, lastModified
+values, or both. For conditional "GET" and "HEAD" requests, the response may be set to
+304 (NOT_MODIFIED). For conditional "POST", "PUT", and "DELETE", the response would be set
+to 409 (PRECONDITION_FAILED) instead to prevent concurrent modification.
 
-* `request.checkNotModified(lastModified)` compares lastModified with the
-`'If-Modified-Since'` or `'If-Unmodified-Since'` request header
-* `request.checkNotModified(eTag)` compares eTag with the `'If-None-Match'` request header
-* `request.checkNotModified(eTag, lastModified)` does both, meaning that both
-conditions should be valid
 
-When receiving conditional `'GET'`/`'HEAD'` requests, `checkNotModified` will check
-that the resource has not been modified and if so, it will result in a `HTTP 304 Not Modified`
-response. In case of conditional `'POST'`/`'PUT'`/`'DELETE'` requests, `checkNotModified`
-will check that the resource has not been modified and if it has been, it will result in a
-`HTTP 409 Precondition Failed` response to prevent concurrent modifications.
+
+[[mvc-caching-static-resources]]
+=== Static resources
+[.small]#<<web-reactive.adoc#webflux-caching-static-resources,Same in Spring WebFlux>>#
+
+Static resources should be served with a "Cache-Control" and conditional response headers
+for optimal performance. See section on configuring <<mvc-config-static-resources>>.
 
 
 
 [[mvc-httpcaching-shallowetag]]
 === ETag Filter
 
-Support for ETags is provided by the Servlet filter `ShallowEtagHeaderFilter`. It is a
-plain Servlet Filter, and thus can be used in combination with any web framework. The
-`ShallowEtagHeaderFilter` filter creates so-called shallow ETags by caching the content
-written to the response and generating an MD5 hash over that to send as an ETag header.
-The next time a client sends a request for the same resource, it uses that hash as the
-`If-None-Match` value. The filter detects this, lets the request be processed as usual, and
-at the end compares the two hashes. If they are equal, a `304` is returned.
-
-Note that this strategy saves network bandwidth but not CPU, as the full response must be
-computed for each request. Other strategies at the controller level, described above, can
-avoid computation.
-
-This filter has a `writeWeakETag` parameter that configures the filter to write Weak ETags,
-like this: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"`, as defined in
-https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3].
+The `ShallowEtagHeaderFilter` can be used to add "shallow" eTag values, computed from the
+response content and thus saving bandwith but not CPU time. See <<filters-shallow-etag>>.
 
 
 
@@ -4549,11 +4539,15 @@ In XML, the same:
 </mvc:resources>
 ----
 
-You can use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
+You can then use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
 transformers -- e.g. to insert versions. The MVC config provides a `ResourceUrlProvider`
 bean so it can be injected into others. You can also make the rewrite transparent with the
 `ResourceUrlEncodingFilter` for Thymeleaf, JSPs, FreeMarker, and others with URL tags that
 rely on `HttpServletResponse#encodeURL`.
+
+Note that when using both `EncodedResourceResolver` (e.g. for serving gzipped or brotli
+encoded resources) and `VersionedResourceResolver`, they must be registered in this order.
+That ensures content based versions are always computed reliably based on the unencoded file.
 
 http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
 and automatically registered when `"org.webjars:webjars-locator"` is present on the
@@ -4640,9 +4634,9 @@ Or in XML:
 === Path Matching
 [.small]#<<web-reactive.adoc#webflux-config-path-matching,Same in Spring WebFlux>>#
 
-This allows customizing options related to URL matching and treatment of the URL.
-For details on the individual options check out the
-{api-spring-framework}/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
+Customize options related to path matching, and treatment of the URL.
+For details on the individual options, see the
+{api-spring-framework}/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] Javadoc.
 
 Example in Java config:
 
@@ -4660,7 +4654,9 @@ Example in Java config:
 				.setUseTrailingSlashMatch(false)
 				.setUseRegisteredSuffixPatternMatch(true)
 				.setPathMatcher(antPathMatcher())
-				.setUrlPathHelper(urlPathHelper());
+				.setUrlPathHelper(urlPathHelper())
+				.addPathPrefix("/api",
+						HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
 		@Bean

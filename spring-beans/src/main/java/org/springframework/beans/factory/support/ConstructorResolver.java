@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.ConstructorProperties;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -32,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -41,10 +44,13 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.InjectionPoint;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.NamedThreadLocal;
@@ -78,6 +84,8 @@ class ConstructorResolver {
 
 	private final AbstractAutowireCapableBeanFactory beanFactory;
 
+	private final Log logger;
+
 
 	/**
 	 * Create a new ConstructorResolver for the given factory and instantiation strategy.
@@ -85,6 +93,7 @@ class ConstructorResolver {
 	 */
 	public ConstructorResolver(AbstractAutowireCapableBeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		this.logger = beanFactory.getLogger();
 	}
 
 
@@ -128,7 +137,7 @@ class ConstructorResolver {
 				}
 			}
 			if (argsToResolve != null) {
-				argsToUse = resolvePreparedArguments(beanName, mbd, bw, constructorToUse, argsToResolve);
+				argsToUse = resolvePreparedArguments(beanName, mbd, bw, constructorToUse, argsToResolve, true);
 			}
 		}
 
@@ -190,12 +199,11 @@ class ConstructorResolver {
 							}
 						}
 						argsHolder = createArgumentArray(beanName, mbd, resolvedValues, bw, paramTypes, paramNames,
-								getUserDeclaredConstructor(candidate), autowiring);
+								getUserDeclaredConstructor(candidate), autowiring, candidates.length == 1);
 					}
 					catch (UnsatisfiedDependencyException ex) {
-						if (this.beanFactory.logger.isTraceEnabled()) {
-							this.beanFactory.logger.trace(
-									"Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
 						}
 						// Swallow and try next constructor.
 						if (causes == null) {
@@ -257,15 +265,15 @@ class ConstructorResolver {
 		}
 
 		try {
-			final InstantiationStrategy strategy = beanFactory.getInstantiationStrategy();
+			final InstantiationStrategy strategy = this.beanFactory.getInstantiationStrategy();
 			Object beanInstance;
 
 			if (System.getSecurityManager() != null) {
 				final Constructor<?> ctorToUse = constructorToUse;
 				final Object[] argumentsToUse = argsToUse;
 				beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
-						strategy.instantiate(mbd, beanName, beanFactory, ctorToUse, argumentsToUse),
-						beanFactory.getAccessControlContext());
+						strategy.instantiate(mbd, beanName, this.beanFactory, ctorToUse, argumentsToUse),
+						this.beanFactory.getAccessControlContext());
 			}
 			else {
 				beanInstance = strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
@@ -403,7 +411,7 @@ class ConstructorResolver {
 				}
 			}
 			if (argsToResolve != null) {
-				argsToUse = resolvePreparedArguments(beanName, mbd, bw, factoryMethodToUse, argsToResolve);
+				argsToUse = resolvePreparedArguments(beanName, mbd, bw, factoryMethodToUse, argsToResolve, true);
 			}
 		}
 
@@ -467,13 +475,12 @@ class ConstructorResolver {
 							if (pnd != null) {
 								paramNames = pnd.getParameterNames(candidate);
 							}
-							argsHolder = createArgumentArray(
-									beanName, mbd, resolvedValues, bw, paramTypes, paramNames, candidate, autowiring);
+							argsHolder = createArgumentArray(beanName, mbd, resolvedValues, bw,
+									paramTypes, paramNames, candidate, autowiring, candidates.length == 1);
 						}
 						catch (UnsatisfiedDependencyException ex) {
-							if (this.beanFactory.logger.isTraceEnabled()) {
-								this.beanFactory.logger.trace("Ignoring factory method [" + candidate +
-										"] of bean '" + beanName + "': " + ex);
+							if (logger.isTraceEnabled()) {
+								logger.trace("Ignoring factory method [" + candidate + "] of bean '" + beanName + "': " + ex);
 							}
 							// Swallow and try next overloaded factory method.
 							if (causes == null) {
@@ -572,8 +579,8 @@ class ConstructorResolver {
 				final Method factoryMethod = factoryMethodToUse;
 				final Object[] args = argsToUse;
 				beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
-						beanFactory.getInstantiationStrategy().instantiate(mbd, beanName, beanFactory, fb, factoryMethod, args),
-						beanFactory.getAccessControlContext());
+						this.beanFactory.getInstantiationStrategy().instantiate(mbd, beanName, this.beanFactory, fb, factoryMethod, args),
+						this.beanFactory.getAccessControlContext());
 			}
 			else {
 				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
@@ -651,7 +658,7 @@ class ConstructorResolver {
 	private ArgumentsHolder createArgumentArray(
 			String beanName, RootBeanDefinition mbd, @Nullable ConstructorArgumentValues resolvedValues,
 			BeanWrapper bw, Class<?>[] paramTypes, @Nullable String[] paramNames, Executable executable,
-			boolean autowiring) throws UnsatisfiedDependencyException {
+			boolean autowiring, boolean fallback) throws UnsatisfiedDependencyException {
 
 		TypeConverter customConverter = this.beanFactory.getCustomTypeConverter();
 		TypeConverter converter = (customConverter != null ? customConverter : bw);
@@ -717,8 +724,8 @@ class ConstructorResolver {
 							"] - did you specify the correct bean references as arguments?");
 				}
 				try {
-					Object autowiredArgument =
-							resolveAutowiredArgument(methodParam, beanName, autowiredBeanNames, converter);
+					Object autowiredArgument = resolveAutowiredArgument(
+							methodParam, beanName, autowiredBeanNames, converter, fallback);
 					args.rawArguments[paramIndex] = autowiredArgument;
 					args.arguments[paramIndex] = autowiredArgument;
 					args.preparedArguments[paramIndex] = new AutowiredArgumentMarker();
@@ -733,8 +740,8 @@ class ConstructorResolver {
 
 		for (String autowiredBeanName : autowiredBeanNames) {
 			this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
-			if (this.beanFactory.logger.isDebugEnabled()) {
-				this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Autowiring by type from bean name '" + beanName +
 						"' via " + (executable instanceof Constructor ? "constructor" : "factory method") +
 						" to bean named '" + autowiredBeanName + "'");
 			}
@@ -746,8 +753,8 @@ class ConstructorResolver {
 	/**
 	 * Resolve the prepared arguments stored in the given bean definition.
 	 */
-	private Object[] resolvePreparedArguments(
-			String beanName, RootBeanDefinition mbd, BeanWrapper bw, Executable executable, Object[] argsToResolve) {
+	private Object[] resolvePreparedArguments(String beanName, RootBeanDefinition mbd, BeanWrapper bw,
+			Executable executable, Object[] argsToResolve, boolean fallback) {
 
 		TypeConverter customConverter = this.beanFactory.getCustomTypeConverter();
 		TypeConverter converter = (customConverter != null ? customConverter : bw);
@@ -761,7 +768,7 @@ class ConstructorResolver {
 			MethodParameter methodParam = MethodParameter.forExecutable(executable, argIndex);
 			GenericTypeResolver.resolveParameterType(methodParam, executable.getDeclaringClass());
 			if (argValue instanceof AutowiredArgumentMarker) {
-				argValue = resolveAutowiredArgument(methodParam, beanName, null, converter);
+				argValue = resolveAutowiredArgument(methodParam, beanName, null, converter, fallback);
 			}
 			else if (argValue instanceof BeanMetadataElement) {
 				argValue = valueResolver.resolveValueIfNecessary("constructor argument", argValue);
@@ -803,17 +810,39 @@ class ConstructorResolver {
 	 */
 	@Nullable
 	protected Object resolveAutowiredArgument(MethodParameter param, String beanName,
-			@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+			@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter, boolean fallback) {
 
-		if (InjectionPoint.class.isAssignableFrom(param.getParameterType())) {
+		Class<?> paramType = param.getParameterType();
+		if (InjectionPoint.class.isAssignableFrom(paramType)) {
 			InjectionPoint injectionPoint = currentInjectionPoint.get();
 			if (injectionPoint == null) {
 				throw new IllegalStateException("No current InjectionPoint available for " + param);
 			}
 			return injectionPoint;
 		}
-		return this.beanFactory.resolveDependency(
-				new DependencyDescriptor(param, true), beanName, autowiredBeanNames, typeConverter);
+		try {
+			return this.beanFactory.resolveDependency(
+					new DependencyDescriptor(param, true), beanName, autowiredBeanNames, typeConverter);
+		}
+		catch (NoUniqueBeanDefinitionException ex) {
+			throw ex;
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			if (fallback) {
+				// Single constructor or factory method -> let's return an empty array/collection
+				// for e.g. a vararg or a non-null List/Set/Map parameter.
+				if (paramType.isArray()) {
+					return Array.newInstance(paramType.getComponentType(), 0);
+				}
+				else if (CollectionFactory.isApproximableCollectionType(paramType)) {
+					return CollectionFactory.createCollection(paramType, 0);
+				}
+				else if (CollectionFactory.isApproximableMapType(paramType)) {
+					return CollectionFactory.createMap(paramType, 0);
+				}
+			}
+			throw ex;
+		}
 	}
 
 	static InjectionPoint setCurrentInjectionPoint(@Nullable InjectionPoint injectionPoint) {

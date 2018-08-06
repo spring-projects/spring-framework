@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.servlet.ModelAndView;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * Factory for assertions on the model.
@@ -81,17 +83,17 @@ public class ModelResultMatchers {
 		};
 	}
 
-    /**
-     * Assert the given model attributes do not exist
-     */
-    public ResultMatcher attributeDoesNotExist(final String... names) {
-        return result -> {
+	/**
+	 * Assert the given model attributes do not exist.
+	 */
+	public ResultMatcher attributeDoesNotExist(final String... names) {
+		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (String name : names) {
 				assertTrue("Model attribute '" + name + "' exists", mav.getModel().get(name) == null);
 			}
 		};
-    }
+	}
 
 	/**
 	 * Assert the given model attribute(s) have errors.

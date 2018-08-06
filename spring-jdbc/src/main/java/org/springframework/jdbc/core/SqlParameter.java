@@ -54,7 +54,7 @@ public class SqlParameter {
 
 	/**
 	 * Create a new anonymous SqlParameter, supplying the SQL type.
-	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
+	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 */
 	public SqlParameter(int sqlType) {
 		this.sqlType = sqlType;
@@ -62,7 +62,7 @@ public class SqlParameter {
 
 	/**
 	 * Create a new anonymous SqlParameter, supplying the SQL type.
-	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
+	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 * @param typeName the type name of the parameter (optional)
 	 */
 	public SqlParameter(int sqlType, @Nullable String typeName) {
@@ -72,7 +72,7 @@ public class SqlParameter {
 
 	/**
 	 * Create a new anonymous SqlParameter, supplying the SQL type.
-	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
+	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 * @param scale the number of digits after the decimal point
 	 * (for DECIMAL and NUMERIC types)
 	 */
@@ -84,7 +84,7 @@ public class SqlParameter {
 	/**
 	 * Create a new SqlParameter, supplying name and SQL type.
 	 * @param name name of the parameter, as used in input and output maps
-	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
+	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 */
 	public SqlParameter(String name, int sqlType) {
 		this.name = name;
@@ -94,7 +94,7 @@ public class SqlParameter {
 	/**
 	 * Create a new SqlParameter, supplying name and SQL type.
 	 * @param name name of the parameter, as used in input and output maps
-	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
+	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 * @param typeName the type name of the parameter (optional)
 	 */
 	public SqlParameter(String name, int sqlType, @Nullable String typeName) {
@@ -106,7 +106,7 @@ public class SqlParameter {
 	/**
 	 * Create a new SqlParameter, supplying name and SQL type.
 	 * @param name name of the parameter, as used in input and output maps
-	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
+	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 * @param scale the number of digits after the decimal point
 	 * (for DECIMAL and NUMERIC types)
 	 */

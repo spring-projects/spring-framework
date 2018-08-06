@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,39 +66,39 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	volatile ResolvableType targetType;
 
-	/** Package-visible field for caching the determined Class of a given bean definition */
+	/** Package-visible field for caching the determined Class of a given bean definition. */
 	@Nullable
 	volatile Class<?> resolvedTargetType;
 
-	/** Package-visible field for caching the return type of a generically typed factory method */
+	/** Package-visible field for caching the return type of a generically typed factory method. */
 	@Nullable
 	volatile ResolvableType factoryMethodReturnType;
 
-	/** Common lock for the four constructor fields below */
+	/** Common lock for the four constructor fields below. */
 	final Object constructorArgumentLock = new Object();
 
-	/** Package-visible field for caching the resolved constructor or factory method */
+	/** Package-visible field for caching the resolved constructor or factory method. */
 	@Nullable
 	Executable resolvedConstructorOrFactoryMethod;
 
-	/** Package-visible field that marks the constructor arguments as resolved */
+	/** Package-visible field that marks the constructor arguments as resolved. */
 	boolean constructorArgumentsResolved = false;
 
-	/** Package-visible field for caching fully resolved constructor arguments */
+	/** Package-visible field for caching fully resolved constructor arguments. */
 	@Nullable
 	Object[] resolvedConstructorArguments;
 
-	/** Package-visible field for caching partly prepared constructor arguments */
+	/** Package-visible field for caching partly prepared constructor arguments. */
 	@Nullable
 	Object[] preparedConstructorArguments;
 
-	/** Common lock for the two post-processing fields below */
+	/** Common lock for the two post-processing fields below. */
 	final Object postProcessingLock = new Object();
 
-	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied */
+	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied. */
 	boolean postProcessed = false;
 
-	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
+	/** Package-visible field that indicates a before-instantiation post-processor having kicked in. */
 	@Nullable
 	volatile Boolean beforeInstantiationResolved;
 
@@ -320,6 +320,19 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		}
 		ResolvableType targetType = this.targetType;
 		return (targetType != null ? targetType.resolve() : null);
+	}
+
+	/**
+	 * Return a {@link ResolvableType} for this bean definition,
+	 * either from runtime-cached type information or from configuration-time
+	 * {@link #setTargetType(ResolvableType)} or {@link #setBeanClass(Class)}.
+	 * @since 5.1
+	 * @see #getTargetType()
+	 * @see #getBeanClass()
+	 */
+	public ResolvableType getResolvableType() {
+		ResolvableType targetType = this.targetType;
+		return (targetType != null ? targetType : ResolvableType.forClass(getBeanClass()));
 	}
 
 	/**

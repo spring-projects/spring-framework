@@ -20,6 +20,7 @@ import java.util.Map;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
@@ -44,7 +45,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @author Brian Clozel
  * @since 5.0
  */
-public abstract class AbstractHandlerMapping extends ApplicationObjectSupport implements HandlerMapping, Ordered {
+public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
+		implements HandlerMapping, Ordered, BeanNameAware {
 
 	private static final WebHandler REQUEST_HANDLED_HANDLER = exchange -> Mono.empty();
 
@@ -57,10 +59,13 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
+	@Nullable
+	private String beanName;
+
 
 	public AbstractHandlerMapping() {
-		  this.patternParser = new PathPatternParser();
-		  this.globalCorsConfigSource = new UrlBasedCorsConfigurationSource(this.patternParser);
+		this.patternParser = new PathPatternParser();
+		this.globalCorsConfigSource = new UrlBasedCorsConfigurationSource(this.patternParser);
 	}
 
 
@@ -141,10 +146,22 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 		return this.order;
 	}
 
+	@Override
+	public void setBeanName(String name) {
+		this.beanName = name;
+	}
+
+	protected String formatMappingName() {
+		return this.beanName != null ? "'" + this.beanName + "'" : "<unknown>";
+	}
+
 
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
 		return getHandlerInternal(exchange).map(handler -> {
+			if (logger.isDebugEnabled()) {
+				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
+			}
 			if (CorsUtils.isCorsRequest(exchange.getRequest())) {
 				CorsConfiguration configA = this.globalCorsConfigSource.getCorsConfiguration(exchange);
 				CorsConfiguration configB = getCorsConfiguration(handler, exchange);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,8 +37,10 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag implements BodyTag {
 
+	@Nullable
 	private BodyContent bodyContent;
 
+	@Nullable
 	private TagWriter tagWriter;
 
 
@@ -57,11 +61,12 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	 * If {@link #shouldRender rendering}, flush any buffered
 	 * {@link BodyContent} or, if no {@link BodyContent} is supplied,
 	 * {@link #renderDefaultContent render the default content}.
-	 * @return Tag#EVAL_PAGE
+	 * @return a {@link javax.servlet.jsp.tagext.Tag#EVAL_PAGE} result
 	 */
 	@Override
 	public int doEndTag() throws JspException {
 		if (shouldRender()) {
+			Assert.state(this.tagWriter != null, "No TagWriter set");
 			if (this.bodyContent != null && StringUtils.hasText(this.bodyContent.getString())) {
 				renderFromBodyContent(this.bodyContent, this.tagWriter);
 			}
@@ -79,7 +84,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	 * override this to add additional content to the output.
 	 */
 	protected void renderFromBodyContent(BodyContent bodyContent, TagWriter tagWriter) throws JspException {
-		flushBufferedBodyContent(this.bodyContent);
+		flushBufferedBodyContent(bodyContent);
 	}
 
 	/**

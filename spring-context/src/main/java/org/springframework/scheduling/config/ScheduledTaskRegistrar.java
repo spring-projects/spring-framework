@@ -254,7 +254,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	}
 
 	/**
-	 * Add a Runnable task to be triggered per the given cron expression
+	 * Add a Runnable task to be triggered per the given cron expression.
 	 */
 	public void addCronTask(Runnable task, String expression) {
 		addCronTask(new CronTask(task, expression));

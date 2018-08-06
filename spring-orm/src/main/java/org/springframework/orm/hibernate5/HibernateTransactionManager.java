@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Create a new HibernateTransactionManager instance.
-	 * @param sessionFactory SessionFactory to manage transactions for
+	 * @param sessionFactory the SessionFactory to manage transactions for
 	 */
 	public HibernateTransactionManager(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -203,7 +203,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
-		if (dataSource != null && dataSource instanceof TransactionAwareDataSourceProxy) {
+		if (dataSource instanceof TransactionAwareDataSourceProxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
@@ -336,7 +336,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	@Nullable
 	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
 		if (this.entityInterceptor instanceof Interceptor) {
-			return (Interceptor) entityInterceptor;
+			return (Interceptor) this.entityInterceptor;
 		}
 		else if (this.entityInterceptor instanceof String) {
 			if (this.beanFactory == null) {
@@ -374,8 +374,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			DataSource sfds = SessionFactoryUtils.getDataSource(getSessionFactory());
 			if (sfds != null) {
 				// Use the SessionFactory's DataSource for exposing transactions to JDBC code.
-				if (logger.isInfoEnabled()) {
-					logger.info("Using DataSource [" + sfds +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Using DataSource [" + sfds +
 							"] of Hibernate SessionFactory for HibernateTransactionManager");
 				}
 				setDataSource(sfds);
@@ -495,6 +495,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (definition.isReadOnly() && txObject.isNewSession()) {
 				// Just set to MANUAL in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.MANUAL);
+				// As of 5.1, we're also setting Hibernate's read-only entity mode by default.
+				session.setDefaultReadOnly(true);
 			}
 
 			if (!definition.isReadOnly() && !txObject.isNewSession()) {
@@ -777,7 +779,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * from the {@code org.springframework.dao} hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
-	 * @param ex HibernateException that occurred
+	 * @param ex the HibernateException that occurred
 	 * @return a corresponding DataAccessException
 	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 */
@@ -890,7 +892,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Holder for suspended resources.
 	 * Used internally by {@code doSuspend} and {@code doResume}.
 	 */
-	private static class SuspendedResourcesHolder {
+	private static final class SuspendedResourcesHolder {
 
 		private final SessionHolder sessionHolder;
 

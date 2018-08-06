@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,15 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.util.IllegalReferenceCountException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.test.publisher.TestPublisher;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.ByteBufferDecoder;
@@ -39,6 +43,9 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.NettyDataBuffer;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.DecoderHttpMessageReader;
@@ -53,23 +60,26 @@ import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.mock.http.client.reactive.test.MockClientHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.codec.json.Jackson2CodecSupport.*;
 
 /**
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  */
 public class BodyExtractorsTests {
 
 	private BodyExtractor.Context context;
 
 	private Map<String, Object> hints;
+
+	private Optional<ServerHttpResponse> serverResponse = Optional.empty();
 
 
 	@Before
@@ -94,7 +104,7 @@ public class BodyExtractorsTests {
 
 			@Override
 			public Optional<ServerHttpResponse> serverResponse() {
-				return Optional.empty();
+				return serverResponse;
 			}
 
 			@Override
@@ -171,7 +181,7 @@ public class BodyExtractorsTests {
 				.verify();
 	}
 
-	@Test // SPR-15758
+	@Test  // SPR-15758
 	public void toMonoWithEmptyBodyAndNoContentType() {
 		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
 				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
@@ -180,6 +190,43 @@ public class BodyExtractorsTests {
 		Mono<Map<String, String>> result = extractor.extract(request, this.context);
 
 		StepVerifier.create(result).expectComplete().verify();
+	}
+
+	@Test
+	public void toMonoVoidAsClientShouldConsumeAndCancel() {
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		TestPublisher<DataBuffer> body = TestPublisher.create();
+
+		BodyExtractor<Mono<Void>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(Void.class);
+		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
+		response.setBody(body.flux());
+
+		StepVerifier.create(extractor.extract(response, this.context))
+				.then(() -> {
+					body.assertWasSubscribed();
+					body.emit(dataBuffer);
+				})
+				.verifyComplete();
+
+		body.assertCancelled();
+	}
+
+	@Test
+	public void toMonoVoidAsClientWithEmptyBody() {
+		TestPublisher<DataBuffer> body = TestPublisher.create();
+
+		BodyExtractor<Mono<Void>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(Void.class);
+		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
+		response.setBody(body.flux());
+
+		StepVerifier.create(extractor.extract(response, this.context))
+				.then(() -> {
+					body.assertWasSubscribed();
+					body.complete();
+				})
+				.verifyComplete();
 	}
 
 	@Test
@@ -366,6 +413,34 @@ public class BodyExtractorsTests {
 				.expectNext(dataBuffer)
 				.expectComplete()
 				.verify();
+	}
+
+	@Test // SPR-17054
+	public void unsupportedMediaTypeShouldConsumeAndCancel() {
+		NettyDataBufferFactory factory = new NettyDataBufferFactory(new PooledByteBufAllocator(true));
+		NettyDataBuffer buffer = factory.wrap(ByteBuffer.wrap("spring".getBytes(StandardCharsets.UTF_8)));
+		TestPublisher<DataBuffer> body = TestPublisher.create();
+
+		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
+		response.getHeaders().setContentType(MediaType.APPLICATION_PDF);
+		response.setBody(body.flux());
+
+		BodyExtractor<Mono<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(User.class);
+		StepVerifier.create(extractor.extract(response, this.context))
+				.then(() -> {
+					body.assertWasSubscribed();
+					body.emit(buffer);
+				})
+				.expectErrorSatisfies(throwable -> {
+					assertTrue(throwable instanceof UnsupportedMediaTypeException);
+					try {
+						buffer.release();
+						Assert.fail("releasing the buffer should have failed");
+					} catch (IllegalReferenceCountException exc) {
+
+					}
+					body.assertCancelled();
+				}).verify();
 	}
 
 

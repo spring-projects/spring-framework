@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,15 @@ import org.springframework.util.Assert;
 
 /**
  * A default implementation of {@link SimpUserRegistry} that relies on
- * {@link AbstractSubProtocolEvent} application context events to keep track of
- * connected users and their subscriptions.
+ * {@link AbstractSubProtocolEvent} application context events to keep
+ * track of connected users and their subscriptions.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
  */
 public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicationListener {
+
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	/* Primary lookup that holds all users and their sessions */
 	private final Map<String, LocalSimpUser> users = new ConcurrentHashMap<>();
@@ -56,9 +58,18 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	private final Object sessionLock = new Object();
 
 
+	/**
+	 * Specify the order value for this registry.
+	 * <p>Default is {@link Ordered#LOWEST_PRECEDENCE}.
+	 * @since 5.0.8
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
 	@Override
 	public int getOrder() {
-		return Ordered.LOWEST_PRECEDENCE;
+		return this.order;
 	}
 
 

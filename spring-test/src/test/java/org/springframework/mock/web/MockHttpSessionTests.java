@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.mock.web;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -24,11 +28,12 @@ import static org.junit.Assert.*;
  * Unit tests for {@link MockHttpSession}.
  *
  * @author Sam Brannen
+ * @author Vedran Pavic
  * @since 3.2
  */
 public class MockHttpSessionTests {
 
-	private final MockHttpSession session = new MockHttpSession();
+	private MockHttpSession session = new MockHttpSession();
 
 
 	@Test
@@ -141,6 +146,72 @@ public class MockHttpSessionTests {
 	public void isNewOnInvalidatedSession() {
 		session.invalidate();
 		session.isNew();
+	}
+
+	@Test
+	public void bindingListenerBindListener() {
+		String bindingListenerName = "bindingListener";
+		CountingHttpSessionBindingListener bindingListener = new CountingHttpSessionBindingListener();
+
+		session.setAttribute(bindingListenerName, bindingListener);
+
+		assertEquals(bindingListener.getCounter(), 1);
+	}
+
+	@Test
+	public void bindingListenerBindListenerThenUnbind() {
+		String bindingListenerName = "bindingListener";
+		CountingHttpSessionBindingListener bindingListener = new CountingHttpSessionBindingListener();
+
+		session.setAttribute(bindingListenerName, bindingListener);
+		session.removeAttribute(bindingListenerName);
+
+		assertEquals(bindingListener.getCounter(), 0);
+	}
+
+	@Test
+	public void bindingListenerBindSameListenerTwice() {
+		String bindingListenerName = "bindingListener";
+		CountingHttpSessionBindingListener bindingListener = new CountingHttpSessionBindingListener();
+
+		session.setAttribute(bindingListenerName, bindingListener);
+		session.setAttribute(bindingListenerName, bindingListener);
+
+		assertEquals(bindingListener.getCounter(), 1);
+	}
+
+	@Test
+	public void bindingListenerBindListenerOverwrite() {
+		String bindingListenerName = "bindingListener";
+		CountingHttpSessionBindingListener bindingListener1 = new CountingHttpSessionBindingListener();
+		CountingHttpSessionBindingListener bindingListener2 = new CountingHttpSessionBindingListener();
+
+		session.setAttribute(bindingListenerName, bindingListener1);
+		session.setAttribute(bindingListenerName, bindingListener2);
+
+		assertEquals(bindingListener1.getCounter(), 0);
+		assertEquals(bindingListener2.getCounter(), 1);
+	}
+
+	private static class CountingHttpSessionBindingListener
+			implements HttpSessionBindingListener {
+
+		private final AtomicInteger counter = new AtomicInteger(0);
+
+		@Override
+		public void valueBound(HttpSessionBindingEvent event) {
+			this.counter.incrementAndGet();
+		}
+
+		@Override
+		public void valueUnbound(HttpSessionBindingEvent event) {
+			this.counter.decrementAndGet();
+		}
+
+		int getCounter() {
+			return this.counter.get();
+		}
+
 	}
 
 }

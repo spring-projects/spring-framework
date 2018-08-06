@@ -54,6 +54,8 @@ import org.springframework.http.codec.json.Jackson2SmileDecoder;
 import org.springframework.http.codec.json.Jackson2SmileEncoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
+import org.springframework.http.codec.protobuf.ProtobufDecoder;
+import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
@@ -76,12 +78,13 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertEquals(12, readers.size());
+		assertEquals(13, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
+		assertEquals(ProtobufDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(SynchronossPartHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(MultipartHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
@@ -94,12 +97,13 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		assertEquals(10, writers.size());
+		assertEquals(11, writers.size());
 		assertEquals(ByteArrayEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ByteBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(DataBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ResourceHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
 		assertStringEncoder(getNextEncoder(writers), true);
+		assertEquals(ProtobufHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
 		assertEquals(Jackson2JsonEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2SmileEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());

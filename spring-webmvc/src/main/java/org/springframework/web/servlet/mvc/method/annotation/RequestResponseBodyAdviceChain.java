@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,20 +52,24 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 	 * {@code ControllerAdviceBean} or {@code RequestBodyAdvice}.
 	 */
 	public RequestResponseBodyAdviceChain(@Nullable List<Object> requestResponseBodyAdvice) {
+		this.requestBodyAdvice.addAll(getAdviceByType(requestResponseBodyAdvice, RequestBodyAdvice.class));
+		this.responseBodyAdvice.addAll(getAdviceByType(requestResponseBodyAdvice, ResponseBodyAdvice.class));
+	}
+
+	@SuppressWarnings("unchecked")
+	static <T> List<T> getAdviceByType(@Nullable List<Object> requestResponseBodyAdvice, Class<T> adviceType) {
 		if (requestResponseBodyAdvice != null) {
+			List<T> result = new ArrayList<>();
 			for (Object advice : requestResponseBodyAdvice) {
 				Class<?> beanType = (advice instanceof ControllerAdviceBean ?
 						((ControllerAdviceBean) advice).getBeanType() : advice.getClass());
-				if (beanType != null) {
-					if (RequestBodyAdvice.class.isAssignableFrom(beanType)) {
-						this.requestBodyAdvice.add(advice);
-					}
-					else if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
-						this.responseBodyAdvice.add(advice);
-					}
+				if (beanType != null && adviceType.isAssignableFrom(beanType)) {
+					result.add((T) advice);
 				}
 			}
+			return result;
 		}
+		return Collections.emptyList();
 	}
 
 

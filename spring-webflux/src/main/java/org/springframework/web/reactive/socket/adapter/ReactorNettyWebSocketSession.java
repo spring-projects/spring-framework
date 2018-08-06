@@ -20,11 +20,11 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.NettyInbound;
-import reactor.ipc.netty.NettyOutbound;
-import reactor.ipc.netty.NettyPipeline;
-import reactor.ipc.netty.http.websocket.WebsocketInbound;
-import reactor.ipc.netty.http.websocket.WebsocketOutbound;
+import reactor.netty.NettyInbound;
+import reactor.netty.NettyOutbound;
+import reactor.netty.NettyPipeline;
+import reactor.netty.http.websocket.WebsocketInbound;
+import reactor.netty.http.websocket.WebsocketOutbound;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.web.reactive.socket.CloseStatus;
@@ -56,12 +56,23 @@ public class ReactorNettyWebSocketSession
 		return getDelegate().getInbound()
 				.aggregateFrames(DEFAULT_FRAME_MAX_SIZE)
 				.receiveFrames()
-				.map(super::toMessage);
+				.map(super::toMessage)
+				.doOnNext(message -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace(getLogPrefix() + "Received " + message);
+					}
+				});
 	}
 
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
-		Flux<WebSocketFrame> frames = Flux.from(messages).map(this::toFrame);
+		Flux<WebSocketFrame> frames = Flux.from(messages)
+				.doOnNext(message -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace(getLogPrefix() + "Sending " + message);
+					}
+				})
+				.map(this::toFrame);
 		return getDelegate().getOutbound()
 				.options(NettyPipeline.SendOptions::flushOnEach)
 				.sendObject(frames)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,13 +72,15 @@ class CallableInterceptorChain {
 			try {
 				this.interceptors.get(i).postProcess(request, task, concurrentResult);
 			}
-			catch (Throwable t) {
+			catch (Throwable ex) {
 				// Save the first exception but invoke all interceptors
 				if (exceptionResult != null) {
-					logger.error("postProcess error", t);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Ignoring failure in postProcess method", ex);
+					}
 				}
 				else {
-					exceptionResult = t;
+					exceptionResult = ex;
 				}
 			}
 		}
@@ -97,8 +99,8 @@ class CallableInterceptorChain {
 					return result;
 				}
 			}
-			catch (Throwable t) {
-				return t;
+			catch (Throwable ex) {
+				return ex;
 			}
 		}
 		return CallableProcessingInterceptor.RESULT_NONE;
@@ -128,8 +130,8 @@ class CallableInterceptorChain {
 					return result;
 				}
 			}
-			catch (Throwable t) {
-				return t;
+			catch (Throwable ex) {
+				return ex;
 			}
 		}
 		return CallableProcessingInterceptor.RESULT_NONE;
@@ -140,8 +142,10 @@ class CallableInterceptorChain {
 			try {
 				this.interceptors.get(i).afterCompletion(request, task);
 			}
-			catch (Throwable t) {
-				logger.error("afterCompletion error", t);
+			catch (Throwable ex) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Ignoring failure in afterCompletion method", ex);
+				}
 			}
 		}
 	}

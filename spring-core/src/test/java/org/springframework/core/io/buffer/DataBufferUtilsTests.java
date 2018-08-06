@@ -225,24 +225,37 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
-	public void takeUntilByteCount() throws Exception {
-		DataBuffer foo = stringBuffer("foo");
-		DataBuffer bar = stringBuffer("bar");
-		DataBuffer baz = stringBuffer("baz");
-		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
-		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(flux, 5L);
+	public void takeUntilByteCount() {
+
+		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(
+				Flux.just(stringBuffer("foo"), stringBuffer("bar")), 5L);
 
 		StepVerifier.create(result)
 				.consumeNextWith(stringConsumer("foo"))
 				.consumeNextWith(stringConsumer("ba"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
-
-		release(baz);
 	}
 
 	@Test
-	public void skipUntilByteCount() throws Exception {
+	public void takeUntilByteCountExact() {
+
+		DataBuffer extraBuffer = stringBuffer("baz");
+
+		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(
+				Flux.just(stringBuffer("foo"), stringBuffer("bar"), extraBuffer), 6L);
+
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+
+		release(extraBuffer);
+	}
+
+	@Test
+	public void skipUntilByteCount() {
 		DataBuffer foo = stringBuffer("foo");
 		DataBuffer bar = stringBuffer("bar");
 		DataBuffer baz = stringBuffer("baz");
@@ -257,7 +270,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
-	public void skipUntilByteCountShouldSkipAll() throws Exception {
+	public void skipUntilByteCountShouldSkipAll() {
 		DataBuffer foo = stringBuffer("foo");
 		DataBuffer bar = stringBuffer("bar");
 		DataBuffer baz = stringBuffer("baz");
@@ -283,7 +296,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		assertReleased(bar);
 		assertReleased(baz);
 	}
-	
+
 	private static void assertReleased(DataBuffer dataBuffer) {
 		if (dataBuffer instanceof NettyDataBuffer) {
 			ByteBuf byteBuf = ((NettyDataBuffer) dataBuffer).getNativeBuffer();

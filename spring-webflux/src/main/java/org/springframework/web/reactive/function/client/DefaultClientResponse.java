@@ -26,7 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,11 +54,14 @@ class DefaultClientResponse implements ClientResponse {
 
 	private final ExchangeStrategies strategies;
 
+	private final String logPrefix;
 
-	public DefaultClientResponse(ClientHttpResponse response, ExchangeStrategies strategies) {
+
+	public DefaultClientResponse(ClientHttpResponse response, ExchangeStrategies strategies, String logPrefix) {
 		this.response = response;
 		this.strategies = strategies;
 		this.headers = new DefaultHeaders();
+		this.logPrefix = logPrefix;
 	}
 
 
@@ -70,6 +73,11 @@ class DefaultClientResponse implements ClientResponse {
 	@Override
 	public HttpStatus statusCode() {
 		return this.response.getStatusCode();
+	}
+
+	@Override
+	public int rawStatusCode() {
+		return this.response.getRawStatusCode();
 	}
 
 	@Override
@@ -95,89 +103,48 @@ class DefaultClientResponse implements ClientResponse {
 			}
 			@Override
 			public Map<String, Object> hints() {
-				return Collections.emptyMap();
+				return Hints.from(Hints.LOG_PREFIX_HINT, logPrefix);
 			}
 		});
 	}
 
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
-		if (Void.class.isAssignableFrom(elementClass)) {
-			return consumeAndCancel();
-		}
-		else {
-			return body(BodyExtractors.toMono(elementClass));
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> Mono<T> consumeAndCancel() {
-		return (Mono<T>) this.response.getBody()
-				.map(buffer -> {
-					DataBufferUtils.release(buffer);
-					throw new ReadCancellationException();
-				})
-				.onErrorResume(ReadCancellationException.class, ex -> Mono.empty())
-				.then();
+		return body(BodyExtractors.toMono(elementClass));
 	}
 
 	@Override
 	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
-		if (Void.class.isAssignableFrom(typeReference.getType().getClass())) {
-			return consumeAndCancel();
-		}
-		else {
-			return body(BodyExtractors.toMono(typeReference));
-		}
+		return body(BodyExtractors.toMono(typeReference));
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
-		if (Void.class.isAssignableFrom(elementClass)) {
-			return Flux.from(consumeAndCancel());
-		}
-		else {
-			return body(BodyExtractors.toFlux(elementClass));
-		}
+		return body(BodyExtractors.toFlux(elementClass));
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
-		if (Void.class.isAssignableFrom(typeReference.getType().getClass())) {
-			return Flux.from(consumeAndCancel());
-		}
-		else {
-			return body(BodyExtractors.toFlux(typeReference));
-		}
+		return body(BodyExtractors.toFlux(typeReference));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {
-		if (Void.class.isAssignableFrom(bodyType)) {
-			return toEntityInternal(consumeAndCancel());
-		}
-		else {
-			return toEntityInternal(bodyToMono(bodyType));
-		}
+		return toEntityInternal(bodyToMono(bodyType));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference) {
-		if (Void.class.isAssignableFrom(typeReference.getType().getClass())) {
-			return toEntityInternal(consumeAndCancel());
-		}
-		else {
-			return toEntityInternal(bodyToMono(typeReference));
-		}
+		return toEntityInternal(bodyToMono(typeReference));
 	}
 
 	private <T> Mono<ResponseEntity<T>> toEntityInternal(Mono<T> bodyMono) {
 		HttpHeaders headers = headers().asHttpHeaders();
-		HttpStatus statusCode = statusCode();
+		int status = rawStatusCode();
 		return bodyMono
-				.map(body -> new ResponseEntity<>(body, headers, statusCode))
+				.map(body -> createEntity(body, headers, status))
 				.switchIfEmpty(Mono.defer(
-						() -> Mono.just(new ResponseEntity<>(headers, statusCode))));
+						() -> Mono.just(createEntity(headers, status))));
 	}
 
 	@Override
@@ -192,10 +159,24 @@ class DefaultClientResponse implements ClientResponse {
 
 	private <T> Mono<ResponseEntity<List<T>>> toEntityListInternal(Flux<T> bodyFlux) {
 		HttpHeaders headers = headers().asHttpHeaders();
-		HttpStatus statusCode = statusCode();
+		int status = rawStatusCode();
 		return bodyFlux
 				.collectList()
-				.map(body -> new ResponseEntity<>(body, headers, statusCode));
+				.map(body -> createEntity(body, headers, status));
+	}
+
+	private <T> ResponseEntity<T> createEntity(HttpHeaders headers, int status) {
+		HttpStatus resolvedStatus = HttpStatus.resolve(status);
+		return resolvedStatus != null
+				? new ResponseEntity<>(headers, resolvedStatus)
+				: ResponseEntity.status(status).headers(headers).build();
+	}
+
+	private <T> ResponseEntity<T> createEntity(T body, HttpHeaders headers, int status) {
+		HttpStatus resolvedStatus = HttpStatus.resolve(status);
+		return resolvedStatus != null
+				? new ResponseEntity<>(body, headers, resolvedStatus)
+				: ResponseEntity.status(status).headers(headers).body(body);
 	}
 
 
@@ -229,11 +210,6 @@ class DefaultClientResponse implements ClientResponse {
 		private OptionalLong toOptionalLong(long value) {
 			return (value != -1 ? OptionalLong.of(value) : OptionalLong.empty());
 		}
-	}
-
-
-	@SuppressWarnings("serial")
-	private static class ReadCancellationException extends RuntimeException {
 	}
 
 }

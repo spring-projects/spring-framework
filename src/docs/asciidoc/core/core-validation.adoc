@@ -725,7 +725,6 @@ The SPI to implement type conversion logic is simple and strongly typed:
 	public interface Converter<S, T> {
 
 		T convert(S source);
-
 	}
 ----
 
@@ -754,7 +753,6 @@ Consider `StringToInteger` as an example for a typical `Converter` implementatio
 		public Integer convert(String source) {
 			return Integer.valueOf(source);
 		}
-
 	}
 ----
 
@@ -775,7 +773,6 @@ example, when converting from String to java.lang.Enum objects, implement
 	public interface ConverterFactory<S, R> {
 
 		<T extends R> Converter<S, T> getConverter(Class<T> targetType);
-
 	}
 ----
 
@@ -833,7 +830,6 @@ by a field annotation, or generic information declared on a field signature.
 		public Set<ConvertiblePair> getConvertibleTypes();
 
 		Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
-
 	}
 ----
 
@@ -872,12 +868,9 @@ such as a `static valueOf` method, is defined on the target class.
 	public interface ConditionalConverter {
 
 		boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
-
 	}
 
-	public interface ConditionalGenericConverter
-		extends GenericConverter, ConditionalConverter {
-
+	public interface ConditionalGenericConverter extends GenericConverter, ConditionalConverter {
 	}
 ----
 
@@ -1079,6 +1072,7 @@ Where Formatter extends from the Printer and Parser building-block interfaces:
 [subs="verbatim,quotes"]
 ----
 	public interface Printer<T> {
+
 		String print(T fieldValue, Locale locale);
 	}
 ----
@@ -1089,6 +1083,7 @@ Where Formatter extends from the Printer and Parser building-block interfaces:
 	import java.text.ParseException;
 
 	public interface Parser<T> {
+
 		T parse(String clientValue, Locale locale) throws ParseException;
 	}
 ----
@@ -1102,8 +1097,8 @@ should throw a ParseException or IllegalArgumentException if a parse attempt fai
 care to ensure your Formatter implementation is thread-safe.
 
 Several Formatter implementations are provided in `format` subpackages as a convenience.
-The `number` package provides a `NumberFormatter`, `CurrencyFormatter`, and
-`PercentFormatter` to format `java.lang.Number` objects using a `java.text.NumberFormat`.
+The `number` package provides a `NumberStyleFormatter`, `CurrencyStyleFormatter`, and
+`PercentStyleFormatter` to format `java.lang.Number` objects using a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
 a `java.text.DateFormat`. The `datetime.joda` package provides comprehensive datetime
 formatting support based on the http://joda-time.sourceforge.net[Joda-Time library].
@@ -1142,7 +1137,6 @@ Consider `DateFormatter` as an example `Formatter` implementation:
 			dateFormat.setLenient(false);
 			return dateFormat;
 		}
-
 	}
 ----
 
@@ -1169,7 +1163,6 @@ an Annotation to a formatter, implement AnnotationFormatterFactory:
 		Printer<?> getPrinter(A annotation, Class<?> fieldType);
 
 		Parser<?> getParser(A annotation, Class<?> fieldType);
-
 	}
 ----
 
@@ -1203,18 +1196,17 @@ specified:
 			return configureFormatterFrom(annotation, fieldType);
 		}
 
-		private Formatter<Number> configureFormatterFrom(NumberFormat annotation,
-				Class<?> fieldType) {
+		private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
 			if (!annotation.pattern().isEmpty()) {
-				return new NumberFormatter(annotation.pattern());
+				return new NumberStyleFormatter(annotation.pattern());
 			} else {
 				Style style = annotation.style();
 				if (style == Style.PERCENT) {
-					return new PercentFormatter();
+					return new PercentStyleFormatter();
 				} else if (style == Style.CURRENCY) {
-					return new CurrencyFormatter();
+					return new CurrencyStyleFormatter();
 				} else {
-					return new NumberFormatter();
+					return new NumberStyleFormatter();
 				}
 			}
 		}
@@ -1230,7 +1222,6 @@ To trigger formatting, simply annotate fields with @NumberFormat:
 
 		@NumberFormat(style=Style.CURRENCY)
 		private BigDecimal decimal;
-
 	}
 ----
 
@@ -1252,7 +1243,6 @@ The example below uses @DateTimeFormat to format a java.util.Date as a ISO Date
 
 		@DateTimeFormat(iso=ISO.DATE)
 		private Date date;
-
 	}
 ----
 
@@ -1284,7 +1274,6 @@ Review the FormatterRegistry SPI below:
 		void addFormatterForFieldType(Formatter<?> formatter);
 
 		void addFormatterForAnnotation(AnnotationFormatterFactory<?, ?> factory);
-
 	}
 ----
 
@@ -1312,7 +1301,6 @@ FormatterRegistry:
 	public interface FormatterRegistrar {
 
 		void registerFormatters(FormatterRegistry registry);
-
 	}
 ----
 
@@ -1470,7 +1458,6 @@ JSR-303 allows you to define declarative validation constraints against such pro
 
 		@Min(0)
 		private int age;
-
 	}
 ----
 
@@ -1543,7 +1530,6 @@ the Spring Validation API:
 
 		@Autowired
 		private Validator validator;
-
 	}
 ----
 
@@ -1555,7 +1541,7 @@ Each Bean Validation constraint consists of two parts. First, a `@Constraint` an
 that declares the constraint and its configurable properties. Second, an implementation
 of the `javax.validation.ConstraintValidator` interface that implements the constraint's
 behavior. To associate a declaration with an implementation, each `@Constraint` annotation
-references a corresponding ValidationConstraint implementation class. At runtime, a
+references a corresponding `ConstraintValidator` implementation class. At runtime, a
 `ConstraintValidatorFactory` instantiates the referenced implementation when the
 constraint annotation is encountered in your domain model.
 

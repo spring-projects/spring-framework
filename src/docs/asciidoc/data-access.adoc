@@ -1835,7 +1835,7 @@ Code within the callback can roll the transaction back by calling the
 			try {
 				updateOperation1();
 				updateOperation2();
-			} catch (SomeBusinessExeption ex) {
+			} catch (SomeBusinessException ex) {
 				**status.setRollbackOnly();**
 			}
 		}
@@ -2214,7 +2214,7 @@ configure the application context to take advantage of these annotations.
 
 
 [[jdbc-introduction]]
-=== Introduction to Spring Framework JDBC
+=== Introduction to Spring Framework's JDBC support
 
 The value-add provided by the Spring Framework JDBC abstraction is perhaps best shown by
 the sequence of actions outlined in the table below. The table shows what actions Spring
@@ -2942,10 +2942,10 @@ query methods, one for an `int` and one that queries for a `String`.
 ----
 
 In addition to the single result query methods, several methods return a list with an
-entry for each row that the query returned. The most generic method is
-`queryForList(..)` which returns a `List` where each entry is a `Map` with each entry in
-the map representing the column value for that row. If you add a method to the above
-example to retrieve a list of all the rows, it would look like this:
+entry for each row that the query returned. The most generic method is `queryForList(..)`
+which returns a `List` where each element is a `Map` containing one entry for each column,
+using the column name as the key. If you add a method to the above example to retrieve a
+list of all the rows, it would look like this:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3826,7 +3826,7 @@ like:
 [subs="verbatim,quotes"]
 ----
 	new SqlParameter("in_id", Types.NUMERIC),
-		new SqlOutParameter("out_first_name", Types.VARCHAR),
+	new SqlOutParameter("out_first_name", Types.VARCHAR),
 ----
 
 The first line with the `SqlParameter` declares an IN parameter. IN parameters can be
@@ -4141,7 +4141,7 @@ constants.
 [subs="verbatim,quotes"]
 ----
 	new SqlParameter("in_id", Types.NUMERIC),
-		new SqlOutParameter("out_first_name", Types.VARCHAR),
+	new SqlOutParameter("out_first_name", Types.VARCHAR),
 ----
 
 The first line with the `SqlParameter` declares an IN parameter. IN parameters can be
@@ -4149,10 +4149,10 @@ used for both stored procedure calls and for queries using the `SqlQuery` and it
 subclasses covered in the following section.
 
 The second line with the `SqlOutParameter` declares an `out` parameter to be used in the
-stored procedure call. There is also an `SqlInOutParameter` for `I` `nOut` parameters,
+stored procedure call. There is also an `SqlInOutParameter` for `InOut` parameters,
 parameters that provide an `in` value to the procedure and that also return a value.
 
-For `i` `n` parameters, in addition to the name and the SQL type, you can specify a
+For `in` parameters, in addition to the name and the SQL type, you can specify a
 scale for numeric data or a type name for custom database types. For `out` parameters
 you can provide a `RowMapper` to handle mapping of rows returned from a REF cursor.
 Another option is to specify an `SqlReturnType` that enables you to define customized
@@ -4295,8 +4295,7 @@ the supplied `ResultSet`.
 
 To pass parameters to a stored procedure that has one or more input parameters in its
 definition in the RDBMS, you can code a strongly typed `execute(..)` method that would
-delegate to the superclass' untyped `execute(Map parameters)` method (which has
-`protected` access); for example:
+delegate to the untyped `execute(Map)` method in the superclass; for example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4337,7 +4336,7 @@ delegate to the superclass' untyped `execute(Map parameters)` method (which has
 === Common problems with parameter and data value handling
 
 Common problems with parameters and data values exist in the different approaches
-provided by the Spring Framework JDBC.
+provided by Spring Framework's JDBC support.
 
 
 [[jdbc-type-information]]
@@ -4407,11 +4406,11 @@ dependency injection.
 
 	jdbcTemplate.execute(
 		"INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
-		new AbstractLobCreatingPreparedStatementCallback(lobHandler) { # <1>
+		new AbstractLobCreatingPreparedStatementCallback(lobHandler) {  # <1>
 			protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
 				ps.setLong(1, 1L);
-				lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length()); # <2>
-				lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length()); # <3>
+				lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());  # <2>
+				lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());  # <3>
 			}
 		}
 	);
@@ -4449,9 +4448,13 @@ with the same instance variable `lobHandler` and a reference to a `DefaultLobHan
 		new RowMapper<Map<String, Object>>() {
 			public Map<String, Object> mapRow(ResultSet rs, int i) throws SQLException {
 				Map<String, Object> results = new HashMap<String, Object>();
-				String clobText = lobHandler.getClobAsString(rs, "a_clob"); # <1>
-	results.put("CLOB", clobText); byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob"); # <2>
-	results.put("BLOB", blobBytes); return results; } });
+				String clobText = lobHandler.getClobAsString(rs, "a_clob");  # <1>
+				results.put("CLOB", clobText);
+				byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");  # <2>
+				results.put("BLOB", blobBytes);
+				return results;
+			}
+		});
 ----
 
 <1> Using the method `getClobAsString`, retrieve the contents of the CLOB.
@@ -5646,6 +5649,12 @@ application uses to refer to them, for example, in `@PersistenceUnit` and
 Use this option for full JPA capabilities in a Spring-based application environment.
 This includes web containers such as Tomcat as well as stand-alone applications and
 integration tests with sophisticated persistence requirements.
+
+If you'd like to specifically configure a Hibernate setup, an immediate alternative is
+to go with Hibernate 5.2/5.3 and set up a native Hibernate `LocalSessionFactoryBean`
+instead of a plain JPA `LocalContainerEntityManagerFactoryBean`, letting it interact
+with JPA access code as well as native Hibernate access code.
+See <<orm-jpa-hibernate,Native Hibernate setup for JPA interaction>> for details.
 ====
 
 The `LocalContainerEntityManagerFactoryBean` gives full control over
@@ -5976,6 +5985,15 @@ to JDBC access code that accesses the same `DataSource`, provided that the regis
 Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
 See the next section for details on the `JpaDialect` mechanism.
 
+[NOTE]
+====
+As an immediate alternative, Spring's native `HibernateTransactionManager` is capable
+of interacting with JPA access code as of Spring Framework 5.1 and Hibernate 5.2/5.3,
+adapting to several Hibernate specifics and providing JDBC interaction out of the box.
+This makes particular sense in combination with `LocalSessionFactoryBean` setup.
+See <<orm-jpa-hibernate,Native Hibernate setup for JPA interaction>> for details.
+====
+
 
 [[orm-jpa-dialect]]
 ==== JpaDialect and JpaVendorAdapter
@@ -6043,6 +6061,31 @@ server itself, i.e. via a JNDI lookup instead of a locally declared
 `LocalContainerEntityManagerFactoryBean`. A server-provided `EntityManagerFactory`
 might require special definitions in your server configuration, making the deployment
 less portable, but will be set up for the server's JTA environment out of the box.
+
+
+[[orm-jpa-hibernate]]
+==== Native Hibernate setup and native Hibernate transactions for JPA interaction
+
+As of Spring Framework 5.1 and Hibernate 5.2/5.3, a native `LocalSessionFactoryBean`
+setup in combination with `HibernateTransactionManager` allows for interaction with
+`@PersistenceContext` and other JPA access code out of the box. A Hibernate
+`SessionFactory` natively implements JPA's `EntityManagerFactory` interface now,
+and a Hibernate `Session` handle natively is a JPA `EntityManager` as well.
+Spring's JPA support facilities automatically detect native Hibernate Sessions.
+
+Such native Hibernate setup can therefore serve as a replacement for a standard JPA
+`LocalContainerEntityManagerFactoryBean` and `JpaTransactionManager` combination
+in many scenarios, allowing for interaction with `SessionFactory.getCurrentSession()`
+(and also `HibernateTemplate`) next to `@PersistenceContext EntityManager` within
+the same local transaction. Such a setup also provides stronger Hibernate integration
+and more configuration flexibility, not being constrained by JPA bootstrap contracts.
+
+There is no need for `HibernateJpaVendorAdapter` configuration in such a scenario
+since Spring's native Hibernate setup provides even more features out of the box:
+e.g. custom Hibernate Integrator setup, Hibernate 5.3 bean container integration,
+as well as stronger optimizations for read-only transactions. Last but not least,
+native Hibernate setup can also be expressed through `LocalSessionFactoryBuilder`,
+seamlessly integrating with `@Bean` style configuration (no `FactoryBean` involved).
 
 
 

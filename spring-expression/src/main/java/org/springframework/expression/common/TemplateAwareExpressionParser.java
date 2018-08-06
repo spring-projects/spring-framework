@@ -17,8 +17,8 @@
 package org.springframework.expression.common;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.expression.Expression;
@@ -87,7 +87,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * @throws ParseException when the expressions cannot be parsed
 	 */
 	private Expression[] parseExpressions(String expressionString, ParserContext context) throws ParseException {
-		List<Expression> expressions = new LinkedList<>();
+		List<Expression> expressions = new ArrayList<>();
 		String prefix = context.getExpressionPrefix();
 		String suffix = context.getExpressionSuffix();
 		int startIdx = 0;

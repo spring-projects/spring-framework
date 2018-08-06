@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,15 +58,15 @@ abstract class AutowireUtils {
 	 */
 	public static void sortConstructors(Constructor<?>[] constructors) {
 		Arrays.sort(constructors, (c1, c2) -> {
-            boolean p1 = Modifier.isPublic(c1.getModifiers());
-            boolean p2 = Modifier.isPublic(c2.getModifiers());
-            if (p1 != p2) {
-                return (p1 ? -1 : 1);
-            }
-            int c1pl = c1.getParameterCount();
-            int c2pl = c2.getParameterCount();
-            return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
-        });
+			boolean p1 = Modifier.isPublic(c1.getModifiers());
+			boolean p2 = Modifier.isPublic(c2.getModifiers());
+			if (p1 != p2) {
+				return (p1 ? -1 : 1);
+			}
+			int c1pl = c1.getParameterCount();
+			int c2pl = c2.getParameterCount();
+			return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
+		});
 	}
 
 	/**
@@ -78,15 +78,15 @@ abstract class AutowireUtils {
 	 */
 	public static void sortFactoryMethods(Method[] factoryMethods) {
 		Arrays.sort(factoryMethods, (fm1, fm2) -> {
-            boolean p1 = Modifier.isPublic(fm1.getModifiers());
-            boolean p2 = Modifier.isPublic(fm2.getModifiers());
-            if (p1 != p2) {
-                return (p1 ? -1 : 1);
-            }
-            int c1pl = fm1.getParameterCount();
-            int c2pl = fm2.getParameterCount();
-            return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
-        });
+			boolean p1 = Modifier.isPublic(fm1.getModifiers());
+			boolean p2 = Modifier.isPublic(fm2.getModifiers());
+			if (p1 != p2) {
+				return (p1 ? -1 : 1);
+			}
+			int c1pl = fm1.getParameterCount();
+			int c2pl = fm2.getParameterCount();
+			return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
+		});
 	}
 
 	/**

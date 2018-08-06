@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class EnableTransactionManagementTests {
 					"Do you actually have org.springframework.aspects on the classpath?");
 		}
 		catch (Exception ex) {
-			assertThat(ex.getMessage(), containsString("AspectJTransactionManagementConfiguration"));
+			assertThat(ex.getMessage(), containsString("AspectJJtaTransactionManagementConfiguration"));
 		}
 	}
 
