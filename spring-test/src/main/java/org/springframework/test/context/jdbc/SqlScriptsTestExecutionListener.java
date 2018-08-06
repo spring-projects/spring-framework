@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
@@ -130,7 +131,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
 		Set<Sql> methodLevelSqls = getScriptsFromElement(testContext.getTestMethod());
 		List<Sql> methodLevelOverrides = methodLevelSqls.stream()
-//							.filter(s -> s.executionPhase() == executionPhase)
+							.filter(s -> s.executionPhase() == executionPhase)
 							.filter(s -> s.mergeMode() == Sql.MergeMode.OVERRIDE)
 							.collect(Collectors.toList());
 		if (methodLevelOverrides.isEmpty()) {
@@ -184,14 +185,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 					mergedSqlConfig, executionPhase, testContext));
 		}
 
-		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-		populator.setSqlScriptEncoding(mergedSqlConfig.getEncoding());
-		populator.setSeparator(mergedSqlConfig.getSeparator());
-		populator.setCommentPrefix(mergedSqlConfig.getCommentPrefix());
-		populator.setBlockCommentStartDelimiter(mergedSqlConfig.getBlockCommentStartDelimiter());
-		populator.setBlockCommentEndDelimiter(mergedSqlConfig.getBlockCommentEndDelimiter());
-		populator.setContinueOnError(mergedSqlConfig.getErrorMode() == ErrorMode.CONTINUE_ON_ERROR);
-		populator.setIgnoreFailedDrops(mergedSqlConfig.getErrorMode() == ErrorMode.IGNORE_FAILED_DROPS);
+		final ResourceDatabasePopulator populator = configurePopulator(mergedSqlConfig);
 
 		String[] scripts = getScripts(sql, testContext, classLevel);
 		scripts = TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(), scripts);
@@ -248,6 +242,19 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 				return null;
 			});
 		}
+	}
+
+	@NotNull
+	private ResourceDatabasePopulator configurePopulator(MergedSqlConfig mergedSqlConfig) {
+		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+		populator.setSqlScriptEncoding(mergedSqlConfig.getEncoding());
+		populator.setSeparator(mergedSqlConfig.getSeparator());
+		populator.setCommentPrefix(mergedSqlConfig.getCommentPrefix());
+		populator.setBlockCommentStartDelimiter(mergedSqlConfig.getBlockCommentStartDelimiter());
+		populator.setBlockCommentEndDelimiter(mergedSqlConfig.getBlockCommentEndDelimiter());
+		populator.setContinueOnError(mergedSqlConfig.getErrorMode() == ErrorMode.CONTINUE_ON_ERROR);
+		populator.setIgnoreFailedDrops(mergedSqlConfig.getErrorMode() == ErrorMode.IGNORE_FAILED_DROPS);
+		return populator;
 	}
 
 	@Nullable
