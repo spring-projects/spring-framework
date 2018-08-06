@@ -17,6 +17,16 @@ import static org.springframework.http.HttpStatus.*;
 @RunWith(Parameterized.class)
 public class DefaultReponseHanderSpecificErrorsTests {
 
+	private final DefaultResponseErrorHandler handler = new DefaultResponseErrorHandler();
+
+	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
+
+	@Parameterized.Parameter
+	public HttpStatus httpStatus;
+
+	@Parameterized.Parameter(1)
+	public Class expectedExceptionClass;
+
 	@Parameters(name = "error: [{0}], exception: [{1}]")
 	public static Object[][] errorCodes() {
 		return new Object[][]{
@@ -40,16 +50,6 @@ public class DefaultReponseHanderSpecificErrorsTests {
 				{HTTP_VERSION_NOT_SUPPORTED, HttpServerErrorException.class}
 		};
 	}
-
-	@Parameterized.Parameter
-	public HttpStatus httpStatus;
-
-	@Parameterized.Parameter(1)
-	public Class expectedExceptionClass;
-
-	private final DefaultResponseErrorHandler handler = new DefaultResponseErrorHandler();
-
-	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
 
 	@Test
 	public void handleErrorIOException() throws Exception {
