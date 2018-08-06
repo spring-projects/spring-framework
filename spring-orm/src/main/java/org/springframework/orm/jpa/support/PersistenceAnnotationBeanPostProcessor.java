@@ -335,6 +335,11 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	@Override
+	public void resetBeanDefinition(String beanName) {
+		this.injectionMetadataCache.remove(beanName);
+	}
+
+	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		return null;
 	}
