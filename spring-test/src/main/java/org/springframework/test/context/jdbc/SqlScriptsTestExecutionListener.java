@@ -20,6 +20,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -127,19 +128,36 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * {@link TestContext} and {@link ExecutionPhase}.
 	 */
 	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
-		executeSqlScriptsByElement(testContext, executionPhase, testContext.getTestClass());
-		executeSqlScriptsByElement(testContext, executionPhase, testContext.getTestMethod());
+		Set<Sql> methodLevelSqls = getScriptsFromElement(testContext.getTestMethod());
+		List<Sql> methodLevelOverrides = methodLevelSqls.stream()
+//							.filter(s -> s.executionPhase() == executionPhase)
+							.filter(s -> s.mergeMode() == Sql.MergeMode.OVERRIDE)
+							.collect(Collectors.toList());
+		if (methodLevelOverrides.isEmpty()) {
+			executeScripts(getScriptsFromElement(testContext.getTestClass()), testContext, executionPhase, true);
+			executeScripts(methodLevelSqls, testContext, executionPhase, false);
+		} else {
+			executeScripts(methodLevelOverrides, testContext, executionPhase, false);
+		}
 	}
 
 	/**
-	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
-	 * {@link TestContext}, {@link ExecutionPhase} and {@link AnnotatedElement}.
+	 * Get SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link AnnotatedElement}.
 	 */
-	private void executeSqlScriptsByElement(TestContext testContext, ExecutionPhase executionPhase, AnnotatedElement annotatedElement) throws Exception {
-		Set<Sql> sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
-				annotatedElement, Sql.class, SqlGroup.class);
-		for (Sql sql : sqlAnnotations) {
-			executeSqlScripts(sql, executionPhase, testContext, annotatedElement instanceof Class);
+	private Set<Sql> getScriptsFromElement(AnnotatedElement annotatedElement) throws Exception {
+		return AnnotatedElementUtils.getMergedRepeatableAnnotations(annotatedElement, Sql.class, SqlGroup.class);
+	}
+
+	/**
+	 * Execute given {@link Sql @Sql} scripts.
+	 * {@link AnnotatedElement}.
+	 */
+	private void executeScripts(Iterable<Sql> scripts, TestContext testContext, ExecutionPhase executionPhase,
+								boolean classLevel)
+			throws Exception {
+		for (Sql sql : scripts) {
+			executeSqlScripts(sql, executionPhase, testContext, classLevel);
 		}
 	}
 
