@@ -641,11 +641,13 @@ public abstract class AnnotationUtils {
 		if (anns.length == 0) {
 			return false;
 		}
-		if (anns.length == 1) {
-			Class<?> annType = anns[0].annotationType();
-			return (annType != Nullable.class && annType != Deprecated.class);
+		for (Annotation ann : anns) {
+			String name = ann.annotationType().getName();
+			if (!name.startsWith("java.lang.") && !name.startsWith("org.springframework.lang.")) {
+				return true;
+			}
 		}
-		return true;
+		return false;
 	}
 
 	private static boolean isOverride(Method method, Method candidate) {
@@ -920,11 +922,11 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Determine if the {@link Annotation} with the supplied name is defined in the
-	 * {@code java.lang.annotation} or {@code org.springframework.lang} package.
-	 * @param annotatedElement the potential annotation type to check
-	 * @return {@code true} if the annotation is in the {@code java.lang.annotation}
-	 * or {@code org.springframework.lang} package
+	 * Determine if the given annotated element is defined in a
+	 * {@code java} or in the {@code org.springframework.lang} package.
+	 * @param annotatedElement the annotated element to check
+	 * @return {@code true} if the given element is in a {@code java}
+	 * package or in the {@code org.springframework.lang} package
 	 * @since 5.1
 	 */
 	static boolean hasPlainJavaAnnotationsOnly(@Nullable Object annotatedElement) {

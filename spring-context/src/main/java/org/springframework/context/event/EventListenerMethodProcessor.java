@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -137,7 +138,7 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 	protected void processBean(
 			final List<EventListenerFactory> factories, final String beanName, final Class<?> targetType) {
 
-		if (!this.nonAnnotatedClasses.contains(targetType)) {
+		if (!this.nonAnnotatedClasses.contains(targetType) && !isSpringContainerClass(targetType)) {
 			Map<Method, EventListener> annotatedMethods = null;
 			try {
 				annotatedMethods = MethodIntrospector.selectMethods(targetType,
@@ -179,6 +180,18 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * Determine whether the given class is an {@code org.springframework}
+	 * bean class that is not annotated as a user or test {@link Component}...
+	 * which indicates that there is no {@link EventListener} to be found there.
+	 * @since 5.1
+	 */
+	private static boolean isSpringContainerClass(Class<?> clazz) {
+		return (clazz.getName().startsWith("org.springframework.") &&
+				!AnnotatedElementUtils.isAnnotated(clazz, Component.class));
 	}
 
 }

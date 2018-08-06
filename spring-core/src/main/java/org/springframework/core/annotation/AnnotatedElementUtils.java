@@ -228,8 +228,8 @@ public abstract class AnnotatedElementUtils {
 		return hasMetaAnnotationTypes(element, null, annotationName);
 	}
 
-	private static boolean hasMetaAnnotationTypes(AnnotatedElement element, @Nullable Class<? extends Annotation> annotationType,
-			@Nullable String annotationName) {
+	private static boolean hasMetaAnnotationTypes(
+			AnnotatedElement element, @Nullable Class<? extends Annotation> annotationType, @Nullable String annotationName) {
 
 		return Boolean.TRUE.equals(
 			searchWithGetSemantics(element, annotationType, annotationName, new SimpleAnnotationProcessor<Boolean>() {
@@ -680,6 +680,11 @@ public abstract class AnnotatedElementUtils {
 			}
 		}
 
+		// Shortcut: no non-java annotations to be found on plain Java classes and org.springframework.lang types...
+		if (AnnotationUtils.hasPlainJavaAnnotationsOnly(element) && !annotationType.getName().startsWith("java")) {
+			return null;
+		}
+
 		// Exhaustive retrieval of merged annotation attributes...
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationType, false, false);
 		return (attributes != null ? AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element) : null);
@@ -1007,7 +1012,7 @@ public abstract class AnnotatedElementUtils {
 
 		if (containerType != null && !processor.aggregates()) {
 			throw new IllegalArgumentException(
-				"Searches for repeatable annotations must supply an aggregating Processor");
+					"Searches for repeatable annotations must supply an aggregating Processor");
 		}
 
 		try {

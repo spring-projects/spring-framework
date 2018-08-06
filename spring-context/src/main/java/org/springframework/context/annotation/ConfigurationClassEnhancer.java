@@ -188,8 +188,8 @@ class ConfigurationClassEnhancer {
 		@Override
 		public int accept(Method method) {
 			for (int i = 0; i < this.callbacks.length; i++) {
-				if (!(this.callbacks[i] instanceof ConditionalCallback) ||
-						((ConditionalCallback) this.callbacks[i]).isMatch(method)) {
+				Callback callback = this.callbacks[i];
+				if (!(callback instanceof ConditionalCallback) || ((ConditionalCallback) callback).isMatch(method)) {
 					return i;
 				}
 			}
@@ -285,6 +285,10 @@ class ConfigurationClassEnhancer {
 
 		@Override
 		public boolean isMatch(Method candidateMethod) {
+			return isSetBeanFactory(candidateMethod);
+		}
+
+		public static boolean isSetBeanFactory(Method candidateMethod) {
 			return (candidateMethod.getName().equals("setBeanFactory") &&
 					candidateMethod.getParameterCount() == 1 &&
 					BeanFactory.class == candidateMethod.getParameterTypes()[0] &&
@@ -430,6 +434,7 @@ class ConfigurationClassEnhancer {
 		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return (candidateMethod.getDeclaringClass() != Object.class &&
+					!BeanFactoryAwareMethodInterceptor.isSetBeanFactory(candidateMethod) &&
 					BeanAnnotationHelper.isBeanAnnotated(candidateMethod));
 		}
 
