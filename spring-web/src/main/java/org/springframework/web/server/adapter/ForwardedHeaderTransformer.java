@@ -16,13 +16,16 @@
 package org.springframework.web.server.adapter;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Function;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -39,7 +42,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, ServerHttpRequest> {
 
-	static final Set<String> FORWARDED_HEADER_NAMES = new LinkedHashSet<>(5);
+	static final Set<String> FORWARDED_HEADER_NAMES =
+			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(6, Locale.ENGLISH));
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
