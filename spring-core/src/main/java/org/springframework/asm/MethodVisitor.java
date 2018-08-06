@@ -523,7 +523,7 @@ public abstract class MethodVisitor {
    *     }
    * } else if (cst instanceof Handle) {
    *     // ...
-   * } else if (cst instanceof Condy) {
+   * } else if (cst instanceof ConstantDynamic) {
    *     // ...
    * } else {
    *     // throw an exception
