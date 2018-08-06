@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * @since 5.0
 	 */
 	protected void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
-
 		String statusText = response.getStatusText();
 		HttpHeaders headers = response.getHeaders();
 		byte[] body = getResponseBody(response);
@@ -106,8 +105,8 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 		}
 	}
 
-	private void handleClientError(HttpStatus statusCode,
-			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+	private void handleClientError(
+			HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
 		switch (statusCode) {
 			case BAD_REQUEST:
@@ -137,8 +136,8 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 		}
 	}
 
-	private void handleServerError(HttpStatus statusCode,
-			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+	private void handleServerError(
+			HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
 		switch (statusCode) {
 			case INTERNAL_SERVER_ERROR:

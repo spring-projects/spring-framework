@@ -67,8 +67,7 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	}
 
 
-	// Sub-classes for specific HTTP status codes..
-
+	// Subclasses for specific HTTP status codes
 
 	/**
 	 * {@link HttpClientErrorException} for status HTTP 400 Bad Request.

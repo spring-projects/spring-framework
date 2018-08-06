@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.adapter;
 
 import java.net.URI;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Function;
@@ -29,12 +29,12 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Extract values from "Forwarded" and "X-Forwarded-*" headers to override the
- * request URI (i.e. {@link ServerHttpRequest#getURI()}) so it reflects the
- * client-originated protocol and address.
+ * Extract values from "Forwarded" and "X-Forwarded-*" headers to override
+ * the request URI (i.e. {@link ServerHttpRequest#getURI()}) so it reflects
+ * the client-originated protocol and address.
  *
- * <p>Alternatively if {@link #setRemoveOnly removeOnly} is set to "true", then
- * "Forwarded" and "X-Forwarded-*" headers are only removed, and not used.
+ * <p>Alternatively if {@link #setRemoveOnly removeOnly} is set to "true",
+ * then "Forwarded" and "X-Forwarded-*" headers are only removed, and not used.
  *
  * @author Rossen Stoyanchev
  * @since 5.1
@@ -43,7 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, ServerHttpRequest> {
 
 	static final Set<String> FORWARDED_HEADER_NAMES =
-			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(6, Locale.ENGLISH));
+			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
@@ -59,7 +59,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 
 
 	/**
-	 * Enables mode in which any "Forwarded" or "X-Forwarded-*" headers are
+	 * Enable mode in which any "Forwarded" or "X-Forwarded-*" headers are
 	 * removed only and the information in them ignored.
 	 * @param removeOnly whether to discard and ignore forwarded headers
 	 */
@@ -69,6 +69,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 
 	/**
 	 * Whether the "remove only" mode is on.
+	 * @see #setRemoveOnly
 	 */
 	public boolean isRemoveOnly() {
 		return this.removeOnly;
@@ -81,7 +82,6 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	 */
 	@Override
 	public ServerHttpRequest apply(ServerHttpRequest request) {
-
 		if (hasForwardedHeaders(request)) {
 			ServerHttpRequest.Builder builder = request.mutate();
 			if (!this.removeOnly) {
@@ -96,7 +96,6 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 			removeForwardedHeaders(builder);
 			request = builder.build();
 		}
-
 		return request;
 	}
 
@@ -117,6 +116,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	private void removeForwardedHeaders(ServerHttpRequest.Builder builder) {
 		builder.headers(map -> FORWARDED_HEADER_NAMES.forEach(map::remove));
 	}
+
 
 	@Nullable
 	private static String getForwardedPrefix(ServerHttpRequest request) {

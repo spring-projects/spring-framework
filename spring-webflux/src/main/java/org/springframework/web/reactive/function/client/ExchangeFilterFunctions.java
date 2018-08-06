@@ -54,10 +54,12 @@ public abstract class ExchangeFilterFunctions {
 	public static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
 			ExchangeFilterFunctions.class.getName() + ".basicAuthenticationCredentials";
 
+
 	/**
 	 * Consume up to the specified number of bytes from the response body and
-	 * cancel if any more data arrives. Internally delegates to
-	 * {@link DataBufferUtils#takeUntilByteCount}.
+	 * cancel if any more data arrives.
+	 * <p>Internally delegates to {@link DataBufferUtils#takeUntilByteCount}.
+	 * @param maxByteCount the limit as number of bytes
 	 * @return the filter to limit the response size with
 	 * @since 5.1
 	 */
@@ -107,6 +109,7 @@ public abstract class ExchangeFilterFunctions {
 						.map(credentials -> (Credentials) credentials));
 	}
 
+	@Deprecated
 	private static ExchangeFilterFunction basicAuthenticationInternal(
 			Function<ClientRequest, Optional<Credentials>> credentialsFunction) {
 
