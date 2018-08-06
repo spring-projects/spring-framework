@@ -8,7 +8,7 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import static org.junit.Assert.assertEquals;
 
 /**
- * Integration tests that verify support for default SQL script detection.
+ * Test to verify method level merge of @Sql annotations.
  *
  * @author Dmitry Semukhin
  */
