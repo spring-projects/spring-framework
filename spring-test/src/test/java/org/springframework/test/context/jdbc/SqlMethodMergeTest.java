@@ -19,7 +19,6 @@ public class SqlMethodMergeTest extends AbstractTransactionalJUnit4SpringContext
 
 	@Test
 	@Sql(value = "data-add-dogbert.sql", mergeMode = Sql.MergeMode.MERGE)
-	// test##_ prefix is required for @FixMethodOrder.
 	public void testMerge() {
 		assertNumUsers(2);
 	}

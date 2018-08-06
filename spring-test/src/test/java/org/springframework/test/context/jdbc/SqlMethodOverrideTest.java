@@ -19,7 +19,6 @@ public class SqlMethodOverrideTest extends AbstractTransactionalJUnit4SpringCont
 
 	@Test
 	@Sql(value = {"schema.sql", "data.sql", "data-add-dogbert.sql", "data-add-catbert.sql"}, mergeMode = Sql.MergeMode.OVERRIDE)
-	// test##_ prefix is required for @FixMethodOrder.
 	public void testMerge() {
 		assertNumUsers(3);
 	}
