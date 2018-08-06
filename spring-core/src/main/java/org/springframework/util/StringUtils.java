@@ -1286,7 +1286,7 @@ public abstract class StringUtils {
 	 * @param coll the {@code Collection} to convert
 	 * @return the delimited {@code String}
 	 */
-	public static String collectionToCommaDelimitedString(Collection<?> coll) {
+	public static String collectionToCommaDelimitedString(@Nullable Collection<?> coll) {
 		return collectionToDelimitedString(coll, ",");
 	}
 
