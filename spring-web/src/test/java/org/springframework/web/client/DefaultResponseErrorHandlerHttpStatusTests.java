@@ -1,9 +1,26 @@
+/*
+ * Copyright 2002-2018 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.client;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,8 +31,12 @@ import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpStatus.*;
 
+/**
+ * Unit tests for {@link DefaultResponseErrorHandler} handling of specific
+ * HTTP status codes.
+ */
 @RunWith(Parameterized.class)
-public class DefaultReponseHanderSpecificErrorsTests {
+public class DefaultResponseErrorHandlerHttpStatusTests {
 
 	@Parameters(name = "error: [{0}], exception: [{1}]")
 	public static Object[][] errorCodes() {
@@ -51,27 +72,29 @@ public class DefaultReponseHanderSpecificErrorsTests {
 
 	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
 
+
 	@Test
 	public void handleErrorIOException() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getRawStatusCode()).willReturn(httpStatus.value());
-		given(response.getHeaders()).willReturn(headers);
+		given(this.response.getRawStatusCode()).willReturn(this.httpStatus.value());
+		given(this.response.getHeaders()).willReturn(headers);
 
 		try {
-			handler.handleError(response);
-			fail("expected " + expectedExceptionClass.getSimpleName());
+			this.handler.handleError(this.response);
+			fail("expected " + this.expectedExceptionClass.getSimpleName());
 		}
 		catch (HttpStatusCodeException ex) {
-			assertEquals("Expected " + expectedExceptionClass.getSimpleName(), expectedExceptionClass, ex.getClass());
+			assertEquals("Expected " + this.expectedExceptionClass.getSimpleName(),
+					this.expectedExceptionClass, ex.getClass());
 		}
 	}
 
 	@Test
 	public void hasErrorTrue() throws Exception {
-		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
-		assertTrue(handler.hasError(response));
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
+		assertTrue(handler.hasError(this.response));
 	}
 
 }
