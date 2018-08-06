@@ -959,7 +959,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Reset all bean definition caches for the given bean,
 	 * including the caches of beans that are derived from it.
+	 * <p>Called after an existing bean definition has been replaced or removed,
+	 * triggering {@link #clearMergedBeanDefinition}, {@link #destroySingleton}
+	 * and {@link MergedBeanDefinitionPostProcessor#resetBeanDefinition} on the
+	 * given bean and on all bean definitions that have the given bean as parent.
 	 * @param beanName the name of the bean to reset
+	 * @see #registerBeanDefinition
+	 * @see #removeBeanDefinition
 	 */
 	protected void resetBeanDefinition(String beanName) {
 		// Remove the merged bean definition for the given bean, if already created.
