@@ -343,8 +343,20 @@ public abstract class ScriptUtils {
 	 */
 	public static boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;
+		boolean inEscape = false;
 		for (int i = 0; i < script.length(); i++) {
-			if (script.charAt(i) == '\'') {
+
+			char c = script.charAt(i);
+			if (c == '\\') {
+				inEscape = !inEscape;
+				continue;
+			}
+			else if (inEscape) {
+				inEscape = false;
+				continue;
+			}
+
+			if (c == '\'') {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral && script.startsWith(delim, i)) {
