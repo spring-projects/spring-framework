@@ -57,6 +57,9 @@ import org.springframework.util.CommonsLogWriter;
  */
 public class HessianExporter extends RemoteExporter implements InitializingBean {
 
+	/**
+	 * The content type for hessian ({@code application/x-hessian}).
+	 */
 	public static final String CONTENT_TYPE_HESSIAN = "application/x-hessian";
 
 
