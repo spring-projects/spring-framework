@@ -640,11 +640,13 @@ public abstract class AnnotationUtils {
 		if (anns.length == 0) {
 			return false;
 		}
-		if (anns.length == 1) {
-			Class<?> annType = anns[0].annotationType();
-			return (annType != Nullable.class && annType != Deprecated.class);
+		for (Annotation ann : anns) {
+			Class<?> annType = ann.annotationType();
+			if (annType != Nullable.class && annType != Deprecated.class) {
+				return true;
+			}
 		}
-		return true;
+		return false;
 	}
 
 	private static boolean isOverride(Method method, Method candidate) {
