@@ -68,13 +68,17 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	/**
 	 * Add the supplied attribute under the supplied name.
 	 * @param attributeName the name of the model attribute (never {@code null})
-	 * @param attributeValue the model attribute value (never {@code null} for {@code ConcurrentModel},
-	 * with the {@code Nullable} declaration inherited from {@link Model#addAttribute(String, Object)})
+	 * @param attributeValue the model attribute value (ignored if {@code null},
+	 * just removing an existing entry if any)
 	 */
 	public ConcurrentModel addAttribute(String attributeName, @Nullable Object attributeValue) {
 		Assert.notNull(attributeName, "Model attribute name must not be null");
-		Assert.notNull(attributeValue, "ConcurrentModel does not support null attribute value");
-		put(attributeName, attributeValue);
+		if (attributeValue != null) {
+			put(attributeName, attributeValue);
+		}
+		else {
+			remove(attributeName);
+		}
 		return this;
 	}
 
