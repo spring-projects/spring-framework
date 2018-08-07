@@ -156,14 +156,13 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * for parsing known annotations into Spring's metadata attribute class.
 	 * Returns {@code null} if it's not transactional.
 	 * <p>Can be overridden to support custom annotations that carry transaction metadata.
-	 * @param ae the annotated method or class
-	 * @return the configured transaction attribute,
-	 * or {@code null} if none was found
+	 * @param element the annotated method or class
+	 * @return the configured transaction attribute, or {@code null} if none was found
 	 */
 	@Nullable
-	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement ae) {
+	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement element) {
 		for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
-			TransactionAttribute attr = annotationParser.parseTransactionAnnotation(ae);
+			TransactionAttribute attr = annotationParser.parseTransactionAnnotation(element);
 			if (attr != null) {
 				return attr;
 			}

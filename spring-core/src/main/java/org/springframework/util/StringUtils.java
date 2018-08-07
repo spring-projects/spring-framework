@@ -983,7 +983,7 @@ public abstract class StringUtils {
 	/**
 	 * Trim the elements of the given {@code String} array,
 	 * calling {@code String.trim()} on each of them.
-	 * @param array the original {@code String} array (potentially {@code null} or empty)
+	 * @param array the original {@code String} array (potentially empty)
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */
 	public static String[] trimArrayElements(String[] array) {
