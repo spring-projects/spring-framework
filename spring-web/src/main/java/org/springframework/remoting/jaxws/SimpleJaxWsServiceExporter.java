@@ -30,17 +30,12 @@ import javax.xml.ws.WebServiceProvider;
  *
  * <p>Note that this exporter will only work if the JAX-WS runtime actually
  * supports publishing with an address argument, i.e. if the JAX-WS runtime
- * ships an internal HTTP server. This is the case with the JAX-WS runtime
- * that's included in Sun's JDK 6 but not with the standalone JAX-WS 2.1 RI.
- *
- * <p>For explicit configuration of JAX-WS endpoints with Sun's JDK 6
- * HTTP server, consider using {@link SimpleHttpServerJaxWsServiceExporter}!
+ * ships an internal HTTP server.
  *
  * @author Juergen Hoeller
  * @since 2.5
  * @see javax.jws.WebService
  * @see javax.xml.ws.Endpoint#publish(String)
- * @see SimpleHttpServerJaxWsServiceExporter
  */
 public class SimpleJaxWsServiceExporter extends AbstractJaxWsServiceExporter {
 

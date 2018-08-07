@@ -29,9 +29,6 @@ import org.springframework.web.util.NestedServletException;
  * Servlet-API-based HTTP request handler that exports the specified service bean
  * as Hessian service endpoint, accessible via a Hessian proxy.
  *
- * <p><b>Note:</b> Spring also provides an alternative version of this exporter,
- * for Sun's JRE 1.6 HTTP server: {@link SimpleHessianServiceExporter}.
- *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>.

@@ -48,7 +48,6 @@ import org.springframework.util.Assert;
  * @see javax.jws.WebService
  * @see javax.xml.ws.Endpoint
  * @see SimpleJaxWsServiceExporter
- * @see SimpleHttpServerJaxWsServiceExporter
  */
 public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, InitializingBean, DisposableBean {
 

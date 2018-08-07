@@ -442,31 +442,6 @@ servlet name matching the bean name of the target exporter:
 	</servlet-mapping>
 ----
 
-If you are running outside of a servlet container and are using Oracle's Java 6, then you
-can use the built-in HTTP server implementation. You can configure the
-`SimpleHttpServerFactoryBean` together with a `SimpleHttpInvokerServiceExporter` as is
-shown in this example:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean name="accountExporter"
-			class="org.springframework.remoting.httpinvoker.SimpleHttpInvokerServiceExporter">
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-
-	<bean id="httpServer"
-			class="org.springframework.remoting.support.SimpleHttpServerFactoryBean">
-		<property name="contexts">
-			<util:map>
-				<entry key="/remoting/AccountService" value-ref="accountExporter"/>
-			</util:map>
-		</property>
-		<property name="port" value="8080"/>
-	</bean>
-----
-
 
 [[remoting-httpinvoker-client]]
 ==== Linking in the service at the client
