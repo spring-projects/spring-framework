@@ -38,12 +38,8 @@ package org.springframework.core;
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
 
-	// See https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java
-	private static final boolean inImageCode = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
-
-
 	public DefaultParameterNameDiscoverer() {
-		if (!inImageCode) {
+		if (!GraalDetector.inImageCode()) {
 			if (KotlinDetector.isKotlinReflectPresent()) {
 				addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
 			}
