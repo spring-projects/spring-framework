@@ -346,19 +346,17 @@ public abstract class ScriptUtils {
 		boolean inEscape = false;
 		for (int i = 0; i < script.length(); i++) {
 
-			char thisChar = script.charAt(i);
-			if (thisChar == '\\')
-			{
+			char c = script.charAt(i);
+			if (c == '\\') {
 				inEscape = !inEscape;
 				continue;
 			}
-			else if (inEscape)
-			{
+			else if (inEscape) {
 				inEscape = false;
 				continue;
 			}
 
-			if (thisChar == '\'') {
+			if (c == '\'') {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral && script.startsWith(delim, i)) {
