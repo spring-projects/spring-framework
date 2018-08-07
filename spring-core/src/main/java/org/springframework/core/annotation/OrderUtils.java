@@ -49,7 +49,7 @@ public abstract class OrderUtils {
 					ClassUtils.forName("javax.annotation.Priority", OrderUtils.class.getClassLoader());
 		}
 		catch (Throwable ex) {
-			// javax.annotation.Priority not available, or present but not loadable (on JDK 6)
+			// javax.annotation.Priority not available
 			priorityAnnotationType = null;
 		}
 	}
