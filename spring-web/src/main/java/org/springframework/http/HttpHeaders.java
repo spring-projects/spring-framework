@@ -711,8 +711,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the value of the {@linkplain #AUTHORIZATION Authorization} header to
 	 * Basic Authentication based on the given username and password.
+	 * <p>Note that Basic Authentication only supports characters in the
+	 * {@link StandardCharsets#ISO_8859_1 ISO-8859-1} character set.
 	 * @param username the username
 	 * @param password the password
+	 * @throws IllegalArgumentException if either {@code user} or
+	 * {@code password} contain characters that cannot be encoded to ISO-8859-1.
 	 * @since 5.1
 	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
 	 */
@@ -725,8 +729,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Basic Authentication based on the given username and password.
 	 * @param username the username
 	 * @param password the password
-	 * @param charset the charset to use to convert the credentials into an octet sequence. Defaults
-	 * to {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1}
+	 * @param charset the charset to use to convert the credentials into an octet
+	 * sequence. Defaults to {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1}
+	 * @throws IllegalArgumentException if either {@code user} or
+	 * {@code password} contain characters that cannot be encoded to ISO-8859-1.
 	 * @since 5.1
 	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
 	 */

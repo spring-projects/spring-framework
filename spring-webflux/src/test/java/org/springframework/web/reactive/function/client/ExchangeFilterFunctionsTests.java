@@ -37,6 +37,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
+ * Unit tests for {@link ExchangeFilterFunctions}.
  * @author Arjen Poutsma
  */
 public class ExchangeFilterFunctionsTests {
@@ -94,7 +95,6 @@ public class ExchangeFilterFunctionsTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void basicAuthenticationUsernamePassword() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = mock(ClientResponse.class);
@@ -113,8 +113,10 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void basicAuthenticationInvalidCharacters() {
+		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
+		ExchangeFunction exchange = r -> Mono.just(mock(ClientResponse.class));
 
-		ExchangeFilterFunctions.basicAuthentication("foo", "\ud83d\udca9");
+		ExchangeFilterFunctions.basicAuthentication("foo", "\ud83d\udca9").filter(request, exchange);
 	}
 
 	@Test
