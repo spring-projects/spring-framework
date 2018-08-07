@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import org.springframework.beans.factory.xml.ParserContext;
  * Utility class for handling registration of auto-proxy creators used internally
  * by the '{@code aop}' namespace tags.
  *
- * <p>Only a single auto-proxy creator can be registered and multiple tags may wish
- * to register different concrete implementations. As such this class delegates to
- * {@link AopConfigUtils} which wraps a simple escalation protocol. Therefore classes
- * may request a particular auto-proxy creator and know that class, <i>or a subclass
- * thereof</i>, will eventually be resident in the application context.
+ * <p>Only a single auto-proxy creator should be registered and multiple configuration
+ * elements may wish to register different concrete implementations. As such this class
+ * delegates to {@link AopConfigUtils} which provides a simple escalation protocol.
+ * Callers may request a particular auto-proxy creator and know that creator,
+ * <i>or a more capable variant thereof</i>, will be registered as a post-processor.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -94,9 +94,8 @@ public abstract class AopNamespaceUtils {
 
 	private static void registerComponentIfNecessary(BeanDefinition beanDefinition, ParserContext parserContext) {
 		if (beanDefinition != null) {
-			BeanComponentDefinition componentDefinition =
-					new BeanComponentDefinition(beanDefinition, AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
-			parserContext.registerComponent(componentDefinition);
+			parserContext.registerComponent(
+					new BeanComponentDefinition(beanDefinition, AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME));
 		}
 	}
 

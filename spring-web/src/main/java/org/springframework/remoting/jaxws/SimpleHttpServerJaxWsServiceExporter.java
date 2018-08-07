@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,11 +157,12 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 		if (this.server == null) {
 			InetSocketAddress address = (this.hostname != null ?
 					new InetSocketAddress(this.hostname, this.port) : new InetSocketAddress(this.port));
-			this.server = HttpServer.create(address, this.backlog);
-			if (this.logger.isInfoEnabled()) {
-				this.logger.info("Starting HttpServer at address " + address);
+			HttpServer server = HttpServer.create(address, this.backlog);
+			if (logger.isInfoEnabled()) {
+				logger.info("Starting HttpServer at address " + address);
 			}
-			this.server.start();
+			server.start();
+			this.server = server;
 			this.localServer = true;
 		}
 		super.afterPropertiesSet();

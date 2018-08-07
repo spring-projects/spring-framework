@@ -144,12 +144,7 @@ public class AnnotationUtilsTests {
 		assertNull(getAnnotation(bridgeMethod, Order.class));
 		assertNotNull(findAnnotation(bridgeMethod, Order.class));
 
-		// As of OpenJDK 8 b99, invoking getAnnotation() on a bridge method actually finds
-		// an annotation on its 'bridged' method. This differs from the previous behavior
-		// of JDK 5 through 7 and from the current behavior of the Eclipse compiler;
-		// however, we need to ensure that the tests pass in the Gradle build. So we
-		// comment out the following assertion.
-		// assertNull(bridgeMethod.getAnnotation(Transactional.class));
+		assertNotNull(bridgeMethod.getAnnotation(Transactional.class));
 		assertNotNull(getAnnotation(bridgeMethod, Transactional.class));
 		assertNotNull(findAnnotation(bridgeMethod, Transactional.class));
 	}
@@ -285,7 +280,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void findAnnotationDeclaringClassForAllScenarios() throws Exception {
+	public void findAnnotationDeclaringClassForAllScenarios() {
 		// no class-level annotation
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedInterface.class));
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedClass.class));
@@ -394,7 +389,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void isAnnotationInheritedForAllScenarios() throws Exception {
+	public void isAnnotationInheritedForAllScenarios() {
 		// no class-level annotation
 		assertFalse(isAnnotationInherited(Transactional.class, NonAnnotatedInterface.class));
 		assertFalse(isAnnotationInherited(Transactional.class, NonAnnotatedClass.class));
@@ -503,7 +498,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getDefaultValueFromNonPublicAnnotation() throws Exception {
+	public void getDefaultValueFromNonPublicAnnotation() {
 		Annotation[] declaredAnnotations = NonPublicAnnotatedClass.class.getDeclaredAnnotations();
 		assertEquals(1, declaredAnnotations.length);
 		Annotation annotation = declaredAnnotations[0];
@@ -514,7 +509,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getDefaultValueFromAnnotationType() throws Exception {
+	public void getDefaultValueFromAnnotationType() {
 		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(Order.class, VALUE));
 		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(Order.class));
 	}
@@ -546,7 +541,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getRepeatableAnnotationsDeclaredOnClassWithAttributeAliases() throws Exception {
+	public void getRepeatableAnnotationsDeclaredOnClassWithAttributeAliases() {
 		final List<String> expectedLocations = asList("A", "B");
 
 		Set<ContextConfig> annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, null);

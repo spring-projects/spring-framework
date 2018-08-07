@@ -156,7 +156,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 			}
 			finally {
 				this.sendStartTime = 0;
-				flushLock.unlock();
+				this.flushLock.unlock();
 			}
 			return true;
 		}
