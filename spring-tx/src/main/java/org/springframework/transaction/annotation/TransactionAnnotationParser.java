@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,16 +39,14 @@ public interface TransactionAnnotationParser {
 
 	/**
 	 * Parse the transaction attribute for the given method or class,
-	 * based on a known annotation type.
-	 * <p>This essentially parses a known transaction annotation into Spring's
-	 * metadata attribute class. Returns {@code null} if the method/class
-	 * is not transactional.
-	 * @param ae the annotated method or class
-	 * @return TransactionAttribute the configured transaction attribute,
-	 * or {@code null} if none was found
+	 * based on an annotation type understood by this parser.
+	 * <p>This essentially parses a known transaction annotation into Spring's metadata
+	 * attribute class. Returns {@code null} if the method/class is not transactional.
+	 * @param element the annotated method or class
+	 * @return the configured transaction attribute, or {@code null} if none found
 	 * @see AnnotationTransactionAttributeSource#determineTransactionAttribute
 	 */
 	@Nullable
-	TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae);
+	TransactionAttribute parseTransactionAnnotation(AnnotatedElement element);
 
 }

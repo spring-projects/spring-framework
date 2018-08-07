@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,9 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 
 	@Override
 	@Nullable
-	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
-		AnnotationAttributes attributes =
-				AnnotatedElementUtils.getMergedAnnotationAttributes(ae, javax.transaction.Transactional.class);
+	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement element) {
+		AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(
+				element, javax.transaction.Transactional.class);
 		if (attributes != null) {
 			return parseTransactionAnnotation(attributes);
 		}
@@ -57,22 +57,22 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 
 	protected TransactionAttribute parseTransactionAnnotation(AnnotationAttributes attributes) {
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
+
 		rbta.setPropagationBehaviorName(
 				RuleBasedTransactionAttribute.PREFIX_PROPAGATION + attributes.getEnum("value").toString());
-		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<>();
-		Class<?>[] rbf = attributes.getClassArray("rollbackOn");
-		for (Class<?> rbRule : rbf) {
-			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbRule);
-			rollBackRules.add(rule);
+
+		ArrayList<RollbackRuleAttribute> rollbackrules = new ArrayList<>();
+		for (Class<?> rbRule : attributes.getClassArray("rollbackOn")) {
+			rollbackrules.add(new RollbackRuleAttribute(rbRule));
 		}
-		Class<?>[] nrbf = attributes.getClassArray("dontRollbackOn");
-		for (Class<?> rbRule : nrbf) {
-			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(rbRule);
-			rollBackRules.add(rule);
+		for (Class<?> rbRule : attributes.getClassArray("dontRollbackOn")) {
+			rollbackrules.add(new NoRollbackRuleAttribute(rbRule));
 		}
-		rbta.getRollbackRules().addAll(rollBackRules);
+		rbta.setRollbackRules(rollbackrules);
+
 		return rbta;
 	}
+
 
 	@Override
 	public boolean equals(Object other) {
