@@ -131,9 +131,14 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 			Collection<CacheOperation> annOps = provider.getCacheOperations(annotationParser);
 			if (annOps != null) {
 				if (ops == null) {
-					ops = new ArrayList<>();
+					ops = annOps;
 				}
-				ops.addAll(annOps);
+				else {
+					Collection<CacheOperation> combined = new ArrayList<>(ops.size() + annOps.size());
+					combined.addAll(ops);
+					combined.addAll(annOps);
+					ops = combined;
+				}
 			}
 		}
 		return ops;

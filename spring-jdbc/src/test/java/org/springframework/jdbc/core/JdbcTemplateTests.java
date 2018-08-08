@@ -176,13 +176,15 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
-		doTestStrings(null, null, null, null, (template, sql, rch) -> template.query(sql, (Object[]) null, rch));
+		doTestStrings(null, null, null, null,
+				(template, sql, rch) -> template.query(sql, (Object[]) null, rch));
 	}
 
 	@Test
 	public void testStringsWithPreparedStatementArgs() throws Exception {
 		final Integer argument = 99;
-		doTestStrings(null, null, null, argument, (template, sql, rch) -> template.query(sql, new Object[] { argument }, rch));
+		doTestStrings(null, null, null, argument,
+				(template, sql, rch) -> template.query(sql, new Object[] {argument}, rch));
 	}
 
 	private void doTestStrings(Integer fetchSize, Integer maxRows, Integer queryTimeout,
@@ -362,10 +364,10 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeUpdate()).willReturn(rowsAffected);
 
 		int actualRowsAffected = this.template.update(sql,
-				new Object[] {4, new SqlParameterValue(Types.NUMERIC, 2, new Float(1.4142))});
+				4, new SqlParameterValue(Types.NUMERIC, 2, Float.valueOf(1.4142f)));
 		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
 		verify(this.preparedStatement).setObject(1, 4);
-		verify(this.preparedStatement).setObject(2, new Float(1.4142), Types.NUMERIC, 2);
+		verify(this.preparedStatement).setObject(2, Float.valueOf(1.4142f), Types.NUMERIC, 2);
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
 	}
@@ -427,8 +429,7 @@ public class JdbcTemplateTests {
 	public void testBatchUpdateWithBatchFailure() throws Exception {
 		final String[] sql = {"A", "B", "C", "D"};
 		given(this.statement.executeBatch()).willThrow(
-				new BatchUpdateException(new int[] { 1, Statement.EXECUTE_FAILED, 1,
-						Statement.EXECUTE_FAILED }));
+				new BatchUpdateException(new int[] {1, Statement.EXECUTE_FAILED, 1, Statement.EXECUTE_FAILED}));
 		mockDatabaseMetaData(true);
 		given(this.connection.createStatement()).willReturn(this.statement);
 
@@ -495,18 +496,16 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
 		mockDatabaseMetaData(true);
 
-		BatchPreparedStatementSetter setter =
-				new BatchPreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps, int i)
-							throws SQLException {
-						ps.setInt(1, ids[i]);
-					}
-					@Override
-					public int getBatchSize() {
-						return ids.length;
-					}
-				};
+		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				ps.setInt(1, ids[i]);
+			}
+			@Override
+			public int getBatchSize() {
+				return ids.length;
+			}
+		};
 
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
@@ -1049,10 +1048,9 @@ public class JdbcTemplateTests {
 		}
 
 		try {
-			this.template.query(con -> con.prepareStatement("my query"),
-					(ResultSetExtractor<Object>) rs2 -> {
-						throw new InvalidDataAccessApiUsageException("");
-					}		);
+			this.template.query(con -> con.prepareStatement("my query"), (ResultSetExtractor<Object>) rs2 -> {
+				throw new InvalidDataAccessApiUsageException("");
+			});
 			fail("Should have thrown InvalidDataAccessApiUsageException");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {

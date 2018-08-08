@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,15 +123,15 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 	/**
 	 * Find and return the first AspectJ annotation on the given method
-	 * (there <i>should</i> only be one anyway...)
+	 * (there <i>should</i> only be one anyway...).
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
 	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
 		Class<?>[] classesToLookFor = new Class<?>[] {
 				Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class, Pointcut.class};
-		for (Class<?> c : classesToLookFor) {
-			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) c);
+		for (Class<?> clazz : classesToLookFor) {
+			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) clazz);
 			if (foundAnnotation != null) {
 				return foundAnnotation;
 			}
@@ -151,6 +151,9 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 
+	/**
+	 * AspectJ annotation types.
+	 */
 	protected enum AspectJAnnotationType {
 
 		AtPointcut,
