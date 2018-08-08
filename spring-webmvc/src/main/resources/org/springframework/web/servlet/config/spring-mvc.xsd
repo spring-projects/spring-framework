@@ -1119,7 +1119,7 @@
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 	The location of a file containing Tiles definitions (or a Spring resource pattern).
-	If no Tiles definitions are registerd, then "/WEB-INF/tiles.xml" is expected to exists.
+	If no Tiles definitions are registered, then "/WEB-INF/tiles.xml" is expected to exists.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>

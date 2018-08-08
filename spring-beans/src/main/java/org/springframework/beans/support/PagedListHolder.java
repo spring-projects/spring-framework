@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * PagedListHolder is a simple state holder for handling lists of objects,
  * separating them into pages. Page numbering starts with 0.
  *
- * <p>This is mainly targetted at usage in web UIs. Typically, an instance will be
+ * <p>This is mainly targeted at usage in web UIs. Typically, an instance will be
  * instantiated with a list of beans, put into the session, and exported as model.
  * The properties can all be set/get programmatically, but the most common way will
  * be data binding, i.e. populating the bean from request parameters. The getters

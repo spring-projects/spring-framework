@@ -81,7 +81,7 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 		}
 		catch (BeansException ex) {
 			throw new DestinationResolutionException(
-					"Failed to look up Destinaton bean with name '" + destinationName + "'", ex);
+					"Failed to look up Destination bean with name '" + destinationName + "'", ex);
 		}
 	}
 

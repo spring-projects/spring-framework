@@ -3911,7 +3911,7 @@ for optimal performance. See section on configuring <<mvc-config-static-resource
 === ETag Filter
 
 The `ShallowEtagHeaderFilter` can be used to add "shallow" eTag values, computed from the
-response content and thus saving bandwith but not CPU time. See <<filters-shallow-etag>>.
+response content and thus saving bandwidth but not CPU time. See <<filters-shallow-etag>>.
 
 
 
