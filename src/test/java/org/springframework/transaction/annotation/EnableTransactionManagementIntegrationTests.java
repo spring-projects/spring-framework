@@ -166,10 +166,30 @@ public class EnableTransactionManagementIntegrationTests {
 	}
 
 
+	private void assertTxProxying(AnnotationConfigApplicationContext ctx) {
+		FooRepository repo = ctx.getBean(FooRepository.class);
+
+		boolean isTxProxy = false;
+		if (AopUtils.isAopProxy(repo)) {
+			for (Advisor advisor : ((Advised)repo).getAdvisors()) {
+				if (advisor instanceof BeanFactoryTransactionAttributeSourceAdvisor) {
+					isTxProxy = true;
+					break;
+				}
+			}
+		}
+		assertTrue("FooRepository is not a TX proxy", isTxProxy);
+
+		// trigger a transaction
+		repo.findAll();
+	}
+
+
 	@Configuration
 	@EnableTransactionManagement
 	@ImportResource("org/springframework/transaction/annotation/enable-caching.xml")
 	static class EnableTxAndCachingConfig {
+
 		@Bean
 		public PlatformTransactionManager txManager() {
 			return new CallCountingTransactionManager();
@@ -194,6 +214,7 @@ public class EnableTransactionManagementIntegrationTests {
 	@Configuration
 	@EnableTransactionManagement
 	static class ImplicitTxManagerConfig {
+
 		@Bean
 		public PlatformTransactionManager txManager() {
 			return new CallCountingTransactionManager();
@@ -209,6 +230,7 @@ public class EnableTransactionManagementIntegrationTests {
 	@Configuration
 	@EnableTransactionManagement
 	static class ExplicitTxManagerConfig implements TransactionManagementConfigurer {
+
 		@Bean
 		public PlatformTransactionManager txManager1() {
 			return new CallCountingTransactionManager();
@@ -230,28 +252,11 @@ public class EnableTransactionManagementIntegrationTests {
 		}
 	}
 
-	private void assertTxProxying(AnnotationConfigApplicationContext ctx) {
-		FooRepository repo = ctx.getBean(FooRepository.class);
-
-		boolean isTxProxy = false;
-		if (AopUtils.isAopProxy(repo)) {
-			for (Advisor advisor : ((Advised)repo).getAdvisors()) {
-				if (advisor instanceof BeanFactoryTransactionAttributeSourceAdvisor) {
-					isTxProxy = true;
-					break;
-				}
-			}
-		}
-		assertTrue("FooRepository is not a TX proxy", isTxProxy);
-
-		// trigger a transaction
-		repo.findAll();
-	}
-
 
 	@Configuration
 	@EnableTransactionManagement
 	static class DefaultTxManagerNameConfig {
+
 		@Bean
 		PlatformTransactionManager transactionManager(DataSource dataSource) {
 			return new DataSourceTransactionManager(dataSource);
@@ -262,6 +267,7 @@ public class EnableTransactionManagementIntegrationTests {
 	@Configuration
 	@EnableTransactionManagement
 	static class CustomTxManagerNameConfig {
+
 		@Bean
 		PlatformTransactionManager txManager(DataSource dataSource) {
 			return new DataSourceTransactionManager(dataSource);
@@ -272,6 +278,7 @@ public class EnableTransactionManagementIntegrationTests {
 	@Configuration
 	@EnableTransactionManagement
 	static class NonConventionalTxManagerNameConfig {
+
 		@Bean
 		PlatformTransactionManager txManager(DataSource dataSource) {
 			return new DataSourceTransactionManager(dataSource);
@@ -282,6 +289,7 @@ public class EnableTransactionManagementIntegrationTests {
 	@Configuration
 	@EnableTransactionManagement(proxyTargetClass=true)
 	static class ProxyTargetClassTxConfig {
+
 		@Bean
 		PlatformTransactionManager transactionManager(DataSource dataSource) {
 			return new DataSourceTransactionManager(dataSource);
@@ -292,6 +300,7 @@ public class EnableTransactionManagementIntegrationTests {
 	@Configuration
 	@EnableTransactionManagement(mode=AdviceMode.ASPECTJ)
 	static class AspectJTxConfig {
+
 		@Bean
 		PlatformTransactionManager transactionManager(DataSource dataSource) {
 			return new DataSourceTransactionManager(dataSource);
@@ -301,6 +310,7 @@ public class EnableTransactionManagementIntegrationTests {
 
 	@Configuration
 	static class Config {
+
 		@Bean
 		FooRepository fooRepository() {
 			JdbcFooRepository repos = new JdbcFooRepository();
@@ -318,6 +328,7 @@ public class EnableTransactionManagementIntegrationTests {
 
 
 	interface FooRepository {
+
 		List<Object> findAll();
 	}
 
@@ -335,6 +346,7 @@ public class EnableTransactionManagementIntegrationTests {
 		}
 	}
 
+
 	@Repository
 	static class DummyFooRepository implements FooRepository {
 
@@ -344,4 +356,5 @@ public class EnableTransactionManagementIntegrationTests {
 			return Collections.emptyList();
 		}
 	}
+
 }

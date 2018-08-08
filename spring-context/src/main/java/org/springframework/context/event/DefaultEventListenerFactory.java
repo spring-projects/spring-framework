@@ -24,6 +24,7 @@ import org.springframework.core.Ordered;
 /**
  * Default {@link EventListenerFactory} implementation that supports the
  * regular {@link EventListener} annotation.
+ *
  * <p>Used as "catch-all" implementation by default.
  *
  * @author Stephane Nicoll
@@ -33,14 +34,16 @@ public class DefaultEventListenerFactory implements EventListenerFactory, Ordere
 
 	private int order = LOWEST_PRECEDENCE;
 
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
 	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
 
 	public boolean supportsMethod(Method method) {
 		return true;
