@@ -363,10 +363,10 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeUpdate()).willReturn(rowsAffected);
 
 		int actualRowsAffected = this.template.update(sql,
-				new Object[] {4, new SqlParameterValue(Types.NUMERIC, 2, new Float(1.4142))});
+				new Object[] {4, new SqlParameterValue(Types.NUMERIC, 2, Float.valueOf(1.4142f))});
 		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
 		verify(this.preparedStatement).setObject(1, 4);
-		verify(this.preparedStatement).setObject(2, new Float(1.4142), Types.NUMERIC, 2);
+		verify(this.preparedStatement).setObject(2, Float.valueOf(1.4142f), Types.NUMERIC, 2);
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
 	}
