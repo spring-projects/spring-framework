@@ -20,7 +20,9 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.lang.Nullable;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -35,7 +37,9 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
-		if (TransactionalProxy.class.isAssignableFrom(targetClass)) {
+		if (TransactionalProxy.class.isAssignableFrom(targetClass) ||
+				PlatformTransactionManager.class.isAssignableFrom(targetClass) ||
+				PersistenceExceptionTranslator.class.isAssignableFrom(targetClass)) {
 			return false;
 		}
 		TransactionAttributeSource tas = getTransactionAttributeSource();

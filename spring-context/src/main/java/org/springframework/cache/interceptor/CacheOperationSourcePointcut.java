@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.cache.CacheManager;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -29,6 +30,7 @@ import org.springframework.util.ObjectUtils;
  * has an attribute for a given method.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -36,6 +38,9 @@ abstract class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut 
 
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
+		if (CacheManager.class.isAssignableFrom(targetClass)) {
+			return false;
+		}
 		CacheOperationSource cas = getCacheOperationSource();
 		return (cas != null && !CollectionUtils.isEmpty(cas.getCacheOperations(method, targetClass)));
 	}
