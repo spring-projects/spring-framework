@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,9 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
 
 	private static final String AJC_MAGIC = "ajc$";
+
+	private static final Class<?>[] ASPECTJ_ANNOTATION_CLASSES = new Class<?>[] {
+			Pointcut.class, Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class};
 
 
 	/** Logger available to subclasses */
@@ -122,14 +125,12 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 	/**
 	 * Find and return the first AspectJ annotation on the given method
-	 * (there <i>should</i> only be one anyway...)
+	 * (there <i>should</i> only be one anyway...).
 	 */
 	@SuppressWarnings("unchecked")
 	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
-		Class<?>[] classesToLookFor = new Class<?>[] {
-				Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class, Pointcut.class};
-		for (Class<?> c : classesToLookFor) {
-			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) c);
+		for (Class<?> clazz : ASPECTJ_ANNOTATION_CLASSES) {
+			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) clazz);
 			if (foundAnnotation != null) {
 				return foundAnnotation;
 			}
@@ -148,6 +149,9 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 
+	/**
+	 * AspectJ annotation types.
+	 */
 	protected enum AspectJAnnotationType {
 
 		AtPointcut,
@@ -167,16 +171,16 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		private static final String[] EXPRESSION_PROPERTIES = new String[] {"value", "pointcut"};
 
-		private static Map<Class<?>, AspectJAnnotationType> annotationTypes =
-				new HashMap<Class<?>, AspectJAnnotationType>();
+		private static Map<Class<?>, AspectJAnnotationType> annotationTypeMap =
+				new HashMap<Class<?>, AspectJAnnotationType>(8);
 
 		static {
-			annotationTypes.put(Pointcut.class,AspectJAnnotationType.AtPointcut);
-			annotationTypes.put(After.class,AspectJAnnotationType.AtAfter);
-			annotationTypes.put(AfterReturning.class,AspectJAnnotationType.AtAfterReturning);
-			annotationTypes.put(AfterThrowing.class,AspectJAnnotationType.AtAfterThrowing);
-			annotationTypes.put(Around.class,AspectJAnnotationType.AtAround);
-			annotationTypes.put(Before.class,AspectJAnnotationType.AtBefore);
+			annotationTypeMap.put(Pointcut.class, AspectJAnnotationType.AtPointcut);
+			annotationTypeMap.put(Before.class, AspectJAnnotationType.AtBefore);
+			annotationTypeMap.put(After.class, AspectJAnnotationType.AtAfter);
+			annotationTypeMap.put(AfterReturning.class, AspectJAnnotationType.AtAfterReturning);
+			annotationTypeMap.put(AfterThrowing.class, AspectJAnnotationType.AtAfterThrowing);
+			annotationTypeMap.put(Around.class, AspectJAnnotationType.AtAround);
 		}
 
 		private final A annotation;
@@ -202,9 +206,9 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		private AspectJAnnotationType determineAnnotationType(A annotation) {
-			for (Class<?> type : annotationTypes.keySet()) {
+			for (Class<?> type : annotationTypeMap.keySet()) {
 				if (type.isInstance(annotation)) {
-					return annotationTypes.get(type);
+					return annotationTypeMap.get(type);
 				}
 			}
 			throw new IllegalStateException("Unknown annotation type: " + annotation.toString());
@@ -213,18 +217,14 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		private String resolveExpression(A annotation) throws Exception {
 			String expression = null;
 			for (String methodName : EXPRESSION_PROPERTIES) {
-				Method method;
 				try {
-					method = annotation.getClass().getDeclaredMethod(methodName);
-				}
-				catch (NoSuchMethodException ex) {
-					method = null;
-				}
-				if (method != null) {
+					Method method = annotation.getClass().getDeclaredMethod(methodName);
 					String candidate = (String) method.invoke(annotation);
 					if (StringUtils.hasText(candidate)) {
 						expression = candidate;
 					}
+				}
+				catch (NoSuchMethodException ex) {
 				}
 			}
 			return expression;
