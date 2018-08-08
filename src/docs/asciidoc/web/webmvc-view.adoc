@@ -461,7 +461,7 @@ integration for using Spring MVC with Groovy Markup.
 
 [TIP]
 ====
-The Groovy Markup Tempalte engine requires Groovy 2.3.1+.
+The Groovy Markup Template engine requires Groovy 2.3.1+.
 ====
 
 

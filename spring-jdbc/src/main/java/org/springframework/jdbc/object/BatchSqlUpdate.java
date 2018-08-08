@@ -47,7 +47,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 public class BatchSqlUpdate extends SqlUpdate {
 
 	/**
-	 * Default number of inserts to accumulate before commiting a batch (5000).
+	 * Default number of inserts to accumulate before committing a batch (5000).
 	 */
 	public static final int DEFAULT_BATCH_SIZE = 5000;
 

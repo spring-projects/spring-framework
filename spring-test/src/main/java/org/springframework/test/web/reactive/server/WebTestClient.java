@@ -199,7 +199,7 @@ public interface WebTestClient {
 	 * without an HTTP server using a mock request and response.
 	 * <p>Consider using the TestContext framework and
 	 * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
-	 * in order to efficently load and inject the Spring configuration into the
+	 * in order to efficiently load and inject the Spring configuration into the
 	 * test class.
 	 * @param applicationContext the Spring context
 	 * @return chained API to customize server and client config; use

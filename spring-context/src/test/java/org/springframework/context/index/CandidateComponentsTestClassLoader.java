@@ -48,7 +48,7 @@ public class CandidateComponentsTestClassLoader extends ClassLoader {
 
 	/**
 	 * Create a test {@link ClassLoader} that creates an index with the
-	 * specifed {@link Resource} instances
+	 * specified {@link Resource} instances
 	 * @param classLoader the classloader to use for all other operations
 	 * @return a test {@link ClassLoader} with an index built based on the
 	 * specified resources.

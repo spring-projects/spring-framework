@@ -96,7 +96,7 @@ In practice, this means that the reserved memory captured by the buffer will be 
 the memory pool, ready to be used for future allocations.
 
 In general, _the last component to access a `DataBuffer` is responsible for releasing it_.
-Withing Spring, there are two sorts of components that release buffers: decoders and transports.
+Within Spring, there are two sorts of components that release buffers: decoders and transports.
 Decoders are responsible for transforming a stream of buffers into other types (see <<codecs>> below),
  and transports are responsible for sending buffers across a network boundary, typically as an HTTP message.
 This means that if you allocate data buffers for the purpose of putting them into an outbound HTTP
@@ -167,7 +167,7 @@ Note that a decoder instance needs to consider <<databuffer-reference-counting, 
 Spring comes with a wide array of default codecs, capable of converting from/to `String`,
 `ByteBuffer`, byte arrays, and also codecs that support marshalling libraries such as JAXB and
 Jackson (with https://github.com/FasterXML/jackson-core/issues/57[Jackson 2.9+ support for non-blocking parsing]).
-Withing the context of Spring WebFlux, codecs are used to convert the request body into a
+Within the context of Spring WebFlux, codecs are used to convert the request body into a
 `@RequestMapping` parameter, or to convert the return type into the response body that is sent back
 to the client.
 The default codecs are configured in the `WebFluxConfigurationSupport` class, and can easily be
