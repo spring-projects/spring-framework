@@ -167,9 +167,7 @@ public class AnnotationUtilsTests {
 
 		assertNull(bridgedMethod.getAnnotation(Order.class));
 		assertNull(getAnnotation(bridgedMethod, Order.class));
-		// AnnotationUtils.findAnnotation(Method, Class<A>) will not find an annotation on
-		// the bridge method for a bridged method.
-		assertNull(findAnnotation(bridgedMethod, Order.class));
+		assertNotNull(findAnnotation(bridgedMethod, Order.class));
 
 		assertNotNull(bridgedMethod.getAnnotation(Transactional.class));
 		assertNotNull(getAnnotation(bridgedMethod, Transactional.class));
@@ -190,6 +188,13 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
+	@Test  // SPR-17146
+	public void findMethodAnnotationFromGenericSuperclass() throws Exception {
+		Method method = ExtendsBaseClassWithGenericAnnotatedMethod.class.getMethod("foo", String.class);
+		Order order = findAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
+
 	@Test
 	public void findMethodAnnotationFromInterfaceOnSuper() throws Exception {
 		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
@@ -204,7 +209,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
-	/** @since 4.1.2 */
+	// @since 4.1.2
 	@Test
 	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverAnnotationsOnInterfaces() {
 		Component component = findAnnotation(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
@@ -212,7 +217,7 @@ public class AnnotationUtilsTests {
 		assertEquals("meta2", component.value());
 	}
 
-	/** @since 4.0.3 */
+	// @since 4.0.3
 	@Test
 	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverInheritedAnnotations() {
 		Transactional transactional = findAnnotation(SubSubClassWithInheritedAnnotation.class, Transactional.class);
@@ -220,7 +225,7 @@ public class AnnotationUtilsTests {
 		assertTrue("readOnly flag for SubSubClassWithInheritedAnnotation", transactional.readOnly());
 	}
 
-	/** @since 4.0.3 */
+	// @since 4.0.3
 	@Test
 	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverInheritedComposedAnnotations() {
 		Component component = findAnnotation(SubSubClassWithInheritedMetaAnnotation.class, Component.class);
@@ -1762,18 +1767,6 @@ public class AnnotationUtilsTests {
 	public static class SubTransactionalAndOrderedClass extends TransactionalAndOrderedClass {
 	}
 
-	public interface InterfaceWithGenericAnnotatedMethod<T> {
-
-		@Order
-		void foo(T t);
-	}
-
-	public static class ImplementsInterfaceWithGenericAnnotatedMethod implements InterfaceWithGenericAnnotatedMethod<String> {
-
-		public void foo(String t) {
-		}
-	}
-
 	public interface InterfaceWithAnnotatedMethod {
 
 		@Order
@@ -1803,6 +1796,30 @@ public class AnnotationUtilsTests {
 
 		@Override
 		public void foo() {
+		}
+	}
+
+	public interface InterfaceWithGenericAnnotatedMethod<T> {
+
+		@Order
+		void foo(T t);
+	}
+
+	public static class ImplementsInterfaceWithGenericAnnotatedMethod implements InterfaceWithGenericAnnotatedMethod<String> {
+
+		public void foo(String t) {
+		}
+	}
+
+	public static abstract class BaseClassWithGenericAnnotatedMethod<T> {
+
+		@Order
+		abstract void foo(T t);
+	}
+
+	public static class ExtendsBaseClassWithGenericAnnotatedMethod extends BaseClassWithGenericAnnotatedMethod<String> {
+
+		public void foo(String t) {
 		}
 	}
 

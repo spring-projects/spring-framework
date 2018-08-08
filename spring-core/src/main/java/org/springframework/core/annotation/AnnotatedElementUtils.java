@@ -386,13 +386,14 @@ public abstract class AnnotatedElementUtils {
 	@Nullable
 	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		// Shortcut: directly present on the element, with no merging needed?
-		if (!(element instanceof Class)) {
-			// Do not use this shortcut against a Class: Inherited annotations
-			// would get preferred over locally declared composed annotations.
-			A annotation = element.getAnnotation(annotationType);
-			if (annotation != null) {
-				return AnnotationUtils.synthesizeAnnotation(annotation, element);
-			}
+		A annotation = element.getDeclaredAnnotation(annotationType);
+		if (annotation != null) {
+			return AnnotationUtils.synthesizeAnnotation(annotation, element);
+		}
+
+		// Shortcut: no non-java annotations to be found on plain Java classes and org.springframework.lang types...
+		if (AnnotationUtils.hasPlainJavaAnnotationsOnly(element) && !annotationType.getName().startsWith("java")) {
+			return null;
 		}
 
 		// Exhaustive retrieval of merged annotation attributes...
@@ -671,13 +672,9 @@ public abstract class AnnotatedElementUtils {
 	@Nullable
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		// Shortcut: directly present on the element, with no merging needed?
-		if (!(element instanceof Class)) {
-			// Do not use this shortcut against a Class: Inherited annotations
-			// would get preferred over locally declared composed annotations.
-			A annotation = element.getAnnotation(annotationType);
-			if (annotation != null) {
-				return AnnotationUtils.synthesizeAnnotation(annotation, element);
-			}
+		A annotation = element.getDeclaredAnnotation(annotationType);
+		if (annotation != null) {
+			return AnnotationUtils.synthesizeAnnotation(annotation, element);
 		}
 
 		// Shortcut: no non-java annotations to be found on plain Java classes and org.springframework.lang types...
@@ -1145,8 +1142,7 @@ public abstract class AnnotatedElementUtils {
 						Set<Method> annotatedMethods = AnnotationUtils.getAnnotatedMethodsInBaseType(clazz);
 						if (!annotatedMethods.isEmpty()) {
 							for (Method annotatedMethod : annotatedMethods) {
-								if (annotatedMethod.getName().equals(method.getName()) &&
-										Arrays.equals(annotatedMethod.getParameterTypes(), method.getParameterTypes())) {
+								if (AnnotationUtils.isOverride(method, annotatedMethod)) {
 									Method resolvedSuperMethod = BridgeMethodResolver.findBridgedMethod(annotatedMethod);
 									result = searchWithFindSemantics(resolvedSuperMethod, annotationType, annotationName,
 											containerType, processor, visited, metaDepth);
@@ -1203,8 +1199,7 @@ public abstract class AnnotatedElementUtils {
 			Set<Method> annotatedMethods = AnnotationUtils.getAnnotatedMethodsInBaseType(ifc);
 			if (!annotatedMethods.isEmpty()) {
 				for (Method annotatedMethod : annotatedMethods) {
-					if (annotatedMethod.getName().equals(method.getName()) &&
-							Arrays.equals(annotatedMethod.getParameterTypes(), method.getParameterTypes())) {
+					if (AnnotationUtils.isOverride(method, annotatedMethod)) {
 						T result = searchWithFindSemantics(annotatedMethod, annotationType, annotationName,
 								containerType, processor, visited, metaDepth);
 						if (result != null) {
@@ -1280,7 +1275,7 @@ public abstract class AnnotatedElementUtils {
 
 	/**
 	 * Validate that the supplied {@code containerType} is a proper container
-	 * annotation for the supplied repeatable {@code annotationType} (i.e.,
+	 * annotation for the supplied repeatable {@code annotationType} (i.e.
 	 * that it declares a {@code value} attribute that holds an array of the
 	 * {@code annotationType}).
 	 * @throws AnnotationConfigurationException if the supplied {@code containerType}
@@ -1322,27 +1317,24 @@ public abstract class AnnotatedElementUtils {
 
 	/**
 	 * Callback interface that is used to process annotations during a search.
-	 * <p>Depending on the use case, a processor may choose to
-	 * {@linkplain #process} a single target annotation, multiple target
-	 * annotations, or all annotations discovered by the currently executing
-	 * search. The term "target" in this context refers to a matching
-	 * annotation (i.e., a specific annotation type that was found during
-	 * the search).
-	 * <p>Returning a non-null value from the {@link #process}
-	 * method instructs the search algorithm to stop searching further;
-	 * whereas, returning {@code null} from the {@link #process} method
-	 * instructs the search algorithm to continue searching for additional
-	 * annotations. One exception to this rule applies to processors
-	 * that {@linkplain #aggregates aggregate} results. If an aggregating
-	 * processor returns a non-null value, that value will be added to the
-	 * list of {@linkplain #getAggregatedResults aggregated results}
+	 * <p>Depending on the use case, a processor may choose to {@linkplain #process}
+	 * a single target annotation, multiple target annotations, or all annotations
+	 * discovered by the currently executing search. The term "target" in this
+	 * context refers to a matching annotation (i.e. a specific annotation type
+	 * that was found during the search).
+	 * <p>Returning a non-null value from the {@link #process} method instructs
+	 * the search algorithm to stop searching further; whereas, returning
+	 * {@code null} from the {@link #process} method instructs the search
+	 * algorithm to continue searching for additional annotations. One exception
+	 * to this rule applies to processors that {@linkplain #aggregates aggregate}
+	 * results. If an aggregating processor returns a non-null value, that value
+	 * will be added to the {@linkplain #getAggregatedResults aggregated results}
 	 * and the search algorithm will continue.
-	 * <p>Processors can optionally {@linkplain #postProcess post-process}
-	 * the result of the {@link #process} method as the search algorithm
-	 * goes back down the annotation hierarchy from an invocation of
-	 * {@link #process} that returned a non-null value down to the
-	 * {@link AnnotatedElement} that was supplied as the starting point to
-	 * the search algorithm.
+	 * <p>Processors can optionally {@linkplain #postProcess post-process} the
+	 * result of the {@link #process} method as the search algorithm goes back
+	 * down the annotation hierarchy from an invocation of {@link #process} that
+	 * returned a non-null value down to the {@link AnnotatedElement} that was
+	 * supplied as the starting point to the search algorithm.
 	 * @param <T> the type of result returned by the processor
 	 */
 	private interface Processor<T> {
