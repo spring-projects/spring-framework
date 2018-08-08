@@ -16,14 +16,6 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.Ordered;
@@ -34,16 +26,19 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.CorsProcessor;
-import org.springframework.web.cors.CorsUtils;
-import org.springframework.web.cors.DefaultCorsProcessor;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.*;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping}
@@ -340,6 +335,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	/**
 	 * Look up a handler for the given request, falling back to the default
 	 * handler if no specific one is found.
+	 *
+	 * 查找给定请求的处理程序，如果找不到特定的请求，则返回默认处理程序。
+	 *
 	 * @param request current HTTP request
 	 * @return the corresponding handler instance, or the default handler
 	 * @see #getHandlerInternal
@@ -347,6 +345,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		// -------------------关键方法----------------
+		// 根据请求获得处理器
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
 			handler = getDefaultHandler();
@@ -355,6 +355,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			return null;
 		}
 		// Bean name or resolved handler?
+		// Bean名称或已解析的处理程序？
 		if (handler instanceof String) {
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);

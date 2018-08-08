@@ -16,17 +16,16 @@
 
 package org.springframework.web.servlet;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handler execution chain, consisting of handler object and any handler interceptors.
@@ -124,6 +123,9 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Apply preHandle methods of registered interceptors.
+	 *
+	 * 应用注册拦截器的preHandle方法。
+	 *
 	 * @return {@code true} if the execution chain should proceed with the
 	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
 	 * that this interceptor has already dealt with the response itself.
@@ -145,6 +147,8 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Apply postHandle methods of registered interceptors.
+	 *
+	 * 应用注册拦截器的postHandle方法。
 	 */
 	void applyPostHandle(HttpServletRequest request, HttpServletResponse response, @Nullable ModelAndView mv)
 			throws Exception {
@@ -162,6 +166,9 @@ public class HandlerExecutionChain {
 	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
 	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
 	 * has successfully completed and returned true.
+	 *
+	 * 在映射的HandlerInterceptors上触发afterCompletion回调。
+	 * 只需为preHandle调用成功完成并返回true的所有拦截器调用afterCompletion。
 	 */
 	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex)
 			throws Exception {

@@ -16,12 +16,12 @@
 
 package org.springframework.web.context.request.async;
 
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.WebRequest;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.WebRequest;
 
 /**
  * Utility methods related to processing asynchronous web requests.
@@ -39,6 +39,8 @@ public abstract class WebAsyncUtils {
 	/**
 	 * Obtain the {@link WebAsyncManager} for the current request, or if not
 	 * found, create and associate it with the request.
+	 *
+	 * 获取当前请求的{@link WebAsyncManager}，如果未找到，则创建该请求并将其与请求关联。
 	 */
 	public static WebAsyncManager getAsyncManager(ServletRequest servletRequest) {
 		WebAsyncManager asyncManager = null;

@@ -16,15 +16,15 @@
 
 package org.springframework.core;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper for resolving synthetic {@link Method#isBridge bridge Methods} to the
@@ -52,6 +52,12 @@ public abstract class BridgeMethodResolver {
 	 * <p>It is safe to call this method passing in a non-bridge {@link Method} instance.
 	 * In such a case, the supplied {@link Method} instance is returned directly to the caller.
 	 * Callers are <strong>not</strong> required to check for bridging before calling this method.
+	 *
+	 * 找到所提供的{@link Method bridge Method}的原始方法。
+	 * <p>调用此方法传入非桥接{@link Method}实例是安全的。
+	 * 在这种情况下，提供的{@link Method}实例将直接返回给调用者。
+	 * 在调用此方法之前，调用者<strong>不</ strong>需要检查桥接。
+	 *
 	 * @param bridgeMethod the method to introspect
 	 * @return the original method (either the bridged method or the passed-in method
 	 * if no more specific one could be found)
@@ -62,6 +68,7 @@ public abstract class BridgeMethodResolver {
 		}
 
 		// Gather all methods with matching name and parameter size.
+		// 使用匹配的名称和参数大小收集所有方法。
 		List<Method> candidateMethods = new ArrayList<>();
 		Method[] methods = ReflectionUtils.getAllDeclaredMethods(bridgeMethod.getDeclaringClass());
 		for (Method candidateMethod : methods) {
@@ -71,19 +78,24 @@ public abstract class BridgeMethodResolver {
 		}
 
 		// Now perform simple quick check.
+		// 现在执行简单的快速检查。
 		if (candidateMethods.size() == 1) {
 			return candidateMethods.get(0);
 		}
 
 		// Search for candidate match.
+		// 搜索候选匹配。
 		Method bridgedMethod = searchCandidates(candidateMethods, bridgeMethod);
 		if (bridgedMethod != null) {
 			// Bridged method found...
+			// 发现桥接方法......
 			return bridgedMethod;
 		}
 		else {
 			// A bridge method was passed in but we couldn't find the bridged method.
 			// Let's proceed with the passed-in method and hope for the best...
+			// 传递了一个桥接方法但我们找不到桥接方法。
+			// 让我们继续传递方法并希望最好的......
 			return bridgeMethod;
 		}
 	}
@@ -102,6 +114,9 @@ public abstract class BridgeMethodResolver {
 
 	/**
 	 * Searches for the bridged method in the given candidates.
+	 *
+	 * 在给定的候选者中搜索桥接方法。
+	 *
 	 * @param candidateMethods the List of candidate Methods
 	 * @param bridgeMethod the bridge method
 	 * @return the bridged method, or {@code null} if none found

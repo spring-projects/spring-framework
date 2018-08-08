@@ -16,10 +16,10 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
+
+import javax.servlet.ServletContext;
 
 /**
  * Interface to provide configuration for a web application. This is read-only while
@@ -36,6 +36,8 @@ import org.springframework.lang.Nullable;
  * <p>In addition to standard application context lifecycle capabilities,
  * WebApplicationContext implementations need to detect {@link ServletContextAware}
  * beans and invoke the {@code setServletContext} method accordingly.
+ *
+ * 用于为Web应用程序提供配置的界面。 这在应用程序运行时是只读的，但如果实现支持，则可以重新加载。
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

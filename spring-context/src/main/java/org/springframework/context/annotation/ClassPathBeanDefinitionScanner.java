@@ -16,17 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionDefaults;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.beans.factory.support.*;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
@@ -35,10 +28,16 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * A bean definition scanner that detects bean candidates on the classpath,
  * registering corresponding bean definitions with a given registry ({@code BeanFactory}
  * or {@code ApplicationContext}).
+ *
+ * 一个bean定义扫描程序，用于检测类路径上的bean候选项，并使用给定的注册表
+ * {@code BeanFactory}或{@code ApplicationContext}注册相应的Bean定义。
  *
  * <p>Candidate classes are detected through configurable type filters. The
  * default filters include classes that are annotated with Spring's
@@ -78,6 +77,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 	/**
 	 * Create a new {@code ClassPathBeanDefinitionScanner} for the given bean factory.
+	 *
+	 * 为给定的bean工厂创建一个新的ClassPathBeanDefinitionScanner。
+	 *
 	 * @param registry the {@code BeanFactory} to load bean definitions into, in the form
 	 * of a {@code BeanDefinitionRegistry}
 	 */

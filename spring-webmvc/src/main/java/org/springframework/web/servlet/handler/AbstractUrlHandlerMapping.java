@@ -16,22 +16,16 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerExecutionChain;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 
 /**
  * Abstract base class for URL-mapped {@link org.springframework.web.servlet.HandlerMapping}
@@ -114,17 +108,23 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	/**
 	 * Look up a handler for the URL path of the given request.
+	 *
+	 * 查找给定请求的URL路径的处理程序。
+	 *
 	 * @param request current HTTP request
 	 * @return the handler instance, or {@code null} if none found
 	 */
 	@Override
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+		// 获得请求路径
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		Object handler = lookupHandler(lookupPath, request);
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
+			// 我们需要直接关注默认处理程序，因为我们需要
+			// 也为它公开PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE。
 			Object rawHandler = null;
 			if ("/".equals(lookupPath)) {
 				rawHandler = getRootHandler();
@@ -158,6 +158,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * both "/test" and "/team". For details, see the AntPathMatcher class.
 	 * <p>Looks for the most exact pattern, where most exact is defined as
 	 * the longest path pattern.
+	 *
+	 * 查找给定URL路径的处理程序实例。
+	 * <p>支持直接匹配，例如 注册的“/ test”匹配“/ test”，以及各种Ant样式模式匹配，
+	 * 例如： 注册的“/ t *”匹配“/ test”和“/ team”。 有关详细信息，请参阅AntPathMatcher类。
+	 * <p>查找最精确的模式，其中最精确的模式定义为最长路径模式。
 	 * @param urlPath URL the bean is mapped to
 	 * @param request current HTTP request (to expose the path within the mapping to)
 	 * @return the associated handler instance, or {@code null} if not found

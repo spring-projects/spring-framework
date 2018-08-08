@@ -16,14 +16,16 @@
 
 package org.springframework.web.servlet;
 
+import org.springframework.web.method.HandlerMethod;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.method.HandlerMethod;
 
 /**
  * Extends {@code HandlerInterceptor} with a callback method invoked after the
  * start of asynchronous request handling.
+ *
+ * 使用在异步请求处理开始后调用的回调方法扩展{@code HandlerInterceptor}。
  *
  * <p>When a handler starts an asynchronous request, the {@link DispatcherServlet}
  * exits without invoking {@code postHandle} and {@code afterCompletion} as it
@@ -66,6 +68,12 @@ public interface AsyncHandlerInterceptor extends HandlerInterceptor {
 	 * avoid modifying them in ways that would conflict with the concurrent
 	 * execution of the handler. A typical use of this method would be to
 	 * clean up thread-local variables.
+	 *
+	 * 当处理程序同时执行时，调用而不是{@code postHandle}和{@code afterCompletion}。
+	 * <p>实现可以使用提供的请求和响应，但应避免以与处理程序的并发执行冲突的方式修改它们。
+	 * 此方法的典型用法是清理线程局部变量。
+	 *
+	 *
 	 * @param request the current request
 	 * @param response the current response
 	 * @param handler the handler (or {@link HandlerMethod}) that started async

@@ -16,11 +16,10 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
-import java.util.concurrent.atomic.AtomicReference;
-
+import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import reactor.netty.DisposableServer;
 
-import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Stephane Maldini
@@ -37,9 +36,9 @@ public class ReactorHttpsServer extends AbstractHttpServer {
 	@Override
 	protected void initServer() {
 		this.reactorHandler = createHttpHandlerAdapter();
-		this.reactorServer = reactor.netty.http.server.HttpServer.create()
+		/*this.reactorServer = reactor.netty.http.server.HttpServer.create()
 			.tcpConfiguration(server -> server.host(getHost()).secure())
-			.port(getPort());
+			.port(getPort());*/
 	}
 
 	private ReactorHttpHandlerAdapter createHttpHandlerAdapter() {

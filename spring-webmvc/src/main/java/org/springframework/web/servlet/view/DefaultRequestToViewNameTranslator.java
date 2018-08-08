@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.view;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * {@link RequestToViewNameTranslator} that simply transforms the URI of
@@ -174,6 +174,9 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	/**
 	 * Transform the request URI (in the context of the webapp) stripping
 	 * slashes and extensions, and replacing the separator as required.
+	 *
+	 * 转换请求URI（在webapp的上下文中）剥离斜杠和扩展，并根据需要替换分隔符。
+	 *
 	 * @param lookupPath the lookup path for the current request,
 	 * as determined by the UrlPathHelper
 	 * @return the transformed path, with slashes and extensions stripped

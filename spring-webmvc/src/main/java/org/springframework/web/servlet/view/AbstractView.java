@@ -16,20 +16,6 @@
 
 package org.springframework.web.servlet.view;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
@@ -40,6 +26,13 @@ import org.springframework.web.context.support.ContextExposingHttpServletRequest
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContext;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.View}
@@ -298,6 +291,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Prepares the view given the specified model, merging it with static
 	 * attributes and a RequestContext attribute, if necessary.
 	 * Delegates to renderMergedOutputModel for the actual rendering.
+	 *
+	 * 如果需要，准备给定指定模型的视图，将其与静态属性和RequestContext属性合并。 委托renderMergedOutputModel进行实际渲染。
+	 *
 	 * @see #renderMergedOutputModel
 	 */
 	@Override
@@ -309,6 +305,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				" and static attributes " + this.staticAttributes);
 		}
 
+		// ------------------------ 关键方法 ------------------------
+		// 创建输出map
 		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
 		prepareResponse(request, response);
 		renderMergedOutputModel(mergedModel, getRequestToExpose(request), response);
@@ -317,6 +315,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Creates a combined output Map (never {@code null}) that includes dynamic values and static attributes.
 	 * Dynamic values take precedence over static attributes.
+	 *
+	 * 创建包含动态值和静态属性的组合输出Map（从不{@code null}）。动态值优先于静态属性。
 	 */
 	protected Map<String, Object> createMergedOutputModel(@Nullable Map<String, ?> model,
 			HttpServletRequest request, HttpServletResponse response) {
@@ -326,6 +326,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				(Map<String, Object>) request.getAttribute(View.PATH_VARIABLES) : null);
 
 		// Consolidate static and dynamic model attributes.
+		// 合并静态和动态模型属性。
 		int size = this.staticAttributes.size();
 		size += (model != null ? model.size() : 0);
 		size += (pathVars != null ? pathVars.size() : 0);
@@ -368,6 +369,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Prepare the given response for rendering.
 	 * <p>The default implementation applies a workaround for an IE bug
 	 * when sending download content via HTTPS.
+	 *
+	 * 准备给定的渲染响应。 <p>默认实现在通过HTTPS发送下载内容时应用IE错误的变通方法。
+	 *
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 */

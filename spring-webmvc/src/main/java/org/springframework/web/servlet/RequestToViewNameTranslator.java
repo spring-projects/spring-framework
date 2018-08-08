@@ -16,14 +16,16 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.lang.Nullable;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Strategy interface for translating an incoming
  * {@link javax.servlet.http.HttpServletRequest} into a
  * logical view name when no view name is explicitly supplied.
+ *
+ * 策略接口，用于在未显式提供视图名称时将传入的{@link javax.servlet.http.HttpServletRequest}转换为逻辑视图名称。
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

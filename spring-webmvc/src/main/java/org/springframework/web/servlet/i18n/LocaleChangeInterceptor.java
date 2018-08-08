@@ -16,14 +16,8 @@
 
 package org.springframework.web.servlet.i18n;
 
-import java.util.Locale;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -31,9 +25,16 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Locale;
+
 /**
  * Interceptor that allows for changing the current locale on every request,
  * via a configurable request parameter (default parameter name: "locale").
+ *
+ * 允许通过可配置的请求参数（默认参数名称：“locale”）更改每个请求的当前区域设置的拦截器。
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev

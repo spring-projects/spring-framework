@@ -40,6 +40,8 @@ import org.springframework.web.util.UrlPathHelper;
  * The central class for managing asynchronous request processing, mainly intended
  * as an SPI and not typically used directly by application classes.
  *
+ * 用于管理异步请求处理的中心类，主要用作SPI，通常不由应用程序类直接使用。
+ *
  * <p>An async scenario starts with request processing as usual in a thread (T1).
  * Concurrent request handling can be initiated by calling
  * {@link #startCallableProcessing(Callable, Object...) startCallableProcessing} or
@@ -127,6 +129,9 @@ public final class WebAsyncManager {
 	 * of "false" means concurrent handling was either not started or possibly
 	 * that it has completed and the request was dispatched for further
 	 * processing of the concurrent result.
+	 *
+	 * 当前请求的所选处理程序是否选择异步处理请求。 返回值“true”表示正在进行并发处理，
+	 * 响应将保持打开状态。 返回值“false”表示并发处理未启动或可能已完成，并且已分派请求以进一步处理并发结果。
 	 */
 	public boolean isConcurrentHandlingStarted() {
 		return (this.asyncWebRequest != null && this.asyncWebRequest.isAsyncStarted());

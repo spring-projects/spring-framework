@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Workflow interface that allows for customized handler execution chains.
@@ -128,6 +128,9 @@ public interface HandlerInterceptor {
 	 * Callback after completion of request processing, that is, after rendering
 	 * the view. Will be called on any outcome of handler execution, thus allows
 	 * for proper resource cleanup.
+	 *
+	 * 完成请求处理后回调，即渲染视图后回调。 将调用处理程序执行的任何结果，从而允许适当的资源清理。
+	 *
 	 * <p>Note: Will only be called if this interceptor's {@code preHandle}
 	 * method has successfully completed and returned {@code true}!
 	 * <p>As with the {@code postHandle} method, the method will be invoked on each

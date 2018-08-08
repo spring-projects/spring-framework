@@ -16,10 +16,10 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.function.Consumer;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.function.Consumer;
 
 /**
  * Extends {@link NativeWebRequest} with methods for asynchronous request processing.
@@ -67,6 +67,8 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	 * Whether the request is in async mode following a call to {@link #startAsync()}.
 	 * Returns "false" if asynchronous processing never started, has completed,
 	 * or the request was dispatched for further processing.
+	 *
+	 * 调用{@link #startAsync（）}后请求是否处于异步模式。 如果异步处理从未开始，已完成，或者已分派请求以进行进一步处理，则返回“false”。
 	 */
 	boolean isAsyncStarted();
 

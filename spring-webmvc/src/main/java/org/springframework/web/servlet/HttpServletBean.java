@@ -16,22 +16,9 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
+import org.springframework.beans.*;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -45,6 +32,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.context.support.StandardServletEnvironment;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
@@ -79,14 +73,21 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * @see #doPost
  */
 @SuppressWarnings("serial")
-public abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware {
+public abstract class  HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware {
 
-	/** Logger available to subclasses */
+	/**
+	 * Logger available to subclasses
+	 *
+	 * 记录器可用于子类
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
 	private ConfigurableEnvironment environment;
 
+	/**
+	 * 必需的属性
+	 */
 	private final Set<String> requiredProperties = new HashSet<>(4);
 
 
@@ -141,6 +142,9 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	/**
 	 * Map config parameters onto bean properties of this servlet, and
 	 * invoke subclass initialization.
+	 *
+	 * 将配置参数映射到此servlet的bean属性，并调用子类初始化。
+	 *
 	 * @throws ServletException if bean properties are invalid (or required
 	 * properties are missing), or if subclass initialization fails.
 	 */
@@ -151,6 +155,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		}
 
 		// Set bean properties from init parameters.
+		// 从init参数设置bean属性。
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
@@ -169,6 +174,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		}
 
 		// Let subclasses do whatever initialization they like.
+		// 让子类做他们喜欢的任何初始化。
 		initServletBean();
 
 		if (logger.isDebugEnabled()) {

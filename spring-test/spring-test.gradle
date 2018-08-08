@@ -1,6 +1,7 @@
 description = "Spring TestContext Framework"
 
 apply plugin: "io.spring.dependency-management"
+apply plugin: 'war'
 
 dependencyManagement {
 	imports {

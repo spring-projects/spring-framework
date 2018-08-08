@@ -16,16 +16,18 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Locale;
+import org.springframework.lang.Nullable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
+import java.util.Locale;
 
 /**
  * Interface for web-based locale resolution strategies that allows for
  * both locale resolution via the request and locale modification via
  * request and response.
+ *
+ * 基于Web的区域设置解析策略的接口，允许通过请求进行区域设置解析，并通过请求和响应修改区域设置。
  *
  * <p>This interface allows for implementations based on request, session,
  * cookies, etc. The default implementation is

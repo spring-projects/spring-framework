@@ -16,34 +16,21 @@
 
 package org.springframework.web.util;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestWrapper;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletResponseWrapper;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.*;
+
+import javax.servlet.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.URI;
+import java.util.*;
 
 /**
  * Miscellaneous utilities for web applications.
@@ -59,6 +46,9 @@ public abstract class WebUtils {
 	 * Standard Servlet 2.3+ spec request attributes for include URI and paths.
 	 * <p>If included via a RequestDispatcher, the current resource will see the
 	 * originating request. Its own URI and paths are exposed as request attributes.
+	 *
+	 * 包含URI和路径的标准Servlet 2.3+规范请求属性。
+	 * <p>如果通过RequestDispatcher包含，则当前资源将看到原始请求。 它自己的URI和路径作为请求属性公开。
 	 */
 	public static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri";
 	public static final String INCLUDE_CONTEXT_PATH_ATTRIBUTE = "javax.servlet.include.context_path";
@@ -412,6 +402,10 @@ public abstract class WebUtils {
 	 * <p>Checks the presence of the "javax.servlet.include.request_uri"
 	 * request attribute. Could check any request attribute that is only
 	 * present in an include request.
+	 *
+	 * 确定给定请求是否为包含请求，即不是来自外部的顶级HTTP请求。
+	 * <p>检查是否存在“javax.servlet.include.request_uri”请求属性。 可以检查仅包含在包含请求中的任何请求属性。
+	 *
 	 * @param request current servlet request
 	 * @return whether the given request is an include request
 	 */

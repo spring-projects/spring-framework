@@ -16,12 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
@@ -42,6 +36,12 @@ import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Creates {@link RequestMappingInfo} instances from type and method-level
@@ -171,6 +171,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * {@inheritDoc}
 	 * <p>Expects a handler to have either a type-level @{@link Controller}
 	 * annotation or a type-level @{@link RequestMapping} annotation.
+	 *
+	 * 检查bean是否符合给定处理程序的条件
+	 * 期望处理程序具有类型级@ {@link Controller}注释或类型级@ {@link RequestMapping}注释。
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
@@ -181,6 +184,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Uses method and type-level @{@link RequestMapping} annotations to create
 	 * the RequestMappingInfo.
+	 *
+	 * 使用方法和类型级别@ {@link RequestMapping}注释来创建RequestMappingInfo。
+	 * 为给定的Method实例提供映射的方法，该方法表示处理的方法
+	 * （例如，使用@RequestMapping注解的controller的方法上所对应的URL）。
+	 *
 	 * @return the created RequestMappingInfo, or {@code null} if the method
 	 * does not have a {@code @RequestMapping} annotation.
 	 * @see #getCustomMethodCondition(Method)
@@ -203,6 +211,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
 	 * supplying the appropriate custom {@link RequestCondition} depending on whether
 	 * the supplied {@code annotatedElement} is a class or method.
+	 *
+	 * 委托{@link #createRequestMappingInfo (RequestMapping，RequestCondition)}，
+	 * 提供适当的自定义{@link RequestCondition}，具体取决于提供的{@code annotatedElement}是类还是方法。
+	 *
 	 * @see #getCustomTypeCondition(Class)
 	 * @see #getCustomMethodCondition(Method)
 	 */

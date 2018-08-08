@@ -24,6 +24,9 @@ import javax.servlet.http.HttpServletRequest;
  * Implementations are typically usable both within an application context
  * and standalone.
  *
+ * 根据<a href="http://www.ietf.org/rfc/rfc1867.txt"> RFC 1867 </a>进行多部分文件上传解析的策略界面。
+ * 实现通常可在应用程序上下文和独立中使用。
+ *
  * <p>There are two concrete implementations included in Spring, as of Spring 3.1:
  * <ul>
  * <li>{@link org.springframework.web.multipart.commons.CommonsMultipartResolver}

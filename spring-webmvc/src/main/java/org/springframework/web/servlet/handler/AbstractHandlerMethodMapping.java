@@ -16,21 +16,6 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -44,6 +29,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Abstract base class for {@link HandlerMapping} implementations that define
@@ -255,6 +247,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Register a handler method and its unique mapping. Invoked at startup for
 	 * each detected handler method.
+	 *
+	 * 注册处理程序方法及其唯一映射。 在启动时为每个检测到的处理程序方法调用。
+	 *
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
 	 * @param mapping the mapping conditions associated with the handler method
@@ -267,6 +262,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	/**
 	 * Create the HandlerMethod instance.
+	 *
+	 * 创建HandlerMethod实例。
+	 *
 	 * @param handler either a bean name or an actual handler instance
 	 * @param method the target method
 	 * @return the created HandlerMethod
@@ -275,6 +273,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		HandlerMethod handlerMethod;
 		if (handler instanceof String) {
 			String beanName = (String) handler;
+			// -------------------------- 关键方法-----------------------------
+			// 创建HandlerMethod对象
 			handlerMethod = new HandlerMethod(beanName,
 					obtainApplicationContext().getAutowireCapableBeanFactory(), method);
 		}
@@ -479,10 +479,19 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	class MappingRegistry {
 
+		/**
+		 * 注册表
+		 */
 		private final Map<T, MappingRegistration<T>> registry = new HashMap<>();
 
+		/**
+		 * mappng - method 映射
+		 */
 		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<>();
 
+		/**
+		 * url - mapping 映射
+		 */
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
 
 		private final Map<String, List<HandlerMethod>> nameLookup = new ConcurrentHashMap<>();
@@ -540,7 +549,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		public void register(T mapping, Object handler, Method method) {
 			this.readWriteLock.writeLock().lock();
 			try {
+				// ---------------------关键方法------------------------
+				// 创建handlerMethod对象
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+				// 验证是否唯一
 				assertUniqueMethodMapping(handlerMethod, mapping);
 
 				if (logger.isInfoEnabled()) {
@@ -548,6 +560,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				}
 				this.mappingLookup.put(mapping, handlerMethod);
 
+				// 获取网址
 				List<String> directUrls = getDirectUrls(mapping);
 				for (String url : directUrls) {
 					this.urlLookup.add(url, mapping);
@@ -581,6 +594,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 		}
 
+		/**
+		 * 获取直接网址
+		 * @param mapping
+		 * @return
+		 */
 		private List<String> getDirectUrls(T mapping) {
 			List<String> urls = new ArrayList<>(1);
 			for (String path : getMappingPathPatterns(mapping)) {

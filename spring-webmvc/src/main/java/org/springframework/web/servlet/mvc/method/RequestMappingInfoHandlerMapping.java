@@ -16,18 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
@@ -45,6 +33,11 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
 import org.springframework.web.servlet.mvc.condition.NameValueExpression;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -103,6 +96,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 	/**
 	 * Expose URI template variables, matrix variables, and producible media types in the request.
+	 *
+	 *  当为给定的HttpServletRequest对象找到匹配的处理方法时调用。
+	 *
 	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
 	 * @see HandlerMapping#MATRIX_VARIABLES_ATTRIBUTE
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
@@ -174,6 +170,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	/**
 	 * Iterate all RequestMappingInfo's once again, look if any match by URL at
 	 * least and raise exceptions according to what doesn't match.
+	 *
+	 * 给定的HttpServletRequest对象找不到匹配的处理方法时被调用
+	 *
 	 * @throws HttpRequestMethodNotSupportedException if there are matches by URL
 	 * but not by HTTP method
 	 * @throws HttpMediaTypeNotAcceptableException if there are matches by URL

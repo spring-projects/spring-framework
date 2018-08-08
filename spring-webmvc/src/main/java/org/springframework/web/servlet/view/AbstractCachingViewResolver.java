@@ -16,18 +16,17 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Convenient base class for {@link org.springframework.web.servlet.ViewResolver}
@@ -44,7 +43,8 @@ import org.springframework.web.servlet.ViewResolver;
  */
 public abstract class AbstractCachingViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
-	/** Default maximum number of entries for the view cache: 1024 */
+	/** Default maximum number of entries for the view cache: 1024
+	 * 视图缓存的默认最大条目数：1024*/
 	public static final int DEFAULT_CACHE_LIMIT = 1024;
 
 	/** Dummy marker object for unresolved views in the cache Maps */
@@ -114,6 +114,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 
 	/**
 	 * Return if caching is enabled.
+	 * 如果启用了缓存，则返回。
 	 */
 	public boolean isCache() {
 		return (this.cacheLimit > 0);
@@ -147,6 +148,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
+			// 启用了缓存
+			// -----------------------关键方法----------------------
+			// 创建视图
 			return createView(viewName, locale);
 		}
 		else {
@@ -157,6 +161,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 					view = this.viewCreationCache.get(cacheKey);
 					if (view == null) {
 						// Ask the subclass to create the View object.
+						// 让子类创建View对象。
 						view = createView(viewName, locale);
 						if (view == null && this.cacheUnresolved) {
 							view = UNRESOLVED_VIEW;
