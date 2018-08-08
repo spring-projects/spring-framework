@@ -398,7 +398,7 @@ public class ProxyFactoryBeanTests {
 		config.removeAdvice(debugInterceptor);
 		it.getSpouse();
 
-		// Still invoked wiht old reference
+		// Still invoked with old reference
 		assertEquals(2, debugInterceptor.getCount());
 
 		// not invoked with new object

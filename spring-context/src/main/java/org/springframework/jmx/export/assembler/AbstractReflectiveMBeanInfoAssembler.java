@@ -339,7 +339,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	/**
 	 * Iterate through all methods on the MBean class and gives subclasses the chance
 	 * to vote on their inclusion. If a particular method corresponds to the accessor
-	 * or mutator of an attribute that is inclued in the managment interface, then
+	 * or mutator of an attribute that is included in the management interface, then
 	 * the corresponding operation is exposed with the &quot;role&quot; descriptor
 	 * field set to the appropriate value.
 	 * @param managedBean the bean instance (might be an AOP proxy)

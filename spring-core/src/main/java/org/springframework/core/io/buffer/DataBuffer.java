@@ -192,7 +192,7 @@ public interface DataBuffer {
 	 * Write at most {@code length} bytes of the given source into this buffer, starting
 	 * at the current writing position of this buffer.
 	 * @param source the bytes to be written into this buffer
-	 * @param offset the index withing {@code source} to start writing from
+	 * @param offset the index within {@code source} to start writing from
 	 * @param length the maximum number of bytes to be written from {@code source}
 	 * @return this buffer
 	 */
