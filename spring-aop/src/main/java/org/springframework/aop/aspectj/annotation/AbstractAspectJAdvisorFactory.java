@@ -42,7 +42,6 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for factories that can create Spring AOP Advisors
@@ -200,7 +199,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			// but need to invoke them reflectively as there isn't a common interface.
 			try {
 				this.pointcutExpression = resolveExpression(annotation);
-				this.argumentNames = (String) annotation.getClass().getMethod("argNames").invoke(annotation);
+				Object argNames = AnnotationUtils.getValue(annotation, "argNames");
+				this.argumentNames = (argNames instanceof String ? (String) argNames : "");
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException(annotation + " is not a valid AspectJ annotation", ex);
@@ -217,9 +217,12 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		private String resolveExpression(A annotation) {
 			for (String attributeName : EXPRESSION_ATTRIBUTES) {
-				String candidate = (String) AnnotationUtils.getValue(annotation, attributeName);
-				if (StringUtils.hasText(candidate)) {
-					return candidate;
+				Object val = AnnotationUtils.getValue(annotation, attributeName);
+				if (val instanceof String) {
+					String str = (String) val;
+					if (!str.isEmpty()) {
+						return str;
+					}
 				}
 			}
 			throw new IllegalStateException("Failed to resolve expression: " + annotation);

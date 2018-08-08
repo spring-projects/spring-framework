@@ -1392,6 +1392,9 @@ public abstract class AnnotationUtils {
 			ReflectionUtils.makeAccessible(method);
 			return method.invoke(annotation);
 		}
+		catch (NoSuchMethodException ex) {
+			return null;
+		}
 		catch (InvocationTargetException ex) {
 			rethrowAnnotationConfigurationException(ex.getTargetException());
 			throw new IllegalStateException(
