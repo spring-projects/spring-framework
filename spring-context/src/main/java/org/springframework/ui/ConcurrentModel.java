@@ -65,6 +65,23 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	}
 
 
+	@Override
+	public Object put(String key, Object value) {
+		if (value != null) {
+			return super.put(key, value);
+		}
+		else {
+			return remove(key);
+		}
+	}
+
+	@Override
+	public void putAll(Map<? extends String, ?> map) {
+		for (Map.Entry<? extends String, ?> entry : map.entrySet()) {
+			put(entry.getKey(), entry.getValue());
+		}
+	}
+
 	/**
 	 * Add the supplied attribute under the supplied name.
 	 * @param attributeName the name of the model attribute (never {@code null})
@@ -73,12 +90,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	 */
 	public ConcurrentModel addAttribute(String attributeName, @Nullable Object attributeValue) {
 		Assert.notNull(attributeName, "Model attribute name must not be null");
-		if (attributeValue != null) {
-			put(attributeName, attributeValue);
-		}
-		else {
-			remove(attributeName);
-		}
+		put(attributeName, attributeValue);
 		return this;
 	}
 
