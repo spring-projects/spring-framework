@@ -78,8 +78,8 @@ class ControllerMethodResolver {
 	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
 	 */
 	private static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
-			(AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
-					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
+			(AnnotationUtils.findAnnotation(method, RequestMapping.class) == null &&
+					AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
 
 
 	private static Log logger = LogFactory.getLog(ControllerMethodResolver.class);

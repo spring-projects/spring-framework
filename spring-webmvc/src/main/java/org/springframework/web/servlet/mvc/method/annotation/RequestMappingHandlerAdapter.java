@@ -124,8 +124,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
 	 */
 	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
-			((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
-					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));
+			(AnnotationUtils.findAnnotation(method, RequestMapping.class) == null &&
+					AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
 
 
 	@Nullable
