@@ -67,6 +67,42 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	}
 
 
+	/**
+	 * Create {@code HttpClientErrorException} or an HTTP status specific sub-class.
+	 * @since 5.1
+	 */
+	public static HttpClientErrorException create(
+			HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+
+		switch (statusCode) {
+			case BAD_REQUEST:
+				return new HttpClientErrorException.BadRequest(statusText, headers, body, charset);
+			case UNAUTHORIZED:
+				return new HttpClientErrorException.Unauthorized(statusText, headers, body, charset);
+			case FORBIDDEN:
+				return new HttpClientErrorException.Forbidden(statusText, headers, body, charset);
+			case NOT_FOUND:
+				return new HttpClientErrorException.NotFound(statusText, headers, body, charset);
+			case METHOD_NOT_ALLOWED:
+				return new HttpClientErrorException.MethodNotAllowed(statusText, headers, body, charset);
+			case NOT_ACCEPTABLE:
+				return new HttpClientErrorException.NotAcceptable(statusText, headers, body, charset);
+			case CONFLICT:
+				return new HttpClientErrorException.Conflict(statusText, headers, body, charset);
+			case GONE:
+				return new HttpClientErrorException.Gone(statusText, headers, body, charset);
+			case UNSUPPORTED_MEDIA_TYPE:
+				return new HttpClientErrorException.UnsupportedMediaType(statusText, headers, body, charset);
+			case TOO_MANY_REQUESTS:
+				return new HttpClientErrorException.TooManyRequests(statusText, headers, body, charset);
+			case UNPROCESSABLE_ENTITY:
+				return new HttpClientErrorException.UnprocessableEntity(statusText, headers, body, charset);
+			default:
+				return new HttpClientErrorException(statusCode, statusText, headers, body, charset);
+		}
+	}
+
+
 	// Subclasses for specific HTTP status codes
 
 	/**

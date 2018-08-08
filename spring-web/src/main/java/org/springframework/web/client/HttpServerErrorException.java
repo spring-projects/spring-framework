@@ -67,6 +67,30 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	}
 
 
+	/**
+	 * Create an {@code HttpServerErrorException} or an HTTP status specific sub-class.
+	 * @since 5.1
+	 */
+	public static HttpServerErrorException create(
+			HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+
+		switch (statusCode) {
+			case INTERNAL_SERVER_ERROR:
+				return new HttpServerErrorException.InternalServerError(statusText, headers, body, charset);
+			case NOT_IMPLEMENTED:
+				return new HttpServerErrorException.NotImplemented(statusText, headers, body, charset);
+			case BAD_GATEWAY:
+				return new HttpServerErrorException.BadGateway(statusText, headers, body, charset);
+			case SERVICE_UNAVAILABLE:
+				return new HttpServerErrorException.ServiceUnavailable(statusText, headers, body, charset);
+			case GATEWAY_TIMEOUT:
+				return new HttpServerErrorException.GatewayTimeout(statusText, headers, body, charset);
+			default:
+				return new HttpServerErrorException(statusCode, statusText, headers, body, charset);
+		}
+	}
+
+
 	// Subclasses for specific HTTP status codes
 
 	/**
