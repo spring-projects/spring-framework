@@ -813,7 +813,8 @@ public abstract class WebUtils {
 		}
 
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		return (ObjectUtils.nullSafeEquals(host, originUrl.getHost()) &&
+		return (ObjectUtils.nullSafeEquals(scheme, originUrl.getScheme()) &&
+				ObjectUtils.nullSafeEquals(host, originUrl.getHost()) &&
 				getPort(scheme, port) == getPort(originUrl.getScheme(), originUrl.getPort()));
 	}
 
