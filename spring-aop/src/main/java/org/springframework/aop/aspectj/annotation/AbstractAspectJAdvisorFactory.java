@@ -169,7 +169,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 */
 	protected static class AspectJAnnotation<A extends Annotation> {
 
-		private static final String[] EXPRESSION_PROPERTIES = new String[] {"value", "pointcut"};
+		private static final String[] EXPRESSION_ATTRIBUTES = new String[] {"pointcut", "value"};
 
 		private static Map<Class<?>, AspectJAnnotationType> annotationTypeMap =
 				new HashMap<Class<?>, AspectJAnnotationType>(8);
@@ -198,36 +198,29 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			// but need to invoke them reflectively as there isn't a common interface.
 			try {
 				this.pointcutExpression = resolveExpression(annotation);
-				this.argumentNames = (String) annotation.getClass().getMethod("argNames").invoke(annotation);
+				this.argumentNames = (String) AnnotationUtils.getValue(annotation, "argNames");
 			}
 			catch (Exception ex) {
-				throw new IllegalArgumentException(annotation + " cannot be an AspectJ annotation", ex);
+				throw new IllegalArgumentException(annotation + " is not a valid AspectJ annotation", ex);
 			}
 		}
 
 		private AspectJAnnotationType determineAnnotationType(A annotation) {
-			for (Class<?> type : annotationTypeMap.keySet()) {
-				if (type.isInstance(annotation)) {
-					return annotationTypeMap.get(type);
-				}
+			AspectJAnnotationType type = annotationTypeMap.get(annotation.annotationType());
+			if (type != null) {
+				return type;
 			}
-			throw new IllegalStateException("Unknown annotation type: " + annotation.toString());
+			throw new IllegalStateException("Unknown annotation type: " + annotation);
 		}
 
-		private String resolveExpression(A annotation) throws Exception {
-			String expression = null;
-			for (String methodName : EXPRESSION_PROPERTIES) {
-				try {
-					Method method = annotation.getClass().getDeclaredMethod(methodName);
-					String candidate = (String) method.invoke(annotation);
-					if (StringUtils.hasText(candidate)) {
-						expression = candidate;
-					}
-				}
-				catch (NoSuchMethodException ex) {
+		private String resolveExpression(A annotation) {
+			for (String attributeName : EXPRESSION_ATTRIBUTES) {
+				String candidate = (String) AnnotationUtils.getValue(annotation, attributeName);
+				if (StringUtils.hasText(candidate)) {
+					return candidate;
 				}
 			}
-			return expression;
+			throw new IllegalStateException("Failed to resolve expression: " + annotation);
 		}
 
 		public AspectJAnnotationType getAnnotationType() {
