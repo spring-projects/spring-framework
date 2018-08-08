@@ -75,8 +75,7 @@ public class ContextPathCompositeHandler implements HttpHandler {
 				})
 				.orElseGet(() -> {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
-					response.setComplete();
-					return Mono.empty();
+					return response.setComplete();
 				});
 	}
 
