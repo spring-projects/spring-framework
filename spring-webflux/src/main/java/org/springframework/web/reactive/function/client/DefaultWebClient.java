@@ -463,9 +463,7 @@ class DefaultWebClient implements WebClient {
 								.map(MimeType::getCharset)
 								.orElse(StandardCharsets.ISO_8859_1);
 						if (HttpStatus.resolve(response.rawStatusCode()) != null) {
-							String msg = String.format("ClientResponse has erroneous status code: %d %s",
-									response.statusCode().value(), response.statusCode().getReasonPhrase());
-							return new WebClientResponseException(msg,
+							return WebClientResponseException.create(
 									response.statusCode().value(),
 									response.statusCode().getReasonPhrase(),
 									response.headers().asHttpHeaders(),

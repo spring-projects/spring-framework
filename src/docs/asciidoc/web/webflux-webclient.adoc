@@ -60,8 +60,10 @@ You can also get a stream of objects decoded from the response:
 			.bodyToFlux(Quote.class);
 ----
 
-By default, responses with 4xx or 5xx status codes result in an error of type
-`WebClientResponseException` but you can customize that:
+By default, responses with 4xx or 5xx status codes result in an
+`WebClientResponseException` or one of its HTTP status specific sub-classes such as
+`WebClientResponseException.BadRequest`, `WebClientResponseException.NotFound`, and others.
+You can also use the `onStatus` method to customize the resulting exception:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
