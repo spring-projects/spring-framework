@@ -32,13 +32,14 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,8 +50,6 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
-
-import static org.springframework.core.MethodIntrospector.selectMethods;
 
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
@@ -69,8 +68,21 @@ import static org.springframework.core.MethodIntrospector.selectMethods;
  */
 class ControllerMethodResolver {
 
-	private static Log logger = LogFactory.getLog(ControllerMethodResolver.class);
+	/**
+	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
+	 */
+	public static final MethodFilter INIT_BINDER_METHODS = method ->
+			AnnotatedElementUtils.hasAnnotation(method, InitBinder.class);
 
+	/**
+	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
+	 */
+	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
+			(!AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class) &&
+					AnnotatedElementUtils.hasAnnotation(method, ModelAttribute.class));
+
+
+	private static Log logger = LogFactory.getLog(ControllerMethodResolver.class);
 
 	private final List<SyncHandlerMethodArgumentResolver> initBinderResolvers;
 
@@ -212,11 +224,11 @@ class ControllerMethodResolver {
 		for (ControllerAdviceBean bean : beans) {
 			Class<?> beanType = bean.getBeanType();
 			if (beanType != null) {
-				Set<Method> attrMethods = selectMethods(beanType, ATTRIBUTE_METHODS);
+				Set<Method> attrMethods = MethodIntrospector.selectMethods(beanType, MODEL_ATTRIBUTE_METHODS);
 				if (!attrMethods.isEmpty()) {
 					this.modelAttributeAdviceCache.put(bean, attrMethods);
 				}
-				Set<Method> binderMethods = selectMethods(beanType, BINDER_METHODS);
+				Set<Method> binderMethods = MethodIntrospector.selectMethods(beanType, INIT_BINDER_METHODS);
 				if (!binderMethods.isEmpty()) {
 					this.initBinderAdviceCache.put(bean, binderMethods);
 				}
@@ -270,7 +282,8 @@ class ControllerMethodResolver {
 		});
 
 		this.initBinderMethodCache
-				.computeIfAbsent(handlerType, aClass -> selectMethods(handlerType, BINDER_METHODS))
+				.computeIfAbsent(handlerType,
+						clazz -> MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS))
 				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
 					result.add(getInitBinderMethod(bean, method));
@@ -302,7 +315,8 @@ class ControllerMethodResolver {
 		});
 
 		this.modelAttributeMethodCache
-				.computeIfAbsent(handlerType, aClass -> selectMethods(handlerType, ATTRIBUTE_METHODS))
+				.computeIfAbsent(handlerType,
+						clazz -> MethodIntrospector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS))
 				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
 					result.add(createAttributeMethod(bean, method));
@@ -372,15 +386,5 @@ class ControllerMethodResolver {
 		}
 		return result;
 	}
-
-
-	/** Filter for {@link InitBinder @InitBinder} methods. */
-	private static final ReflectionUtils.MethodFilter BINDER_METHODS = method ->
-			AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
-
-	/** Filter for {@link ModelAttribute @ModelAttribute} methods. */
-	private static final ReflectionUtils.MethodFilter ATTRIBUTE_METHODS = method ->
-			(AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
-					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
 
 }
