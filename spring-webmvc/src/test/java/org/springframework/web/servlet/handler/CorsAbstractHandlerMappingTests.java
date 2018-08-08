@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,39 @@ public class CorsAbstractHandlerMappingTests {
 		assertArrayEquals(config.getAllowedOrigins().toArray(), new String[]{"*"});
 	}
 
+	@Test
+	public void actualRequestWithCorsConfigurationSource() throws Exception {
+		this.handlerMapping.setCorsConfigurationSource(new CustomCorsConfigurationSource());
+		this.request.setMethod(RequestMethod.GET.name());
+		this.request.setRequestURI("/foo");
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		assertNotNull(chain);
+		assertTrue(chain.getHandler() instanceof SimpleHandler);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertEquals(true, config.getAllowCredentials());
+	}
+
+	@Test
+	public void preflightRequestWithCorsConfigurationSource() throws Exception {
+		this.handlerMapping.setCorsConfigurationSource(new CustomCorsConfigurationSource());
+		this.request.setMethod(RequestMethod.OPTIONS.name());
+		this.request.setRequestURI("/foo");
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		assertNotNull(chain);
+		assertNotNull(chain.getHandler());
+		assertTrue(chain.getHandler().getClass().getSimpleName().equals("PreFlightHandler"));
+		CorsConfiguration config = getCorsConfiguration(chain, true);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertEquals(true, config.getAllowCredentials());
+	}
+
 
 	private CorsConfiguration getCorsConfiguration(HandlerExecutionChain chain, boolean isPreFlightRequest) {
 		if (isPreFlightRequest) {
@@ -206,6 +239,17 @@ public class CorsAbstractHandlerMappingTests {
 			return config;
 		}
 
+	}
+
+	public class CustomCorsConfigurationSource implements CorsConfigurationSource {
+
+		@Override
+		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+			CorsConfiguration config = new CorsConfiguration();
+			config.addAllowedOrigin("*");
+			config.setAllowCredentials(true);
+			return config;
+		}
 	}
 
 }
