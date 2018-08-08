@@ -59,15 +59,15 @@ import org.springframework.lang.Nullable;
  */
 public abstract class StringUtils {
 
-	private static final String FOLDER_SEPARATOR = "/";
+	private static final String FOLDER_SEPARATOR = "/";//文件夹分隔符
 
-	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
+	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";//windows 的文件夹分隔符
 
-	private static final String TOP_PATH = "..";
+	private static final String TOP_PATH = "..";//顶层目录
 
-	private static final String CURRENT_PATH = ".";
+	private static final String CURRENT_PATH = ".";//当前目录
 
-	private static final char EXTENSION_SEPARATOR = '.';
+	private static final char EXTENSION_SEPARATOR = '.';//扩展器
 
 
 	//---------------------------------------------------------------------

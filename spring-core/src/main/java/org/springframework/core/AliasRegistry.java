@@ -39,13 +39,19 @@ public interface AliasRegistry {
 	void registerAlias(String name, String alias);
 
 	/**
+	 *
+	 * 移除别名
 	 * Remove the specified alias from this registry.
+	 *
+	 *
 	 * @param alias the alias to remove
 	 * @throws IllegalStateException if no such alias was found
 	 */
 	void removeAlias(String alias);
 
 	/**
+	 *
+	 * 判断是不是别名
 	 * Determine whether this given name is defines as an alias
 	 * (as opposed to the name of an actually registered component).
 	 * @param name the name to check
@@ -54,6 +60,8 @@ public interface AliasRegistry {
 	boolean isAlias(String name);
 
 	/**
+	 *
+	 * 返回所有的别名
 	 * Return the aliases for the given name, if defined.
 	 * @param name the name to check for aliases
 	 * @return the aliases, or an empty array if none

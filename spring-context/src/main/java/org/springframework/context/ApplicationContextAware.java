@@ -23,17 +23,28 @@ import org.springframework.beans.factory.Aware;
  * Interface to be implemented by any object that wishes to be notified
  * of the {@link ApplicationContext} that it runs in.
  *
+ *
+ * 本接口可以被任何对象实现，如果这个对象希望在运行的时候接受到 ApplicationContext 给它发出的通知
+ *
+ *
+ *
  * <p>Implementing this interface makes sense for example when an object
- * requires access to a set of collaborating beans. Note that configuration
- * via bean references is preferable to implementing this interface just
+ * requires access to a set of collaborating（合作的） beans. Note that configuration
+ * via bean references is preferable（更好的） to implementing this interface just
  * for bean lookup purposes.
  *
  * <p>This interface can also be implemented if an object needs access to file
- * resources, i.e. wants to call {@code getResource}, wants to publish
- * an application event, or requires access to the MessageSource. However,
- * it is preferable to implement the more specific {@link ResourceLoaderAware},
+ * resources,
+ * 如果一个对象希望访问文件资源的时候，这个对象也可以实现这个接口。
+ *
+ * i.e. wants to call {@code lookup}, wants to publish
+ * an application event, or requires access to the MessageSource.
+ * 想要调用 lookup 方法，想要发布一个application事件，或者需要访问这个 MessageSource
+ *
+ * However, it is preferable to implement the more specific {@link ResourceLoaderAware},
  * {@link ApplicationEventPublisherAware} or {@link MessageSourceAware} interface
  * in such a specific scenario.
+ * 然而在这样的情形，最好实现 ResourceLoaderAware ApplicationEventPublisherAware MessageSourceAware 接口
  *
  * <p>Note that file resource dependencies can also be exposed as bean properties
  * of type {@link org.springframework.core.io.Resource}, populated via Strings
@@ -60,7 +71,10 @@ public interface ApplicationContextAware extends Aware {
 
 	/**
 	 * Set the ApplicationContext that this object runs in.
-	 * Normally this call will be used to initialize the object.
+	 * 设置这个对象运行的ApplicationContext 环境
+	 *
+	 * Normally this call will be used to initialize the object.正常情况下在 对象初始化的时候调用
+	 *
 	 * <p>Invoked after population of normal bean properties but before an init callback such
 	 * as {@link org.springframework.beans.factory.InitializingBean#afterPropertiesSet()}
 	 * or a custom init-method. Invoked after {@link ResourceLoaderAware#setResourceLoader},

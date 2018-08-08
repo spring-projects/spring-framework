@@ -23,6 +23,13 @@ package org.springframework.core.io;
  * without an explicit prefix, hence applying relative to the local
  * {@link ResourceLoader}'s context).
  *
+ *
+ * 从封闭的“上下文”加载的资源的扩展接口，例如来自@link javax.servlet.ServletContext，
+ * 但是也来自普通的类路径路径或相对文件系统路径
+ * （没有明确的前缀，因此应用相对于本地@link ResourceLoader的上下文）
+ *
+ * 我理解的就是相对于本地的上下文档的资源接口，这个资源路径中没得前缀，是资源表示的一种方式
+ *
  * @author Juergen Hoeller
  * @since 2.5
  * @see org.springframework.web.context.support.ServletContextResource

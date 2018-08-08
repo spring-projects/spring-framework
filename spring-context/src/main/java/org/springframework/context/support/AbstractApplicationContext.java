@@ -82,13 +82,18 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ *
+ *  Ioc 容器实际上就是 Context 组件结合其他两个组件共同构建了一个 Bean 关系网，
+ *  如何构建这个关系网？构建的入口就在 AbstractApplicationContext 类的 refresh 方法中
+ *
+ *
  * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
  * interface. Doesn't mandate the type of storage used for configuration; simply
  * implements common context functionality. Uses the Template Method design pattern,
  * requiring concrete subclasses to implement abstract methods.
  *
- * ******************************* ApplicationContext 接口的抽象实现，针对配置，不强制配置存储类型，仅仅实现了公共的语境的方法
- * **********************************使用模板方法的设计模式，需要子类具体实现这些抽象方法
+ * *****************ApplicationContext 接口的抽象实现，针对配置，不强制配置存储类型，仅仅实现了公共的语境的方法
+ * *****************使用模板方法的设计模式，需要子类具体实现这些抽象方法
  *
  * <p>
  * <p>In contrast to a plain BeanFactory, an ApplicationContext is supposed
@@ -575,6 +580,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * Ioc 容器实际上就是 Context 组件结合其他两个组件共同构建了一个 Bean 关系网，
+	 * 	 * 如何构建这个关系网？构建的入口就在 AbstractApplicationContext 类的 refresh 方法中
+	 * 	 * 这个方法就是构建整个 Ioc 容器过程的完整的代码，
+	 *
 	 * Return the list of statically specified ApplicationListeners.
 	 */
 	public Collection<ApplicationListener<?>> getApplicationListeners() {
@@ -1028,6 +1037,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 *
+	 * 了解了里面的每一行代码基本上就了解大部分 Spring 的原理和功能了
+	 *
 	 * Finish the refresh of this context, invoking the LifecycleProcessor's
 	 * onRefresh() method and publishing the
 	 *

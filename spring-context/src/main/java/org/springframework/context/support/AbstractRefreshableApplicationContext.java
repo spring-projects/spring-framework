@@ -27,10 +27,18 @@ import org.springframework.lang.Nullable;
 
 /**
  * Base class for {@link org.springframework.context.ApplicationContext}
+ *
+ *   ***************AbstractRefreshableApplicationContext
+ *   ***************是针对 ApplicationContext类的基类-（可更新的 Context）****************
+ *
  * implementations which are supposed to support multiple calls to {@link #refresh()},
  * creating a new internal bean factory instance every time.
+ * 这个接口的实现应该支持，多次调用refresh() 方法，每次调用创建一个内部的bean 工厂实例。
+ *
  * Typically (but not necessarily), such a context will be driven by
  * a set of config locations to load bean definitions from.
+ * 通常情况，但不是必须的，这样的context 将会被一系列的bean的定义 配置location 来驱动
+ *
  *
  * <p>The only method to be implemented by subclasses is {@link #loadBeanDefinitions},
  * which gets invoked on each refresh. A concrete implementation is supposed to load
@@ -38,18 +46,30 @@ import org.springframework.lang.Nullable;
  * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory},
  * typically delegating to one or more specific bean definition readers.
  *
+ * 子类实现的唯一方法是 loadBeanDefinitions  它在每次refresh 的时候调用，一个具体的实现应该加载给定的bean 的定义
+ * 通常情况是 delegating 委托 一个或多个 特定的bean 定义读取器
+ *
+ *
  * <p><b>Note that there is a similar base class for WebApplicationContexts.</b>
  * {@link org.springframework.web.context.support.AbstractRefreshableWebApplicationContext}
  * provides the same subclassing strategy, but additionally pre-implements
  * all context functionality for web environments. There is also a
  * pre-defined way to receive config locations for a web context.
  *
+ * 这里还有一个WebApplicationContexts提供类似的功能，就是为 web 准备的 Context 他可以直接访问到 ServletContext
+ *
+ *
  * <p>Concrete standalone subclasses of this base class, reading in a
  * specific bean definition format, are {@link ClassPathXmlApplicationContext}
  * and {@link FileSystemXmlApplicationContext}, which both derive from the
  * common {@link AbstractXmlApplicationContext} base class;
+ *
+ * 具体的子类有 ClassPathXmlApplicationContext 和FileSystemXmlApplicationContext ，他们读取特定格式的Bean definition
+ * 他们有个一公共的父类AbstractXmlApplicationContext，
+ *
  * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext}
  * supports {@code @Configuration}-annotated classes as a source of bean definitions.
+ *
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -65,7 +85,7 @@ import org.springframework.lang.Nullable;
 public abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
 
 	@Nullable
-	private Boolean allowBeanDefinitionOverriding;
+	private Boolean allowBeanDefinitionOverriding; //是否允许循环依赖的标记
 
 	@Nullable
 	private Boolean allowCircularReferences;
@@ -131,12 +151,17 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			//创建beanFactory
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			beanFactory.setSerializationId(getId());
+
+
 			//--------------------关键方法-------------------
 			//设置是否可以覆盖同名称的不同定义的对象以及是否可以循环依赖
 			customizeBeanFactory(beanFactory);
+
 			//--------------------关键方法-------------------加载beandefinitions，
 			// 在xml模式下，调用XmlBeanDefinitionReader的loadBeanDefinitions方法
 			loadBeanDefinitions(beanFactory);
+
+			/**为避免多次refreshBeanFactory（）方法的调用，有线程安全问题，使用了同步锁*/
 			synchronized (this.beanFactoryMonitor) {
 				this.beanFactory = beanFactory;
 			}
@@ -196,6 +221,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 
 	/**
 	 * Create an internal bean factory for this context.
+	 * **为当前这个context创建一个内部的Bean工厂
+	 *
 	 * Called for each {@link #refresh()} attempt.
 	 * <p>The default implementation creates a
 	 * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
@@ -214,6 +241,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 
 	/**
 	 * Customize the internal bean factory used by this context.
+	 * 自定义内部的Bean工厂，被这个context使用
+	 *
 	 * Called for each {@link #refresh()} attempt.
 	 * <p>The default implementation applies this context's
 	 * {@linkplain #setAllowBeanDefinitionOverriding "allowBeanDefinitionOverriding"}

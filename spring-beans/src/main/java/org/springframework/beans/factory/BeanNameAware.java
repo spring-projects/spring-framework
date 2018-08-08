@@ -23,6 +23,12 @@ package org.springframework.beans.factory;
  * brittle dependence on external configuration, as well as a possibly
  * unnecessary dependence on a Spring API.
  *
+ *  Bean想要他们的bean 名称在Bean工厂中引起注意，那就可以实现这个接口。
+ *  我的理解就是Bean可以通过bean的名称在Bean工厂中被找到，可以通过这个name 给Bean发送通知
+ *
+ *  注意：通常不建议Bean依赖它的名称，这样，一个潜在的脆弱的外部依赖可能产生，
+ *  以及对Spring API的不必要的依赖
+ *
  * <p>For a list of all bean lifecycle methods, see the
  * {@link BeanFactory BeanFactory javadocs}.
  *

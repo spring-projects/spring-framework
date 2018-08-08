@@ -32,6 +32,16 @@ import org.springframework.util.ObjectUtils;
  * Holder that combines a {@link Resource} descriptor with a specific encoding
  * or {@code Charset} to be used for reading from the resource.
  *
+ * Resource本来是一个纯净的接口，现在需要将Resource接口添加额外的功能，
+ * 然后通过扩展一个接口来实现有编码的资源
+ *
+ * Spring中大量存在这样的设计：
+ * 首先定义一个纯粹的接口或类，然后根据不同的需求，灵活的设计各个接口实现和子类
+ * 也能说明Spring的设计是很好的面向对象设计，然后抽象封装得相当好
+ *
+ *
+ *
+ *
  * <p>Used as an argument for operations that support reading content with
  * a specific encoding, typically via a {@code java.io.Reader}.
  *

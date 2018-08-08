@@ -21,6 +21,18 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
+ *
+ *
+ *  BeanFactory 有三个子类：ListableBeanFactory、HierarchicalBeanFactory 和 AutowireCapableBeanFactory。
+ *  但是从上图中我们可以发现最终的默认实现类是 DefaultListableBeanFactory，
+ *  实现了所有的接口。那为何要定义这么多层次的接口呢？查阅这些接口的源码和说明发现，
+ *  每个接口都有使用的场合，它主要是为了区分在 Spring 内部对象的传递和转化过程中，对对象的数据访问所做的限制。
+ *  例如 ListableBeanFactory 接口表示这些 Bean 是可列表的，而 HierarchicalBeanFactory 表示的这些 Bean 是有继承关系的，
+ *  也就是每个 Bean 有可能有父 Bean。AutowireCapableBeanFactory 接口定义 Bean 的自动装配规则。
+ *  这四个接口共同定义了 Bean 的集合、Bean 之间的关系、以及 Bean 行为
+ *
+ *
+ *
  * The root interface for accessing a Spring bean container.
  * 访问springIOC容器的根接口
  *

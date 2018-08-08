@@ -30,6 +30,11 @@ import org.springframework.lang.Nullable;
  * Utility methods for resolving resource locations to files in the
  * file system. Mainly for internal use within the framework.
  *
+ * 将资源位置解析为文件系统中的文件的实用方法。主要用于框架内的内部使用
+ *
+ * 个人理解：就是你给以字符串形式的资源描述定义，然后将它解析成文件系统中的的引用
+ * 拿到这个引用后就可以读取文件，然后解析文件中的内容了
+ *
  * <p>Consider using Spring's Resource abstraction in the core package
  * for handling all kinds of file resources in a uniform manner.
  * {@link org.springframework.core.io.ResourceLoader}'s {@code getResource()}

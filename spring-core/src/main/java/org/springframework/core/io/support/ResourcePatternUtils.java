@@ -21,6 +21,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
+ * 测试提交
  * Utility class for determining whether a given URL is a resource
  * location that can be loaded via a {@link ResourcePatternResolver}.
  *

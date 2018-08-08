@@ -33,12 +33,22 @@ import org.springframework.core.AliasRegistry;
  *
  *
  * <p>This is the only interface in Spring's bean factory packages that encapsulates
- * <i>registration</i> of bean definitions. The standard BeanFactory interfaces
+ * <i>registration</i> of bean definitions.
+ * 这是Spring bean工厂包中封装的唯一接口对bean定义的注册。
+ *
+ * The standard BeanFactory interfaces
  * only cover access to a <i>fully configured factory instance</i>.
+ * BeanFactory接口标准只包括对一个完整配置的工厂实例的访问
+ *
  *
  * <p>Spring's bean definition readers expect to work on an implementation of this
  * interface. Known implementors within the Spring core are DefaultListableBeanFactory
  * and GenericApplicationContext.
+ *
+ * Spring的bean定义读者期望在这个接口实现上工作
+ * 在Spring核心中已知的实现者是DefaultListableBeanFactory
+ * 和GenericApplicationContext
+ *
  *
  * @author Juergen Hoeller
  * @since 26.11.2003

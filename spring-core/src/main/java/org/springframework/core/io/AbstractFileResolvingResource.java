@@ -34,8 +34,12 @@ import org.springframework.util.ResourceUtils;
  * Abstract base class for resources which resolve URLs into File references,
  * such as {@link UrlResource} or {@link ClassPathResource}.
  *
+ * 抽象基类，用于将url解析成文件引用的资源 比如：UrlResource、ClassPathResource是它的实现类
+ *
  * <p>Detects the "file" protocol as well as the JBoss "vfs" protocol in URLs,
  * resolving file system references accordingly.
+ *
+ * 在url中检测“文件”协议和JBoss“vfs”协议，并相应地解析文件系统引用
  *
  * @author Juergen Hoeller
  * @since 3.0
