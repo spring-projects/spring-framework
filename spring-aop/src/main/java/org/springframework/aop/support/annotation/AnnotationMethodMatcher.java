@@ -22,7 +22,7 @@ import java.lang.reflect.Proxy;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcher;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -54,7 +54,7 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 	 * @param annotationType the annotation type to look for
 	 * @param checkInherited whether to also check the superclasses and
 	 * interfaces as well as meta-annotations for the annotation type
-	 * (i.e. whether to use {@link AnnotationUtils#findAnnotation(Method, Class)}
+	 * (i.e. whether to use {@link AnnotatedElementUtils#hasAnnotation}
 	 * semantics instead of standard Java {@link Method#isAnnotationPresent})
 	 * @since 5.0
 	 */
@@ -81,8 +81,7 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 	}
 
 	private boolean matchesMethod(Method method) {
-		return (this.checkInherited ?
-				(AnnotationUtils.findAnnotation(method, this.annotationType) != null) :
+		return (this.checkInherited ? AnnotatedElementUtils.hasAnnotation(method, this.annotationType) :
 				method.isAnnotationPresent(this.annotationType));
 	}
 
