@@ -2031,6 +2031,7 @@ through the `ObjectMapper` property for cases where custom JSON
 serializers/deserializers need to be provided for specific types.
 
 
+
 [[mvc-view-xml-mapping]]
 === XML
 [.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same in Spring WebFlux>>#

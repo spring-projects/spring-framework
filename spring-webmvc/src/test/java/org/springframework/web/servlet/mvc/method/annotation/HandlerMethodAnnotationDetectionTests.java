@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,31 +66,29 @@ public class HandlerMethodAnnotationDetectionTests {
 	@Parameters(name = "controller [{0}], auto-proxy [{1}]")
 	public static Object[][] handlerTypes() {
 		return new Object[][] {
+				{ SimpleController.class, true }, // CGLIB proxy
+				{ SimpleController.class, false },
 
-			{ SimpleController.class, true }, // CGLIB proxy
-			{ SimpleController.class, false },
+				{ AbstractClassController.class, true }, // CGLIB proxy
+				{ AbstractClassController.class, false },
 
-			{ AbstractClassController.class, true }, // CGLIB proxy
-			{ AbstractClassController.class, false },
+				{ ParameterizedAbstractClassController.class, true }, // CGLIB proxy
+				{ ParameterizedAbstractClassController.class, false },
 
-			{ ParameterizedAbstractClassController.class, true }, // CGLIB proxy
-			{ ParameterizedAbstractClassController.class, false },
+				{ ParameterizedSubclassOverridesDefaultMappings.class, true }, // CGLIB proxy
+				{ ParameterizedSubclassOverridesDefaultMappings.class, false },
 
-			{ ParameterizedSubclassOverridesDefaultMappings.class, true }, // CGLIB proxy
-			{ ParameterizedSubclassOverridesDefaultMappings.class, false },
+				// TODO [SPR-9517] Enable ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass test cases
+				// { ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass.class, true }, // CGLIB proxy
+				// { ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass.class, false },
 
-			// TODO [SPR-9517] Enable ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass test cases
-			// { ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass.class, true }, // CGLIB proxy
-			// { ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass.class, false },
+				{ InterfaceController.class, true }, // JDK dynamic proxy
+				{ InterfaceController.class, false },
 
-			{ InterfaceController.class, true }, // JDK dynamic proxy
-			{ InterfaceController.class, false },
+				{ ParameterizedInterfaceController.class, false }, // no AOP
 
-			{ ParameterizedInterfaceController.class, false }, // no AOP
-
-			{ SupportClassController.class, true }, // CGLIB proxy
-			{ SupportClassController.class, false }
-
+				{ SupportClassController.class, true }, // CGLIB proxy
+				{ SupportClassController.class, false }
 		};
 	}
 

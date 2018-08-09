@@ -71,13 +71,13 @@ class ControllerMethodResolver {
 	/**
 	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
 	 */
-	public static final MethodFilter INIT_BINDER_METHODS = method ->
+	private static final MethodFilter INIT_BINDER_METHODS = method ->
 			AnnotatedElementUtils.hasAnnotation(method, InitBinder.class);
 
 	/**
 	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
 	 */
-	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
+	private static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
 			(!AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class) &&
 					AnnotatedElementUtils.hasAnnotation(method, ModelAttribute.class));
 
@@ -217,7 +217,6 @@ class ControllerMethodResolver {
 	}
 
 	private void initControllerAdviceCaches(ApplicationContext applicationContext) {
-
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(applicationContext);
 		AnnotationAwareOrderComparator.sort(beans);
 
