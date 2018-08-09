@@ -150,9 +150,13 @@ public class AnnotationUtilsTests {
 				.anyMatch(element -> element.getClassName().startsWith("org.eclipse.jdt"));
 
 		// As of JDK 8, invoking getAnnotation() on a bridge method actually finds an
-		// annotation on its 'bridged' method; however, the Eclipse compiler still does
-		// not properly support this. Thus, we effectively ignore the following assertion
-		// if the test is currently executing within the Eclipse IDE.
+		// annotation on its 'bridged' method [1]; however, the Eclipse compiler will not
+		// support this until Eclipse 4.9 [2]. Thus, we effectively ignore the following
+		// assertion if the test is currently executing within the Eclipse IDE.
+		//
+		// [1] https://bugs.openjdk.java.net/browse/JDK-6695379
+		// [2] https://bugs.eclipse.org/bugs/show_bug.cgi?id=495396
+		//
 		if (!runningInEclipse) {
 			assertNotNull(bridgeMethod.getAnnotation(Transactional.class));
 		}
