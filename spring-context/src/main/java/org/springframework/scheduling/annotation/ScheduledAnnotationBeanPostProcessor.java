@@ -105,7 +105,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
 	/**
-	 * The default name of the {@link TaskScheduler} bean to pick up: "taskScheduler".
+	 * The default name of the {@link TaskScheduler} bean to pick up: {@value}.
 	 * <p>Note that the initial lookup happens by type; this is just the fallback
 	 * in case of multiple scheduler beans found in the context.
 	 * @since 4.2
@@ -405,14 +405,16 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (StringUtils.hasLength(cron)) {
 					Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
 					processedSchedule = true;
-					TimeZone timeZone;
-					if (StringUtils.hasText(zone)) {
-						timeZone = StringUtils.parseTimeZoneString(zone);
+					if (!Scheduled.CRON_DISABLED.equals(cron)) {
+						TimeZone timeZone;
+						if (StringUtils.hasText(zone)) {
+							timeZone = StringUtils.parseTimeZoneString(zone);
+						}
+						else {
+							timeZone = TimeZone.getDefault();
+						}
+						tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
 					}
-					else {
-						timeZone = TimeZone.getDefault();
-					}
-					tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
 				}
 			}
 
@@ -478,12 +480,8 @@ public class ScheduledAnnotationBeanPostProcessor
 
 			// Finally register the scheduled tasks
 			synchronized (this.scheduledTasks) {
-				Set<ScheduledTask> registeredTasks = this.scheduledTasks.get(bean);
-				if (registeredTasks == null) {
-					registeredTasks = new LinkedHashSet<>(4);
-					this.scheduledTasks.put(bean, registeredTasks);
-				}
-				registeredTasks.addAll(tasks);
+				Set<ScheduledTask> regTasks = this.scheduledTasks.computeIfAbsent(bean, key -> new LinkedHashSet<>(4));
+				regTasks.addAll(tasks);
 			}
 		}
 		catch (IllegalArgumentException ex) {

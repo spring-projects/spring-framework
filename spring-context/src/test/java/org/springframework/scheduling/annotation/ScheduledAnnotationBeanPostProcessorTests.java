@@ -45,6 +45,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
+import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
@@ -82,7 +83,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -108,7 +111,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -134,7 +139,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -195,7 +202,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(2, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -231,7 +240,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -259,7 +270,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -307,7 +320,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@Test(expected = BeanCreationException.class)
-	public void cronTaskWithMethodValidation() throws InterruptedException {
+	public void cronTaskWithMethodValidation() {
 		BeanDefinition validationDefinition = new RootBeanDefinition(MethodValidationPostProcessor.class);
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(CronTestBean.class);
@@ -325,7 +338,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -350,7 +365,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar) new DirectFieldAccessor(
 			postProcessor).getPropertyValue("registrar");
@@ -376,7 +393,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -407,7 +426,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -422,6 +443,24 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals(target, targetObject);
 		assertEquals("x", targetMethod.getName());
 		assertEquals(businessHoursCronExpression, task.getExpression());
+	}
+
+	@Test
+	public void propertyPlaceholderWithInactiveCron() {
+		String businessHoursCronExpression = "-";
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+		Properties properties = new Properties();
+		properties.setProperty("schedules.businessHours", businessHoursCronExpression);
+		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
+		BeanDefinition targetDefinition = new RootBeanDefinition(PropertyPlaceholderWithCronTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("placeholder", placeholderDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertTrue(postProcessor.getScheduledTasks().isEmpty());
 	}
 
 	@Test
@@ -447,7 +486,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -488,7 +529,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -518,7 +561,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.getBeanFactory().registerSingleton("schedules", schedules);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -549,7 +594,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -574,7 +621,9 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
-		Object postProcessor = context.getBean("postProcessor");
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertEquals(1, postProcessor.getScheduledTasks().size());
+
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
@@ -802,6 +851,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		public void generateReport() {
 		}
 	}
+
 
 	static class PropertyPlaceholderWithCronTestBean {
 
