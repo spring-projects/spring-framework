@@ -60,7 +60,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	private static final String AJC_MAGIC = "ajc$";
 
 	private static final Class<?>[] ASPECTJ_ANNOTATION_CLASSES = new Class<?>[] {
-			Pointcut.class, Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class};
+			Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class};
 
 
 	/** Logger available to subclasses */
@@ -152,16 +152,12 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 
 	/**
-	 * AspectJ annotation types.
+	 * Enum for AspectJ annotation types.
+	 * @see AspectJAnnotation#getAnnotationType()
 	 */
 	protected enum AspectJAnnotationType {
 
-		AtPointcut,
-		AtBefore,
-		AtAfter,
-		AtAfterReturning,
-		AtAfterThrowing,
-		AtAround
+		AtPointcut, AtAround, AtBefore, AtAfter, AtAfterReturning, AtAfterThrowing
 	}
 
 
@@ -177,11 +173,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		static {
 			annotationTypeMap.put(Pointcut.class, AspectJAnnotationType.AtPointcut);
+			annotationTypeMap.put(Around.class, AspectJAnnotationType.AtAround);
 			annotationTypeMap.put(Before.class, AspectJAnnotationType.AtBefore);
 			annotationTypeMap.put(After.class, AspectJAnnotationType.AtAfter);
 			annotationTypeMap.put(AfterReturning.class, AspectJAnnotationType.AtAfterReturning);
 			annotationTypeMap.put(AfterThrowing.class, AspectJAnnotationType.AtAfterThrowing);
-			annotationTypeMap.put(Around.class, AspectJAnnotationType.AtAround);
 		}
 
 		private final A annotation;
@@ -195,8 +191,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		public AspectJAnnotation(A annotation) {
 			this.annotation = annotation;
 			this.annotationType = determineAnnotationType(annotation);
-			// We know these methods exist with the same name on each object,
-			// but need to invoke them reflectively as there isn't a common interface.
 			try {
 				this.pointcutExpression = resolveExpression(annotation);
 				Object argNames = AnnotationUtils.getValue(annotation, "argNames");
@@ -267,11 +261,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			if (annotation == null) {
 				return null;
 			}
-			StringTokenizer strTok = new StringTokenizer(annotation.getArgumentNames(), ",");
-			if (strTok.countTokens() > 0) {
-				String[] names = new String[strTok.countTokens()];
+			StringTokenizer nameTokens = new StringTokenizer(annotation.getArgumentNames(), ",");
+			if (nameTokens.countTokens() > 0) {
+				String[] names = new String[nameTokens.countTokens()];
 				for (int i = 0; i < names.length; i++) {
-					names[i] = strTok.nextToken();
+					names[i] = nameTokens.nextToken();
 				}
 				return names;
 			}
