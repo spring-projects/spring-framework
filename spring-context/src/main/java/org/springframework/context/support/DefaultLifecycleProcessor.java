@@ -154,7 +154,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	/**
 	 * Start the specified bean as part of the given set of Lifecycle beans,
 	 * making sure that any beans that it depends on are started first.
-	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
+	 * @param lifecycleBeans a Map with bean name as key and Lifecycle instance as value
 	 * @param beanName the name of the bean to start
 	 */
 	private void doStart(Map<String, ? extends Lifecycle> lifecycleBeans, String beanName, boolean autoStartupOnly) {
@@ -167,7 +167,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			if (!bean.isRunning() &&
 					(!autoStartupOnly || !(bean instanceof SmartLifecycle) || ((SmartLifecycle) bean).isAutoStartup())) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Starting bean '" + beanName + "' of type [" + bean.getClass() + "]");
+					logger.debug("Starting bean '" + beanName + "' of type [" + bean.getClass().getName() + "]");
 				}
 				try {
 					bean.start();
@@ -207,7 +207,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	/**
 	 * Stop the specified bean as part of the given set of Lifecycle beans,
 	 * making sure that any beans that depends on it are stopped first.
-	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
+	 * @param lifecycleBeans a Map with bean name as key and Lifecycle instance as value
 	 * @param beanName the name of the bean to stop
 	 */
 	private void doStop(Map<String, ? extends Lifecycle> lifecycleBeans, final String beanName,
@@ -223,7 +223,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				if (bean.isRunning()) {
 					if (bean instanceof SmartLifecycle) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Asking bean '" + beanName + "' of type [" + bean.getClass() + "] to stop");
+							logger.debug("Asking bean '" + beanName + "' of type [" +
+									bean.getClass().getName() + "] to stop");
 						}
 						countDownBeanNames.add(beanName);
 						((SmartLifecycle) bean).stop(new Runnable() {
@@ -239,7 +240,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					}
 					else {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Stopping bean '" + beanName + "' of type [" + bean.getClass() + "]");
+							logger.debug("Stopping bean '" + beanName + "' of type [" +
+									bean.getClass().getName() + "]");
 						}
 						bean.stop();
 						if (logger.isDebugEnabled()) {
@@ -248,7 +250,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					}
 				}
 				else if (bean instanceof SmartLifecycle) {
-					// don't wait for beans that aren't running
+					// Don't wait for beans that aren't running...
 					latch.countDown();
 				}
 			}
@@ -307,8 +309,6 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class LifecycleGroup {
 
-		private final List<LifecycleGroupMember> members = new ArrayList<LifecycleGroupMember>();
-
 		private final int phase;
 
 		private final long timeout;
@@ -317,9 +317,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		private final boolean autoStartupOnly;
 
-		private volatile int smartMemberCount;
+		private final List<LifecycleGroupMember> members = new ArrayList<LifecycleGroupMember>();
 
-		public LifecycleGroup(int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans, boolean autoStartupOnly) {
+		private int smartMemberCount;
+
+		public LifecycleGroup(
+				int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans, boolean autoStartupOnly) {
+
 			this.phase = phase;
 			this.timeout = timeout;
 			this.lifecycleBeans = lifecycleBeans;
@@ -327,10 +331,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		}
 
 		public void add(String name, Lifecycle bean) {
+			this.members.add(new LifecycleGroupMember(name, bean));
 			if (bean instanceof SmartLifecycle) {
 				this.smartMemberCount++;
 			}
-			this.members.add(new LifecycleGroupMember(name, bean));
 		}
 
 		public void start() {
@@ -363,7 +367,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					doStop(this.lifecycleBeans, member.name, latch, countDownBeanNames);
 				}
 				else if (member.bean instanceof SmartLifecycle) {
-					// already removed, must have been a dependent
+					// Already removed: must have been a dependent bean from another phase
 					latch.countDown();
 				}
 			}

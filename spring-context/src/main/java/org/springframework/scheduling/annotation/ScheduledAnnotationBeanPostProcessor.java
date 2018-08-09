@@ -101,7 +101,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
 	/**
-	 * The default name of the {@link TaskScheduler} bean to pick up: "taskScheduler".
+	 * The default name of the {@link TaskScheduler} bean to pick up: {@value}.
 	 * <p>Note that the initial lookup happens by type; this is just the fallback
 	 * in case of multiple scheduler beans found in the context.
 	 * @since 4.2

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import java.lang.annotation.Target;
  * <em>composed annotations</em> with attribute overrides.
  *
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @author Dave Syer
  * @author Chris Beams
  * @since 3.0
@@ -55,10 +56,10 @@ import java.lang.annotation.Target;
 public @interface Scheduled {
 
 	/**
-	 * A cron-like expression, extending the usual UN*X definition to include
-	 * triggers on the second as well as minute, hour, day of month, month
-	 * and day of week.  e.g. {@code "0 * * * * MON-FRI"} means once per minute on
-	 * weekdays (at the top of the minute - the 0th second).
+	 * A cron-like expression, extending the usual UN*X definition to include triggers
+	 * on the second as well as minute, hour, day of month, month and day of week.
+	 * <p>E.g. {@code "0 * * * * MON-FRI"} means once per minute on weekdays
+	 * (at the top of the minute - the 0th second).
 	 * @return an expression that can be parsed to a cron schedule
 	 * @see org.springframework.scheduling.support.CronSequenceGenerator
 	 */
