@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,6 @@ public class EnableAsyncTests {
 			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException ex) {
-			ex.printStackTrace();
 			assertTrue(ex.getCause() instanceof BeanNotOfRequiredTypeException);
 		}
 	}
@@ -112,7 +111,6 @@ public class EnableAsyncTests {
 			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException ex) {
-			ex.printStackTrace();
 			assertTrue(ex.getCause() instanceof BeanNotOfRequiredTypeException);
 		}
 	}
@@ -219,8 +217,8 @@ public class EnableAsyncTests {
 		ctx.close();
 	}
 
-	@Test
-	public void spr14949FindsOnInterfaceWithInterfaceProxy() throws InterruptedException {
+	@Test  // SPR-14949
+	public void findOnInterfaceWithInterfaceProxy() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14949ConfigA.class);
 
 		AsyncInterface asyncBean = ctx.getBean(AsyncInterface.class);
@@ -231,8 +229,8 @@ public class EnableAsyncTests {
 		ctx.close();
 	}
 
-	@Test @Ignore  // TODO
-	public void spr14949FindsOnInterfaceWithCglibProxy() throws InterruptedException {
+	@Test @Ignore  // SPR-14949
+	public void findOnInterfaceWithCglibProxy() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14949ConfigB.class);
 
 		AsyncInterface asyncBean = ctx.getBean(AsyncInterface.class);

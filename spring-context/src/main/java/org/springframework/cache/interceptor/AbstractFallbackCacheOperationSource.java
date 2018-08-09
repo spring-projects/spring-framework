@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * Canonical value held in cache to indicate no caching attribute was
 	 * found for this method and we don't need to look again.
 	 */
-	private final static Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
+	private static final Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
 
 
 	/**
@@ -163,22 +163,20 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 
 
 	/**
-	 * Subclasses need to implement this to return the caching attribute
-	 * for the given method, if any.
-	 * @param method the method to retrieve the attribute for
-	 * @return all caching attribute associated with this method
-	 * (or {@code null} if none)
-	 */
-	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
-
-	/**
-	 * Subclasses need to implement this to return the caching attribute
-	 * for the given class, if any.
+	 * Subclasses need to implement this to return the caching attribute for the
+	 * given class, if any.
 	 * @param clazz the class to retrieve the attribute for
-	 * @return all caching attribute associated with this class
-	 * (or {@code null} if none)
+	 * @return all caching attribute associated with this class, or {@code null} if none
 	 */
 	protected abstract Collection<CacheOperation> findCacheOperations(Class<?> clazz);
+
+	/**
+	 * Subclasses need to implement this to return the caching attribute for the
+	 * given method, if any.
+	 * @param method the method to retrieve the attribute for
+	 * @return all caching attribute associated with this method, or {@code null} if none
+	 */
+	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
 
 	/**
 	 * Should only public methods be allowed to have caching semantics?

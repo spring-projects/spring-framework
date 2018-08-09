@@ -42,14 +42,14 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 /**
  * Integration tests for auto proxy creation by advisor recognition working in
- * conjunction with transaction managment resources.
+ * conjunction with transaction management resources.
  *
  * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorTests
  *
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class AdvisorAutoProxyCreatorIntegrationTests {
+public class AdvisorAutoProxyCreatorIntegrationTests {
 
 	private static final Class<?> CLASS = AdvisorAutoProxyCreatorIntegrationTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();

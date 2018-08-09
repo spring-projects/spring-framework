@@ -52,7 +52,7 @@ import org.springframework.beans.factory.config.BeanReference;
  * all {@link BeanReference BeanReferences} that are required to validate the configuration of the
  * overall logical entity as well as those required to provide full user visualisation of the configuration.
  * It is expected that certain {@link BeanReference BeanReferences} will not be important to
- * validation or to the user view of the configuration and as such these may be ommitted. A tool may wish to
+ * validation or to the user view of the configuration and as such these may be omitted. A tool may wish to
  * display any additional {@link BeanReference BeanReferences} sourced through the supplied
  * {@link BeanDefinition BeanDefinitions} but this is not considered to be a typical case.
  *

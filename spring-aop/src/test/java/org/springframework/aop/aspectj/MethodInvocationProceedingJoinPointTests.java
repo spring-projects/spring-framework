@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @since 2.0
  */
-public final class MethodInvocationProceedingJoinPointTests {
+public class MethodInvocationProceedingJoinPointTests {
 
 	@Test
 	public void testingBindingWithJoinPoint() {
@@ -217,7 +217,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 			itb.unreliableFileOperation();
 		}
 		catch (IOException ex) {
-			// we don't realy care...
+			// we don't really care...
 		}
 	}
 

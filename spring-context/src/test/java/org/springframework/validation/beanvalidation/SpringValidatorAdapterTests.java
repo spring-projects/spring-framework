@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import static org.junit.Assert.*;
 /**
  * @author Kazuki Shimizu
  * @author Juergen Hoeller
- * @since 4.3
  */
 public class SpringValidatorAdapterTests {
 
@@ -162,7 +161,7 @@ public class SpringValidatorAdapterTests {
 	@Test  // SPR-16177
 	public void testWithSet() {
 		Parent parent = new Parent();
-		parent.setName("Parent whith set");
+		parent.setName("Parent with set");
 		parent.getChildSet().addAll(createChildren(parent));
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(parent, "parent");
@@ -184,6 +183,7 @@ public class SpringValidatorAdapterTests {
 
 		return Arrays.asList(child1, child2);
 	}
+
 
 	@Same(field = "password", comparingField = "confirmPassword")
 	@Same(field = "email", comparingField = "confirmEmail")

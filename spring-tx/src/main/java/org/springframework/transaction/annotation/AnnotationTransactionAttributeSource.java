@@ -129,13 +129,13 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 
 	@Override
-	protected TransactionAttribute findTransactionAttribute(Method method) {
-		return determineTransactionAttribute(method);
+	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
+		return determineTransactionAttribute(clazz);
 	}
 
 	@Override
-	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
-		return determineTransactionAttribute(clazz);
+	protected TransactionAttribute findTransactionAttribute(Method method) {
+		return determineTransactionAttribute(method);
 	}
 
 	/**

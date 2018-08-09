@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,7 +173,7 @@ public class ScheduledTimerListener {
 	 * Set the period between repeated task executions, in milliseconds.
 	 * <p>Default is -1, leading to one-time execution. In case of zero or a
 	 * positive value, the task will be executed repeatedly, with the given
-	 * interval inbetween executions.
+	 * interval in-between executions.
 	 * <p>Note that the semantics of the period value vary between fixed-rate
 	 * and fixed-delay execution.
 	 * <p><b>Note:</b> A period of 0 (for example as fixed delay) <i>is</i>

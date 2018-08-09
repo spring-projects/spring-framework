@@ -144,7 +144,8 @@ public class AnnotationUtilsTests {
 		assertNull(getAnnotation(bridgeMethod, Order.class));
 		assertNotNull(findAnnotation(bridgeMethod, Order.class));
 
-		assertNotNull(bridgeMethod.getAnnotation(Transactional.class));
+		// Inconsistent behavior between javac and Eclipse compiler
+		// assertNotNull(bridgeMethod.getAnnotation(Transactional.class));
 		assertNotNull(getAnnotation(bridgeMethod, Transactional.class));
 		assertNotNull(findAnnotation(bridgeMethod, Transactional.class));
 	}
@@ -186,7 +187,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
-	/** @since 4.1.2 */
+	// @since 4.1.2
 	@Test
 	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverAnnotationsOnInterfaces() {
 		Component component = findAnnotation(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
@@ -194,7 +195,7 @@ public class AnnotationUtilsTests {
 		assertEquals("meta2", component.value());
 	}
 
-	/** @since 4.0.3 */
+	// @since 4.0.3
 	@Test
 	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverInheritedAnnotations() {
 		Transactional transactional = findAnnotation(SubSubClassWithInheritedAnnotation.class, Transactional.class);
@@ -202,7 +203,7 @@ public class AnnotationUtilsTests {
 		assertTrue("readOnly flag for SubSubClassWithInheritedAnnotation", transactional.readOnly());
 	}
 
-	/** @since 4.0.3 */
+	// @since 4.0.3
 	@Test
 	public void findClassAnnotationFavorsMoreLocallyDeclaredComposedAnnotationsOverInheritedComposedAnnotations() {
 		Component component = findAnnotation(SubSubClassWithInheritedMetaAnnotation.class, Component.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+ * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping#setCorsProcessor
  */
 public interface CorsProcessor {
