@@ -40,7 +40,7 @@ import org.springframework.util.MimeType;
  * An {@code Encoder} that writes {@link com.google.protobuf.Message}s
  * using <a href="https://developers.google.com/protocol-buffers/">Google Protocol Buffers</a>.
  *
- * Flux are serialized using
+ * <p>Flux are serialized using
  * <a href="https://developers.google.com/protocol-buffers/docs/techniques?hl=en#streaming">delimited Protobuf messages</a>
  * with the size of each message specified before the message itself. Single values are
  * serialized using regular Protobuf message format (without the size prepended before the message).

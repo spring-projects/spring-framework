@@ -129,6 +129,17 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.verifyComplete();
 	}
 
+	@Test
+	public void defaultInstance() {
+		Mono<Msg> result = this.webClient.get()
+				.uri("/default-instance")
+				.retrieve()
+				.bodyToMono(Msg.class);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
 	@RestController
 	@SuppressWarnings("unused")
 	static class ProtobufController {
@@ -151,6 +162,11 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 		@GetMapping("/empty")
 		Mono<Msg> empty() {
 			return Mono.empty();
+		}
+
+		@GetMapping("default-instance")
+		Mono<Msg> defaultInstance() {
+			return Mono.just(Msg.getDefaultInstance());
 		}
 
 	}

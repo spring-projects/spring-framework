@@ -16,12 +16,7 @@
 
 package org.springframework.http.codec.protobuf;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import com.google.protobuf.Message;
 import org.junit.Before;
@@ -47,8 +42,6 @@ import static org.springframework.core.ResolvableType.forClass;
 
 /**
  * Unit tests for {@link ProtobufDecoder}.
- * TODO Make tests more readable
- * TODO Add a test where an input DataBuffer is larger than a message
  *
  * @author Sebastien Deleuze
  */
@@ -56,7 +49,13 @@ public class ProtobufDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final static MimeType PROTOBUF_MIME_TYPE = new MimeType("application", "x-protobuf");
 
-	private final Msg testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
+	private final SecondMsg secondMsg = SecondMsg.newBuilder().setBlah(123).build();
+
+	private final Msg testMsg = Msg.newBuilder().setFoo("Foo").setBlah(secondMsg).build();
+
+	private final SecondMsg secondMsg2 = SecondMsg.newBuilder().setBlah(456).build();
+
+	private final Msg testMsg2 = Msg.newBuilder().setFoo("Bar").setBlah(secondMsg2).build();
 
 	private ProtobufDecoder decoder;
 
@@ -82,51 +81,59 @@ public class ProtobufDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void decodeToMono() {
-		byte[] body = this.testMsg.toByteArray();
-		Flux<DataBuffer> source = Flux.just(this.bufferFactory.wrap(body));
+		DataBuffer data = this.bufferFactory.wrap(testMsg.toByteArray());
 		ResolvableType elementType = forClass(Msg.class);
-		Mono<Message> mono = this.decoder.decodeToMono(source, elementType, null,
-				emptyMap());
+
+		Mono<Message> mono = this.decoder.decodeToMono(Flux.just(data), elementType, null, emptyMap());
 
 		StepVerifier.create(mono)
-				.expectNext(this.testMsg)
+				.expectNext(testMsg)
+				.verifyComplete();
+	}
+
+	@Test
+	public void decodeToMonoWithLargerDataBuffer() {
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(1024);
+		buffer.write(testMsg.toByteArray());
+		ResolvableType elementType = forClass(Msg.class);
+
+		Mono<Message> mono = this.decoder.decodeToMono(Flux.just(buffer), elementType, null, emptyMap());
+
+		StepVerifier.create(mono)
+				.expectNext(testMsg)
 				.verifyComplete();
 	}
 
 	@Test
 	public void decodeChunksToMono() {
-		byte[] body = this.testMsg.toByteArray();
-		List<DataBuffer> chunks = new ArrayList<>();
-		chunks.add(this.bufferFactory.wrap(Arrays.copyOfRange(body, 0, 4)));
-		chunks.add(this.bufferFactory.wrap(Arrays.copyOfRange(body, 4, body.length)));
-		Flux<DataBuffer> source = Flux.fromIterable(chunks);
+		DataBuffer buffer = this.bufferFactory.wrap(testMsg.toByteArray());
+		Flux<DataBuffer> chunks = Flux.just(
+				buffer.slice(0, 4),
+				buffer.slice(4, buffer.readableByteCount() - 4));
+		DataBufferUtils.retain(buffer);
 		ResolvableType elementType = forClass(Msg.class);
-		Mono<Message> mono = this.decoder.decodeToMono(source, elementType, null,
+
+		Mono<Message> mono = this.decoder.decodeToMono(chunks, elementType, null,
 				emptyMap());
 
 		StepVerifier.create(mono)
-				.expectNext(this.testMsg)
+				.expectNext(testMsg)
 				.verifyComplete();
 	}
 
 	@Test
 	public void decode() throws IOException {
-		Msg testMsg2 = Msg.newBuilder().setFoo("Bar").setBlah(SecondMsg.newBuilder().setBlah(456).build()).build();
-
 		DataBuffer buffer = bufferFactory.allocateBuffer();
-		OutputStream outputStream = buffer.asOutputStream();
-		this.testMsg.writeDelimitedTo(outputStream);
-
+		testMsg.writeDelimitedTo(buffer.asOutputStream());
 		DataBuffer buffer2 = bufferFactory.allocateBuffer();
-		OutputStream outputStream2 = buffer2.asOutputStream();
-		testMsg2.writeDelimitedTo(outputStream2);
-
+		testMsg2.writeDelimitedTo(buffer2.asOutputStream());
 		Flux<DataBuffer> source = Flux.just(buffer, buffer2);
 		ResolvableType elementType = forClass(Msg.class);
+
 		Flux<Message> messages = this.decoder.decode(source, elementType, null, emptyMap());
 
 		StepVerifier.create(messages)
-				.expectNext(this.testMsg)
+				.expectNext(testMsg)
 				.expectNext(testMsg2)
 				.verifyComplete();
 
@@ -135,42 +142,50 @@ public class ProtobufDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
-	public void decodeChunks() throws IOException {
-		Msg testMsg2 = Msg.newBuilder().setFoo("Bar").setBlah(SecondMsg.newBuilder().setBlah(456).build()).build();
-		List<DataBuffer> chunks = new ArrayList<>();
+	public void decodeSplitChunks() throws IOException {
+		DataBuffer buffer = bufferFactory.allocateBuffer();
+		testMsg.writeDelimitedTo(buffer.asOutputStream());
+		DataBuffer buffer2 = bufferFactory.allocateBuffer();
+		testMsg2.writeDelimitedTo(buffer2.asOutputStream());
+		Flux<DataBuffer> chunks = Flux.just(
+				buffer.slice(0, 4),
+				buffer.slice(4, buffer.readableByteCount() - 4),
+				buffer2.slice(0, 2),
+				buffer2.slice(2, buffer2.readableByteCount() - 2));
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		this.testMsg.writeDelimitedTo(outputStream);
-		byte[] byteArray = outputStream.toByteArray();
-		ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
-		testMsg2.writeDelimitedTo(outputStream2);
-		byte[] byteArray2 = outputStream2.toByteArray();
-
-		chunks.add(this.bufferFactory.wrap(Arrays.copyOfRange(byteArray, 0, 4)));
-		byte[] chunk2 = Arrays.copyOfRange(byteArray, 4, byteArray.length);
-		byte[] chunk3 = Arrays.copyOfRange(byteArray2, 0, 4);
-		byte[] combined = new byte[chunk2.length + chunk3.length];
-		for (int i = 0; i < combined.length; ++i)
-		{
-			combined[i] = i < chunk2.length ? chunk2[i] : chunk3[i - chunk2.length];
-		}
-		chunks.add(this.bufferFactory.wrap(combined));
-		chunks.add(this.bufferFactory.wrap(Arrays.copyOfRange(byteArray2, 4, byteArray2.length)));
-
-		Flux<DataBuffer> source = Flux.fromIterable(chunks);
 		ResolvableType elementType = forClass(Msg.class);
-		Flux<Message> messages = this.decoder.decode(source, elementType, null, emptyMap());
+		Flux<Message> messages = this.decoder.decode(chunks, elementType, null, emptyMap());
 
 		StepVerifier.create(messages)
-				.expectNext(this.testMsg)
+				.expectNext(testMsg)
 				.expectNext(testMsg2)
 				.verifyComplete();
+
+		DataBufferUtils.release(buffer);
+		DataBufferUtils.release(buffer2);
+	}
+
+	@Test
+	public void decodeMergedChunks() throws IOException {
+		DataBuffer buffer = bufferFactory.allocateBuffer();
+		testMsg.writeDelimitedTo(buffer.asOutputStream());
+		testMsg.writeDelimitedTo(buffer.asOutputStream());
+
+		ResolvableType elementType = forClass(Msg.class);
+		Flux<Message> messages = this.decoder.decode(Mono.just(buffer), elementType, null, emptyMap());
+
+		StepVerifier.create(messages)
+				.expectNext(testMsg)
+				.expectNext(testMsg)
+				.verifyComplete();
+
+		DataBufferUtils.release(buffer);
 	}
 
 	@Test
 	public void exceedMaxSize() {
 		this.decoder.setMaxMessageSize(1);
-		byte[] body = this.testMsg.toByteArray();
+		byte[] body = testMsg.toByteArray();
 		Flux<DataBuffer> source = Flux.just(this.bufferFactory.wrap(body));
 		ResolvableType elementType = forClass(Msg.class);
 		Flux<Message> messages = this.decoder.decode(source, elementType, null,
