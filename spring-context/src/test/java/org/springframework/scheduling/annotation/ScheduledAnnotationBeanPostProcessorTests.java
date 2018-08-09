@@ -369,11 +369,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals(1, postProcessor.getScheduledTasks().size());
 
 		Object target = context.getBean("target");
-		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar) new DirectFieldAccessor(
-			postProcessor).getPropertyValue("registrar");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
 		@SuppressWarnings("unchecked")
-		List<IntervalTask> fixedRateTasks = (List<IntervalTask>) new DirectFieldAccessor(registrar).getPropertyValue(
-			"fixedRateTasks");
+		List<IntervalTask> fixedRateTasks = (List<IntervalTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
 		assertEquals(1, fixedRateTasks.size());
 		IntervalTask task = fixedRateTasks.get(0);
 		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
@@ -694,8 +694,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class SeveralFixedRatesWithSchedulesContainerAnnotationTestBean {
 
-		@Schedules({ @Scheduled(fixedRate = 4000),
-			@Scheduled(fixedRate = 4000, initialDelay = 2000) })
+		@Schedules({@Scheduled(fixedRate = 4000), @Scheduled(fixedRate = 4000, initialDelay = 2000)})
 		public void fixedRate() {
 		}
 	}
