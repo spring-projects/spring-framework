@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator.OverflowStrategy;
 
 import static org.junit.Assert.*;
 
@@ -104,7 +105,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		}
 		catch (SessionLimitExceededException ex) {
 			String actual = ex.getMessage();
-			String regex = "Message send time [\\d]+ \\(ms\\) for session '123' exceeded the allowed limit 100";
+			String regex = "Send time [\\d]+ \\(ms\\) for session '123' exceeded the allowed limit 100";
 			assertTrue("Unexpected message: " + actual, actual.matches(regex));
 			assertEquals(CloseStatus.SESSION_NOT_RELIABLE, ex.getStatus());
 		}
@@ -139,10 +140,37 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		}
 		catch (SessionLimitExceededException ex) {
 			String actual = ex.getMessage();
-			String regex = "The send buffer size [\\d]+ bytes for session '123' exceeded the allowed limit 1024";
+			String regex = "Buffer size [\\d]+ bytes for session '123' exceeds the allowed limit 1024";
 			assertTrue("Unexpected message: " + actual, actual.matches(regex));
 			assertEquals(CloseStatus.SESSION_NOT_RELIABLE, ex.getStatus());
 		}
+	}
+
+	@Test // SPR-17140
+	public void overflowStrategyDrop() throws IOException, InterruptedException {
+
+		BlockingSession session = new BlockingSession();
+		session.setId("123");
+		session.setOpen(true);
+
+		final ConcurrentWebSocketSessionDecorator decorator =
+				new ConcurrentWebSocketSessionDecorator(session, 10*1000, 1024, OverflowStrategy.DROP);
+
+		sendBlockingMessage(decorator);
+
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0 ; i < 1023; i++) {
+			sb.append("a");
+		}
+
+		for (int i=0; i < 5; i++) {
+			TextMessage message = new TextMessage(sb.toString());
+			decorator.sendMessage(message);
+		}
+
+		assertEquals(1023, decorator.getBufferSize());
+		assertTrue(session.isOpen());
+
 	}
 
 	@Test
