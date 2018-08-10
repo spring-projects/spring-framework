@@ -605,29 +605,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
-		List<String> results = new ArrayList<>();
+		List<String> result = new ArrayList<>();
 		for (String beanName : this.beanDefinitionNames) {
 			BeanDefinition beanDefinition = getBeanDefinition(beanName);
 			if (!beanDefinition.isAbstract() && findAnnotationOnBean(beanName, annotationType) != null) {
-				results.add(beanName);
+				result.add(beanName);
 			}
 		}
 		for (String beanName : this.manualSingletonNames) {
-			if (!results.contains(beanName) && findAnnotationOnBean(beanName, annotationType) != null) {
-				results.add(beanName);
+			if (!result.contains(beanName) && findAnnotationOnBean(beanName, annotationType) != null) {
+				result.add(beanName);
 			}
 		}
-		return StringUtils.toStringArray(results);
+		return StringUtils.toStringArray(result);
 	}
 
 	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
 		String[] beanNames = getBeanNamesForAnnotation(annotationType);
-		Map<String, Object> results = new LinkedHashMap<>(beanNames.length);
+		Map<String, Object> result = new LinkedHashMap<>(beanNames.length);
 		for (String beanName : beanNames) {
-			results.put(beanName, getBean(beanName));
+			Object beanInstance = getBean(beanName);
+			if (!(beanInstance instanceof NullBean)) {
+				result.put(beanName, beanInstance);
+			}
 		}
-		return results;
+		return result;
 	}
 
 	/**
