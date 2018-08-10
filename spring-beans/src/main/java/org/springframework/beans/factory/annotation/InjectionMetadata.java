@@ -70,8 +70,8 @@ public class InjectionMetadata {
 			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
 				beanDefinition.registerExternallyManagedConfigMember(member);
 				checkedElements.add(element);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Registered injected element on class [" + this.targetClass.getName() + "]: " + element);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Registered injected element on class [" + this.targetClass.getName() + "]: " + element);
 				}
 			}
 		}
@@ -83,10 +83,9 @@ public class InjectionMetadata {
 		Collection<InjectedElement> elementsToIterate =
 				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
-			boolean debug = logger.isDebugEnabled();
 			for (InjectedElement element : elementsToIterate) {
-				if (debug) {
-					logger.debug("Processing injected element of bean '" + beanName + "': " + element);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Processing injected element of bean '" + beanName + "': " + element);
 				}
 				element.inject(target, beanName, pvs);
 			}

@@ -414,9 +414,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				TargetSource ts = tsc.getTargetSource(beanClass, beanName);
 				if (ts != null) {
 					// Found a matching TargetSource.
-					if (logger.isDebugEnabled()) {
-						logger.debug("TargetSourceCreator [" + tsc +
-								" found custom TargetSource for bean with name '" + beanName + "'");
+					if (logger.isTraceEnabled()) {
+						logger.trace("TargetSourceCreator [" + tsc +
+								"] found custom TargetSource for bean with name '" + beanName + "'");
 					}
 					return ts;
 				}
@@ -522,10 +522,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				}
 			}
 		}
-		if (logger.isDebugEnabled()) {
+		if (logger.isTraceEnabled()) {
 			int nrOfCommonInterceptors = commonInterceptors.length;
 			int nrOfSpecificInterceptors = (specificInterceptors != null ? specificInterceptors.length : 0);
-			logger.debug("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
+			logger.trace("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
 					" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 		}
 
