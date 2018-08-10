@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.transaction.interceptor;
 
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.util.StringUtils;
 
 /**
  * Spring's common transaction attribute implementation.
@@ -136,7 +137,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 */
 	protected final StringBuilder getAttributeDescription() {
 		StringBuilder result = getDefinitionDescription();
-		if (this.qualifier != null) {
+		if (StringUtils.hasText(this.qualifier)) {
 			result.append("; '").append(this.qualifier).append("'");
 		}
 		return result;
