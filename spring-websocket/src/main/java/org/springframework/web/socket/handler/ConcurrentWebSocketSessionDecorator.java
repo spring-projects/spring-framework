@@ -136,6 +136,32 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 		while (!this.buffer.isEmpty() && !shouldNotSend());
 	}
 
+	/**
+	 * Flush message buffer and reset the buffer limit,
+	 * waiting if necessary until the flush lock acquired
+	 * @throws IOException if send failed
+	 */
+	public void flushMessageBuffer() throws IOException {
+		this.flushLock.lock();
+		try {
+			while (!closeInProgress) {
+				WebSocketMessage<?> message = this.buffer.poll();
+				if (message == null) {
+					this.limitExceeded = false;
+					break;
+				}
+				this.bufferSize.addAndGet(message.getPayloadLength() * -1);
+				this.sendStartTime = System.currentTimeMillis();
+				getDelegate().sendMessage(message);
+				this.sendStartTime = 0;
+			}
+		}
+		finally {
+			this.sendStartTime = 0;
+			this.flushLock.unlock();
+		}
+	}
+
 	private boolean shouldNotSend() {
 		return (this.limitExceeded || this.closeInProgress);
 	}
