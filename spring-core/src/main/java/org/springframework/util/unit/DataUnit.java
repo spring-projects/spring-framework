@@ -32,35 +32,37 @@ public enum DataUnit {
 	BYTES("B", DataSize.ofBytes(1)),
 
 	/**
-	 * KiloByte.
+	 * KiloBytes.
 	 */
 	KILOBYTES("KB", DataSize.ofKiloBytes(1)),
 
 	/**
-	 * MegaByte.
+	 * MegaBytes.
 	 */
 	MEGABYTES("MB", DataSize.ofMegaBytes(1)),
 
 	/**
-	 * TeraByte.
+	 * GigaBytes.
 	 */
 	GIGABYTES("GB", DataSize.ofGigaBytes(1)),
 
 	/**
-	 * TeraByte.
+	 * TeraBytes.
 	 */
 	TERABYTES("TB", DataSize.ofTeraBytes(1));
+
 
 	private final String suffix;
 
 	private final DataSize size;
+
 
 	DataUnit(String suffix, DataSize size) {
 		this.suffix = suffix;
 		this.size = size;
 	}
 
-	protected DataSize getSize() {
+	DataSize size() {
 		return this.size;
 	}
 
@@ -68,7 +70,8 @@ public enum DataUnit {
 	 * Return the {@link DataUnit} matching the specified {@code suffix}.
 	 * @param suffix one of the standard suffix
 	 * @return the {@link DataUnit} matching the specified {@code suffix}
-	 * @throws IllegalArgumentException if the suffix does not match any instance
+	 * @throws IllegalArgumentException if the suffix does not match any
+	 * of this enum's constants
 	 */
 	public static DataUnit fromSuffix(String suffix) {
 		for (DataUnit candidate : values()) {

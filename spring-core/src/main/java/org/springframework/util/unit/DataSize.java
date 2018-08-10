@@ -25,8 +25,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * A data size, such as '12MB'.
- * <p>
- * This class models a size in terms of bytes and is immutable and thread-safe.
+ *
+ * <p>This class models a size in terms of bytes and is immutable and thread-safe.
  *
  * @author Stephane Nicoll
  * @since 5.1
@@ -60,6 +60,7 @@ public final class DataSize implements Comparable<DataSize> {
 
 
 	private final long bytes;
+
 
 	private DataSize(long bytes) {
 		this.bytes = bytes;
@@ -113,13 +114,13 @@ public final class DataSize implements Comparable<DataSize> {
 
 	/**
 	 * Obtain a {@link DataSize} representing an amount in the specified {@link DataUnit}.
-	 * @param amount the amount of the size, measured in terms of the unit, positive or
-	 * negative
-	 * @return a {@link DataSize}
+	 * @param amount the amount of the size, measured in terms of the unit,
+	 * positive or negative
+	 * @return a corresponding {@link DataSize}
 	 */
 	public static DataSize of(long amount, DataUnit unit) {
 		Assert.notNull(unit, "Unit must not be null");
-		return new DataSize(Math.multiplyExact(amount, unit.getSize().toBytes()));
+		return new DataSize(Math.multiplyExact(amount, unit.size().toBytes()));
 	}
 
 	/**
@@ -162,20 +163,17 @@ public final class DataSize implements Comparable<DataSize> {
 			Matcher matcher = PATTERN.matcher(text);
 			Assert.state(matcher.matches(), "Does not match data size pattern");
 			DataUnit unit = determineDataUnit(matcher.group(2), defaultUnit);
-			Long amount = Long.parseLong(matcher.group(1));
+			long amount = Long.parseLong(matcher.group(1));
 			return DataSize.of(amount, unit);
 		}
 		catch (Exception ex) {
-			throw new IllegalArgumentException(
-					"'" + text + "' is not a valid data size", ex);
+			throw new IllegalArgumentException("'" + text + "' is not a valid data size", ex);
 		}
 	}
 
-	private static DataUnit determineDataUnit(String suffix,
-			@Nullable DataUnit defaultUnit) {
-		defaultUnit = (defaultUnit != null ? defaultUnit : DataUnit.BYTES);
-		return (StringUtils.hasLength(suffix) ? DataUnit.fromSuffix(suffix)
-				: defaultUnit);
+	private static DataUnit determineDataUnit(String suffix, @Nullable DataUnit defaultUnit) {
+		DataUnit defaultUnitToUse = (defaultUnit != null ? defaultUnit : DataUnit.BYTES);
+		return (StringUtils.hasLength(suffix) ? DataUnit.fromSuffix(suffix) : defaultUnitToUse);
 	}
 
 	/**
@@ -236,16 +234,17 @@ public final class DataSize implements Comparable<DataSize> {
 		return String.format("%dB", this.bytes);
 	}
 
+
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (o == null || getClass() != o.getClass()) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		DataSize that = (DataSize) o;
-		return this.bytes == that.bytes;
+		DataSize otherSize = (DataSize) other;
+		return (this.bytes == otherSize.bytes);
 	}
 
 	@Override
@@ -254,4 +253,3 @@ public final class DataSize implements Comparable<DataSize> {
 	}
 
 }
-
