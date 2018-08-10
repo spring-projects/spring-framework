@@ -101,6 +101,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * is defined in (typically the current DispatcherServlet's context).
 	 * <p>Switch this flag on to detect handler beans in ancestor contexts
 	 * (typically the Spring root WebApplicationContext) as well.
+	 * @see #getCandidateBeanNames()
 	 */
 	public void setDetectHandlerMethodsInAncestorContexts(boolean detectHandlerMethodsInAncestorContexts) {
 		this.detectHandlerMethodsInAncestorContexts = detectHandlerMethodsInAncestorContexts;
@@ -178,7 +179,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	public void unregisterMapping(T mapping) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Unregister mapping \"" + mapping);
+			logger.trace("Unregister mapping \"" + mapping + "\"");
 		}
 		this.mappingRegistry.unregister(mapping);
 	}
@@ -188,62 +189,78 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	/**
 	 * Detects handler methods at initialization.
+	 * @see #initHandlerMethods
 	 */
 	@Override
 	public void afterPropertiesSet() {
-
 		initHandlerMethods();
-
-		// Total includes detected mappings + explicit registrations via registerMapping..
-		int total = this.getHandlerMethods().size();
-
-		if ((logger.isTraceEnabled() && total == 0) || (logger.isDebugEnabled() && total > 0) ) {
-			logger.debug(total + " mappings in " + formatMappingName());
-		}
 	}
 
 	/**
 	 * Scan beans in the ApplicationContext, detect and register handler methods.
-	 * @see #isHandler(Class)
-	 * @see #getMappingForMethod(Method, Class)
-	 * @see #handlerMethodsInitialized(Map)
+	 * @see #getCandidateBeanNames()
+	 * @see #processCandidateBean
+	 * @see #handlerMethodsInitialized
 	 */
 	protected void initHandlerMethods() {
-
-		String[] beanNames = (this.detectHandlerMethodsInAncestorContexts ?
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(obtainApplicationContext(), Object.class) :
-				obtainApplicationContext().getBeanNamesForType(Object.class));
-
-		for (String beanName : beanNames) {
+		for (String beanName : getCandidateBeanNames()) {
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
-				Class<?> beanType = null;
-				try {
-					beanType = obtainApplicationContext().getType(beanName);
-				}
-				catch (Throwable ex) {
-					// An unresolvable bean type, probably from a lazy bean - let's ignore it.
-					if (logger.isTraceEnabled()) {
-						logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
-					}
-				}
-				if (beanType != null && isHandler(beanType)) {
-					detectHandlerMethods(beanName);
-				}
+				processCandidateBean(beanName);
 			}
 		}
 		handlerMethodsInitialized(getHandlerMethods());
 	}
 
 	/**
-	 * Look for handler methods in a handler.
-	 * @param handler the bean name of a handler or a handler instance
+	 * Determine the names of candidate beans in the application context.
+	 * @since 5.1
+	 * @see #setDetectHandlerMethodsInAncestorContexts
+	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors
 	 */
-	protected void detectHandlerMethods(final Object handler) {
+	protected String[] getCandidateBeanNames() {
+		return (this.detectHandlerMethodsInAncestorContexts ?
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(obtainApplicationContext(), Object.class) :
+				obtainApplicationContext().getBeanNamesForType(Object.class));
+	}
+
+	/**
+	 * Determine the type of the specified candidate bean and call
+	 * {@link #detectHandlerMethods} if identified as a handler type.
+	 * <p>This implementation avoids bean creation through checking
+	 * {@link org.springframework.beans.factory.BeanFactory#getType}
+	 * and calling {@link #detectHandlerMethods} with the bean name.
+	 * @param beanName the name of the candidate bean
+	 * @since 5.1
+	 * @see #isHandler
+	 * @see #detectHandlerMethods
+	 */
+	protected void processCandidateBean(String beanName) {
+		Class<?> beanType = null;
+		try {
+			beanType = obtainApplicationContext().getType(beanName);
+		}
+		catch (Throwable ex) {
+			// An unresolvable bean type, probably from a lazy bean - let's ignore it.
+			if (logger.isTraceEnabled()) {
+				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
+			}
+		}
+		if (beanType != null && isHandler(beanType)) {
+			detectHandlerMethods(beanName);
+		}
+	}
+
+	/**
+	 * Look for handler methods in the specified handler bean.
+	 * @param handler either a bean name or an actual handler instance
+	 * @see #getMappingForMethod
+	 */
+	protected void detectHandlerMethods(Object handler) {
 		Class<?> handlerType = (handler instanceof String ?
 				obtainApplicationContext().getType((String) handler) : handler.getClass());
 
 		if (handlerType != null) {
-			final Class<?> userType = ClassUtils.getUserClass(handlerType);
+			Class<?> userType = ClassUtils.getUserClass(handlerType);
 			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
 					(MethodIntrospector.MetadataLookup<T>) method -> {
 						try {
@@ -309,6 +326,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param handlerMethods a read-only map with handler methods and mappings.
 	 */
 	protected void handlerMethodsInitialized(Map<T, HandlerMethod> handlerMethods) {
+		// Total includes detected mappings + explicit registrations via registerMapping
+		int total = handlerMethods.size();
+		if ((logger.isTraceEnabled() && total == 0) || (logger.isDebugEnabled() && total > 0) ) {
+			logger.debug(total + " mappings in " + formatMappingName());
+		}
 	}
 
 
@@ -476,7 +498,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * A registry that maintains all mappings to handler methods, exposing methods
 	 * to perform lookups and providing concurrent access.
-	 *
 	 * <p>Package-private for testing purposes.
 	 */
 	class MappingRegistry {
@@ -544,7 +565,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			try {
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
 				assertUniqueMethodMapping(handlerMethod, mapping);
-
 				this.mappingLookup.put(mapping, handlerMethod);
 
 				List<String> directUrls = getDirectUrls(mapping);
