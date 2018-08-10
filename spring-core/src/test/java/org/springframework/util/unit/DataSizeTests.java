@@ -108,8 +108,18 @@ public class DataSizeTests {
 	}
 
 	@Test
+	public void parseNegativeNumberWithDefaultUnitUsesBytes() {
+		assertEquals(DataSize.ofBytes(-1), DataSize.parse("-1"));
+	}
+
+	@Test
 	public void parseWithNullDefaultUnitUsesBytes() {
 		assertEquals(DataSize.ofKiloBytes(1), DataSize.parse("1024", null));
+	}
+
+	@Test
+	public void parseNegativeNumberWithNullDefaultUnitUsesBytes() {
+		assertEquals(DataSize.ofKiloBytes(-1), DataSize.parse("-1024", null));
 	}
 
 	@Test
@@ -118,8 +128,23 @@ public class DataSizeTests {
 	}
 
 	@Test
+	public void parseNegativeNumberWithCustomDefaultUnit() {
+		assertEquals(DataSize.ofKiloBytes(-1), DataSize.parse("-1", DataUnit.KILOBYTES));
+	}
+
+	@Test
 	public void parseWithBytes() {
 		assertEquals(DataSize.ofKiloBytes(1), DataSize.parse("1024B"));
+	}
+
+	@Test
+	public void parseWithNegativeBytes() {
+		assertEquals(DataSize.ofKiloBytes(-1), DataSize.parse("-1024B"));
+	}
+
+	@Test
+	public void parseWithPostivieBytes() {
+		assertEquals(DataSize.ofKiloBytes(1), DataSize.parse("+1024B"));
 	}
 
 	@Test
@@ -128,8 +153,18 @@ public class DataSizeTests {
 	}
 
 	@Test
+	public void parseWithNegativeKiloBytes() {
+		assertEquals(DataSize.ofBytes(-1024), DataSize.parse("-1KB"));
+	}
+
+	@Test
 	public void parseWithMegaBytes() {
 		assertEquals(DataSize.ofMegaBytes(4), DataSize.parse("4MB"));
+	}
+
+	@Test
+	public void parseWithNegativeMegaBytes() {
+		assertEquals(DataSize.ofMegaBytes(-4), DataSize.parse("-4MB"));
 	}
 
 	@Test
@@ -138,13 +173,43 @@ public class DataSizeTests {
 	}
 
 	@Test
+	public void parseWithNegativeGigaBytes() {
+		assertEquals(DataSize.ofMegaBytes(-1024), DataSize.parse("-1GB"));
+	}
+
+	@Test
 	public void parseWithTeraBytes() {
 		assertEquals(DataSize.ofTeraBytes(1), DataSize.parse("1TB"));
 	}
 
 	@Test
+	public void parseWithNegativeTeraBytes() {
+		assertEquals(DataSize.ofTeraBytes(-1), DataSize.parse("-1TB"));
+	}
+
+	@Test
+	public void isNegativeWithPositive() {
+		assertFalse(DataSize.ofBytes(50).isNegative());
+	}
+
+	@Test
+	public void isNegativeWithZero() {
+		assertFalse(DataSize.ofBytes(0).isNegative());
+	}
+
+	@Test
+	public void isNegativeWithNegative() {
+		assertTrue(DataSize.ofBytes(-1).isNegative());
+	}
+
+	@Test
 	public void toStringUsesBytes() {
 		assertEquals("1024B", DataSize.ofKiloBytes(1).toString());
+	}
+
+	@Test
+	public void toStringWithNegativeBytes() {
+		assertEquals("-1024B", DataSize.ofKiloBytes(-1).toString());
 	}
 
 	@Test

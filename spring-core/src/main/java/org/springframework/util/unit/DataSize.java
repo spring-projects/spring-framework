@@ -36,7 +36,7 @@ public final class DataSize implements Comparable<DataSize> {
 	/**
 	 * The pattern for parsing.
 	 */
-	private static final Pattern PATTERN = Pattern.compile("^(\\d+)([a-zA-Z]{0,2})$");
+	private static final Pattern PATTERN = Pattern.compile("^([+\\-]?\\d+)([a-zA-Z]{0,2})$");
 
 	/**
 	 * Bytes per KiloByte.
@@ -68,7 +68,7 @@ public final class DataSize implements Comparable<DataSize> {
 
 	/**
 	 * Obtain a {@link DataSize} representing the specified number of bytes.
-	 * @param bytes the number of bytes
+	 * @param bytes the number of bytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
 	public static DataSize ofBytes(long bytes) {
@@ -77,7 +77,7 @@ public final class DataSize implements Comparable<DataSize> {
 
 	/**
 	 * Obtain a {@link DataSize} representing the specified number of kilobytes.
-	 * @param kiloBytes the number of kilobytes
+	 * @param kiloBytes the number of kilobytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
 	public static DataSize ofKiloBytes(long kiloBytes) {
@@ -86,7 +86,7 @@ public final class DataSize implements Comparable<DataSize> {
 
 	/**
 	 * Obtain a {@link DataSize} representing the specified number of megabytes.
-	 * @param megaBytes the number of megabytes
+	 * @param megaBytes the number of megabytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
 	public static DataSize ofMegaBytes(long megaBytes) {
@@ -95,7 +95,7 @@ public final class DataSize implements Comparable<DataSize> {
 
 	/**
 	 * Obtain a {@link DataSize} representing the specified number of gigabytes.
-	 * @param gigaBytes the number of gigabytes
+	 * @param gigaBytes the number of gigabytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
 	public static DataSize ofGigaBytes(long gigaBytes) {
@@ -104,7 +104,7 @@ public final class DataSize implements Comparable<DataSize> {
 
 	/**
 	 * Obtain a {@link DataSize} representing the specified number of terabytes.
-	 * @param teraBytes the number of terabytes
+	 * @param teraBytes the number of terabytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
 	public static DataSize ofTeraBytes(long teraBytes) {
@@ -113,7 +113,8 @@ public final class DataSize implements Comparable<DataSize> {
 
 	/**
 	 * Obtain a {@link DataSize} representing an amount in the specified {@link DataUnit}.
-	 * @param amount the amount of the size, measured in terms of the unit
+	 * @param amount the amount of the size, measured in terms of the unit, positive or
+	 * negative
 	 * @return a {@link DataSize}
 	 */
 	public static DataSize of(long amount, DataUnit unit) {
@@ -175,6 +176,14 @@ public final class DataSize implements Comparable<DataSize> {
 		defaultUnit = (defaultUnit != null ? defaultUnit : DataUnit.BYTES);
 		return (StringUtils.hasLength(suffix) ? DataUnit.fromSuffix(suffix)
 				: defaultUnit);
+	}
+
+	/**
+	 * Checks if this size is negative, excluding zero.
+	 * @return true if this size has a size less than zero bytes
+	 */
+	public boolean isNegative() {
+		return this.bytes < 0;
 	}
 
 	/**
