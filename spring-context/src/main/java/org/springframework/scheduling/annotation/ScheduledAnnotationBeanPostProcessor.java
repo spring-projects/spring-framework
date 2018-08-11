@@ -33,6 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -312,7 +313,12 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	@Override
-	public Object postProcessAfterInitialization(final Object bean, String beanName) {
+	public Object postProcessAfterInitialization(Object bean, String beanName) {
+		if (bean instanceof AopInfrastructureBean) {
+			// Ignore AOP infrastructure such as scoped proxies.
+			return bean;
+		}
+
 		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
 		if (!this.nonAnnotatedClasses.contains(targetClass)) {
 			Map<Method, Set<Scheduled>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
