@@ -52,7 +52,8 @@ import org.springframework.util.ClassUtils;
  * @see #setProxyTargetClass
  */
 @SuppressWarnings("serial")
-public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<Object>, BeanFactoryAware {
+public class ScopedProxyFactoryBean extends ProxyConfig
+		implements FactoryBean<Object>, BeanFactoryAware, AopInfrastructureBean {
 
 	/** The TargetSource that manages scoping. */
 	private final SimpleBeanTargetSource scopedTargetSource = new SimpleBeanTargetSource();
