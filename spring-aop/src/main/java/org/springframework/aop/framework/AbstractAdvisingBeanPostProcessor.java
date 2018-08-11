@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aop.Advisor;
-import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.lang.Nullable;
@@ -64,7 +63,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		if (this.advisor == null || bean instanceof ScopedObject || bean instanceof AopInfrastructureBean) {
+		if (this.advisor == null || bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
@@ -93,7 +92,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			return proxyFactory.getProxy(getProxyClassLoader());
 		}
 
-		// No async proxy needed.
+		// No proxy needed.
 		return bean;
 	}
 

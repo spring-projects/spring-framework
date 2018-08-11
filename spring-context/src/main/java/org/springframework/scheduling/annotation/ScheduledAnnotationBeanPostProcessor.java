@@ -35,7 +35,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -334,9 +333,9 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		// Only process scoped target instances, not scoped proxies...
-		if (bean instanceof ScopedObject || bean instanceof AopInfrastructureBean ||
-				bean instanceof TaskScheduler || bean instanceof ScheduledExecutorService) {
+		if (bean instanceof AopInfrastructureBean || bean instanceof TaskScheduler ||
+				bean instanceof ScheduledExecutorService) {
+			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
 
