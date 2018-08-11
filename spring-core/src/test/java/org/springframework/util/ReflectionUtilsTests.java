@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class ReflectionUtilsTests {
 		TestObject bean = new TestObject();
 		bean.setName(rob);
 
-		Method getName = TestObject.class.getMethod("getName", (Class[]) null);
+		Method getName = TestObject.class.getMethod("getName");
 		Method setName = TestObject.class.getMethod("setName", String.class);
 
 		Object name = ReflectionUtils.invokeMethod(getName, bean);
@@ -302,13 +302,13 @@ public class ReflectionUtilsTests {
 		class Parent {
 			@SuppressWarnings("unused")
 			public Number m1() {
-				return new Integer(42);
+				return Integer.valueOf(42);
 			}
 		}
 		class Leaf extends Parent {
 			@Override
 			public Integer m1() {
-				return new Integer(42);
+				return Integer.valueOf(42);
 			}
 		}
 		int m1MethodCount = 0;
@@ -362,9 +362,9 @@ public class ReflectionUtilsTests {
 
 	private static class ListSavingMethodCallback implements ReflectionUtils.MethodCallback {
 
-		private List<String> methodNames = new LinkedList<String>();
+		private List<String> methodNames = new LinkedList<>();
 
-		private List<Method> methods = new LinkedList<Method>();
+		private List<Method> methods = new LinkedList<>();
 
 		@Override
 		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {

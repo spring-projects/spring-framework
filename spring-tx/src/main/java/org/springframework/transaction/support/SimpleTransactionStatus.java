@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package org.springframework.transaction.support;
 
 /**
  * A simple {@link org.springframework.transaction.TransactionStatus}
- * implementation.
- *
- * <p>Derives from {@link AbstractTransactionStatus} and adds an explicit
- * {@link #isNewTransaction() "newTransaction"} flag.
+ * implementation. Derives from {@link AbstractTransactionStatus} and
+ * adds an explicit {@link #isNewTransaction() "newTransaction"} flag.
  *
  * <p>This class is not used by any of Spring's pre-built
  * {@link org.springframework.transaction.PlatformTransactionManager}
@@ -32,8 +30,7 @@ package org.springframework.transaction.support;
  *
  * @author Juergen Hoeller
  * @since 1.2.3
- * @see #SimpleTransactionStatus(boolean)
- * @see TransactionCallback
+ * @see TransactionCallback#doInTransaction
  */
 public class SimpleTransactionStatus extends AbstractTransactionStatus {
 
@@ -41,7 +38,7 @@ public class SimpleTransactionStatus extends AbstractTransactionStatus {
 
 
 	/**
-	 * Create a new instance of the {@link SimpleTransactionStatus} class,
+	 * Create a new {@code SimpleTransactionStatus} instance,
 	 * indicating a new transaction.
 	 */
 	public SimpleTransactionStatus() {
@@ -49,7 +46,7 @@ public class SimpleTransactionStatus extends AbstractTransactionStatus {
 	}
 
 	/**
-	 * Create a new instance of the {@link SimpleTransactionStatus} class.
+	 * Create a new {@code SimpleTransactionStatus} instance.
 	 * @param newTransaction whether to indicate a new transaction
 	 */
 	public SimpleTransactionStatus(boolean newTransaction) {

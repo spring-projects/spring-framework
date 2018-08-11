@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import javax.xml.stream.events.Namespace;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.ext.LexicalHandler;
+
+import org.springframework.lang.Nullable;
 
 /**
  * SAX {@link org.xml.sax.ContentHandler} and {@link LexicalHandler}
@@ -68,7 +70,7 @@ class StaxEventHandler extends AbstractStaxHandler {
 
 
 	@Override
-	public void setDocumentLocator(Locator locator) {
+	public void setDocumentLocator(@Nullable Locator locator) {
 		if (locator != null) {
 			this.eventFactory.setLocation(new LocatorLocationAdapter(locator));
 		}
@@ -96,17 +98,14 @@ class StaxEventHandler extends AbstractStaxHandler {
 	}
 
 	private List<Namespace> getNamespaces(Map<String, String> namespaceMapping) {
-		List<Namespace> result = new ArrayList<Namespace>();
-		for (Map.Entry<String, String> entry : namespaceMapping.entrySet()) {
-			String prefix = entry.getKey();
-			String namespaceUri = entry.getValue();
-			result.add(this.eventFactory.createNamespace(prefix, namespaceUri));
-		}
+		List<Namespace> result = new ArrayList<>();
+		namespaceMapping.forEach((prefix, namespaceUri) ->
+				result.add(this.eventFactory.createNamespace(prefix, namespaceUri)));
 		return result;
 	}
 
 	private List<Attribute> getAttributes(Attributes attributes) {
-		List<Attribute> result = new ArrayList<Attribute>();
+		List<Attribute> result = new ArrayList<>();
 		for (int i = 0; i < attributes.getLength(); i++) {
 			QName attrName = toQName(attributes.getURI(i), attributes.getQName(i));
 			if (!isNamespaceDeclaration(attrName)) {

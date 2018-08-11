@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.HtmlUtils;
 
@@ -43,7 +44,7 @@ abstract class ValueFormatter {
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
 	 * @see #getDisplayString(Object, java.beans.PropertyEditor, boolean)
 	 */
-	public static String getDisplayString(Object value, boolean htmlEscape) {
+	public static String getDisplayString(@Nullable Object value, boolean htmlEscape) {
 		String displayValue = ObjectUtils.getDisplayString(value);
 		return (htmlEscape ? HtmlUtils.htmlEscape(displayValue) : displayValue);
 	}
@@ -55,7 +56,9 @@ abstract class ValueFormatter {
 	 * to obtain the display value.
 	 * @see #getDisplayString(Object, boolean)
 	 */
-	public static String getDisplayString(Object value, PropertyEditor propertyEditor, boolean htmlEscape) {
+	public static String getDisplayString(
+			@Nullable Object value, @Nullable PropertyEditor propertyEditor, boolean htmlEscape) {
+
 		if (propertyEditor != null && !(value instanceof String)) {
 			try {
 				propertyEditor.setValue(value);

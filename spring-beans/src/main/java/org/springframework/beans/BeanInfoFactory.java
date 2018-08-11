@@ -19,6 +19,8 @@ package org.springframework.beans;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Strategy interface for creating {@link BeanInfo} instances for Spring beans.
  * Can be used to plug in custom bean property resolution strategies (e.g. for other
@@ -52,6 +54,7 @@ public interface BeanInfoFactory {
 	 * @return the BeanInfo, or {@code null} if the given class is not supported
 	 * @throws IntrospectionException in case of exceptions
 	 */
+	@Nullable
 	BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException;
 
 }

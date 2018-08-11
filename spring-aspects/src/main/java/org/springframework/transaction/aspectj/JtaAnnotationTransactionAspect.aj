@@ -45,7 +45,7 @@ import org.springframework.transaction.annotation.AnnotationTransactionAttribute
  * @see javax.transaction.Transactional
  * @see AnnotationTransactionAspect
  */
-@RequiredTypes({"javax.transaction.Transactional"})
+@RequiredTypes("javax.transaction.Transactional")
 public aspect JtaAnnotationTransactionAspect extends AbstractTransactionAspect {
 
 	public JtaAnnotationTransactionAspect() {

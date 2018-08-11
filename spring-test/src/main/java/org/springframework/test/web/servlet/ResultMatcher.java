@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,28 @@ package org.springframework.test.web.servlet;
  * @author Sam Brannen
  * @since 3.2
  */
+@FunctionalInterface
 public interface ResultMatcher {
 
 	/**
 	 * Assert the result of an executed request.
-	 *
 	 * @param result the result of the executed request
 	 * @throws Exception if a failure occurs
 	 */
 	void match(MvcResult result) throws Exception;
+
+
+	/**
+	 * Static method for matching with an array of result matchers.
+	 * @param matchers the matchers
+	 * @since 5.1
+	 */
+	static ResultMatcher matchAll(ResultMatcher... matchers) {
+		return result -> {
+			for (ResultMatcher matcher : matchers) {
+			matcher.match(result);
+			}
+		};
+	}
 
 }

@@ -27,7 +27,7 @@
 		<property name="beans">
 			<map>
 				<entry key="bean:name=proxyTestBean1">
-					<ref local="testBean"/>
+					<ref bean="testBean"/>
 				</entry>
 			</map>
 		</property>

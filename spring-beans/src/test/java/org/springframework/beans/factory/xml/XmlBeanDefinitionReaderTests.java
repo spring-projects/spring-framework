@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.xml.sax.InputSource;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -29,8 +30,6 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
-
-import org.xml.sax.InputSource;
 
 import static org.junit.Assert.*;
 
@@ -47,23 +46,10 @@ public class XmlBeanDefinitionReaderTests {
 		new XmlBeanDefinitionReader(registry).setDocumentReaderClass(DefaultBeanDefinitionDocumentReader.class);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void setParserClassToNull() {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		new XmlBeanDefinitionReader(registry).setDocumentReaderClass(null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void setParserClassToUnsupportedParserType() throws Exception {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		new XmlBeanDefinitionReader(registry).setDocumentReaderClass(String.class);
-	}
-
 	@Test(expected = BeanDefinitionStoreException.class)
 	public void withOpenInputStream() {
 		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		Resource resource = new InputStreamResource(getClass().getResourceAsStream(
-				"test.xml"));
+		Resource resource = new InputStreamResource(getClass().getResourceAsStream("test.xml"));
 		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
 	}
 
@@ -135,16 +121,16 @@ public class XmlBeanDefinitionReaderTests {
 	}
 
 	@Test
-	public void dtdValidationAutodetect() throws Exception {
+	public void dtdValidationAutodetect() {
 		doTestValidation("validateWithDtd.xml");
 	}
 
 	@Test
-	public void xsdValidationAutodetect() throws Exception {
+	public void xsdValidationAutodetect() {
 		doTestValidation("validateWithXsd.xml");
 	}
 
-	private void doTestValidation(String resourceName) throws Exception {
+	private void doTestValidation(String resourceName) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		Resource resource = new ClassPathResource(resourceName, getClass());
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(resource);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
@@ -40,15 +41,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Base class for {@code @RequestAttribute} and {@code @SessionAttribute} method
@@ -67,11 +61,13 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(request, response);
+
 		this.resolver = createResolver();
+
 		this.handleMethod = AbstractRequestAttributesArgumentResolverTests.class
 				.getDeclaredMethod(getHandleMethodName(), Foo.class, Foo.class, Foo.class, Optional.class);
 	}
@@ -87,7 +83,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 	@Test
 	public void supportsParameter() throws Exception {
 		assertTrue(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0)));
-		assertFalse(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 4)));
+		assertFalse(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, -1)));
 	}
 
 	@Test
@@ -135,7 +131,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 		Object actual = testResolveArgument(param, factory);
 		assertNotNull(actual);
 		assertEquals(Optional.class, actual.getClass());
-		assertFalse(((Optional) actual).isPresent());
+		assertFalse(((Optional<?>) actual).isPresent());
 
 		Foo foo = new Foo();
 		this.webRequest.setAttribute("foo", foo, getScope());
@@ -143,8 +139,8 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 		actual = testResolveArgument(param, factory);
 		assertNotNull(actual);
 		assertEquals(Optional.class, actual.getClass());
-		assertTrue(((Optional) actual).isPresent());
-		assertSame(foo, ((Optional) actual).get());
+		assertTrue(((Optional<?>) actual).isPresent());
+		assertSame(foo, ((Optional<?>) actual).get());
 	}
 
 	private Object testResolveArgument(MethodParameter param) throws Exception {
@@ -180,6 +176,8 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 			@SessionAttribute(name="foo") Optional<Foo> optionalFoo) {
 	}
 
+
 	private static class Foo {
 	}
+
 }

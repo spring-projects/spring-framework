@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public @interface IfProfileValue {
 	/**
 	 * A single, permissible {@code value} of the <em>profile value</em>
 	 * for the given {@link #name}.
-	 * <p>Note: Assigning values to both {@link #value} and {@link #values}
+	 * <p>Note: Assigning values to both {@code #value} and {@link #values}
 	 * will lead to a configuration conflict.
 	 */
 	String value() default "";
@@ -117,7 +117,7 @@ public @interface IfProfileValue {
 	/**
 	 * A list of all permissible {@code values} of the <em>profile value</em>
 	 * for the given {@link #name}.
-	 * <p>Note: Assigning values to both {@link #value} and {@link #values}
+	 * <p>Note: Assigning values to both {@link #value} and {@code #values}
 	 * will lead to a configuration conflict.
 	 */
 	String[] values() default {};

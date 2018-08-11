@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.scheduling.commonj;
 
 import commonj.timers.TimerListener;
 
+import org.springframework.lang.Nullable;
+
 /**
  * JavaBean that describes a scheduled TimerListener, consisting of
  * the TimerListener itself (or a Runnable to create a TimerListener for)
@@ -34,12 +36,13 @@ import commonj.timers.TimerListener;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see commonj.timers.TimerListener
- * @see commonj.timers.TimerManager#schedule(commonj.timers.TimerListener, long, long)
- * @see commonj.timers.TimerManager#scheduleAtFixedRate(commonj.timers.TimerListener, long, long)
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler}
  */
+@Deprecated
 public class ScheduledTimerListener {
 
+	@Nullable
 	private TimerListener timerListener;
 
 	private long delay = 0;
@@ -140,13 +143,14 @@ public class ScheduledTimerListener {
 	/**
 	 * Set the TimerListener to schedule.
 	 */
-	public void setTimerListener(TimerListener timerListener) {
+	public void setTimerListener(@Nullable TimerListener timerListener) {
 		this.timerListener = timerListener;
 	}
 
 	/**
 	 * Return the TimerListener to schedule.
 	 */
+	@Nullable
 	public TimerListener getTimerListener() {
 		return this.timerListener;
 	}
@@ -173,7 +177,7 @@ public class ScheduledTimerListener {
 	 * Set the period between repeated task executions, in milliseconds.
 	 * <p>Default is -1, leading to one-time execution. In case of zero or a
 	 * positive value, the task will be executed repeatedly, with the given
-	 * interval inbetween executions.
+	 * interval in-between executions.
 	 * <p>Note that the semantics of the period value vary between fixed-rate
 	 * and fixed-delay execution.
 	 * <p><b>Note:</b> A period of 0 (for example as fixed delay) <i>is</i>

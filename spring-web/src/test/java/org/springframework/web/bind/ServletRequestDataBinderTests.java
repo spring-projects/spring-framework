@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ public class ServletRequestDataBinderTests {
 		request.addParameter("test_age", "" + 50);
 
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertTrue("Didn't fidn normal when given prefix", !pvs.contains("forname"));
+		assertTrue("Didn't find normal when given prefix", !pvs.contains("forname"));
 		assertTrue("Did treat prefix as normal when not given prefix", pvs.contains("test_forname"));
 
 		pvs = new ServletRequestParameterPropertyValues(request, "test");
@@ -242,7 +242,7 @@ public class ServletRequestDataBinderTests {
 		assertTrue("Doesn't contain tory", !pvs.contains("tory"));
 
 		PropertyValue[] ps = pvs.getPropertyValues();
-		Map<String, String> m = new HashMap<String, String>();
+		Map<String, String> m = new HashMap<>();
 		m.put("forname", "Tony");
 		m.put("surname", "Blair");
 		m.put("age", "50");

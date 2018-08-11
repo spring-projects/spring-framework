@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,6 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  */
 public class URIEditorTests {
-
-	private void doTestURI(String uriSpec) {
-		PropertyEditor uriEditor = new URIEditor();
-		uriEditor.setAsText(uriSpec);
-		Object value = uriEditor.getValue();
-		assertTrue(value instanceof URI);
-		URI uri = (URI) value;
-		assertEquals(uriSpec, uri.toString());
-	}
 
 	@Test
 	public void standardURI() throws Exception {
@@ -139,6 +130,16 @@ public class URIEditorTests {
 		URI uri = (URI) value;
 		assertEquals(uri.toString(), uriEditor.getAsText());
 		assertEquals("http://example.com/spaces%20and%20%E2%82%AC", uri.toASCIIString());
+	}
+
+
+	private void doTestURI(String uriSpec) {
+		PropertyEditor uriEditor = new URIEditor();
+		uriEditor.setAsText(uriSpec);
+		Object value = uriEditor.getValue();
+		assertTrue(value instanceof URI);
+		URI uri = (URI) value;
+		assertEquals(uriSpec, uri.toString());
 	}
 
 }

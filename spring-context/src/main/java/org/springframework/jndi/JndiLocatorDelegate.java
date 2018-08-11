@@ -20,6 +20,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.springframework.core.SpringProperties;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link JndiLocatorSupport} subclass with public lookup methods,
@@ -59,7 +60,7 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 	}
 
 	@Override
-	public <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
+	public <T> T lookup(String jndiName, @Nullable Class<T> requiredType) throws NamingException {
 		return super.lookup(jndiName, requiredType);
 	}
 
@@ -76,7 +77,7 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 	}
 
 	/**
-	 * Check whether a default JNDI environment, as in a J2EE environment,
+	 * Check whether a default JNDI environment, as in a Java EE environment,
 	 * is available on this JVM.
 	 * @return {@code true} if a default InitialContext can be used,
 	 * {@code false} if not

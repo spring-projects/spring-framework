@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * conjunction with @{@link Configuration} classes.
  *
  * <h3>Example usage</h3>
+ *
  * <p>Given a file {@code app.properties} containing the key/value pair
  * {@code testbean.name=myTestBean}, the following {@code @Configuration} class
  * uses {@code @PropertySource} to contribute {@code app.properties} to the
@@ -41,6 +42,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * &#064;Configuration
  * &#064;PropertySource("classpath:/com/myco/app.properties")
  * public class AppConfig {
+ *
  *     &#064;Autowired
  *     Environment env;
  *
@@ -52,12 +54,13 @@ import org.springframework.core.io.support.PropertySourceFactory;
  *     }
  * }</pre>
  *
- * Notice that the {@code Environment} object is @{@link
- * org.springframework.beans.factory.annotation.Autowired Autowired} into the
+ * Notice that the {@code Environment} object is
+ * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} into the
  * configuration class and then used when populating the {@code TestBean} object. Given
  * the configuration above, a call to {@code testBean.getName()} will return "myTestBean".
  *
  * <h3>Resolving ${...} placeholders in {@code <bean>} and {@code @Value} annotations</h3>
+ *
  * In order to resolve ${...} placeholders in {@code <bean>} definitions or {@code @Value}
  * annotations using properties from a {@code PropertySource}, one must register
  * a {@code PropertySourcesPlaceholderConfigurer}. This happens automatically when using
@@ -68,13 +71,16 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * for details and examples.
  *
  * <h3>Resolving ${...} placeholders within {@code @PropertySource} resource locations</h3>
+ *
  * Any ${...} placeholders present in a {@code @PropertySource} {@linkplain #value()
  * resource location} will be resolved against the set of property sources already
- * registered against the environment.  For example:
+ * registered against the environment. For example:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;PropertySource("classpath:/com/${my.placeholder:default/path}/app.properties")
  * public class AppConfig {
+ *
  *     &#064;Autowired
  *     Environment env;
  *
@@ -94,6 +100,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * IllegalArgumentException} will be thrown.
  *
  * <h3>A note on property overriding with @PropertySource</h3>
+ *
  * In cases where a given property key exists in more than one {@code .properties}
  * file, the last {@code @PropertySource} annotation processed will 'win' and override.
  *
@@ -113,9 +120,9 @@ import org.springframework.core.io.support.PropertySourceFactory;
  *
  * The override ordering depends on the order in which these classes are registered
  * with the application context.
+ *
  * <pre class="code">
- * AnnotationConfigApplicationContext ctx =
- *     new AnnotationConfigApplicationContext();
+ * AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
  * ctx.register(ConfigA.class);
  * ctx.register(ConfigB.class);
  * ctx.refresh();
@@ -133,6 +140,12 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * See {@link org.springframework.core.env.ConfigurableEnvironment ConfigurableEnvironment}
  * and {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}
  * javadocs for details.
+ *
+ * <p><b>NOTE: This annotation is repeatable according to Java 8 conventions.</b>
+ * However, all such {@code @PropertySource} annotations need to be declared at the same
+ * level: either directly on the configuration class or as meta-annotations within the
+ * same custom annotation. Mixing of direct annotations and meta-annotations is not
+ * recommended since direct annotations will effectively override meta-annotations.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -160,8 +173,9 @@ public @interface PropertySource {
 
 	/**
 	 * Indicate the resource location(s) of the properties file to be loaded.
-	 * For example, {@code "classpath:/com/myco/app.properties"} or
-	 * {@code "file:/path/to/file"}.
+	 * <p>Both traditional and XML-based properties file formats are supported
+	 * &mdash; for example, {@code "classpath:/com/myco/app.properties"}
+	 * or {@code "file:/path/to/file.xml"}.
 	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted;
 	 * each location must evaluate to exactly one {@code .properties} resource.
 	 * <p>${...} placeholders will be resolved against any/all property sources already

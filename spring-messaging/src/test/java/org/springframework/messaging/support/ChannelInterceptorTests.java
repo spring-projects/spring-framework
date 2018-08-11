@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class ChannelInterceptorTests {
 	public void postSendInterceptorMessageWasSent() {
 		final AtomicBoolean preSendInvoked = new AtomicBoolean(false);
 		final AtomicBoolean completionInvoked = new AtomicBoolean(false);
-		this.channel.addInterceptor(new ChannelInterceptorAdapter() {
+		this.channel.addInterceptor(new ChannelInterceptor() {
 			@Override
 			public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
 				assertInput(message, channel, sent);
@@ -121,7 +121,7 @@ public class ChannelInterceptorTests {
 		};
 		final AtomicBoolean preSendInvoked = new AtomicBoolean(false);
 		final AtomicBoolean completionInvoked = new AtomicBoolean(false);
-		testChannel.addInterceptor(new ChannelInterceptorAdapter() {
+		testChannel.addInterceptor(new ChannelInterceptor() {
 			@Override
 			public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
 				assertInput(message, channel, sent);
@@ -186,7 +186,7 @@ public class ChannelInterceptorTests {
 
 	private static class TestMessageHandler implements MessageHandler {
 
-		private final List<Message<?>> messages = new ArrayList<Message<?>>();
+		private final List<Message<?>> messages = new ArrayList<>();
 
 		public List<Message<?>> getMessages() {
 			return this.messages;
@@ -199,7 +199,7 @@ public class ChannelInterceptorTests {
 	}
 
 
-	private abstract static class AbstractTestInterceptor extends ChannelInterceptorAdapter {
+	private abstract static class AbstractTestInterceptor implements ChannelInterceptor {
 
 		private AtomicInteger counter = new AtomicInteger();
 

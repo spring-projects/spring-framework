@@ -43,10 +43,10 @@ import org.springframework.core.annotation.AliasFor;
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.annotation.Profile
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
 public @interface ActiveProfiles {
 
 	/**

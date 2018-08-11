@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,7 @@ public class BeanDefinitionTests {
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5));
 		bd.getPropertyValues().add("name", "myName");
 		bd.getPropertyValues().add("age", "99");
+		bd.setQualifiedElement(getClass());
 
 		GenericBeanDefinition childBd = new GenericBeanDefinition();
 		childBd.setParentName("bd");
@@ -138,6 +139,7 @@ public class BeanDefinitionTests {
 
 		mergedBd.getConstructorArgumentValues().getArgumentValue(1, null).setValue(new Integer(9));
 		assertEquals(new Integer(5), bd.getConstructorArgumentValues().getArgumentValue(1, null).getValue());
+		assertEquals(getClass(), bd.getQualifiedElement());
 	}
 
 }

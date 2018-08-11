@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
  * @author Dmitriy Kopylenko
  * @author Chris Beams
  */
-public final class AdvisorAdapterRegistrationTests {
+public class AdvisorAdapterRegistrationTests {
 
 	@Before
 	@After

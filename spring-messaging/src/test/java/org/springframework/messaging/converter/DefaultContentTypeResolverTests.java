@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class DefaultContentTypeResolverTests {
 
 	@Test
 	public void resolve() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
 		MessageHeaders headers = new MessageHeaders(map);
 
@@ -55,7 +55,7 @@ public class DefaultContentTypeResolverTests {
 
 	@Test
 	public void resolveStringContentType() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE);
 		MessageHeaders headers = new MessageHeaders(map);
 
@@ -64,7 +64,7 @@ public class DefaultContentTypeResolverTests {
 
 	@Test(expected = InvalidMimeTypeException.class)
 	public void resolveInvalidStringContentType() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put(MessageHeaders.CONTENT_TYPE, "invalidContentType");
 		MessageHeaders headers = new MessageHeaders(map);
 		this.resolver.resolve(headers);
@@ -72,7 +72,7 @@ public class DefaultContentTypeResolverTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void resolveUnknownHeaderType() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put(MessageHeaders.CONTENT_TYPE, new Integer(1));
 		MessageHeaders headers = new MessageHeaders(map);
 		this.resolver.resolve(headers);

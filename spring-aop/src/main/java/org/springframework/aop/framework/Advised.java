@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ public interface Advised extends TargetClassAware {
 	 * or -1 if no such advice is an advice for this proxy.
 	 * <p>The return value of this method can be used to index into
 	 * the advisors array.
-	 * @param advice AOP Alliance advice to search for
+	 * @param advice the AOP Alliance advice to search for
 	 * @return index from 0 of this advice, or -1 if there's no such advice
 	 */
 	int indexOf(Advice advice);

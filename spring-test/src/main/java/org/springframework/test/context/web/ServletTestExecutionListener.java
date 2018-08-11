@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -96,8 +97,8 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 			ServletTestExecutionListener.class, "createdByTheTestContextFramework");
 
 	/**
-	 * Attribute name for a {@link TestContext} attribute which indicates that that
-	 * the {@code ServletTestExecutionListener} should be activated. When not set to
+	 * Attribute name for a {@link TestContext} attribute which indicates that the
+	 * {@code ServletTestExecutionListener} should be activated. When not set to
 	 * {@code true}, activation occurs when the {@linkplain TestContext#getTestClass()
 	 * test class} is annotated with {@link WebAppConfiguration @WebAppConfiguration}.
 	 * <p>Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.
@@ -105,6 +106,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 */
 	public static final String ACTIVATE_LISTENER = Conventions.getQualifiedAttributeName(
 			ServletTestExecutionListener.class, "activateListener");
+
 
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
@@ -122,7 +124,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * callback phase via Spring Web's {@link RequestContextHolder}, but only if
 	 * the {@linkplain TestContext#getTestClass() test class} is annotated with
 	 * {@link WebAppConfiguration @WebAppConfiguration}.
-	 *
 	 * @see TestExecutionListener#prepareTestInstance(TestContext)
 	 * @see #setUpRequestContextIfNecessary(TestContext)
 	 */
@@ -136,7 +137,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * {@link RequestContextHolder}, but only if the
 	 * {@linkplain TestContext#getTestClass() test class} is annotated with
 	 * {@link WebAppConfiguration @WebAppConfiguration}.
-	 *
 	 * @see TestExecutionListener#beforeTestMethod(TestContext)
 	 * @see #setUpRequestContextIfNecessary(TestContext)
 	 */
@@ -154,11 +154,9 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * into the test instance for subsequent tests by setting the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
 	 * in the test context to {@code true}.
-	 *
 	 * <p>The {@link #RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} and
 	 * {@link #POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} will be subsequently
 	 * removed from the test context, regardless of their values.
-	 *
 	 * @see TestExecutionListener#afterTestMethod(TestContext)
 	 */
 	@Override
@@ -194,11 +192,9 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 		if (context instanceof WebApplicationContext) {
 			WebApplicationContext wac = (WebApplicationContext) context;
 			ServletContext servletContext = wac.getServletContext();
-			if (!(servletContext instanceof MockServletContext)) {
-				throw new IllegalStateException(String.format(
+			Assert.state(servletContext instanceof MockServletContext, () -> String.format(
 						"The WebApplicationContext for test context %s must be configured with a MockServletContext.",
 						testContext));
-			}
 
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format(

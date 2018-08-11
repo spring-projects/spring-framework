@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.xml.sax.ext.LexicalHandler;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
@@ -59,6 +60,7 @@ import org.springframework.oxm.ValidationFailureException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.oxm.support.SaxResourceUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.util.xml.StaxUtils;
@@ -72,8 +74,8 @@ import org.springframework.util.xml.StaxUtils;
  * can only be used to unmarshal XML that represents that specific class. If you want to unmarshal
  * multiple classes, you have to provide a mapping file using {@code setMappingLocations}.
  *
- * <p>Due to limitations of Castor's API, it is required to set the encoding used for
- * writing to output streams. It defaults to {@code UTF-8}.
+ * <p>Due to limitations of Castor's API, it is required to set the encoding used for writing
+ * to output streams. It defaults to {@code UTF-8}.
  *
  * @author Arjen Poutsma
  * @author Jakub Narloch
@@ -84,7 +86,9 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setTargetPackages(String[])
  * @see #setMappingLocation(Resource)
  * @see #setMappingLocations(Resource[])
+ * @deprecated as of Spring Framework 4.3.13, due to the lack of activity on the Castor project
  */
+@Deprecated
 public class CastorMarshaller extends AbstractMarshaller implements InitializingBean, BeanClassLoaderAware {
 
 	/**
@@ -93,12 +97,15 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
 
+	@Nullable
 	private Resource[] mappingLocations;
 
 	private String encoding = DEFAULT_ENCODING;
 
+	@Nullable
 	private Class<?>[] targetClasses;
 
+	@Nullable
 	private String[] targetPackages;
 
 	private boolean validating = false;
@@ -111,10 +118,13 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private boolean marshalExtendedType = true;
 
+	@Nullable
 	private String rootElement;
 
+	@Nullable
 	private String noNamespaceSchemaLocation;
 
+	@Nullable
 	private String schemaLocation;
 
 	private boolean useXSITypeAtRoot = false;
@@ -125,32 +135,44 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private boolean ignoreExtraElements = false;
 
+	@Nullable
 	private Object rootObject;
 
 	private boolean reuseObjects = false;
 
 	private boolean clearCollections = false;
 
+	@Nullable
 	private Map<String, String> castorProperties;
 
+	@Nullable
 	private Map<String, String> doctypes;
 
+	@Nullable
 	private Map<String, String> processingInstructions;
 
+	@Nullable
 	private Map<String, String> namespaceMappings;
 
+	@Nullable
 	private Map<String, String> namespaceToPackageMapping;
 
+	@Nullable
 	private EntityResolver entityResolver;
 
+	@Nullable
 	private XMLClassDescriptorResolver classDescriptorResolver;
 
+	@Nullable
 	private IDResolver idResolver;
 
+	@Nullable
 	private ObjectFactory objectFactory;
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
+	@Nullable
 	private XMLContext xmlContext;
 
 
@@ -455,8 +477,9 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * @see XMLContext#addMapping(org.exolab.castor.mapping.Mapping)
 	 * @see XMLContext#addClass(Class)
 	 */
-	protected XMLContext createXMLContext(Resource[] mappingLocations, Class<?>[] targetClasses,
-			String[] targetPackages) throws MappingException, ResolverException, IOException {
+	protected XMLContext createXMLContext(@Nullable Resource[] mappingLocations,
+			@Nullable Class<?>[] targetClasses, @Nullable String[] targetPackages)
+			throws MappingException, ResolverException, IOException {
 
 		XMLContext context = new XMLContext();
 		if (!ObjectUtils.isEmpty(mappingLocations)) {
@@ -473,9 +496,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 			context.addPackages(targetPackages);
 		}
 		if (this.castorProperties != null) {
-			for (Map.Entry<String, String> property : this.castorProperties.entrySet()) {
-				context.setProperty(property.getKey(), property.getValue());
-			}
+			this.castorProperties.forEach(context::setProperty);
 		}
 		return context;
 	}
@@ -518,22 +539,24 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	@Override
-	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
+	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, @Nullable LexicalHandler lexicalHandler)
 			throws XmlMappingException {
 
-		Marshaller marshaller = xmlContext.createMarshaller();
+		Assert.state(this.xmlContext != null, "CastorMarshaller not initialized");
+		Marshaller marshaller = this.xmlContext.createMarshaller();
 		marshaller.setContentHandler(contentHandler);
 		doMarshal(graph, marshaller);
 	}
 
 	@Override
 	protected void marshalOutputStream(Object graph, OutputStream outputStream) throws XmlMappingException, IOException {
-		marshalWriter(graph, new OutputStreamWriter(outputStream, encoding));
+		marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
 	}
 
 	@Override
 	protected void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
-		Marshaller marshaller = xmlContext.createMarshaller();
+		Assert.state(this.xmlContext != null, "CastorMarshaller not initialized");
+		Marshaller marshaller = this.xmlContext.createMarshaller();
 		marshaller.setWriter(writer);
 		doMarshal(graph, marshaller);
 	}
@@ -562,19 +585,13 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		marshaller.setSchemaLocation(this.schemaLocation);
 		marshaller.setUseXSITypeAtRoot(this.useXSITypeAtRoot);
 		if (this.doctypes != null) {
-			for (Map.Entry<String, String> doctype : this.doctypes.entrySet()) {
-				marshaller.setDoctype(doctype.getKey(), doctype.getValue());
-			}
+			this.doctypes.forEach(marshaller::setDoctype);
 		}
 		if (this.processingInstructions != null) {
-			for (Map.Entry<String, String> processingInstruction : this.processingInstructions.entrySet()) {
-				marshaller.addProcessingInstruction(processingInstruction.getKey(), processingInstruction.getValue());
-			}
+			this.processingInstructions.forEach(marshaller::addProcessingInstruction);
 		}
 		if (this.namespaceMappings != null) {
-			for (Map.Entry<String, String> entry : this.namespaceMappings.entrySet()) {
-				marshaller.setNamespaceMapping(entry.getKey(), entry.getValue());
-			}
+			this.namespaceMappings.forEach(marshaller::setNamespaceMapping);
 		}
 	}
 
@@ -648,6 +665,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	private Unmarshaller createUnmarshaller() {
+		Assert.state(this.xmlContext != null, "CastorMarshaller not initialized");
 		Unmarshaller unmarshaller = this.xmlContext.createUnmarshaller();
 		customizeUnmarshaller(unmarshaller);
 		return unmarshaller;
@@ -665,9 +683,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		unmarshaller.setReuseObjects(this.reuseObjects);
 		unmarshaller.setClearCollections(this.clearCollections);
 		if (this.namespaceToPackageMapping != null) {
-			for (Map.Entry<String, String> mapping : this.namespaceToPackageMapping.entrySet()) {
-				unmarshaller.addNamespaceToPackageMapping(mapping.getKey(), mapping.getValue());
-			}
+			this.namespaceToPackageMapping.forEach(unmarshaller::addNamespaceToPackageMapping);
 		}
 		if (this.entityResolver != null) {
 			unmarshaller.setEntityResolver(this.entityResolver);
@@ -692,7 +708,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * {@code org.springframework.oxm} hierarchy.
 	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
 	 * unmarshalling, since Castor itself does not make this distinction in its exception hierarchy.
-	 * @param ex Castor {@code XMLException} that occurred
+	 * @param ex the Castor {@code XMLException} that occurred
 	 * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
 	 * or unmarshalling ({@code false})
 	 * @return the corresponding {@code XmlMappingException}

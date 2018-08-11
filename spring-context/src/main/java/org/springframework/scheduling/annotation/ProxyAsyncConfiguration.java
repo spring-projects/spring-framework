@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  *
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 3.1
  * @see EnableAsync
  * @see AsyncConfigurationSelector
@@ -45,15 +46,10 @@ public class ProxyAsyncConfiguration extends AbstractAsyncConfiguration {
 	public AsyncAnnotationBeanPostProcessor asyncAdvisor() {
 		Assert.notNull(this.enableAsync, "@EnableAsync annotation metadata was not injected");
 		AsyncAnnotationBeanPostProcessor bpp = new AsyncAnnotationBeanPostProcessor();
+		bpp.configure(this.executor, this.exceptionHandler);
 		Class<? extends Annotation> customAsyncAnnotation = this.enableAsync.getClass("annotation");
 		if (customAsyncAnnotation != AnnotationUtils.getDefaultValue(EnableAsync.class, "annotation")) {
 			bpp.setAsyncAnnotationType(customAsyncAnnotation);
-		}
-		if (this.executor != null) {
-			bpp.setExecutor(this.executor);
-		}
-		if (this.exceptionHandler != null) {
-			bpp.setExceptionHandler(this.exceptionHandler);
 		}
 		bpp.setProxyTargetClass(this.enableAsync.getBoolean("proxyTargetClass"));
 		bpp.setOrder(this.enableAsync.<Integer>getNumber("order"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.util;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
-import static java.util.Collections.singletonMap;
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
 
 /**
@@ -70,12 +70,12 @@ public class MimeTypeTests {
 	}
 
 	@Test
-	public void parseCharset() throws Exception {
+	public void parseCharset() {
 		String s = "text/html; charset=iso-8859-1";
 		MimeType mimeType = MimeType.valueOf(s);
 		assertEquals("Invalid type", "text", mimeType.getType());
 		assertEquals("Invalid subtype", "html", mimeType.getSubtype());
-		assertEquals("Invalid charset", Charset.forName("ISO-8859-1"), mimeType.getCharSet());
+		assertEquals("Invalid charset", StandardCharsets.ISO_8859_1, mimeType.getCharset());
 	}
 
 	@Test
@@ -84,7 +84,17 @@ public class MimeTypeTests {
 		MimeType mimeType = MimeType.valueOf(s);
 		assertEquals("Invalid type", "application", mimeType.getType());
 		assertEquals("Invalid subtype", "xml", mimeType.getSubtype());
-		assertEquals("Invalid charset", Charset.forName("UTF-8"), mimeType.getCharSet());
+		assertEquals("Invalid charset", StandardCharsets.UTF_8, mimeType.getCharset());
+	}
+
+	@Test
+	public void parseQuotedSeparator() {
+		String s = "application/xop+xml;charset=utf-8;type=\"application/soap+xml;action=\\\"http://x.y.z\\\"\"";
+		MimeType mimeType = MimeType.valueOf(s);
+		assertEquals("Invalid type", "application", mimeType.getType());
+		assertEquals("Invalid subtype", "xop+xml", mimeType.getSubtype());
+		assertEquals("Invalid charset", StandardCharsets.UTF_8, mimeType.getCharset());
+		assertEquals("\"application/soap+xml;action=\\\"http://x.y.z\\\"\"", mimeType.getParameter("type"));
 	}
 
 	@Test
@@ -96,7 +106,7 @@ public class MimeTypeTests {
 	}
 
 	@Test
-	public void includes() throws Exception {
+	public void includes() {
 		MimeType textPlain = MimeTypeUtils.TEXT_PLAIN;
 		assertTrue("Equal types is not inclusive", textPlain.includes(textPlain));
 		MimeType allText = new MimeType("text");
@@ -112,18 +122,21 @@ public class MimeTypeTests {
 
 		MimeType applicationSoapXml = new MimeType("application", "soap+xml");
 		MimeType applicationWildcardXml = new MimeType("application", "*+xml");
+		MimeType suffixXml = new MimeType("application", "x.y+z+xml"); // SPR-15795
 
 		assertTrue(applicationSoapXml.includes(applicationSoapXml));
 		assertTrue(applicationWildcardXml.includes(applicationWildcardXml));
+		assertTrue(applicationWildcardXml.includes(suffixXml));
 
 		assertTrue(applicationWildcardXml.includes(applicationSoapXml));
 		assertFalse(applicationSoapXml.includes(applicationWildcardXml));
+		assertFalse(suffixXml.includes(applicationWildcardXml));
 
 		assertFalse(applicationWildcardXml.includes(MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test
-	public void isCompatible() throws Exception {
+	public void isCompatible() {
 		MimeType textPlain = MimeTypeUtils.TEXT_PLAIN;
 		assertTrue("Equal types is not compatible", textPlain.isCompatibleWith(textPlain));
 		MimeType allText = new MimeType("text");
@@ -139,25 +152,28 @@ public class MimeTypeTests {
 
 		MimeType applicationSoapXml = new MimeType("application", "soap+xml");
 		MimeType applicationWildcardXml = new MimeType("application", "*+xml");
+		MimeType suffixXml = new MimeType("application", "x.y+z+xml"); // SPR-15795
 
 		assertTrue(applicationSoapXml.isCompatibleWith(applicationSoapXml));
 		assertTrue(applicationWildcardXml.isCompatibleWith(applicationWildcardXml));
+		assertTrue(applicationWildcardXml.isCompatibleWith(suffixXml));
 
 		assertTrue(applicationWildcardXml.isCompatibleWith(applicationSoapXml));
 		assertTrue(applicationSoapXml.isCompatibleWith(applicationWildcardXml));
+		assertTrue(suffixXml.isCompatibleWith(applicationWildcardXml));
 
 		assertFalse(applicationWildcardXml.isCompatibleWith(MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test
-	public void testToString() throws Exception {
+	public void testToString() {
 		MimeType mimeType = new MimeType("text", "plain");
 		String result = mimeType.toString();
 		assertEquals("Invalid toString() returned", "text/plain", result);
 	}
 
 	@Test
-	public void parseMimeType() throws Exception {
+	public void parseMimeType() {
 		String s = "audio/*";
 		MimeType mimeType = MimeTypeUtils.parseMimeType(s);
 		assertEquals("Invalid type", "audio", mimeType.getType());
@@ -190,6 +206,11 @@ public class MimeTypeTests {
 	}
 
 	@Test(expected = InvalidMimeTypeException.class)
+	public void parseMimeTypeMissingTypeAndSubtype() {
+		MimeTypeUtils.parseMimeType("     ;a=b");
+	}
+
+	@Test(expected = InvalidMimeTypeException.class)
 	public void parseMimeTypeEmptyParameterAttribute() {
 		MimeTypeUtils.parseMimeType("audio/*;=value");
 	}
@@ -214,22 +235,28 @@ public class MimeTypeTests {
 		MimeTypeUtils.parseMimeType("text/html; charset=foo-bar");
 	}
 
-	/**
-	 * SPR-8917
-	 */
-	@Test
+	@Test  // SPR-8917
 	public void parseMimeTypeQuotedParameterValue() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("audio/*;attr=\"v>alue\"");
 		assertEquals("\"v>alue\"", mimeType.getParameter("attr"));
 	}
 
-	/**
-	 * SPR-8917
-	 */
-	@Test
+	@Test  // SPR-8917
 	public void parseMimeTypeSingleQuotedParameterValue() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("audio/*;attr='v>alue'");
 		assertEquals("'v>alue'", mimeType.getParameter("attr"));
+	}
+
+	@Test // SPR-16630
+	public void parseMimeTypeWithSpacesAroundEquals() {
+		MimeType mimeType = MimeTypeUtils.parseMimeType("multipart/x-mixed-replace;boundary = --myboundary");
+		assertEquals("--myboundary", mimeType.getParameter("boundary"));
+	}
+
+	@Test // SPR-16630
+	public void parseMimeTypeWithSpacesAroundEqualsAndQuotedValue() {
+		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain; foo = \" bar \" ");
+		assertEquals("\" bar \"", mimeType.getParameter("foo"));
 	}
 
 	@Test(expected = InvalidMimeTypeException.class)
@@ -238,7 +265,7 @@ public class MimeTypeTests {
 	}
 
 	@Test
-	public void parseMimeTypes() throws Exception {
+	public void parseMimeTypes() {
 		String s = "text/plain, text/html, text/x-dvi, text/x-c";
 		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes(s);
 		assertNotNull("No mime types returned", mimeTypes);
@@ -263,13 +290,13 @@ public class MimeTypeTests {
 
 		assertTrue("Invalid comparison result", audioBasicLevel.compareTo(audio) > 0);
 
-		List<MimeType> expected = new ArrayList<MimeType>();
+		List<MimeType> expected = new ArrayList<>();
 		expected.add(audio);
 		expected.add(audioBasic);
 		expected.add(audioBasicLevel);
 		expected.add(audioWave);
 
-		List<MimeType> result = new ArrayList<MimeType>(expected);
+		List<MimeType> result = new ArrayList<>(expected);
 		Random rnd = new Random();
 		// shuffle & sort 10 times
 		for (int i = 0; i < 10; i++) {
@@ -310,6 +337,8 @@ public class MimeTypeTests {
 		MimeType m2 = new MimeType("text", "plain", singletonMap("charset", "utf-8"));
 		assertEquals(m1, m2);
 		assertEquals(m2, m1);
+		assertEquals(0, m1.compareTo(m2));
+		assertEquals(0, m2.compareTo(m1));
 	}
 
 }

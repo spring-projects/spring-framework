@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -106,7 +108,7 @@ public class SqlQueryTests  {
 
 		SqlQuery<Integer> query = new MappingSqlQueryWithParameters<Integer>() {
 			@Override
-			protected Integer mapRow(ResultSet rs, int rownum, Object[] params, Map<? ,?> context)
+			protected Integer mapRow(ResultSet rs, int rownum, @Nullable Object[] params, @Nullable Map<? ,?> context)
 					throws SQLException {
 				assertTrue("params were null", params == null);
 				assertTrue("context was null", context == null);
@@ -498,7 +500,7 @@ public class SqlQueryTests  {
 			}
 
 			public Customer findCustomer(int id) {
-				Map<String, Integer> params = new HashMap<String, Integer>();
+				Map<String, Integer> params = new HashMap<>();
 				params.put("id", id);
 				return executeByNamedParam(params).get(0);
 			}
@@ -556,7 +558,7 @@ public class SqlQueryTests  {
 			}
 
 			public Customer findCustomer(int id, String country) {
-				Map<String, Object> params = new HashMap<String, Object>();
+				Map<String, Object> params = new HashMap<>();
 				params.put("id", id);
 				params.put("country", country);
 				return executeByNamedParam(params).get(0);
@@ -602,19 +604,19 @@ public class SqlQueryTests  {
 			}
 
 			public List<Customer> findCustomers(List<Integer> ids) {
-				Map<String, Object> params = new HashMap<String, Object>();
+				Map<String, Object> params = new HashMap<>();
 				params.put("ids", ids);
 				return executeByNamedParam(params);
 			}
 		}
 
 		CustomerQuery query = new CustomerQuery(dataSource);
-		List<Integer> ids = new ArrayList<Integer>();
+		List<Integer> ids = new ArrayList<>();
 		ids.add(1);
 		ids.add(2);
 		List<Customer> cust = query.findCustomers(ids);
 
-		assertEquals("We got two customers back", cust.size(), 2);
+		assertEquals("We got two customers back", 2, cust.size());
 		assertEquals("First customer id was assigned correctly", cust.get(0).getId(), 1);
 		assertEquals("First customer forename was assigned correctly", cust.get(0).getForename(), "rod");
 		assertEquals("Second customer id was assigned correctly", cust.get(1).getId(), 2);
@@ -654,7 +656,7 @@ public class SqlQueryTests  {
 			}
 
 			public List<Customer> findCustomers(Integer id) {
-				Map<String, Object> params = new HashMap<String, Object>();
+				Map<String, Object> params = new HashMap<>();
 				params.put("id1", id);
 				return executeByNamedParam(params);
 			}
@@ -663,7 +665,7 @@ public class SqlQueryTests  {
 		CustomerQuery query = new CustomerQuery(dataSource);
 		List<Customer> cust = query.findCustomers(1);
 
-		assertEquals("We got two customers back", cust.size(), 2);
+		assertEquals("We got two customers back", 2, cust.size());
 		assertEquals("First customer id was assigned correctly", cust.get(0).getId(), 1);
 		assertEquals("First customer forename was assigned correctly", cust.get(0).getForename(), "rod");
 		assertEquals("Second customer id was assigned correctly", cust.get(1).getId(), 2);
@@ -701,7 +703,7 @@ public class SqlQueryTests  {
 			}
 
 			public List<Customer> findCustomers(Integer id1) {
-				Map<String, Integer> params = new HashMap<String, Integer>();
+				Map<String, Integer> params = new HashMap<>();
 				params.put("id1", id1);
 				return executeByNamedParam(params);
 			}
@@ -729,7 +731,7 @@ public class SqlQueryTests  {
 			}
 
 			@Override
-			protected Customer updateRow(ResultSet rs, int rownum, Map<? ,?> context)
+			protected Customer updateRow(ResultSet rs, int rownum, @Nullable Map<? ,?> context)
 					throws SQLException {
 				rs.updateString(2, "" + context.get(rs.getInt(COLUMN_NAMES[0])));
 				return null;
@@ -737,7 +739,7 @@ public class SqlQueryTests  {
 		}
 
 		CustomerUpdateQuery query = new CustomerUpdateQuery(dataSource);
-		Map<Integer, String> values = new HashMap<Integer, String>(2);
+		Map<Integer, String> values = new HashMap<>(2);
 		values.put(1, "Rod");
 		values.put(2, "Thomas");
 		query.execute(2, values);
@@ -763,9 +765,7 @@ public class SqlQueryTests  {
 		}
 
 		public String[] run() {
-			List<String> list = execute();
-			String[] results = list.toArray(new String[list.size()]);
-			return results;
+			return StringUtils.toStringArray(execute());
 		}
 	}
 

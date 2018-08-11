@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,10 @@ import javax.sql.DataSource;
  */
 public class DerbyMaxValueIncrementer extends AbstractIdentityColumnMaxValueIncrementer {
 
-	/** The default for dummy name */
+	/** The default for dummy name. */
 	private static final String DEFAULT_DUMMY_NAME = "dummy";
 
-	/** The name of the dummy column used for inserts */
+	/** The name of the dummy column used for inserts. */
 	private String dummyName = DEFAULT_DUMMY_NAME;
 
 

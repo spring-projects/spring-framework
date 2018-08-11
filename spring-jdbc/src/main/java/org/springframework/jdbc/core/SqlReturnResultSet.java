@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ package org.springframework.jdbc.core;
  * must be provided to handle any returned rows.
  *
  * <p>Returned {@link java.sql.ResultSet ResultSets} - like all stored procedure
- * parameters - <b>must</b> have names.
+ * parameters - must have names.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -33,7 +33,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 	/**
 	 * Create a new instance of the {@link SqlReturnResultSet} class.
 	 * @param name name of the parameter, as used in input and output maps
-	 * @param extractor ResultSetExtractor to use for parsing the {@link java.sql.ResultSet}
+	 * @param extractor the {@link ResultSetExtractor} to use for parsing the {@link java.sql.ResultSet}
 	 */
 	public SqlReturnResultSet(String name, ResultSetExtractor<?> extractor) {
 		super(name, 0, extractor);
@@ -42,7 +42,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 	/**
 	 * Create a new instance of the {@link SqlReturnResultSet} class.
 	 * @param name name of the parameter, as used in input and output maps
-	 * @param handler RowCallbackHandler to use for parsing the {@link java.sql.ResultSet}
+	 * @param handler the {@link RowCallbackHandler} to use for parsing the {@link java.sql.ResultSet}
 	 */
 	public SqlReturnResultSet(String name, RowCallbackHandler handler) {
 		super(name, 0, handler);
@@ -51,19 +51,19 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 	/**
 	 * Create a new instance of the {@link SqlReturnResultSet} class.
 	 * @param name name of the parameter, as used in input and output maps
-	 * @param mapper RowMapper to use for parsing the {@link java.sql.ResultSet}
+	 * @param mapper the {@link RowMapper} to use for parsing the {@link java.sql.ResultSet}
 	 */
 	public SqlReturnResultSet(String name, RowMapper<?> mapper) {
 		super(name, 0, mapper);
 	}
 
+
 	/**
-	 * Return whether this parameter is an implicit return parameter used during the
-	 * results preocessing of the CallableStatement.getMoreResults/getUpdateCount.
-	 * <p>This implementation always returns {@code true}.
+	 * This implementation always returns {@code true}.
 	 */
 	@Override
 	public boolean isResultsParameter() {
 		return true;
 	}
+
 }

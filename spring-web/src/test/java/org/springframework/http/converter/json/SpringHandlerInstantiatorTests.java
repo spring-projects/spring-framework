@@ -47,7 +47,6 @@ import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -93,7 +92,7 @@ public class SpringHandlerInstantiatorTests {
 	public void autowiredDeserializer() throws IOException {
 		String json = "{\"username\":\"bob\"}";
 		User user = this.objectMapper.readValue(json, User.class);
-		assertEquals(user.getUsername(), "BOB");
+		assertEquals("BOB", user.getUsername());
 	}
 
 	@Test
@@ -137,7 +136,9 @@ public class SpringHandlerInstantiatorTests {
 		private Capitalizer capitalizer;
 
 		@Override
-		public void serialize(User user, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+		public void serialize(User user, JsonGenerator jsonGenerator,
+				SerializerProvider serializerProvider) throws IOException {
+
 			jsonGenerator.writeStartObject();
 			jsonGenerator.writeStringField("username", this.capitalizer.capitalize(user.getUsername()));
 			jsonGenerator.writeEndObject();
@@ -151,7 +152,7 @@ public class SpringHandlerInstantiatorTests {
 		private Capitalizer capitalizer;
 
 		@Override
-		public Object deserializeKey(String key, DeserializationContext context) throws IOException, JsonProcessingException {
+		public Object deserializeKey(String key, DeserializationContext context) throws IOException {
 			return this.capitalizer.capitalize(key);
 		}
 	}
@@ -165,13 +166,17 @@ public class SpringHandlerInstantiatorTests {
 		public static boolean isAutowiredFiledInitialized = false;
 
 		@Override
-		public TypeSerializer buildTypeSerializer(SerializationConfig config, JavaType baseType, Collection<NamedType> subtypes) {
+		public TypeSerializer buildTypeSerializer(SerializationConfig config, JavaType baseType,
+				Collection<NamedType> subtypes) {
+
 			isAutowiredFiledInitialized = (this.capitalizer != null);
 			return super.buildTypeSerializer(config, baseType, subtypes);
 		}
 
 		@Override
-		public TypeDeserializer buildTypeDeserializer(DeserializationConfig config, JavaType baseType, Collection<NamedType> subtypes) {
+		public TypeDeserializer buildTypeDeserializer(DeserializationConfig config,
+				JavaType baseType, Collection<NamedType> subtypes) {
+
 			return super.buildTypeDeserializer(config, baseType, subtypes);
 		}
 	}
@@ -197,8 +202,7 @@ public class SpringHandlerInstantiatorTests {
 			return JsonTypeInfo.Id.CUSTOM;
 		}
 
-		@Override
-		@SuppressWarnings("deprecation")
+		// Only needed when compiling against Jackson 2.7; gone in 2.8
 		public JavaType typeFromId(String s) {
 			return TypeFactory.defaultInstance().constructFromCanonical(s);
 		}

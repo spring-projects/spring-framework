@@ -5,7 +5,7 @@
 	<bean id="jenny" name="jenny" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
-		<property name="spouse"><ref local="david"/></property>
+		<property name="spouse"><ref bean="david"/></property>
 	</bean>
 
 	<bean id="david" class="org.springframework.tests.sample.beans.TestBean">
@@ -17,7 +17,7 @@
 	<bean id="jenks" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>Andrew</value></property>
 		<property name="age"><value>36</value></property>
-		<property name="spouse"><ref local="jenny"/></property>
+		<property name="spouse"><ref bean="jenny"/></property>
 	</bean>
 
 	<bean id="emma" class="org.springframework.tests.sample.beans.TestBean">
@@ -29,7 +29,7 @@
 	<bean id="georgia" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Georgia</value></property>
 		<property name="age"><value>33</value></property>
-		<property name="spouse"><ref local="jenks"/></property>
+		<property name="spouse"><ref bean="jenks"/></property>
 	</bean>
 
 	<bean id="ego" class="org.springframework.tests.sample.beans.TestBean">

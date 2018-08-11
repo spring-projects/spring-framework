@@ -1,4 +1,0 @@
-##
-## test template for Velocity view with exception
-##
-$command.unreliableFileOperation()

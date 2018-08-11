@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.core.env;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -57,10 +56,6 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
-import org.springframework.web.portlet.context.AbstractRefreshablePortletApplicationContext;
-import org.springframework.web.portlet.context.StandardPortletEnvironment;
-import org.springframework.web.portlet.context.StaticPortletApplicationContext;
-import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -311,6 +306,37 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
+	public void annotationConfigApplicationContext_withProfileExpressionMatchOr() {
+		testProfileExpression(true, "p3");
+	}
+
+	@Test
+	public void annotationConfigApplicationContext_withProfileExpressionMatchAnd() {
+		testProfileExpression(true, "p1", "p2");
+	}
+
+	@Test
+	public void annotationConfigApplicationContext_withProfileExpressionNoMatchAnd() {
+		testProfileExpression(false, "p1");
+	}
+
+	@Test
+	public void annotationConfigApplicationContext_withProfileExpressionNoMatchNone() {
+		testProfileExpression(false, "p4");
+	}
+
+	private void testProfileExpression(boolean expected, String... activeProfiles) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		StandardEnvironment environment = new StandardEnvironment();
+		environment.setActiveProfiles(activeProfiles);
+		ctx.setEnvironment(environment);
+		ctx.register(ProfileExpressionConfig.class);
+		ctx.refresh();
+		assertThat("wrong presence of expression bean",
+				ctx.containsBean("expressionBean"), is(expected));
+	}
+
+	@Test
 	public void webApplicationContext() {
 		GenericWebApplicationContext ctx = new GenericWebApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 		assertHasStandardServletEnvironment(ctx);
@@ -519,36 +545,6 @@ public class EnvironmentSystemIntegrationTests {
 	}
 
 	@Test
-	public void staticPortletApplicationContext() {
-		StaticPortletApplicationContext ctx = new StaticPortletApplicationContext();
-
-		assertHasStandardPortletEnvironment(ctx);
-
-		registerEnvironmentBeanDefinition(ctx);
-
-		ctx.setEnvironment(prodEnv);
-		ctx.refresh();
-
-		assertHasEnvironment(ctx, prodEnv);
-		assertEnvironmentBeanRegistered(ctx);
-		assertEnvironmentAwareInvoked(ctx, prodEnv);
-	}
-
-	@Test
-	public void xmlPortletApplicationContext() {
-		AbstractRefreshablePortletApplicationContext ctx = new XmlPortletApplicationContext();
-		ctx.setEnvironment(prodEnv);
-		ctx.setConfigLocation("classpath:" + XML_PATH);
-		ctx.refresh();
-
-		assertHasEnvironment(ctx, prodEnv);
-		assertEnvironmentBeanRegistered(ctx);
-		assertEnvironmentAwareInvoked(ctx, prodEnv);
-		assertThat(ctx.containsBean(DEV_BEAN_NAME), is(false));
-		assertThat(ctx.containsBean(PROD_BEAN_NAME), is(true));
-	}
-
-	@Test
 	public void abstractApplicationContextValidatesRequiredPropertiesOnRefresh() {
 		{
 			ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -603,13 +599,6 @@ public class EnvironmentSystemIntegrationTests {
 		Environment defaultEnv = ctx.getEnvironment();
 		assertThat(defaultEnv, notNullValue());
 		assertThat(defaultEnv, instanceOf(StandardServletEnvironment.class));
-	}
-
-	private void assertHasStandardPortletEnvironment(WebApplicationContext ctx) {
-		// ensure a default portlet environment exists
-		Environment defaultEnv = ctx.getEnvironment();
-		assertThat(defaultEnv, notNullValue());
-		assertThat(defaultEnv, instanceOf(StandardPortletEnvironment.class));
 	}
 
 	private void assertHasEnvironment(ApplicationContext ctx, Environment expectedEnv) {
@@ -682,6 +671,15 @@ public class EnvironmentSystemIntegrationTests {
 	static class DerivedDevConfig extends DevConfig {
 		@Bean
 		public Object derivedDevBean() {
+			return new Object();
+		}
+	}
+
+	@Profile("(p1 & p2) | p3")
+	@Configuration
+	static class ProfileExpressionConfig {
+		@Bean
+		public Object expressionBean() {
 			return new Object();
 		}
 	}

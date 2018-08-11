@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,14 @@ import org.springframework.cache.Cache;
  * @author Stephane Nicoll
  * @since 4.1
  */
+@FunctionalInterface
 public interface CacheResolver {
 
 	/**
 	 * Return the cache(s) to use for the specified invocation.
 	 * @param context the context of the particular invocation
 	 * @return the cache(s) to use (never {@code null})
+	 * @throws IllegalStateException if cache resolution failed
 	 */
 	Collection<? extends Cache> resolveCaches(CacheOperationInvocationContext<?> context);
 

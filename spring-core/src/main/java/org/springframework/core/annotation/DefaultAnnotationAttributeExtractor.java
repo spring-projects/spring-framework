@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -32,7 +32,7 @@ import org.springframework.util.ReflectionUtils;
  * @see AliasFor
  * @see AbstractAliasAwareAnnotationAttributeExtractor
  * @see MapAnnotationAttributeExtractor
- * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
+ * @see AnnotationUtils#synthesizeAnnotation
  */
 class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttributeExtractor<Annotation> {
 
@@ -42,21 +42,23 @@ class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAt
 	 * @param annotatedElement the element that is annotated with the supplied
 	 * annotation; may be {@code null} if unknown
 	 */
-	DefaultAnnotationAttributeExtractor(Annotation annotation, AnnotatedElement annotatedElement) {
+	DefaultAnnotationAttributeExtractor(Annotation annotation, @Nullable Object annotatedElement) {
 		super(annotation.annotationType(), annotatedElement, annotation);
 	}
 
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(Method attributeMethod) {
 		ReflectionUtils.makeAccessible(attributeMethod);
 		return ReflectionUtils.invokeMethod(attributeMethod, getSource());
 	}
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(String attributeName) {
 		Method attributeMethod = ReflectionUtils.findMethod(getAnnotationType(), attributeName);
-		return getRawAttributeValue(attributeMethod);
+		return (attributeMethod != null ? getRawAttributeValue(attributeMethod) : null);
 	}
 
 }

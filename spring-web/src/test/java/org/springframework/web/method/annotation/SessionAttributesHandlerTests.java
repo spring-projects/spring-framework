@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,15 @@ import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static java.util.Arrays.*;
-import static org.junit.Assert.*;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture with {@link SessionAttributesHandler}.
- *
  * @author Rossen Stoyanchev
  */
 public class SessionAttributesHandlerTests {
@@ -50,10 +53,10 @@ public class SessionAttributesHandlerTests {
 
 	@Test
 	public void isSessionAttribute() throws Exception {
-		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr1", null));
-		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr2", null));
+		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr1", String.class));
+		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr2", String.class));
 		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("simple", TestBean.class));
-		assertFalse(sessionAttributesHandler.isHandlerSessionAttribute("simple", null));
+		assertFalse(sessionAttributesHandler.isHandlerSessionAttribute("simple", String.class));
 	}
 
 	@Test
@@ -64,14 +67,14 @@ public class SessionAttributesHandlerTests {
 		sessionAttributeStore.storeAttribute(request, "attr4", new TestBean());
 
 		assertEquals("Named attributes (attr1, attr2) should be 'known' right away",
-				new HashSet<String>(asList("attr1", "attr2")),
+				new HashSet<>(asList("attr1", "attr2")),
 				sessionAttributesHandler.retrieveAttributes(request).keySet());
 
 		// Resolve 'attr3' by type
 		sessionAttributesHandler.isHandlerSessionAttribute("attr3", TestBean.class);
 
 		assertEquals("Named attributes (attr1, attr2) and resolved attribute (att3) should be 'known'",
-				new HashSet<String>(asList("attr1", "attr2", "attr3")),
+				new HashSet<>(asList("attr1", "attr2", "attr3")),
 				sessionAttributesHandler.retrieveAttributes(request).keySet());
 	}
 

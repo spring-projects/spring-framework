@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.scheduling.aspectj;
+
+import java.util.function.Supplier;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,14 +58,14 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	public void asyncPostProcessorExecutorReference() {
 		Object executor = context.getBean("testExecutor");
 		Object aspect = context.getBean(TaskManagementConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME);
-		assertSame(executor, new DirectFieldAccessor(aspect).getPropertyValue("defaultExecutor"));
+		assertSame(executor, ((Supplier) new DirectFieldAccessor(aspect).getPropertyValue("defaultExecutor")).get());
 	}
 
 	@Test
 	public void asyncPostProcessorExceptionHandlerReference() {
 		Object exceptionHandler = context.getBean("testExceptionHandler");
 		Object aspect = context.getBean(TaskManagementConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME);
-		assertSame(exceptionHandler, new DirectFieldAccessor(aspect).getPropertyValue("exceptionHandler"));
+		assertSame(exceptionHandler, ((Supplier) new DirectFieldAccessor(aspect).getPropertyValue("exceptionHandler")).get());
 	}
 
 }

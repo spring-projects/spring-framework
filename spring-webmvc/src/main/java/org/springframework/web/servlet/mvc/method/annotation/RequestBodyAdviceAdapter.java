@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * A convenient starting point for implementing
@@ -34,17 +35,6 @@ import org.springframework.http.converter.HttpMessageConverter;
  * @since 4.2
  */
 public abstract class RequestBodyAdviceAdapter implements RequestBodyAdvice {
-
-	/**
-	 * The default implementation returns the body that was passed in.
-	 */
-	@Override
-	public Object handleEmptyBody(Object body, HttpInputMessage inputMessage,
-			MethodParameter parameter, Type targetType,
-			Class<? extends HttpMessageConverter<?>> converterType) {
-
-		return body;
-	}
 
 	/**
 	 * The default implementation returns the InputMessage that was passed in.
@@ -63,6 +53,18 @@ public abstract class RequestBodyAdviceAdapter implements RequestBodyAdvice {
 	@Override
 	public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+
+		return body;
+	}
+
+	/**
+	 * The default implementation returns the body that was passed in.
+	 */
+	@Override
+	@Nullable
+	public Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage,
+			MethodParameter parameter, Type targetType,
+			Class<? extends HttpMessageConverter<?>> converterType) {
 
 		return body;
 	}

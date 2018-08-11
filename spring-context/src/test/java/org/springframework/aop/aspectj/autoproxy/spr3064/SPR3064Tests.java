@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class SPR3064Tests {
+public class SPR3064Tests {
 
 	private Service service;
 

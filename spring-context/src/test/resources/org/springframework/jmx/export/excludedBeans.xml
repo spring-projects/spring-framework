@@ -7,7 +7,7 @@
 
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="server">
-			<ref local="server"/>
+			<ref bean="server"/>
 		</property>
 		<property name="autodetect">
 			<value>true</value>
@@ -20,7 +20,7 @@
 
 	<bean id="connector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
 		<property name="server">
-			<ref local="server"/>
+			<ref bean="server"/>
 		</property>
 	</bean>
 

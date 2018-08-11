@@ -1,26 +1,33 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.setup;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -32,6 +39,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  * @author Rob Winch
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Stephane Nicoll
  */
 public class DefaultMockMvcBuilderTests {
 
@@ -118,6 +126,34 @@ public class DefaultMockMvcBuilderTests {
 		assertSame(root, wac.getParent());
 		assertSame(ear, wac.getParent().getParent());
 		assertSame(root, WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
+	}
+
+	/**
+	 * See /SPR-14277
+	 */
+	@Test
+	public void dispatcherServletCustomizer() {
+		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
+		DefaultMockMvcBuilder builder = webAppContextSetup(root);
+		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("test-id"));
+		builder.dispatchOptions(true);
+		MockMvc mvc = builder.build();
+		DispatcherServlet ds = (DispatcherServlet) new DirectFieldAccessor(mvc)
+				.getPropertyValue("servlet");
+		assertEquals("test-id", ds.getContextId());
+	}
+
+	@Test
+	public void dispatcherServletCustomizerProcessedInOrder() {
+		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
+		DefaultMockMvcBuilder builder = webAppContextSetup(root);
+		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("test-id"));
+		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("override-id"));
+		builder.dispatchOptions(true);
+		MockMvc mvc = builder.build();
+		DispatcherServlet ds = (DispatcherServlet) new DirectFieldAccessor(mvc)
+				.getPropertyValue("servlet");
+		assertEquals("override-id", ds.getContextId());
 	}
 
 }

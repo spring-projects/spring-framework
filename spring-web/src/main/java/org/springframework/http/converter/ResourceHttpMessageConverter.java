@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,53 +19,53 @@ package org.springframework.http.converter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-
-import javax.activation.FileTypeMap;
-import javax.activation.MimetypesFileTypeMap;
 
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.HttpRange;
-import org.springframework.http.HttpRangeResource;
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.MimeTypeUtils;
+import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can read and write {@link Resource Resources}
+ * Implementation of {@link HttpMessageConverter} that can read/write {@link Resource Resources}
  * and supports byte range requests.
  *
- * <p>By default, this converter can read all media types. The Java Activation Framework (JAF) -
- * if available - is used to determine the {@code Content-Type} of written resources.
- * If JAF is not available, {@code application/octet-stream} is used.
- *
- * <p>This converter supports HTTP byte range requests and can write partial content, when provided
- * with an {@link HttpRangeResource} instance containing the required Range information.
+ * <p>By default, this converter can read all media types. The {@link MediaTypeFactory} is used
+ * to determine the {@code Content-Type} of written resources.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Kazuki Shimizu
- * @author Brian Clozel
  * @since 3.0.2
  */
 public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<Resource> {
 
-	private static final boolean jafPresent = ClassUtils.isPresent(
-			"javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
+	private final boolean supportsReadStreaming;
 
 
+	/**
+	 * Create a new instance of the {@code ResourceHttpMessageConverter}
+	 * that supports read streaming, i.e. can convert an
+	 * {@code HttpInputMessage} to {@code InputStreamResource}.
+	 */
 	public ResourceHttpMessageConverter() {
 		super(MediaType.ALL);
+		this.supportsReadStreaming = true;
+	}
+
+	/**
+	 * Create a new instance of the {@code ResourceHttpMessageConverter}.
+	 * @param supportsReadStreaming whether the converter should support
+	 * read streaming, i.e. convert to {@code InputStreamResource}
+	 * @since 5.0
+	 */
+	public ResourceHttpMessageConverter(boolean supportsReadStreaming) {
+		super(MediaType.ALL);
+		this.supportsReadStreaming = supportsReadStreaming;
 	}
 
 
@@ -78,39 +78,42 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		if (InputStreamResource.class == clazz) {
-			return new InputStreamResource(inputMessage.getBody());
+		if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
+			return new InputStreamResource(inputMessage.getBody()) {
+				@Override
+				public String getFilename() {
+					return inputMessage.getHeaders().getContentDisposition().getFilename();
+				}
+			};
 		}
-		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
+		else if (Resource.class == clazz || ByteArrayResource.class.isAssignableFrom(clazz)) {
 			byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
-			return new ByteArrayResource(body);
+			return new ByteArrayResource(body) {
+				@Override
+				@Nullable
+				public String getFilename() {
+					return inputMessage.getHeaders().getContentDisposition().getFilename();
+				}
+			};
 		}
 		else {
-			throw new IllegalStateException("Unsupported resource class: " + clazz);
+			throw new HttpMessageNotReadableException("Unsupported resource class: " + clazz, inputMessage);
 		}
 	}
 
 	@Override
 	protected MediaType getDefaultContentType(Resource resource) {
-		if (jafPresent) {
-			return ActivationMediaTypeFactory.getMediaType(resource);
-		}
-		else {
-			return MediaType.APPLICATION_OCTET_STREAM;
-		}
+		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 	}
 
 	@Override
-	protected Long getContentLength(Resource resource, MediaType contentType) throws IOException {
+	protected Long getContentLength(Resource resource, @Nullable MediaType contentType) throws IOException {
 		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
 		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
 		if (InputStreamResource.class == resource.getClass()) {
 			return null;
 		}
 		long contentLength = resource.contentLength();
-		if (contentLength > Integer.MAX_VALUE) {
-			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
-		}
 		return (contentLength < 0 ? null : contentLength);
 	}
 
@@ -118,13 +121,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		outputMessage.getHeaders().add(HttpHeaders.ACCEPT_RANGES, "bytes");
-		if (resource instanceof HttpRangeResource) {
-			writePartialContent((HttpRangeResource) resource, outputMessage);
-		}
-		else {
-			writeContent(resource, outputMessage);
-		}
+		writeContent(resource, outputMessage);
 	}
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
@@ -148,159 +145,6 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		}
 		catch (FileNotFoundException ex) {
 			// ignore, see SPR-12999
-		}
-	}
-
-	/**
-	 * Write parts of the resource as indicated by the request {@code Range} header.
-	 * @param resource the identified resource (never {@code null})
-	 * @param outputMessage current servlet response
-	 * @throws IOException in case of errors while writing the content
-	 */
-	protected void writePartialContent(HttpRangeResource resource, HttpOutputMessage outputMessage) throws IOException {
-
-		Assert.notNull(resource, "Resource should not be null");
-
-		List<HttpRange> ranges = resource.getHttpRanges();
-		HttpHeaders responseHeaders = outputMessage.getHeaders();
-		MediaType contentType = responseHeaders.getContentType();
-		Long length = getContentLength(resource, contentType);
-
-		if (ranges.size() == 1) {
-			HttpRange range = ranges.get(0);
-
-			long start = range.getRangeStart(length);
-			long end = range.getRangeEnd(length);
-			long rangeLength = end - start + 1;
-
-			responseHeaders.add("Content-Range", "bytes " + start + "-" + end + "/" + length);
-			responseHeaders.setContentLength((int) rangeLength);
-
-			InputStream in = resource.getInputStream();
-			try {
-				copyRange(in, outputMessage.getBody(), start, end);
-			}
-			finally {
-				try {
-					in.close();
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-			}
-		}
-		else {
-			String boundaryString = MimeTypeUtils.generateMultipartBoundaryString();
-			responseHeaders.set(HttpHeaders.CONTENT_TYPE, "multipart/byteranges; boundary=" + boundaryString);
-
-			OutputStream out = outputMessage.getBody();
-
-			for (HttpRange range : ranges) {
-				long start = range.getRangeStart(length);
-				long end = range.getRangeEnd(length);
-
-				InputStream in = resource.getInputStream();
-
-				// Writing MIME header.
-				println(out);
-				print(out, "--" + boundaryString);
-				println(out);
-				if (contentType != null) {
-					print(out, "Content-Type: " + contentType.toString());
-					println(out);
-				}
-				print(out, "Content-Range: bytes " + start + "-" + end + "/" + length);
-				println(out);
-				println(out);
-
-				// Printing content
-				copyRange(in, out, start, end);
-			}
-			println(out);
-			print(out, "--" + boundaryString + "--");
-		}
-	}
-
-	private static void println(OutputStream os) throws IOException {
-		os.write('\r');
-		os.write('\n');
-	}
-
-	private static void print(OutputStream os, String buf) throws IOException {
-		os.write(buf.getBytes("US-ASCII"));
-	}
-
-	private void copyRange(InputStream in, OutputStream out, long start, long end) throws IOException {
-		long skipped = in.skip(start);
-		if (skipped < start) {
-			throw new IOException("Skipped only " + skipped + " bytes out of " + start + " required.");
-		}
-
-		long bytesToCopy = end - start + 1;
-		byte buffer[] = new byte[StreamUtils.BUFFER_SIZE];
-		while (bytesToCopy > 0) {
-			int bytesRead = in.read(buffer);
-			if (bytesRead <= bytesToCopy) {
-				out.write(buffer, 0, bytesRead);
-				bytesToCopy -= bytesRead;
-			}
-			else {
-				out.write(buffer, 0, (int) bytesToCopy);
-				bytesToCopy = 0;
-			}
-			if (bytesRead == -1) {
-				break;
-			}
-		}
-	}
-
-
-	/**
-	 * Inner class to avoid a hard-coded JAF dependency.
-	 */
-	private static class ActivationMediaTypeFactory {
-
-		private static final FileTypeMap fileTypeMap;
-
-		static {
-			fileTypeMap = loadFileTypeMapFromContextSupportModule();
-		}
-
-		private static FileTypeMap loadFileTypeMapFromContextSupportModule() {
-			// See if we can find the extended mime.types from the context-support module...
-			Resource mappingLocation = new ClassPathResource("org/springframework/mail/javamail/mime.types");
-			if (mappingLocation.exists()) {
-				InputStream inputStream = null;
-				try {
-					inputStream = mappingLocation.getInputStream();
-					return new MimetypesFileTypeMap(inputStream);
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-				finally {
-					if (inputStream != null) {
-						try {
-							inputStream.close();
-						}
-						catch (IOException ex) {
-							// ignore
-						}
-					}
-				}
-			}
-			return FileTypeMap.getDefaultFileTypeMap();
-		}
-
-		public static MediaType getMediaType(Resource resource) {
-			String filename = resource.getFilename();
-			if (filename != null) {
-				String mediaType = fileTypeMap.getContentType(filename);
-				if (StringUtils.hasText(mediaType)) {
-					return MediaType.parseMediaType(mediaType);
-				}
-			}
-			return null;
 		}
 	}
 

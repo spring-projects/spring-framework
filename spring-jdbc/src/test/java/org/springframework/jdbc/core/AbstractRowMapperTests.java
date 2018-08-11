@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 
 import org.springframework.jdbc.core.test.ConcretePerson;
+import org.springframework.jdbc.core.test.DatePerson;
 import org.springframework.jdbc.core.test.Person;
 import org.springframework.jdbc.core.test.SpacePerson;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -47,21 +49,30 @@ public abstract class AbstractRowMapperTests {
 		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
 	}
 
-	protected void verifyConcretePerson(ConcretePerson bean) throws Exception {
+	protected void verifyPerson(ConcretePerson bean) throws Exception {
 		assertEquals("Bubba", bean.getName());
 		assertEquals(22L, bean.getAge());
 		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
 		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
 	}
 
-	protected void verifySpacePerson(SpacePerson bean) {
+	protected void verifyPerson(SpacePerson bean) {
 		assertEquals("Bubba", bean.getLastName());
 		assertEquals(22L, bean.getAge());
-		assertEquals(new java.util.Date(1221222L), bean.getBirthDate());
+		assertEquals(new java.sql.Timestamp(1221222L).toLocalDateTime(), bean.getBirthDate());
 		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
 	}
 
-	protected static enum MockType {ONE,TWO,THREE};
+	protected void verifyPerson(DatePerson bean) {
+		assertEquals("Bubba", bean.getLastName());
+		assertEquals(22L, bean.getAge());
+		assertEquals(new java.sql.Date(1221222L).toLocalDate(), bean.getBirthDate());
+		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+	}
+
+
+	protected enum MockType {ONE, TWO, THREE};
+
 
 	protected static class Mock {
 
@@ -79,8 +90,8 @@ public abstract class AbstractRowMapperTests {
 			this(MockType.ONE);
 		}
 
-		public Mock(MockType type)
-				throws Exception {
+		@SuppressWarnings("unchecked")
+		public Mock(MockType type) throws Exception {
 			connection = mock(Connection.class);
 			statement = mock(Statement.class);
 			resultSet = mock(ResultSet.class);
@@ -94,8 +105,10 @@ public abstract class AbstractRowMapperTests {
 			given(resultSet.getString(1)).willReturn("Bubba");
 			given(resultSet.getLong(2)).willReturn(22L);
 			given(resultSet.getTimestamp(3)).willReturn(new Timestamp(1221222L));
+			given(resultSet.getObject(anyInt(), any(Class.class))).willThrow(new SQLFeatureNotSupportedException());
+			given(resultSet.getDate(3)).willReturn(new java.sql.Date(1221222L));
 			given(resultSet.getBigDecimal(4)).willReturn(new BigDecimal("1234.56"));
-			given(resultSet.wasNull()).willReturn(type == MockType.TWO ? true : false);
+			given(resultSet.wasNull()).willReturn(type == MockType.TWO);
 
 			given(resultSetMetaData.getColumnCount()).willReturn(4);
 			given(resultSetMetaData.getColumnLabel(1)).willReturn(
@@ -119,4 +132,5 @@ public abstract class AbstractRowMapperTests {
 			verify(statement).close();
 		}
 	}
+
 }

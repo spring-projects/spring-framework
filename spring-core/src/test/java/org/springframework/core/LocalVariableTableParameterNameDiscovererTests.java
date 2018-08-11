@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 
 	@Test
 	public void methodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
-		Method getName = TestObject.class.getMethod("getName", new Class[0]);
+		Method getName = TestObject.class.getMethod("getName");
 		String[] names = discoverer.getParameterNames(getName);
 		assertNotNull("should find method info", names);
 		assertEquals("no argument names", 0, names.length);
@@ -47,7 +47,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 
 	@Test
 	public void methodParameterNameDiscoveryWithArgs() throws NoSuchMethodException {
-		Method setName = TestObject.class.getMethod("setName", new Class[] { String.class });
+		Method setName = TestObject.class.getMethod("setName", String.class);
 		String[] names = discoverer.getParameterNames(setName);
 		assertNotNull("should find method info", names);
 		assertEquals("one argument", 1, names.length);
@@ -56,7 +56,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 
 	@Test
 	public void consParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
-		Constructor<TestObject> noArgsCons = TestObject.class.getConstructor(new Class[0]);
+		Constructor<TestObject> noArgsCons = TestObject.class.getConstructor();
 		String[] names = discoverer.getParameterNames(noArgsCons);
 		assertNotNull("should find cons info", names);
 		assertEquals("no argument names", 0, names.length);
@@ -64,7 +64,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 
 	@Test
 	public void consParameterNameDiscoveryArgs() throws NoSuchMethodException {
-		Constructor<TestObject> twoArgCons = TestObject.class.getConstructor(new Class[] { String.class, int.class });
+		Constructor<TestObject> twoArgCons = TestObject.class.getConstructor(String.class, int.class);
 		String[] names = discoverer.getParameterNames(twoArgCons);
 		assertNotNull("should find cons info", names);
 		assertEquals("one argument", 2, names.length);
@@ -74,7 +74,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 
 	@Test
 	public void staticMethodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
-		Method m = getClass().getMethod("staticMethodNoLocalVars", new Class[0]);
+		Method m = getClass().getMethod("staticMethodNoLocalVars");
 		String[] names = discoverer.getParameterNames(m);
 		assertNotNull("should find method info", names);
 		assertEquals("no argument names", 0, names.length);
@@ -84,14 +84,14 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	public void overloadedStaticMethod() throws Exception {
 		Class<? extends LocalVariableTableParameterNameDiscovererTests> clazz = this.getClass();
 
-		Method m1 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE, Long.TYPE });
+		Method m1 = clazz.getMethod("staticMethod", Long.TYPE, Long.TYPE);
 		String[] names = discoverer.getParameterNames(m1);
 		assertNotNull("should find method info", names);
 		assertEquals("two arguments", 2, names.length);
 		assertEquals("x", names[0]);
 		assertEquals("y", names[1]);
 
-		Method m2 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE, Long.TYPE, Long.TYPE });
+		Method m2 = clazz.getMethod("staticMethod", Long.TYPE, Long.TYPE, Long.TYPE);
 		names = discoverer.getParameterNames(m2);
 		assertNotNull("should find method info", names);
 		assertEquals("three arguments", 3, names.length);
@@ -104,13 +104,13 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	public void overloadedStaticMethodInInnerClass() throws Exception {
 		Class<InnerClass> clazz = InnerClass.class;
 
-		Method m1 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE });
+		Method m1 = clazz.getMethod("staticMethod", Long.TYPE);
 		String[] names = discoverer.getParameterNames(m1);
 		assertNotNull("should find method info", names);
 		assertEquals("one argument", 1, names.length);
 		assertEquals("x", names[0]);
 
-		Method m2 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE, Long.TYPE });
+		Method m2 = clazz.getMethod("staticMethod", Long.TYPE, Long.TYPE);
 		names = discoverer.getParameterNames(m2);
 		assertNotNull("should find method info", names);
 		assertEquals("two arguments", 2, names.length);
@@ -122,14 +122,14 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	public void overloadedMethod() throws Exception {
 		Class<? extends LocalVariableTableParameterNameDiscovererTests> clazz = this.getClass();
 
-		Method m1 = clazz.getMethod("instanceMethod", new Class[] { Double.TYPE, Double.TYPE });
+		Method m1 = clazz.getMethod("instanceMethod", Double.TYPE, Double.TYPE);
 		String[] names = discoverer.getParameterNames(m1);
 		assertNotNull("should find method info", names);
 		assertEquals("two arguments", 2, names.length);
 		assertEquals("x", names[0]);
 		assertEquals("y", names[1]);
 
-		Method m2 = clazz.getMethod("instanceMethod", new Class[] { Double.TYPE, Double.TYPE, Double.TYPE });
+		Method m2 = clazz.getMethod("instanceMethod", Double.TYPE, Double.TYPE, Double.TYPE);
 		names = discoverer.getParameterNames(m2);
 		assertNotNull("should find method info", names);
 		assertEquals("three arguments", 3, names.length);
@@ -142,13 +142,13 @@ public class LocalVariableTableParameterNameDiscovererTests {
 	public void overloadedMethodInInnerClass() throws Exception {
 		Class<InnerClass> clazz = InnerClass.class;
 
-		Method m1 = clazz.getMethod("instanceMethod", new Class[] { String.class });
+		Method m1 = clazz.getMethod("instanceMethod", String.class);
 		String[] names = discoverer.getParameterNames(m1);
 		assertNotNull("should find method info", names);
 		assertEquals("one argument", 1, names.length);
 		assertEquals("aa", names[0]);
 
-		Method m2 = clazz.getMethod("instanceMethod", new Class[] { String.class, String.class });
+		Method m2 = clazz.getMethod("instanceMethod", String.class, String.class);
 		names = discoverer.getParameterNames(m2);
 		assertNotNull("should find method info", names);
 		assertEquals("two arguments", 2, names.length);
@@ -223,6 +223,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 		assertNull(names);
 	}
 
+
 	public static void staticMethodNoLocalVars() {
 	}
 
@@ -245,6 +246,7 @@ public class LocalVariableTableParameterNameDiscovererTests {
 		double u = x * y * z;
 		return u;
 	}
+
 
 	public static class InnerClass {
 
@@ -278,7 +280,9 @@ public class LocalVariableTableParameterNameDiscovererTests {
 		}
 	}
 
+
 	public static class GenerifiedClass<K, V> {
+
 		private static long date;
 
 		static {
@@ -317,4 +321,5 @@ public class LocalVariableTableParameterNameDiscovererTests {
 			return date;
 		}
 	}
+
 }

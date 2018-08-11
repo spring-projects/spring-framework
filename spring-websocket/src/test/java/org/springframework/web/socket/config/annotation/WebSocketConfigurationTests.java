@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
-		return new Class<?>[] { TestConfig.class };
+		return new Class<?>[] {TestConfig.class};
 	}
 
 	@Test
@@ -97,9 +97,9 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 			registry.addHandler(serverHandler(), "/ws")
-				.setHandshakeHandler(this.handshakeHandler);
+					.setHandshakeHandler(this.handshakeHandler);
 			registry.addHandler(serverHandler(), "/sockjs").withSockJS()
-				.setTransportHandlerOverrides(new WebSocketTransportHandler(this.handshakeHandler));
+					.setTransportHandlerOverrides(new WebSocketTransportHandler(this.handshakeHandler));
 		}
 
 		@Bean
@@ -107,6 +107,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 			return new TestHandler();
 		}
 	}
+
 
 	private static class TestHandler extends AbstractWebSocketHandler {
 

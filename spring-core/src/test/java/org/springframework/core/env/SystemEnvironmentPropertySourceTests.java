@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class SystemEnvironmentPropertySourceTests {
 
 	@Before
 	public void setUp() {
-		envMap = new HashMap<String, Object>();
+		envMap = new HashMap<>();
 		ps = new SystemEnvironmentPropertySource("sysEnv", envMap);
 	}
 
@@ -158,7 +158,7 @@ public class SystemEnvironmentPropertySourceTests {
 			}
 			@Override
 			public Set<String> keySet() {
-				return new HashSet<String>(super.keySet());
+				return new HashSet<>(super.keySet());
 			}
 		};
 		envMap.put("A_KEY", "a_value");

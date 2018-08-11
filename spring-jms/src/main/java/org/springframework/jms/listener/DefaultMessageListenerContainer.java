@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.CachingDestinationResolver;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -173,6 +174,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	private static final Constants constants = new Constants(DefaultMessageListenerContainer.class);
 
 
+	@Nullable
 	private Executor taskExecutor;
 
 	private BackOff backOff = new FixedBackOff(DEFAULT_RECOVERY_INTERVAL, Long.MAX_VALUE);
@@ -189,7 +191,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private int idleTaskExecutionLimit = 1;
 
-	private final Set<AsyncMessageListenerInvoker> scheduledInvokers = new HashSet<AsyncMessageListenerInvoker>();
+	private final Set<AsyncMessageListenerInvoker> scheduledInvokers = new HashSet<>();
 
 	private int activeInvokerCount = 0;
 
@@ -199,6 +201,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private volatile boolean interrupted = false;
 
+	@Nullable
 	private Runnable stopCallback;
 
 	private Object currentRecoveryMarker = new Object();
@@ -256,7 +259,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #setCacheLevel
 	 */
 	public void setCacheLevelName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith("CACHE_")) {
+		if (!constantName.startsWith("CACHE_")) {
 			throw new IllegalArgumentException("Only cache constants allowed");
 		}
 		setCacheLevel(constants.asNumber(constantName).intValue());
@@ -560,21 +563,32 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		logger.debug("Waiting for shutdown of message listener invokers");
 		try {
 			synchronized (this.lifecycleMonitor) {
-				// Waiting for AsyncMessageListenerInvokers to deactivate themselves...
+				long receiveTimeout = getReceiveTimeout();
+				long waitStartTime = System.currentTimeMillis();
+				int waitCount = 0;
 				while (this.activeInvokerCount > 0) {
+					if (waitCount > 0 && !isAcceptMessagesWhileStopping() &&
+							System.currentTimeMillis() - waitStartTime >= receiveTimeout) {
+						// Unexpectedly some invokers are still active after the receive timeout period
+						// -> interrupt remaining receive attempts since we'd reject the messages anyway
+						for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
+							scheduledInvoker.interruptIfNecessary();
+						}
+					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
-								" message listener invokers");
+								" message listener invokers (iteration " + waitCount + ")");
 					}
-					long timeout = getReceiveTimeout();
-					if (timeout > 0) {
-						this.lifecycleMonitor.wait(timeout);
+					// Wait for AsyncMessageListenerInvokers to deactivate themselves...
+					if (receiveTimeout > 0) {
+						this.lifecycleMonitor.wait(receiveTimeout);
 					}
 					else {
 						this.lifecycleMonitor.wait();
 					}
+					waitCount++;
 				}
-				// Clear remaining scheduled invokers, possibly left over as paused tasks...
+				// Clear remaining scheduled invokers, possibly left over as paused tasks
 				for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
 					scheduledInvoker.clearResources();
 				}
@@ -614,6 +628,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	@Override
 	public void stop(Runnable callback) throws JmsException {
 		synchronized (this.lifecycleMonitor) {
+			if (!isRunning() || this.stopCallback != null) {
+				// Not started, already stopped, or previous stop attempt in progress
+				// -> return immediately, no stop process to control anymore.
+				callback.run();
+				return;
+			}
 			this.stopCallback = callback;
 		}
 		stop();
@@ -711,6 +731,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	@Override
 	protected void doRescheduleTask(Object task) {
+		Assert.state(this.taskExecutor != null, "No TaskExecutor available");
 		this.taskExecutor.execute((Runnable) task);
 	}
 
@@ -854,7 +875,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 		if (ex instanceof SharedConnectionNotInitializedException) {
 			if (!alreadyRecovered) {
-				logger.info("JMS message listener invoker needs to establish shared Connection");
+				logger.debug("JMS message listener invoker needs to establish shared Connection");
 			}
 		}
 		else {
@@ -922,7 +943,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					Connection con = createConnection();
 					JmsUtils.closeConnection(con);
 				}
-				logger.info("Successfully refreshed JMS Connection");
+				logger.debug("Successfully refreshed JMS Connection");
 				break;
 			}
 			catch (Exception ex) {
@@ -989,7 +1010,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 		else {
 			try {
-				Thread.sleep(interval);
+				synchronized (this.lifecycleMonitor) {
+					this.lifecycleMonitor.wait(interval);
+				}
 			}
 			catch (InterruptedException interEx) {
 				// Re-interrupt current thread, to allow other threads to react.
@@ -1023,10 +1046,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	private class AsyncMessageListenerInvoker implements SchedulingAwareRunnable {
 
+		@Nullable
 		private Session session;
 
+		@Nullable
 		private MessageConsumer consumer;
 
+		@Nullable
 		private Object lastRecoveryMarker;
 
 		private boolean lastMessageSucceeded;
@@ -1034,6 +1060,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		private int idleTaskExecutionCount = 0;
 
 		private volatile boolean idle = true;
+
+		@Nullable
+		private volatile Thread currentReceiveThread;
 
 		@Override
 		public void run() {
@@ -1057,9 +1086,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			catch (Throwable ex) {
 				clearResources();
 				if (!this.lastMessageSucceeded) {
-					// We failed more than once in a row or on startup - sleep before
-					// first recovery attempt.
-					sleepBeforeRecoveryAttempt();
+					// We failed more than once in a row or on startup -
+					// wait before first recovery attempt.
+					waitBeforeRecoveryAttempt();
 				}
 				this.lastMessageSucceeded = false;
 				boolean alreadyRecovered = false;
@@ -1154,10 +1183,16 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 
 		private boolean invokeListener() throws JMSException {
-			initResourcesIfNecessary();
-			boolean messageReceived = receiveAndExecute(this, this.session, this.consumer);
-			this.lastMessageSucceeded = true;
-			return messageReceived;
+			this.currentReceiveThread = Thread.currentThread();
+			try {
+				initResourcesIfNecessary();
+				boolean messageReceived = receiveAndExecute(this, this.session, this.consumer);
+				this.lastMessageSucceeded = true;
+				return messageReceived;
+			}
+			finally {
+				this.currentReceiveThread = null;
+			}
 		}
 
 		private void decreaseActiveInvokerCount() {
@@ -1192,6 +1227,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 		}
 
+		private void interruptIfNecessary() {
+			Thread currentReceiveThread = this.currentReceiveThread;
+			if (currentReceiveThread != null && !currentReceiveThread.isInterrupted()) {
+				currentReceiveThread.interrupt();
+			}
+		}
+
 		private void clearResources() {
 			if (sharedConnectionEnabled()) {
 				synchronized (sharedConnectionMonitor) {
@@ -1214,11 +1256,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		/**
 		 * Apply the back-off time once. In a regular scenario, the back-off is only applied if we
-		 * failed to recover with the broker. This additional sleep period avoids a burst retry
+		 * failed to recover with the broker. This additional wait period avoids a burst retry
 		 * scenario when the broker is actually up but something else if failing (i.e. listener
 		 * specific).
 		 */
-		private void sleepBeforeRecoveryAttempt() {
+		private void waitBeforeRecoveryAttempt() {
 			BackOffExecution execution = DefaultMessageListenerContainer.this.backOff.start();
 			applyBackOffTime(execution);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,13 +203,13 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * customize {@code GenericApplicationContext}'s standard settings.
 	 *
 	 * @param context the context that should be prepared
+	 * @since 2.5
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @see #loadContext(String...)
 	 * @see GenericApplicationContext#setAllowBeanDefinitionOverriding
 	 * @see GenericApplicationContext#setResourceLoader
 	 * @see GenericApplicationContext#setId
 	 * @see #prepareContext(ConfigurableApplicationContext, MergedContextConfiguration)
-	 * @since 2.5
 	 */
 	protected void prepareContext(GenericApplicationContext context) {
 	}
@@ -222,13 +222,13 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * to customize {@code DefaultListableBeanFactory}'s standard settings.
 	 *
 	 * @param beanFactory the bean factory created by this {@code ContextLoader}
+	 * @since 2.5
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @see #loadContext(String...)
 	 * @see DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
 	 * @see DefaultListableBeanFactory#setAllowCircularReferences
 	 * @see DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
-	 * @since 2.5
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
 	}
@@ -250,8 +250,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 *
 	 * @param context the context into which the bean definitions should be loaded
 	 * @param mergedConfig the merged context configuration
-	 * @see #loadContext(MergedContextConfiguration)
 	 * @since 3.1
+	 * @see #loadContext(MergedContextConfiguration)
 	 */
 	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
 		createBeanDefinitionReader(context).loadBeanDefinitions(mergedConfig.getLocations());
@@ -264,10 +264,10 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @param context the context for which the {@code BeanDefinitionReader}
 	 * should be created
 	 * @return a {@code BeanDefinitionReader} for the supplied context
+	 * @since 2.5
 	 * @see #loadContext(String...)
 	 * @see #loadBeanDefinitions
 	 * @see BeanDefinitionReader
-	 * @since 2.5
 	 */
 	protected abstract BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context);
 
@@ -280,10 +280,10 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * to customize the application context.
 	 *
 	 * @param context the newly created application context
+	 * @since 2.5
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @see #loadContext(String...)
 	 * @see #customizeContext(ConfigurableApplicationContext, MergedContextConfiguration)
-	 * @since 2.5
 	 */
 	protected void customizeContext(GenericApplicationContext context) {
 	}

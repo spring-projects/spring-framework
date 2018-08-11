@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ResourceTestBean;
 
 import static org.hamcrest.Matchers.*;
@@ -53,7 +54,7 @@ public class ConversionServiceFactoryBeanTests {
 	@Test
 	public void createDefaultConversionServiceWithSupplements() {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
-		Set<Object> converters = new HashSet<Object>();
+		Set<Object> converters = new HashSet<>();
 		converters.add(new Converter<String, Foo>() {
 			@Override
 			public Foo convert(String source) {
@@ -78,7 +79,8 @@ public class ConversionServiceFactoryBeanTests {
 				return Collections.singleton(new ConvertiblePair(String.class, Baz.class));
 			}
 			@Override
-			public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			@Nullable
+			public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 				return new Baz();
 			}
 		});
@@ -91,10 +93,10 @@ public class ConversionServiceFactoryBeanTests {
 		assertTrue(service.canConvert(String.class, Baz.class));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void createDefaultConversionServiceWithInvalidSupplements() {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
-		Set<Object> converters = new HashSet<Object>();
+		Set<Object> converters = new HashSet<>();
 		converters.add("bogus");
 		factory.setConverters(converters);
 		factory.afterPropertiesSet();

@@ -1,0 +1,321 @@
+= Appendix
+
+
+
+
+[[xsd-schemas]]
+== XML Schemas
+
+This part of the appendix lists XML schemas related to integration technologies.
+
+
+
+[[xsd-schemas-jee]]
+=== The jee schema
+
+The `jee` tags deal with Java EE (Java Enterprise Edition)-related configuration issues,
+such as looking up a JNDI object and defining EJB references.
+
+To use the tags in the `jee` schema, you need to have the following preamble at the top
+of your Spring XML configuration file; the text in the following snippet references the
+correct schema so that the tags in the `jee` namespace are available to you.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		__xmlns:jee="http://www.springframework.org/schema/jee"__ xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"__> <!-- bean definitions here -->
+
+	</beans>
+----
+
+
+[[xsd-schemas-jee-jndi-lookup]]
+==== <jee:jndi-lookup/> (simple)
+
+Before...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="**dataSource**" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="jdbc/MyDataSource"/>
+	</bean>
+	<bean id="userDao" class="com.foo.JdbcUserDao">
+		<!-- Spring will do the cast automatically (as usual) -->
+		<property name="dataSource" ref="**dataSource**"/>
+	</bean>
+----
+
+After...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jee:jndi-lookup id="**dataSource**" jndi-name="jdbc/MyDataSource"/>
+
+	<bean id="userDao" class="com.foo.JdbcUserDao">
+		<!-- Spring will do the cast automatically (as usual) -->
+		<property name="dataSource" ref="**dataSource**"/>
+	</bean>
+----
+
+
+[[xsd-schemas-jee-jndi-lookup-environment-single]]
+==== <jee:jndi-lookup/> (with single JNDI environment setting)
+
+Before...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="jdbc/MyDataSource"/>
+		<property name="jndiEnvironment">
+			<props>
+				<prop key="foo">bar</prop>
+			</props>
+		</property>
+	</bean>
+----
+
+After...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
+		<jee:environment>foo=bar</jee:environment>
+	</jee:jndi-lookup>
+----
+
+
+[[xsd-schemas-jee-jndi-lookup-evironment-multiple]]
+==== <jee:jndi-lookup/> (with multiple JNDI environment settings)
+
+Before...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="jdbc/MyDataSource"/>
+		<property name="jndiEnvironment">
+			<props>
+				<prop key="foo">bar</prop>
+				<prop key="ping">pong</prop>
+			</props>
+		</property>
+	</bean>
+----
+
+After...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
+		<!-- newline-separated, key-value pairs for the environment (standard Properties format) -->
+		<jee:environment>
+			foo=bar
+			ping=pong
+		</jee:environment>
+	</jee:jndi-lookup>
+----
+
+
+[[xsd-schemas-jee-jndi-lookup-complex]]
+==== <jee:jndi-lookup/> (complex)
+
+Before...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="jdbc/MyDataSource"/>
+		<property name="cache" value="true"/>
+		<property name="resourceRef" value="true"/>
+		<property name="lookupOnStartup" value="false"/>
+		<property name="expectedType" value="com.myapp.DefaultFoo"/>
+		<property name="proxyInterface" value="com.myapp.Foo"/>
+	</bean>
+----
+
+After...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jee:jndi-lookup id="simple"
+			jndi-name="jdbc/MyDataSource"
+			cache="true"
+			resource-ref="true"
+			lookup-on-startup="false"
+			expected-type="com.myapp.DefaultFoo"
+			proxy-interface="com.myapp.Foo"/>
+----
+
+
+[[xsd-schemas-jee-local-slsb]]
+==== <jee:local-slsb/> (simple)
+
+The `<jee:local-slsb/>` tag configures a reference to an EJB Stateless SessionBean.
+
+Before...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="simple"
+			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+		<property name="jndiName" value="ejb/RentalServiceBean"/>
+		<property name="businessInterface" value="com.foo.service.RentalService"/>
+	</bean>
+----
+
+After...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jee:local-slsb id="simpleSlsb" jndi-name="ejb/RentalServiceBean"
+			business-interface="com.foo.service.RentalService"/>
+----
+
+
+[[xsd-schemas-jee-local-slsb-complex]]
+==== <jee:local-slsb/> (complex)
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="complexLocalEjb"
+			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+		<property name="jndiName" value="ejb/RentalServiceBean"/>
+		<property name="businessInterface" value="com.foo.service.RentalService"/>
+		<property name="cacheHome" value="true"/>
+		<property name="lookupHomeOnStartup" value="true"/>
+		<property name="resourceRef" value="true"/>
+	</bean>
+----
+
+After...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jee:local-slsb id="complexLocalEjb"
+			jndi-name="ejb/RentalServiceBean"
+			business-interface="com.foo.service.RentalService"
+			cache-home="true"
+			lookup-home-on-startup="true"
+			resource-ref="true">
+----
+
+
+[[xsd-schemas-jee-remote-slsb]]
+==== <jee:remote-slsb/>
+
+The `<jee:remote-slsb/>` tag configures a reference to a `remote` EJB Stateless
+SessionBean.
+
+Before...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="complexRemoteEjb"
+			class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
+		<property name="jndiName" value="ejb/MyRemoteBean"/>
+		<property name="businessInterface" value="com.foo.service.RentalService"/>
+		<property name="cacheHome" value="true"/>
+		<property name="lookupHomeOnStartup" value="true"/>
+		<property name="resourceRef" value="true"/>
+		<property name="homeInterface" value="com.foo.service.RentalService"/>
+		<property name="refreshHomeOnConnectFailure" value="true"/>
+	</bean>
+----
+
+After...
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jee:remote-slsb id="complexRemoteEjb"
+			jndi-name="ejb/MyRemoteBean"
+			business-interface="com.foo.service.RentalService"
+			cache-home="true"
+			lookup-home-on-startup="true"
+			resource-ref="true"
+			home-interface="com.foo.service.RentalService"
+			refresh-home-on-connect-failure="true">
+----
+
+
+
+
+[[xsd-schemas-jms]]
+=== The jms schema
+
+The `jms` tags deal with configuring JMS-related beans such as Spring's
+<<integration.adoc#jms-mdp,MessageListenerContainers>>. These tags are detailed in the
+section of the <<integration.adoc#jms,JMS chapter>> entitled <<integration.adoc#jms-namespace,
+JMS namespace support>>. Please do consult that chapter for full details on this support
+and the `jms` tags themselves.
+
+In the interest of completeness, to use the tags in the `jms` schema, you need to have
+the following preamble at the top of your Spring XML configuration file; the text in the
+following snippet references the correct schema so that the tags in the `jms` namespace
+are available to you.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		__xmlns:jms="http://www.springframework.org/schema/jms"__ xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"__> <!-- bean definitions here -->
+
+	</beans>
+----
+
+
+[[xsd-schemas-context-mbe]]
+=== <context:mbean-export/>
+
+This element is detailed in
+<<integration.adoc#jmx-context-mbeanexport, Configuring annotation based MBean export>>.
+
+
+
+[[xsd-schemas-cache]]
+=== The cache schema
+
+The `cache` tags can be used to enable support for Spring's `@CacheEvict`, `@CachePut`
+and `@Caching` annotations. It it also supports declarative XML-based caching. See
+<<integration.adoc#cache-annotation-enable,Enable caching annotations>> and
+<<integration.adoc#cache-declarative-xml,Declarative XML-based caching>> for details.
+
+To use the tags in the `cache` schema, you need to have the following preamble at the
+top of your Spring XML configuration file; the text in the following snippet references
+the correct schema so that the tags in the `cache` namespace are available to you.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		__xmlns:cache="http://www.springframework.org/schema/cache"__ xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"__> <!-- bean definitions here -->
+
+	</beans>
+----

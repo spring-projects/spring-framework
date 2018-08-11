@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.response;
 
 import java.net.URI;
@@ -22,7 +23,7 @@ import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpResponse;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
 
@@ -39,7 +40,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
 	}
 
 	@Test
@@ -49,7 +50,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
-		assertArrayEquals("foo".getBytes(), FileCopyUtils.copyToByteArray(response.getBody()));
+		assertArrayEquals("foo".getBytes(), StreamUtils.copyToByteArray(response.getBody()));
 	}
 
 	@Test
@@ -59,7 +60,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertNull(response.getHeaders().getContentType());
-		assertArrayEquals("foo".getBytes(), FileCopyUtils.copyToByteArray(response.getBody()));
+		assertArrayEquals("foo".getBytes(), StreamUtils.copyToByteArray(response.getBody()));
 	}
 
 	@Test
@@ -70,7 +71,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals(location, response.getHeaders().getLocation());
-		assertNull(response.getBody());
+		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
 	}
 
 	@Test
@@ -80,7 +81,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
 	}
 
 	@Test
@@ -90,7 +91,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
 	}
 
 	@Test
@@ -100,7 +101,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
 	}
 
 	@Test
@@ -110,7 +111,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
 	}
 
 	@Test
@@ -120,7 +121,7 @@ public class ResponseCreatorsTests {
 
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
-		assertNull(response.getBody());
+		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
 	}
 
 }

@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  *
  * @author Rick Evans
  */
-public final class CharArrayPropertyEditorTests {
+public class CharArrayPropertyEditorTests {
 
 	private final PropertyEditor charEditor = new CharArrayPropertyEditor();
 

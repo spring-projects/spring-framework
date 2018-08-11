@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.match;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +27,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
-
 
 /**
  * Unit tests for {@link ContentRequestMatchers}.
@@ -52,14 +52,14 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON).match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testContentTypeNoMatch1() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		MockRestRequestMatchers.content().contentType("application/xml").match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testContentTypeNoMatch2() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
@@ -73,7 +73,7 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().string("test").match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testStringNoMatch() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
@@ -88,7 +88,7 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().bytes(content).match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testBytesNoMatch() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
@@ -101,7 +101,7 @@ public class ContentRequestMatchersTests {
 		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
 
 		this.request.getHeaders().setContentType(MediaType.parseMediaType(contentType));
-		this.request.getBody().write(body.getBytes(Charset.forName("UTF-8")));
+		this.request.getBody().write(body.getBytes(StandardCharsets.UTF_8));
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 		map.add("name 1", "value 1");
@@ -119,7 +119,7 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().xml(content).match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testXmlNoMatch() throws Exception {
 		this.request.getBody().write("<foo>11</foo>".getBytes());
 
@@ -134,12 +134,60 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().node(hasXPath("/foo/bar")).match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testNodeMatcherNoMatch() throws Exception {
 		String content = "<foo><bar>baz</bar></foo>";
 		this.request.getBody().write(content.getBytes());
 
 		MockRestRequestMatchers.content().node(hasXPath("/foo/bar/bar")).match(this.request);
+	}
+
+	@Test
+	public void testJsonLenientMatch() throws Exception {
+		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is allowed\" \n}";
+		this.request.getBody().write(content.getBytes());
+
+		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}")
+				.match(this.request);
+		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}", false)
+				.match(this.request);
+	}
+
+	@Test
+	public void testJsonStrictMatch() throws Exception {
+		String content = "{\n \"foo\": \"bar\", \"foo array\":[\"first\",\"second\"] \n}";
+		this.request.getBody().write(content.getBytes());
+
+		MockRestRequestMatchers
+				.content()
+				.json("{\n \"foo array\":[\"first\",\"second\"] , \"foo\": \"bar\" \n}", true)
+				.match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void testJsonLenientNoMatch() throws Exception {
+		String content = "{\n \"bar\" : \"foo\"  \n}";
+		this.request.getBody().write(content.getBytes());
+
+		MockRestRequestMatchers
+				.content()
+				.json("{\n \"foo\" : \"bar\"  \n}")
+				.match(this.request);
+		MockRestRequestMatchers
+				.content()
+				.json("{\n \"foo\" : \"bar\"  \n}", false)
+				.match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void testJsonStrictNoMatch() throws Exception {
+		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is NOT allowed\" \n}";
+		this.request.getBody().write(content.getBytes());
+
+		MockRestRequestMatchers
+				.content()
+				.json("{\n \"foo array\":[\"second\",\"first\"] \n}", true)
+				.match(this.request);
 	}
 
 }

@@ -23,7 +23,7 @@
 			<bean class="org.springframework.tests.sample.beans.TestBean">
 				<property name="someSet">
 					<set>
-						<ref local="proxy1"/>
+						<ref bean="proxy1"/>
 					</set>
 				</property>
 			</bean>

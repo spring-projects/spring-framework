@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
-
 /**
  * Unit tests for {@link RequestAttributeMethodArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
+ * @since 4.3
  */
-public class RequestAttributeMethodArgumentResolverTests
-		extends AbstractRequestAttributesArgumentResolverTests {
-
+public class RequestAttributeMethodArgumentResolverTests extends AbstractRequestAttributesArgumentResolverTests {
 
 	@Override
 	protected HandlerMethodArgumentResolver createResolver() {

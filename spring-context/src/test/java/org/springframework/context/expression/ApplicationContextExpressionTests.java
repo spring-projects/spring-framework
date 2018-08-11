@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.Test;
 
 import org.springframework.beans.factory.ObjectFactory;
@@ -61,6 +62,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class ApplicationContextExpressionTests {
@@ -326,11 +328,10 @@ public class ApplicationContextExpressionTests {
 
 	@Test
 	public void resourceInjection() throws IOException {
-		System.setProperty("logfile", "log4j.properties");
-		try {
-			AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(ResourceInjectionBean.class);
+		System.setProperty("logfile", "do_not_delete_me.txt");
+		try (AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(ResourceInjectionBean.class)) {
 			ResourceInjectionBean resourceInjectionBean = ac.getBean(ResourceInjectionBean.class);
-			Resource resource = new ClassPathResource("log4j.properties");
+			Resource resource = new ClassPathResource("do_not_delete_me.txt");
 			assertEquals(resource, resourceInjectionBean.resource);
 			assertEquals(resource.getURL(), resourceInjectionBean.url);
 			assertEquals(resource.getURI(), resourceInjectionBean.uri);

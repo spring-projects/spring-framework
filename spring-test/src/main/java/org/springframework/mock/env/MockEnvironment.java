@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,14 @@ public class MockEnvironment extends AbstractEnvironment {
 	 * Create a new {@code MockEnvironment} with a single {@link MockPropertySource}.
 	 */
 	public MockEnvironment() {
-		getPropertySources().addLast(propertySource);
+		getPropertySources().addLast(this.propertySource);
 	}
 
 	/**
 	 * Set a property on the underlying {@link MockPropertySource} for this environment.
 	 */
 	public void setProperty(String key, String value) {
-		propertySource.setProperty(key, value);
+		this.propertySource.setProperty(key, value);
 	}
 
 	/**

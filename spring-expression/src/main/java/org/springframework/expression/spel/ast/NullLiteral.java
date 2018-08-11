@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.expression.spel.CodeFlow;
 public class NullLiteral extends Literal {
 
 	public NullLiteral(int pos) {
-		super(null,pos);
+		super(null, pos);
 		this.exitTypeDescriptor = "Ljava/lang/Object";
 	}
 
@@ -48,7 +48,7 @@ public class NullLiteral extends Literal {
 	public boolean isCompilable() {
 		return true;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		mv.visitInsn(ACONST_NULL);

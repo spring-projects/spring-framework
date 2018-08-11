@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class BshScriptEvaluatorTests {
 	@Test
 	public void testGroovyScriptWithArguments() {
 		ScriptEvaluator evaluator = new BshScriptEvaluator();
-		Map<String, Object> arguments = new HashMap<String, Object>();
+		Map<String, Object> arguments = new HashMap<>();
 		arguments.put("a", 3);
 		arguments.put("b", 2);
 		Object result = evaluator.evaluate(new StaticScriptSource("return a * b;"), arguments);

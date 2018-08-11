@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class SpringObjenesis implements Objenesis {
 	private final InstantiatorStrategy strategy;
 
 	private final ConcurrentReferenceHashMap<Class<?>, ObjectInstantiator<?>> cache =
-			new ConcurrentReferenceHashMap<Class<?>, ObjectInstantiator<?>>();
+			new ConcurrentReferenceHashMap<>();
 
 	private volatile Boolean worthTrying;
 

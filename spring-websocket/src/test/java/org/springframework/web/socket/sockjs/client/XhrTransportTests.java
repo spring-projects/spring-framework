@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,10 +75,9 @@ public class XhrTransportTests {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.sendMessageResponseToReturn = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		URI url = new URI("http://example.com");
-		transport.executeSendRequest(url, null, new TextMessage("payload"));
+		transport.executeSendRequest(url, new HttpHeaders(), new TextMessage("payload"));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void connect() throws Exception {
 		HttpHeaders handshakeHeaders = new HttpHeaders();
@@ -87,13 +86,9 @@ public class XhrTransportTests {
 		TransportRequest request = mock(TransportRequest.class);
 		given(request.getSockJsUrlInfo()).willReturn(new SockJsUrlInfo(new URI("http://example.com")));
 		given(request.getHandshakeHeaders()).willReturn(handshakeHeaders);
-
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("foo", "bar");
+		given(request.getHttpRequestHeaders()).willReturn(new HttpHeaders());
 
 		TestXhrTransport transport = new TestXhrTransport();
-		transport.setRequestHeaders(requestHeaders);
-
 		WebSocketHandler handler = mock(WebSocketHandler.class);
 		transport.connect(request, handler);
 
@@ -105,9 +100,8 @@ public class XhrTransportTests {
 		verify(request).getHttpRequestHeaders();
 		verifyNoMoreInteractions(request);
 
-		assertEquals(2, transport.actualHandshakeHeaders.size());
+		assertEquals(1, transport.actualHandshakeHeaders.size());
 		assertEquals("foo", transport.actualHandshakeHeaders.getOrigin());
-		assertEquals("bar", transport.actualHandshakeHeaders.getFirst("foo"));
 
 		assertFalse(transport.actualSession.isDisconnected());
 		captor.getValue().run();

@@ -19,6 +19,8 @@ package org.springframework.cache.interceptor;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface used by {@link CacheInterceptor}. Implementations know how to source
  * cache operation attributes, whether from configuration, metadata attributes at
@@ -37,6 +39,7 @@ public interface CacheOperationSource {
 	 * the declaring class of the method must be used)
 	 * @return all cache operations for this method, or {@code null} if none found
 	 */
-	Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass);
+	@Nullable
+	Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass);
 
 }

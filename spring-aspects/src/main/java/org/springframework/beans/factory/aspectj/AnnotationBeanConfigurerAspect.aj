@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * Concrete aspect that uses the {@link Configurable} annotation to identify
  * which classes need autowiring.
  *
- * <p>The bean name to look up will be taken from the {@code &#64;Configurable}
- * annotation if specified, otherwise the default bean name to look up will be
+ * <p>The bean name to look up will be taken from the {@code @Configurable}
+ * annotation if specified; otherwise, the default bean name to look up will be
  * the fully qualified name of the class being configured.
  *
  * @author Rod Johnson

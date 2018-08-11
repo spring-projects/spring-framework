@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class InstanceComparatorTests {
 
 	@Test
 	public void shouldCompareClasses() throws Exception {
-		Comparator<Object> comparator = new InstanceComparator<Object>(C1.class, C2.class);
+		Comparator<Object> comparator = new InstanceComparator<>(C1.class, C2.class);
 		assertThat(comparator.compare(c1, c1), is(0));
 		assertThat(comparator.compare(c1, c2), is(-1));
 		assertThat(comparator.compare(c2, c1), is(1));
@@ -51,7 +51,7 @@ public class InstanceComparatorTests {
 
 	@Test
 	public void shouldCompareInterfaces() throws Exception {
-		Comparator<Object> comparator = new InstanceComparator<Object>(I1.class, I2.class);
+		Comparator<Object> comparator = new InstanceComparator<>(I1.class, I2.class);
 		assertThat(comparator.compare(c1, c1), is(0));
 		assertThat(comparator.compare(c1, c2), is(0));
 		assertThat(comparator.compare(c2, c1), is(0));
@@ -62,7 +62,7 @@ public class InstanceComparatorTests {
 
 	@Test
 	public void shouldCompareMix() throws Exception {
-		Comparator<Object> comparator = new InstanceComparator<Object>(I1.class, C3.class);
+		Comparator<Object> comparator = new InstanceComparator<>(I1.class, C3.class);
 		assertThat(comparator.compare(c1, c1), is(0));
 		assertThat(comparator.compare(c3, c4), is(-1));
 		assertThat(comparator.compare(c3, null), is(-1));

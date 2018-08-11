@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.mock;
-
 
 /**
  * Text fixture for {@link ModelFactory} tests.
@@ -158,7 +157,7 @@ public class ModelFactoryTests {
 			modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
 			fail("Expected HttpSessionRequiredException");
 		}
-		catch (HttpSessionRequiredException e) {
+		catch (HttpSessionRequiredException ex) {
 			// expected
 		}
 
@@ -229,9 +228,7 @@ public class ModelFactoryTests {
 		assertNull(this.attributeStore.retrieveAttribute(this.webRequest, attributeName));
 	}
 
-	// SPR-12542
-
-	@Test
+	@Test  // SPR-12542
 	public void updateModelWhenRedirecting() throws Exception {
 		String attributeName = "sessionAttr";
 		String attribute = "value";
@@ -274,8 +271,8 @@ public class ModelFactoryTests {
 	}
 
 
-	@SessionAttributes({"sessionAttr", "foo"}) @SuppressWarnings("unused")
-	private static class TestController {
+	@SessionAttributes({"sessionAttr", "foo"})
+	static class TestController {
 
 		@ModelAttribute
 		public void modelAttr(Model model) {
@@ -308,6 +305,7 @@ public class ModelFactoryTests {
 		public void handleSessionAttr(@ModelAttribute("sessionAttr") String sessionAttr) {
 		}
 	}
+
 
 	private static class Foo {
 	}

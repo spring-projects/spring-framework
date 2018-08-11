@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import org.springframework.web.cors.DefaultCorsProcessor;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * {@link javax.servlet.Filter} that handles CORS preflight requests and intercepts CORS
- * simple and actual requests thanks to a {@link CorsProcessor} implementation
- * ({@link DefaultCorsProcessor} by default) in order to add the relevant CORS response
- * headers (like {@code Access-Control-Allow-Origin}) using the provided
+ * {@link javax.servlet.Filter} that handles CORS preflight requests and intercepts
+ * CORS simple and actual requests thanks to a {@link CorsProcessor} implementation
+ * ({@link DefaultCorsProcessor} by default) in order to add the relevant CORS
+ * response headers (like {@code Access-Control-Allow-Origin}) using the provided
  * {@link CorsConfigurationSource} (for example an {@link UrlBasedCorsConfigurationSource}
  * instance.
  *
@@ -52,19 +52,21 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  */
 public class CorsFilter extends OncePerRequestFilter {
 
-	private CorsProcessor processor = new DefaultCorsProcessor();
-
 	private final CorsConfigurationSource configSource;
+
+	private CorsProcessor processor = new DefaultCorsProcessor();
 
 
 	/**
-	 * Constructor accepting a {@link CorsConfigurationSource} used by the filter to find
-	 * the {@link CorsConfiguration} to use for each incoming request.
+	 * Constructor accepting a {@link CorsConfigurationSource} used by the filter
+	 * to find the {@link CorsConfiguration} to use for each incoming request.
 	 * @see UrlBasedCorsConfigurationSource
 	 */
 	public CorsFilter(CorsConfigurationSource configSource) {
+		Assert.notNull(configSource, "CorsConfigurationSource must not be null");
 		this.configSource = configSource;
 	}
+
 
 	/**
 	 * Configure a custom {@link CorsProcessor} to use to apply the matched
@@ -75,6 +77,7 @@ public class CorsFilter extends OncePerRequestFilter {
 		Assert.notNull(processor, "CorsProcessor must not be null");
 		this.processor = processor;
 	}
+
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -89,6 +92,7 @@ public class CorsFilter extends OncePerRequestFilter {
 				}
 			}
 		}
+
 		filterChain.doFilter(request, response);
 	}
 

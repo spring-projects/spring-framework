@@ -1,0 +1,59 @@
+/*
+ * Copyright 2002-2017 the original author or authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.jdbc.core.namedparam
+
+/**
+ * Extension for [MapSqlParameterSource.addValue] providing Array like setter.
+ *
+ * ```kotlin
+ * source["age"] = 3
+ * ```
+ * @author Mario Arias
+ * @since 5.0
+ *
+ */
+operator fun MapSqlParameterSource.set(paramName: String, value: Any) {
+	this.addValue(paramName, value)
+}
+
+/**
+ * Extension for [MapSqlParameterSource.addValue] providing Array like setter.
+ *
+ * ```kotlin
+ * source["age", JDBCType.INTEGER.vendorTypeNumber] = 3
+ * ```
+ * @author Mario Arias
+ * @since 5.0
+ *
+ */
+operator fun MapSqlParameterSource.set(paramName: String, sqlType: Int, value: Any) {
+	this.addValue(paramName, value, sqlType)
+}
+
+/**
+ * Extension for [MapSqlParameterSource.addValue] providing Array like setter
+ *
+ * ```kotlin
+ * source["age", JDBCType.INTEGER.vendorTypeNumber, "INT"] = 3
+ * ```
+ * @author Mario Arias
+ * @since 5.0
+ *
+ */
+operator fun MapSqlParameterSource.set(paramName: String, sqlType: Int, typeName: String, value: Any) {
+	this.addValue(paramName, value, sqlType, typeName)
+}

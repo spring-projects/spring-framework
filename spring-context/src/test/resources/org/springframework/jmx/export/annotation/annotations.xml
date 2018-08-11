@@ -7,15 +7,15 @@
 		<property name="beans">
 			<map>
 				<entry key="namingTest">
-					<ref local="testBean"/>
+					<ref bean="testBean"/>
 				</entry>
 			</map>
 		</property>
 		<property name="assembler">
-			<ref local="metadataAssembler"/>
+			<ref bean="metadataAssembler"/>
 		</property>
 		<property name="namingStrategy">
-			<ref local="metadataNamingStrategy"/>
+			<ref bean="metadataNamingStrategy"/>
 		</property>
 	</bean>
 

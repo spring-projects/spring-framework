@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import static org.springframework.core.env.AbstractEnvironment.*;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 public class StandardEnvironmentTests {
 
 	private static final String ALLOWED_PROPERTY_NAME = "theanswer";
@@ -129,42 +130,42 @@ public class StandardEnvironmentTests {
 		assertThat(activeProfiles.length, is(2));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNullProfileArray() {
 		environment.setActiveProfiles((String[])null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNullProfile() {
 		environment.setActiveProfiles((String)null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withEmptyProfile() {
 		environment.setActiveProfiles("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNotOperator() {
 		environment.setActiveProfiles("p1", "!p2");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfileArray() {
 		environment.setDefaultProfiles((String[])null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfile() {
 		environment.setDefaultProfiles((String)null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withEmptyProfile() {
 		environment.setDefaultProfiles("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNotOperator() {
 		environment.setDefaultProfiles("d1", "!d2");
 	}
@@ -204,7 +205,7 @@ public class StandardEnvironmentTests {
 		System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void defaultProfileWithCircularPlaceholder() {
 		System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "${spring.profiles.default}");
 		try {
@@ -263,26 +264,25 @@ public class StandardEnvironmentTests {
 		assertThat(Arrays.asList(environment.getDefaultProfiles()), hasItems("pd2", "pd3"));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withEmptyArgumentList() {
 		environment.acceptsProfiles();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withNullArgumentList() {
 		environment.acceptsProfiles((String[])null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withNullArgument() {
 		environment.acceptsProfiles((String)null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withEmptyArgument() {
 		environment.acceptsProfiles("");
 	}
-
 
 	@Test
 	public void acceptsProfiles_activeProfileSetProgrammatically() {
@@ -321,9 +321,18 @@ public class StandardEnvironmentTests {
 		assertThat(environment.acceptsProfiles("!p1"), is(false));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withInvalidNotOperator() {
 		environment.acceptsProfiles("p1", "!");
+	}
+
+	@Test
+	public void acceptsProfiles_withProfileExpression() {
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
+		environment.addActiveProfile("p1");
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
+		environment.addActiveProfile("p2");
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(true));
 	}
 
 	@Test

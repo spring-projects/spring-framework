@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,20 +163,34 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *
  * <p>For reference, the example above can be compared to the following Spring XML
  * configuration:
+ *
  * <pre class="code">
- * {@code
- * <beans>
- *     <task:annotation-driven scheduler="taskScheduler"/>
- *     <task:scheduler id="taskScheduler" pool-size="42"/>
- *     <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
- *     <bean id="myTask" class="com.foo.MyTask"/>
- * </beans>
- * }</pre>
- * the examples are equivalent save that in XML a <em>fixed-rate</em> period is used
+ * &lt;beans>
+ *
+ *     &lt;task:annotation-driven scheduler="taskScheduler"/&gt;
+ *
+ *     &lt;task:scheduler id="taskScheduler" pool-size="42"/&gt;
+ *
+ *     &lt;task:scheduled-tasks scheduler="taskScheduler"&gt;
+ *         &lt;task:scheduled ref="myTask" method="work" fixed-rate="1000"/&gt;
+ *     &lt;/task:scheduled-tasks&gt;
+ *
+ *     &lt;bean id="myTask" class="com.foo.MyTask"/&gt;
+ *
+ * &lt;/beans&gt;
+ * </pre>
+ *
+ * The examples are equivalent save that in XML a <em>fixed-rate</em> period is used
  * instead of a custom <em>{@code Trigger}</em> implementation; this is because the
  * {@code task:} namespace {@code scheduled} cannot easily expose such support. This is
  * but one demonstration how the code-based approach allows for maximum configurability
  * through direct access to actual componentry.<p>
+ *
+ * <b>Note: {@code @EnableScheduling} applies to its local application context only,
+ * allowing for selective scheduling of beans at different levels.</b> Please redeclare
+ * {@code @EnableScheduling} in each individual context, e.g. the common root web
+ * application context and any separate {@code DispatcherServlet} application contexts,
+ * if you need to apply its behavior at multiple levels.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

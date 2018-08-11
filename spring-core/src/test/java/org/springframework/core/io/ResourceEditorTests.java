@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Dave Syer
  */
-public final class ResourceEditorTests {
+public class ResourceEditorTests {
 
 	@Test
 	public void sunnyDay() throws Exception {
@@ -75,7 +75,7 @@ public final class ResourceEditorTests {
 		}
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testStrictSystemPropertyReplacement() {
 		PropertyEditor editor = new ResourceEditor(new DefaultResourceLoader(), new StandardEnvironment(), false);
 		System.setProperty("test.prop", "foo");

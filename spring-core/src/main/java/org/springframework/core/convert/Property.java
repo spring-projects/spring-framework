@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -36,8 +37,8 @@ import org.springframework.util.StringUtils;
  * is not available in a number of environments (e.g. Android, Java ME), so this is
  * desirable for portability of Spring's core conversion facility.
  *
- * <p>Used to build a TypeDescriptor from a property location.
- * The built TypeDescriptor can then be used to convert from/to the property type.
+ * <p>Used to build a {@link TypeDescriptor} from a property location. The built
+ * {@code TypeDescriptor} can then be used to convert from/to the property type.
  *
  * @author Keith Donald
  * @author Phillip Webb
@@ -47,32 +48,36 @@ import org.springframework.util.StringUtils;
  */
 public final class Property {
 
-	private static Map<Property, Annotation[]> annotationCache =
-			new ConcurrentReferenceHashMap<Property, Annotation[]>();
+	private static Map<Property, Annotation[]> annotationCache = new ConcurrentReferenceHashMap<>();
 
 	private final Class<?> objectType;
 
+	@Nullable
 	private final Method readMethod;
 
+	@Nullable
 	private final Method writeMethod;
 
 	private final String name;
 
 	private final MethodParameter methodParameter;
 
+	@Nullable
 	private Annotation[] annotations;
 
 
-	public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
+	public Property(Class<?> objectType, @Nullable Method readMethod, @Nullable Method writeMethod) {
 		this(objectType, readMethod, writeMethod, null);
 	}
 
-	public Property(Class<?> objectType, Method readMethod, Method writeMethod, String name) {
+	public Property(
+			Class<?> objectType, @Nullable Method readMethod, @Nullable Method writeMethod, @Nullable String name) {
+
 		this.objectType = objectType;
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 		this.methodParameter = resolveMethodParameter();
-		this.name = (name == null ? resolveName() : name);
+		this.name = (name != null ? name : resolveName());
 	}
 
 
@@ -100,6 +105,7 @@ public final class Property {
 	/**
 	 * The property getter method: e.g. {@code getFoo()}
 	 */
+	@Nullable
 	public Method getReadMethod() {
 		return this.readMethod;
 	}
@@ -107,6 +113,7 @@ public final class Property {
 	/**
 	 * The property setter method: e.g. {@code setFoo(String)}
 	 */
+	@Nullable
 	public Method getWriteMethod() {
 		return this.writeMethod;
 	}
@@ -143,12 +150,16 @@ public final class Property {
 			}
 			return StringUtils.uncapitalize(this.readMethod.getName().substring(index));
 		}
-		else {
-			int index = this.writeMethod.getName().indexOf("set") + 3;
+		else if (this.writeMethod != null) {
+			int index = this.writeMethod.getName().indexOf("set");
 			if (index == -1) {
 				throw new IllegalArgumentException("Not a setter method");
 			}
+			index += 3;
 			return StringUtils.uncapitalize(this.writeMethod.getName().substring(index));
+		}
+		else {
+			throw new IllegalStateException("Property is neither readable nor writeable");
 		}
 	}
 
@@ -171,6 +182,7 @@ public final class Property {
 		return write;
 	}
 
+	@Nullable
 	private MethodParameter resolveReadMethodParameter() {
 		if (getReadMethod() == null) {
 			return null;
@@ -178,6 +190,7 @@ public final class Property {
 		return resolveParameterType(new MethodParameter(getReadMethod(), -1));
 	}
 
+	@Nullable
 	private MethodParameter resolveWriteMethodParameter() {
 		if (getWriteMethod() == null) {
 			return null;
@@ -194,19 +207,19 @@ public final class Property {
 	private Annotation[] resolveAnnotations() {
 		Annotation[] annotations = annotationCache.get(this);
 		if (annotations == null) {
-			Map<Class<? extends Annotation>, Annotation> annotationMap = new LinkedHashMap<Class<? extends Annotation>, Annotation>();
+			Map<Class<? extends Annotation>, Annotation> annotationMap = new LinkedHashMap<>();
 			addAnnotationsToMap(annotationMap, getReadMethod());
 			addAnnotationsToMap(annotationMap, getWriteMethod());
 			addAnnotationsToMap(annotationMap, getField());
-			annotations = annotationMap.values().toArray(new Annotation[annotationMap.size()]);
+			annotations = annotationMap.values().toArray(new Annotation[0]);
 			annotationCache.put(this, annotations);
 		}
 		return annotations;
 	}
 
 	private void addAnnotationsToMap(
-		Map<Class<? extends Annotation>, Annotation> annotationMap,
-		AnnotatedElement object) {
+			Map<Class<? extends Annotation>, Annotation> annotationMap, @Nullable AnnotatedElement object) {
+
 		if (object != null) {
 			for (Annotation annotation : object.getAnnotations()) {
 				annotationMap.put(annotation.annotationType(), annotation);
@@ -214,31 +227,37 @@ public final class Property {
 		}
 	}
 
+	@Nullable
 	private Field getField() {
 		String name = getName();
 		if (!StringUtils.hasLength(name)) {
 			return null;
 		}
+		Field field = null;
 		Class<?> declaringClass = declaringClass();
-		Field field = ReflectionUtils.findField(declaringClass, name);
-		if (field == null) {
-			// Same lenient fallback checking as in CachedIntrospectionResults...
-			field = ReflectionUtils.findField(declaringClass,
-					name.substring(0, 1).toLowerCase() + name.substring(1));
+		if (declaringClass != null) {
+			field = ReflectionUtils.findField(declaringClass, name);
 			if (field == null) {
-				field = ReflectionUtils.findField(declaringClass,
-						name.substring(0, 1).toUpperCase() + name.substring(1));
+				// Same lenient fallback checking as in CachedIntrospectionResults...
+				field = ReflectionUtils.findField(declaringClass, StringUtils.uncapitalize(name));
+				if (field == null) {
+					field = ReflectionUtils.findField(declaringClass, StringUtils.capitalize(name));
+				}
 			}
 		}
 		return field;
 	}
 
+	@Nullable
 	private Class<?> declaringClass() {
 		if (getReadMethod() != null) {
 			return getReadMethod().getDeclaringClass();
 		}
-		else {
+		else if (getWriteMethod() != null) {
 			return getWriteMethod().getDeclaringClass();
+		}
+		else {
+			return null;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxProcessor;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.HandlerMethod;
@@ -50,6 +57,7 @@ import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
@@ -60,16 +68,10 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.verify;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for
@@ -79,7 +81,6 @@ import static org.mockito.Mockito.verify;
  * @author Brian Clozel
  * @author Sebastien Deleuze
  */
-@SuppressWarnings("unused")
 public class SimpAnnotationMethodMessageHandlerTests {
 
 	private static final String TEST_INVALID_VALUE = "invalidValue";
@@ -164,7 +165,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Test
 	public void subscribeEventDestinationVariableResolution() {
-		Message<?> message = createMessage("/pre/sub/bar/value");
+		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, "/pre/sub/bar/value", null);
 		this.messageHandler.registerHandler(this.testController);
 		this.messageHandler.handleMessage(message);
 
@@ -203,6 +204,30 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
 		assertNotNull(handlerMethod);
 		assertEquals("illegalState", handlerMethod.getMethod().getName());
+	}
+
+	@Test
+	public void exceptionAsCause() {
+		Message<?> message = createMessage("/pre/illegalStateCause");
+		this.messageHandler.registerHandler(this.testController);
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("handleExceptionWithHandlerMethodArg", this.testController.method);
+		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
+		assertNotNull(handlerMethod);
+		assertEquals("illegalStateCause", handlerMethod.getMethod().getName());
+	}
+
+	@Test
+	public void errorAsMessageHandlingException() {
+		Message<?> message = createMessage("/pre/error");
+		this.messageHandler.registerHandler(this.testController);
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("handleErrorWithHandlerMethodArg", this.testController.method);
+		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
+		assertNotNull(handlerMethod);
+		assertEquals("errorAsThrowable", handlerMethod.getMethod().getName());
 	}
 
 	@Test
@@ -246,7 +271,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void listenableFutureSuccess() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class))).willReturn(emptyMessage);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
 		ListenableFutureController controller = new ListenableFutureController();
 		this.messageHandler.registerHandler(controller);
@@ -266,7 +291,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void listenableFutureFailure() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class))).willReturn(emptyMessage);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
 		ListenableFutureController controller = new ListenableFutureController();
 		this.messageHandler.registerHandler(controller);
@@ -276,7 +301,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		this.messageHandler.handleMessage(message);
 
 		controller.future.run();
-		assertTrue(controller.exceptionCatched);
+		assertTrue(controller.exceptionCaught);
 	}
 
 	@Test
@@ -284,7 +309,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void completableFutureSuccess() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class))).willReturn(emptyMessage);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
 		CompletableFutureController controller = new CompletableFutureController();
 		this.messageHandler.registerHandler(controller);
@@ -304,7 +329,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void completableFutureFailure() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class))).willReturn(emptyMessage);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
 		CompletableFutureController controller = new CompletableFutureController();
 		this.messageHandler.registerHandler(controller);
@@ -315,6 +340,61 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		controller.future.completeExceptionally(new IllegalStateException());
 		assertTrue(controller.exceptionCaught);
+	}
+
+	@Test
+	public void monoSuccess() {
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
+
+		ReactiveController controller = new ReactiveController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		Message<?> message = createMessage("/app1/mono");
+		this.messageHandler.handleMessage(message);
+
+		assertNotNull(controller.mono);
+		controller.mono.onNext("foo");
+		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
+		assertEquals("foo", this.payloadCaptor.getValue());
+	}
+
+	@Test
+	public void monoFailure() {
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
+
+		ReactiveController controller = new ReactiveController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		Message<?> message = createMessage("/app1/mono");
+		this.messageHandler.handleMessage(message);
+
+		controller.mono.onError(new IllegalStateException());
+		assertTrue(controller.exceptionCaught);
+	}
+
+	@Test
+	public void fluxNotHandled() {
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
+
+		ReactiveController controller = new ReactiveController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		Message<?> message = createMessage("/app1/flux");
+		this.messageHandler.handleMessage(message);
+
+		assertNotNull(controller.flux);
+		controller.flux.onNext("foo");
+
+		verify(this.converter, never()).toMessage(any(), any(MessageHeaders.class));
 	}
 
 	@Test
@@ -333,7 +413,11 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	private Message<?> createMessage(String destination, Map<String, Object> headers) {
-		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
+		return createMessage(SimpMessageType.MESSAGE, destination, headers);
+	}
+
+	private Message<?> createMessage(SimpMessageType messageType, String destination, Map<String, Object> headers) {
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(messageType);
 		accessor.setSessionId("session1");
 		accessor.setSessionAttributes(new HashMap<>());
 		accessor.setDestination(destination);
@@ -344,7 +428,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 		return MessageBuilder.withPayload(new byte[0]).setHeaders(accessor).build();
 	}
-
 
 
 	private static class TestSimpAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
@@ -367,7 +450,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		private String method;
 
-		private Map<String, Object> arguments = new LinkedHashMap<String, Object>();
+		private Map<String, Object> arguments = new LinkedHashMap<>();
 
 		@MessageMapping("/headers")
 		public void headers(@Header String foo, @Headers Map<String, Object> headers) {
@@ -413,7 +496,17 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageMapping("/illegalState")
 		public void illegalState() {
-			throw new IllegalStateException();
+			throw new IllegalStateException("my cause");
+		}
+
+		@MessageMapping("/illegalStateCause")
+		public void illegalStateCause() {
+			throw new RuntimeException(new IllegalStateException("my cause"));
+		}
+
+		@MessageMapping("/error")
+		public void errorAsThrowable() {
+			throw new Error("my cause");
 		}
 
 		@MessageExceptionHandler(MethodArgumentNotValidException.class)
@@ -421,10 +514,18 @@ public class SimpAnnotationMethodMessageHandlerTests {
 			this.method = "handleValidationException";
 		}
 
-		@MessageExceptionHandler(IllegalStateException.class)
-		public void handleExceptionWithHandlerMethodArg(HandlerMethod handlerMethod) {
+		@MessageExceptionHandler
+		public void handleExceptionWithHandlerMethodArg(IllegalStateException ex, HandlerMethod handlerMethod) {
 			this.method = "handleExceptionWithHandlerMethodArg";
 			this.arguments.put("handlerMethod", handlerMethod);
+			assertEquals("my cause", ex.getMessage());
+		}
+
+		@MessageExceptionHandler
+		public void handleErrorWithHandlerMethodArg(Error ex, HandlerMethod handlerMethod) {
+			this.method = "handleErrorWithHandlerMethodArg";
+			this.arguments.put("handlerMethod", handlerMethod);
+			assertEquals("my cause", ex.getMessage());
 		}
 
 		@MessageMapping("/scope")
@@ -440,12 +541,12 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 	}
 
+
 	@Controller
 	@MessageMapping("pre")
 	private static class DotPathSeparatorController {
 
 		private String method;
-
 
 		@MessageMapping("foo")
 		public void handleFoo() {
@@ -453,22 +554,24 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 	}
 
+
 	@Controller
 	@MessageMapping("listenable-future")
 	private static class ListenableFutureController {
 
 		private ListenableFutureTask<String> future;
-		private boolean exceptionCatched = false;
+
+		private boolean exceptionCaught = false;
 
 		@MessageMapping("success")
 		public ListenableFutureTask<String> handleListenableFuture() {
-			this.future = new ListenableFutureTask<String>(() -> "foo");
+			this.future = new ListenableFutureTask<>(() -> "foo");
 			return this.future;
 		}
 
 		@MessageMapping("failure")
 		public ListenableFutureTask<String> handleListenableFutureException() {
-			this.future = new ListenableFutureTask<String>(() -> {
+			this.future = new ListenableFutureTask<>(() -> {
 				throw new IllegalStateException();
 			});
 			return this.future;
@@ -476,10 +579,10 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageExceptionHandler(IllegalStateException.class)
 		public void handleValidationException() {
-			this.exceptionCatched = true;
+			this.exceptionCaught = true;
 		}
-
 	}
+
 
 	@Controller
 	private static class CompletableFutureController {
@@ -498,14 +601,41 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		public void handleValidationException() {
 			this.exceptionCaught = true;
 		}
-
 	}
+
+	@Controller
+	private static class ReactiveController {
+
+		private MonoProcessor<String> mono;
+
+		private FluxProcessor<String, String> flux;
+
+		private boolean exceptionCaught = false;
+
+		@MessageMapping("mono")
+		public Mono<String> handleMono() {
+			this.mono = MonoProcessor.create();
+			return this.mono;
+		}
+
+		@MessageMapping("flux")
+		public Flux<String> handleFlux() {
+			this.flux = EmitterProcessor.create();
+			return this.flux;
+		}
+
+		@MessageExceptionHandler(IllegalStateException.class)
+		public void handleValidationException() {
+			this.exceptionCaught = true;
+		}
+	}
+
 
 	private static class StringTestValidator implements Validator {
 
 		private final String invalidValue;
 
-		private StringTestValidator(String invalidValue) {
+		public StringTestValidator(String invalidValue) {
 			this.invalidValue = invalidValue;
 		}
 
@@ -515,7 +645,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 			String value = (String) target;
 			if (invalidValue.equals(value)) {
 				errors.reject("invalid value '"+invalidValue+"'");

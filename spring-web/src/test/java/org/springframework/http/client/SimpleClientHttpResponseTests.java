@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,68 +16,57 @@
 
 package org.springframework.http.client;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.util.StreamUtils;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Brian Clozel
+ * @author Juergen Hoeller
  */
 public class SimpleClientHttpResponseTests {
 
-	private final Charset UTF8 = Charset.forName("UTF-8");
+	private final HttpURLConnection connection = mock(HttpURLConnection.class);
 
-	private SimpleClientHttpResponse response;
+	private final SimpleClientHttpResponse response = new SimpleClientHttpResponse(this.connection);
 
-	private HttpURLConnection connection;
 
-	@Before
-	public void setup() throws Exception {
-		this.connection = mock(HttpURLConnection.class);
-		this.response = new SimpleClientHttpResponse(this.connection);
-	}
-
-	// SPR-14040
-	@Test
+	@Test  // SPR-14040
 	public void shouldNotCloseConnectionWhenResponseClosed() throws Exception {
-		TestByteArrayInputStream is = new TestByteArrayInputStream("Spring".getBytes(UTF8));
+		TestByteArrayInputStream is = new TestByteArrayInputStream("Spring".getBytes(StandardCharsets.UTF_8));
 		given(this.connection.getErrorStream()).willReturn(null);
 		given(this.connection.getInputStream()).willReturn(is);
 
 		InputStream responseStream = this.response.getBody();
-		assertThat(StreamUtils.copyToString(responseStream, UTF8), is("Spring"));
+		assertThat(StreamUtils.copyToString(responseStream, StandardCharsets.UTF_8), is("Spring"));
 
 		this.response.close();
 		assertTrue(is.isClosed());
 		verify(this.connection, never()).disconnect();
 	}
 
-	// SPR-14040
-	@Test
+	@Test  // SPR-14040
 	public void shouldDrainStreamWhenResponseClosed() throws Exception {
 		byte[] buf = new byte[6];
-		TestByteArrayInputStream is = new TestByteArrayInputStream("SpringSpring".getBytes(UTF8));
+		TestByteArrayInputStream is = new TestByteArrayInputStream("SpringSpring".getBytes(StandardCharsets.UTF_8));
 		given(this.connection.getErrorStream()).willReturn(null);
 		given(this.connection.getInputStream()).willReturn(is);
 
 		InputStream responseStream = this.response.getBody();
 		responseStream.read(buf);
-		assertThat(new String(buf, UTF8), is("Spring"));
+		assertThat(new String(buf, StandardCharsets.UTF_8), is("Spring"));
 		assertThat(is.available(), is(6));
 
 		this.response.close();
@@ -86,16 +75,15 @@ public class SimpleClientHttpResponseTests {
 		verify(this.connection, never()).disconnect();
 	}
 
-	// SPR-14040
-	@Test
+	@Test  // SPR-14040
 	public void shouldDrainErrorStreamWhenResponseClosed() throws Exception {
 		byte[] buf = new byte[6];
-		TestByteArrayInputStream is = new TestByteArrayInputStream("SpringSpring".getBytes(UTF8));
+		TestByteArrayInputStream is = new TestByteArrayInputStream("SpringSpring".getBytes(StandardCharsets.UTF_8));
 		given(this.connection.getErrorStream()).willReturn(is);
 
 		InputStream responseStream = this.response.getBody();
 		responseStream.read(buf);
-		assertThat(new String(buf, UTF8), is("Spring"));
+		assertThat(new String(buf, StandardCharsets.UTF_8), is("Spring"));
 		assertThat(is.available(), is(6));
 
 		this.response.close();
@@ -104,8 +92,22 @@ public class SimpleClientHttpResponseTests {
 		verify(this.connection, never()).disconnect();
 	}
 
+	@Test  // SPR-16773
+	public void shouldNotDrainWhenErrorStreamClosed() throws Exception {
+		InputStream is = mock(InputStream.class);
+		given(this.connection.getErrorStream()).willReturn(is);
+		doNothing().when(is).close();
+		given(is.read(any())).willThrow(new NullPointerException("from HttpURLConnection#ErrorStream"));
 
-	class TestByteArrayInputStream extends ByteArrayInputStream {
+		InputStream responseStream = this.response.getBody();
+		responseStream.close();
+		this.response.close();
+
+		verify(is).close();
+	}
+
+
+	private static class TestByteArrayInputStream extends ByteArrayInputStream {
 
 		private boolean closed;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,14 @@ package org.springframework.oxm.jibx;
 import java.io.StringWriter;
 import javax.xml.transform.stream.StreamResult;
 
-import org.custommonkey.xmlunit.XMLUnit;
-
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTests;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does not occur by
@@ -43,8 +39,10 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 
 	@BeforeClass
 	public static void compilerAssumptions() {
-		Assume.group(TestGroup.CUSTOM_COMPILATION);
+		// JiBX compiler is currently not compatible with JDK 9
+		Assume.assumeTrue(System.getProperty("java.version").startsWith("1.8."));
 	}
+
 
 	@Override
 	protected JibxMarshaller createMarshaller() throws Exception {
@@ -63,6 +61,7 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 		return flights;
 	}
 
+
 	@Test(expected = IllegalArgumentException.class)
 	public void afterPropertiesSetNoContextPath() throws Exception {
 		JibxMarshaller marshaller = new JibxMarshaller();
@@ -74,11 +73,10 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 		marshaller.setIndent(4);
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(flights, new StreamResult(writer));
-		XMLUnit.setIgnoreWhitespace(false);
 		String expected =
 				"<?xml version=\"1.0\"?>\n" + "<flights xmlns=\"http://samples.springframework.org/flight\">\n" +
 						"    <flight>\n" + "        <number>42</number>\n" + "    </flight>\n" + "</flights>";
-		assertXMLEqual(expected, writer.toString());
+		assertThat(writer.toString(), isSimilarTo(expected).ignoreWhitespace());
 	}
 
 	@Test

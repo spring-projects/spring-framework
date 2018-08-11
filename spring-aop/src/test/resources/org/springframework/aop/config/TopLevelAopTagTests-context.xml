@@ -1,6 +1,6 @@
 <config xmlns="http://www.springframework.org/schema/aop"
-				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
 	<pointcut id="testPointcut" expression="execution(* foo(..)) and within(springbank.dao.AccountDao+)"/>
 	<pointcut id="testPointcut1" expression="execution(* springbank.dao.AccountDao.foo(..))"/>

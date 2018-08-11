@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -25,11 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -64,6 +67,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	// CONNECT
 
 	public static final String HOST = "host";
+
+	public static final String ACCEPT_VERSION = "accept-version";
 
 	public static final String LOGIN = "login";
 
@@ -105,17 +110,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Create a new instance to be populated with new header values.
 	 */
 	public StompHeaders() {
-		this(new LinkedMultiValueMap<String, String>(4), false);
+		this(new LinkedMultiValueMap<>(4), false);
 	}
 
 	private StompHeaders(Map<String, List<String>> headers, boolean readOnly) {
 		Assert.notNull(headers, "'headers' must not be null");
 		if (readOnly) {
-			Map<String, List<String>> map = new LinkedMultiValueMap<String, String>(headers.size());
-			for (Entry<String, List<String>> entry : headers.entrySet()) {
-				List<String> values = Collections.unmodifiableList(entry.getValue());
-				map.put(entry.getKey(), values);
-			}
+			Map<String, List<String>> map = new LinkedMultiValueMap<>(headers.size());
+			headers.forEach((key, value) -> map.put(key, Collections.unmodifiableList(value)));
 			this.headers = Collections.unmodifiableMap(map);
 		}
 		else {
@@ -128,15 +130,21 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the content-type header.
 	 * Applies to the SEND, MESSAGE, and ERROR frames.
 	 */
-	public void setContentType(MimeType mimeType) {
-		Assert.isTrue(!mimeType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
-		Assert.isTrue(!mimeType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
-		set(CONTENT_TYPE, mimeType.toString());
+	public void setContentType(@Nullable MimeType mimeType) {
+		if (mimeType != null) {
+			Assert.isTrue(!mimeType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
+			Assert.isTrue(!mimeType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
+			set(CONTENT_TYPE, mimeType.toString());
+		}
+		else {
+			set(CONTENT_TYPE, null);
+		}
 	}
 
 	/**
 	 * Return the content-type header value.
 	 */
+	@Nullable
 	public MimeType getContentType() {
 		String value = getFirst(CONTENT_TYPE);
 		return (StringUtils.hasLength(value) ? MimeTypeUtils.parseMimeType(value) : null);
@@ -162,13 +170,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the receipt header.
 	 * Applies to any client frame other than CONNECT.
 	 */
-	public void setReceipt(String receipt) {
+	public void setReceipt(@Nullable String receipt) {
 		set(RECEIPT, receipt);
 	}
 
 	/**
 	 * Get the receipt header.
 	 */
+	@Nullable
 	public String getReceipt() {
 		return getFirst(RECEIPT);
 	}
@@ -177,28 +186,56 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the host header.
 	 * Applies to the CONNECT frame.
 	 */
-	public void setHost(String host) {
+	public void setHost(@Nullable String host) {
 		set(HOST, host);
 	}
 
 	/**
 	 * Get the host header.
 	 */
+	@Nullable
 	public String getHost() {
 		return getFirst(HOST);
+	}
+
+	/**
+	 * Set the accept-version header. Must be one of "1.1", "1.2", or both.
+	 * Applies to the CONNECT frame.
+	 * @since 5.0.7
+	 */
+	public void setAcceptVersion(@Nullable String... acceptVersions) {
+		if (ObjectUtils.isEmpty(acceptVersions)) {
+			set(ACCEPT_VERSION, null);
+			return;
+		}
+		Arrays.stream(acceptVersions).forEach(version ->
+				Assert.isTrue(version != null && (version.equals("1.1") || version.equals("1.2")),
+						"Invalid version: " + version));
+		set(ACCEPT_VERSION, StringUtils.arrayToCommaDelimitedString(acceptVersions));
+	}
+
+	/**
+	 * Get the accept-version header.
+	 * @since 5.0.7
+	 */
+	@Nullable
+	public String[] getAcceptVersion() {
+		String value = getFirst(ACCEPT_VERSION);
+		return value != null ? StringUtils.commaDelimitedListToStringArray(value) : null;
 	}
 
 	/**
 	 * Set the login header.
 	 * Applies to the CONNECT frame.
 	 */
-	public void setLogin(String login) {
+	public void setLogin(@Nullable String login) {
 		set(LOGIN, login);
 	}
 
 	/**
 	 * Get the login header.
 	 */
+	@Nullable
 	public String getLogin() {
 		return getFirst(LOGIN);
 	}
@@ -207,13 +244,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the passcode header.
 	 * Applies to the CONNECT frame.
 	 */
-	public void setPasscode(String passcode) {
+	public void setPasscode(@Nullable String passcode) {
 		set(PASSCODE, passcode);
 	}
 
 	/**
 	 * Get the passcode header.
 	 */
+	@Nullable
 	public String getPasscode() {
 		return getFirst(PASSCODE);
 	}
@@ -222,22 +260,28 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the heartbeat header.
 	 * Applies to the CONNECT and CONNECTED frames.
 	 */
-	public void setHeartbeat(long[] heartbeat) {
-		Assert.notNull(heartbeat);
+	public void setHeartbeat(@Nullable long[] heartbeat) {
+		if (heartbeat == null || heartbeat.length != 2) {
+			throw new IllegalArgumentException("Heart-beat array must be of length 2, not " +
+					(heartbeat != null ? heartbeat.length : "null"));
+		}
 		String value = heartbeat[0] + "," + heartbeat[1];
-		Assert.isTrue(heartbeat[0] >= 0 && heartbeat[1] >= 0, "Heart-beat values cannot be negative: "  + value);
+		if (heartbeat[0] < 0 || heartbeat[1] < 0) {
+			throw new IllegalArgumentException("Heart-beat values cannot be negative: " + value);
+		}
 		set(HEARTBEAT, value);
 	}
 
 	/**
 	 * Get the heartbeat header.
 	 */
+	@Nullable
 	public long[] getHeartbeat() {
 		String rawValue = getFirst(HEARTBEAT);
-		if (!StringUtils.hasText(rawValue)) {
+		String[] rawValues = StringUtils.split(rawValue, ",");
+		if (rawValues == null) {
 			return null;
 		}
-		String[] rawValues = StringUtils.commaDelimitedListToStringArray(rawValue);
 		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
 	}
 
@@ -254,13 +298,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the session header.
 	 * Applies to the CONNECTED frame.
 	 */
-	public void setSession(String session) {
+	public void setSession(@Nullable String session) {
 		set(SESSION, session);
 	}
 
 	/**
 	 * Get the session header.
 	 */
+	@Nullable
 	public String getSession() {
 		return getFirst(SESSION);
 	}
@@ -269,7 +314,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the server header.
 	 * Applies to the CONNECTED frame.
 	 */
-	public void setServer(String server) {
+	public void setServer(@Nullable String server) {
 		set(SERVER, server);
 	}
 
@@ -277,6 +322,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Get the server header.
 	 * Applies to the CONNECTED frame.
 	 */
+	@Nullable
 	public String getServer() {
 		return getFirst(SERVER);
 	}
@@ -284,7 +330,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Set the destination header.
 	 */
-	public void setDestination(String destination) {
+	public void setDestination(@Nullable String destination) {
 		set(DESTINATION, destination);
 	}
 
@@ -292,6 +338,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Get the destination header.
 	 * Applies to the SEND, SUBSCRIBE, and MESSAGE frames.
 	 */
+	@Nullable
 	public String getDestination() {
 		return getFirst(DESTINATION);
 	}
@@ -300,13 +347,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the id header.
 	 * Applies to the SUBSCR0BE, UNSUBSCRIBE, and ACK or NACK frames.
 	 */
-	public void setId(String id) {
+	public void setId(@Nullable String id) {
 		set(ID, id);
 	}
 
 	/**
 	 * Get the id header.
 	 */
+	@Nullable
 	public String getId() {
 		return getFirst(ID);
 	}
@@ -315,13 +363,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the ack header to one of "auto", "client", or "client-individual".
 	 * Applies to the SUBSCRIBE and MESSAGE frames.
 	 */
-	public void setAck(String ack) {
+	public void setAck(@Nullable String ack) {
 		set(ACK, ack);
 	}
 
 	/**
 	 * Get the ack header.
 	 */
+	@Nullable
 	public String getAck() {
 		return getFirst(ACK);
 	}
@@ -330,13 +379,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the login header.
 	 * Applies to the MESSAGE frame.
 	 */
-	public void setSubscription(String subscription) {
+	public void setSubscription(@Nullable String subscription) {
 		set(SUBSCRIPTION, subscription);
 	}
 
 	/**
 	 * Get the subscription header.
 	 */
+	@Nullable
 	public String getSubscription() {
 		return getFirst(SUBSCRIPTION);
 	}
@@ -345,13 +395,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the message-id header.
 	 * Applies to the MESSAGE frame.
 	 */
-	public void setMessageId(String messageId) {
+	public void setMessageId(@Nullable String messageId) {
 		set(MESSAGE_ID, messageId);
 	}
 
 	/**
 	 * Get the message-id header.
 	 */
+	@Nullable
 	public String getMessageId() {
 		return getFirst(MESSAGE_ID);
 	}
@@ -360,13 +411,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the receipt-id header.
 	 * Applies to the RECEIPT frame.
 	 */
-	public void setReceiptId(String receiptId) {
+	public void setReceiptId(@Nullable String receiptId) {
 		set(RECEIPT_ID, receiptId);
 	}
 
 	/**
 	 * Get the receipt header.
 	 */
+	@Nullable
 	public String getReceiptId() {
 		return getFirst(RECEIPT_ID);
 	}
@@ -377,8 +429,9 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * @return the first header value, or {@code null} if none
 	 */
 	@Override
+	@Nullable
 	public String getFirst(String headerName) {
-		List<String> headerValues = headers.get(headerName);
+		List<String> headerValues = this.headers.get(headerName);
 		return headerValues != null ? headerValues.get(0) : null;
 	}
 
@@ -391,13 +444,20 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * @see #set(String, String)
 	 */
 	@Override
-	public void add(String headerName, String headerValue) {
-		List<String> headerValues = headers.get(headerName);
-		if (headerValues == null) {
-			headerValues = new LinkedList<String>();
-			this.headers.put(headerName, headerValues);
-		}
+	public void add(String headerName, @Nullable String headerValue) {
+		List<String> headerValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
+	}
+
+	@Override
+	public void addAll(String headerName, List<? extends String> headerValues) {
+		List<String> currentValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+		currentValues.addAll(headerValues);
+	}
+
+	@Override
+	public void addAll(MultiValueMap<String, String> values) {
+		values.forEach(this::addAll);
 	}
 
 	/**
@@ -409,25 +469,21 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * @see #add(String, String)
 	 */
 	@Override
-	public void set(String headerName, String headerValue) {
-		List<String> headerValues = new LinkedList<String>();
+	public void set(String headerName, @Nullable String headerValue) {
+		List<String> headerValues = new LinkedList<>();
 		headerValues.add(headerValue);
-		headers.put(headerName, headerValues);
+		this.headers.put(headerName, headerValues);
 	}
 
 	@Override
 	public void setAll(Map<String, String> values) {
-		for (Entry<String, String> entry : values.entrySet()) {
-			set(entry.getKey(), entry.getValue());
-		}
+		values.forEach(this::set);
 	}
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<String,String>(this.headers.size());
-		for (Entry<String, List<String>> entry : headers.entrySet()) {
-			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
-		}
+		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
+		this.headers.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
 		return singleValueMap;
 	}
 
@@ -497,14 +553,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 	@Override
 	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof StompHeaders)) {
-			return false;
-		}
-		StompHeaders otherHeaders = (StompHeaders) other;
-		return this.headers.equals(otherHeaders.headers);
+		return (this == other || (other instanceof StompHeaders &&
+				this.headers.equals(((StompHeaders) other).headers)));
 	}
 
 	@Override
@@ -521,8 +571,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Return a {@code StompHeaders} object that can only be read, not written to.
 	 */
-	public static StompHeaders readOnlyStompHeaders(Map<String, List<String>> headers) {
-		return new StompHeaders(headers, true);
+	public static StompHeaders readOnlyStompHeaders(@Nullable Map<String, List<String>> headers) {
+		return new StompHeaders((headers != null ? headers : Collections.emptyMap()), true);
 	}
 
 }

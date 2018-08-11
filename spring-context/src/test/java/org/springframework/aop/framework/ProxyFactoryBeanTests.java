@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.TestListener;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.TimeStamped;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.advice.MyThrowsHandler;
@@ -69,7 +70,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class ProxyFactoryBeanTests {
+public class ProxyFactoryBeanTests {
 
 	private static final Class<?> CLASS = ProxyFactoryBeanTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -259,22 +260,22 @@ public final class ProxyFactoryBeanTests {
 
 		// Check it works without AOP
 		SideEffectBean raw = (SideEffectBean) bf.getBean("prototypeTarget");
-		assertEquals(INITIAL_COUNT, raw.getCount() );
+		assertEquals(INITIAL_COUNT, raw.getCount());
 		raw.doWork();
-		assertEquals(INITIAL_COUNT+1, raw.getCount() );
+		assertEquals(INITIAL_COUNT+1, raw.getCount());
 		raw = (SideEffectBean) bf.getBean("prototypeTarget");
-		assertEquals(INITIAL_COUNT, raw.getCount() );
+		assertEquals(INITIAL_COUNT, raw.getCount());
 
 		// Now try with advised instances
 		SideEffectBean prototype2FirstInstance = (SideEffectBean) bf.getBean(beanName);
-		assertEquals(INITIAL_COUNT, prototype2FirstInstance.getCount() );
+		assertEquals(INITIAL_COUNT, prototype2FirstInstance.getCount());
 		prototype2FirstInstance.doWork();
-		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount() );
+		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount());
 
 		SideEffectBean prototype2SecondInstance = (SideEffectBean) bf.getBean(beanName);
 		assertFalse("Prototypes are not ==", prototype2FirstInstance == prototype2SecondInstance);
-		assertEquals(INITIAL_COUNT, prototype2SecondInstance.getCount() );
-		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount() );
+		assertEquals(INITIAL_COUNT, prototype2SecondInstance.getCount());
+		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount());
 
 		return prototype2FirstInstance;
 	}
@@ -397,7 +398,7 @@ public final class ProxyFactoryBeanTests {
 		config.removeAdvice(debugInterceptor);
 		it.getSpouse();
 
-		// Still invoked wiht old reference
+		// Still invoked with old reference
 		assertEquals(2, debugInterceptor.getCount());
 
 		// not invoked with new object
@@ -714,7 +715,7 @@ public final class ProxyFactoryBeanTests {
 	@SuppressWarnings("serial")
 	public static class PointcutForVoid extends DefaultPointcutAdvisor {
 
-		public static List<String> methodNames = new LinkedList<String>();
+		public static List<String> methodNames = new LinkedList<>();
 
 		public static void reset() {
 			methodNames.clear();
@@ -730,7 +731,7 @@ public final class ProxyFactoryBeanTests {
 			});
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override
-				public boolean matches(Method m, Class<?> targetClass, Object... args) {
+				public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 					return m.getReturnType() == Void.TYPE;
 				}
 			});

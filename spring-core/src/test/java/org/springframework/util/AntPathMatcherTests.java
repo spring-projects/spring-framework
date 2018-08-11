@@ -53,6 +53,7 @@ public class AntPathMatcherTests {
 		// test exact matching
 		assertTrue(pathMatcher.match("test", "test"));
 		assertTrue(pathMatcher.match("/test", "/test"));
+		assertTrue(pathMatcher.match("http://example.org", "http://example.org")); // SPR-14141
 		assertFalse(pathMatcher.match("/test.jpg", "test.jpg"));
 		assertFalse(pathMatcher.match("test", "/test"));
 		assertFalse(pathMatcher.match("/test", "test"));
@@ -133,6 +134,14 @@ public class AntPathMatcherTests {
 		assertTrue(pathMatcher.match("", ""));
 
 		assertTrue(pathMatcher.match("/{bla}.*", "/testing.html"));
+	}
+
+	// SPR-14247
+	@Test
+	public void matchWithTrimTokensEnabled() throws Exception {
+		pathMatcher.setTrimTokens(true);
+
+		assertTrue(pathMatcher.match("/foo/bar", "/foo /bar"));
 	}
 
 	@Test
@@ -322,7 +331,7 @@ public class AntPathMatcherTests {
 		assertEquals(Collections.singletonMap("hotel", "1"), result);
 
 		result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}/bookings/{booking}", "/hotels/1/bookings/2");
-		Map<String, String> expected = new LinkedHashMap<String, String>();
+		Map<String, String> expected = new LinkedHashMap<>();
 		expected.put("hotel", "1");
 		expected.put("booking", "2");
 		assertEquals(expected, result);
@@ -340,7 +349,7 @@ public class AntPathMatcherTests {
 		assertEquals(Collections.singletonMap("B", "b"), result);
 
 		result = pathMatcher.extractUriTemplateVariables("/{name}.{extension}", "/test.html");
-		expected = new LinkedHashMap<String, String>();
+		expected = new LinkedHashMap<>();
 		expected.put("name", "test");
 		expected.put("extension", "html");
 		assertEquals(expected, result);
@@ -490,7 +499,7 @@ public class AntPathMatcherTests {
 	@Test
 	public void patternComparatorSort() {
 		Comparator<String> comparator = pathMatcher.getPatternComparator("/hotels/new");
-		List<String> paths = new ArrayList<String>(3);
+		List<String> paths = new ArrayList<>(3);
 
 		paths.add(null);
 		paths.add("/hotels/new");

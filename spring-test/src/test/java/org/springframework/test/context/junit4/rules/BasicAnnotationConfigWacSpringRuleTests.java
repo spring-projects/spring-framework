@@ -37,7 +37,7 @@ public class BasicAnnotationConfigWacSpringRuleTests extends BasicAnnotationConf
 	// All tests are in superclass.
 
 	@ClassRule
-	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+	public static final SpringClassRule springClassRule = new SpringClassRule();
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();

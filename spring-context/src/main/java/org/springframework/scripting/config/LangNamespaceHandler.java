@@ -42,7 +42,6 @@ public class LangNamespaceHandler extends NamespaceHandlerSupport {
 	@Override
 	public void init() {
 		registerScriptBeanDefinitionParser("groovy", "org.springframework.scripting.groovy.GroovyScriptFactory");
-		registerScriptBeanDefinitionParser("jruby", "org.springframework.scripting.jruby.JRubyScriptFactory");
 		registerScriptBeanDefinitionParser("bsh", "org.springframework.scripting.bsh.BshScriptFactory");
 		registerScriptBeanDefinitionParser("std", "org.springframework.scripting.support.StandardScriptFactory");
 		registerBeanDefinitionParser("defaults", new ScriptingDefaultsParser());

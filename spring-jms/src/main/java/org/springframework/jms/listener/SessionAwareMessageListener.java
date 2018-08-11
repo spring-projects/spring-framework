@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,14 @@ import javax.jms.Session;
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @param <M> the message type
  * @see AbstractMessageListenerContainer#setMessageListener
  * @see DefaultMessageListenerContainer
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  * @see javax.jms.MessageListener
  */
+@FunctionalInterface
 public interface SessionAwareMessageListener<M extends Message> {
 
 	/**

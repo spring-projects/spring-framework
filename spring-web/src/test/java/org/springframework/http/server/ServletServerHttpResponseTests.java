@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.http.server;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,13 +29,12 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.FileCopyUtils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class ServletServerHttpResponseTests {
 
@@ -65,7 +64,7 @@ public class ServletServerHttpResponseTests {
 		headers.add(headerName, headerValue1);
 		String headerValue2 = "value2";
 		headers.add(headerName, headerValue2);
-		headers.setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
+		headers.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
 
 		response.close();
 		assertTrue("Header not set", mockResponse.getHeaderNames().contains(headerName));
@@ -79,7 +78,6 @@ public class ServletServerHttpResponseTests {
 
 	@Test
 	public void preExistingHeadersFromHttpServletResponse() {
-
 		String headerName = "Access-Control-Allow-Origin";
 		String headerValue = "localhost:8080";
 
@@ -89,6 +87,8 @@ public class ServletServerHttpResponseTests {
 		assertEquals(headerValue, this.response.getHeaders().getFirst(headerName));
 		assertEquals(Collections.singletonList(headerValue), this.response.getHeaders().get(headerName));
 		assertTrue(this.response.getHeaders().containsKey(headerName));
+		assertEquals(headerValue, this.response.getHeaders().getFirst(headerName));
+		assertEquals(headerValue, this.response.getHeaders().getAccessControlAllowOrigin());
 	}
 
 	@Test
@@ -98,4 +98,5 @@ public class ServletServerHttpResponseTests {
 
 		assertArrayEquals("Invalid content written", content, mockResponse.getContentAsByteArray());
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import static org.junit.Assert.*;
 public class SimpleUrlHandlerMappingTests {
 
 	@Test
+	@SuppressWarnings("resource")
 	public void handlerBeanNotFound() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		XmlWebApplicationContext root = new XmlWebApplicationContext();
@@ -77,7 +78,7 @@ public class SimpleUrlHandlerMappingTests {
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
 		handlerMapping.setUrlDecode(false);
 		Object controller = new Object();
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> urlMap = new LinkedHashMap<>();
 		urlMap.put("/*/baz", controller);
 		handlerMapping.setUrlMap(urlMap);
 		handlerMapping.setApplicationContext(new StaticApplicationContext());
@@ -89,6 +90,7 @@ public class SimpleUrlHandlerMappingTests {
 		assertSame(controller, hec.getHandler());
 	}
 
+	@SuppressWarnings("resource")
 	private void checkMappings(String beanName) throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();

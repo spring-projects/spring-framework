@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		GetterBean target = new GetterBean();
 		BeanWrapper accessor = createAccessor(target);
 		accessor.setPropertyValue("name", "tom");
-		assertTrue("Set name to tom", target.getName().equals("tom"));
+		assertEquals("tom", target.getAliasedName());
+		assertEquals("tom", accessor.getPropertyValue("aliasedName"));
 	}
 
 	@Test
@@ -58,7 +59,17 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		BeanWrapper accessor = createAccessor(target);
 		accessor.setExtractOldValueForEditor(true); // This will call the getter
 		accessor.setPropertyValue("name", "tom");
-		assertTrue("Set name to tom", target.getName().equals("tom"));
+		assertEquals("tom", target.getAliasedName());
+		assertEquals("tom", accessor.getPropertyValue("aliasedName"));
+	}
+
+	@Test
+	public void aliasedSetterThroughDefaultMethod() {
+		GetterBean target = new GetterBean();
+		BeanWrapper accessor = createAccessor(target);
+		accessor.setPropertyValue("aliasedName", "tom");
+		assertEquals("tom", target.getAliasedName());
+		assertEquals("tom", accessor.getPropertyValue("aliasedName"));
 	}
 
 	@Test
@@ -194,9 +205,43 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		assertEquals("x", accessor.getPropertyValue("object.name"));
 	}
 
+	@Test
+	public void incompletelyQuotedKeyLeadsToPropertyException() {
+		TestBean target = new TestBean();
+		try {
+			BeanWrapper accessor = createAccessor(target);
+			accessor.setPropertyValue("[']", "foobar");
+			fail("Should throw exception on invalid property");
+		}
+		catch (NotWritablePropertyException ex) {
+			assertNull(ex.getPossibleMatches());
+		}
+	}
+
+
+	private interface BaseProperty {
+
+		default String getAliasedName() {
+			return getName();
+		}
+
+		String getName();
+	}
+
 
 	@SuppressWarnings("unused")
-	private static class GetterBean {
+	private interface AliasedProperty extends BaseProperty {
+
+		default void setAliasedName(String name) {
+			setName(name);
+		}
+
+		void setName(String name);
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class GetterBean implements AliasedProperty {
 
 		private String name;
 
@@ -211,6 +256,7 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 			return name;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class IntelliBean {

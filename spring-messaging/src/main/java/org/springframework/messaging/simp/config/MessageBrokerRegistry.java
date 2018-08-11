@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.config;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -39,22 +40,32 @@ public class MessageBrokerRegistry {
 
 	private final MessageChannel clientOutboundChannel;
 
+	@Nullable
 	private SimpleBrokerRegistration simpleBrokerRegistration;
 
+	@Nullable
 	private StompBrokerRelayRegistration brokerRelayRegistration;
 
 	private final ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
+	@Nullable
 	private String[] applicationDestinationPrefixes;
 
+	@Nullable
 	private String userDestinationPrefix;
 
+	@Nullable
 	private PathMatcher pathMatcher;
+
+	@Nullable
+	private Integer cacheLimit;
+
+	private boolean preservePublishOrder;
 
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
-		Assert.notNull(clientInboundChannel);
-		Assert.notNull(clientOutboundChannel);
+		Assert.notNull(clientInboundChannel, "Inbound channel must not be null");
+		Assert.notNull(clientOutboundChannel, "Outbound channel must not be null");
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 	}
@@ -96,6 +107,18 @@ public class MessageBrokerRegistry {
 		return this.brokerChannelRegistration;
 	}
 
+	@Nullable
+	protected String getUserDestinationBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
+	}
+
+	@Nullable
+	protected String getUserRegistryBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
+	}
+
 	/**
 	 * Configure one or more prefixes to filter destinations targeting application
 	 * annotated methods. For example destinations prefixed with "/app" may be
@@ -111,6 +134,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	@Nullable
 	protected Collection<String> getApplicationDestinationPrefixes() {
 		return (this.applicationDestinationPrefixes != null ?
 				Arrays.asList(this.applicationDestinationPrefixes) : null);
@@ -133,18 +157,9 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	@Nullable
 	protected String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
-	}
-
-	protected String getUserDestinationBroadcast() {
-		return (this.brokerRelayRegistration != null ?
-				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
-	}
-
-	protected String getUserRegistryBroadcast() {
-		return (this.brokerRelayRegistration != null ?
-				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
 	}
 
 	/**
@@ -162,17 +177,47 @@ public class MessageBrokerRegistry {
 	 * <p>When the simple broker is enabled, the PathMatcher configured here is
 	 * also used to match message destinations when brokering messages.
 	 * @since 4.1
+	 * @see org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry#setPathMatcher
 	 */
 	public MessageBrokerRegistry setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 		return this;
 	}
 
+	@Nullable
 	protected PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
 
+	/**
+	 * Configure the cache limit to apply for registrations with the broker.
+	 * <p>This is currently only applied for the destination cache in the
+	 * subscription registry. The default cache limit there is 1024.
+	 * @since 4.3.2
+	 * @see org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry#setCacheLimit
+	 */
+	public MessageBrokerRegistry setCacheLimit(int cacheLimit) {
+		this.cacheLimit = cacheLimit;
+		return this;
+	}
 
+	/**
+	 * Whether the client must receive messages in the order of publication.
+	 * <p>By default messages sent to the {@code "clientOutboundChannel"} may
+	 * not be processed in the same order because the channel is backed by a
+	 * ThreadPoolExecutor that in turn does not guarantee processing in order.
+	 * <p>When this flag is set to {@code true} messages within the same session
+	 * will be sent to the {@code "clientOutboundChannel"} one at a time in
+	 * order to preserve the order of publication. Enable this only if needed
+	 * since there is some performance overhead to keep messages in order.
+	 * @since 5.1
+	 */
+	public MessageBrokerRegistry setPreservePublishOrder(boolean preservePublishOrder) {
+		this.preservePublishOrder = preservePublishOrder;
+		return this;
+	}
+
+	@Nullable
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
 		if (this.simpleBrokerRegistration == null && this.brokerRelayRegistration == null) {
 			enableSimpleBroker();
@@ -180,14 +225,19 @@ public class MessageBrokerRegistry {
 		if (this.simpleBrokerRegistration != null) {
 			SimpleBrokerMessageHandler handler = this.simpleBrokerRegistration.getMessageHandler(brokerChannel);
 			handler.setPathMatcher(this.pathMatcher);
+			handler.setCacheLimit(this.cacheLimit);
+			handler.setPreservePublishOrder(this.preservePublishOrder);
 			return handler;
 		}
 		return null;
 	}
 
+	@Nullable
 	protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
 		if (this.brokerRelayRegistration != null) {
-			return this.brokerRelayRegistration.getMessageHandler(brokerChannel);
+			StompBrokerRelayMessageHandler relay = this.brokerRelayRegistration.getMessageHandler(brokerChannel);
+			relay.setPreservePublishOrder(this.preservePublishOrder);
+			return relay;
 		}
 		return null;
 	}

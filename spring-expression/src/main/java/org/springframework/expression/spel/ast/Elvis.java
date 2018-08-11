@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,7 +37,7 @@ import org.springframework.util.StringUtils;
 public class Elvis extends SpelNodeImpl {
 
 	public Elvis(int pos, SpelNodeImpl... args) {
-		super(pos,args);
+		super(pos, args);
 	}
 
 
@@ -49,6 +51,7 @@ public class Elvis extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue value = this.children[0].getValueInternal(state);
+		// If this check is changed, the generateCode method will need changing too
 		if (!StringUtils.isEmpty(value.getValue())) {
 			return value;
 		}
@@ -77,16 +80,26 @@ public class Elvis extends SpelNodeImpl {
 		// exit type descriptor can be null if both components are literal expressions
 		computeExitTypeDescriptor();
 		this.children[0].generateCode(mv, cf);
+		String lastDesc = cf.lastDescriptor();
+		Assert.state(lastDesc != null, "No last descriptor");
+		CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();
 		mv.visitInsn(DUP);
 		mv.visitJumpInsn(IFNULL, elseTarget);
-		mv.visitJumpInsn(GOTO, endOfIf);
+		// Also check if empty string, as per the code in the interpreted version
+		mv.visitInsn(DUP);
+		mv.visitLdcInsn("");
+		mv.visitInsn(SWAP);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z",false);
+		mv.visitJumpInsn(IFEQ, endOfIf);  // if not empty, drop through to elseTarget
 		mv.visitLabel(elseTarget);
 		mv.visitInsn(POP);
 		this.children[1].generateCode(mv, cf);
 		if (!CodeFlow.isPrimitive(this.exitTypeDescriptor)) {
-			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+			lastDesc = cf.lastDescriptor();
+			Assert.state(lastDesc != null, "No last descriptor");
+			CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		}
 		mv.visitLabel(endOfIf);
 		cf.pushDescriptor(this.exitTypeDescriptor);
@@ -97,13 +110,7 @@ public class Elvis extends SpelNodeImpl {
 				this.children[1].exitTypeDescriptor != null) {
 			String conditionDescriptor = this.children[0].exitTypeDescriptor;
 			String ifNullValueDescriptor = this.children[1].exitTypeDescriptor;
-			if (conditionDescriptor.equals(ifNullValueDescriptor)) {
-				this.exitTypeDescriptor = conditionDescriptor;
-			}
-			else if (conditionDescriptor.equals("Ljava/lang/Object") && !CodeFlow.isPrimitive(ifNullValueDescriptor)) {
-				this.exitTypeDescriptor = ifNullValueDescriptor;
-			}
-			else if (ifNullValueDescriptor.equals("Ljava/lang/Object") && !CodeFlow.isPrimitive(conditionDescriptor)) {
+			if (ObjectUtils.nullSafeEquals(conditionDescriptor, ifNullValueDescriptor)) {
 				this.exitTypeDescriptor = conditionDescriptor;
 			}
 			else {

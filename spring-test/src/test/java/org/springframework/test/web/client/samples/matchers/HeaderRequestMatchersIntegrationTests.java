@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.client.samples.matchers;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,13 +45,15 @@ public class HeaderRequestMatchersIntegrationTests {
 
 	private static final String RESPONSE_BODY = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
+
 	private MockRestServiceServer mockServer;
 
 	private RestTemplate restTemplate;
 
+
 	@Before
 	public void setup() {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		converters.add(new MappingJackson2HttpMessageConverter());
 
@@ -60,25 +63,26 @@ public class HeaderRequestMatchersIntegrationTests {
 		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
 	}
 
+
 	@Test
 	public void testString() throws Exception {
-
 		this.mockServer.expect(requestTo("/person/1"))
 			.andExpect(header("Accept", "application/json, application/*+json"))
 			.andRespond(withSuccess(RESPONSE_BODY, MediaType.APPLICATION_JSON));
 
-		this.restTemplate.getForObject(new URI("/person/1"), Person.class);
-		this.mockServer.verify();
+		executeAndVerify();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testStringContains() throws Exception {
-
 		this.mockServer.expect(requestTo("/person/1"))
 			.andExpect(header("Accept", containsString("json")))
 			.andRespond(withSuccess(RESPONSE_BODY, MediaType.APPLICATION_JSON));
 
+		executeAndVerify();
+	}
+
+	private void executeAndVerify() throws URISyntaxException {
 		this.restTemplate.getForObject(new URI("/person/1"), Person.class);
 		this.mockServer.verify();
 	}

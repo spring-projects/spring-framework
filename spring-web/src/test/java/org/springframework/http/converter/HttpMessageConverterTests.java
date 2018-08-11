@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class HttpMessageConverterTests {
 	@Test
 	public void canRead() {
 		MediaType mediaType = new MediaType("foo", "bar");
-		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(mediaType);
+		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
 		assertTrue(converter.canRead(MyType.class, mediaType));
 		assertFalse(converter.canRead(MyType.class, new MediaType("foo", "*")));
@@ -50,7 +50,7 @@ public class HttpMessageConverterTests {
 	@Test
 	public void canReadWithWildcardSubtype() {
 		MediaType mediaType = new MediaType("foo");
-		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(mediaType);
+		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
 		assertTrue(converter.canRead(MyType.class, new MediaType("foo", "bar")));
 		assertTrue(converter.canRead(MyType.class, new MediaType("foo", "*")));
@@ -60,7 +60,7 @@ public class HttpMessageConverterTests {
 	@Test
 	public void canWrite() {
 		MediaType mediaType = new MediaType("foo", "bar");
-		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(mediaType);
+		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
 		assertTrue(converter.canWrite(MyType.class, mediaType));
 		assertTrue(converter.canWrite(MyType.class, new MediaType("foo", "*")));
@@ -70,7 +70,7 @@ public class HttpMessageConverterTests {
 	@Test
 	public void canWriteWithWildcardInSupportedSubtype() {
 		MediaType mediaType = new MediaType("foo");
-		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(mediaType);
+		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
 		assertTrue(converter.canWrite(MyType.class, new MediaType("foo", "bar")));
 		assertTrue(converter.canWrite(MyType.class, new MediaType("foo", "*")));

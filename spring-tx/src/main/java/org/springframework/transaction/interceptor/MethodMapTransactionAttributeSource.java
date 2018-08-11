@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -45,24 +46,25 @@ import org.springframework.util.PatternMatchUtils;
 public class MethodMapTransactionAttributeSource
 		implements TransactionAttributeSource, BeanClassLoaderAware, InitializingBean {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Map from method name to attribute value */
+	/** Map from method name to attribute value. */
+	@Nullable
 	private Map<String, TransactionAttribute> methodMap;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private boolean eagerlyInitialized = false;
 
 	private boolean initialized = false;
 
-	/** Map from Method to TransactionAttribute */
-	private final Map<Method, TransactionAttribute> transactionAttributeMap =
-			new HashMap<Method, TransactionAttribute>();
+	/** Map from Method to TransactionAttribute. */
+	private final Map<Method, TransactionAttribute> transactionAttributeMap = new HashMap<>();
 
-	/** Map from Method to name pattern used for registration */
-	private final Map<Method, String> methodNameMap = new HashMap<Method, String>();
+	/** Map from Method to name pattern used for registration. */
+	private final Map<Method, String> methodNameMap = new HashMap<>();
 
 
 	/**
@@ -101,14 +103,12 @@ public class MethodMapTransactionAttributeSource
 
 	/**
 	 * Initialize the specified {@link #setMethodMap(java.util.Map) "methodMap"}, if any.
-	 * @param methodMap Map from method names to {@code TransactionAttribute} instances
+	 * @param methodMap a Map from method names to {@code TransactionAttribute} instances
 	 * @see #setMethodMap
 	 */
-	protected void initMethodMap(Map<String, TransactionAttribute> methodMap) {
+	protected void initMethodMap(@Nullable Map<String, TransactionAttribute> methodMap) {
 		if (methodMap != null) {
-			for (Map.Entry<String, TransactionAttribute> entry : methodMap.entrySet()) {
-				addTransactionalMethod(entry.getKey(), entry.getValue());
-			}
+			methodMap.forEach(this::addTransactionalMethod);
 		}
 	}
 
@@ -122,7 +122,7 @@ public class MethodMapTransactionAttributeSource
 	 */
 	public void addTransactionalMethod(String name, TransactionAttribute attr) {
 		Assert.notNull(name, "Name must not be null");
-		int lastDotIndex = name.lastIndexOf(".");
+		int lastDotIndex = name.lastIndexOf('.');
 		if (lastDotIndex == -1) {
 			throw new IllegalArgumentException("'" + name + "' is not a valid method name: format is FQN.methodName");
 		}
@@ -145,7 +145,7 @@ public class MethodMapTransactionAttributeSource
 		String name = clazz.getName() + '.'  + mappedName;
 
 		Method[] methods = clazz.getDeclaredMethods();
-		List<Method> matchingMethods = new ArrayList<Method>();
+		List<Method> matchingMethods = new ArrayList<>();
 		for (Method method : methods) {
 			if (isMatch(method.getName(), mappedName)) {
 				matchingMethods.add(method);
@@ -156,7 +156,7 @@ public class MethodMapTransactionAttributeSource
 					"Couldn't find method '" + mappedName + "' on class [" + clazz.getName() + "]");
 		}
 
-		// register all matching methods
+		// Register all matching methods
 		for (Method method : matchingMethods) {
 			String regMethodName = this.methodNameMap.get(method);
 			if (regMethodName == null || (!regMethodName.equals(name) && regMethodName.length() <= name.length())) {
@@ -207,7 +207,8 @@ public class MethodMapTransactionAttributeSource
 
 
 	@Override
-	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
+	@Nullable
+	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		if (this.eagerlyInitialized) {
 			return this.transactionAttributeMap.get(method);
 		}

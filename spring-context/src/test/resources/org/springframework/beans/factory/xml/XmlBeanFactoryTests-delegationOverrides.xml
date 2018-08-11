@@ -64,7 +64,7 @@
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
 		<!-- Could use id and href -->
-			<ref local="david"/>
+			<ref bean="david"/>
 		</property>
 	</bean>
 

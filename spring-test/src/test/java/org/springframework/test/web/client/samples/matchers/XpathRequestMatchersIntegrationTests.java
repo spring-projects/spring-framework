@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.client.samples.matchers;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,15 +54,16 @@ public class XpathRequestMatchersIntegrationTests {
 	private static final Map<String, String> NS =
 			Collections.singletonMap("ns", "http://example.org/music/people");
 
+
 	private MockRestServiceServer mockServer;
 
 	private RestTemplate restTemplate;
 
 	private PeopleWrapper people;
 
+
 	@Before
 	public void setup() {
-
 		List<Person> composers = Arrays.asList(
 				new Person("Johann Sebastian Bach").setSomeDouble(21),
 				new Person("Johannes Brahms").setSomeDouble(.0025),
@@ -74,7 +76,7 @@ public class XpathRequestMatchersIntegrationTests {
 
 		this.people = new PeopleWrapper(composers, performers);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new Jaxb2RootElementHttpMessageConverter());
 
 		this.restTemplate = new RestTemplate();
@@ -83,9 +85,9 @@ public class XpathRequestMatchersIntegrationTests {
 		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
 	}
 
+
 	@Test
 	public void testExists() throws Exception {
-
 		String composer = "/ns:people/composers/composer[%s]";
 		String performer = "/ns:people/performers/performer[%s]";
 
@@ -99,13 +101,11 @@ public class XpathRequestMatchersIntegrationTests {
 			.andExpect(xpath(performer, NS, 2).exists())
 			.andRespond(withSuccess());
 
-		this.restTemplate.put(new URI("/composers"), this.people);
-		this.mockServer.verify();
+		executeAndVerify();
 	}
 
 	@Test
 	public void testDoesNotExist() throws Exception {
-
 		String composer = "/ns:people/composers/composer[%s]";
 		String performer = "/ns:people/performers/performer[%s]";
 
@@ -117,13 +117,11 @@ public class XpathRequestMatchersIntegrationTests {
 			.andExpect(xpath(performer, NS, 3).doesNotExist())
 			.andRespond(withSuccess());
 
-		this.restTemplate.put(new URI("/composers"), this.people);
-		this.mockServer.verify();
+		executeAndVerify();
 	}
 
 	@Test
 	public void testString() throws Exception {
-
 		String composerName = "/ns:people/composers/composer[%s]/name";
 		String performerName = "/ns:people/performers/performer[%s]/name";
 
@@ -140,13 +138,11 @@ public class XpathRequestMatchersIntegrationTests {
 			.andExpect(xpath(composerName, NS, 1).string(notNullValue())) // Hamcrest..
 			.andRespond(withSuccess());
 
-		this.restTemplate.put(new URI("/composers"), this.people);
-		this.mockServer.verify();
+		executeAndVerify();
 	}
 
 	@Test
 	public void testNumber() throws Exception {
-
 		String composerDouble = "/ns:people/composers/composer[%s]/someDouble";
 
 		this.mockServer.expect(requestTo("/composers"))
@@ -159,8 +155,7 @@ public class XpathRequestMatchersIntegrationTests {
 			.andExpect(xpath(composerDouble, NS, 3).number(closeTo(1.6, .01))) // Hamcrest..
 			.andRespond(withSuccess());
 
-		this.restTemplate.put(new URI("/composers"), this.people);
-		this.mockServer.verify();
+		executeAndVerify();
 	}
 
 	@Test
@@ -174,13 +169,11 @@ public class XpathRequestMatchersIntegrationTests {
 			.andExpect(xpath(performerBooleanValue, NS, 2).booleanValue(true))
 			.andRespond(withSuccess());
 
-		this.restTemplate.put(new URI("/composers"), this.people);
-		this.mockServer.verify();
+		executeAndVerify();
 	}
 
 	@Test
 	public void testNodeCount() throws Exception {
-
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(4))
@@ -189,6 +182,10 @@ public class XpathRequestMatchersIntegrationTests {
 			.andExpect(xpath("/ns:people/performers/performer", NS).nodeCount(equalTo(2))) // Hamcrest..
 			.andRespond(withSuccess());
 
+		executeAndVerify();
+	}
+
+	private void executeAndVerify() throws URISyntaxException {
 		this.restTemplate.put(new URI("/composers"), this.people);
 		this.mockServer.verify();
 	}
@@ -223,4 +220,5 @@ public class XpathRequestMatchersIntegrationTests {
 			return this.performers;
 		}
 	}
+
 }

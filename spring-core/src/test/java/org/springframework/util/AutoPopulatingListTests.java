@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,22 +32,22 @@ public class AutoPopulatingListTests {
 
 	@Test
 	public void withClass() throws Exception {
-		doTestWithClass(new AutoPopulatingList<Object>(TestObject.class));
+		doTestWithClass(new AutoPopulatingList<>(TestObject.class));
 	}
 
 	@Test
 	public void withClassAndUserSuppliedBackingList() throws Exception {
-		doTestWithClass(new AutoPopulatingList<Object>(new LinkedList<Object>(), TestObject.class));
+		doTestWithClass(new AutoPopulatingList<Object>(new LinkedList<>(), TestObject.class));
 	}
 
 	@Test
 	public void withElementFactory() throws Exception {
-		doTestWithElementFactory(new AutoPopulatingList<Object>(new MockElementFactory()));
+		doTestWithElementFactory(new AutoPopulatingList<>(new MockElementFactory()));
 	}
 
 	@Test
 	public void withElementFactoryAndUserSuppliedBackingList() throws Exception {
-		doTestWithElementFactory(new AutoPopulatingList<Object>(new LinkedList<Object>(), new MockElementFactory()));
+		doTestWithElementFactory(new AutoPopulatingList<Object>(new LinkedList<>(), new MockElementFactory()));
 	}
 
 	private void doTestWithClass(AutoPopulatingList<Object> list) {

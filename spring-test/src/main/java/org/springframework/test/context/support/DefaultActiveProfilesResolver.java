@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.test.util.MetaAnnotationUtils.*;
+import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptor;
 
 /**
  * Default implementation of the {@link ActiveProfilesResolver} strategy that
@@ -59,7 +59,7 @@ public class DefaultActiveProfilesResolver implements ActiveProfilesResolver {
 	public String[] resolve(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
 
-		final Set<String> activeProfiles = new LinkedHashSet<String>();
+		final Set<String> activeProfiles = new LinkedHashSet<>();
 
 		Class<ActiveProfiles> annotationType = ActiveProfiles.class;
 		AnnotationDescriptor<ActiveProfiles> descriptor = findAnnotationDescriptor(testClass, annotationType);

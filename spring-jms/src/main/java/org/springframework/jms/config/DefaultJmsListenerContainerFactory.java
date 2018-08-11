@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jms.config;
 import java.util.concurrent.Executor;
 
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.backoff.BackOff;
 
@@ -35,22 +36,31 @@ import org.springframework.util.backoff.BackOff;
 public class DefaultJmsListenerContainerFactory
 		extends AbstractJmsListenerContainerFactory<DefaultMessageListenerContainer> {
 
+	@Nullable
 	private Executor taskExecutor;
 
+	@Nullable
 	private PlatformTransactionManager transactionManager;
 
+	@Nullable
 	private Integer cacheLevel;
 
+	@Nullable
 	private String cacheLevelName;
 
+	@Nullable
 	private String concurrency;
 
+	@Nullable
 	private Integer maxMessagesPerTask;
 
+	@Nullable
 	private Long receiveTimeout;
 
+	@Nullable
 	private Long recoveryInterval;
 
+	@Nullable
 	private BackOff backOff;
 
 
@@ -152,7 +162,7 @@ public class DefaultJmsListenerContainerFactory
 		if (this.backOff != null) {
 			container.setBackOff(this.backOff);
 			if (this.recoveryInterval != null) {
-				logger.warn("Ignoring recovery interval in DefaultJmsListenerContainerFactory in favor of BackOff");
+				logger.info("Ignoring recovery interval in DefaultJmsListenerContainerFactory in favor of BackOff");
 			}
 		}
 		else if (this.recoveryInterval != null) {

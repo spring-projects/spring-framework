@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.core.annotation.AnnotationUtils.*;
-import static org.springframework.util.ReflectionUtils.*;
 
 /**
  * {@link InvocationHandler} for an {@link Annotation} that Spring has
@@ -47,7 +45,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 	private final AnnotationAttributeExtractor<?> attributeExtractor;
 
-	private final Map<String, Object> valueCache = new ConcurrentHashMap<String, Object>(8);
+	private final Map<String, Object> valueCache = new ConcurrentHashMap<>(8);
 
 
 	/**
@@ -63,22 +61,21 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		if (isEqualsMethod(method)) {
+		if (ReflectionUtils.isEqualsMethod(method)) {
 			return annotationEquals(args[0]);
 		}
-		if (isHashCodeMethod(method)) {
+		if (ReflectionUtils.isHashCodeMethod(method)) {
 			return annotationHashCode();
 		}
-		if (isToStringMethod(method)) {
+		if (ReflectionUtils.isToStringMethod(method)) {
 			return annotationToString();
 		}
-		if (isAnnotationTypeMethod(method)) {
+		if (AnnotationUtils.isAnnotationTypeMethod(method)) {
 			return annotationType();
 		}
-		if (!isAttributeMethod(method)) {
-			String msg = String.format("Method [%s] is unsupported for synthesized annotation type [%s]",
-					method, annotationType());
-			throw new AnnotationConfigurationException(msg);
+		if (!AnnotationUtils.isAttributeMethod(method)) {
+			throw new AnnotationConfigurationException(String.format(
+					"Method [%s] is unsupported for synthesized annotation type [%s]", method, annotationType()));
 		}
 		return getAttributeValue(method);
 	}
@@ -100,10 +97,10 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 			// Synthesize nested annotations before returning them.
 			if (value instanceof Annotation) {
-				value = synthesizeAnnotation((Annotation) value, this.attributeExtractor.getAnnotatedElement());
+				value = AnnotationUtils.synthesizeAnnotation((Annotation) value, this.attributeExtractor.getAnnotatedElement());
 			}
 			else if (value instanceof Annotation[]) {
-				value = synthesizeAnnotationArray((Annotation[]) value, this.attributeExtractor.getAnnotatedElement());
+				value = AnnotationUtils.synthesizeAnnotationArray((Annotation[]) value, this.attributeExtractor.getAnnotatedElement());
 			}
 
 			this.valueCache.put(attributeName, value);
@@ -164,9 +161,9 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 			return false;
 		}
 
-		for (Method attributeMethod : getAttributeMethods(annotationType())) {
+		for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotationType())) {
 			Object thisValue = getAttributeValue(attributeMethod);
-			Object otherValue = invokeMethod(attributeMethod, other);
+			Object otherValue = ReflectionUtils.invokeMethod(attributeMethod, other);
 			if (!ObjectUtils.nullSafeEquals(thisValue, otherValue)) {
 				return false;
 			}
@@ -181,7 +178,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 	private int annotationHashCode() {
 		int result = 0;
 
-		for (Method attributeMethod : getAttributeMethods(annotationType())) {
+		for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotationType())) {
 			Object value = getAttributeValue(attributeMethod);
 			int hashCode;
 			if (value.getClass().isArray()) {
@@ -239,7 +236,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 	private String annotationToString() {
 		StringBuilder sb = new StringBuilder("@").append(annotationType().getName()).append("(");
 
-		Iterator<Method> iterator = getAttributeMethods(annotationType()).iterator();
+		Iterator<Method> iterator = AnnotationUtils.getAttributeMethods(annotationType()).iterator();
 		while (iterator.hasNext()) {
 			Method attributeMethod = iterator.next();
 			sb.append(attributeMethod.getName());

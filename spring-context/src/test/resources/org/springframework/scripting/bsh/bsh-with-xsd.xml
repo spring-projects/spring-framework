@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xmlns:lang="http://www.springframework.org/schema/lang"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:lang="http://www.springframework.org/schema/lang"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd">
 
 	<lang:bsh id="messenger" script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh"
@@ -29,7 +28,7 @@
 	</lang:bsh>
 
 	<lang:bsh id="messengerByType" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"
-			autowire="byType" dependency-check="objects" init-method="init" destroy-method="destroy">
+			autowire="byType" init-method="init" destroy-method="destroy">
 	</lang:bsh>
 
 	<lang:bsh id="messengerByName" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"
@@ -52,12 +51,12 @@
 		<lang:property name="message" value="Hello World!"/>
 	</lang:bsh>
 
-<lang:bsh id="eventListener" script-interfaces="org.springframework.context.ApplicationListener,org.springframework.scripting.Messenger" >
-<lang:inline-script><![CDATA[
-int count;
-void onApplicationEvent (org.springframework.context.ApplicationEvent event) { count++; System.out.println(event); }
-String getMessage() { return "count=" + count; }
-]]></lang:inline-script>
-</lang:bsh>
+    <lang:bsh id="eventListener" script-interfaces="org.springframework.context.ApplicationListener,org.springframework.scripting.Messenger" >
+        <lang:inline-script><![CDATA[
+            int count;
+            void onApplicationEvent (org.springframework.context.ApplicationEvent event) { count++; System.out.println(event); }
+            String getMessage() { return "count=" + count; }
+        ]]></lang:inline-script>
+    </lang:bsh>
 
 </beans>
