@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			return proxyFactory.getProxy(getProxyClassLoader());
 		}
 
-		// No async proxy needed.
+		// No proxy needed.
 		return bean;
 	}
 
@@ -155,7 +155,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	 * Subclasses may choose to implement this: for example,
 	 * to change the interfaces exposed.
 	 * <p>The default implementation is empty.
-	 * @param proxyFactory ProxyFactory that is already configured with
+	 * @param proxyFactory the ProxyFactory that is already configured with
 	 * target, advisor and interfaces and will be used to create the proxy
 	 * immediately after this method returns
 	 * @since 4.2.3
