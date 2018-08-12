@@ -130,7 +130,7 @@ public final class DataSize implements Comparable<DataSize> {
 	 * Examples:
 	 * <pre>
 	 * "12KB" -- parses as "12 kilobytes"
-	 * "5MB"  -- parses as "5 megabytes" (where a minute is 60 seconds)
+	 * "5MB"  -- parses as "5 megabytes"
 	 * "20"   -- parses as "20 bytes"
 	 * </pre>
 	 * @param text the text to parse
@@ -151,7 +151,7 @@ public final class DataSize implements Comparable<DataSize> {
 	 * Examples:
 	 * <pre>
 	 * "12KB" -- parses as "12 kilobytes"
-	 * "5MB"  -- parses as "5 megabytes" (where a minute is 60 seconds)
+	 * "5MB"  -- parses as "5 megabytes"
 	 * "20"   -- parses as "20 kilobytes" (where the {@code defaultUnit} is {@link DataUnit#KILOBYTES})
 	 * </pre>
 	 * @param text the text to parse
