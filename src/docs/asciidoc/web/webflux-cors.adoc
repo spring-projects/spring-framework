@@ -213,7 +213,7 @@ To configure the filter, you can declare a `CorsWebFilter` bean and pass a
 `CorsConfigurationSource` to its constructor:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 @Bean
 CorsWebFilter corsFilter() {

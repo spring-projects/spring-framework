@@ -254,7 +254,7 @@ To configure the filter pass a
 `CorsConfigurationSource` to its constructor:
 
 [source,java,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 CorsConfiguration config = new CorsConfiguration();
 
