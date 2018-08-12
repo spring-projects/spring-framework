@@ -350,7 +350,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(targetClass);
 				if (logger.isTraceEnabled()) {
-					logger.trace("No @Scheduled annotations found on bean class: " + bean.getClass());
+					logger.trace("No @Scheduled annotations found on bean class: " + targetClass);
 				}
 			}
 			else {
@@ -507,9 +507,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @see ScheduledMethodRunnable#ScheduledMethodRunnable(Object, Method)
 	 */
 	protected Runnable createRunnable(Object target, Method method) {
-		Assert.isTrue(method.getParameterCount() == 0,
-				"Only no-arg methods may be annotated with @Scheduled");
-
+		Assert.isTrue(method.getParameterCount() == 0, "Only no-arg methods may be annotated with @Scheduled");
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, target.getClass());
 		return new ScheduledMethodRunnable(target, invocableMethod);
 	}
