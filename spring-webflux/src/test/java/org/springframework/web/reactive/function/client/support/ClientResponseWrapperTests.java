@@ -82,6 +82,7 @@ public class ClientResponseWrapperTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void cookies() {
 		MultiValueMap<String, ResponseCookie> cookies = mock(MultiValueMap.class);
 		when(mockResponse.cookies()).thenReturn(cookies);

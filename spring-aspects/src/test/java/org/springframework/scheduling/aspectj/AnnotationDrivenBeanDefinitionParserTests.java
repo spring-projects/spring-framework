@@ -55,6 +55,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void asyncPostProcessorExecutorReference() {
 		Object executor = context.getBean("testExecutor");
 		Object aspect = context.getBean(TaskManagementConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME);
@@ -62,6 +63,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void asyncPostProcessorExceptionHandlerReference() {
 		Object exceptionHandler = context.getBean("testExceptionHandler");
 		Object aspect = context.getBean(TaskManagementConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME);

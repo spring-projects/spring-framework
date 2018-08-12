@@ -936,6 +936,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		@RequestMapping
 		@ResponseBody
+		@SuppressWarnings("unchecked")
 		public List<T> handleTypeInfoList() {
 			List<T> list = new ArrayList<>();
 			list.add((T) new Foo("foo"));

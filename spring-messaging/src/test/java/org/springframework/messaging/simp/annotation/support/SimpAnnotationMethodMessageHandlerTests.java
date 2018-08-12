@@ -42,7 +42,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.HandlerMethod;
@@ -267,9 +266,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void listenableFutureSuccess() {
-		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
 		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
@@ -287,9 +286,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void listenableFutureFailure() {
-		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
 		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
@@ -305,9 +304,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void completableFutureSuccess() {
-		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
 		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
@@ -325,9 +324,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void completableFutureFailure() {
-		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
 		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
@@ -343,6 +342,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void monoSuccess() {
 		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
@@ -362,6 +362,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void monoFailure() {
 		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
@@ -379,6 +380,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void fluxNotHandled() {
 		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);

@@ -23,9 +23,6 @@ import java.util.function.Consumer;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
@@ -59,9 +56,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @since 4.2
  */
 public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodReturnValueHandler {
-
-	private static final Log logger = LogFactory.getLog(ResponseBodyEmitterReturnValueHandler.class);
-
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 

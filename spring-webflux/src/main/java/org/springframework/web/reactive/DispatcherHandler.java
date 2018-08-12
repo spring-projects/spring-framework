@@ -21,8 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -73,8 +71,6 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	private static final Exception HANDLER_NOT_FOUND_EXCEPTION =
 			new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
 
-
-	private static final Log logger = LogFactory.getLog(DispatcherHandler.class);
 
 	@Nullable
 	private List<HandlerMapping> handlerMappings;

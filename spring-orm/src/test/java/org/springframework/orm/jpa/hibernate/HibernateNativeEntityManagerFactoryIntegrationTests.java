@@ -71,7 +71,7 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testCurrentSession() {
 		String firstName = "Tony";
 		insertPerson(firstName);

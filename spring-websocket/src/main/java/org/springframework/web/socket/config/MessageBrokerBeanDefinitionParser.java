@@ -679,6 +679,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 		private final List<WebSocketHandlerDecoratorFactory> factories;
 
+		@SuppressWarnings("unused")
 		public DecoratingFactoryBean(WebSocketHandler handler, List<WebSocketHandlerDecoratorFactory> factories) {
 			this.handler = handler;
 			this.factories = factories;

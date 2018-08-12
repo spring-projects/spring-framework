@@ -136,6 +136,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void cookies() {
 		MultiValueMap<String, HttpCookie> cookies = mock(MultiValueMap.class);
 		when(mockRequest.cookies()).thenReturn(cookies);

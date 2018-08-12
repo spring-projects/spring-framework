@@ -65,7 +65,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.*;
 
 /**

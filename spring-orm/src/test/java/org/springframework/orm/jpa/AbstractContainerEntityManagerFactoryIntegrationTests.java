@@ -81,7 +81,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	public void testEntityManagerProxyIsProxy() {
 		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
-		List<Person> people = q.getResultList();
+		q.getResultList();
 
 		assertTrue("Should be open to start with", sharedEntityManager.isOpen());
 		sharedEntityManager.close();
