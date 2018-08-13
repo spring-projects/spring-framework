@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.cache.transaction.AbstractTransactionSupportingCacheM
  */
 public class JCacheCacheManager extends AbstractTransactionSupportingCacheManager {
 
-	private javax.cache.CacheManager cacheManager;
+	private CacheManager cacheManager;
 
 	private boolean allowNullValues = true;
 
@@ -60,14 +60,14 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	/**
 	 * Set the backing JCache {@link javax.cache.CacheManager}.
 	 */
-	public void setCacheManager(javax.cache.CacheManager cacheManager) {
+	public void setCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
 	/**
 	 * Return the backing JCache {@link javax.cache.CacheManager}.
 	 */
-	public javax.cache.CacheManager getCacheManager() {
+	public CacheManager getCacheManager() {
 		return this.cacheManager;
 	}
 

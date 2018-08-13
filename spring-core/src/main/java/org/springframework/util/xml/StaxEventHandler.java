@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,9 +95,9 @@ class StaxEventHandler extends AbstractStaxHandler {
 
 	}
 
-	private List<Namespace> getNamespaces(Map<String, String> namespaceMapping) {
-		List<Namespace> result = new ArrayList<Namespace>();
-		for (Map.Entry<String, String> entry : namespaceMapping.entrySet()) {
+	private List<Namespace> getNamespaces(Map<String, String> namespaceMappings) {
+		List<Namespace> result = new ArrayList<Namespace>(namespaceMappings.size());
+		for (Map.Entry<String, String> entry : namespaceMappings.entrySet()) {
 			String prefix = entry.getKey();
 			String namespaceUri = entry.getValue();
 			result.add(this.eventFactory.createNamespace(prefix, namespaceUri));
@@ -106,8 +106,9 @@ class StaxEventHandler extends AbstractStaxHandler {
 	}
 
 	private List<Attribute> getAttributes(Attributes attributes) {
-		List<Attribute> result = new ArrayList<Attribute>();
-		for (int i = 0; i < attributes.getLength(); i++) {
+		int attrLength = attributes.getLength();
+		List<Attribute> result = new ArrayList<Attribute>(attrLength);
+		for (int i = 0; i < attrLength; i++) {
 			QName attrName = toQName(attributes.getURI(i), attributes.getQName(i));
 			if (!isNamespaceDeclaration(attrName)) {
 				result.add(this.eventFactory.createAttribute(attrName, attributes.getValue(i)));
@@ -153,9 +154,8 @@ class StaxEventHandler extends AbstractStaxHandler {
 	}
 
 	// Ignored
-
 	@Override
-	protected void skippedEntityInternal(String name) throws XMLStreamException {
+	protected void skippedEntityInternal(String name) {
 	}
 
 
