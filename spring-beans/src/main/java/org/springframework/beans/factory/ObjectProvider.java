@@ -17,6 +17,8 @@
 package org.springframework.beans.factory;
 
 import java.util.Iterator;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -93,6 +95,26 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	}
 
 	/**
+	 * Apply an instance (possibly shared or independent) of the object
+	 * managed by this factory, if available.
+	 * @param dependencyFunction a function for applying the target object
+	 * if available (not called otherwise)
+	 * @return dependencyFunction result
+	 * or {@link java.util.Optional#empty()} if not available
+	 * @throws BeansException in case of creation errors
+	 * @since 5.1
+	 * @see #getIfAvailable()
+	 */
+	default <R> Optional<R> applyIfAvailable(Function<T, R> dependencyFunction) throws BeansException {
+		T dependency = getIfAvailable();
+		if (dependency != null) {
+			return Optional.ofNullable(dependencyFunction.apply(dependency));
+		} else {
+			return Optional.empty();
+		}
+	}
+
+	/**
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
 	 * @return an instance of the bean, or {@code null} if not available or
@@ -133,6 +155,26 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 		T dependency = getIfUnique();
 		if (dependency != null) {
 			dependencyConsumer.accept(dependency);
+		}
+	}
+
+	/**
+	 * Apply an instance (possibly shared or independent) of the object
+	 * managed by this factory, if unique.
+	 * @param dependencyFunction a function for applying the target object
+	 * if unique (not called otherwise)
+	 * @return dependencyFunction result
+	 * or {@link java.util.Optional#empty()} if not unique
+	 * @throws BeansException in case of creation errors
+	 * @since 5.1
+	 * @see #getIfUnique()
+	 */
+	default <R> Optional<R> applyIfUnique(Function<T, R> dependencyFunction) throws BeansException {
+		T dependency = getIfUnique();
+		if (dependency != null) {
+			return Optional.ofNullable(dependencyFunction.apply(dependency));
+		} else {
+			return Optional.empty();
 		}
 	}
 

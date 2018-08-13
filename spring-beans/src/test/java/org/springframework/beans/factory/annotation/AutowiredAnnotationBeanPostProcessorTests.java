@@ -33,9 +33,11 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import org.junit.After;
@@ -1149,9 +1151,11 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertEquals(bf.getBean("testBean"), bean.getOptionalTestBean());
 		assertEquals(bf.getBean("testBean"), bean.getOptionalTestBeanWithDefault());
 		assertEquals(bf.getBean("testBean"), bean.consumeOptionalTestBean());
+		assertEquals(bf.getBean("testBean"), bean.applyOptionalTestBean());
 		assertEquals(bf.getBean("testBean"), bean.getUniqueTestBean());
 		assertEquals(bf.getBean("testBean"), bean.getUniqueTestBeanWithDefault());
 		assertEquals(bf.getBean("testBean"), bean.consumeUniqueTestBean());
+		assertEquals(bf.getBean("testBean"), bean.applyUniqueTestBean());
 
 		List<?> testBeans = bean.iterateTestBeans();
 		assertEquals(1, testBeans.size());
@@ -2804,6 +2808,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			return consumedTestBean;
 		}
 
+		public TestBean applyOptionalTestBean() {
+			return this.testBeanProvider.applyIfAvailable(UnaryOperator.identity()).get();
+		}
+
 		public TestBean getUniqueTestBean() {
 			return this.testBeanProvider.getIfUnique();
 		}
@@ -2815,6 +2823,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		public TestBean consumeUniqueTestBean() {
 			this.testBeanProvider.ifUnique(tb -> consumedTestBean = tb);
 			return consumedTestBean;
+		}
+
+		public TestBean applyUniqueTestBean() {
+			return this.testBeanProvider.applyIfUnique(UnaryOperator.identity()).get();
 		}
 
 		public List<TestBean> iterateTestBeans() {
