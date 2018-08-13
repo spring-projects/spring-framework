@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 public class JCacheCacheManager extends AbstractTransactionSupportingCacheManager {
 
 	@Nullable
-	private javax.cache.CacheManager cacheManager;
+	private CacheManager cacheManager;
 
 	private boolean allowNullValues = true;
 
@@ -63,7 +63,7 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	/**
 	 * Set the backing JCache {@link javax.cache.CacheManager}.
 	 */
-	public void setCacheManager(@Nullable javax.cache.CacheManager cacheManager) {
+	public void setCacheManager(@Nullable CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
@@ -71,7 +71,7 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	 * Return the backing JCache {@link javax.cache.CacheManager}.
 	 */
 	@Nullable
-	public javax.cache.CacheManager getCacheManager() {
+	public CacheManager getCacheManager() {
 		return this.cacheManager;
 	}
 
