@@ -74,6 +74,12 @@ public class UriComponentsTests {
 		assertEquals("/hotel%20list/Z%C3%BCrich%20specials?q=a%2Bb", uri.expand("a+b").toString());
 	}
 
+	@Test // SPR-17168
+	public void encodeAndExpandWithDollarSign() {
+		UriComponents uri = UriComponentsBuilder.fromPath("/path").queryParam("q", "{value}").encode().build();
+		assertEquals("/path?q=JavaClass%241.class", uri.expand("JavaClass$1.class").toString());
+	}
+
 	@Test
 	public void toUriEncoded() throws URISyntaxException {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(
