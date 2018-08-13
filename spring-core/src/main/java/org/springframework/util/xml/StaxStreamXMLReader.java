@@ -243,7 +243,7 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 
 	private void handleDtd() throws SAXException {
 		if (getLexicalHandler() != null) {
-			javax.xml.stream.Location location = this.reader.getLocation();
+			Location location = this.reader.getLocation();
 			getLexicalHandler().startDTD(null, location.getPublicId(), location.getSystemId());
 		}
 		if (getLexicalHandler() != null) {
