@@ -17,7 +17,6 @@
 package org.springframework.cache.jcache;
 
 import java.util.concurrent.Callable;
-
 import javax.cache.Cache;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
