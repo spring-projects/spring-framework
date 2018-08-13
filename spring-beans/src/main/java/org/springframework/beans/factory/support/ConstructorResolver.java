@@ -79,6 +79,8 @@ import org.springframework.util.StringUtils;
  */
 class ConstructorResolver {
 
+	private static final Object[] EMPTY_ARGS = new Object[0];
+
 	private static final NamedThreadLocal<InjectionPoint> currentInjectionPoint =
 			new NamedThreadLocal<>("Current injection point");
 
@@ -111,8 +113,8 @@ class ConstructorResolver {
 	 * or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	public BeanWrapper autowireConstructor(final String beanName, final RootBeanDefinition mbd,
-			@Nullable Constructor<?>[] chosenCtors, @Nullable final Object[] explicitArgs) {
+	public BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd,
+			@Nullable Constructor<?>[] chosenCtors, @Nullable Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
@@ -141,7 +143,35 @@ class ConstructorResolver {
 			}
 		}
 
-		if (constructorToUse == null) {
+		if (constructorToUse == null || argsToUse == null) {
+			// Take specified constructors, if any.
+			Constructor<?>[] candidates = chosenCtors;
+			if (candidates == null) {
+				Class<?> beanClass = mbd.getBeanClass();
+				try {
+					candidates = (mbd.isNonPublicAccessAllowed() ?
+							beanClass.getDeclaredConstructors() : beanClass.getConstructors());
+				}
+				catch (Throwable ex) {
+					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+							"Resolution of declared constructors on bean Class [" + beanClass.getName() +
+							"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
+				}
+			}
+
+			if (candidates.length == 1 && explicitArgs == null && !mbd.hasConstructorArgumentValues()) {
+				Constructor<?> uniqueCandidate = candidates[0];
+				if (uniqueCandidate.getParameterCount() == 0) {
+					synchronized (mbd.constructorArgumentLock) {
+						mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
+						mbd.constructorArgumentsResolved = true;
+						mbd.resolvedConstructorArguments = EMPTY_ARGS;
+					}
+					bw.setBeanInstance(instantiate(beanName, mbd, uniqueCandidate, EMPTY_ARGS));
+					return bw;
+				}
+			}
+
 			// Need to resolve the constructor.
 			boolean autowiring = (chosenCtors != null ||
 					mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
@@ -157,20 +187,6 @@ class ConstructorResolver {
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			}
 
-			// Take specified constructors, if any.
-			Constructor<?>[] candidates = chosenCtors;
-			if (candidates == null) {
-				Class<?> beanClass = mbd.getBeanClass();
-				try {
-					candidates = (mbd.isNonPublicAccessAllowed() ?
-							beanClass.getDeclaredConstructors() : beanClass.getConstructors());
-				}
-				catch (Throwable ex) {
-					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-							"Resolution of declared constructors on bean Class [" + beanClass.getName() +
-							"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
-				}
-			}
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor<?>> ambiguousConstructors = null;
@@ -264,23 +280,23 @@ class ConstructorResolver {
 			}
 		}
 
-		try {
-			final InstantiationStrategy strategy = this.beanFactory.getInstantiationStrategy();
-			Object beanInstance;
+		bw.setBeanInstance(instantiate(beanName, mbd, constructorToUse, argsToUse));
+		return bw;
+	}
 
+	private Object instantiate(
+			String beanName, RootBeanDefinition mbd, Constructor constructorToUse, Object[] argsToUse) {
+
+		try {
+			InstantiationStrategy strategy = this.beanFactory.getInstantiationStrategy();
 			if (System.getSecurityManager() != null) {
-				final Constructor<?> ctorToUse = constructorToUse;
-				final Object[] argumentsToUse = argsToUse;
-				beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
-						strategy.instantiate(mbd, beanName, this.beanFactory, ctorToUse, argumentsToUse),
+				return AccessController.doPrivileged((PrivilegedAction<Object>) () ->
+						strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse),
 						this.beanFactory.getAccessControlContext());
 			}
 			else {
-				beanInstance = strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
+				return strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}
-
-			bw.setBeanInstance(beanInstance);
-			return bw;
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
@@ -330,7 +346,7 @@ class ConstructorResolver {
 	 * the {@link RootBeanDefinition#isNonPublicAccessAllowed()} flag.
 	 * Called as the starting point for factory method determination.
 	 */
-	private Method[] getCandidateMethods(final Class<?> factoryClass, final RootBeanDefinition mbd) {
+	private Method[] getCandidateMethods(Class<?> factoryClass, RootBeanDefinition mbd) {
 		if (System.getSecurityManager() != null) {
 			return AccessController.doPrivileged((PrivilegedAction<Method[]>) () ->
 					(mbd.isNonPublicAccessAllowed() ?
@@ -358,7 +374,7 @@ class ConstructorResolver {
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper instantiateUsingFactoryMethod(
-			final String beanName, final RootBeanDefinition mbd, @Nullable final Object[] explicitArgs) {
+			String beanName, RootBeanDefinition mbd, @Nullable Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
@@ -421,13 +437,27 @@ class ConstructorResolver {
 			factoryClass = ClassUtils.getUserClass(factoryClass);
 
 			Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
-			List<Method> candidateSet = new ArrayList<>();
+			List<Method> candidateList = new ArrayList<>();
 			for (Method candidate : rawCandidates) {
 				if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
-					candidateSet.add(candidate);
+					candidateList.add(candidate);
 				}
 			}
-			Method[] candidates = candidateSet.toArray(new Method[0]);
+
+			if (candidateList.size() == 1 && explicitArgs == null && !mbd.hasConstructorArgumentValues()) {
+				Method uniqueCandidate = candidateList.get(0);
+				if (uniqueCandidate.getParameterCount() == 0) {
+					synchronized (mbd.constructorArgumentLock) {
+						mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
+						mbd.constructorArgumentsResolved = true;
+						mbd.resolvedConstructorArguments = EMPTY_ARGS;
+					}
+					bw.setBeanInstance(instantiate(beanName, mbd, factoryBean, uniqueCandidate, EMPTY_ARGS));
+					return bw;
+				}
+			}
+
+			Method[] candidates = candidateList.toArray(new Method[0]);
 			AutowireUtils.sortFactoryMethods(candidates);
 
 			ConstructorArgumentValues resolvedValues = null;
@@ -460,7 +490,7 @@ class ConstructorResolver {
 				if (paramTypes.length >= minNrOfArgs) {
 					ArgumentsHolder argsHolder;
 
-					if (explicitArgs != null){
+					if (explicitArgs != null) {
 						// Explicit arguments given -> arguments length must match exactly.
 						if (paramTypes.length != explicitArgs.length) {
 							continue;
@@ -533,7 +563,7 @@ class ConstructorResolver {
 						argTypes.add(arg != null ? arg.getClass().getSimpleName() : "null");
 					}
 				}
-				else if (resolvedValues != null){
+				else if (resolvedValues != null) {
 					Set<ValueHolder> valueHolders = new LinkedHashSet<>(resolvedValues.getArgumentCount());
 					valueHolders.addAll(resolvedValues.getIndexedArgumentValues().values());
 					valueHolders.addAll(resolvedValues.getGenericArgumentValues());
@@ -571,24 +601,24 @@ class ConstructorResolver {
 			}
 		}
 
-		try {
-			Object beanInstance;
+		bw.setBeanInstance(instantiate(beanName, mbd, factoryBean, factoryMethodToUse, argsToUse));
+		return bw;
+	}
 
+	private Object instantiate(
+			String beanName, RootBeanDefinition mbd, Object factoryBean, Method factoryMethod, Object[] args) {
+
+		try {
 			if (System.getSecurityManager() != null) {
-				final Object fb = factoryBean;
-				final Method factoryMethod = factoryMethodToUse;
-				final Object[] args = argsToUse;
-				beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
-						this.beanFactory.getInstantiationStrategy().instantiate(mbd, beanName, this.beanFactory, fb, factoryMethod, args),
+				return AccessController.doPrivileged((PrivilegedAction<Object>) () ->
+						this.beanFactory.getInstantiationStrategy().instantiate(
+								mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args),
 						this.beanFactory.getAccessControlContext());
 			}
 			else {
-				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
-						mbd, beanName, this.beanFactory, factoryBean, factoryMethodToUse, argsToUse);
+				return this.beanFactory.getInstantiationStrategy().instantiate(
+						mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args);
 			}
-
-			bw.setBeanInstance(beanInstance);
-			return bw;
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
