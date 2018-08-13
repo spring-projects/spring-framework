@@ -47,17 +47,19 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent DataBuffer} stream into a stream of {@link XMLEvents}.
- * That is, given the following XML:
+ * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent XMLEvents}.
  *
- * <pre>
+ * <p>Given the following XML:
+ *
+ * <pre class="code">
  * &lt;root>
  *     &lt;child&gt;foo&lt;/child&gt;
  *     &lt;child&gt;bar&lt;/child&gt;
  * &lt;/root&gt;
  * </pre>
  *
- * this method with result in a flux with the following events:
+ * this decoder will produce a {@link Flux} with the following events:
+ *
  * <ol>
  * <li>{@link javax.xml.stream.events.StartDocument}</li>
  * <li>{@link javax.xml.stream.events.StartElement} {@code root}</li>
@@ -70,8 +72,8 @@ import org.springframework.util.xml.StaxUtils;
  * <li>{@link javax.xml.stream.events.EndElement} {@code root}</li>
  * </ol>
  *
- * Note that this decoder is not registered by default but used internally
- * by other decoders who are there by default.
+ * <p>Note that this decoder is not registered by default but is used internally
+ * by other decoders which are registered by default.
  *
  * @author Arjen Poutsma
  * @since 5.0

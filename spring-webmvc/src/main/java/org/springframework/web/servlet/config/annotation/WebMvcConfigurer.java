@@ -82,7 +82,7 @@ public interface WebMvcConfigurer {
 	}
 
 	/**
-	 * Add {@link Converter}s and {@link Formatter Converter}s and {@link Formatters} in addition to the ones
+	 * Add {@link Converter Converters} and {@link Formatter Formatters} in addition to the ones
 	 * registered by default.
 	 */
 	default void addFormatters(FormatterRegistry registry) {
