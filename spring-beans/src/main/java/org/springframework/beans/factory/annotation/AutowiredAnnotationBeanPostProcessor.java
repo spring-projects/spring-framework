@@ -252,7 +252,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						}
 						catch (NoSuchBeanDefinitionException ex) {
 							throw new BeanCreationException(beanName,
-								"Cannot apply @Lookup to beans without corresponding bean definition");
+									"Cannot apply @Lookup to beans without corresponding bean definition");
 						}
 					}
 				});

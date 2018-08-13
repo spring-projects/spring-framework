@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	}
 
 	@Nullable
-	protected Collection<CacheOperation> parseCacheAnnotations(DefaultCacheConfig cachingConfig, AnnotatedElement ae) {
+	private Collection<CacheOperation> parseCacheAnnotations(DefaultCacheConfig cachingConfig, AnnotatedElement ae) {
 		Collection<CacheOperation> ops = parseCacheAnnotations(cachingConfig, ae, false);
 		if (ops != null && ops.size() > 1 && ae.getAnnotations().length > 0) {
 			// More than one operation found -> local declarations override interface-declared ones...
@@ -88,6 +88,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 				ops.add(parseCacheableAnnotation(ae, cachingConfig, cacheable));
 			}
 		}
+
 		Collection<CacheEvict> evicts = (localOnly ? AnnotatedElementUtils.getAllMergedAnnotations(ae, CacheEvict.class) :
 				AnnotatedElementUtils.findAllMergedAnnotations(ae, CacheEvict.class));
 		if (!evicts.isEmpty()) {
@@ -96,6 +97,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 				ops.add(parseEvictAnnotation(ae, cachingConfig, evict));
 			}
 		}
+
 		Collection<CachePut> puts = (localOnly ? AnnotatedElementUtils.getAllMergedAnnotations(ae, CachePut.class) :
 				AnnotatedElementUtils.findAllMergedAnnotations(ae, CachePut.class));
 		if (!puts.isEmpty()) {
@@ -104,6 +106,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 				ops.add(parsePutAnnotation(ae, cachingConfig, put));
 			}
 		}
+
 		Collection<Caching> cachings = (localOnly ? AnnotatedElementUtils.getAllMergedAnnotations(ae, Caching.class) :
 				AnnotatedElementUtils.findAllMergedAnnotations(ae, Caching.class));
 		if (!cachings.isEmpty()) {
@@ -313,7 +316,6 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 				builder.setCacheManager(this.cacheManager);
 			}
 		}
-
 	}
 
 }

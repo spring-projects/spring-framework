@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ public interface InstantiationStrategy {
 	/**
 	 * Return an instance of the bean with the given name in this factory.
 	 * @param bd the bean definition
-	 * @param beanName the name of the bean when it's created in this context.
-	 * The name can be {@code null} if we're autowiring a bean which doesn't
+	 * @param beanName the name of the bean when it is created in this context.
+	 * The name can be {@code null} if we are autowiring a bean which doesn't
 	 * belong to the factory.
 	 * @param owner the owning BeanFactory
 	 * @return a bean instance for this bean definition
@@ -52,8 +52,8 @@ public interface InstantiationStrategy {
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given constructor.
 	 * @param bd the bean definition
-	 * @param beanName the name of the bean when it's created in this context.
-	 * The name can be {@code null} if we're autowiring a bean which doesn't
+	 * @param beanName the name of the bean when it is created in this context.
+	 * The name can be {@code null} if we are autowiring a bean which doesn't
 	 * belong to the factory.
 	 * @param owner the owning BeanFactory
 	 * @param ctor the constructor to use
@@ -68,8 +68,8 @@ public interface InstantiationStrategy {
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given factory method.
 	 * @param bd the bean definition
-	 * @param beanName the name of the bean when it's created in this context.
-	 * The name can be {@code null} if we're autowiring a bean which doesn't
+	 * @param beanName the name of the bean when it is created in this context.
+	 * The name can be {@code null} if we are autowiring a bean which doesn't
 	 * belong to the factory.
 	 * @param owner the owning BeanFactory
 	 * @param factoryBean the factory bean instance to call the factory method on,
