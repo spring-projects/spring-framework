@@ -363,8 +363,10 @@ public interface WebTestClient {
 
 
 	/**
-	 * Steps for customizing the {@link WebClient} used to test with
-	 * internally delegating to a {@link WebClient.Builder}.
+	 * Steps for customizing the {@link WebClient} used to test with,
+	 * internally delegating to a
+	 * {@link org.springframework.web.reactive.function.client.WebClient.Builder
+	 * WebClient.Builder}.
 	 */
 	interface Builder {
 

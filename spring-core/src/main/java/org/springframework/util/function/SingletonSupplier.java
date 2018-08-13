@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * A {@link java.util.function Supplier} decorator that caches a singleton result and
+ * A {@link java.util.function.Supplier} decorator that caches a singleton result and
  * makes it available from {@link #get()} (nullable) and {@link #obtain()} (null-safe).
  *
  * <p>A {@code SingletonSupplier} can be constructed via {@code of} factory methods

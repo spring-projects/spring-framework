@@ -27,7 +27,8 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * A {@link HandlerExceptionResolver} that delegates to a list of other {@link HandlerExceptionResolver HandlerExceptionResolver} that delegates to a list of other {@link HandlerExceptionResolvers}.
+ * A {@link HandlerExceptionResolver} that delegates to a list of other
+ * {@link HandlerExceptionResolver HandlerExceptionResolvers}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -66,7 +67,8 @@ public class HandlerExceptionResolverComposite implements HandlerExceptionResolv
 
 	/**
 	 * Resolve the exception by iterating over the list of configured exception resolvers.
-	 * The first one to return a ModelAndView instance wins. Otherwise {@code null} is returned.
+	 * <p>The first one to return a {@link ModelAndView} wins. Otherwise {@code null}
+	 * is returned.
 	 */
 	@Override
 	@Nullable
