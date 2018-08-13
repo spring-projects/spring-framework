@@ -344,18 +344,18 @@ public abstract class ScriptUtils {
 	public static boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;
 		boolean inEscape = false;
-		for (int i = 0; i < script.length(); i++) {
 
+		for (int i = 0; i < script.length(); i++) {
 			char c = script.charAt(i);
-			if (c == '\\') {
-				inEscape = !inEscape;
-				continue;
-			}
-			else if (inEscape) {
+			if (inEscape) {
 				inEscape = false;
 				continue;
 			}
-
+			// MySQL style escapes
+			if (c == '\\') {
+				inEscape = true;
+				continue;
+			}
 			if (c == '\'') {
 				inLiteral = !inLiteral;
 			}
@@ -363,6 +363,7 @@ public abstract class ScriptUtils {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
