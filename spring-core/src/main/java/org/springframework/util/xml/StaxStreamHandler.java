@@ -27,8 +27,6 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.LexicalHandler;
 
-import org.springframework.util.Assert;
-
 /**
  * SAX {@link org.xml.sax.ContentHandler} and {@link LexicalHandler}
  * that writes to an {@link XMLStreamWriter}.
@@ -42,7 +40,6 @@ class StaxStreamHandler extends AbstractStaxHandler {
 
 
 	public StaxStreamHandler(XMLStreamWriter streamWriter) {
-		Assert.notNull(streamWriter, "XMLStreamWriter must not be null");
 		this.streamWriter = streamWriter;
 	}
 

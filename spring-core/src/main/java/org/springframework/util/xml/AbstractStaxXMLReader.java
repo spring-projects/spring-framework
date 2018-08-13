@@ -147,7 +147,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 * Parse the StAX XML reader passed at construction-time.
 	 * <p><b>NOTE:</b>: The given system identifier is not read, but ignored.
 	 * @param ignored is ignored
-	 * @throws SAXException A SAX exception, possibly wrapping a {@code XMLStreamException}
+	 * @throws SAXException a SAX exception, possibly wrapping a {@code XMLStreamException}
 	 */
 	@Override
 	public final void parse(String ignored) throws SAXException {
