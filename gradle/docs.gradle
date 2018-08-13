@@ -27,6 +27,7 @@ task api(type: Javadoc) {
 	options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
 	options.author = true
 	options.header = rootProject.description
+	options.use = true
 	options.overview = "src/docs/api/overview.html"
 	options.stylesheetFile = file("src/docs/api/stylesheet.css")
 	options.splitIndex = true
