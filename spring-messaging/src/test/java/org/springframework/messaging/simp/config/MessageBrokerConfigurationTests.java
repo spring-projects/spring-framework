@@ -30,6 +30,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -57,6 +58,9 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
 import org.springframework.messaging.simp.user.MultiServerUserRegistry;
+import org.springframework.messaging.simp.user.SimpSubscription;
+import org.springframework.messaging.simp.user.SimpSubscriptionMatcher;
+import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserRegistryMessageHandler;
@@ -431,6 +435,15 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
+	public void customUserRegistryOrder() {
+		ApplicationContext context = loadConfig(CustomConfig.class);
+
+		SimpUserRegistry registry = context.getBean(SimpUserRegistry.class);
+		assertTrue(registry instanceof TestUserRegistry);
+		assertEquals(99, ((TestUserRegistry) registry).getOrder());
+	}
+
+	@Test
 	public void userBroadcasts() {
 		ApplicationContext context = loadConfig(BrokerRelayConfig.class);
 
@@ -559,8 +572,12 @@ public class MessageBrokerConfigurationTests {
 	static class BaseTestMessageBrokerConfig extends AbstractMessageBrokerConfiguration {
 
 		@Override
-		protected SimpUserRegistry createLocalUserRegistry() {
-			return mock(SimpUserRegistry.class);
+		protected SimpUserRegistry createLocalUserRegistry(@Nullable Integer order) {
+			TestUserRegistry registry = new TestUserRegistry();
+			if (order != null) {
+				registry.setOrder(order);
+			}
+			return registry;
 		}
 	}
 
@@ -647,6 +664,7 @@ public class MessageBrokerConfigurationTests {
 			registry.setPathMatcher(new AntPathMatcher(".")).enableSimpleBroker("/topic", "/queue");
 			registry.setCacheLimit(8192);
 			registry.setPreservePublishOrder(true);
+			registry.setUserRegistryOrder(99);
 		}
 	}
 
@@ -714,6 +732,34 @@ public class MessageBrokerConfigurationTests {
 			this.messages.add(message);
 			return true;
 		}
+	}
+
+
+	private static class TestUserRegistry implements SimpUserRegistry, Ordered {
+
+		private Integer order;
+
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+
+		@Override
+		public int getOrder() {
+			return this.order;
+		}
+
+		@Override
+		public SimpUser getUser(String userName) { return null; }
+
+		@Override
+		public Set<SimpUser> getUsers() { return null; }
+
+		@Override
+		public int getUserCount() { return 0; }
+
+		@Override
+		public Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher) { return null; }
 	}
 
 

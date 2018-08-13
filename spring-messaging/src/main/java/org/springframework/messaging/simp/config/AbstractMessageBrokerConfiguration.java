@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -419,15 +420,32 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
+	@SuppressWarnings("deprecation")
 	public SimpUserRegistry userRegistry() {
-		return (getBrokerRegistry().getUserRegistryBroadcast() != null ?
-				new MultiServerUserRegistry(createLocalUserRegistry()) : createLocalUserRegistry());
+		SimpUserRegistry registry = createLocalUserRegistry();
+		if (registry == null) {
+			registry = createLocalUserRegistry(getBrokerRegistry().getUserRegistryOrder());
+		}
+		boolean broadcast = getBrokerRegistry().getUserRegistryBroadcast() != null;
+		return (broadcast ? new MultiServerUserRegistry(registry) : registry);
 	}
 
 	/**
-	 * Create the user registry that provides access to the local users.
+	 * Create the user registry that provides access to local users.
+	 * @deprecated as of 5.1 in favor of {@link #createLocalUserRegistry(Integer)}
 	 */
-	protected abstract SimpUserRegistry createLocalUserRegistry();
+	@Deprecated
+	@Nullable
+	protected SimpUserRegistry createLocalUserRegistry() {
+		return null;
+	}
+
+	/**
+	 * Create the user registry that provides access to local users.
+	 * @param order the order to use as a {@link SmartApplicationListener}.
+	 * @since 5.1
+	 */
+	protected abstract SimpUserRegistry createLocalUserRegistry(@Nullable Integer order);
 
 	/**
 	 * Return a {@link org.springframework.validation.Validator
