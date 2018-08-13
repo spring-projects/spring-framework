@@ -170,6 +170,8 @@ public class ScriptUtilsUnitTests {
 		assertTrue(containsSqlScriptDelimiters("select 1\n select 2", "\n"));
 		assertFalse(containsSqlScriptDelimiters("select 1\n select 2", "\n\n"));
 		assertTrue(containsSqlScriptDelimiters("select 1\n\n select 2", "\n\n"));
+		assertTrue(containsSqlScriptDelimiters("insert into users(first_name, last_name)\nvalues('Charles', 'd\\'Artagnan');", ";"));
+		assertFalse(containsSqlScriptDelimiters("insert into users(first_name, last_name)\nvalues('a\\\\', 'b;')", ";"));
 	}
 
 	private String readScript(String path) throws Exception {
