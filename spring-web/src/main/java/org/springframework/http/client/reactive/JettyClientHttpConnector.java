@@ -51,14 +51,14 @@ public class JettyClientHttpConnector implements ClientHttpConnector, SmartLifec
 
 
 	/**
-	 * Create a Jetty {@link ClientHttpConnector} with the default {@link HttpClient}.
+	 * Default constructor that creates a new instance of {@link HttpClient}.
 	 */
 	public JettyClientHttpConnector() {
 		this(new HttpClient());
 	}
 
 	/**
-	 * Create a Jetty {@link ClientHttpConnector} with the given {@link HttpClient}.
+	 * Constructor with an initialized {@link HttpClient}.
 	 */
 	public JettyClientHttpConnector(HttpClient httpClient) {
 		Assert.notNull(httpClient, "HttpClient is required");

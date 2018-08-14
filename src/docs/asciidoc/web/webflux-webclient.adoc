@@ -1,34 +1,142 @@
 [[webflux-client]]
 = WebClient
 
-The `spring-webflux` module includes a reactive, non-blocking client for HTTP requests
-with a functional-style API client and Reactive Streams support. `WebClient` depends on a
-lower level HTTP client library to execute requests and that support is pluggable.
+Spring WebFlux includes a reactive, non-blocking `WebClient` for performing HTTP requests
+using a functional-style API that exposes Reactor `Flux` and `Mono` types, see
+<<web-reactive.adoc#webflux-reactive-libraries>>. The client relies on the same
+<<web-reactive.adoc#webflux-codecs,codecs>> that WebFlux server applications use to work
+with request and response content.
 
-`WebClient`
-uses the same <<web-reactive.adoc#webflux-codecs,codecs>> as WebFlux server applications do, and
-shares a common base package, some common APIs, and infrastructure with the
-server <<web-reactive.adoc#webflux-fn,functional web framework>>.
-The API exposes Reactor `Flux` and `Mono` types, also see
-<<web-reactive.adoc#webflux-reactive-libraries>>. By default it uses
-it uses https://github.com/reactor/reactor-netty[Reactor Netty] as the HTTP client
-library and
-https://github.com/jetty-project/jetty-reactive-httpclient[Jetty ReactiveStreams HttpClient]
-is supported as well via `JettyClientHttpConnector`, but others can be plugged in
-through a custom `ClientHttpConnector`.
+Internally `WebClient` delegates to an HTTP client library. By default it uses
+https://github.com/reactor/reactor-netty[Reactor Netty], there is built-in support for
+the Jetty https://github.com/jetty-project/jetty-reactive-httpclient[reactive HtpClient],
+and others can be plugged in through a `ClientHttpConnector`.
 
-By comparison to the <<integration.adoc#rest-resttemplate,RestTemplate>>, the
-`WebClient` is:
 
-* non-blocking, reactive, and supports higher concurrency with less hardware resources.
-* provides a functional API that takes advantage of Java 8 lambdas.
-* supports both synchronous and asynchronous scenarios.
-* supports streaming up or down from a server.
 
-The `RestTemplate` is not a good fit for use in non-blocking applications, and therefore
-Spring WebFlux application should always use the `WebClient`. The `WebClient` should also
-be preferred in Spring MVC, in most high concurrency scenarios, and for composing a
-sequence of remote, inter-dependent calls.
+
+[[webflux-client-builder]]
+== Configuration
+
+The simplest way to create a `WebClient` is through one of the static factory methods:
+
+* `WebClient.create()`
+* `WebClient.create(String baseUrl)`
+
+The above uses Reactor Netty `HttpClient` from "io.projectreactor.netty:reactor-netty"
+with default settings and participates in global resources such for event loop threads and
+a connection pool, see <<webflux-client-builder-reactor, Reactor Netty configuration>>.
+
+The `WebClient.Builder` can be used for access to further options:
+
+* `uriBuilderFactory` -- customized `UriBuilderFactory` to use as a base URL.
+* `defaultHeader` -- headers for every request.
+* `defaultCookie)` -- cookies for every request.
+* `defaultRequest` -- `Consumer` to customize every request.
+* `filter` -- client filter for every request.
+* `exchangeStrategies` -- HTTP message reader/writer customizations.
+* `clientConnector` -- HTTP client library settings.
+
+For example, to configure <<web-reactive.adoc#webflux-codecs,HTTP codecs>>:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	ExchangeStrategies strategies = ExchangeStrategies.builder()
+			.codecs(configurer -> {
+				// ...
+			})
+			.build();
+
+	WebClient client = WebClient.builder()
+			.exchangeStrategies(strategies)
+			.build();
+----
+
+Once built a `WebClient` instance is immutable. However, you can clone it, and build a
+modified copy without affecting the original instance:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	WebClient client1 = WebClient.builder()
+			.filter(filterA).filter(filterB).build();
+
+	WebClient client2 = client1.mutate()
+			.filter(filterC).filter(filterD).build();
+
+	// client1 has filterA, filterB
+
+	// client2 has filterA, filterB, filterC, filterD
+----
+
+
+
+[[webflux-client-builder-reactor]]
+=== Reactor Netty
+
+To customize Reactor Netty settings:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	HttpClient httpClient = HttpClient.create()
+	httpClient.secure(sslSpec -> ...);
+	ClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
+
+	WebClient webClient = WebClient.builder().clientConnector(connector).build();
+----
+
+By default `HttpClient` participates in the global Reactor Netty resources held in
+`reactor.netty.http.HttpResources`, including event loop threads and a connection pool.
+This is the recommended mode since fixed, shared resources are preferred for event loop
+concurrency. In this mode global resources remain active until the process exits.
+
+If the server is timed with the process, there is typically no need for an explicit
+shutdown. However if the server can start or stop in-process, e.g. Spring MVC
+application deployed as a WAR, you can declare a Spring-managed bean of type
+`ReactorResourceFactory` with `globaResources=true` (the default) to ensure the Reactor
+Netty global resources are shut down when the Spring `ApplicationContext` is closed:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	@Bean
+	public ReactorResourceFactory reactorResourceFactory() {
+		return new ReactorResourceFactory();
+	}
+----
+
+You may also choose not to participate in the global Reactor Netty resources. However keep
+in mind in this mode the burden is on you to ensure all Reactor Netty client and server
+instances use shared resources:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	@Bean
+	public ReactorResourceFactory resourceFactory() {
+		ReactorResourceFactory factory = new ReactorResourceFactory();
+		factory.setGlobalResources(false); // <1>
+		return factory;
+	}
+
+	@Bean
+	public WebClient webClient() {
+
+		Function<HttpClient, HttpClient> mapper = client -> {
+			// Further customizations...
+		};
+
+		ClientHttpConnector connector =
+				new ReactorClientHttpConnector(resourceFactory(), mapper); // <2>
+
+		return WebClient.builder().clientConnector(connector).build(); // <3>
+	}
+----
+<1> Create resources independent of global ones.
+<2> Use `ReactorClientHttpConnector` constructor with resource factory.
+<3> Plug the connector into the `WebClient.Builder`.
 
 
 
@@ -268,69 +376,11 @@ inline-style, through the built-in `BodyInserters`. For example:
 
 
 
-[[webflux-client-builder]]
-== Builder options
-
-A simple way to create `WebClient` is through the static factory methods `create()` and
-`create(String)` with a base URL for all requests. You can also use `WebClient.builder()`
-for access to more options.
-
-To customize the underlying HTTP client:
-
-[source,java,intent=0]
-[subs="verbatim,quotes"]
-----
-	SslContext sslContext = ...
-
-	ClientHttpConnector connector = new ReactorClientHttpConnector(
-			builder -> builder.sslContext(sslContext));
-
-	WebClient webClient = WebClient.builder()
-			.clientConnector(connector)
-			.build();
-----
-
-To customize the <<web-reactive.adoc#webflux-codecs,HTTP codecs>> used for encoding and
-decoding HTTP messages:
-
-[source,java,intent=0]
-[subs="verbatim,quotes"]
-----
-	ExchangeStrategies strategies = ExchangeStrategies.builder()
-			.codecs(configurer -> {
-				// ...
-			})
-			.build();
-
-	WebClient webClient = WebClient.builder()
-			.exchangeStrategies(strategies)
-			.build();
-----
-
-The builder can be used to insert <<webflux-client-filter>>.
-
-Explore the `WebClient.Builder` in your IDE for other options related to URI building,
-default headers (and cookies), and more.
-
-After the `WebClient` is built, you can always obtain a new builder from it, in order to
-build a new `WebClient`, based on, but without affecting the current instance:
-
-[source,java,intent=0]
-[subs="verbatim,quotes"]
-----
-	WebClient modifiedClient = client.mutate()
-			// user builder methods...
-			.build();
-----
-
-
-
-
 [[webflux-client-filter]]
 == Client Filters
 
-You can register an `ExchangeFilterFunction` in the `WebClient.Builder` to intercept and
-possibly modify requests performed through the client:
+You can register a client filter (`ExchangeFilterFunction`) through the `WebClient.Builder`
+in order to intercept and/or modify requests:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]

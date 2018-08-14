@@ -33,4 +33,13 @@ See <<integration.adoc#rest-client-access,RestTemplate>> for details.
 introduced in 5.0 and offers a modern alternative to the `RestTemplate` with efficient
 support for both synchronous and asynchronous, as well as streaming scenarios.
 
+In contrast to the `RestTemplate`, the `WebClient` supports the following:
+
+* Non-blocking I/O.
+* Reactive Streams back pressure.
+* High concurrency with less hardware resources.
+* Functional-style, fluent API taking advantage of Java 8 lambdas.
+* Synchronous and asynchronous interactions.
+* Streaming up to or streaming down from a server.
+
 See <<web-reactive.adoc#webflux-client,WebClient>> for more details.
