@@ -28,7 +28,6 @@ import reactor.netty.http.client.HttpClientRequest;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
-import reactor.netty.tcp.TcpClient;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -49,7 +48,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 
 
 	/**
-	 * Default constructor that initializes an {@link HttpClient} with:
+	 * Default constructor. Initializes {@link HttpClient} via:
 	 * <pre class="code">
 	 * HttpClient.create().compress()
 	 * </pre>
