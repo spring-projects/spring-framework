@@ -42,6 +42,7 @@ import org.springframework.web.servlet.view.json.AbstractJackson2View;
  *
  * @author Sebastien Deleuze
  * @since 4.1
+ * @see org.springframework.web.servlet.view.json.MappingJackson2JsonView
  */
 public class MappingJackson2XmlView extends AbstractJackson2View {
 
@@ -73,20 +74,12 @@ public class MappingJackson2XmlView extends AbstractJackson2View {
 		super(xmlMapper, DEFAULT_CONTENT_TYPE);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+
 	@Override
 	public void setModelKey(String modelKey) {
 		this.modelKey = modelKey;
 	}
 
-	/**
-	 * Filter out undesired attributes from the given model.
-	 * The return value can be either another {@link Map} or a single value object.
-	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
-	 * @return the value to be rendered
-	 */
 	@Override
 	protected Object filterModel(Map<String, Object> model) {
 		Object value = null;

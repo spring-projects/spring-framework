@@ -906,7 +906,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
 		logRequest(request);
 
 		// Keep a snapshot of the request attributes in case of an include,
@@ -953,7 +952,6 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	private void logRequest(HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-
 			String params;
 			if (isEnableLoggingRequestDetails()) {
 				params = request.getParameterMap().entrySet().stream()
@@ -961,16 +959,14 @@ public class DispatcherServlet extends FrameworkServlet {
 						.collect(Collectors.joining(", "));
 			}
 			else {
-				params = request.getParameterMap().isEmpty() ? "" :  "masked";
+				params = (request.getParameterMap().isEmpty() ? "" :  "masked");
 			}
 
 			String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
-
-			String dispatchType = !request.getDispatcherType().equals(DispatcherType.REQUEST) ?
-					"\"" + request.getDispatcherType().name() + "\" dispatch for " : "";
-
-			String message = dispatchType + request.getMethod() +
-					" \"" + getRequestUri(request) + query + "\", parameters={" + params + "}";
+			String dispatchType = (!request.getDispatcherType().equals(DispatcherType.REQUEST) ?
+					"\"" + request.getDispatcherType().name() + "\" dispatch for " : "");
+			String message = (dispatchType + request.getMethod() + " \"" + getRequestUri(request) +
+					query + "\", parameters={" + params + "}");
 
 			if (logger.isTraceEnabled()) {
 				List<String> values = Collections.list(request.getHeaderNames());
