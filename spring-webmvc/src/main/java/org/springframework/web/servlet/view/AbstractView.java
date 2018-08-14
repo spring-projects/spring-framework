@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,7 +128,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				String tok = st.nextToken();
 				int eqIdx = tok.indexOf('=');
 				if (eqIdx == -1) {
-					throw new IllegalArgumentException("Expected = in attributes CSV string '" + propString + "'");
+					throw new IllegalArgumentException(
+							"Expected '=' in attributes CSV string '" + propString + "'");
 				}
 				if (eqIdx >= tok.length() - 2) {
 					throw new IllegalArgumentException(
@@ -170,7 +171,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * the View instance configuration. "Dynamic" attributes, on the other hand,
 	 * are values passed in as part of the model.
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
-	 * @param attributes Map with name Strings as keys and attribute objects as values
+	 * @param attributes a Map with name Strings as keys and attribute objects as values
 	 */
 	public void setAttributesMap(Map<String, ?> attributes) {
 		if (attributes != null) {
@@ -419,7 +420,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Expose the model objects in the given map as request attributes.
 	 * Names will be taken from the model Map.
 	 * This method is suitable for all resources reachable by {@link javax.servlet.RequestDispatcher}.
-	 * @param model Map of model objects to expose
+	 * @param model a Map of model objects to expose
 	 * @param request current HTTP request
 	 */
 	protected void exposeModelAsRequestAttributes(Map<String, Object> model, HttpServletRequest request) throws Exception {
