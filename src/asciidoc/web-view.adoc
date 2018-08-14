@@ -2674,7 +2674,7 @@ The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to rende
 content as JSON. By default, the entire contents of the model map (with the exception of
 framework-specific classes) will be encoded as JSON. For cases where the contents of the
 map need to be filtered, users may specify a specific set of model attributes to encode
-via the `RenderedAttributes` property. The `extractValueFromSingleKeyModel` property may
+via the `modelKeys` property. The `extractValueFromSingleKeyModel` property may
 also be used to have the value in single-key models extracted and serialized directly
 rather than as a map of model attributes.
 
