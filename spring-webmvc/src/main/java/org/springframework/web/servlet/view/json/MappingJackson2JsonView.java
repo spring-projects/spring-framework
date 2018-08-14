@@ -149,7 +149,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * Filter out undesired attributes from the given model.
 	 * The return value can be either another {@link Map} or a single value object.
 	 * <p>The default implementation removes {@link BindingResult} instances and entries
-	 * not included in the {@link #setModelKeys renderedAttributes} property.
+	 * not included in the {@link #setModelKeys modelKeys} property.
 	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
 	 * @return the value to be rendered
 	 */
