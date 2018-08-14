@@ -32,6 +32,7 @@ import io.netty.channel.socket.SocketChannelConfig;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -83,6 +84,9 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private int connectTimeout = -1;
 
 	private int readTimeout = -1;
+
+	@Nullable
+	private ProxyHandler proxyHandler;
 
 	@Nullable
 	private volatile Bootstrap bootstrap;
@@ -149,6 +153,14 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.readTimeout = readTimeout;
 	}
 
+	/**
+	 * Set proxy handler. hen configured it is used to create and insert an
+	 * {@link io.netty.handler.proxy.ProxyHandler} in the channel pipeline.
+	 */
+	public void setProxyHandler(ProxyHandler proxyHandler) {
+		this.proxyHandler = proxyHandler;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
@@ -204,6 +216,9 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 					protected void initChannel(SocketChannel channel) throws Exception {
 						configureChannel(channel.config());
 						ChannelPipeline pipeline = channel.pipeline();
+						if (proxyHandler != null) {
+							pipeline.addFirst(proxyHandler);
+						}
 						if (isSecure) {
 							Assert.notNull(sslContext, "sslContext should not be null");
 							pipeline.addLast(sslContext.newHandler(channel.alloc(), uri.getHost(), uri.getPort()));
