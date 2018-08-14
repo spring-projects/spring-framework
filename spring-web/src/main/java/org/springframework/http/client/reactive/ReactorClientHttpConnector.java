@@ -26,6 +26,9 @@ import reactor.netty.NettyOutbound;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientRequest;
 import reactor.netty.http.client.HttpClientResponse;
+import reactor.netty.resources.ConnectionProvider;
+import reactor.netty.resources.LoopResources;
+import reactor.netty.tcp.TcpClient;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -39,21 +42,53 @@ import org.springframework.util.Assert;
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector {
 
+	private final static Function<HttpClient, HttpClient> defaultInitializer = HttpClient::compress;
+
+
 	private final HttpClient httpClient;
 
 
 	/**
-	 * Create a Reactor Netty {@link ClientHttpConnector}
-	 * with default configuration and HTTP compression support enabled.
+	 * Default constructor that initializes an {@link HttpClient} with:
+	 * <pre class="code">
+	 * HttpClient.create().compress()
+	 * </pre>
 	 */
 	public ReactorClientHttpConnector() {
-		this.httpClient = HttpClient.create().compress();
+		this.httpClient = defaultInitializer.apply(HttpClient.create());
 	}
 
 	/**
-	 * Create a Reactor Netty {@link ClientHttpConnector} with a fully
-	 * configured {@code HttpClient}.
-	 * @param httpClient the client instance to use
+	 * Constructor with externally managed Reactor Netty resources, including
+	 * {@link LoopResources} for event loop threads, and {@link ConnectionProvider}
+	 * for the connection pool.
+	 * <p>This constructor should be used only when you don't want the client
+	 * to participate in the Reactor Netty global resources. By default the
+	 * client participates in the Reactor Netty global resources held in
+	 * {@link reactor.netty.http.HttpResources}, which is recommended since
+	 * fixed, shared resources are favored for event loop concurrency. However,
+	 * consider declaring a {@link ReactorResourceFactory} bean with
+	 * {@code globaResources=true} in order to ensure the Reactor Netty global
+	 * resources are shut down when the Spring ApplicationContext is closed.
+	 * @param factory the resource factory to obtain the resources from
+	 * @param mapper a mapper for further initialization of the created client
+	 * @since 5.1
+	 */
+	public ReactorClientHttpConnector(ReactorResourceFactory factory, Function<HttpClient, HttpClient> mapper) {
+		this.httpClient = defaultInitializer.andThen(mapper).apply(initHttpClient(factory));
+	}
+
+	private static HttpClient initHttpClient(ReactorResourceFactory resourceFactory) {
+		ConnectionProvider provider = resourceFactory.getConnectionProvider();
+		LoopResources resources = resourceFactory.getLoopResources();
+		Assert.notNull(provider, "No ConnectionProvider: is ReactorResourceFactory not initialized yet?");
+		Assert.notNull(resources, "No LoopResources: is ReactorResourceFactory not initialized yet?");
+		return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources)).compress();
+	}
+
+	/**
+	 * Constructor with a pre-configured {@code HttpClient} instance.
+	 * @param httpClient the client to use
 	 * @since 5.1
 	 */
 	public ReactorClientHttpConnector(HttpClient httpClient) {
