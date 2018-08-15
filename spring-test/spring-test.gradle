@@ -2,6 +2,7 @@ description = "Spring TestContext Framework"
 
 dependencyManagement {
 	imports {
+		mavenBom "org.junit:junit-bom:${junit5Version}"
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
@@ -27,8 +28,8 @@ dependencies {
 	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 	optional("javax.xml.bind:jaxb-api:2.3.0")
 	optional("javax.websocket:javax.websocket-api:1.1")
-	optional("junit:junit:4.12")
-	optional("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+	optional('junit:junit:4.12')
+	optional('org.junit.jupiter:junit-jupiter-api')
 	optional("org.testng:testng:6.14.3")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
@@ -62,8 +63,8 @@ dependencies {
 	testCompile("org.hibernate:hibernate-core:5.2.17.Final")
 	testCompile("org.hibernate:hibernate-validator:6.0.12.Final")
 	// Enable use of the JUnit Platform Runner
-	testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
-	testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
+	testCompile('org.junit.platform:junit-platform-runner')
+	testCompile('org.junit.jupiter:junit-jupiter-params')
 	testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
 	testCompile("com.rometools:rome:1.11.0")
@@ -78,9 +79,9 @@ dependencies {
 	testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 	// Pull in the latest JUnit 5 Launcher API and the Vintage engine as well
 	// so that we can run JUnit 4 tests in IntelliJ IDEA.
-	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-	testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
-	testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
+	testRuntime('org.junit.jupiter:junit-jupiter-engine')
+	testRuntime('org.junit.platform:junit-platform-launcher')
+	testRuntime('org.junit.vintage:junit-vintage-engine')
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
