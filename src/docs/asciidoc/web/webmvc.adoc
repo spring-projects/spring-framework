@@ -1816,7 +1816,7 @@ supported for all return values, see below for more details.
 | The return value is converted through ``HttpMessageConverter``s and written to the
   response. See <<mvc-ann-responsebody>>.
 
-| `HttpEntity<B>`, `ResponseEntity<B>`, `Optional<HttpEntity<B>>`, `Optional<ResponseEntity<B>>`
+| `HttpEntity<B>`, `ResponseEntity<B>`
 | The return value specifies the full response including HTTP headers and body be converted
   through ``HttpMessageConverter``s and written to the response.
   See <<mvc-ann-responseentity>>.
@@ -2658,21 +2658,6 @@ on a container object that specifies request headers and body. Below is an examp
 		URI location = ... ;
 		return ResponseEntity.created(location).build();
 	}
-----
-
-In case of a `java.util.Optional<ResponseEntity>` return type, the `Optional.empty()`
-case will be automatically converted to a `ResponseEntity` with an empty body and an HTTP
-404 status, so you don't need to chain your optional with an `orElse` / `orElseGet` for
-simple HTTP 404 responses. Here's an example of this:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-@GetMapping("/user")
-public Optional<ResponseEntity<User>> fetchUser() {
-	Optional<User> user = //...
-	return user.map(ResponseEntity::ok);
-}
 ----
 
 

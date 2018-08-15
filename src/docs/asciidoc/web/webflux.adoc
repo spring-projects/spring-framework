@@ -1749,10 +1749,14 @@ controller. The following code snippet shows the usage:
 
 [TIP]
 ====
+<<<<<<< HEAD
 Unlike the Servlet API "request parameter" concept that conflates query parameters, form
+=======
+Unlike the Servlet API "request paramater" concept that conflate query parameters, form
+>>>>>>> parent of 7e91733502... Infer HTTP 404 from empty Optional/Publisher types
 data, and multiparts into one, in WebFlux each is accessed individually through the
 `ServerWebExchange`. While `@RequestParam` binds to query parameters only, you can
-use data binding to apply query parameters, form data, and multiparts to a
+use data binding to apply query paramerters, form data, and multiparts to a
 <<webflux-ann-modelattrib-method-args,command object>>.
 ====
 
@@ -2273,22 +2277,6 @@ on a container object that specifies request headers and body. Below is an examp
 		URI location = ...
 		return new ResponseEntity.created(location).build();
 	}
-----
-
-As is the case for many return values, `ResponseEntity` can be wrapped by a reactive type
-such as `Mono`. In case of a `Mono<ResponseEntity>` return type, an empty `Mono` will be
-automatically converted to a `ResponseEntity` with an empty body and an HTTP 404 status,
-so you don't need to chain your `Mono` with a `switchIfEmpty` / `defaultIfEmpty` for
-simple HTTP 404 responses. Here's an example of this:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-@GetMapping("/user")
-public Mono<ResponseEntity<User>> fetchUser() {
-	Mono<User> user = //...
-	return user.map(ResponseEntity::ok);
-}
 ----
 
 

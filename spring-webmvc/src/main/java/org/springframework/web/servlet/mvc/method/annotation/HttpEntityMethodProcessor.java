@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +33,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -123,9 +121,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		Class<?> parameterType = returnType.nestedIfOptional().getNestedParameterType();
-		return (HttpEntity.class.isAssignableFrom(parameterType) &&
-				!RequestEntity.class.isAssignableFrom(parameterType));
+		return (HttpEntity.class.isAssignableFrom(returnType.getParameterType()) &&
+				!RequestEntity.class.isAssignableFrom(returnType.getParameterType()));
 	}
 
 	@Override
@@ -153,7 +150,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	@Nullable
 	private Type getHttpEntityType(MethodParameter parameter) {
-		Assert.isAssignable(HttpEntity.class, parameter.getNestedParameterType());
+		Assert.isAssignable(HttpEntity.class, parameter.getParameterType());
 		Type parameterType = parameter.getGenericParameterType();
 		if (parameterType instanceof ParameterizedType) {
 			ParameterizedType type = (ParameterizedType) parameterType;
@@ -172,7 +169,6 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
@@ -183,12 +179,6 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
-
-		if (returnType.getParameterType() == Optional.class) {
-			Optional<HttpEntity<?>> optionalEntity = (Optional<HttpEntity<?>>) returnValue;
-			returnValue = optionalEntity.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-			returnType = returnType.nestedIfOptional();
-		}
 
 		Assert.isInstanceOf(HttpEntity.class, returnValue);
 		HttpEntity<?> responseEntity = (HttpEntity<?>) returnValue;

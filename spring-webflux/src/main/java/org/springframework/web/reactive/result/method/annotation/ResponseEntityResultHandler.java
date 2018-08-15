@@ -55,8 +55,6 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 	private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
-	private static final ResponseEntity<Object> notFound = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
 
 	/**
 	 * Basic constructor with a default {@link ReactiveAdapterRegistry}.
@@ -121,8 +119,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 		if (adapter != null) {
 			Assert.isTrue(!adapter.isMultiValue(), "Only a single ResponseEntity supported");
-			returnValueMono = Mono.from(adapter.toPublisher(result.getReturnValue()))
-					.defaultIfEmpty(notFound);
+			returnValueMono = Mono.from(adapter.toPublisher(result.getReturnValue()));
 			bodyParameter = actualParameter.nested().nested();
 		}
 		else {
