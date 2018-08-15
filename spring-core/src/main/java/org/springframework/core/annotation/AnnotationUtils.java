@@ -346,7 +346,7 @@ public abstract class AnnotationUtils {
 
 		if (annotatedElement instanceof Class) {
 			Class<?> superclass = ((Class<?>) annotatedElement).getSuperclass();
-			if (superclass != null && Object.class != superclass) {
+			if (superclass != null && superclass != Object.class) {
 				return getRepeatableAnnotations(superclass, annotationType, containerAnnotationType);
 			}
 		}
@@ -553,7 +553,7 @@ public abstract class AnnotationUtils {
 			Class<?> clazz = method.getDeclaringClass();
 			while (result == null) {
 				clazz = clazz.getSuperclass();
-				if (clazz == null || Object.class == clazz) {
+				if (clazz == null || clazz == Object.class) {
 					break;
 				}
 				Set<Method> annotatedMethods = getAnnotatedMethodsInBaseType(clazz);
@@ -600,6 +600,35 @@ public abstract class AnnotationUtils {
 		return null;
 	}
 
+	/**
+	 * Does the given method override the given candidate method?
+	 * @param method the overriding method
+	 * @param candidate the potentially overridden method
+	 * @since 5.0.8
+	 */
+	static boolean isOverride(Method method, Method candidate) {
+		if (!candidate.getName().equals(method.getName()) ||
+				candidate.getParameterCount() != method.getParameterCount()) {
+			return false;
+		}
+		Class<?>[] paramTypes = method.getParameterTypes();
+		if (Arrays.equals(candidate.getParameterTypes(), paramTypes)) {
+			return true;
+		}
+		for (int i = 0; i < paramTypes.length; i++) {
+			if (paramTypes[i] != ResolvableType.forMethodParameter(candidate, i, method.getDeclaringClass()).resolve()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Determine the methods on the given type with searchable annotations on them.
+	 * @param baseType the superclass or interface to search
+	 * @return the cached set of annotated methods
+	 * @since 5.0.5
+	 */
 	static Set<Method> getAnnotatedMethodsInBaseType(Class<?> baseType) {
 		boolean ifcCheck = baseType.isInterface();
 		if (ifcCheck && ClassUtils.isJavaLanguageInterface(baseType)) {
@@ -634,6 +663,13 @@ public abstract class AnnotationUtils {
 		return annotatedMethods;
 	}
 
+	/**
+	 * Determine whether the specified method has searchable annotations,
+	 * i.e. not just {@code java.lang} or {@code org.springframework.lang}
+	 * annotations such as {@link Deprecated} and {@link Nullable}.
+	 * @param ifcMethod the interface method to check
+	 * @@since 5.0.5
+	 */
 	private static boolean hasSearchableAnnotations(Method ifcMethod) {
 		Annotation[] anns = ifcMethod.getAnnotations();
 		if (anns.length == 0) {
@@ -646,23 +682,6 @@ public abstract class AnnotationUtils {
 			}
 		}
 		return false;
-	}
-
-	static boolean isOverride(Method method, Method candidate) {
-		if (!candidate.getName().equals(method.getName()) ||
-				candidate.getParameterCount() != method.getParameterCount()) {
-			return false;
-		}
-		Class<?>[] paramTypes = method.getParameterTypes();
-		if (Arrays.equals(candidate.getParameterTypes(), paramTypes)) {
-			return true;
-		}
-		for (int i = 0; i < paramTypes.length; i++) {
-			if (paramTypes[i] != ResolvableType.forMethodParameter(candidate, i, method.getDeclaringClass()).resolve()) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	/**
@@ -763,7 +782,7 @@ public abstract class AnnotationUtils {
 		}
 
 		Class<?> superclass = clazz.getSuperclass();
-		if (superclass == null || Object.class == superclass) {
+		if (superclass == null || superclass == Object.class) {
 			return null;
 		}
 		return findAnnotation(superclass, annotationType, visited);
@@ -793,7 +812,7 @@ public abstract class AnnotationUtils {
 	 */
 	@Nullable
 	public static Class<?> findAnnotationDeclaringClass(Class<? extends Annotation> annotationType, @Nullable Class<?> clazz) {
-		if (clazz == null || Object.class == clazz) {
+		if (clazz == null || clazz == Object.class) {
 			return null;
 		}
 		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
@@ -827,8 +846,10 @@ public abstract class AnnotationUtils {
 	 * @see #isAnnotationDeclaredLocally(Class, Class)
 	 */
 	@Nullable
-	public static Class<?> findAnnotationDeclaringClassForTypes(List<Class<? extends Annotation>> annotationTypes, @Nullable Class<?> clazz) {
-		if (clazz == null || Object.class == clazz) {
+	public static Class<?> findAnnotationDeclaringClassForTypes(
+			List<Class<? extends Annotation>> annotationTypes, @Nullable Class<?> clazz) {
+
+		if (clazz == null || clazz == Object.class) {
 			return null;
 		}
 		for (Class<? extends Annotation> annotationType : annotationTypes) {

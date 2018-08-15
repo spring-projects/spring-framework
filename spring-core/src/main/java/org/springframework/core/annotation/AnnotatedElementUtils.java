@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -854,19 +855,21 @@ public class AnnotatedElementUtils {
 					return result;
 				}
 
-				if (element instanceof Class) { // otherwise getAnnotations doesn't return anything new
-					List<Annotation> inheritedAnnotations = new ArrayList<>();
-					for (Annotation annotation : element.getAnnotations()) {
-						if (!declaredAnnotations.contains(annotation)) {
-							inheritedAnnotations.add(annotation);
+				if (element instanceof Class) {  // otherwise getAnnotations doesn't return anything new
+					Class<?> superclass = ((Class) element).getSuperclass();
+					if (superclass != null && superclass != Object.class) {
+						List<Annotation> inheritedAnnotations = new LinkedList<>();
+						for (Annotation annotation : element.getAnnotations()) {
+							if (!declaredAnnotations.contains(annotation)) {
+								inheritedAnnotations.add(annotation);
+							}
 						}
-					}
-
-					// Continue searching within inherited annotations
-					result = searchWithGetSemanticsInAnnotations(element, inheritedAnnotations,
-							annotationType, annotationName, containerType, processor, visited, metaDepth);
-					if (result != null) {
-						return result;
+						// Continue searching within inherited annotations
+						result = searchWithGetSemanticsInAnnotations(element, inheritedAnnotations,
+								annotationType, annotationName, containerType, processor, visited, metaDepth);
+						if (result != null) {
+							return result;
+						}
 					}
 				}
 			}
@@ -1126,7 +1129,7 @@ public class AnnotatedElementUtils {
 					Class<?> clazz = method.getDeclaringClass();
 					while (true) {
 						clazz = clazz.getSuperclass();
-						if (clazz == null || Object.class == clazz) {
+						if (clazz == null || clazz == Object.class) {
 							break;
 						}
 						Set<Method> annotatedMethods = AnnotationUtils.getAnnotatedMethodsInBaseType(clazz);
@@ -1152,23 +1155,23 @@ public class AnnotatedElementUtils {
 				}
 				else if (element instanceof Class) {
 					Class<?> clazz = (Class<?>) element;
-
-					// Search on interfaces
-					for (Class<?> ifc : clazz.getInterfaces()) {
-						T result = searchWithFindSemantics(ifc, annotationType, annotationName,
-								containerType, processor, visited, metaDepth);
-						if (result != null) {
-							return result;
+					if (!Annotation.class.isAssignableFrom(clazz)) {
+						// Search on interfaces
+						for (Class<?> ifc : clazz.getInterfaces()) {
+							T result = searchWithFindSemantics(ifc, annotationType, annotationName,
+									containerType, processor, visited, metaDepth);
+							if (result != null) {
+								return result;
+							}
 						}
-					}
-
-					// Search on superclass
-					Class<?> superclass = clazz.getSuperclass();
-					if (superclass != null && Object.class != superclass) {
-						T result = searchWithFindSemantics(superclass, annotationType, annotationName,
-								containerType, processor, visited, metaDepth);
-						if (result != null) {
-							return result;
+						// Search on superclass
+						Class<?> superclass = clazz.getSuperclass();
+						if (superclass != null && superclass != Object.class) {
+							T result = searchWithFindSemantics(superclass, annotationType, annotationName,
+									containerType, processor, visited, metaDepth);
+							if (result != null) {
+								return result;
+							}
 						}
 					}
 				}
