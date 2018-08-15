@@ -350,6 +350,20 @@ public class ResponseEntityResultHandlerTests {
 		assertResponseBodyIsEmpty(exchange);
 	}
 
+	@Test // SPR-13281
+	public void handleEmptyMonoShouldResultInNotFoundStatus() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(APPLICATION_JSON));
+
+		MethodParameter type = on(TestController.class).resolveReturnType(Mono.class, ResponseEntity.class);
+		HandlerResult result = new HandlerResult(new TestController(), Mono.empty(), type);
+
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
+		assertResponseBodyIsEmpty(exchange);
+	}
+
 
 
 	private void testHandle(Object returnValue, MethodParameter returnType) {
