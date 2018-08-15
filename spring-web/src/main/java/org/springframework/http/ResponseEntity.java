@@ -223,6 +223,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 5.1
 	 */
 	public static <T> ResponseEntity<T> of(Optional<T> body) {
+		Assert.notNull(body, "Body must not be null");
 		return body.map(ResponseEntity::ok).orElse(notFound().build());
 	}
 
