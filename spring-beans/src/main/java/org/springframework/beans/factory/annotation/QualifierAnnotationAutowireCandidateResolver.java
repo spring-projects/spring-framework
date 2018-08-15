@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -342,10 +342,12 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * Determine a suggested value from any of the given candidate annotations.
 	 */
 	protected Object findValue(Annotation[] annotationsToSearch) {
-		AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
-				AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);
-		if (attr != null) {
-			return extractValue(attr);
+		if (annotationsToSearch.length > 0) {   // qualifier annotations have to be local
+			AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
+					AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);
+			if (attr != null) {
+				return extractValue(attr);
+			}
 		}
 		return null;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes =
-			new LinkedHashSet<Class<? extends Annotation>>();
+ 			new LinkedHashSet<Class<? extends Annotation>>(4);
 
 	private String requiredParameterName = "required";
 
@@ -484,7 +484,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	private AnnotationAttributes findAutowiredAnnotation(AccessibleObject ao) {
-		if (ao.getAnnotations().length > 0) {
+		if (ao.getAnnotations().length > 0) {  // autowiring annotations have to be local
 			for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
 				AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ao, type);
 				if (attributes != null) {
@@ -594,11 +594,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							registerDependentBeans(beanName, autowiredBeanNames);
 							if (autowiredBeanNames.size() == 1) {
 								String autowiredBeanName = autowiredBeanNames.iterator().next();
-								if (beanFactory.containsBean(autowiredBeanName)) {
-									if (beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
-										this.cachedFieldValue = new ShortcutDependencyDescriptor(
-												desc, autowiredBeanName, field.getType());
-									}
+								if (beanFactory.containsBean(autowiredBeanName) &&
+										beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
+									this.cachedFieldValue = new ShortcutDependencyDescriptor(
+											desc, autowiredBeanName, field.getType());
 								}
 							}
 						}
