@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import javax.net.ssl.SSLException;
 
 import io.netty.bootstrap.Bootstrap;
@@ -86,7 +87,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private int readTimeout = -1;
 
 	@Nullable
-	private ProxyHandler proxyHandler;
+	private Supplier<ProxyHandler> proxyHandlerSupplier;
 
 	@Nullable
 	private volatile Bootstrap bootstrap;
@@ -154,11 +155,12 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	/**
-	 * Set proxy handler. hen configured it is used to create and insert an
+	 * Set proxy handler supplier, which will create and insert
 	 * {@link io.netty.handler.proxy.ProxyHandler} in the channel pipeline.
+	 * <p>Supplier need to create no instance because proxy handler is not shareable.</p>
 	 */
-	public void setProxyHandler(ProxyHandler proxyHandler) {
-		this.proxyHandler = proxyHandler;
+	public void setProxyHandlerSupplier(Supplier<ProxyHandler> proxyHandlerSupplier) {
+		this.proxyHandlerSupplier = proxyHandlerSupplier;
 	}
 
 
@@ -216,8 +218,8 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 					protected void initChannel(SocketChannel channel) throws Exception {
 						configureChannel(channel.config());
 						ChannelPipeline pipeline = channel.pipeline();
-						if (proxyHandler != null) {
-							pipeline.addFirst(proxyHandler);
+						if (proxyHandlerSupplier != null) {
+							pipeline.addFirst(proxyHandlerSupplier.get());
 						}
 						if (isSecure) {
 							Assert.notNull(sslContext, "sslContext should not be null");
