@@ -1749,7 +1749,7 @@ controller. The following code snippet shows the usage:
 
 [TIP]
 ====
-Unlike the Servlet API "request parameter" concept that conflate query parameters, form
+Unlike the Servlet API "request parameter" concept that conflates query parameters, form
 data, and multiparts into one, in WebFlux each is accessed individually through the
 `ServerWebExchange`. While `@RequestParam` binds to query parameters only, you can
 use data binding to apply query parameters, form data, and multiparts to a
@@ -1758,17 +1758,17 @@ use data binding to apply query parameters, form data, and multiparts to a
 
 Method parameters using using the `@RequestParam` annotation are required by default, but
 you can specify that a method parameter is optional by setting ``@RequestParam``'s
-`required` flag to `false` or by declaring the argument with an `java.util.Optional`
+`required` flag to `false` or by declaring the argument with a `java.util.Optional`
 wrapper.
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
 
-When an `@RequestParam` annotation is declared as `Map<String, String>` or
+When an `@RequestParam` annotation is declared on a `Map<String, String>` or
 `MultiValueMap<String, String>` argument, the map is populated with all query parameters.
 
-Note that use of `@RequestParam` is optional, e.g. to set its attributes.
-By default any argument that is a simple value type, as determined by
+Note that use of `@RequestParam` is optional -- for example, to set its attributes. By
+default any argument that is a simple value type, as determined by
 {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
 and is not resolved by any other argument resolver, is treated as if it was annotated
 with `@RequestParam`.
@@ -2275,12 +2275,11 @@ on a container object that specifies request headers and body. Below is an examp
 	}
 ----
 
-As many return values, `ResponseEntity` can be wrapped by a reactive type such as `Mono`.
-In case of a `Mono<ResponseEntity>` return type, the empty `Mono` case will be
+As is the case for many return values, `ResponseEntity` can be wrapped by a reactive type
+such as `Mono`. In case of a `Mono<ResponseEntity>` return type, an empty `Mono` will be
 automatically converted to a `ResponseEntity` with an empty body and an HTTP 404 status,
-so you don't need to chain your `Mono` with an `switchIfEmpty` / `defaultIfEmpty` for simple
-HTTP 404 responses.
-Here's an example of this:
+so you don't need to chain your `Mono` with a `switchIfEmpty` / `defaultIfEmpty` for
+simple HTTP 404 responses. Here's an example of this:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]

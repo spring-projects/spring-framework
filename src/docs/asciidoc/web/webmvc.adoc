@@ -2661,10 +2661,9 @@ on a container object that specifies request headers and body. Below is an examp
 ----
 
 In case of a `java.util.Optional<ResponseEntity>` return type, the `Optional.empty()`
-case will be automatically  converted to a `ResponseEntity` with an empty body
-and an HTTP 404 status, so you don't need to chain your optional with
-an `orElse` / `orElseGet` for simple HTTP 404 responses.
-Here's an example of this:
+case will be automatically converted to a `ResponseEntity` with an empty body and an HTTP
+404 status, so you don't need to chain your optional with an `orElse` / `orElseGet` for
+simple HTTP 404 responses. Here's an example of this:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
