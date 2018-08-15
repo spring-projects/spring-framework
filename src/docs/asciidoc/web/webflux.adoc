@@ -1749,14 +1749,10 @@ controller. The following code snippet shows the usage:
 
 [TIP]
 ====
-<<<<<<< HEAD
 Unlike the Servlet API "request parameter" concept that conflates query parameters, form
-=======
-Unlike the Servlet API "request paramater" concept that conflate query parameters, form
->>>>>>> parent of 7e91733502... Infer HTTP 404 from empty Optional/Publisher types
 data, and multiparts into one, in WebFlux each is accessed individually through the
-`ServerWebExchange`. While `@RequestParam` binds to query parameters only, you can
-use data binding to apply query paramerters, form data, and multiparts to a
+`ServerWebExchange`. While `@RequestParam` binds to query parameters only, you can use
+data binding to apply query parameters, form data, and multiparts to a
 <<webflux-ann-modelattrib-method-args,command object>>.
 ====
 
