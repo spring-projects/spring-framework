@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
@@ -211,6 +212,18 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 */
 	public static BodyBuilder status(int status) {
 		return new DefaultBuilder(status);
+	}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body
+	 * and the {@linkplain HttpStatus#OK OK} status, or an empty body and a
+	 * {@linkplain HttpStatus#NOT_FOUND NOT FOUND} status in case of a
+	 * {@linkplain Optional#empty()} parameter.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.1
+	 */
+	public static <T> ResponseEntity<T> of(Optional<T> body) {
+		return body.map(ResponseEntity::ok).orElse(notFound().build());
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.Matchers;
@@ -70,6 +71,25 @@ public class ResponseEntityTests {
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void ofOptional() {
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.of(entity));
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void ofEmptyOptional() {
+		ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.empty());
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
 	}
 
 	@Test
