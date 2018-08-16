@@ -80,8 +80,7 @@ To customize Reactor Netty settings:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-	HttpClient httpClient = HttpClient.create()
-	httpClient.secure(sslSpec -> ...);
+	HttpClient httpClient = HttpClient.create().secure(sslSpec -> ...);
 	ClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
 
 	WebClient webClient = WebClient.builder().clientConnector(connector).build();
