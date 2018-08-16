@@ -23,7 +23,7 @@ import java.util.concurrent.Executor;
 import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.io.MappedByteBufferPool;
 import org.eclipse.jetty.util.ProcessorUtils;
-import org.eclipse.jetty.util.component.ContainerLifeCycle;
+import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.eclipse.jetty.util.thread.Scheduler;
@@ -127,7 +127,6 @@ public class JettyResourceFactory implements InitializingBean, DisposableBean {
 		if (this.executor == null) {
 			QueuedThreadPool threadPool = new QueuedThreadPool();
 			threadPool.setName(name);
-			threadPool.start();
 			this.executor = threadPool;
 		}
 		if (this.byteBufferPool == null) {
@@ -137,19 +136,32 @@ public class JettyResourceFactory implements InitializingBean, DisposableBean {
 							: ProcessorUtils.availableProcessors() * 2);
 		}
 		if (this.scheduler == null) {
-			Scheduler scheduler = new ScheduledExecutorScheduler(name + "-scheduler", false);
-			scheduler.start();
-			this.scheduler = scheduler;
+			this.scheduler = new ScheduledExecutorScheduler(name + "-scheduler", false);
 		}
+
+		if (this.executor instanceof LifeCycle) {
+			((LifeCycle)this.executor).start();
+		}
+		this.scheduler.start();
 	}
 
 	@Override
 	public void destroy() throws Exception {
-		if (this.executor instanceof ContainerLifeCycle) {
-			((ContainerLifeCycle)this.executor).stop();
+		try {
+			if (this.executor instanceof LifeCycle) {
+				((LifeCycle)this.executor).stop();
+			}
 		}
-		if (this.scheduler != null) {
-			this.scheduler.stop();
+		catch (Throwable ex) {
+			// ignore
+		}
+		try {
+			if (this.scheduler != null) {
+				this.scheduler.stop();
+			}
+		}
+		catch (Throwable ex) {
+			// ignore
 		}
 	}
 
