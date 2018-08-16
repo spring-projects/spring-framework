@@ -311,8 +311,8 @@ The above definition of the `dataSource` bean uses the `<jndi-lookup/>` tag from
 ====
 
 You can also use Hibernate local transactions easily, as shown in the following
-examples. In this case, you need to define a Hibernate `LocalSessionFactoryBean`, which
-your application code will use to obtain Hibernate `Session` instances.
+examples. In this case, you need to define a Hibernate `LocalSessionFactoryBean`,
+which your application code will use to obtain Hibernate `Session` instances.
 
 The `DataSource` bean definition will be similar to the local JDBC example shown
 previously and thus is not shown in the following example.
@@ -5116,8 +5116,8 @@ chapter will then cover the other ORM technologies, showing briefer examples the
 ====
 As of Spring Framework 5.0, Spring requires Hibernate ORM 4.3 or later for JPA support
 and even Hibernate ORM 5.0+ for programming against the native Hibernate Session API.
-Note that the Hibernate team does not maintain any versions prior to 5.0 anymore and
-is likely to focus on 5.2+ exclusively soon.
+Note that the Hibernate team does not maintain any versions prior to 5.1 anymore and
+is likely to focus on 5.3+ exclusively soon.
 ====
 
 
@@ -5175,8 +5175,25 @@ configuration:
 ----
 
 You can also access a JNDI-located `SessionFactory`, using Spring's
-`JndiObjectFactoryBean` / `<jee:jndi-lookup>` to retrieve and expose it. However, that
-is typically not common outside of an EJB context.
+`JndiObjectFactoryBean` / `<jee:jndi-lookup>` to retrieve and expose it.
+However, that is typically not common outside of an EJB context.
+
+[NOTE]
+====
+Spring also provides a `LocalSessionFactoryBuilder` variant, seamlessly integrating
+with `@Bean` style configuration and programmatic setup (no `FactoryBean` involved).
+
+Both `LocalSessionFactoryBean` and `LocalSessionFactoryBuilder` support background
+bootstrapping, with Hibernate initialization running in parallel to the application
+bootstrap thread on a given bootstrap executor (e.g. a `SimpleAsyncTaskExecutor`).
+On `LocalSessionFactoryBean`, this is available through the "bootstrapExecutor"
+property; on the programmatic `LocalSessionFactoryBuilder`, there is an overloaded
+`buildSessionFactory` method which takes a bootstrap executor argument.
+
+As of Spring Framework 5.1, such a native Hibernate setup can also expose a JPA
+`EntityManagerFactory` for standard JPA interaction next to native Hibernate access.
+See <<orm-jpa-hibernate,Native Hibernate setup for JPA>> for details.
+====
 
 
 [[orm-hibernate-straight]]
@@ -5781,7 +5798,7 @@ This is important especially when the hosting applications rely on different JPA
 implementations because the JPA transformers are applied only at class loader level and
 thus are isolated from each other.
 
-[[orm-jpa-multiple]]
+[[orm-jpa-setup-multiple]]
 ===== Dealing with multiple persistence units
 
 For applications that rely on multiple persistence units locations, stored in various
@@ -5824,6 +5841,30 @@ affect __all__ hosted units, or programmatically, through the
 `PersistenceUnitPostProcessor`, which allows persistence unit selection. If no
 `PersistenceUnitManager` is specified, one is created and used internally by
 `LocalContainerEntityManagerFactoryBean`.
+
+[[orm-jpa-setup-background]]
+===== Background bootstrapping
+
+`LocalContainerEntityManagerFactoryBean` supports background bootstrapping through
+the `bootstrapExecutor` property:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="bootstrapExecutor">
+			<bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
+		</property>
+	</bean>
+----
+
+The actual JPA provider bootstrapping will be handed off to the specified executor then,
+running in parallel to the application bootstrap thread. The exposed `EntityManagerFactory`
+proxy can be injected into other application components and is even able to respond
+`EntityManagerFactoryInfo` configuration inspection. However, once the actual JPA provider
+is being accessed by other components, e.g. calling `createEntityManager`, those calls
+will block until the background bootstrapping has completed. In particular, when using
+Spring Data JPA, make sure to set up deferred bootstrapping for its repositories as well.
 
 
 [[orm-jpa-dao]]
@@ -6086,6 +6127,17 @@ e.g. custom Hibernate Integrator setup, Hibernate 5.3 bean container integration
 as well as stronger optimizations for read-only transactions. Last but not least,
 native Hibernate setup can also be expressed through `LocalSessionFactoryBuilder`,
 seamlessly integrating with `@Bean` style configuration (no `FactoryBean` involved).
+
+[NOTE]
+====
+`LocalSessionFactoryBean` and `LocalSessionFactoryBuilder` support background
+bootstrapping, just like the JPA `LocalContainerEntityManagerFactoryBean`.
+See <<orm-jpa-setup-background,Background bootstrapping>> for an introduction.
+
+On `LocalSessionFactoryBean`, this is available through the "bootstrapExecutor"
+property; on the programmatic `LocalSessionFactoryBuilder`, there is an overloaded
+`buildSessionFactory` method which takes a bootstrap executor argument.
+====
 
 
 
