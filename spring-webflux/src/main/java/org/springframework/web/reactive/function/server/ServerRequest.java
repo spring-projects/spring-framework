@@ -85,12 +85,10 @@ public interface ServerRequest {
 	/**
 	 * Return a {@code UriBuilderComponents}  from the URI associated with this
 	 * {@code ServerRequest}.
-	 *
 	 * <p><strong>Note:</strong> as of 5.1 this method ignores
 	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
 	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
 	 * to extract and use, or to discard such headers.
-	 *
 	 * @return a URI builder
 	 */
 	UriBuilder uriBuilder();

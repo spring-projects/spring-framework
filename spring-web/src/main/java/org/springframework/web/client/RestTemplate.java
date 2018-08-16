@@ -193,7 +193,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	/**
 	 * Create a new instance of the {@link RestTemplate} using the given list of
 	 * {@link HttpMessageConverter} to use.
-	 * @param messageConverters the list of {@link HttpMessageConverter} to use.
+	 * @param messageConverters the list of {@link HttpMessageConverter} to use
 	 * @since 3.2.7
 	 */
 	public RestTemplate(List<HttpMessageConverter<?>> messageConverters) {
@@ -204,7 +204,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	private static DefaultUriBuilderFactory initUriTemplateHandler() {
 		DefaultUriBuilderFactory uriFactory = new DefaultUriBuilderFactory();
-		uriFactory.setEncodingMode(EncodingMode.URI_COMPONENT); // for backwards compatibility..
+		uriFactory.setEncodingMode(EncodingMode.URI_COMPONENT);  // for backwards compatibility..
 		return uriFactory;
 	}
 
@@ -279,13 +279,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * backwards compatibility, the encoding mode is set to
 	 * {@link EncodingMode#URI_COMPONENT URI_COMPONENT}. As of 5.0.8, prefer
 	 * using {@link EncodingMode#TEMPLATE_AND_VALUES TEMPLATE_AND_VALUES}.
-	 *
 	 * <p><strong>Note:</strong> in 5.0 the switch from
 	 * {@link org.springframework.web.util.DefaultUriTemplateHandler
 	 * DefaultUriTemplateHandler} (deprecated in 4.3), as the default to use, to
 	 * {@link DefaultUriBuilderFactory} brings in a different default for the
 	 * {@code parsePath} property (switching from false to true).
-	 *
 	 * @param handler the URI template handler to use
 	 */
 	public void setUriTemplateHandler(UriTemplateHandler handler) {
@@ -649,7 +647,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 
-	// general execution
+	// General execution
 
 	/**
 	 * {@inheritDoc}
@@ -817,7 +815,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	/**
-	 * Returns a response extractor for {@link HttpHeaders}.
+	 * Return a response extractor for {@link HttpHeaders}.
 	 */
 	protected ResponseExtractor<HttpHeaders> headersExtractor() {
 		return this.headersExtractor;

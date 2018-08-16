@@ -449,8 +449,9 @@ public interface WebTestClient {
 		Builder responseTimeout(Duration timeout);
 
 		/**
-		 * Apply the given {@code Consumer} to this builder instance.
+		 * Apply the given configurer to this builder instance.
 		 * <p>This can be useful for applying pre-packaged customizations.
+		 * @param configurer the configurer to apply
 		 */
 		Builder apply(WebTestClientConfigurer configurer);
 
