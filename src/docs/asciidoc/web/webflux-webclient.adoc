@@ -138,6 +138,54 @@ instances use shared resources:
 <3> Plug the connector into the `WebClient.Builder`.
 
 
+[[webflux-client-builder-jetty]]
+=== Jetty
+
+To customize Jetty `HttpClient` settings:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	HttpClient httpClient = new HttpClient();
+	httpClient.setCookieStore(...);
+	ClientHttpConnector connector = new JettyClientHttpConnector(httpClient);
+
+	WebClient webClient = WebClient.builder().clientConnector(connector).build();
+----
+
+By default `HttpClient` creates its own resources (`Executor`, `ByteBufferPool`, `Scheduler`)
+which remain active until the process exits or `stop()` is called.
+
+You can share resources between multiple intances of Jetty client (and server) and ensure the
+resources are shut down when the Spring `ApplicationContext` is closed by declaring a
+Spring-managed bean of type `JettyResourceFactory`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	@Bean
+	public JettyResourceFactory resourceFactory() {
+		return new JettyResourceFactory();
+	}
+
+	@Bean
+	public WebClient webClient() {
+
+		Consumer<HttpClient> customizer = client -> {
+			// Further customizations...
+		};
+
+		ClientHttpConnector connector =
+				new JettyClientHttpConnector(resourceFactory(), customizer); // <2>
+
+		return WebClient.builder().clientConnector(connector).build(); // <3>
+	}
+----
+
+<1> Create shared resources.
+<2> Use `JettyClientHttpConnector` constructor with resource factory.
+<3> Plug the connector into the `WebClient.Builder`.
+
 
 
 [[webflux-client-retrieve]]
