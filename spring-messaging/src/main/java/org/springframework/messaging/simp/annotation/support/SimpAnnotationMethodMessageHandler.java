@@ -251,7 +251,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to pass on to
-	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandlers}
+	 * {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}
 	 * that send messages from controller return values.
 	 * <p>By default, this property is not set.
 	 */
@@ -332,7 +332,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		// Annotation-based return value types
 
-		SendToMethodReturnValueHandler sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, true);
+		SendToMethodReturnValueHandler sendToHandler =
+				new SendToMethodReturnValueHandler(this.brokerTemplate, true);
 		sendToHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(sendToHandler);
 
@@ -341,10 +342,11 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		subscriptionHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(subscriptionHandler);
 
-		// custom return value types
+		// Custom return value types
+
 		handlers.addAll(getCustomReturnValueHandlers());
 
-		// catch-all
+		// Catch-all
 
 		sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
 		sendToHandler.setHeaderInitializer(this.headerInitializer);

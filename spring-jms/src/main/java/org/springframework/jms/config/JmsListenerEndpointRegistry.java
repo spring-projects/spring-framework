@@ -44,12 +44,13 @@ import org.springframework.util.Assert;
  * lifecycle of the listener containers, in particular within the lifecycle
  * of the application context.
  *
- * <p>Contrary to {@link MessageListenerContainer MessageListenerContainers} created manually, listener
- * containers managed by registry are not beans in the application context and
- * are not candidates for autowiring. Use {@link #getListenerContainers()} if
- * you need to access this registry's listener containers for management purposes.
- * If you need to access to a specific message listener container, use
- * {@link #getListenerContainer(String)} with the id of the endpoint.
+ * <p>Contrary to {@link MessageListenerContainer MessageListenerContainers}
+ * created manually, listener containers managed by registry are not beans
+ * in the application context and are not candidates for autowiring.
+ * Use {@link #getListenerContainers()} if you need to access this registry's
+ * listener containers for management purposes. If you need to access to a
+ * specific message listener container, use {@link #getListenerContainer(String)}
+ * with the id of the endpoint.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
