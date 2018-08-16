@@ -10,11 +10,11 @@ dependencies {
 	castor "org.codehaus.castor:castor-anttasks:1.4.1"
 	jibx "org.jibx:jibx-bind:1.3.1"
 	jibx "org.apache.bcel:bcel:6.0"
-	xjc 'javax.xml.bind:jaxb-api:2.3.0'
-	xjc 'com.sun.xml.bind:jaxb-core:2.3.0.1'
-	xjc 'com.sun.xml.bind:jaxb-impl:2.3.0.1'
-	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.11'  // 2.3.0 breaks with "xjc failed"
-	xjc 'com.sun.activation:javax.activation:1.2.0'
+	xjc "javax.xml.bind:jaxb-api:2.3.0"
+	xjc "com.sun.xml.bind:jaxb-core:2.3.0.1"
+	xjc "com.sun.xml.bind:jaxb-impl:2.3.0.1"
+	xjc "com.sun.xml.bind:jaxb-xjc:2.2.11"  // 2.3.0 breaks with "xjc failed"
+	xjc "com.sun.activation:javax.activation:1.2.0"
 }
 
 ext.genSourcesDir = "${buildDir}/generated-sources"
@@ -101,19 +101,19 @@ dependencies {
 	optional("javax.xml.bind:jaxb-api:2.3.0")
 	optional("javax.activation:activation:1.1.1")
 	optional("org.codehaus.castor:castor-xml:1.4.1")  {
-		exclude group: 'stax', module: 'stax-api'
+		exclude group: "stax", module: "stax-api"
 		exclude group: "org.springframework", module: "spring-context"
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("com.thoughtworks.xstream:xstream:1.4.10") {
-		exclude group: 'xpp3', module: 'xpp3_min'
-		exclude group: 'xmlpull', module: 'xmlpull'
+		exclude group: "xpp3", module: "xpp3_min"
+		exclude group: "xmlpull", module: "xmlpull"
 	}
 	optional("org.jibx:jibx-run:1.3.1")
 	testCompile(project(":spring-context"))
 	testCompile("org.ogce:xpp3:1.1.6")
 	testCompile("org.codehaus.jettison:jettison:1.3.8") {
-		exclude group: 'stax', module: 'stax-api'
+		exclude group: "stax", module: "stax-api"
 	}
 	testCompile(files(genCastor.classesDir).builtBy(genCastor))
 	testCompile(files(genJaxb.classesDir).builtBy(genJaxb))

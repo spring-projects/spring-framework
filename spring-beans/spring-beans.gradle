@@ -3,7 +3,7 @@ description = "Spring Beans"
 apply plugin: "groovy"
 
 dependencies {
-	compile(project(':spring-core'))
+	compile(project(":spring-core"))
 	optional("javax.inject:javax.inject:1")
 	optional("org.yaml:snakeyaml:1.21")
 	optional("org.codehaus.groovy:groovy-xml:${groovyVersion}")
@@ -26,6 +26,6 @@ compileGroovy {
 // This module also builds Kotlin code and the compileKotlin task naturally depends on
 // compileJava. We need to redefine dependencies to break task cycles.
 def deps = compileGroovy.taskDependencies.immutableValues + compileGroovy.taskDependencies.mutableValues
-compileGroovy.dependsOn = deps - 'compileJava'
+compileGroovy.dependsOn = deps - "compileJava"
 compileKotlin.dependsOn(compileGroovy)
 compileKotlin.classpath += files(compileGroovy.destinationDir)

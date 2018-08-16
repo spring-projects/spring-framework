@@ -12,7 +12,7 @@ dependencies {
 	compile(project(":spring-aop"))
 	compile(project(":spring-beans"))
 	compile(project(":spring-context"))
-	compile(project(':spring-core'))
+	compile(project(":spring-core"))
 	compile(project(":spring-expression"))
 	compile(project(":spring-web"))
 	optional(project(":spring-context-support"))  // for FreeMarker support
@@ -21,7 +21,7 @@ dependencies {
 	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 	optional("javax.el:javax.el-api:3.0.1-b04")
 	optional("javax.xml.bind:jaxb-api:2.3.0")
-	optional('org.webjars:webjars-locator-core:0.35')
+	optional("org.webjars:webjars-locator-core:0.35")
 	optional("com.rometools:rome:1.11.0")
 	optional("com.github.librepdf:openpdf:1.2.0")
 	optional("org.apache.poi:poi-ooxml:3.17")
