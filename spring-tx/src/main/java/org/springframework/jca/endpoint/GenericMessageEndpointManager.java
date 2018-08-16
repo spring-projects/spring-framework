@@ -159,7 +159,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 
 	private boolean autoStartup = true;
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
 
 	private volatile boolean running = false;
 

@@ -72,21 +72,6 @@ public class JettyClientHttpConnector implements ClientHttpConnector, SmartLifec
 
 
 	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public boolean isRunning() {
-		return this.httpClient.isRunning();
-	}
-
-	@Override
 	public void start() {
 		try {
 			// HttpClient is internally synchronized and protected with state checks
@@ -108,9 +93,8 @@ public class JettyClientHttpConnector implements ClientHttpConnector, SmartLifec
 	}
 
 	@Override
-	public void stop(Runnable callback) {
-		stop();
-		callback.run();
+	public boolean isRunning() {
+		return this.httpClient.isRunning();
 	}
 
 

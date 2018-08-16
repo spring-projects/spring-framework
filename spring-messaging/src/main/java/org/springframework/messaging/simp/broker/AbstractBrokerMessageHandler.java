@@ -173,11 +173,6 @@ public abstract class AbstractBrokerMessageHandler
 		return this.autoStartup;
 	}
 
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
-
 
 	@Override
 	public void start() {

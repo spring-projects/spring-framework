@@ -66,7 +66,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean autoStartup = true;
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
 
 	@Nullable
 	private String beanName;
@@ -317,12 +317,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
 		}
-	}
-
-	@Override
-	public void stop(Runnable callback) {
-		stop();
-		callback.run();
 	}
 
 	/**

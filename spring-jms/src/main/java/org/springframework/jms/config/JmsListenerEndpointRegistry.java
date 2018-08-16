@@ -66,7 +66,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	private final Map<String, MessageListenerContainer> listenerContainers =
 			new ConcurrentHashMap<>();
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -196,11 +196,6 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	@Override
 	public int getPhase() {
 		return this.phase;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
 	}
 
 	@Override

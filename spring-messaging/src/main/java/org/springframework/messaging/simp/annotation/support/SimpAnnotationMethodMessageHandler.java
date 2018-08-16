@@ -269,16 +269,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 
 	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
 	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			this.clientInboundChannel.subscribe(this);

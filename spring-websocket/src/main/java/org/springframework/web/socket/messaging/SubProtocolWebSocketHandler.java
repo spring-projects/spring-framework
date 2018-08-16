@@ -255,16 +255,6 @@ public class SubProtocolWebSocketHandler
 
 
 	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
 	public final void start() {
 		Assert.isTrue(this.defaultProtocolHandler != null || !this.protocolHandlers.isEmpty(), "No handlers");
 

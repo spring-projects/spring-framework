@@ -148,16 +148,6 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 
 	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
 	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			this.clientInboundChannel.subscribe(this);

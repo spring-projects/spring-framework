@@ -207,7 +207,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	private int startupDelay = 0;
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
 
 	private boolean exposeSchedulerInRepository = false;
 
@@ -794,12 +794,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				throw new SchedulingException("Could not stop Quartz Scheduler", ex);
 			}
 		}
-	}
-
-	@Override
-	public void stop(Runnable callback) throws SchedulingException {
-		stop();
-		callback.run();
 	}
 
 	@Override
