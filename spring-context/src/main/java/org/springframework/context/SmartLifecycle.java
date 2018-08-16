@@ -72,7 +72,9 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	 * @see LifecycleProcessor#onRefresh()
 	 * @see ConfigurableApplicationContext#refresh()
 	 */
-	boolean isAutoStartup();
+	default boolean isAutoStartup() {
+		return true;
+	}
 
 	/**
 	 * Indicates that a Lifecycle component must stop if it is currently running.
@@ -87,6 +89,9 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	 * @see #stop()
 	 * @see #getPhase()
 	 */
-	void stop(Runnable callback);
+	default void stop(Runnable callback) {
+		this.stop();
+		callback.run();
+	}
 
 }
