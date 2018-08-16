@@ -148,13 +148,13 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 
 	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
+	public boolean isAutoStartup() {
+		return true;
 	}
 
 	@Override
-	public boolean isAutoStartup() {
-		return true;
+	public int getPhase() {
+		return Integer.MAX_VALUE;
 	}
 
 	@Override

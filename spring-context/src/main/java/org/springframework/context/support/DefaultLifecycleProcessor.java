@@ -195,11 +195,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new HashMap<>();
 		lifecycleBeans.forEach((beanName, bean) -> {
-			int shutdownOrder = getPhase(bean);
-			LifecycleGroup group = phases.get(shutdownOrder);
+			int shutdownPhase = getPhase(bean);
+			LifecycleGroup group = phases.get(shutdownPhase);
 			if (group == null) {
-				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans, false);
-				phases.put(shutdownOrder, group);
+				group = new LifecycleGroup(shutdownPhase, this.timeoutPerShutdownPhase, lifecycleBeans, false);
+				phases.put(shutdownPhase, group);
 			}
 			group.add(beanName, bean);
 		});
@@ -302,11 +302,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	/**
 	 * Determine the lifecycle phase of the given bean.
-	 * <p>The default implementation checks for the {@link Phased} interface.
-	 * Can be overridden to apply other/further policies.
+	 * <p>The default implementation checks for the {@link Phased} interface, using
+	 * a default of 0 otherwise. Can be overridden to apply other/further policies.
 	 * @param bean the bean to introspect
-	 * @return the phase an integer value. The suggested default is 0.
-	 * @see Phased
+	 * @return the phase (an integer value)
+	 * @see Phased#getPhase()
 	 * @see SmartLifecycle
 	 */
 	protected int getPhase(Lifecycle bean) {
@@ -412,9 +412,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		@Override
 		public int compareTo(LifecycleGroupMember other) {
-			int thisOrder = getPhase(this.bean);
-			int otherOrder = getPhase(other.bean);
-			return Integer.compare(thisOrder, otherOrder);
+			int thisPhase = getPhase(this.bean);
+			int otherPhase = getPhase(other.bean);
+			return Integer.compare(thisPhase, otherPhase);
 		}
 	}
 
