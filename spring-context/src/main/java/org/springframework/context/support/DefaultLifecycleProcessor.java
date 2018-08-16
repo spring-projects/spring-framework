@@ -187,11 +187,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		Map<Integer, LifecycleGroup> phases = new HashMap<Integer, LifecycleGroup>();
 		for (Map.Entry<String, Lifecycle> entry : lifecycleBeans.entrySet()) {
 			Lifecycle bean = entry.getValue();
-			int shutdownOrder = getPhase(bean);
-			LifecycleGroup group = phases.get(shutdownOrder);
+			int shutdownPhase = getPhase(bean);
+			LifecycleGroup group = phases.get(shutdownPhase);
 			if (group == null) {
-				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans, false);
-				phases.put(shutdownOrder, group);
+				group = new LifecycleGroup(shutdownPhase, this.timeoutPerShutdownPhase, lifecycleBeans, false);
+				phases.put(shutdownPhase, group);
 			}
 			group.add(entry.getKey(), bean);
 		}
@@ -291,11 +291,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	/**
 	 * Determine the lifecycle phase of the given bean.
-	 * <p>The default implementation checks for the {@link Phased} interface.
-	 * Can be overridden to apply other/further policies.
+	 * <p>The default implementation checks for the {@link Phased} interface, using
+	 * a default of 0 otherwise. Can be overridden to apply other/further policies.
 	 * @param bean the bean to introspect
-	 * @return the phase an integer value. The suggested default is 0.
-	 * @see Phased
+	 * @return the phase (an integer value)
+	 * @see Phased#getPhase()
 	 * @see SmartLifecycle
 	 */
 	protected int getPhase(Lifecycle bean) {
@@ -402,9 +402,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		@Override
 		public int compareTo(LifecycleGroupMember other) {
-			int thisOrder = getPhase(this.bean);
-			int otherOrder = getPhase(other.bean);
-			return (thisOrder == otherOrder ? 0 : (thisOrder < otherOrder) ? -1 : 1);
+			int thisPhase = getPhase(this.bean);
+			int otherPhase = getPhase(other.bean);
+			return (thisPhase == otherPhase ? 0 : (thisPhase < otherPhase) ? -1 : 1);
 		}
 	}
 

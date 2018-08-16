@@ -211,8 +211,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * when connected on the STOMP level after the CONNECTED frame is received.
 	 * @param url the url to connect to
 	 * @param handler the session handler
-	 * @param uriVars URI variables to expand into the URL
-	 * @return ListenableFuture for access to the session when ready for use
+	 * @param uriVars the URI variables to expand into the URL
+	 * @return a ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(String url, StompSessionHandler handler, Object... uriVars) {
 		return connect(url, null, handler, uriVars);
@@ -225,8 +225,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param url the url to connect to
 	 * @param handshakeHeaders the headers for the WebSocket handshake
 	 * @param handler the session handler
-	 * @param uriVariables URI variables to expand into the URL
-	 * @return ListenableFuture for access to the session when ready for use
+	 * @param uriVariables the URI variables to expand into the URL
+	 * @return a ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(String url, WebSocketHttpHeaders handshakeHeaders,
 			StompSessionHandler handler, Object... uriVariables) {
@@ -243,8 +243,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param handshakeHeaders headers for the WebSocket handshake
 	 * @param connectHeaders headers for the STOMP CONNECT frame
 	 * @param handler the session handler
-	 * @param uriVariables URI variables to expand into the URL
-	 * @return ListenableFuture for access to the session when ready for use
+	 * @param uriVariables the URI variables to expand into the URL
+	 * @return a ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(String url, WebSocketHttpHeaders handshakeHeaders,
 			StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
@@ -262,7 +262,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param handshakeHeaders the headers for the WebSocket handshake
 	 * @param connectHeaders headers for the STOMP CONNECT frame
 	 * @param sessionHandler the STOMP session handler
-	 * @return ListenableFuture for access to the session when ready for use
+	 * @return a ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(URI url, WebSocketHttpHeaders handshakeHeaders,
 			StompHeaders connectHeaders, StompSessionHandler sessionHandler) {
@@ -392,7 +392,10 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		}
 
 		private void updateLastWriteTime() {
-			this.lastWriteTime = (this.lastWriteTime != -1 ? System.currentTimeMillis() : -1);
+			long lastWriteTime = this.lastWriteTime;
+			if (lastWriteTime != -1) {
+				this.lastWriteTime = System.currentTimeMillis();
+			}
 		}
 
 		@Override
