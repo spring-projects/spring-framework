@@ -264,7 +264,7 @@ public interface ServerRequest {
 	Mono<MultiValueMap<String, Part>> multipartData();
 
 
-	// Static methods
+	// Static builder methods
 
 	/**
 	 * Create a new {@code ServerRequest} based on the given {@code ServerWebExchange} and
@@ -285,20 +285,20 @@ public interface ServerRequest {
 	interface Headers {
 
 		/**
-		 * Return the list of acceptable {@linkplain MediaType media types},
+		 * Return the list of acceptable {@code MediaType media types},
 		 * as specified by the {@code Accept} header.
 		 * <p>Returns an empty list when the acceptable media types are unspecified.
 		 */
 		List<MediaType> accept();
 
 		/**
-		 * Return the list of acceptable {@linkplain Charset charsets},
+		 * Return the list of acceptable {@code Charset charsets},
 		 * as specified by the {@code Accept-Charset} header.
 		 */
 		List<Charset> acceptCharset();
 
 		/**
-		 * Return the list of acceptable {@linkplain Locale.LanguageRange languages},
+		 * Return the list of acceptable {@code Locale.LanguageRange languages},
 		 * as specified by the {@code Accept-Language} header.
 		 */
 		List<Locale.LanguageRange> acceptLanguage();
@@ -310,7 +310,7 @@ public interface ServerRequest {
 		OptionalLong contentLength();
 
 		/**
-		 * Return the {@linkplain MediaType media type} of the body, as specified
+		 * Return the {@code MediaType media type} of the body, as specified
 		 * by the {@code Content-Type} header.
 		 */
 		Optional<MediaType> contentType();

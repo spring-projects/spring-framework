@@ -102,27 +102,24 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	}
 
 	/**
-	 * Constructor with a {@link ClientOptions.Builder} that can be used to
+	 * Constructor with a {@code ClientOptions.Builder} that can be used to
 	 * customize Reactor Netty client options.
-	 *
 	 * <p><strong>Note: </strong> this constructor manages the lifecycle of the
 	 * {@link TcpClient} and its underlying resources. Please do not customize
 	 * any of the following options:
-	 * {@link ClientOptions.Builder#channelGroup(ChannelGroup) ChannelGroup},
-	 * {@link ClientOptions.Builder#loopResources(LoopResources) LoopResources}, and
-	 * {@link ClientOptions.Builder#poolResources(PoolResources) PoolResources}.
-	 * You may set the {@link ClientOptions.Builder#disablePool() disablePool}
+	 * {@code ClientOptions.Builder#channelGroup(ChannelGroup) ChannelGroup},
+	 * {@code ClientOptions.Builder#loopResources(LoopResources) LoopResources}, and
+	 * {@code ClientOptions.Builder#poolResources(PoolResources) PoolResources}.
+	 * You may set the {@code ClientOptions.Builder#disablePool() disablePool}
 	 * option if you simply want to turn off pooling.
-	 *
 	 * <p>For full control over the initialization and lifecycle of the TcpClient,
 	 * see {@link #ReactorNettyTcpClient(TcpClient, ReactorNettyCodec)}.
-	 *
 	 * @param optionsConsumer consumer to customize client options
 	 * @param codec the code to use
 	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec
 	 */
-	public ReactorNettyTcpClient(Consumer<ClientOptions.Builder<?>> optionsConsumer,
-			ReactorNettyCodec<P> codec) {
+	public ReactorNettyTcpClient(
+			Consumer<ClientOptions.Builder<?>> optionsConsumer, ReactorNettyCodec<P> codec) {
 
 		Assert.notNull(optionsConsumer, "Consumer<ClientOptions.Builder<?> is required");
 		Assert.notNull(codec, "ReactorNettyCodec is required");
@@ -155,7 +152,6 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	/**
 	 * Constructor with an externally created {@link TcpClient} instance whose
 	 * lifecycle is expected to be managed externally.
-	 *
 	 * @param tcpClient the TcpClient instance to use
 	 * @param codec the code to use
 	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec

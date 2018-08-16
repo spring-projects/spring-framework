@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 
 	/**
 	 * Create a Reactor Netty {@link ClientHttpConnector} with the given
-	 * {@link HttpClientOptions.Builder}
+	 * {@code HttpClientOptions.Builder}
 	 */
 	public ReactorClientHttpConnector(Consumer<? super HttpClientOptions.Builder> clientOptions) {
 		this.httpClient = HttpClient.create(clientOptions);

@@ -66,7 +66,7 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 
 	/**
 	 * Constructor with the {@link XnioWorker} to pass to
-	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}
+	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}.
 	 * @param worker the Xnio worker
 	 */
 	public UndertowWebSocketClient(XnioWorker worker) {
@@ -112,9 +112,10 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	/**
 	 * Set the {@link io.undertow.connector.ByteBufferPool ByteBufferPool} to pass to
 	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}.
-	 * <p>By default an indirect {@link io.undertow.server.DefaultByteBufferPool} with a buffer size
-	 * of {@value #DEFAULT_POOL_BUFFER_SIZE} is used.
+	 * <p>By default an indirect {@link io.undertow.server.DefaultByteBufferPool}
+	 * with a buffer size of 8192 is used.
 	 * @since 5.0.8
+	 * @see #DEFAULT_POOL_BUFFER_SIZE
 	 */
 	public void setByteBufferPool(ByteBufferPool byteBufferPool) {
 		Assert.notNull(byteBufferPool, "ByteBufferPool must not be null");
@@ -122,8 +123,9 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	}
 
 	/**
-	 * @return the {@link io.undertow.connector.ByteBufferPool} currently used
-	 * for newly created WebSocket sessions by this client
+	 * Return the {@link io.undertow.connector.ByteBufferPool} currently used
+	 * for newly created WebSocket sessions by this client.
+	 * @return the byte buffer pool
 	 * @since 5.0.8
 	 */
 	public ByteBufferPool getByteBufferPool() {
@@ -131,17 +133,15 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	}
 
 	/**
-	 * Return the configured {@code Consumer<ConnectionBuilder}.
+	 * Return the configured <code>Consumer&lt;ConnectionBuilder&gt;</code>.
 	 */
 	public Consumer<ConnectionBuilder> getConnectionBuilderConsumer() {
 		return this.builderConsumer;
 	}
 
 	/**
-	 * Configure the size of the {@link io.undertow.connector.ByteBufferPool
-	 * ByteBufferPool} to pass to
-	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}.
-	 * <p>By default the buffer size is set to {@value #DEFAULT_POOL_BUFFER_SIZE}.
+	 * Configure the size of the {@link io.undertow.connector.ByteBufferPool} to pass
+	 * to {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}.
 	 * @deprecated as of 5.0.8 this method is deprecated in favor
 	 * of {@link #setByteBufferPool(io.undertow.connector.ByteBufferPool)}
 	 */

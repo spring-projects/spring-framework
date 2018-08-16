@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	/**
 	 * Template method called from {@link #hasError(ClientHttpResponse)}.
 	 * <p>The default implementation checks if the given status code is
-	 * {@link HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
-	 * {@link HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
+	 * {@code HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
+	 * {@code HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
 	 * Can be overridden in subclasses.
 	 * @param statusCode the HTTP status code
 	 * @return {@code true} if the response has an error; {@code false} otherwise
@@ -100,7 +100,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 						response.getHeaders(), getResponseBody(response), getCharset(response));
 		}
 	}
-
 
 	/**
 	 * Determine the HTTP status of the given response.

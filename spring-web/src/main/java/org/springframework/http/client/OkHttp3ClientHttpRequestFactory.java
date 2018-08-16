@@ -71,9 +71,8 @@ public class OkHttp3ClientHttpRequestFactory
 
 
 	/**
-	 * Sets the underlying read timeout in milliseconds.
+	 * Set the underlying read timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see OkHttpClient.Builder#readTimeout(long, TimeUnit)
 	 */
 	public void setReadTimeout(int readTimeout) {
 		this.client = this.client.newBuilder()
@@ -82,9 +81,8 @@ public class OkHttp3ClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the underlying write timeout in milliseconds.
+	 * Set the underlying write timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see OkHttpClient.Builder#writeTimeout(long, TimeUnit)
 	 */
 	public void setWriteTimeout(int writeTimeout) {
 		this.client = this.client.newBuilder()
@@ -93,9 +91,8 @@ public class OkHttp3ClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the underlying connect timeout in milliseconds.
+	 * Set the underlying connect timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see OkHttpClient.Builder#connectTimeout(long, TimeUnit)
 	 */
 	public void setConnectTimeout(int connectTimeout) {
 		this.client = this.client.newBuilder()
