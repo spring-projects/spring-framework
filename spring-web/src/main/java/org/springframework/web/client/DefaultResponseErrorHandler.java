@@ -55,8 +55,8 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	/**
 	 * Template method called from {@link #hasError(ClientHttpResponse)}.
 	 * <p>The default implementation checks if the given status code is
-	 * {@link HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
-	 * {@link HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
+	 * {@code HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
+	 * {@code HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
 	 * Can be overridden in subclasses.
 	 * @param statusCode the HTTP status code
 	 * @return {@code true} if the response has an error; {@code false} otherwise

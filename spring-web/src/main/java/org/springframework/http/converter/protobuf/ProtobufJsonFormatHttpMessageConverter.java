@@ -43,7 +43,7 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 
 	/**
 	 * Construct a new {@code ProtobufJsonFormatHttpMessageConverter} with default
-	 * {@link JsonFormat.Parser} and {@link JsonFormat.Printer} configuration.
+	 * {@code JsonFormat.Parser} and {@code JsonFormat.Printer} configuration.
 	 */
 	public ProtobufJsonFormatHttpMessageConverter() {
 		this(null,  null, (ExtensionRegistry)null);
@@ -51,7 +51,7 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 
 	/**
 	 * Construct a new {@code ProtobufJsonFormatHttpMessageConverter} with the given
-	 * {@link JsonFormat.Parser} and {@link JsonFormat.Printer} configuration.
+	 * {@code JsonFormat.Parser} and {@code JsonFormat.Printer} configuration.
 	 * @param parser the JSON parser configuration
 	 * @param printer the JSON printer configuration
 	 */
@@ -63,7 +63,7 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 
 	/**
 	 * Construct a new {@code ProtobufJsonFormatHttpMessageConverter} with the given
-	 * {@link JsonFormat.Parser} and {@link JsonFormat.Printer} configuration, also
+	 * {@code JsonFormat.Parser} and {@code JsonFormat.Printer} configuration, also
 	 * accepting a registry that specifies protocol message extensions.
 	 * @param parser the JSON parser configuration
 	 * @param printer the JSON printer configuration
@@ -78,7 +78,7 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 
 	/**
 	 * Construct a new {@code ProtobufJsonFormatHttpMessageConverter} with the given
-	 * {@link JsonFormat.Parser} and {@link JsonFormat.Printer} configuration, also
+	 * {@code JsonFormat.Parser} and {@code JsonFormat.Printer} configuration, also
 	 * accepting an initializer that allows the registration of message extensions.
 	 * @param parser the JSON parser configuration
 	 * @param printer the JSON printer configuration

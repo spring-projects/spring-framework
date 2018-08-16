@@ -23,8 +23,8 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.lang.Nullable;
 
 /**
- * The default implementation of Spring's {@link SqlRowSetMetaData} interface, wrapping
- * a {@link java.sql.ResultSetMetaData} instance, catching any {@link SQLException java.sql.ResultSetMetaData} instance, catching any {@link SQLExceptions}
+ * The default implementation of Spring's {@link SqlRowSetMetaData} interface, wrapping a
+ * {@link java.sql.ResultSetMetaData} instance, catching any {@link SQLException SQLExceptions}
  * and translating them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
  * <p>Used by {@link ResultSetWrappingSqlRowSet}.

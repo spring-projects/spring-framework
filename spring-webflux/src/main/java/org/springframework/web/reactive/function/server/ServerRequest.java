@@ -320,20 +320,20 @@ public interface ServerRequest {
 	interface Headers {
 
 		/**
-		 * Return the list of acceptable {@linkplain MediaType media types},
+		 * Return the list of acceptable {@code MediaType media types},
 		 * as specified by the {@code Accept} header.
 		 * <p>Returns an empty list when the acceptable media types are unspecified.
 		 */
 		List<MediaType> accept();
 
 		/**
-		 * Return the list of acceptable {@linkplain Charset charsets},
+		 * Return the list of acceptable {@code Charset charsets},
 		 * as specified by the {@code Accept-Charset} header.
 		 */
 		List<Charset> acceptCharset();
 
 		/**
-		 * Return the list of acceptable {@linkplain Locale.LanguageRange languages},
+		 * Return the list of acceptable {@code Locale.LanguageRange languages},
 		 * as specified by the {@code Accept-Language} header.
 		 */
 		List<Locale.LanguageRange> acceptLanguage();
@@ -345,7 +345,7 @@ public interface ServerRequest {
 		OptionalLong contentLength();
 
 		/**
-		 * Return the {@linkplain MediaType media type} of the body, as specified
+		 * Return the {@code MediaType media type} of the body, as specified
 		 * by the {@code Content-Type} header.
 		 */
 		Optional<MediaType> contentType();
@@ -398,7 +398,7 @@ public interface ServerRequest {
 		 */
 		Builder uri(URI uri);
 
-		/**
+		/**
 		 * Add the given header value(s) under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
@@ -427,8 +427,8 @@ public interface ServerRequest {
 		Builder cookie(String name, String... values);
 
 		/**
-		 * Manipulate this request's cookies with the given consumer. The
-		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * Manipulate this request's cookies with the given consumer.
+		 * The map provided to the consumer is "live", so that the consumer can be used to
 		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
 		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
 		 * {@link MultiValueMap} methods.
@@ -465,9 +465,9 @@ public interface ServerRequest {
 		Builder attribute(String name, Object value);
 
 		/**
-		 * Manipulate this request's attributes with the given consumer. The map provided to the
-		 * consumer is "live", so that the consumer can be used to
-		 * {@linkplain Map#put(Object, Object) overwrite} existing header values,
+		 * Manipulate this request's attributes with the given consumer.
+		 * The map provided to the consumer is "live", so that the consumer can be used
+		 * to {@linkplain Map#put(Object, Object) overwrite} existing header values,
 		 * {@linkplain Map#remove(Object) remove} values, or use any of the other
 		 * {@link Map} methods.
 		 * @param attributesConsumer a function that consumes the attributes map

@@ -81,10 +81,8 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	}
 
 	/**
-	 * Add {@link Consumer} for a {@link ResponseCookie.ResponseCookieBuilder
-	 * ResponseCookieBuilder} that will be invoked for each cookie being built,
-	 * just before the call to
-	 * {@link ResponseCookie.ResponseCookieBuilder#build() build()}.
+	 * Add {@link Consumer} for a {@code ResponseCookieBuilder} that will be invoked
+	 * for each cookie being built, just before the call to {@code build()}.
 	 * @param initializer consumer for a cookie builder
 	 * @since 5.1
 	 */

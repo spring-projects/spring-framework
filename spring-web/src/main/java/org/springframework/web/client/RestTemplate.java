@@ -73,7 +73,7 @@ import org.springframework.web.util.UriTemplateHandler;
  * support of less frequent cases.
  *
  * <p><strong>NOTE:</strong> As of 5.0, the non-blocking, reactive
- * {@link org.springframework.web.reactive.client.WebClient WebClient} offers a
+ * {@code org.springframework.web.reactive.client.WebClient} offers a
  * modern alternative to the {@code RestTemplate} with efficient support for
  * both sync and async, as well as streaming scenarios. The {@code RestTemplate}
  * will be deprecated in a future version and will not have major new features

@@ -61,7 +61,7 @@ import org.springframework.util.ClassUtils;
  * <p>On the classpath, bundle resources will be read with the locally configured
  * {@link #setDefaultEncoding encoding}: by default, ISO-8859-1; consider switching
  * this to UTF-8, or to {@code null} for the platform default encoding. On the JDK 9+
- * module path where locally provided {@link ResourceBundle.Control} handles are not
+ * module path where locally provided {@code ResourceBundle.Control} handles are not
  * supported, this MessageSource always falls back to {@link ResourceBundle#getBundle}
  * retrieval with the platform default encoding: UTF-8 with a ISO-8859-1 fallback on
  * JDK 9+ (configurable through the "java.util.PropertyResourceBundle.encoding" system
@@ -269,7 +269,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * Load a property-based resource bundle from the given reader.
 	 * <p>This will be called in case of a {@link #setDefaultEncoding "defaultEncoding"},
 	 * including {@link ResourceBundleMessageSource}'s default ISO-8859-1 encoding.
-	 * Note that this method can only be called with a {@link ResourceBundle.Control}:
+	 * Note that this method can only be called with a {@code ResourceBundle.Control}:
 	 * When running on the JDK 9+ module path where such control handles are not
 	 * supported, any overrides in custom subclasses will effectively get ignored.
 	 * <p>The default implementation returns a {@link PropertyResourceBundle}.
@@ -291,7 +291,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * set to {@code null}, explicitly enforcing the platform default encoding
 	 * (which is UTF-8 with a ISO-8859-1 fallback on JDK 9+ but configurable
 	 * through the "java.util.PropertyResourceBundle.encoding" system property).
-	 * Note that this method can only be called with a {@link ResourceBundle.Control}:
+	 * Note that this method can only be called with a {@code ResourceBundle.Control}:
 	 * When running on the JDK 9+ module path where such control handles are not
 	 * supported, any overrides in custom subclasses will effectively get ignored.
 	 * <p>The default implementation returns a {@link PropertyResourceBundle}.
@@ -395,9 +395,9 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 
 
 	/**
-	 * Custom implementation of Java 6's {@code ResourceBundle.Control},
-	 * adding support for custom file encodings, deactivating the fallback to the
-	 * system locale and activating ResourceBundle's native cache, if desired.
+	 * Custom implementation of {@code ResourceBundle.Control}, adding support
+	 * for custom file encodings, deactivating the fallback to the system locale
+	 * and activating ResourceBundle's native cache, if desired.
 	 */
 	private class MessageSourceControl extends ResourceBundle.Control {
 
