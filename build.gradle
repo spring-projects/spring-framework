@@ -38,7 +38,7 @@ ext {
 	kotlinVersion        = '1.2.60'
 	log4jVersion         = '2.11.1'
 	nettyVersion         = '4.1.28.Final'
-	reactorVersion       = 'Californium-M1'
+	reactorVersion       = 'Californium-M2'
 	rxjavaVersion        = '1.3.8'
 	rxjavaAdapterVersion = '1.2.1'
 	rxjava2Version       = '2.2.0'
