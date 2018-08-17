@@ -102,7 +102,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 			String registeredName = entry.getValue();
 			if (registeredName.equals(name)) {
 				String registeredAlias = entry.getKey();
-				return (registeredAlias.equals(alias) || hasAlias(registeredAlias, alias));
+				if (registeredAlias.equals(alias) || hasAlias(registeredAlias, alias)) {
+					return true;
+				}
 			}
 		}
 		return false;
