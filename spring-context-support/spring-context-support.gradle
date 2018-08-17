@@ -6,7 +6,7 @@ dependencies {
 	compile(project(":spring-core"))
 	optional(project(":spring-jdbc"))  // for Quartz support
 	optional(project(":spring-tx"))  // for Quartz support
-	optional("javax.activation:activation:1.1.1")
+	optional("javax.activation:javax.activation-api:1.2.0")
 	optional("javax.mail:javax.mail-api:1.6.1")
 	optional("javax.cache:cache-api:1.1.0")
 	optional("com.github.ben-manes.caffeine:caffeine:2.6.2")

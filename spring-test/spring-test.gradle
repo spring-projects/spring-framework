@@ -20,7 +20,7 @@ dependencies {
 	optional(project(":spring-webflux"))
 	optional(project(":spring-webmvc"))
 	optional(project(":spring-websocket"))
-	optional("javax.activation:activation:1.1.1")
+	optional("javax.activation:javax.activation-api:1.2.0")
 	optional("javax.el:javax.el-api:3.0.1-b04")
 	optional("javax.inject:javax.inject:1")
 	optional("javax.servlet:javax.servlet-api:4.0.1")
@@ -47,7 +47,7 @@ dependencies {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
-	optional("org.xmlunit:xmlunit-matchers:2.6.0")
+	optional("org.xmlunit:xmlunit-matchers:2.6.1")
 	optional("org.skyscreamer:jsonassert:1.5.0")
 	optional("com.jayway.jsonpath:json-path:2.4.0")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")

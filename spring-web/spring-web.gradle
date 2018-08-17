@@ -77,7 +77,7 @@ dependencies {
 	testCompile("com.squareup.okhttp3:mockwebserver:3.11.0")
 	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	testCompile("org.skyscreamer:jsonassert:1.5.0")
-	testCompile("org.xmlunit:xmlunit-matchers:2.6.0")
+	testCompile("org.xmlunit:xmlunit-matchers:2.6.1")
 	testRuntime("com.sun.mail:javax.mail:1.6.1")
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
