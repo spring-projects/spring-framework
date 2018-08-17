@@ -281,7 +281,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 							inputMessage, outputMessage);
 					if (body != null) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Writing [" + formatValue(body) + "]");
+							Object formatted = (body instanceof CharSequence ? "\"" + body + "\"" : body);
+							logger.debug("Writing [" + formatted + "]");
 						}
 						addContentDispositionHeader(inputMessage, outputMessage);
 						if (genericConverter != null) {
@@ -396,10 +397,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	private MediaType getMostSpecificMediaType(MediaType acceptType, MediaType produceType) {
 		MediaType produceTypeToUse = produceType.copyQualityValue(acceptType);
 		return (MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceTypeToUse) <= 0 ? acceptType : produceTypeToUse);
-	}
-
-	static String formatValue(Object body) {
-		return (body instanceof CharSequence ? "\"" + body + "\"" : body.toString());
 	}
 
 	/**

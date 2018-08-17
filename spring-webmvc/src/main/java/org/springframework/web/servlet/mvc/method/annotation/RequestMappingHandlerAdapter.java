@@ -885,8 +885,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
 				asyncManager.clearConcurrentResult();
 				if (logger.isDebugEnabled()) {
-					String formatted = AbstractMessageConverterMethodProcessor.formatValue(result);
-					logger.debug("Resume with async result [" + formatted + "]");
+					logger.debug("Resume with async result [" +
+							(result instanceof CharSequence ? "\"" + result + "\"" :  result) + "]");
 				}
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}

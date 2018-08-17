@@ -209,9 +209,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/** Should we dispatch an HTTP TRACE request to {@link #doService}?. */
 	private boolean dispatchTraceRequest = false;
 
-	/** Should we set the status to 500 for unhandled failures? */
-	private boolean shouldHandleFailure = false;
-
 	/** WebApplicationContext for this servlet. */
 	@Nullable
 	private WebApplicationContext webApplicationContext;
@@ -473,17 +470,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	public void setDispatchTraceRequest(boolean dispatchTraceRequest) {
 		this.dispatchTraceRequest = dispatchTraceRequest;
-	}
-
-	/**
-	 * Whether to handle failures wth {@code response.sendError(500)} as opposed
-	 * to letting them propagate to the container which may log a stacktrace
-	 * even if an error dispatch (e.g. Spring Boot app) handles the exception.
-	 * @param shouldHandleFailure whether to handle failures or propagate
-	 * @since 5.1
-	 */
-	public void setShouldHandleFailure(boolean shouldHandleFailure) {
-		this.shouldHandleFailure = shouldHandleFailure;
 	}
 
 	/**
@@ -1012,16 +998,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			doService(request, response);
 		}
 		catch (ServletException | IOException ex) {
-			if (!handleFailure(request, response, ex)) {
-				failureCause = ex;
-				throw ex;
-			}
+			failureCause = ex;
+			throw ex;
 		}
 		catch (Throwable ex) {
-			if (!handleFailure(request, response, ex)) {
-				failureCause = ex;
-				throw new NestedServletException("Request processing failed", ex);
-			}
+			failureCause = ex;
+			throw new NestedServletException("Request processing failed", ex);
 		}
 
 		finally {
@@ -1085,24 +1067,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		LocaleContextHolder.setLocaleContext(prevLocaleContext, this.threadContextInheritable);
 		RequestContextHolder.setRequestAttributes(previousAttributes, this.threadContextInheritable);
-	}
-
-	private boolean handleFailure(HttpServletRequest request, HttpServletResponse response, Throwable ex) {
-		if (this.shouldHandleFailure) {
-			try {
-				response.sendError(500);
-			}
-			catch (IOException ex2) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Handling of failure failed: " + ex2);
-				}
-				return false;
-			}
-			request.setAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE, 500);
-			WebUtils.exposeErrorRequestAttributes(request, ex, getServletName());
-			return true;
-		}
-		return false;
 	}
 
 	private void logResult(HttpServletRequest request, HttpServletResponse response,
