@@ -32,6 +32,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link CacheManager} implementation that lazily builds {@link CaffeineCache}
@@ -59,7 +60,9 @@ public class CaffeineCacheManager implements CacheManager {
 
 	private boolean dynamic = true;
 
-	private Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
+	private final ConcurrentMap<String, Caffeine> cacheBuilder = new ConcurrentHashMap<>(16);
+
+	private Caffeine<Object, Object> defaultCacheBuilder = Caffeine.newBuilder();
 
 	@Nullable
 	private CacheLoader<Object, Object> cacheLoader;
@@ -109,8 +112,18 @@ public class CaffeineCacheManager implements CacheManager {
 	 * @see com.github.benmanes.caffeine.cache.Caffeine#build()
 	 */
 	public void setCaffeine(Caffeine<Object, Object> caffeine) {
+		setCaffeine(null, caffeine);
+	}
+
+	/**
+	 * Set the Caffeine to use for building the
+	 * {@link CaffeineCache} instance with the given name.
+	 * @see #createNativeCaffeineCache
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#build()
+	 */
+	public void setCaffeine(String name, Caffeine<Object, Object> caffeine) {
 		Assert.notNull(caffeine, "Caffeine must not be null");
-		doSetCaffeine(caffeine);
+		doSetCaffeine(name, caffeine);
 	}
 
 	/**
@@ -120,7 +133,17 @@ public class CaffeineCacheManager implements CacheManager {
 	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(CaffeineSpec)
 	 */
 	public void setCaffeineSpec(CaffeineSpec caffeineSpec) {
-		doSetCaffeine(Caffeine.from(caffeineSpec));
+		setCaffeineSpec(null, caffeineSpec);
+	}
+
+	/**
+	 * Set the {@link CaffeineSpec} to use for building the
+	 * {@link CaffeineCache} instance with the given name.
+	 * @see #createNativeCaffeineCache
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(CaffeineSpec)
+	 */
+	public void setCaffeineSpec(String name, CaffeineSpec caffeineSpec) {
+		doSetCaffeine(name, Caffeine.from(caffeineSpec));
 	}
 
 	/**
@@ -131,7 +154,18 @@ public class CaffeineCacheManager implements CacheManager {
 	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(String)
 	 */
 	public void setCacheSpecification(String cacheSpecification) {
-		doSetCaffeine(Caffeine.from(cacheSpecification));
+		setCacheSpecification(null, cacheSpecification);
+	}
+
+	/**
+	 * Set the Caffeine cache specification String to use for building the
+	 * {@link CaffeineCache} instance with the given name. The given value needs to
+	 * comply with Caffeine's {@link CaffeineSpec} (see its javadoc).
+	 * @see #createNativeCaffeineCache
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(String)
+	 */
+	public void setCacheSpecification(String name, String cacheSpecification) {
+		doSetCaffeine(name, Caffeine.from(cacheSpecification));
 	}
 
 	/**
@@ -206,17 +240,32 @@ public class CaffeineCacheManager implements CacheManager {
 	 * @return the native Caffeine Cache instance
 	 */
 	protected com.github.benmanes.caffeine.cache.Cache<Object, Object> createNativeCaffeineCache(String name) {
-		if (this.cacheLoader != null) {
-			return this.cacheBuilder.build(this.cacheLoader);
+		if(cacheBuilder.containsKey(name)){
+			return createNativeCaffeineCache(cacheBuilder.get(name));
 		}
-		else {
-			return this.cacheBuilder.build();
+		else{
+			return createNativeCaffeineCache(defaultCacheBuilder);
 		}
 	}
 
-	private void doSetCaffeine(Caffeine<Object, Object> cacheBuilder) {
-		if (!ObjectUtils.nullSafeEquals(this.cacheBuilder, cacheBuilder)) {
-			this.cacheBuilder = cacheBuilder;
+	private com.github.benmanes.caffeine.cache.Cache<Object, Object> createNativeCaffeineCache(Caffeine builder){
+		if (this.cacheLoader != null) {
+			return builder.build(this.cacheLoader);
+		}
+		else {
+			return builder.build();
+		}
+	}
+
+	private void doSetCaffeine(String name, Caffeine<Object, Object> cacheBuilder) {
+		if(StringUtils.isEmpty(name)){
+			if (!ObjectUtils.nullSafeEquals(this.defaultCacheBuilder, cacheBuilder)) {
+				this.defaultCacheBuilder = cacheBuilder;
+				refreshKnownCaches();
+			}
+		}
+		else if(!ObjectUtils.nullSafeEquals(this.cacheBuilder.get(name), cacheBuilder)) {
+			this.cacheBuilder.put(name, cacheBuilder);
 			refreshKnownCaches();
 		}
 	}
