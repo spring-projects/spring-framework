@@ -34,8 +34,7 @@ import org.springframework.messaging.Message;
 public interface ReactorNettyCodec<P> {
 
 	/**
-	 * Decode the input {@link ByteBuf} into one or more {@link Message ByteBuf}
-	 * into one or more {@link Message} objects.
+	 * Decode the input {@link ByteBuf} into one or more {@link Message Messages}.
 	 * @param inputBuffer the input buffer to decode from
 	 * @return 0 or more decoded messages
 	 */
@@ -43,7 +42,7 @@ public interface ReactorNettyCodec<P> {
 
 	/**
 	 * Encode the given {@link Message} to the output {@link ByteBuf}.
-	 * @param message the message the encode
+	 * @param message the message to encode
 	 * @param outputBuffer the buffer to write to
 	 */
 	void encode(Message<P> message, ByteBuf outputBuffer);
