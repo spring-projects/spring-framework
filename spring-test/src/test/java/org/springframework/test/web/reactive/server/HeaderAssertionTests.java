@@ -39,6 +39,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Konrad Czajka
  * @since 5.0
  */
 public class HeaderAssertionTests {
@@ -217,6 +218,37 @@ public class HeaderAssertionTests {
 		}
 	}
 
+	@Test
+	public void lastModifiedWhenHeaderSpecified() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setLastModified(1500000000);
+		HeaderAssertions assertions = headerAssertions(headers);
+
+		assertions.lastModified(1500000000);
+	}
+
+	@Test
+	public void lastModifiedWhenHeaderIsNotSpecified() {
+		HeaderAssertions assertions = headerAssertions(new HttpHeaders());
+
+		assertions.lastModified(-1);
+	}
+
+	@Test
+	public void expiresWhenHeaderSpecified() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setExpires(1500000000);
+		HeaderAssertions assertions = headerAssertions(headers);
+
+		assertions.expires(1500000000);
+	}
+
+	@Test
+	public void expiresWhenHeaderIsNotSpecified() {
+		HeaderAssertions assertions = headerAssertions(new HttpHeaders());
+
+		assertions.expires(-1);
+	}
 
 	private HeaderAssertions headerAssertions(HttpHeaders responseHeaders) {
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
