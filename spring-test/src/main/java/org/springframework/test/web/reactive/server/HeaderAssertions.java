@@ -182,14 +182,14 @@ public class HeaderAssertions {
 	 * Expect an "Expires" header with the given value.
 	 */
 	public WebTestClient.ResponseSpec expires(int expires) {
-		return assertHeader("Expires", expires, getHeaders().getExpires());
+		return assertHeader("Expires", (long)expires, getHeaders().getExpires());
 	}
 
 	/**
 	 * Expect a "Last-Modified" header with the given value.
 	 */
 	public WebTestClient.ResponseSpec lastModified(int lastModified) {
-		return assertHeader("Last-Modified", lastModified, getHeaders().getLastModified());
+		return assertHeader("Last-Modified", (long)lastModified, getHeaders().getLastModified());
 	}
 
 
