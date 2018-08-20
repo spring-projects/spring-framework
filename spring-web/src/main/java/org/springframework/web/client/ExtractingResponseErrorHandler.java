@@ -17,11 +17,13 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
@@ -149,8 +151,13 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 		}
 	}
 
+	@Override
+	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+		handleError(response, response.getStatusCode());
+	}
+
 	private void extract(@Nullable Class<? extends RestClientException> exceptionClass,
-			ClientHttpResponse response) throws IOException {
+						ClientHttpResponse response) throws IOException {
 
 		if (exceptionClass == null) {
 			return;

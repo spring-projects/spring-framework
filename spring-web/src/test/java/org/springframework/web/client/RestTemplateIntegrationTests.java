@@ -247,6 +247,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				assertThat(ex.getStatusText()).isNotNull();
 				assertThat(ex.getResponseBodyAsString()).isNotNull();
+				assertThat(ex.getMessage()).isEqualTo("404 Client Error after GET http://localhost:" + port + "/status/notfound : [no body]");
 			});
 	}
 
@@ -259,7 +260,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 			.satisfies(ex -> {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 				assumeFalse(clientHttpRequestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
-				assertThat(ex.getMessage()).isEqualTo("400 Client Error: [no body]");
+				assertThat(ex.getMessage()).isEqualTo("400 Client Error after GET http://localhost:" + port + "/status/badrequest : [no body]");
 			});
 	}
 
@@ -273,6 +274,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 				assertThat(ex.getStatusText()).isNotNull();
 				assertThat(ex.getResponseBodyAsString()).isNotNull();
+				assertThat(ex.getMessage()).isEqualTo("500 Server Error after GET http://localhost:" + port + "/status/server : [no body]");
 			});
 	}
 
