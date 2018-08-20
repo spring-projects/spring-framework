@@ -18,6 +18,7 @@ package org.springframework.web.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -75,6 +77,22 @@ public class DefaultResponseErrorHandlerTests {
 		assertThatExceptionOfType(HttpClientErrorException.class)
 				.isThrownBy(() -> handler.handleError(response))
 				.withMessage("404 Not Found: [Hello World]")
+				.satisfies(ex -> assertThat(ex.getResponseHeaders()).isSameAs(headers));
+	}
+
+	@Test
+	public void handleErrorWithUrlAndMethod() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
+		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
+		given(response.getStatusText()).willReturn("Not Found");
+		given(response.getHeaders()).willReturn(headers);
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8)));
+
+		assertThatExceptionOfType(HttpClientErrorException.class)
+				.isThrownBy(() -> handler.handleError(URI.create("https://example.com"), HttpMethod.GET, response))
+				.withMessage("404 Not Found after GET https://example.com : [Hello World]")
 				.satisfies(ex -> assertThat(ex.getResponseHeaders()).isSameAs(headers));
 	}
 
