@@ -16,9 +16,11 @@
 
 package org.springframework.web.client;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 
@@ -49,4 +51,7 @@ public class UnknownHttpStatusCodeException extends RestClientResponseException 
 				rawStatusCode, statusText, responseHeaders, responseBody, responseCharset);
 	}
 
+	public UnknownHttpStatusCodeException(int rawStatusCode, String statusText, HttpHeaders headers, byte[] responseBody, Charset charset, URI url, HttpMethod method) {
+		super("Unknown status code [" + rawStatusCode + "]" + " " + statusText, rawStatusCode, statusText, headers, responseBody, charset, url, method);
+	}
 }

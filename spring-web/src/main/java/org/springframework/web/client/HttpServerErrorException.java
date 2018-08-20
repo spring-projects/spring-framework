@@ -16,9 +16,11 @@
 
 package org.springframework.web.client;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 
@@ -66,6 +68,14 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 		super(statusCode, statusText, headers, body, charset);
 	}
 
+	/**
+	 * Constructor with a status code and status text, headers, content, request URL, and method.
+	 */
+	public HttpServerErrorException(HttpStatus statusCode, String statusText,
+			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset charset,
+			@Nullable URI url, @Nullable HttpMethod method) {
+		super(statusCode, statusText, headers, body, charset, url, method);
+	}
 
 	// Sub-classes for specific HTTP status codes..
 
@@ -77,8 +87,10 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class InternalServerError extends HttpServerErrorException {
 
-		InternalServerError(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.INTERNAL_SERVER_ERROR, statusText, headers, body, charset);
+		InternalServerError(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(HttpStatus.INTERNAL_SERVER_ERROR, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -89,8 +101,10 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class NotImplemented extends HttpServerErrorException {
 
-		NotImplemented(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.NOT_IMPLEMENTED, statusText, headers, body, charset);
+		NotImplemented(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(HttpStatus.NOT_IMPLEMENTED, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -101,8 +115,10 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class BadGateway extends HttpServerErrorException {
 
-		BadGateway(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.BAD_GATEWAY, statusText, headers, body, charset);
+		BadGateway(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(HttpStatus.BAD_GATEWAY, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -113,8 +129,10 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class ServiceUnavailable extends HttpServerErrorException {
 
-		ServiceUnavailable(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.SERVICE_UNAVAILABLE, statusText, headers, body, charset);
+		ServiceUnavailable(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(HttpStatus.SERVICE_UNAVAILABLE, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -125,8 +143,10 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class GatewayTimeout extends HttpServerErrorException {
 
-		GatewayTimeout(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.GATEWAY_TIMEOUT, statusText, headers, body, charset);
+		GatewayTimeout(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(HttpStatus.GATEWAY_TIMEOUT, statusText, headers, body, charset, url, method);
 		}
 	}
 

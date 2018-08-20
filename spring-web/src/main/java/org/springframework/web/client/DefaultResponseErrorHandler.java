@@ -17,9 +17,11 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -67,16 +69,24 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Delegates to {@link #handleError(ClientHttpResponse, HttpStatus)} with the response status code.
+	 * Delegates to {@link #handleError(URI, HttpMethod, ClientHttpResponse)} with null URI and method.
 	 */
 	@Override
 	public void handleError(ClientHttpResponse response) throws IOException {
+		handleError(null, null, response);
+	}
+
+	/**
+	 * Delegates to {@link #handleError(URI, HttpMethod, ClientHttpResponse, HttpStatus)} with the response status code.
+	 */
+	@Override
+	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode = HttpStatus.resolve(response.getRawStatusCode());
 		if (statusCode == null) {
 			throw new UnknownHttpStatusCodeException(response.getRawStatusCode(), response.getStatusText(),
-					response.getHeaders(), getResponseBody(response), getCharset(response));
+					response.getHeaders(), getResponseBody(response), getCharset(response), url, method);
 		}
-		handleError(response, statusCode);
+		handleError(url, method, response, statusCode);
 	}
 
 	/**
@@ -88,6 +98,18 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * @since 5.0
 	 */
 	protected void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
+		handleError(null, null, response, statusCode);
+	}
+
+	/**
+	 * Handle the error in the given response with the given resolved status code.
+	 * <p>This default implementation throws a {@link HttpClientErrorException} if the response status code
+	 * is {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}, a {@link HttpServerErrorException}
+	 * if it is {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR},
+	 * and a {@link RestClientException} in other cases.
+	 * @since 5.0
+	 */
+	protected void handleError(@Nullable URI url, @Nullable HttpMethod method, ClientHttpResponse response, HttpStatus statusCode) throws IOException {
 
 		String statusText = response.getStatusText();
 		HttpHeaders headers = response.getHeaders();
@@ -96,63 +118,63 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 		switch (statusCode.series()) {
 			case CLIENT_ERROR:
-				handleClientError(statusCode, statusText, headers, body, charset);
+				handleClientError(statusCode, statusText, headers, body, charset, url, method);
 				return;
 			case SERVER_ERROR:
-				handleServerError(statusCode, statusText, headers, body, charset);
+				handleServerError(statusCode, statusText, headers, body, charset, url, method);
 				return;
 			default:
-				throw new UnknownHttpStatusCodeException(statusCode.value(), statusText, headers, body, charset);
+				throw new UnknownHttpStatusCodeException(statusCode.value(), statusText, headers, body, charset, url, method);
 		}
 	}
 
 	private void handleClientError(HttpStatus statusCode,
-			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset, @Nullable URI url, @Nullable HttpMethod method) {
 
 		switch (statusCode) {
 			case BAD_REQUEST:
-				throw new HttpClientErrorException.BadRequest(statusText, headers, body, charset);
+				throw new HttpClientErrorException.BadRequest(statusText, headers, body, charset, url, method);
 			case UNAUTHORIZED:
-				throw new HttpClientErrorException.Unauthorized(statusText, headers, body, charset);
+				throw new HttpClientErrorException.Unauthorized(statusText, headers, body, charset, url, method);
 			case FORBIDDEN:
-				throw new HttpClientErrorException.Forbidden(statusText, headers, body, charset);
+				throw new HttpClientErrorException.Forbidden(statusText, headers, body, charset, url, method);
 			case NOT_FOUND:
-				throw new HttpClientErrorException.NotFound(statusText, headers, body, charset);
+				throw new HttpClientErrorException.NotFound(statusText, headers, body, charset, url, method);
 			case METHOD_NOT_ALLOWED:
-				throw new HttpClientErrorException.MethodNotAllowed(statusText, headers, body, charset);
+				throw new HttpClientErrorException.MethodNotAllowed(statusText, headers, body, charset, url, method);
 			case NOT_ACCEPTABLE:
-				throw new HttpClientErrorException.NotAcceptable(statusText, headers, body, charset);
+				throw new HttpClientErrorException.NotAcceptable(statusText, headers, body, charset, url, method);
 			case CONFLICT:
-				throw new HttpClientErrorException.Conflict(statusText, headers, body, charset);
+				throw new HttpClientErrorException.Conflict(statusText, headers, body, charset, url, method);
 			case GONE:
-				throw new HttpClientErrorException.Gone(statusText, headers, body, charset);
+				throw new HttpClientErrorException.Gone(statusText, headers, body, charset, url, method);
 			case UNSUPPORTED_MEDIA_TYPE:
-				throw new HttpClientErrorException.UnsupportedMediaType(statusText, headers, body, charset);
+				throw new HttpClientErrorException.UnsupportedMediaType(statusText, headers, body, charset, url, method);
 			case TOO_MANY_REQUESTS:
-				throw new HttpClientErrorException.TooManyRequests(statusText, headers, body, charset);
+				throw new HttpClientErrorException.TooManyRequests(statusText, headers, body, charset, url, method);
 			case UNPROCESSABLE_ENTITY:
-				throw new HttpClientErrorException.UnprocessableEntity(statusText, headers, body, charset);
+				throw new HttpClientErrorException.UnprocessableEntity(statusText, headers, body, charset, url, method);
 			default:
-				throw new HttpClientErrorException(statusCode, statusText, headers, body, charset);
+				throw new HttpClientErrorException(statusCode, statusText, headers, body, charset, url, method);
 		}
 	}
 
 	private void handleServerError(HttpStatus statusCode,
-			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset, @Nullable URI url, @Nullable HttpMethod method) {
 
 		switch (statusCode) {
 			case INTERNAL_SERVER_ERROR:
-					throw new HttpServerErrorException.InternalServerError(statusText, headers, body, charset);
+				throw new HttpServerErrorException.InternalServerError(statusText, headers, body, charset, url, method);
 			case NOT_IMPLEMENTED:
-				throw new HttpServerErrorException.NotImplemented(statusText, headers, body, charset);
+				throw new HttpServerErrorException.NotImplemented(statusText, headers, body, charset, url, method);
 			case BAD_GATEWAY:
-				throw new HttpServerErrorException.BadGateway(statusText, headers, body, charset);
+				throw new HttpServerErrorException.BadGateway(statusText, headers, body, charset, url, method);
 			case SERVICE_UNAVAILABLE:
-				throw new HttpServerErrorException.ServiceUnavailable(statusText, headers, body, charset);
+				throw new HttpServerErrorException.ServiceUnavailable(statusText, headers, body, charset, url, method);
 			case GATEWAY_TIMEOUT:
-				throw new HttpServerErrorException.GatewayTimeout(statusText, headers, body, charset);
+				throw new HttpServerErrorException.GatewayTimeout(statusText, headers, body, charset, url, method);
 			default:
-				throw new HttpServerErrorException(statusCode, statusText, headers, body, charset);
+				throw new HttpServerErrorException(statusCode, statusText, headers, body, charset, url, method);
 		}
 	}
 
