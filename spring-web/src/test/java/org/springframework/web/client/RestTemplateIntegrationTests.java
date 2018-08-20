@@ -188,7 +188,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		}
 		catch (HttpClientErrorException.BadRequest ex) {
 			assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-			assertEquals("400 Client Error", ex.getMessage());
+			assertEquals("400 Client Error after GET http://localhost:" + port + "/status/badrequest : [no body]", ex.getMessage());
 		}
 	}
 

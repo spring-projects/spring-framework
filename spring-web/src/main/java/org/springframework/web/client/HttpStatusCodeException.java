@@ -16,9 +16,11 @@
 
 package org.springframework.web.client;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -83,8 +85,28 @@ public abstract class HttpStatusCodeException extends RestClientResponseExceptio
 	protected HttpStatusCodeException(HttpStatus statusCode, String statusText,
 			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
-		super(getMessage(statusCode, statusText), statusCode.value(), statusText,
-				responseHeaders, responseBody, responseCharset);
+		this(getMessage(statusCode, statusText), statusCode, statusText,
+				responseHeaders, responseBody, responseCharset, null, null);
+	}
+
+	/**
+	 * Construct instance with an {@link HttpStatus}, status text, content, and
+	 * a response charset.
+	 * @param message the exception message
+	 * @param statusCode the status code
+	 * @param statusText the status text
+	 * @param responseHeaders the response headers, may be {@code null}
+	 * @param responseBody the response body content, may be {@code null}
+	 * @param responseCharset the response body charset, may be {@code null}
+	 * @param url the request URL, may be {@code null}
+	 * @param method the request method, may be {@code null}
+	 */
+	protected HttpStatusCodeException(String message, HttpStatus statusCode, String statusText,
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset,
+			@Nullable URI url, @Nullable HttpMethod method) {
+
+		super(message, statusCode.value(), statusText, responseHeaders, responseBody,
+				responseCharset, url, method);
 		this.statusCode = statusCode;
 	}
 

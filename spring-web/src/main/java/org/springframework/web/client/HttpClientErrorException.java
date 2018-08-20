@@ -16,9 +16,11 @@
 
 package org.springframework.web.client;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 
@@ -66,39 +68,49 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 		super(statusCode, statusText, headers, body, responseCharset);
 	}
 
+	/**
+	 * Constructor with a status code and status text, headers, content, request URL and method.
+	 */
+	public HttpClientErrorException(String message, HttpStatus statusCode, String statusText,
+			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset responseCharset,
+			@Nullable URI url, @Nullable HttpMethod method) {
+
+		super(message, statusCode, statusText, headers, body, responseCharset, url, method);
+	}
 
 	/**
 	 * Create {@code HttpClientErrorException} or an HTTP status specific sub-class.
 	 * @since 5.1
 	 */
 	public static HttpClientErrorException create(
-			HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+			String message, HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body,
+			@Nullable Charset charset, @Nullable URI url, @Nullable HttpMethod method) {
 
 		switch (statusCode) {
 			case BAD_REQUEST:
-				return new HttpClientErrorException.BadRequest(statusText, headers, body, charset);
+				return new HttpClientErrorException.BadRequest(message, statusText, headers, body, charset, url, method);
 			case UNAUTHORIZED:
-				return new HttpClientErrorException.Unauthorized(statusText, headers, body, charset);
+				return new HttpClientErrorException.Unauthorized(message, statusText, headers, body, charset, url, method);
 			case FORBIDDEN:
-				return new HttpClientErrorException.Forbidden(statusText, headers, body, charset);
+				return new HttpClientErrorException.Forbidden(message, statusText, headers, body, charset, url, method);
 			case NOT_FOUND:
-				return new HttpClientErrorException.NotFound(statusText, headers, body, charset);
+				return new HttpClientErrorException.NotFound(message, statusText, headers, body, charset, url, method);
 			case METHOD_NOT_ALLOWED:
-				return new HttpClientErrorException.MethodNotAllowed(statusText, headers, body, charset);
+				return new HttpClientErrorException.MethodNotAllowed(message, statusText, headers, body, charset, url, method);
 			case NOT_ACCEPTABLE:
-				return new HttpClientErrorException.NotAcceptable(statusText, headers, body, charset);
+				return new HttpClientErrorException.NotAcceptable(message, statusText, headers, body, charset, url, method);
 			case CONFLICT:
-				return new HttpClientErrorException.Conflict(statusText, headers, body, charset);
+				return new HttpClientErrorException.Conflict(message, statusText, headers, body, charset, url, method);
 			case GONE:
-				return new HttpClientErrorException.Gone(statusText, headers, body, charset);
+				return new HttpClientErrorException.Gone(message, statusText, headers, body, charset, url, method);
 			case UNSUPPORTED_MEDIA_TYPE:
-				return new HttpClientErrorException.UnsupportedMediaType(statusText, headers, body, charset);
+				return new HttpClientErrorException.UnsupportedMediaType(message, statusText, headers, body, charset, url, method);
 			case TOO_MANY_REQUESTS:
-				return new HttpClientErrorException.TooManyRequests(statusText, headers, body, charset);
+				return new HttpClientErrorException.TooManyRequests(message, statusText, headers, body, charset, url, method);
 			case UNPROCESSABLE_ENTITY:
-				return new HttpClientErrorException.UnprocessableEntity(statusText, headers, body, charset);
+				return new HttpClientErrorException.UnprocessableEntity(message, statusText, headers, body, charset, url, method);
 			default:
-				return new HttpClientErrorException(statusCode, statusText, headers, body, charset);
+				return new HttpClientErrorException(message, statusCode, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -112,8 +124,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class BadRequest extends HttpClientErrorException {
 
-		BadRequest(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.BAD_REQUEST, statusText, headers, body, charset);
+		BadRequest(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.BAD_REQUEST, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -124,8 +138,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class Unauthorized extends HttpClientErrorException {
 
-		Unauthorized(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.UNAUTHORIZED, statusText, headers, body, charset);
+		Unauthorized(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.UNAUTHORIZED, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -136,8 +152,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class Forbidden extends HttpClientErrorException {
 
-		Forbidden(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.FORBIDDEN, statusText, headers, body, charset);
+		Forbidden(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.FORBIDDEN, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -148,8 +166,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class NotFound extends HttpClientErrorException {
 
-		NotFound(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.NOT_FOUND, statusText, headers, body, charset);
+		NotFound(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.NOT_FOUND, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -160,8 +180,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class MethodNotAllowed extends HttpClientErrorException {
 
-		MethodNotAllowed(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.METHOD_NOT_ALLOWED, statusText, headers, body, charset);
+		MethodNotAllowed(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.METHOD_NOT_ALLOWED, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -172,8 +194,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class NotAcceptable extends HttpClientErrorException {
 
-		NotAcceptable(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.NOT_ACCEPTABLE, statusText, headers, body, charset);
+		NotAcceptable(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.NOT_ACCEPTABLE, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -184,8 +208,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class Conflict extends HttpClientErrorException {
 
-		Conflict(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.CONFLICT, statusText, headers, body, charset);
+		Conflict(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.CONFLICT, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -196,8 +222,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class Gone extends HttpClientErrorException {
 
-		Gone(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.GONE, statusText, headers, body, charset);
+		Gone(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.GONE, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -208,8 +236,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class UnsupportedMediaType extends HttpClientErrorException {
 
-		UnsupportedMediaType(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, statusText, headers, body, charset);
+		UnsupportedMediaType(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.UNSUPPORTED_MEDIA_TYPE, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -220,8 +250,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class UnprocessableEntity extends HttpClientErrorException {
 
-		UnprocessableEntity(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.UNPROCESSABLE_ENTITY, statusText, headers, body, charset);
+		UnprocessableEntity(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.UNPROCESSABLE_ENTITY, statusText, headers, body, charset, url, method);
 		}
 	}
 
@@ -232,8 +264,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	@SuppressWarnings("serial")
 	public static class TooManyRequests extends HttpClientErrorException {
 
-		TooManyRequests(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.TOO_MANY_REQUESTS, statusText, headers, body, charset);
+		TooManyRequests(String message, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable URI url, @Nullable HttpMethod method) {
+
+			super(message, HttpStatus.TOO_MANY_REQUESTS, statusText, headers, body, charset, url, method);
 		}
 	}
 

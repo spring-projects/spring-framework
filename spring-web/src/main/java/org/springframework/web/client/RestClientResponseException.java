@@ -17,10 +17,12 @@
 package org.springframework.web.client;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 
 /**
@@ -48,6 +50,12 @@ public class RestClientResponseException extends RestClientException {
 	@Nullable
 	private final String responseCharset;
 
+	@Nullable
+	private final HttpMethod method;
+
+	@Nullable
+	private final URI url;
+
 
 	/**
 	 * Construct a new instance of with the given response data.
@@ -59,6 +67,22 @@ public class RestClientResponseException extends RestClientException {
 	 */
 	public RestClientResponseException(String message, int statusCode, String statusText,
 			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+		this(message, statusCode, statusText, responseHeaders, responseBody, responseCharset, null, null);
+	}
+
+	/**
+	 * Construct a new instance of with the given response data.
+	 * @param statusCode the raw status code value
+	 * @param statusText the status text
+	 * @param responseHeaders the response headers (may be {@code null})
+	 * @param responseBody the response body content (may be {@code null})
+	 * @param responseCharset the response body charset (may be {@code null})
+	 * @param url the request URL (may be {@code null})
+	 * @param method the request method (may be {@code null})
+	 */
+	public RestClientResponseException(String message, int statusCode, String statusText,
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset,
+			@Nullable URI url, @Nullable HttpMethod method) {
 
 		super(message);
 		this.rawStatusCode = statusCode;
@@ -66,6 +90,8 @@ public class RestClientResponseException extends RestClientException {
 		this.responseHeaders = responseHeaders;
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
 		this.responseCharset = (responseCharset != null ? responseCharset.name() : null);
+		this.method = method;
+		this.url = url;
 	}
 
 
@@ -96,6 +122,20 @@ public class RestClientResponseException extends RestClientException {
 	 */
 	public byte[] getResponseBodyAsByteArray() {
 		return this.responseBody;
+	}
+
+	/**
+	 * Return the HTTP request method.
+	 */
+	public HttpMethod getMethod() {
+		return method;
+	}
+
+	/**
+	 * Return the HTTP request url.
+	 */
+	public URI getUrl() {
+		return url;
 	}
 
 	/**

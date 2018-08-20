@@ -16,9 +16,11 @@
 
 package org.springframework.web.client;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 
@@ -45,8 +47,24 @@ public class UnknownHttpStatusCodeException extends RestClientResponseException 
 	public UnknownHttpStatusCodeException(int rawStatusCode, String statusText, @Nullable HttpHeaders responseHeaders,
 			@Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
-		super("Unknown status code [" + rawStatusCode + "]" + " " + statusText,
-				rawStatusCode, statusText, responseHeaders, responseBody, responseCharset);
+		this("Unknown status code [" + rawStatusCode + "]" + " " + statusText,
+				rawStatusCode, statusText, responseHeaders, responseBody, responseCharset, null, null);
 	}
 
+	/**
+	 * Construct a new instance of {@code HttpStatusCodeException} based on an
+	 * {@link HttpStatus}, status text, and response body content.
+	 * @param rawStatusCode the raw status code value
+	 * @param statusText the status text
+	 * @param responseHeaders the response headers (may be {@code null})
+	 * @param responseBody the response body content (may be {@code null})
+	 * @param responseCharset the response body charset (may be {@code null})
+	 * @param url the request URI (may be {@code null})
+	 * @param method the request HTTP method (may be {@code null})
+	 */
+	public UnknownHttpStatusCodeException(String message, int rawStatusCode, String statusText, @Nullable HttpHeaders responseHeaders,
+			@Nullable byte[] responseBody, @Nullable Charset responseCharset, @Nullable URI url, @Nullable HttpMethod method) {
+
+		super(message, rawStatusCode, statusText, responseHeaders, responseBody, responseCharset, url, method);
+	}
 }
