@@ -1804,7 +1804,7 @@ user and associate it with subsequent STOMP messages on the same session:
 
 		@Override
 		public void configureClientInboundChannel(ChannelRegistration registration) {
-			registration.setInterceptors(new ChannelInterceptorAdapter() {
+			registration.interceptors(new ChannelInterceptor() {
 				@Override
 				public Message<?> preSend(Message<?> message, MessageChannel channel) {
 					StompHeaderAccessor accessor =
@@ -2063,7 +2063,7 @@ For example to intercept inbound messages from clients:
 
 		@Override
 		public void configureClientInboundChannel(ChannelRegistration registration) {
-			registration.setInterceptors(new MyChannelInterceptor());
+			registration.interceptors(new MyChannelInterceptor());
 		}
 	}
 ----
