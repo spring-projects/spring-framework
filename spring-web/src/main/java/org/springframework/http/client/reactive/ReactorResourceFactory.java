@@ -142,25 +142,29 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 
 	@Override
 	public void destroy() {
-
-		try {
-			ConnectionProvider provider = this.connectionProvider;
-			if (provider != null) {
-				provider.dispose();
+		if (this.globalResources) {
+			HttpResources.disposeLoopsAndConnections();
+		}
+		else {
+			try {
+				ConnectionProvider provider = this.connectionProvider;
+				if (provider != null) {
+					provider.dispose();
+				}
 			}
-		}
-		catch (Throwable ex) {
-			// ignore
-		}
-
-		try {
-			LoopResources resources = this.loopResources;
-			if (resources != null) {
-				resources.dispose();
+			catch (Throwable ex) {
+				// ignore
 			}
-		}
-		catch (Throwable ex) {
-			// ignore
+
+			try {
+				LoopResources resources = this.loopResources;
+				if (resources != null) {
+					resources.dispose();
+				}
+			}
+			catch (Throwable ex) {
+				// ignore
+			}
 		}
 	}
 
