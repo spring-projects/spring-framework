@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.cache.CacheManager} implementation
- * backed by a JCache {@link javax.cache.CacheManager}.
+ * backed by a JCache {@link CacheManager javax.cache.CacheManager}.
  *
  * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
@@ -53,7 +53,7 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 
 	/**
 	 * Create a new JCacheCacheManager for the given backing JCache.
-	 * @param cacheManager the backing JCache {@link javax.cache.CacheManager}
+	 * @param cacheManager the backing JCache {@link CacheManager javax.cache.CacheManager}
 	 */
 	public JCacheCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
@@ -61,14 +61,14 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 
 
 	/**
-	 * Set the backing JCache {@link javax.cache.CacheManager}.
+	 * Set the backing JCache {@link CacheManager javax.cache.CacheManager}.
 	 */
 	public void setCacheManager(@Nullable CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
 	/**
-	 * Return the backing JCache {@link javax.cache.CacheManager}.
+	 * Return the backing JCache {@link CacheManager javax.cache.CacheManager}.
 	 */
 	@Nullable
 	public CacheManager getCacheManager() {
