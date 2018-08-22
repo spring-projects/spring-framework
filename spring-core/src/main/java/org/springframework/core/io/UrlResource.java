@@ -148,7 +148,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 		try {
 			return new URL(StringUtils.cleanPath(originalPath));
 		}
-		catch (MalformedURLException ex) {
+		catch (Throwable ex) {
 			// Cleaned URL path cannot be converted to URL
 			// -> take original URL.
 			return originalUrl;
