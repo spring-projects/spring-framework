@@ -1831,7 +1831,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (initMethod == null) {
 			if (mbd.isEnforceInitMethod()) {
-				throw new BeanDefinitionValidationException("Couldn't find an init method named '" +
+				throw new BeanDefinitionValidationException("Could not find an init method named '" +
 						initMethodName + "' on bean with name '" + beanName + "'");
 			}
 			else {
