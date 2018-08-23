@@ -335,7 +335,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	/**
 	 * Return whether a fallback match is allowed.
 	 * <p>This is {@code false} by default but may be overridden to return {@code true} in order
-	 * to suggest to a {@link org.springframework.beans.factory.support.AutowireCandidateResolver}
+	 * to suggest to an {@link org.springframework.beans.factory.support.AutowireCandidateResolver}
 	 * that a fallback match is acceptable as well.
 	 * @since 4.0
 	 */

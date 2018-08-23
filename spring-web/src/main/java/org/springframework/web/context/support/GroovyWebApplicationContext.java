@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
 /**
  * {@link org.springframework.web.context.WebApplicationContext} implementation which takes
  * its configuration from Groovy bean definition scripts and/or XML files, as understood by
- * an {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader}.
+ * a {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader}.
  * This is essentially the equivalent of
  * {@link org.springframework.context.support.GenericGroovyApplicationContext}
  * for a web environment.
