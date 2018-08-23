@@ -107,6 +107,18 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	@Deprecated
 	int AUTOWIRE_AUTODETECT = 4;
 
+	/**
+	 * Suffix for the "original instance" convention when initializing an existing
+	 * bean instance: to be appended to the fully-qualified bean class name,
+	 * e.g. "com.mypackage.MyClass.ORIGINAL", in order to enforce the given instance
+	 * to be returned, i.e. no proxies etc.
+	 * @since 5.1
+	 * @see #initializeBean(Object, String)
+	 * @see #applyBeanPostProcessorsBeforeInitialization(Object, String)
+	 * @see #applyBeanPostProcessorsAfterInitialization(Object, String)
+	 */
+	String ORIGINAL_INSTANCE_SUFFIX = ".ORIGINAL";
+
 
 	//-------------------------------------------------------------------------
 	// Typical methods for creating and populating external bean instances
@@ -264,9 +276,12 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * for callbacks but not checked against the registered bean definitions.
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean, to be passed to it if necessary
-	 * (only passed to {@link BeanPostProcessor BeanPostProcessors})
+	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
+	 * can follow the {@link #ORIGINAL_INSTANCE_SUFFIX} convention in order to
+	 * enforce the given instance to be returned, i.e. no proxies etc)
 	 * @return the bean instance to use, either the original or a wrapped one
 	 * @throws BeansException if the initialization failed
+	 * @see #ORIGINAL_INSTANCE_SUFFIX
 	 */
 	Object initializeBean(Object existingBean, String beanName) throws BeansException;
 
@@ -275,10 +290,13 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * instance, invoking their {@code postProcessBeforeInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
-	 * @param beanName the name of the bean
+	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
+	 * can follow the {@link #ORIGINAL_INSTANCE_SUFFIX} convention in order to
+	 * enforce the given instance to be returned, i.e. no proxies etc)
 	 * @return the bean instance to use, either the original or a wrapped one
 	 * @throws BeansException if any post-processing failed
 	 * @see BeanPostProcessor#postProcessBeforeInitialization
+	 * @see #ORIGINAL_INSTANCE_SUFFIX
 	 */
 	Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
 			throws BeansException;
@@ -288,10 +306,13 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * instance, invoking their {@code postProcessAfterInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
-	 * @param beanName the name of the bean
+	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
+	 * can follow the {@link #ORIGINAL_INSTANCE_SUFFIX} convention in order to
+	 * enforce the given instance to be returned, i.e. no proxies etc)
 	 * @return the bean instance to use, either the original or a wrapped one
 	 * @throws BeansException if any post-processing failed
 	 * @see BeanPostProcessor#postProcessAfterInitialization
+	 * @see #ORIGINAL_INSTANCE_SUFFIX
 	 */
 	Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException;
