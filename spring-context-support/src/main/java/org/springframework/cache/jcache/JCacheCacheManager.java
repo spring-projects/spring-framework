@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,15 +45,18 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 
 
 	/**
-	 * Create a new JCacheCacheManager, setting the target JCache CacheManager
-	 * through the {@link #setCacheManager} bean property.
+	 * Create a new {@code JCacheCacheManager} without a backing JCache
+	 * {@link CacheManager javax.cache.CacheManager}.
+	 * <p>The backing JCache {@code javax.cache.CacheManager} can be set via the
+	 * {@link #setCacheManager} bean property.
 	 */
 	public JCacheCacheManager() {
 	}
 
 	/**
-	 * Create a new JCacheCacheManager for the given backing JCache.
-	 * @param cacheManager the backing JCache {@link CacheManager javax.cache.CacheManager}
+	 * Create a new {@code JCacheCacheManager} for the given backing JCache
+	 * {@link CacheManager javax.cache.CacheManager}.
+	 * @param cacheManager the backing JCache {@code javax.cache.CacheManager}
 	 */
 	public JCacheCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;

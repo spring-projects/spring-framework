@@ -42,7 +42,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 
 
 	/**
-	 * Create a {@link org.springframework.cache.jcache.JCacheCache} instance.
+	 * Create a {@code JCacheCache} instance.
 	 * @param jcache backing JCache Cache instance
 	 */
 	public JCacheCache(Cache<Object, Object> jcache) {
@@ -50,7 +50,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	/**
-	 * Create a {@link org.springframework.cache.jcache.JCacheCache} instance.
+	 * Create a {@code JCacheCache} instance.
 	 * @param jcache backing JCache Cache instance
 	 * @param allowNullValues whether to accept and convert null values for this cache
 	 */
