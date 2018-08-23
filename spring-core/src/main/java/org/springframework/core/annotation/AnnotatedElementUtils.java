@@ -916,7 +916,7 @@ public abstract class AnnotatedElementUtils {
 				}
 
 				if (element instanceof Class) {  // otherwise getAnnotations doesn't return anything new
-					Class<?> superclass = ((Class) element).getSuperclass();
+					Class<?> superclass = ((Class<?>) element).getSuperclass();
 					if (superclass != null && superclass != Object.class) {
 						List<Annotation> inheritedAnnotations = new LinkedList<>();
 						for (Annotation annotation : element.getAnnotations()) {
