@@ -73,13 +73,13 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 
 	@Nullable
-	protected List<HandlerMapping> handlerMappings;
+	private List<HandlerMapping> handlerMappings;
 
 	@Nullable
-	protected List<HandlerAdapter> handlerAdapters;
+	private List<HandlerAdapter> handlerAdapters;
 
 	@Nullable
-	protected List<HandlerResultHandler> resultHandlers;
+	private List<HandlerResultHandler> resultHandlers;
 
 
 	/**
