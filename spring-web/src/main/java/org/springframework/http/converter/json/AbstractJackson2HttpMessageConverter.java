@@ -269,15 +269,12 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			if (type != null && TypeUtils.isAssignable(type, value.getClass())) {
 				javaType = getJavaType(type, null);
 			}
-			ObjectWriter objectWriter;
+			ObjectWriter objectWriter = this.objectMapper.writer();
 			if (serializationView != null) {
-				objectWriter = this.objectMapper.writerWithView(serializationView);
+				objectWriter = objectWriter.withView(serializationView);
 			}
-			else if (filters != null) {
-				objectWriter = this.objectMapper.writer(filters);
-			}
-			else {
-				objectWriter = this.objectMapper.writer();
+			if (filters != null) {
+				objectWriter = objectWriter.with(filters);
 			}
 			if (javaType != null && javaType.isContainerType()) {
 				objectWriter = objectWriter.forType(javaType);
