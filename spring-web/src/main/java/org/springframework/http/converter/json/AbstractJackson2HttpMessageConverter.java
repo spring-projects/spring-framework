@@ -254,10 +254,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		try {
 			writePrefix(generator, object);
 
+			Object value = object;
 			Class<?> serializationView = null;
 			FilterProvider filters = null;
-			Object value = object;
 			JavaType javaType = null;
+
 			if (object instanceof MappingJacksonValue) {
 				MappingJacksonValue container = (MappingJacksonValue) object;
 				value = container.getValue();
@@ -267,15 +268,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			if (type != null && value != null && TypeUtils.isAssignable(type, value.getClass())) {
 				javaType = getJavaType(type, null);
 			}
-			ObjectWriter objectWriter;
-			if (serializationView != null) {
-				objectWriter = this.objectMapper.writerWithView(serializationView);
-			}
-			else if (filters != null) {
-				objectWriter = this.objectMapper.writer(filters);
-			}
-			else {
-				objectWriter = this.objectMapper.writer();
+
+			ObjectWriter objectWriter = (serializationView != null ?
+					this.objectMapper.writerWithView(serializationView) : this.objectMapper.writer());
+			if (filters != null) {
+				objectWriter = objectWriter.with(filters);
 			}
 			if (javaType != null && javaType.isContainerType()) {
 				objectWriter = objectWriter.forType(javaType);
@@ -289,7 +286,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 			writeSuffix(generator, object);
 			generator.flush();
-
 		}
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);
