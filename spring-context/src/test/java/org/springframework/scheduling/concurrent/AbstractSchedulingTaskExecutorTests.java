@@ -16,21 +16,16 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.util.asyncassert.AsyncAssert;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -92,8 +87,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		Future<?> future = executor.submit(task);
 		try {
 			future.get(1000, TimeUnit.MILLISECONDS);
-		}
-		catch (ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			assertTrue(future.isDone());
 			throw ex;
 		}
@@ -115,8 +109,11 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestTask task = new TestTask(1);
 		ListenableFuture<?> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
-		Thread.sleep(1000);
-		assertTrue(future.isDone());
+
+		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
+				   .timeout(1, TimeUnit.SECONDS)
+				   .await(future::isDone);
 		assertNull(outcome);
 		assertThreadNamePrefix(task);
 	}
@@ -126,8 +123,11 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestTask task = new TestTask(0);
 		ListenableFuture<?> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
-		Thread.sleep(1000);
-		assertTrue(future.isDone());
+
+		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
+				   .timeout(1, TimeUnit.SECONDS)
+				   .await(() -> future.isDone() && outcome != null);
 		assertSame(RuntimeException.class, outcome.getClass());
 	}
 
@@ -165,8 +165,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task2 = new TestCallable(-1);
 		Future<?> future2 = executor.submit(task2);
 		shutdownExecutor();
-		future1.get(100, TimeUnit.MILLISECONDS);
-		future2.get(100, TimeUnit.MILLISECONDS);
+		future1.get(1000, TimeUnit.MILLISECONDS);
+		future2.get(1000, TimeUnit.MILLISECONDS);
 	}
 
 	@Test
@@ -174,8 +174,11 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task = new TestCallable(1);
 		ListenableFuture<String> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
-		Thread.sleep(100);
-		assertTrue(future.isDone());
+
+		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
+				   .timeout(1, TimeUnit.SECONDS)
+				   .await(() -> future.isDone() && outcome != null);
 		assertEquals(THREAD_NAME_PREFIX, outcome.toString().substring(0, THREAD_NAME_PREFIX.length()));
 	}
 
@@ -184,8 +187,10 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task = new TestCallable(0);
 		ListenableFuture<String> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
-		Thread.sleep(100);
-		assertTrue(future.isDone());
+		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
+				   .timeout(1, TimeUnit.SECONDS)
+				   .await(() -> future.isDone() && outcome != null);
 		assertSame(RuntimeException.class, outcome.getClass());
 	}
 
@@ -196,8 +201,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task2 = new TestCallable(-1);
 		ListenableFuture<?> future2 = executor.submitListenable(task2);
 		shutdownExecutor();
-		future1.get(100, TimeUnit.MILLISECONDS);
-		future2.get(100, TimeUnit.MILLISECONDS);
+		future1.get(1000, TimeUnit.MILLISECONDS);
+		future2.get(1000, TimeUnit.MILLISECONDS);
 	}
 
 
@@ -212,8 +217,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	private void await(CountDownLatch latch) {
 		try {
 			latch.await(1000, TimeUnit.MILLISECONDS);
-		}
-		catch (InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			throw new IllegalStateException(ex);
 		}
 		assertEquals("latch did not count down,", 0, latch.getCount());
@@ -240,8 +244,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 			lastThread = Thread.currentThread();
 			try {
 				Thread.sleep(10);
-			}
-			catch (InterruptedException ex) {
+			} catch (InterruptedException ex) {
 			}
 			if (expectedRunCount >= 0) {
 				if (actualRunCount.incrementAndGet() > expectedRunCount) {
@@ -267,8 +270,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		public String call() throws Exception {
 			try {
 				Thread.sleep(10);
-			}
-			catch (InterruptedException ex) {
+			} catch (InterruptedException ex) {
 			}
 			if (expectedRunCount >= 0) {
 				if (actualRunCount.incrementAndGet() > expectedRunCount) {

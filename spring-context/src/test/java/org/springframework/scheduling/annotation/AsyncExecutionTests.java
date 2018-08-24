@@ -16,19 +16,9 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
@@ -39,7 +29,18 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.asyncassert.AsyncAssert;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -78,40 +79,35 @@ public class AsyncExecutionTests {
 		try {
 			asyncTest.returnSomething(0).get();
 			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
 		try {
 			asyncTest.returnSomething(-1).get();
 			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IOException);
 		}
 
 		try {
 			asyncTest.returnSomethingListenable(0).get();
 			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
 		try {
 			asyncTest.returnSomethingListenable(-1).get();
 			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IOException);
 		}
 
 		try {
 			asyncTest.returnSomethingCompletable(0).get();
 			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 	}
@@ -195,24 +191,21 @@ public class AsyncExecutionTests {
 		try {
 			asyncTest.returnSomething(0).get();
 			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
 		try {
 			asyncTest.returnSomethingListenable(0).get();
 			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
 		try {
 			asyncTest.returnSomethingCompletable(0).get();
 			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 	}
@@ -365,19 +358,24 @@ public class AsyncExecutionTests {
 
 	@Test
 	public void asyncMethodListener() throws Exception {
+		// Arrange
 		originalThreadName = Thread.currentThread().getName();
 		listenerCalled = 0;
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodListener.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		// Act
 		context.refresh();
-		Thread.sleep(1000);
-		assertEquals(1, listenerCalled);
+		// Assert
+		AsyncAssert.get()
+				   .timeout(1, TimeUnit.SECONDS)
+				   .await(() -> listenerCalled == 1);
 	}
 
 	@Test
 	public void asyncClassListener() throws Exception {
+		// Arrange
 		originalThreadName = Thread.currentThread().getName();
 		listenerCalled = 0;
 		listenerConstructed = 0;
@@ -385,15 +383,20 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassListener.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		// Act
 		context.refresh();
 		context.close();
-		Thread.sleep(1000);
+		// Assert
+		AsyncAssert.get()
+				   .timeout(1, TimeUnit.SECONDS)
+				   .await(() -> listenerCalled == 2);
 		assertEquals(2, listenerCalled);
 		assertEquals(1, listenerConstructed);
 	}
 
 	@Test
 	public void asyncPrototypeClassListener() throws Exception {
+		// Arrange
 		originalThreadName = Thread.currentThread().getName();
 		listenerCalled = 0;
 		listenerConstructed = 0;
@@ -403,9 +406,13 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", listenerDef);
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		// Act
 		context.refresh();
 		context.close();
-		Thread.sleep(1000);
+		// Assert
+		AsyncAssert.get()
+				   .timeout(1, TimeUnit.SECONDS)
+				   .await(()->listenerCalled == 2);
 		assertEquals(2, listenerCalled);
 		assertEquals(2, listenerConstructed);
 	}
@@ -439,8 +446,7 @@ public class AsyncExecutionTests {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			if (i == 0) {
 				throw new IllegalArgumentException();
-			}
-			else if (i < 0) {
+			} else if (i < 0) {
 				return AsyncResult.forExecutionException(new IOException());
 			}
 			return AsyncResult.forValue(Integer.toString(i));
@@ -451,8 +457,7 @@ public class AsyncExecutionTests {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			if (i == 0) {
 				throw new IllegalArgumentException();
-			}
-			else if (i < 0) {
+			} else if (i < 0) {
 				return AsyncResult.forExecutionException(new IOException());
 			}
 			return new AsyncResult<>(Integer.toString(i));

@@ -17,9 +17,11 @@
 package org.springframework.context.support;
 
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.asyncassert.AsyncAssert;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -61,10 +63,11 @@ public class SimpleThreadScopeTests {
 		thread1.start();
 		thread2.start();
 
-		Thread.sleep(200);
+		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
+				   .timeout(500, TimeUnit.MILLISECONDS)
+				   .await(() -> beans[0] != null & beans[1] != null);
 
-		assertNotNull(beans[0]);
-		assertNotNull(beans[1]);
 		assertNotSame(beans[0], beans[1]);
 	}
 
