@@ -16,9 +16,9 @@
 
 package org.springframework.oxm.mime;
 
-import javax.activation.DataHandler;
-
 import org.springframework.lang.Nullable;
+
+import javax.activation.DataHandler;
 
 /**
  * Represents a container for MIME attachments

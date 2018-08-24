@@ -16,13 +16,12 @@
 
 package org.springframework.ejb.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.jndi.JndiObjectFactoryBean;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
 
 /**
  * Simple {@link org.springframework.beans.factory.xml.BeanDefinitionParser} implementation that

@@ -17,10 +17,9 @@
 package org.springframework.test.context.junit4.annotation;
 
 import org.junit.Test;
-
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration tests that verify support for configuration classes in

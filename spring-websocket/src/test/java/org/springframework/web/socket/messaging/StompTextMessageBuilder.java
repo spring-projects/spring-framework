@@ -16,12 +16,12 @@
 
 package org.springframework.web.socket.messaging;
 
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.web.socket.TextMessage;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.web.socket.TextMessage;
 
 /**
  * A builder for creating WebSocket messages with STOMP frame content.

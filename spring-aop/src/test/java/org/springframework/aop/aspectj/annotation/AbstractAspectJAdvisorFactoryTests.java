@@ -16,35 +16,12 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.io.FileNotFoundException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.rmi.RemoteException;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.DeclareParents;
-import org.aspectj.lang.annotation.DeclarePrecedence;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Ignore;
 import org.junit.Test;
-import test.aop.DefaultLockable;
-import test.aop.Lockable;
-import test.aop.PerTargetAspect;
-import test.aop.TwoAdviceAspect;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
@@ -58,8 +35,22 @@ import org.springframework.core.annotation.Order;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
+import test.aop.DefaultLockable;
+import test.aop.Lockable;
+import test.aop.PerTargetAspect;
+import test.aop.TwoAdviceAspect;
 
-import static org.hamcrest.Matchers.*;
+import java.io.FileNotFoundException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.rmi.RemoteException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.*;
 
 /**

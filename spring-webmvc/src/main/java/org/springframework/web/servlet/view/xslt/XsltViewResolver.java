@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.view.xslt;
 
-import java.util.Properties;
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.URIResolver;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
+
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.URIResolver;
+import java.util.Properties;
 
 /**
  * {@link org.springframework.web.servlet.ViewResolver} implementation that

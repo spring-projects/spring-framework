@@ -16,21 +16,15 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.ServletContext;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.lang.Nullable;
-import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
-import org.springframework.web.accept.ContentNegotiationStrategy;
-import org.springframework.web.accept.FixedContentNegotiationStrategy;
-import org.springframework.web.accept.HeaderContentNegotiationStrategy;
-import org.springframework.web.accept.ParameterContentNegotiationStrategy;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
+import org.springframework.web.accept.*;
+
+import javax.servlet.ServletContext;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Creates a {@code ContentNegotiationManager} and configures it with

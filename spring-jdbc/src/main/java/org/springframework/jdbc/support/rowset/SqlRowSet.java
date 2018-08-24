@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.support.rowset;
 
+import org.springframework.jdbc.InvalidResultSetAccessException;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -23,8 +25,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
-
-import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * Mirror interface for {@link javax.sql.RowSet}, representing

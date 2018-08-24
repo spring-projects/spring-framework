@@ -16,11 +16,11 @@
 
 package org.springframework.scheduling.support;
 
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
-
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Variant of {@link MethodInvokingRunnable} meant to be used for processing

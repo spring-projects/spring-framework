@@ -15,14 +15,13 @@
  */
 package org.springframework.web.reactive.socket;
 
-import java.util.function.Function;
-
 import org.reactivestreams.Publisher;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
+import java.util.function.Function;
 
 /**
  * Represents a WebSocket session with Reactive Streams input and output.

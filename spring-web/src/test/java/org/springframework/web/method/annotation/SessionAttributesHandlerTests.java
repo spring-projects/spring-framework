@@ -17,10 +17,7 @@
 package org.springframework.web.method.annotation;
 
 
-import java.util.HashSet;
-
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ModelMap;
@@ -30,7 +27,9 @@ import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static java.util.Arrays.*;
+import java.util.HashSet;
+
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 /**

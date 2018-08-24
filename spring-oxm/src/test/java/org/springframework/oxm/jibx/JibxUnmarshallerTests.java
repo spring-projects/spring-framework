@@ -16,16 +16,16 @@
 
 package org.springframework.oxm.jibx;
 
-import java.io.ByteArrayInputStream;
-import javax.xml.transform.stream.StreamSource;
-
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.springframework.oxm.AbstractUnmarshallerTests;
 
-import static org.junit.Assert.*;
+import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does

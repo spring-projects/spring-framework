@@ -16,14 +16,8 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -31,11 +25,12 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.IdTimestampMessageHeaderInitializer;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.util.AlternativeJdkIdGenerator;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.MultiValueMap;
+import org.springframework.util.*;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 

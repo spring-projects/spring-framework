@@ -16,14 +16,14 @@
 
 package org.springframework.web.multipart.support;
 
-import java.io.IOException;
-
 import org.junit.Test;
-
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Rick Evans

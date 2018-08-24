@@ -16,13 +16,8 @@
 
 package org.springframework.context.config;
 
-import java.io.FileNotFoundException;
-import java.util.Calendar;
-import java.util.Date;
-
 import org.junit.After;
 import org.junit.Test;
-
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -30,7 +25,12 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.Assert.*;
+import java.io.FileNotFoundException;
+import java.util.Calendar;
+import java.util.Date;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma

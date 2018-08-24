@@ -16,23 +16,18 @@
 
 package org.springframework.jmx.support;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
-
 import org.junit.After;
 import org.junit.Test;
-
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+
+import javax.management.*;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 import static org.junit.Assert.*;
 

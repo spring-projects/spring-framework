@@ -16,14 +16,13 @@
 
 package org.springframework.web.reactive.socket;
 
-import java.net.URI;
-import java.security.Principal;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.security.Principal;
 
 /**
  * Simple container of information related to the handshake request that started

@@ -16,11 +16,11 @@
 
 package org.springframework.tests.sample.beans;
 
-import java.io.InputStream;
-import java.util.Map;
-
 import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
+
+import java.io.InputStream;
+import java.util.Map;
 
 /**
  * @author Juergen Hoeller

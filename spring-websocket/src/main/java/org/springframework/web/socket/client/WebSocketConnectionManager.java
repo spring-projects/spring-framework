@@ -16,8 +16,6 @@
 
 package org.springframework.web.socket.client;
 
-import java.util.List;
-
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -27,6 +25,8 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
+
+import java.util.List;
 
 /**
  * A WebSocket connection manager that is given a URI, a {@link WebSocketClient}, and a

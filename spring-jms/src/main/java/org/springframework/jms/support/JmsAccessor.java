@@ -16,19 +16,18 @@
 
 package org.springframework.jms.support;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.Session;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.jms.JmsException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Session;
 
 /**
  * Base class for {@link org.springframework.jms.core.JmsTemplate} and other

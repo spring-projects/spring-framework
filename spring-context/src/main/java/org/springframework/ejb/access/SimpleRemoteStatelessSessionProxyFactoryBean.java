@@ -16,13 +16,13 @@
 
 package org.springframework.ejb.access;
 
-import javax.naming.NamingException;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import javax.naming.NamingException;
 
 /**
  * Convenient {@link FactoryBean} for remote SLSB proxies.

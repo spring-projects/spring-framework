@@ -16,9 +16,9 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.jms.Destination;
-
 import org.springframework.jca.StubActivationSpec;
+
+import javax.jms.Destination;
 
 /**
  * StubActivationSpec which implements all required and optional properties (see

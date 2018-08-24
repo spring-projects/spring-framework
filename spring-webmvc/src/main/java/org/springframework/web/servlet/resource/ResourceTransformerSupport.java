@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.Collections;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 
 /**
  * A base class for a {@code ResourceTransformer} with an optional helper method

@@ -16,10 +16,10 @@
 
 package org.springframework.test.web.client;
 
-import java.io.IOException;
-
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+
+import java.io.IOException;
 
 /**
  * Abstraction for creating HTTP request expectations, applying them to actual

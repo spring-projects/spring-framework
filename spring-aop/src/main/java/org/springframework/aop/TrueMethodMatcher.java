@@ -16,10 +16,10 @@
 
 package org.springframework.aop;
 
+import org.springframework.lang.Nullable;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Canonical MethodMatcher instance that matches all methods.

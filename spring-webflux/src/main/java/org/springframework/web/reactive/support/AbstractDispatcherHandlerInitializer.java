@@ -16,12 +16,6 @@
 
 package org.springframework.web.reactive.support;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -31,6 +25,8 @@ import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
+
+import javax.servlet.*;
 
 /**
  * Base class for {@link org.springframework.web.WebApplicationInitializer}

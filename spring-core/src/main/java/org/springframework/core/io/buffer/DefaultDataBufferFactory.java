@@ -16,9 +16,9 @@
 
 package org.springframework.core.io.buffer;
 
-import java.nio.ByteBuffer;
-
 import org.springframework.util.Assert;
+
+import java.nio.ByteBuffer;
 
 /**
  * Default implementation of the {@code DataBufferFactory} interface. Allows for

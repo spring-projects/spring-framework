@@ -16,20 +16,10 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -37,6 +27,11 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Handles {@link HttpEntity} and {@link ResponseEntity} return values.

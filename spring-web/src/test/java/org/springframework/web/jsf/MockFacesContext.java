@@ -16,7 +16,6 @@
 
 package org.springframework.web.jsf;
 
-import java.util.Iterator;
 import javax.faces.application.Application;
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;
@@ -26,6 +25,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseStream;
 import javax.faces.context.ResponseWriter;
 import javax.faces.render.RenderKit;
+import java.util.Iterator;
 
 /**
  * Mock implementation of the {@code FacesContext} class to facilitate

@@ -16,17 +16,12 @@
 
 package org.springframework.util.xml;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
+import java.util.*;
 
 /**
  * Simple {@code javax.xml.namespace.NamespaceContext} implementation.

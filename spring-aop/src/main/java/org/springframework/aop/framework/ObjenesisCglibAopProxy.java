@@ -16,16 +16,15 @@
 
 package org.springframework.aop.framework;
 
-import java.lang.reflect.Constructor;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Constructor;
 
 /**
  * Objenesis-based extension of {@link CglibAopProxy} to create proxy instances

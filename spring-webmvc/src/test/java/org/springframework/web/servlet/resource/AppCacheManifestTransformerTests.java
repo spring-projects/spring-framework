@@ -16,22 +16,23 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link AppCacheManifestTransformer}.

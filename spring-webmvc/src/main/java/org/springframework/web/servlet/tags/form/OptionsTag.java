@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
-
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
+
+import javax.servlet.jsp.JspException;
 
 /**
  * Convenient tag that allows one to supply a collection of objects

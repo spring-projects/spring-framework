@@ -16,14 +16,14 @@
 
 package org.springframework.http.codec;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.lang.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Default implementation of {@link ClientCodecConfigurer}.

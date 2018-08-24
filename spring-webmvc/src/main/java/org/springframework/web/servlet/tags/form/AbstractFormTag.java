@@ -16,13 +16,12 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.beans.PropertyEditor;
-
-import javax.servlet.jsp.JspException;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
+
+import javax.servlet.jsp.JspException;
+import java.beans.PropertyEditor;
 
 /**
  * Base class for all JSP form tags. Provides utility methods for

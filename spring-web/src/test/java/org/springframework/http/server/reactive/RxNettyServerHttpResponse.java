@@ -24,17 +24,16 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.ResponseContentWriter;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import rx.Observable;
-import rx.RxReactiveStreams;
-import rx.functions.Func1;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import rx.Observable;
+import rx.RxReactiveStreams;
+import rx.functions.Func1;
 
 /**
  * Adapt {@link ServerHttpResponse} to the RxNetty {@link HttpServerResponse}.

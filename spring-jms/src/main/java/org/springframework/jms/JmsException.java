@@ -16,10 +16,10 @@
 
 package org.springframework.jms;
 
-import javax.jms.JMSException;
-
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;
+
+import javax.jms.JMSException;
 
 /**
  * Base class for exception thrown by the framework whenever it

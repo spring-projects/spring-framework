@@ -16,18 +16,17 @@
 
 package org.springframework.aop.aspectj;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ITestBean;
+
+import java.lang.reflect.Method;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 

@@ -16,10 +16,10 @@
 
 package org.springframework.validation;
 
+import org.springframework.util.Assert;
+
 import java.io.Serializable;
 import java.util.Map;
-
-import org.springframework.util.Assert;
 
 /**
  * Map-based implementation of the BindingResult interface,

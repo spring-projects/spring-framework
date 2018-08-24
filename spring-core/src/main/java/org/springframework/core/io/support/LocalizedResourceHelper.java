@@ -16,13 +16,13 @@
 
 package org.springframework.core.io.support;
 
-import java.util.Locale;
-
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Locale;
 
 /**
  * Helper class for loading a localized resource,

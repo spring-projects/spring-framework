@@ -16,10 +16,10 @@
 
 package org.springframework.core.type;
 
+import org.springframework.util.Assert;
+
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashSet;
-
-import org.springframework.util.Assert;
 
 /**
  * {@link ClassMetadata} implementation that uses standard reflection

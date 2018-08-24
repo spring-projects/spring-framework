@@ -16,10 +16,10 @@
 
 package org.springframework.scripting.groovy;
 
+import org.codehaus.groovy.control.BytecodeProcessor;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import org.codehaus.groovy.control.BytecodeProcessor;
 
 /**
  * @author Juergen Hoeller

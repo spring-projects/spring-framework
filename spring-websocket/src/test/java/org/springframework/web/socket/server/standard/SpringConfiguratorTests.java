@@ -16,12 +16,9 @@
 
 package org.springframework.web.socket.server.standard;
 
-import javax.websocket.server.ServerEndpoint;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -31,7 +28,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
-import static org.junit.Assert.*;
+import javax.websocket.server.ServerEndpoint;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 public class SpringConfiguratorTests {
 

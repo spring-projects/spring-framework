@@ -16,6 +16,12 @@
 
 package org.springframework.web.util;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
+import org.springframework.lang.Nullable;
+import org.springframework.util.*;
+import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -23,16 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
 
 /**
  * Builder for {@link UriComponents}.

@@ -16,14 +16,14 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * A {@link org.springframework.web.servlet.resource.ResourceResolver} that

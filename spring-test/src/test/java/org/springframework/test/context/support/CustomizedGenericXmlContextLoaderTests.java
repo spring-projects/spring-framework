@@ -17,10 +17,10 @@
 package org.springframework.test.context.support;
 
 import org.junit.Test;
-
 import org.springframework.context.support.GenericApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Unit test which verifies that extensions of

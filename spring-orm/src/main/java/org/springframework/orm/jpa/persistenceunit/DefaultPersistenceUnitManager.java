@@ -16,28 +16,8 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.persistence.Converter;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PersistenceException;
-import javax.persistence.SharedCacheMode;
-import javax.persistence.ValidationMode;
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.index.CandidateComponentsIndex;
@@ -62,6 +42,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
+
+import javax.persistence.*;
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Default implementation of the {@link PersistenceUnitManager} interface.

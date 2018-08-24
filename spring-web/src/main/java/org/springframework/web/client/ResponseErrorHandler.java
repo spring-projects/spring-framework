@@ -16,11 +16,11 @@
 
 package org.springframework.web.client;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Strategy interface used by the {@link RestTemplate} to determine

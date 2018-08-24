@@ -16,10 +16,10 @@
 
 package org.springframework.aop.support;
 
-import java.lang.reflect.Method;
-
 import org.springframework.aop.MethodMatcher;
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Method;
 
 /**
  * Convenient abstract superclass for dynamic method matchers,

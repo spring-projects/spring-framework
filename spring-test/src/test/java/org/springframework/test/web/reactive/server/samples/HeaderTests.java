@@ -17,7 +17,6 @@
 package org.springframework.test.web.reactive.server.samples;
 
 import org.junit.Test;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;

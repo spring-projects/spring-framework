@@ -16,9 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
@@ -36,6 +33,9 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 
 /**
  * An extension of {@link RequestMappingInfoHandlerMapping} that creates

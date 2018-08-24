@@ -16,15 +16,15 @@
 
 package org.springframework.core.type.classreading;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Chris Beams

@@ -16,11 +16,11 @@
 
 package org.springframework.cache.interceptor;
 
+import org.springframework.util.Assert;
+
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.springframework.util.Assert;
 
 /**
  * Base class for cache operations.

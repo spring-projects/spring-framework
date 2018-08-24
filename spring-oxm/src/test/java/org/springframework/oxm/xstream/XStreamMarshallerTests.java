@@ -47,25 +47,15 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayOutputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.inOrder;
-import static org.mockito.BDDMockito.isA;
-import static org.mockito.BDDMockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**

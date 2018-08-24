@@ -16,9 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Document;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.w3c.dom.Document;
 
 /**
  * SPI for parsing an XML document that contains Spring bean definitions.

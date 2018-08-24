@@ -16,19 +16,13 @@
 
 package org.springframework.core.type.classreading;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import org.springframework.asm.AnnotationVisitor;
-import org.springframework.asm.Attribute;
-import org.springframework.asm.ClassVisitor;
-import org.springframework.asm.FieldVisitor;
-import org.springframework.asm.MethodVisitor;
-import org.springframework.asm.Opcodes;
-import org.springframework.asm.SpringAsmInfo;
+import org.springframework.asm.*;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * ASM class visitor which looks only for the class name and implemented types,

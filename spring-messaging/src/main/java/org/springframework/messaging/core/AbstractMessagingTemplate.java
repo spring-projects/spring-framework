@@ -16,10 +16,10 @@
 
 package org.springframework.messaging.core;
 
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+
+import java.util.Map;
 
 /**
  * An extension of {@link AbstractMessageReceivingTemplate} that adds support for

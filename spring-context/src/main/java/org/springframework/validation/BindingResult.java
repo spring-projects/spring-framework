@@ -16,11 +16,11 @@
 
 package org.springframework.validation;
 
-import java.beans.PropertyEditor;
-import java.util.Map;
-
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.lang.Nullable;
+
+import java.beans.PropertyEditor;
+import java.util.Map;
 
 /**
  * General interface that represents binding results. Extends the

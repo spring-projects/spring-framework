@@ -16,13 +16,13 @@
 
 package org.springframework.context.support;
 
-import java.util.Locale;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
+
+import java.util.Locale;
 
 /**
  * {@link org.springframework.context.ApplicationContext} implementation

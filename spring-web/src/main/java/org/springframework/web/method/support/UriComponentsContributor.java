@@ -16,12 +16,12 @@
 
 package org.springframework.web.method.support;
 
-import java.util.Map;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Map;
 
 /**
  * Strategy for contributing to the building of a {@link UriComponents} by

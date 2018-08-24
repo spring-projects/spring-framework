@@ -16,14 +16,16 @@
 
 package org.springframework.build.gradle
 
-import org.gradle.api.*
+import org.gradle.api.Action
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.maven.Conf2ScopeMapping
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.MavenPlugin
 import org.gradle.plugins.ide.eclipse.EclipsePlugin
 import org.gradle.plugins.ide.idea.IdeaPlugin
-import org.gradle.api.invocation.*
 
 /**
  * Gradle plugin that allows projects to merged together. Primarily developed to

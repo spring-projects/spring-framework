@@ -17,10 +17,9 @@
 package org.springframework.test.context.junit4.spr3896;
 
 import org.junit.Test;
-
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * JUnit 4 based integration test for verifying support for the

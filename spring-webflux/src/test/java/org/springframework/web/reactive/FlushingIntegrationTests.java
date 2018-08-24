@@ -16,16 +16,9 @@
 
 package org.springframework.web.reactive;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
@@ -36,8 +29,14 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import static org.junit.Assert.*;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze

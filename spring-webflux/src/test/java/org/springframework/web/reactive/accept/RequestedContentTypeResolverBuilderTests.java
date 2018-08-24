@@ -15,14 +15,13 @@
  */
 package org.springframework.web.reactive.accept;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 

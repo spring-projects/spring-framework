@@ -16,9 +16,9 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
-import java.util.regex.Pattern;
-
 import com.gargoylesoftware.htmlunit.WebRequest;
+
+import java.util.regex.Pattern;
 
 /**
  * A {@link WebRequestMatcher} that allows matching on

@@ -16,10 +16,9 @@
 
 package org.springframework.web.reactive.socket.server;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 /**
  * A service to delegate WebSocket-related HTTP requests to.

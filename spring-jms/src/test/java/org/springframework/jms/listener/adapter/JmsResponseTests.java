@@ -16,15 +16,14 @@
 
 package org.springframework.jms.listener.adapter;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Session;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.jms.support.destination.DestinationResolver;
+
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Session;
 
 import static org.junit.Assert.assertSame;
 import static org.mockito.BDDMockito.given;

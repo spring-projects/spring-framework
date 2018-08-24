@@ -17,7 +17,6 @@
 package org.springframework.scheduling.concurrent;
 
 import org.junit.Test;
-
 import org.springframework.core.task.NoOpRunnable;
 
 /**

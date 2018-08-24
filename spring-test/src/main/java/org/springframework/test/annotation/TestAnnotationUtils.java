@@ -16,9 +16,9 @@
 
 package org.springframework.test.annotation;
 
-import java.lang.reflect.Method;
-
 import org.springframework.core.annotation.AnnotatedElementUtils;
+
+import java.lang.reflect.Method;
 
 /**
  * Collection of utility methods for working with Spring's core testing annotations.

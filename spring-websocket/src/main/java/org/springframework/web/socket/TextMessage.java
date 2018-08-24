@@ -16,9 +16,9 @@
 
 package org.springframework.web.socket;
 
-import java.nio.charset.StandardCharsets;
-
 import org.springframework.lang.Nullable;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * A text WebSocket message.

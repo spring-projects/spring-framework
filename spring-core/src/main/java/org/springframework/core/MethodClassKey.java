@@ -16,10 +16,10 @@
 
 package org.springframework.core;
 
-import java.lang.reflect.Method;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+
+import java.lang.reflect.Method;
 
 /**
  * A common key class for a method against a specific target class,

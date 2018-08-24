@@ -16,18 +16,14 @@
 
 package org.springframework.jca.cci.connection;
 
-import javax.naming.NamingException;
-import javax.naming.Reference;
-import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
-import javax.resource.cci.ConnectionSpec;
-import javax.resource.cci.RecordFactory;
-import javax.resource.cci.ResourceAdapterMetaData;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.resource.ResourceException;
+import javax.resource.cci.*;
 
 /**
  * CCI {@link ConnectionFactory} implementation that delegates all calls

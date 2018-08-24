@@ -1,13 +1,12 @@
 package org.springframework.web.cors.reactive;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
-import org.springframework.web.cors.*;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
 
 /**

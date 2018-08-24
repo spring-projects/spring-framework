@@ -16,10 +16,10 @@
 
 package org.springframework.remoting.support;
 
+import org.springframework.lang.Nullable;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Encapsulates a remote invocation result, holding a result value or an exception.

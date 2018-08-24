@@ -16,11 +16,11 @@
 
 package org.springframework.remoting.jaxws;
 
+import org.springframework.util.Assert;
+
 import javax.annotation.Resource;
 import javax.jws.WebService;
 import javax.xml.ws.WebServiceContext;
-
-import org.springframework.util.Assert;
 
 /**
  * @author Juergen Hoeller

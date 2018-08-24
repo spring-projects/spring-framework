@@ -16,13 +16,13 @@
 
 package org.springframework.transaction.annotation;
 
-import java.io.Serializable;
-import java.lang.reflect.AnnotatedElement;
-import javax.ejb.ApplicationException;
-import javax.ejb.TransactionAttributeType;
-
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
+
+import javax.ejb.ApplicationException;
+import javax.ejb.TransactionAttributeType;
+import java.io.Serializable;
+import java.lang.reflect.AnnotatedElement;
 
 /**
  * Strategy implementation for parsing EJB3's {@link javax.ejb.TransactionAttribute}

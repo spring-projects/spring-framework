@@ -16,6 +16,15 @@
 
 package org.springframework.beans.factory.config;
 
+import org.junit.Test;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.tests.sample.beans.TestBean;
+
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.text.DateFormat;
@@ -25,17 +34,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
-
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.tests.sample.beans.TestBean;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller

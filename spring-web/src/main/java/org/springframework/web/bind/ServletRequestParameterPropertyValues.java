@@ -16,11 +16,11 @@
 
 package org.springframework.web.bind;
 
-import javax.servlet.ServletRequest;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.ServletRequest;
 
 /**
  * PropertyValues implementation created from parameters in a ServletRequest.

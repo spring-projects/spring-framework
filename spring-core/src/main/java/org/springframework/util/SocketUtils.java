@@ -16,13 +16,13 @@
 
 package org.springframework.util;
 
+import javax.net.ServerSocketFactory;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.net.ServerSocketFactory;
 
 /**
  * Simple utility methods for working with network sockets &mdash; for example,

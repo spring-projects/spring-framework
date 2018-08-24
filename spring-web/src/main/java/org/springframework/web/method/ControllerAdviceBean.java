@@ -16,14 +16,6 @@
 
 package org.springframework.web.method;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
@@ -36,6 +28,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+
+import java.lang.annotation.Annotation;
+import java.util.*;
 
 /**
  * Encapsulates information about an {@linkplain ControllerAdvice @ControllerAdvice}

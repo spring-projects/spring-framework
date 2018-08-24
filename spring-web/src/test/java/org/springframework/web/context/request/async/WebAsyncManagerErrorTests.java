@@ -16,24 +16,21 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import javax.servlet.AsyncEvent;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.mock.web.test.MockAsyncContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
 
+import javax.servlet.AsyncEvent;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.web.context.request.async.CallableProcessingInterceptor.RESULT_NONE;
 
 /**

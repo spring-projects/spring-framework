@@ -16,14 +16,14 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
-
-import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.lang.Nullable;
-import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * {@link RowMapper} implementation that creates a {@code java.util.Map}

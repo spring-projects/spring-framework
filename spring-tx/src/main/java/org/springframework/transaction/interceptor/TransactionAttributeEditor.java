@@ -16,9 +16,9 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.beans.PropertyEditorSupport;
-
 import org.springframework.util.StringUtils;
+
+import java.beans.PropertyEditorSupport;
 
 /**
  * PropertyEditor for {@link TransactionAttribute} objects. Accepts a String of form

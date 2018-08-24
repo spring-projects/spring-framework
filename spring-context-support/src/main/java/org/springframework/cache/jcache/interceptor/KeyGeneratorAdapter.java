@@ -16,17 +16,17 @@
 
 package org.springframework.cache.jcache.interceptor;
 
+import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+
+import javax.cache.annotation.CacheInvocationParameter;
+import javax.cache.annotation.CacheKeyGenerator;
+import javax.cache.annotation.CacheKeyInvocationContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import javax.cache.annotation.CacheInvocationParameter;
-import javax.cache.annotation.CacheKeyGenerator;
-import javax.cache.annotation.CacheKeyInvocationContext;
-
-import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Spring's {@link KeyGenerator} implementation that either delegates to a

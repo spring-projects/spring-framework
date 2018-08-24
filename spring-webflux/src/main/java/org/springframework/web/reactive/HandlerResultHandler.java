@@ -16,9 +16,8 @@
 
 package org.springframework.web.reactive;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 /**
  * Process the {@link HandlerResult}, usually returned by an {@link HandlerAdapter}.

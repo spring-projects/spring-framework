@@ -16,19 +16,19 @@
 
 package org.springframework.format.datetime.joda;
 
-import java.util.Locale;
-import java.util.TimeZone;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Test;
-
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
+import java.util.Locale;
+import java.util.TimeZone;
+
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Phillip Webb

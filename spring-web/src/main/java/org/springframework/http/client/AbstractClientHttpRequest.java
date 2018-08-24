@@ -16,11 +16,11 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Abstract base for {@link ClientHttpRequest} that makes sure that headers

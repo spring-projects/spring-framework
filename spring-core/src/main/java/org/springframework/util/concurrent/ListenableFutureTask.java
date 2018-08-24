@@ -16,12 +16,12 @@
 
 package org.springframework.util.concurrent;
 
+import org.springframework.lang.Nullable;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link FutureTask} that implements {@link ListenableFuture}.

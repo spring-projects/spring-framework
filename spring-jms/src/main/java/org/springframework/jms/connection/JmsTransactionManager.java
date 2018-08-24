@@ -16,25 +16,14 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.TransactionRolledBackException;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
-import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.InvalidIsolationLevelException;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.UnexpectedRollbackException;
-import org.springframework.transaction.support.AbstractPlatformTransactionManager;
-import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.ResourceTransactionManager;
-import org.springframework.transaction.support.SmartTransactionObject;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.*;
+import org.springframework.transaction.support.*;
 import org.springframework.util.Assert;
+
+import javax.jms.*;
+import java.lang.IllegalStateException;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation

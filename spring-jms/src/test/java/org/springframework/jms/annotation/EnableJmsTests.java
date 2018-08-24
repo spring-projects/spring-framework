@@ -16,39 +16,27 @@
 
 package org.springframework.jms.annotation;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-import javax.jms.JMSException;
-import javax.jms.MessageListener;
-
 import org.hamcrest.core.Is;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.jms.config.JmsListenerContainerTestFactory;
-import org.springframework.jms.config.JmsListenerEndpointRegistrar;
-import org.springframework.jms.config.JmsListenerEndpointRegistry;
-import org.springframework.jms.config.MessageListenerTestContainer;
-import org.springframework.jms.config.MethodJmsListenerEndpoint;
-import org.springframework.jms.config.SimpleJmsListenerEndpoint;
+import org.springframework.jms.config.*;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.stereotype.Component;
+
+import javax.jms.JMSException;
+import javax.jms.MessageListener;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import static org.junit.Assert.*;
 

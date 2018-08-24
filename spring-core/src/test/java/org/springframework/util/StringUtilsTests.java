@@ -16,11 +16,11 @@
 
 package org.springframework.util;
 
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 

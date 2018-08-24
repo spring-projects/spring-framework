@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.object;
 
-import java.util.Map;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Map;
 
 /**
  * A concrete variant of {@link SqlQuery} which can be configured

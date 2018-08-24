@@ -17,12 +17,12 @@
 package org.springframework.validation;
 
 import org.junit.Test;
-
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.DefaultMessageCodesResolver.Format;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link DefaultMessageCodesResolver}.

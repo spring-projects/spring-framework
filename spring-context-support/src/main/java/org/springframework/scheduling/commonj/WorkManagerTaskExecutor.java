@@ -16,19 +16,7 @@
 
 package org.springframework.scheduling.commonj;
 
-import java.util.Collection;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import javax.naming.NamingException;
-
-import commonj.work.Work;
-import commonj.work.WorkException;
-import commonj.work.WorkItem;
-import commonj.work.WorkListener;
-import commonj.work.WorkManager;
-import commonj.work.WorkRejectedException;
-
+import commonj.work.*;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
@@ -40,6 +28,12 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
+
+import javax.naming.NamingException;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * TaskExecutor implementation that delegates to a CommonJ WorkManager,

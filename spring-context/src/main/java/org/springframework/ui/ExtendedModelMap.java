@@ -16,10 +16,10 @@
 
 package org.springframework.ui;
 
+import org.springframework.lang.Nullable;
+
 import java.util.Collection;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Subclass of {@link ModelMap} that implements the {@link Model} interface.

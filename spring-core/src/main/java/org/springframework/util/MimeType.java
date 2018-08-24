@@ -16,19 +16,11 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeSet;
-
-import org.springframework.lang.Nullable;
+import java.util.*;
 
 /**
  * Represents a MIME Type, as originally defined in RFC 2046 and subsequently used in

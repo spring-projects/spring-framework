@@ -16,14 +16,14 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.LinkedList;
-
-import org.springframework.lang.Nullable;
 
 /**
  * A speedy alternative to {@link java.io.ByteArrayOutputStream}. Note that

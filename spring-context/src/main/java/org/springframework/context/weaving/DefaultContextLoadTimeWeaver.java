@@ -16,11 +16,8 @@
 
 package org.springframework.context.weaving;
 
-import java.lang.instrument.ClassFileTransformer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.instrument.InstrumentationSavingAgent;
@@ -34,6 +31,8 @@ import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeav
 import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWeaver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.lang.instrument.ClassFileTransformer;
 
 /**
  * Default {@link LoadTimeWeaver} bean for use in an application context,

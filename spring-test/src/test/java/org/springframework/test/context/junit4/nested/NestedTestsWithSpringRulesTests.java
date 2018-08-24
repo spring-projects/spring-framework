@@ -16,9 +16,9 @@
 
 package org.springframework.test.context.junit4.nested;
 
+import de.bechte.junit.runners.context.HierarchicalContextRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,8 +29,6 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
-import de.bechte.junit.runners.context.HierarchicalContextRunner;
 
 /**
  * JUnit 4 based integration tests for <em>nested</em> test classes that are

@@ -16,16 +16,15 @@
 
 package org.springframework.test.context.junit4;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import org.junit.Test;
 import org.junit.runners.model.FrameworkMethod;
-
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
 
-import static org.junit.Assert.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link SpringJUnit4ClassRunner}.

@@ -16,12 +16,12 @@
 
 package org.springframework.web.multipart;
 
+import org.springframework.core.io.InputStreamSource;
+import org.springframework.lang.Nullable;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.springframework.core.io.InputStreamSource;
-import org.springframework.lang.Nullable;
 
 /**
  * A representation of an uploaded file received in a multipart request.

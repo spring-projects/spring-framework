@@ -16,12 +16,11 @@
 
 package org.springframework.core.io.support;
 
-import java.beans.PropertyEditor;
-
 import org.junit.Test;
-
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
+
+import java.beans.PropertyEditor;
 
 import static org.junit.Assert.*;
 

@@ -16,22 +16,12 @@
 
 package org.springframework.jms.support;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.QueueBrowser;
-import javax.jms.QueueRequestor;
-import javax.jms.Session;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.jms.InvalidClientIDException;
 import org.springframework.jms.InvalidDestinationException;
 import org.springframework.jms.InvalidSelectorException;
-import org.springframework.jms.JmsException;
-import org.springframework.jms.JmsSecurityException;
+import org.springframework.jms.*;
 import org.springframework.jms.MessageEOFException;
 import org.springframework.jms.MessageFormatException;
 import org.springframework.jms.MessageNotReadableException;
@@ -39,9 +29,10 @@ import org.springframework.jms.MessageNotWriteableException;
 import org.springframework.jms.ResourceAllocationException;
 import org.springframework.jms.TransactionInProgressException;
 import org.springframework.jms.TransactionRolledBackException;
-import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.jms.*;
 
 /**
  * Generic utility methods for working with JMS. Mainly for internal use

@@ -16,13 +16,8 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -33,7 +28,11 @@ import org.springframework.test.web.servlet.StubMvcResult;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link StatusResultMatchers}.

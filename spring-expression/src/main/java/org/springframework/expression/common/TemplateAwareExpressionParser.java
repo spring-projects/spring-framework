@@ -16,15 +16,15 @@
 
 package org.springframework.expression.common;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
-
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.lang.Nullable;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Stack;
 
 /**
  * An expression parser that understands templates. It can be subclassed by expression

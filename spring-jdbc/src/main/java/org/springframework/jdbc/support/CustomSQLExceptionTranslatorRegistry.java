@@ -16,13 +16,12 @@
 
 package org.springframework.jdbc.support;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Registry for custom {@link org.springframework.jdbc.support.SQLExceptionTranslator} instances associated with

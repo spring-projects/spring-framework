@@ -16,12 +16,12 @@
 
 package org.springframework.messaging.simp;
 
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.core.MessageSendingOperations;
+
+import java.util.Map;
 
 /**
  * A specialization of {@link MessageSendingOperations} with methods for use with

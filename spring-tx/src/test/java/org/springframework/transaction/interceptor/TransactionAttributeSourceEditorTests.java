@@ -16,11 +16,10 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.lang.reflect.Method;
-
 import org.junit.Test;
-
 import org.springframework.transaction.TransactionDefinition;
+
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 

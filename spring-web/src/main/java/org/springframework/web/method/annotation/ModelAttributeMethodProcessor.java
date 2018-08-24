@@ -16,14 +16,8 @@
 
 package org.springframework.web.method.annotation;
 
-import java.beans.ConstructorProperties;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -42,6 +36,11 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import java.beans.ConstructorProperties;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.util.Map;
 
 /**
  * Resolve {@code @ModelAttribute} annotated method arguments and handle

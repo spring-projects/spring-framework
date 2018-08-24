@@ -16,10 +16,10 @@
 
 package org.springframework.core.task.support;
 
-import java.util.concurrent.Executor;
-
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.Executor;
 
 /**
  * Adapter that exposes the {@link java.util.concurrent.Executor} interface

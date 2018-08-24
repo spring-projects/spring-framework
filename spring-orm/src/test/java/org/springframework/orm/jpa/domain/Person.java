@@ -16,17 +16,9 @@
 
 package org.springframework.orm.jpa.domain;
 
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-
 import org.springframework.tests.sample.beans.TestBean;
+
+import javax.persistence.*;
 
 /**
  * Simple JavaBean domain object representing an person.

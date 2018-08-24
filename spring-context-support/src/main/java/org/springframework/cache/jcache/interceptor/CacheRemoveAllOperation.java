@@ -16,11 +16,11 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import javax.cache.annotation.CacheMethodDetails;
-import javax.cache.annotation.CacheRemoveAll;
-
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.util.ExceptionTypeFilter;
+
+import javax.cache.annotation.CacheMethodDetails;
+import javax.cache.annotation.CacheRemoveAll;
 
 /**
  * The {@link JCacheOperation} implementation for a {@link CacheRemoveAll} operation.

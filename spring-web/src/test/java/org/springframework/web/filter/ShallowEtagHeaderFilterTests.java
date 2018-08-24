@@ -16,15 +16,14 @@
 
 package org.springframework.web.filter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletResponse;
-
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
+
+import javax.servlet.FilterChain;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.*;
 

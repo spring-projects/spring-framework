@@ -16,17 +16,16 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.Properties;
-import java.util.concurrent.ThreadFactory;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.lang.Nullable;
+
+import javax.naming.NamingException;
+import java.util.Properties;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * JNDI-based variant of {@link CustomizableThreadFactory}, performing a default lookup

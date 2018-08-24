@@ -16,8 +16,6 @@
 
 package org.springframework.validation;
 
-import java.beans.PropertyEditor;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
@@ -27,6 +25,8 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.ConvertingPropertyEditorAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.beans.PropertyEditor;
 
 /**
  * Abstract base class for {@link BindingResult} implementations that work with

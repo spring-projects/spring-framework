@@ -16,19 +16,19 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Spring's base implementation of the JPA

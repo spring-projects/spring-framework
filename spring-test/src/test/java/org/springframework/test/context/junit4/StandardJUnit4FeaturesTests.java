@@ -16,15 +16,15 @@
 
 package org.springframework.test.context.junit4;
 
-import java.util.ArrayList;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Simple unit test to verify the expected functionality of standard JUnit 4.4+

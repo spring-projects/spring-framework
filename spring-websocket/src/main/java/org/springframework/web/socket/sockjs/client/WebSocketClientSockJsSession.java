@@ -16,19 +16,15 @@
 
 package org.springframework.web.socket.sockjs.client;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.List;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.SettableListenableFuture;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketExtension;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.*;
 import org.springframework.web.socket.adapter.NativeWebSocketSession;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.List;
 
 /**
  * An extension of {@link AbstractClientSockJsSession} wrapping and delegating

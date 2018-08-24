@@ -16,17 +16,17 @@
 
 package org.springframework.transaction.interceptor;
 
+import org.junit.Test;
+import org.springframework.transaction.TransactionDefinition;
+
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Test;
-
-import org.springframework.transaction.TransactionDefinition;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rod Johnson

@@ -16,10 +16,10 @@
 
 package org.springframework.core;
 
+import org.junit.Test;
+
 import java.util.Locale;
 import java.util.Set;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 

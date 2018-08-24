@@ -18,7 +18,7 @@ package org.springframework.web.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alef Arendsen

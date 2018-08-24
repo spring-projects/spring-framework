@@ -16,16 +16,12 @@
 
 package org.springframework.web;
 
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import javax.servlet.ServletException;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import javax.servlet.ServletException;
+import java.util.*;
 
 /**
  * Exception thrown when a request handler does not support a

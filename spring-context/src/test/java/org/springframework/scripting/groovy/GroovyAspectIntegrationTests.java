@@ -18,10 +18,10 @@ package org.springframework.scripting.groovy;
 
 import org.junit.After;
 import org.junit.Test;
-
 import org.springframework.context.support.GenericXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Dave Syer

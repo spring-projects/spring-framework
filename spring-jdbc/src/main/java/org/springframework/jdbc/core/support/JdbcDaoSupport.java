@@ -16,9 +16,6 @@
 
 package org.springframework.jdbc.core.support;
 
-import java.sql.Connection;
-import javax.sql.DataSource;
-
 import org.springframework.dao.support.DaoSupport;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,6 +23,9 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
 
 /**
  * Convenient super class for JDBC-based data access objects.

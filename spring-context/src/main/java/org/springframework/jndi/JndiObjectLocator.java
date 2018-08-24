@@ -16,12 +16,12 @@
 
 package org.springframework.jndi;
 
-import javax.naming.NamingException;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import javax.naming.NamingException;
 
 /**
  * Convenient superclass for JNDI-based service locators,

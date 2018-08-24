@@ -16,13 +16,8 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.After;
 import org.junit.Test;
-
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,8 +31,13 @@ import org.springframework.scheduling.config.TaskManagementConfigUtils;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests use of @EnableScheduling on @Configuration classes.

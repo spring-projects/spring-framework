@@ -16,13 +16,6 @@
 
 package org.springframework.expression.spel.standard;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
-import java.util.regex.Pattern;
-
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
@@ -30,52 +23,13 @@ import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.SpelParserConfiguration;
-import org.springframework.expression.spel.ast.Assign;
-import org.springframework.expression.spel.ast.BeanReference;
-import org.springframework.expression.spel.ast.BooleanLiteral;
-import org.springframework.expression.spel.ast.CompoundExpression;
-import org.springframework.expression.spel.ast.ConstructorReference;
-import org.springframework.expression.spel.ast.Elvis;
-import org.springframework.expression.spel.ast.FunctionReference;
-import org.springframework.expression.spel.ast.Identifier;
-import org.springframework.expression.spel.ast.Indexer;
-import org.springframework.expression.spel.ast.InlineList;
-import org.springframework.expression.spel.ast.InlineMap;
-import org.springframework.expression.spel.ast.Literal;
-import org.springframework.expression.spel.ast.MethodReference;
-import org.springframework.expression.spel.ast.NullLiteral;
-import org.springframework.expression.spel.ast.OpAnd;
-import org.springframework.expression.spel.ast.OpDec;
-import org.springframework.expression.spel.ast.OpDivide;
-import org.springframework.expression.spel.ast.OpEQ;
-import org.springframework.expression.spel.ast.OpGE;
-import org.springframework.expression.spel.ast.OpGT;
-import org.springframework.expression.spel.ast.OpInc;
-import org.springframework.expression.spel.ast.OpLE;
-import org.springframework.expression.spel.ast.OpLT;
-import org.springframework.expression.spel.ast.OpMinus;
-import org.springframework.expression.spel.ast.OpModulus;
-import org.springframework.expression.spel.ast.OpMultiply;
-import org.springframework.expression.spel.ast.OpNE;
-import org.springframework.expression.spel.ast.OpOr;
-import org.springframework.expression.spel.ast.OpPlus;
-import org.springframework.expression.spel.ast.OperatorBetween;
-import org.springframework.expression.spel.ast.OperatorInstanceof;
-import org.springframework.expression.spel.ast.OperatorMatches;
-import org.springframework.expression.spel.ast.OperatorNot;
-import org.springframework.expression.spel.ast.OperatorPower;
-import org.springframework.expression.spel.ast.Projection;
-import org.springframework.expression.spel.ast.PropertyOrFieldReference;
-import org.springframework.expression.spel.ast.QualifiedIdentifier;
-import org.springframework.expression.spel.ast.Selection;
-import org.springframework.expression.spel.ast.SpelNodeImpl;
-import org.springframework.expression.spel.ast.StringLiteral;
-import org.springframework.expression.spel.ast.Ternary;
-import org.springframework.expression.spel.ast.TypeReference;
-import org.springframework.expression.spel.ast.VariableReference;
+import org.springframework.expression.spel.ast.*;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Hand-written SpEL parser. Instances are reusable but are not thread-safe.

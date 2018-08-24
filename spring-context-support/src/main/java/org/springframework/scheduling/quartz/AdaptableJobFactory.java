@@ -21,7 +21,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
-
 import org.springframework.util.ReflectionUtils;
 
 /**

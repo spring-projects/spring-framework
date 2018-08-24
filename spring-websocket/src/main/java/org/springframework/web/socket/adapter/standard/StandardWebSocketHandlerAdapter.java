@@ -16,22 +16,17 @@
 
 package org.springframework.web.socket.adapter.standard;
 
-import java.nio.ByteBuffer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
+import org.springframework.web.socket.*;
+import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
+
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.util.Assert;
-import org.springframework.web.socket.BinaryMessage;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.PongMessage;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
+import java.nio.ByteBuffer;
 
 /**
  * Adapts a {@link WebSocketHandler} to the standard WebSocket for Java API.

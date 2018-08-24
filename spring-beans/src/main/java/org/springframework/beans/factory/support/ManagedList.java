@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
 import org.springframework.lang.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tag collection class used to hold managed List elements, which may

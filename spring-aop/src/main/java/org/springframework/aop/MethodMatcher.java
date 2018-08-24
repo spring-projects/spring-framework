@@ -16,9 +16,9 @@
 
 package org.springframework.aop;
 
-import java.lang.reflect.Method;
-
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Method;
 
 /**
  * Part of a {@link Pointcut}: Checks whether the target method is eligible for advice.

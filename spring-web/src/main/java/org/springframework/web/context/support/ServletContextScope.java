@@ -16,14 +16,14 @@
 
 package org.springframework.web.context.support;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import javax.servlet.ServletContext;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.util.Assert;
+
+import javax.servlet.ServletContext;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * {@link Scope} wrapper for a ServletContext, i.e. for global web application attributes.

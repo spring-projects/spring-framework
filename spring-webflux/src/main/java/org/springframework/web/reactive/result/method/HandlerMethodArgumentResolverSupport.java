@@ -16,14 +16,14 @@
 
 package org.springframework.web.reactive.result.method;
 
-import java.lang.annotation.Annotation;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.util.Assert;
+
+import java.lang.annotation.Annotation;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 /**
  * Base class for {@link HandlerMethodArgumentResolver} implementations with access to a

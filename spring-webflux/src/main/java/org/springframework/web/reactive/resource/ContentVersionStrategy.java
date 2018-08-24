@@ -16,10 +16,10 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.IOException;
-
 import org.springframework.core.io.Resource;
 import org.springframework.util.DigestUtils;
+
+import java.io.IOException;
 
 /**
  * A {@code VersionStrategy} that calculates an Hex MD5 hashes from the content

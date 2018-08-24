@@ -16,13 +16,9 @@
 
 package org.springframework.cache.config;
 
-import java.io.IOException;
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.CacheTestUtils;
 import org.springframework.cache.annotation.EnableCaching;
@@ -33,6 +29,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.IOException;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 

@@ -16,9 +16,9 @@
 
 package org.springframework.beans.support;
 
-import java.io.Serializable;
-
 import org.springframework.util.StringUtils;
+
+import java.io.Serializable;
 
 /**
  * Mutable implementation of the {@link SortDefinition} interface.

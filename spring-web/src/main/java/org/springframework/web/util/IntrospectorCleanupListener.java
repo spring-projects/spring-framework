@@ -16,11 +16,11 @@
 
 package org.springframework.web.util;
 
-import java.beans.Introspector;
+import org.springframework.beans.CachedIntrospectionResults;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-
-import org.springframework.beans.CachedIntrospectionResults;
+import java.beans.Introspector;
 
 /**
  * Listener that flushes the JDK's {@link java.beans.Introspector JavaBeans Introspector}

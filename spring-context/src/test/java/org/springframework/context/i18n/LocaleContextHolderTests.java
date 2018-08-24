@@ -16,10 +16,10 @@
 
 package org.springframework.context.i18n;
 
+import org.junit.Test;
+
 import java.util.Locale;
 import java.util.TimeZone;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 

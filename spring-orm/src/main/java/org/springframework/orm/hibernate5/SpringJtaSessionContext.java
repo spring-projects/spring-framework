@@ -20,7 +20,6 @@ import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.context.internal.JTASessionContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**

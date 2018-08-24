@@ -16,17 +16,16 @@
 
 package org.springframework.context.index;
 
-import java.io.IOException;
-import java.util.Set;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.IOException;
+import java.util.Set;
+
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link CandidateComponentsIndexLoader}.

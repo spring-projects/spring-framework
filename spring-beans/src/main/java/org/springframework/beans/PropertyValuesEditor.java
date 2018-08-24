@@ -16,10 +16,10 @@
 
 package org.springframework.beans;
 
+import org.springframework.beans.propertyeditors.PropertiesEditor;
+
 import java.beans.PropertyEditorSupport;
 import java.util.Properties;
-
-import org.springframework.beans.propertyeditors.PropertiesEditor;
 
 /**
  * {@link java.beans.PropertyEditor Editor} for a {@link PropertyValues} object.

@@ -16,24 +16,20 @@
 
 package org.springframework.core.io.buffer;
 
+import io.netty.buffer.*;
+import org.junit.Rule;
+import org.junit.rules.Verifier;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.PoolArenaMetric;
-import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.buffer.PooledByteBufAllocatorMetric;
-import io.netty.buffer.UnpooledByteBufAllocator;
-import org.junit.Rule;
-import org.junit.rules.Verifier;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma

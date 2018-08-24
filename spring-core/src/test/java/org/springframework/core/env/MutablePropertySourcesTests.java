@@ -17,7 +17,6 @@
 package org.springframework.core.env;
 
 import org.junit.Test;
-
 import org.springframework.mock.env.MockPropertySource;
 
 import static org.hamcrest.CoreMatchers.*;

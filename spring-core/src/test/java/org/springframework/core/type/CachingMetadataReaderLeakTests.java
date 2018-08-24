@@ -16,10 +16,7 @@
 
 package org.springframework.core.type;
 
-import java.net.URL;
-
 import org.junit.Test;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
@@ -28,8 +25,10 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import java.net.URL;
+
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for checking the behaviour of {@link CachingMetadataReaderFactory} under

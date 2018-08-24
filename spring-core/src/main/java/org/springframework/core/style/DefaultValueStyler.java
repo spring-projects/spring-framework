@@ -16,16 +16,12 @@
 
 package org.springframework.core.style;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Converts objects to String form, generally for debugging purposes,

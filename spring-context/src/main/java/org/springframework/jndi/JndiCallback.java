@@ -16,10 +16,10 @@
 
 package org.springframework.jndi;
 
+import org.springframework.lang.Nullable;
+
 import javax.naming.Context;
 import javax.naming.NamingException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Callback interface to be implemented by classes that need to perform an

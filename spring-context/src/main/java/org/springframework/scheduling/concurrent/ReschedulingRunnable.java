@@ -16,20 +16,15 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.Date;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
+
+import java.util.Date;
+import java.util.concurrent.*;
 
 /**
  * Internal adapter that reschedules an underlying {@link Runnable} according

@@ -16,17 +16,13 @@
 
 package org.springframework.jmx.export.assembler;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.management.modelmbean.ModelMBeanNotificationInfo;
-
 import org.springframework.jmx.export.metadata.JmxMetadataUtils;
 import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import javax.management.modelmbean.ModelMBeanNotificationInfo;
+import java.util.*;
 
 /**
  * Base class for MBeanInfoAssemblers that support configurable

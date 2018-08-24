@@ -16,14 +16,6 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -41,6 +33,14 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Result handler that prints {@link MvcResult} details to a given output

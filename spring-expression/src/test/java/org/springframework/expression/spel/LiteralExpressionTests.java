@@ -17,7 +17,6 @@
 package org.springframework.expression.spel;
 
 import org.junit.Test;
-
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.common.LiteralExpression;

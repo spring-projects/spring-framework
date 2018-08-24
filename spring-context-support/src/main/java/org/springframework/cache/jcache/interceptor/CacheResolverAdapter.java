@@ -1,15 +1,15 @@
 package org.springframework.cache.jcache.interceptor;
 
 
-import java.util.Collection;
-import java.util.Collections;
-import javax.cache.annotation.CacheInvocationContext;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.jcache.JCacheCache;
 import org.springframework.util.Assert;
+
+import javax.cache.annotation.CacheInvocationContext;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Spring's {@link CacheResolver} implementation that delegates to a standard

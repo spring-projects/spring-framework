@@ -16,11 +16,6 @@
 
 package org.springframework.web.reactive.function.server.support;
 
-import java.util.Collections;
-import java.util.List;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -32,6 +27,10 @@ import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * {@code HandlerResultHandler} implementation that supports {@link ServerResponse}s.

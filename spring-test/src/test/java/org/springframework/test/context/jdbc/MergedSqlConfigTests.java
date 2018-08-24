@@ -16,14 +16,16 @@
 
 package org.springframework.test.context.jdbc;
 
-import java.lang.reflect.Method;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.*;
 import static org.springframework.test.context.jdbc.SqlConfig.ErrorMode.*;
-import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.*;
+import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.INFERRED;
+import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
 
 /**
  * Unit tests for {@link MergedSqlConfig}.

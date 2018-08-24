@@ -16,8 +16,6 @@
 
 package org.springframework.cache.annotation;
 
-import java.util.Collection;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheErrorHandler;
@@ -29,6 +27,8 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Collection;
 
 /**
  * Abstract base {@code @Configuration} class providing common structure

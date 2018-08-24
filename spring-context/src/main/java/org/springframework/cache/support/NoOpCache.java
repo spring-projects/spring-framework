@@ -16,11 +16,11 @@
 
 package org.springframework.cache.support;
 
-import java.util.concurrent.Callable;
-
 import org.springframework.cache.Cache;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.Callable;
 
 /**
  * A no operation {@link Cache} implementation suitable for disabling caching.

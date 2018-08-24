@@ -16,13 +16,12 @@
 
 package org.springframework.messaging.tcp.reactor;
 
+import io.netty.buffer.ByteBuf;
+import org.springframework.messaging.Message;
+
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
-
-import io.netty.buffer.ByteBuf;
-
-import org.springframework.messaging.Message;
 
 /**
  * Convenient base class for {@link ReactorNettyCodec} implementations that need

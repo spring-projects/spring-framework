@@ -16,13 +16,13 @@
 
 package org.springframework.instrument.classloading.weblogic;
 
+import org.springframework.lang.Nullable;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Adapter that implements WebLogic ClassPreProcessor interface, delegating to a

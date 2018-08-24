@@ -16,10 +16,10 @@
 
 package org.springframework.transaction.support;
 
-import java.util.Date;
-
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionTimedOutException;
+
+import java.util.Date;
 
 /**
  * Convenient base class for resource holders.
@@ -196,7 +196,7 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 		clear();
 		this.referenceCount = 0;
 	}
-
+// 这一步被调用了也有可能
 	@Override
 	public void unbound() {
 		this.isVoid = true;

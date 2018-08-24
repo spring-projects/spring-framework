@@ -16,14 +16,14 @@
 
 package org.springframework.jmx.export.notification;
 
+import org.springframework.util.Assert;
+
 import javax.management.AttributeChangeNotification;
 import javax.management.MBeanException;
 import javax.management.Notification;
 import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.modelmbean.ModelMBeanNotificationBroadcaster;
-
-import org.springframework.util.Assert;
 
 /**
  * {@link NotificationPublisher} implementation that uses the infrastructure

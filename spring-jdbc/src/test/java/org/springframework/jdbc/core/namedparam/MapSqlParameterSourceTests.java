@@ -17,10 +17,9 @@
 package org.springframework.jdbc.core.namedparam;
 
 import org.junit.Test;
-
 import org.springframework.jdbc.core.SqlParameterValue;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rick Evans

@@ -16,13 +16,9 @@
 
 package org.springframework.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
 import org.springframework.lang.Nullable;
+
+import java.io.*;
 
 /**
  * Static utilities for serialization and deserialization.

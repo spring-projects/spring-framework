@@ -15,22 +15,17 @@
  */
 package org.springframework.web.reactive.socket.adapter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-
+import io.netty.handler.codec.http.websocketx.*;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base class for Netty-based {@link WebSocketSession} adapters that provides

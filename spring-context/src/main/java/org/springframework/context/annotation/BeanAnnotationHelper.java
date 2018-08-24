@@ -16,9 +16,9 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.reflect.Method;
-
 import org.springframework.core.annotation.AnnotatedElementUtils;
+
+import java.lang.reflect.Method;
 
 /**
  * Utilities for processing {@link Bean}-annotated methods.

@@ -16,12 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.beans.PropertyEditor;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -29,6 +23,12 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.servlet.tags.EditorAwareTag;
 import org.springframework.web.servlet.tags.NestedPathTag;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
+import java.beans.PropertyEditor;
 
 /**
  * Base tag for all data-binding aware JSP form tags.

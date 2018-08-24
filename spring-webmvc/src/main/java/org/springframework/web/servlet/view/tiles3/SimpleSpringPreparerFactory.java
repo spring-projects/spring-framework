@@ -16,16 +16,15 @@
 
 package org.springframework.web.servlet.view.tiles3;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.tiles.TilesException;
 import org.apache.tiles.preparer.PreparerException;
 import org.apache.tiles.preparer.ViewPreparer;
 import org.apache.tiles.preparer.factory.NoSuchPreparerException;
-
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Tiles {@link org.apache.tiles.preparer.PreparerFactory} implementation

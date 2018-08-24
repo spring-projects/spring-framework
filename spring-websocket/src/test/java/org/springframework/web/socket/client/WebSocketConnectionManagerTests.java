@@ -16,12 +16,7 @@
 
 package org.springframework.web.socket.client;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Test;
-
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -33,6 +28,10 @@ import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.*;
 

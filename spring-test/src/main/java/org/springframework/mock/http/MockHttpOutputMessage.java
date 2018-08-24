@@ -16,14 +16,14 @@
 
 package org.springframework.mock.http;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpOutputMessage;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpOutputMessage;
 
 /**
  * Mock implementation of {@link HttpOutputMessage}.

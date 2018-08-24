@@ -16,16 +16,15 @@
 
 package org.springframework.format.datetime.joda;
 
-import java.util.TimeZone;
-
 import org.joda.time.Chronology;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
-
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.lang.Nullable;
+
+import java.util.TimeZone;
 
 /**
  * A context that holds user-specific Joda-Time settings such as the user's

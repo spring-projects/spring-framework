@@ -16,8 +16,8 @@
 
 package org.springframework.context.index;
 
-import java.util.Set;
 import javax.lang.model.element.Element;
+import java.util.Set;
 
 /**
  * Provide the list of stereotypes that match an {@link Element}.

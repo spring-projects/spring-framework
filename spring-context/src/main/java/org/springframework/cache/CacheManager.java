@@ -16,9 +16,9 @@
 
 package org.springframework.cache;
 
-import java.util.Collection;
-
 import org.springframework.lang.Nullable;
+
+import java.util.Collection;
 
 /**
  * Spring's central cache manager SPI.

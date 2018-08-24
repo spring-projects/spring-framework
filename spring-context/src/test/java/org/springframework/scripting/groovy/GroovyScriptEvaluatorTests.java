@@ -16,19 +16,19 @@
 
 package org.springframework.scripting.groovy;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.scripting.support.StandardScriptEvaluator;
 import org.springframework.scripting.support.StaticScriptSource;
 
-import static org.junit.Assert.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller

@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.serviceloader;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
+
 import java.util.Iterator;
 import java.util.ServiceLoader;
-
-import org.springframework.beans.factory.BeanClassLoaderAware;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that exposes the

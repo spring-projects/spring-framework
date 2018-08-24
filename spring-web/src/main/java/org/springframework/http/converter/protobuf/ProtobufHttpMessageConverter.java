@@ -16,17 +16,6 @@
 
 package org.springframework.http.converter.protobuf;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
@@ -34,7 +23,6 @@ import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
 import com.googlecode.protobuf.format.FormatFactory;
 import com.googlecode.protobuf.format.ProtobufFormatter;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -44,6 +32,13 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.io.*;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.springframework.http.MediaType.*;
 

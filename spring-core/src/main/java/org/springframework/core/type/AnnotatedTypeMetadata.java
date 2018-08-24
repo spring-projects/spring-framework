@@ -16,10 +16,10 @@
 
 package org.springframework.core.type;
 
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
+
+import java.util.Map;
 
 /**
  * Defines access to the annotations of a specific type ({@link AnnotationMetadata class}

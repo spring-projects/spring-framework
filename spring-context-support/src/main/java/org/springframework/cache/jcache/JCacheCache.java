@@ -16,14 +16,14 @@
 
 package org.springframework.cache.jcache;
 
-import java.util.concurrent.Callable;
-import javax.cache.processor.EntryProcessor;
-import javax.cache.processor.EntryProcessorException;
-import javax.cache.processor.MutableEntry;
-
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.cache.processor.EntryProcessor;
+import javax.cache.processor.EntryProcessorException;
+import javax.cache.processor.MutableEntry;
+import java.util.concurrent.Callable;
 
 /**
  * {@link org.springframework.cache.Cache} implementation on top of a

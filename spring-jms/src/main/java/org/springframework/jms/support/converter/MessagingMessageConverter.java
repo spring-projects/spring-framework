@@ -16,10 +16,6 @@
 
 package org.springframework.jms.support.converter;
 
-import java.util.Map;
-import javax.jms.JMSException;
-import javax.jms.Session;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.SimpleJmsHeaderMapper;
@@ -29,6 +25,10 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.core.AbstractMessagingTemplate;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+
+import javax.jms.JMSException;
+import javax.jms.Session;
+import java.util.Map;
 
 /**
  * Convert a {@link Message} from the messaging abstraction to and from a

@@ -16,19 +16,14 @@
 
 package org.springframework.jms.support;
 
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.AbstractHeaderMapper;
 import org.springframework.util.StringUtils;
+
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import java.util.*;
 
 /**
  * Simple implementation of {@link JmsHeaderMapper}.

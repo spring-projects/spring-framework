@@ -16,13 +16,13 @@
 
 package org.springframework.cache.config;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Simple cacheable service.

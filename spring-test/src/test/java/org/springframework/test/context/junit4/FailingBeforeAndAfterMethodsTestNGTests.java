@@ -21,9 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.testng.ITestNGListener;
-import org.testng.TestNG;
-
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
@@ -34,8 +31,10 @@ import org.springframework.test.context.testng.TrackingTestNGTestListener;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.util.ClassUtils;
+import org.testng.ITestNGListener;
+import org.testng.TestNG;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests which verify that '<i>before</i>' and '<i>after</i>'

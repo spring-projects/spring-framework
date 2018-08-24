@@ -18,7 +18,6 @@ package org.springframework.orm.hibernate5;
 
 import org.hibernate.UnresolvableObjectException;
 import org.hibernate.WrongClassException;
-
 import org.springframework.orm.ObjectRetrievalFailureException;
 
 /**

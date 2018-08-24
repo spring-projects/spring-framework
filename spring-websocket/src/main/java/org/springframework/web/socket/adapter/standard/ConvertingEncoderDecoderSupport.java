@@ -16,13 +16,6 @@
 
 package org.springframework.web.socket.adapter.standard;
 
-import java.nio.ByteBuffer;
-import javax.websocket.DecodeException;
-import javax.websocket.Decoder;
-import javax.websocket.EncodeException;
-import javax.websocket.Encoder;
-import javax.websocket.EndpointConfig;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -35,6 +28,9 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ContextLoader;
+
+import javax.websocket.*;
+import java.nio.ByteBuffer;
 
 /**
  * Base class that can be used to implement a standard {@link javax.websocket.Encoder}

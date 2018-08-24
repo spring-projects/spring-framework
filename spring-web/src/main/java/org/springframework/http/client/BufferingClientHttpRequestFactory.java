@@ -16,10 +16,10 @@
 
 package org.springframework.http.client;
 
+import org.springframework.http.HttpMethod;
+
 import java.io.IOException;
 import java.net.URI;
-
-import org.springframework.http.HttpMethod;
 
 /**
  * Wrapper for a {@link ClientHttpRequestFactory} that buffers

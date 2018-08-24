@@ -16,24 +16,23 @@
 
 package org.springframework.http.server.reactive;
 
-import java.net.InetSocketAddress;
-import java.net.URISyntaxException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.util.Assert;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Publisher;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.util.Assert;
 import reactor.core.publisher.Mono;
 import rx.Observable;
 import rx.RxReactiveStreams;
+
+import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 
 /**
  * Adapt {@link HttpHandler} to the RxNetty {@link RequestHandler}.

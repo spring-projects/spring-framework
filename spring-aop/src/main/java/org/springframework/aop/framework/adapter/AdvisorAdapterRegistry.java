@@ -17,7 +17,6 @@
 package org.springframework.aop.framework.adapter;
 
 import org.aopalliance.intercept.MethodInterceptor;
-
 import org.springframework.aop.Advisor;
 
 /**

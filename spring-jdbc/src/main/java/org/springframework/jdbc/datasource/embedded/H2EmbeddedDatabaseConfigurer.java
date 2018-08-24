@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import java.sql.Driver;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.sql.Driver;
 
 /**
  * {@link EmbeddedDatabaseConfigurer} for an H2 embedded database instance.

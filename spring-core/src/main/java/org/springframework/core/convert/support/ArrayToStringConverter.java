@@ -16,15 +16,15 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Set;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Converts an array to a comma-delimited String. First adapts the source array

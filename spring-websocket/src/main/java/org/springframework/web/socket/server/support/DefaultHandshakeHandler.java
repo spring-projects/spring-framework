@@ -16,10 +16,10 @@
 
 package org.springframework.web.socket.server.support;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
+
+import javax.servlet.ServletContext;
 
 /**
  * A default {@link org.springframework.web.socket.server.HandshakeHandler} implementation,

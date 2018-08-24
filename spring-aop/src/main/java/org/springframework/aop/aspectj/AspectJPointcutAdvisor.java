@@ -17,7 +17,6 @@
 package org.springframework.aop.aspectj;
 
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;

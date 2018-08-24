@@ -16,17 +16,16 @@
 
 package org.springframework.web.servlet.view.feed;
 
-import java.io.OutputStreamWriter;
-import java.util.Map;
+import com.rometools.rome.feed.WireFeed;
+import com.rometools.rome.io.WireFeedOutput;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.view.AbstractView;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.rometools.rome.feed.WireFeed;
-import com.rometools.rome.io.WireFeedOutput;
-
-import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.view.AbstractView;
+import java.io.OutputStreamWriter;
+import java.util.Map;
 
 /**
  * Abstract base class for Atom and RSS Feed views, using the

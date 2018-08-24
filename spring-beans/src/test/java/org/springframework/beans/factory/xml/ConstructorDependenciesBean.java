@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.io.Serializable;
-
 import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import java.io.Serializable;
 
 /**
  * Simple bean used to check constructor dependency checking.

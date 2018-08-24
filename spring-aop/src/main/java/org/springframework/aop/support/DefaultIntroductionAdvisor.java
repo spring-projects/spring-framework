@@ -16,12 +16,7 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
@@ -30,6 +25,10 @@ import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.io.Serializable;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Simple {@link org.springframework.aop.IntroductionAdvisor} implementation

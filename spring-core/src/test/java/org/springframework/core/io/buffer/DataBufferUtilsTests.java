@@ -16,16 +16,16 @@
 
 package org.springframework.core.io.buffer;
 
+import org.junit.Test;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
+
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-
-import org.junit.Test;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
 
 import static org.junit.Assert.assertFalse;
 

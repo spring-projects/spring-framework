@@ -16,10 +16,10 @@
 
 package org.springframework.core.type.filter;
 
-import java.io.IOException;
-
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+
+import java.io.IOException;
 
 /**
  * Base interface for type filters using a

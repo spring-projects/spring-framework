@@ -16,14 +16,14 @@
 
 package org.springframework.jca.context;
 
-import javax.resource.spi.BootstrapContext;
-import javax.resource.spi.work.WorkManager;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.Assert;
+
+import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.work.WorkManager;
 
 /**
  * {@link org.springframework.context.ApplicationContext} implementation

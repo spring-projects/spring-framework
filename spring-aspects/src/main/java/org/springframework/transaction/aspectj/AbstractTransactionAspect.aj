@@ -18,7 +18,6 @@ package org.springframework.transaction.aspectj;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;

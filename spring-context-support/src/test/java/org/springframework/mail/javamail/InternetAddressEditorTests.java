@@ -18,7 +18,7 @@ package org.springframework.mail.javamail;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Brian Hanafee

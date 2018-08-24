@@ -16,17 +16,16 @@
 
 package org.springframework.ui.freemarker;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
 import freemarker.cache.TemplateLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 /**
  * FreeMarker {@link TemplateLoader} adapter that loads via a Spring {@link ResourceLoader}.

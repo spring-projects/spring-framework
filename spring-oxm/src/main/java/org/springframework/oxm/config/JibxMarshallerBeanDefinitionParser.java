@@ -16,9 +16,8 @@
 
 package org.springframework.oxm.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.w3c.dom.Element;
 
 /**
  * Parser for the {@code <oxm:jibx-marshaller/>} element.

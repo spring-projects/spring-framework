@@ -16,10 +16,10 @@
 
 package org.springframework.aop.scope;
 
-import java.io.Serializable;
-
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * Default implementation of the {@link ScopedObject} interface.

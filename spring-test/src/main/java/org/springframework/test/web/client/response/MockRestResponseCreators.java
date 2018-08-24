@@ -16,13 +16,13 @@
 
 package org.springframework.test.web.client.response;
 
-import java.net.URI;
-
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.test.web.client.ResponseCreator;
+
+import java.net.URI;
 
 /**
  * Static factory methods for obtaining a {@link ResponseCreator} instance.

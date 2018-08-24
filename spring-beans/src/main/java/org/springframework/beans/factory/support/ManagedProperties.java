@@ -16,11 +16,11 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Properties;
-
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
 import org.springframework.lang.Nullable;
+
+import java.util.Properties;
 
 /**
  * Tag class which represents a Spring-managed {@link Properties} instance

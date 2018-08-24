@@ -16,11 +16,11 @@
 
 package org.springframework.core.io;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * {@link Resource} implementation for a given {@link InputStream}.

@@ -16,9 +16,9 @@
 
 package org.springframework.scheduling.support;
 
-import java.util.Date;
-
 import org.springframework.scheduling.TriggerContext;
+
+import java.util.Date;
 
 /**
  * Simple data holder implementation of the {@link TriggerContext} interface.

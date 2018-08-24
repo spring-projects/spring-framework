@@ -16,12 +16,12 @@
 
 package org.springframework.core.env;
 
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
 
 /**
  * {@link CommandLinePropertySource} implementation backed by a JOpt {@link OptionSet}.

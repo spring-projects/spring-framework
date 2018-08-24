@@ -16,13 +16,8 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-
 import org.quartz.SchedulerConfigException;
 import org.quartz.simpl.SimpleThreadPool;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -31,6 +26,10 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * Subclass of Quartz's SimpleThreadPool that implements Spring's

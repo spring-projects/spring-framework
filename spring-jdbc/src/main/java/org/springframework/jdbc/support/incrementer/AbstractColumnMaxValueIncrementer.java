@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc.support.incrementer;
 
-import javax.sql.DataSource;
-
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 
 /**
  * Abstract base class for {@link DataFieldMaxValueIncrementer} implementations that use

@@ -16,9 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -32,6 +29,9 @@ import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Resolves method arguments annotated with @{@link PathVariable}.

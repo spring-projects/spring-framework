@@ -16,17 +16,16 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import javax.servlet.RequestDispatcher;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockRequestDispatcher;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
+
+import javax.servlet.RequestDispatcher;
 
 import static org.junit.Assert.*;
 

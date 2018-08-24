@@ -16,9 +16,9 @@
 
 package org.springframework.util;
 
-import java.io.Writer;
-
 import org.apache.commons.logging.Log;
+
+import java.io.Writer;
 
 /**
  * {@code java.io.Writer} adapter for a Commons Logging {@code Log}.

@@ -16,11 +16,11 @@
 
 package org.springframework.remoting.jaxws;
 
-import javax.xml.ws.Service;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+
+import javax.xml.ws.Service;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} for locally

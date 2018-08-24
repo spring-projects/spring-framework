@@ -17,11 +17,10 @@
 package org.springframework.aop.target;
 
 import org.junit.Test;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop

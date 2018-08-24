@@ -16,13 +16,13 @@
 
 package example.scannable;
 
-import java.util.concurrent.Future;
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.AsyncResult;
+
+import javax.annotation.PostConstruct;
+import java.util.concurrent.Future;
 
 /**
  * @author Mark Fisher

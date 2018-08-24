@@ -16,28 +16,20 @@
 
 package org.springframework.expression.spel;
 
+import org.junit.Test;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.expression.*;
+import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.testresources.PlaceOfBirth;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.Test;
-
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.expression.AccessException;
-import org.springframework.expression.BeanResolver;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionInvocationTargetException;
-import org.springframework.expression.MethodExecutor;
-import org.springframework.expression.MethodFilter;
-import org.springframework.expression.MethodResolver;
-import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 import static org.junit.Assert.*;
 

@@ -19,7 +19,6 @@ package org.springframework.cache;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 
 /**

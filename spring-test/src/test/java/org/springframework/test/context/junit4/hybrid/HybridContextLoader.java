@@ -26,7 +26,7 @@ import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.support.AbstractGenericContextLoader;
 import org.springframework.util.Assert;
 
-import static org.springframework.test.context.support.AnnotationConfigContextLoaderUtils.*;
+import static org.springframework.test.context.support.AnnotationConfigContextLoaderUtils.detectDefaultConfigurationClasses;
 
 /**
  * Hybrid {@link SmartContextLoader} that supports path-based and class-based

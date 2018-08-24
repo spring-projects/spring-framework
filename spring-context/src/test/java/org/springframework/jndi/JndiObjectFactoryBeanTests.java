@@ -16,16 +16,15 @@
 
 package org.springframework.jndi;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

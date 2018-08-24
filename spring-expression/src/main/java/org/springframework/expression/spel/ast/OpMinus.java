@@ -16,9 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
@@ -27,6 +24,9 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * The minus operator supports:

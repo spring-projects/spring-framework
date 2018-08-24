@@ -16,14 +16,14 @@
 
 package org.springframework.http.codec;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Default implementation of {@link ServerCodecConfigurer}.

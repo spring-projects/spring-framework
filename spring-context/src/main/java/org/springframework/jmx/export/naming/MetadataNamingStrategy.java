@@ -16,10 +16,6 @@
 
 package org.springframework.jmx.export.naming;
 
-import java.util.Hashtable;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
@@ -29,6 +25,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.util.Hashtable;
 
 /**
  * An implementation of the {@link ObjectNamingStrategy} interface

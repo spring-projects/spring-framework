@@ -16,9 +16,9 @@
 
 package org.springframework.transaction.config;
 
-import java.io.Serializable;
-
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.Serializable;
 
 /**
  * @author Rob Harrop

@@ -16,28 +16,20 @@
 
 package org.springframework.jmx.export.assembler;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-import javax.management.Descriptor;
-import javax.management.MBeanParameterInfo;
-import javax.management.modelmbean.ModelMBeanNotificationInfo;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jmx.export.metadata.InvalidMetadataException;
-import org.springframework.jmx.export.metadata.JmxAttributeSource;
-import org.springframework.jmx.export.metadata.JmxMetadataUtils;
-import org.springframework.jmx.export.metadata.ManagedAttribute;
-import org.springframework.jmx.export.metadata.ManagedMetric;
-import org.springframework.jmx.export.metadata.ManagedNotification;
-import org.springframework.jmx.export.metadata.ManagedOperation;
-import org.springframework.jmx.export.metadata.ManagedOperationParameter;
-import org.springframework.jmx.export.metadata.ManagedResource;
+import org.springframework.jmx.export.metadata.*;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import javax.management.Descriptor;
+import javax.management.MBeanParameterInfo;
+import javax.management.modelmbean.ModelMBeanNotificationInfo;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 
 /**
  * Implementation of the {@link MBeanInfoAssembler} interface that reads

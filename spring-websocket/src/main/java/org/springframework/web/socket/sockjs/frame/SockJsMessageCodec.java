@@ -16,10 +16,10 @@
 
 package org.springframework.web.socket.sockjs.frame;
 
+import org.springframework.lang.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Encode and decode messages to and from a SockJS message frame,

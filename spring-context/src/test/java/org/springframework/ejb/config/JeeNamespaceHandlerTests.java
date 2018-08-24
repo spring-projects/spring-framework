@@ -18,7 +18,6 @@ package org.springframework.ejb.config;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;

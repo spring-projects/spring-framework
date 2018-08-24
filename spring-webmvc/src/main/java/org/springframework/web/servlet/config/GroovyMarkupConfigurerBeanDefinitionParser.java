@@ -16,11 +16,10 @@
 
 package org.springframework.web.servlet.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.w3c.dom.Element;
 
 /**
  * Parse the <mvc:groovy-configurer> MVC namespace element and register a

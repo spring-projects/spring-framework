@@ -18,7 +18,6 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.TypePatternMatcher;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;

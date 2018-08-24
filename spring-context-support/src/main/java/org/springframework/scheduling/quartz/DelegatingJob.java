@@ -19,7 +19,6 @@ package org.springframework.scheduling.quartz;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import org.springframework.util.Assert;
 
 /**

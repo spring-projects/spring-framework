@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
+import org.springframework.lang.Nullable;
+
 import java.util.Collection;
 import java.util.Iterator;
-
-import org.springframework.lang.Nullable;
 
 /**
  * A base class for {@link RequestCondition} types providing implementations of

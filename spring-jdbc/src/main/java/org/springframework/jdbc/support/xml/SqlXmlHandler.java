@@ -16,17 +16,15 @@
 
 package org.springframework.jdbc.support.xml;
 
+import org.springframework.lang.Nullable;
+import org.w3c.dom.Document;
+
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-
-import org.w3c.dom.Document;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Abstraction for handling XML fields in specific databases. Its main purpose

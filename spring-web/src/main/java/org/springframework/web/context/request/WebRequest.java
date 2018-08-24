@@ -16,12 +16,12 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.lang.Nullable;
+
 import java.security.Principal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Generic interface for a web request. Mainly intended for generic web

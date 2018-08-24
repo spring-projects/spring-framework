@@ -16,11 +16,11 @@
 
 package org.springframework.test.web.servlet.setup;
 
-import javax.servlet.http.HttpSession;
-
 import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * {@link MockMvcConfigurer} that stores and re-uses the HTTP session across

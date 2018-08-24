@@ -16,9 +16,6 @@
 
 package org.springframework.messaging.simp.config;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
@@ -26,6 +23,9 @@ import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * A registry for configuring message broker options.

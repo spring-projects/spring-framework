@@ -16,13 +16,12 @@
 
 package org.springframework.web.reactive.result.view;
 
+import org.junit.Test;
+import org.springframework.http.HttpHeaders;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.junit.Test;
-
-import org.springframework.http.HttpHeaders;
 
 import static org.junit.Assert.*;
 

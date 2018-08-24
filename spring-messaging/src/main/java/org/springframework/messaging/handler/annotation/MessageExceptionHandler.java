@@ -17,11 +17,7 @@
 
 package org.springframework.messaging.handler.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Annotation for handling exceptions thrown from message-handling methods within a

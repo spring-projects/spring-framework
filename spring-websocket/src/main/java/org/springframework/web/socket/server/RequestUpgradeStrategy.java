@@ -16,15 +16,15 @@
 
 package org.springframework.web.socket.server;
 
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
+
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A server-specific strategy for performing the actual upgrade to a WebSocket exchange.

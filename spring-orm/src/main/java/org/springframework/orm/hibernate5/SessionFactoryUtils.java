@@ -16,57 +16,28 @@
 
 package org.springframework.orm.hibernate5;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-import javax.persistence.PersistenceException;
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
-import org.hibernate.JDBCException;
-import org.hibernate.NonUniqueObjectException;
-import org.hibernate.NonUniqueResultException;
-import org.hibernate.ObjectDeletedException;
-import org.hibernate.PersistentObjectException;
-import org.hibernate.PessimisticLockException;
-import org.hibernate.PropertyValueException;
-import org.hibernate.QueryException;
+import org.hibernate.*;
 import org.hibernate.QueryTimeoutException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.StaleObjectStateException;
-import org.hibernate.StaleStateException;
-import org.hibernate.TransientObjectException;
-import org.hibernate.UnresolvableObjectException;
-import org.hibernate.WrongClassException;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.lock.OptimisticEntityLockException;
 import org.hibernate.dialect.lock.PessimisticEntityLockException;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.exception.ConstraintViolationException;
-import org.hibernate.exception.DataException;
-import org.hibernate.exception.JDBCConnectionException;
-import org.hibernate.exception.LockAcquisitionException;
-import org.hibernate.exception.SQLGrammarException;
+import org.hibernate.exception.*;
 import org.hibernate.service.UnknownServiceException;
-
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.dao.*;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import javax.persistence.PersistenceException;
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * Helper class featuring methods for Hibernate Session handling.

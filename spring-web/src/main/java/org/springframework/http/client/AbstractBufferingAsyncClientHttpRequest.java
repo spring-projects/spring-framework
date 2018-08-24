@@ -16,12 +16,12 @@
 
 package org.springframework.http.client;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.util.concurrent.ListenableFuture;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Base implementation of {@link AsyncClientHttpRequest} that buffers output

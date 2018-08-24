@@ -16,10 +16,6 @@
 
 package org.springframework.web.reactive.function.server.support;
 
-import java.lang.reflect.Method;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
@@ -27,6 +23,9 @@ import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
 
 /**
  * {@code HandlerAdapter} implementation that supports {@link HandlerFunction}s.

@@ -16,17 +16,17 @@
 
 package org.springframework.jdbc.object;
 
+import org.junit.Test;
+import org.springframework.jdbc.core.SqlParameter;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.Types;
-import javax.sql.DataSource;
 
-import org.junit.Test;
-
-import org.springframework.jdbc.core.SqlParameter;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.*;
 
 /**

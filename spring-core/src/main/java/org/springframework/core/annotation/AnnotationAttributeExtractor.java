@@ -16,10 +16,10 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.lang.Nullable;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-
-import org.springframework.lang.Nullable;
 
 /**
  * An {@code AnnotationAttributeExtractor} is responsible for

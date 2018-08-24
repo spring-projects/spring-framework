@@ -16,16 +16,15 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.util.Map;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.hamcrest.Matcher;
-import org.w3c.dom.Node;
-
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.w3c.dom.Node;
+
+import javax.xml.xpath.XPathExpressionException;
+import java.util.Map;
 
 /**
  * Factory for assertions on the response content using XPath expressions.

@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import java.sql.Driver;
-import javax.sql.DataSource;
-
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+
+import javax.sql.DataSource;
+import java.sql.Driver;
 
 /**
  * Creates a {@link SimpleDriverDataSource}.

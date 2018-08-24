@@ -16,17 +16,16 @@
 
 package org.springframework.jdbc.core.support;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import javax.sql.DataSource;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.*;
 
 /**

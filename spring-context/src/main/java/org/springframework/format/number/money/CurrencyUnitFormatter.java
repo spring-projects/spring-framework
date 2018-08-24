@@ -16,11 +16,11 @@
 
 package org.springframework.format.number.money;
 
-import java.util.Locale;
+import org.springframework.format.Formatter;
+
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
-
-import org.springframework.format.Formatter;
+import java.util.Locale;
 
 /**
  * Formatter for JSR-354 {@link javax.money.CurrencyUnit} values,

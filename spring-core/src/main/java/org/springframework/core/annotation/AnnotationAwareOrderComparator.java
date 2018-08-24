@@ -16,14 +16,14 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.core.DecoratingProxy;
+import org.springframework.core.OrderComparator;
+
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.springframework.core.DecoratingProxy;
-import org.springframework.core.OrderComparator;
 
 /**
  * {@code AnnotationAwareOrderComparator} is an extension of

@@ -16,15 +16,8 @@
 
 package org.springframework.orm.jpa;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -32,6 +25,12 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Base class for any class that needs to access a JPA {@link EntityManagerFactory},

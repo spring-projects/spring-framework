@@ -16,11 +16,11 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Simple stop watch, allowing for timing of a number of tasks,

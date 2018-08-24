@@ -16,9 +16,9 @@
 
 package org.springframework.context.event.test;
 
-import java.util.UUID;
-
 import org.springframework.context.ApplicationEvent;
+
+import java.util.UUID;
 
 /**
  * A basic test event that can be uniquely identified easily.

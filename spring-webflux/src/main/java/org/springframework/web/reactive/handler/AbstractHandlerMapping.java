@@ -16,24 +16,19 @@
 
 package org.springframework.web.reactive.handler;
 
-import java.util.Map;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.CorsConfigurationSource;
-import org.springframework.web.cors.reactive.CorsProcessor;
-import org.springframework.web.cors.reactive.CorsUtils;
-import org.springframework.web.cors.reactive.DefaultCorsProcessor;
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.reactive.*;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.util.pattern.PathPatternParser;
+import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 /**
  * Abstract base class for {@link org.springframework.web.reactive.HandlerMapping}

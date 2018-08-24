@@ -16,12 +16,11 @@
 package org.springframework.test.web.reactive.server;
 
 import org.junit.Test;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.ResponseCookie;
 import org.springframework.web.server.WebHandler;
+import reactor.core.publisher.Mono;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

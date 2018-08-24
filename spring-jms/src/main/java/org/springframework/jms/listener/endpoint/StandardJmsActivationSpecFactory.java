@@ -16,20 +16,20 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import java.util.Map;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.resource.spi.ActivationSpec;
-import javax.resource.spi.ResourceAdapter;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jms.support.destination.DestinationResolutionException;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.lang.Nullable;
+
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.Topic;
+import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.ResourceAdapter;
+import java.util.Map;
 
 /**
  * Standard implementation of the {@link JmsActivationSpecFactory} interface.

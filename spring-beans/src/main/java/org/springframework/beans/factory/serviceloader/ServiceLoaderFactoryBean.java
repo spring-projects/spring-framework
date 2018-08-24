@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.serviceloader;
 
-import java.util.ServiceLoader;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
+
+import java.util.ServiceLoader;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that exposes the

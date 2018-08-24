@@ -16,13 +16,9 @@
 
 package org.springframework.messaging.handler.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.messaging.Message;
+
+import java.lang.annotation.*;
 
 /**
  * Annotation that indicates a method's return value should be converted to

@@ -16,15 +16,15 @@
 
 package org.springframework.http.converter;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Type;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Type;
 
 /**
  * Abstract base class for most {@link GenericHttpMessageConverter} implementations.

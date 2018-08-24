@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Map;
 
 /**
  * Holder for both Model and View in the web MVC framework.

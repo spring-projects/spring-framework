@@ -16,18 +16,18 @@
 
 package org.springframework.http.client;
 
+import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.concurrent.ListenableFuture;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
-
-import org.springframework.core.task.AsyncListenableTaskExecutor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
-import org.springframework.util.StreamUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses

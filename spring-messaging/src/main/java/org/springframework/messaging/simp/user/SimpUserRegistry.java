@@ -16,9 +16,9 @@
 
 package org.springframework.messaging.simp.user;
 
-import java.util.Set;
-
 import org.springframework.lang.Nullable;
+
+import java.util.Set;
 
 /**
  * A registry of currently connected users.

@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
-import java.lang.reflect.Method;
-
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.lang.reflect.Method;
 
 /**
  * SPI for resolving custom return values from a specific handler method.

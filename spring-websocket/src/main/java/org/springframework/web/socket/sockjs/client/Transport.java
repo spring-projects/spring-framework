@@ -16,12 +16,12 @@
 
 package org.springframework.web.socket.sockjs.client;
 
-import java.util.List;
-
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.transport.TransportType;
+
+import java.util.List;
 
 /**
  * A client-side implementation for a SockJS transport.

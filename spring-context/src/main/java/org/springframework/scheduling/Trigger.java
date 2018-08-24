@@ -16,9 +16,9 @@
 
 package org.springframework.scheduling;
 
-import java.util.Date;
-
 import org.springframework.lang.Nullable;
+
+import java.util.Date;
 
 /**
  * Common interface for trigger objects that determine the next execution time

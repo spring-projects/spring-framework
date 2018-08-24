@@ -16,18 +16,17 @@
 
 package org.springframework.jndi;
 
-import java.util.Hashtable;
-import java.util.Properties;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.CollectionUtils;
+import java.util.Hashtable;
+import java.util.Properties;
 
 /**
  * Helper class that simplifies JNDI operations. It provides methods to lookup and

@@ -16,16 +16,10 @@
 
 package org.springframework.transaction.jta;
 
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.RollbackException;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.xa.XAResource;
-
 import org.springframework.util.Assert;
+
+import javax.transaction.*;
+import javax.transaction.xa.XAResource;
 
 /**
  * Adapter for a managed JTA Transaction handle, taking a JTA

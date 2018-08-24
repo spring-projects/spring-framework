@@ -16,16 +16,10 @@
 
 package org.springframework.web.reactive.socket.client;
 
-import java.net.URI;
-import java.util.List;
-
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.io.UpgradeListener;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-
 import org.springframework.context.Lifecycle;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -34,6 +28,11 @@ import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
+
+import java.net.URI;
+import java.util.List;
 
 /**
  * A {@link WebSocketClient} implementation for use with Jetty

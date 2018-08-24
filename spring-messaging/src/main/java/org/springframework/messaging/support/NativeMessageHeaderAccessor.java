@@ -16,18 +16,14 @@
 
 package org.springframework.messaging.support;
 
+import org.springframework.lang.Nullable;
+import org.springframework.messaging.Message;
+import org.springframework.util.*;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
-import org.springframework.messaging.Message;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
 
 /**
  * An extension of {@link MessageHeaderAccessor} that also stores and provides read/write

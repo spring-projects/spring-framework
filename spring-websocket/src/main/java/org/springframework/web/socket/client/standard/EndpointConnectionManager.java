@@ -16,18 +16,6 @@
 
 package org.springframework.web.socket.client.standard;
 
-import java.util.Arrays;
-import java.util.List;
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.ClientEndpointConfig.Configurator;
-import javax.websocket.ContainerProvider;
-import javax.websocket.Decoder;
-import javax.websocket.Encoder;
-import javax.websocket.Endpoint;
-import javax.websocket.Extension;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -36,6 +24,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.client.ConnectionManagerSupport;
 import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
+
+import javax.websocket.*;
+import javax.websocket.ClientEndpointConfig.Configurator;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A WebSocket connection manager that is given a URI, an {@link Endpoint}, connects to a

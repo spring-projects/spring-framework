@@ -16,10 +16,10 @@
 
 package org.springframework.validation;
 
-import java.util.List;
-
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.lang.Nullable;
+
+import java.util.List;
 
 /**
  * Stores and exposes information about data-binding and validation

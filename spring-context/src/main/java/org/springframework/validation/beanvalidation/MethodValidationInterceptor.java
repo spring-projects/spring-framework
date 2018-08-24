@@ -16,22 +16,17 @@
 
 package org.springframework.validation.beanvalidation;
 
-import java.lang.reflect.Method;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import javax.validation.executable.ExecutableValidator;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.*;
+import javax.validation.executable.ExecutableValidator;
+import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * An AOP Alliance {@link MethodInterceptor} implementation that delegates to a

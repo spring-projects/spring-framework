@@ -16,12 +16,12 @@
 
 package org.springframework.messaging.simp;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.AbstractMessageCondition;
 import org.springframework.util.Assert;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * A message condition that checks the message type.

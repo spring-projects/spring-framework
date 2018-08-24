@@ -16,12 +16,12 @@
 
 package org.springframework.beans;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * Combined exception, composed of individual PropertyAccessException instances.

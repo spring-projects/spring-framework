@@ -16,22 +16,13 @@
 
 package org.springframework.jdbc.support.lob;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.sql.*;
 
 /**
  * Default implementation of the {@link LobHandler} interface.

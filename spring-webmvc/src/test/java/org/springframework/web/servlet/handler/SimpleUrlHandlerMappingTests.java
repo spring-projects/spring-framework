@@ -16,11 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.junit.Test;
-
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.support.StaticApplicationContext;
@@ -31,6 +27,9 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.WebUtils;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 

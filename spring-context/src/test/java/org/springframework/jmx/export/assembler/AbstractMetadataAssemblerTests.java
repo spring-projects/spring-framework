@@ -16,17 +16,7 @@
 
 package org.springframework.jmx.export.assembler;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.management.Descriptor;
-import javax.management.MBeanInfo;
-import javax.management.MBeanParameterInfo;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
-import javax.management.modelmbean.ModelMBeanInfo;
-import javax.management.modelmbean.ModelMBeanOperationInfo;
-
 import org.junit.Test;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
@@ -34,6 +24,15 @@ import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
+
+import javax.management.Descriptor;
+import javax.management.MBeanInfo;
+import javax.management.MBeanParameterInfo;
+import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import javax.management.modelmbean.ModelMBeanInfo;
+import javax.management.modelmbean.ModelMBeanOperationInfo;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 

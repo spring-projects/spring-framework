@@ -16,8 +16,6 @@
 
 package org.springframework.context.index;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -26,6 +24,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Type utilities.

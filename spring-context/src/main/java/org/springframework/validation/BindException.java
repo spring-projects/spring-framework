@@ -16,13 +16,13 @@
 
 package org.springframework.validation;
 
-import java.beans.PropertyEditor;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.beans.PropertyEditor;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Thrown when binding errors are considered fatal. Implements the

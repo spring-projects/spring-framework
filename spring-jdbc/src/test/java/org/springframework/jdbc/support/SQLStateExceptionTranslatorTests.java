@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.SQLException;
-
 import org.junit.Test;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
 
-import static org.junit.Assert.*;
+import java.sql.SQLException;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rod Johnson

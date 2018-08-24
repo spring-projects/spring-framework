@@ -16,11 +16,11 @@
 
 package org.springframework.context.conversionservice;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Keith Donald

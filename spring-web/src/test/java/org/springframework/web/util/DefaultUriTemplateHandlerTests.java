@@ -16,13 +16,13 @@
 
 package org.springframework.web.util;
 
+import org.junit.Test;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link DefaultUriTemplateHandler}.

@@ -17,7 +17,6 @@
 package org.springframework.web.bind;
 
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;

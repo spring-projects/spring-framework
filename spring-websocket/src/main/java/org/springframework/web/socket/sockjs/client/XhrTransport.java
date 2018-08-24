@@ -16,10 +16,10 @@
 
 package org.springframework.web.socket.sockjs.client;
 
-import java.net.URI;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
+
+import java.net.URI;
 
 /**
  * A SockJS {@link Transport} that uses HTTP requests to simulate a WebSocket

@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.core.metadata;
 
+import org.springframework.lang.Nullable;
+
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Derby specific implementation for the {@link CallMetaDataProvider} interface.

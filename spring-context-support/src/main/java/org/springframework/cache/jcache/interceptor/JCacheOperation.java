@@ -16,12 +16,12 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import java.lang.annotation.Annotation;
-import javax.cache.annotation.CacheInvocationParameter;
-import javax.cache.annotation.CacheMethodDetails;
-
 import org.springframework.cache.interceptor.BasicOperation;
 import org.springframework.cache.interceptor.CacheResolver;
+
+import javax.cache.annotation.CacheInvocationParameter;
+import javax.cache.annotation.CacheMethodDetails;
+import java.lang.annotation.Annotation;
 
 /**
  * Model the base of JSR-107 cache operation.

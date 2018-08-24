@@ -16,13 +16,6 @@
 
 package org.springframework.scripting.support;
 
-import java.io.IOException;
-import java.util.Map;
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
@@ -31,6 +24,13 @@ import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * {@code javax.script} (JSR-223) based implementation of Spring's {@link ScriptEvaluator}

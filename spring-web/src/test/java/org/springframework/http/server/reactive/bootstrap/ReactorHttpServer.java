@@ -16,11 +16,10 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
-import java.util.concurrent.atomic.AtomicReference;
-
+import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import reactor.ipc.netty.NettyContext;
 
-import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Stephane Maldini

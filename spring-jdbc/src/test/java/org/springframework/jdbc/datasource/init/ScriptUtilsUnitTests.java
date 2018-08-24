@@ -16,13 +16,12 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.EncodedResource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.*;

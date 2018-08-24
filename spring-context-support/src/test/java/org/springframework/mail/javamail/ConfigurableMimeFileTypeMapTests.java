@@ -16,14 +16,13 @@
 
 package org.springframework.mail.javamail;
 
-import java.io.File;
-
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import static org.junit.Assert.*;
+import java.io.File;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop

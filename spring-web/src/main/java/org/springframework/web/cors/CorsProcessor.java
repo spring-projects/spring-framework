@@ -16,12 +16,11 @@
 
 package org.springframework.web.cors;
 
-import java.io.IOException;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
+import java.io.IOException;
 
 /**
  * A strategy that takes a request and a {@link CorsConfiguration} and updates

@@ -16,11 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.OutputStream;
-import java.util.concurrent.Callable;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +28,11 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
+import java.util.concurrent.Callable;
 
 /**
  * Supports return values of type

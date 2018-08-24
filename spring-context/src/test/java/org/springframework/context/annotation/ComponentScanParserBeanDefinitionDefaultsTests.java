@@ -18,7 +18,6 @@ package org.springframework.context.annotation;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;

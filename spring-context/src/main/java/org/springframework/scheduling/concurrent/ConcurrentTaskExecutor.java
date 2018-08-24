@@ -16,15 +16,6 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import javax.enterprise.concurrent.ManagedExecutors;
-import javax.enterprise.concurrent.ManagedTask;
-
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.support.TaskExecutorAdapter;
@@ -33,6 +24,15 @@ import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import javax.enterprise.concurrent.ManagedExecutors;
+import javax.enterprise.concurrent.ManagedTask;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Adapter that takes a {@code java.util.concurrent.Executor} and exposes

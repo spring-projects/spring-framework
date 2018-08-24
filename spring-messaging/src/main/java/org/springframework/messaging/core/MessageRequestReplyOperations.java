@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.core;
 
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
+
+import java.util.Map;
 
 /**
  * Operations for sending messages to and receiving the reply from a destination.

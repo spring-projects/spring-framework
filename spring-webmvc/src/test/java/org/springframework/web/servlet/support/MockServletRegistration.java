@@ -16,14 +16,10 @@
 
 package org.springframework.web.servlet.support;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletRegistration;
 import javax.servlet.ServletSecurityElement;
+import java.util.*;
 
 class MockServletRegistration implements ServletRegistration.Dynamic {
 

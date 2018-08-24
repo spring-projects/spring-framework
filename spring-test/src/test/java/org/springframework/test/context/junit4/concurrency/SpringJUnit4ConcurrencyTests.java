@@ -16,21 +16,12 @@
 
 package org.springframework.test.context.junit4.concurrency;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.ParallelComputer;
-
 import org.springframework.test.context.hierarchies.web.DispatcherWacRootWacEarTests;
-import org.springframework.test.context.junit4.InheritedConfigSpringJUnit4ClassRunnerAppCtxTests;
-import org.springframework.test.context.junit4.MethodLevelTransactionalSpringRunnerTests;
-import org.springframework.test.context.junit4.SpringJUnit47ClassRunnerRuleTests;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.junit4.TimedTransactionalSpringRunnerTests;
+import org.springframework.test.context.junit4.*;
 import org.springframework.test.context.junit4.rules.BaseAppCtxRuleTests;
 import org.springframework.test.context.junit4.rules.BasicAnnotationConfigWacSpringRuleTests;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
@@ -44,8 +35,11 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.ReflectionUtils;
 
-import static org.springframework.core.annotation.AnnotatedElementUtils.*;
-import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+
+import static org.springframework.core.annotation.AnnotatedElementUtils.hasAnnotation;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
  * Concurrency tests for the {@link SpringRunner}, {@link SpringClassRule}, and

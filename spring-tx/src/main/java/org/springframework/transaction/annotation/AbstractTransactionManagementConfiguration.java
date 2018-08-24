@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.annotation;
 
-import java.util.Collection;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +29,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Collection;
 
 /**
  * Abstract base {@code @Configuration} class providing common structure for enabling

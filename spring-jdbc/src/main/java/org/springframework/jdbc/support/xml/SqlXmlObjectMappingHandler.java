@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.support.xml;
 
+import org.springframework.lang.Nullable;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Abstraction for handling XML object mapping to fields in a database.

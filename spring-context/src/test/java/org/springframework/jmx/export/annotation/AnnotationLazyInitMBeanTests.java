@@ -16,14 +16,13 @@
 
 package org.springframework.jmx.export.annotation;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.junit.Test;
-
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jmx.support.ObjectNameManager;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import static org.junit.Assert.*;
 

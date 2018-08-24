@@ -16,11 +16,11 @@
 
 package org.springframework.beans.factory.parsing;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * {@link ComponentDefinition} implementation that holds one or more nested

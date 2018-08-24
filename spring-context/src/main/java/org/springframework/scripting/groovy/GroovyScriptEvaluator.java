@@ -16,21 +16,20 @@
 
 package org.springframework.scripting.groovy;
 
-import java.io.IOException;
-import java.util.Map;
-
 import groovy.lang.Binding;
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.CompilationCustomizer;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ResourceScriptSource;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Groovy-based implementation of Spring's {@link ScriptEvaluator} strategy interface.

@@ -16,12 +16,12 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.StreamUtils;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Simple implementation of {@link ClientHttpRequest} that wraps another request.

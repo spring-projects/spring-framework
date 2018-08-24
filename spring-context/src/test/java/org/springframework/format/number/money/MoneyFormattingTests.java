@@ -16,14 +16,9 @@
 
 package org.springframework.format.number.money;
 
-import java.util.Locale;
-import javax.money.CurrencyUnit;
-import javax.money.MonetaryAmount;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.annotation.NumberFormat;
@@ -31,7 +26,12 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
-import static org.junit.Assert.*;
+import javax.money.CurrencyUnit;
+import javax.money.MonetaryAmount;
+import java.util.Locale;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller

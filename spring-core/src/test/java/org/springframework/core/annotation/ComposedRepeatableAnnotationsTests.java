@@ -16,25 +16,22 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.lang.annotation.*;
+import java.lang.reflect.AnnotatedElement;
+import java.util.Iterator;
+import java.util.Set;
+
 import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
-import static org.springframework.core.annotation.AnnotatedElementUtils.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.springframework.core.annotation.AnnotatedElementUtils.findMergedRepeatableAnnotations;
+import static org.springframework.core.annotation.AnnotatedElementUtils.getMergedRepeatableAnnotations;
 
 /**
  * Unit tests that verify support for getting and finding all composed, repeatable

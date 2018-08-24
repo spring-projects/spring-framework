@@ -16,23 +16,18 @@
 
 package org.springframework.core;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.tests.sample.objects.TestObject;
+import org.springframework.util.ClassUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.tests.sample.objects.TestObject;
-import org.springframework.util.ClassUtils;
+import java.lang.reflect.Method;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 

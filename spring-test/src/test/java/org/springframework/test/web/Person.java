@@ -16,10 +16,10 @@
 
 package org.springframework.test.web;
 
+import org.springframework.util.ObjectUtils;
+
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.springframework.util.ObjectUtils;
 
 @XmlRootElement
 public class Person {

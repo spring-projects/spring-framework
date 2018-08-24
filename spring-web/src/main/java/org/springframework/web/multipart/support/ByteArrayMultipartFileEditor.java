@@ -16,11 +16,11 @@
 
 package org.springframework.web.multipart.support;
 
-import java.io.IOException;
-
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * Custom {@link java.beans.PropertyEditor} for converting

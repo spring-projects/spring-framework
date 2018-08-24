@@ -18,7 +18,6 @@ package org.springframework.context.event;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -31,8 +30,8 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Dmitriy Kopylenko

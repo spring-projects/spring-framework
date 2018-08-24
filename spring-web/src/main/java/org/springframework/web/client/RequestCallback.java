@@ -16,9 +16,9 @@
 
 package org.springframework.web.client;
 
-import java.io.IOException;
-
 import org.springframework.http.client.ClientHttpRequest;
+
+import java.io.IOException;
 
 /**
  * Callback interface for code that operates on a {@link ClientHttpRequest}. Allows to manipulate the request

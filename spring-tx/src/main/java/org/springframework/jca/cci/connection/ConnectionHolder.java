@@ -16,9 +16,9 @@
 
 package org.springframework.jca.cci.connection;
 
-import javax.resource.cci.Connection;
-
 import org.springframework.transaction.support.ResourceHolderSupport;
+
+import javax.resource.cci.Connection;
 
 /**
  * Connection holder, wrapping a CCI Connection.

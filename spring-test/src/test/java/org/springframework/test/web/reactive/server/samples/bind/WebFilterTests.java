@@ -16,15 +16,14 @@
 
 package org.springframework.test.web.reactive.server.samples.bind;
 
-import java.nio.charset.StandardCharsets;
-
 import org.junit.Test;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.WebFilter;
+import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Tests for a {@link WebFilter}.

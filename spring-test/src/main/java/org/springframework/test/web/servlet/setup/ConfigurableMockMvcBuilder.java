@@ -16,12 +16,12 @@
 
 package org.springframework.test.web.servlet.setup;
 
-import javax.servlet.Filter;
-
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
+
+import javax.servlet.Filter;
 
 /**
  * Defines common methods for building a {@code MockMvc}.

@@ -18,12 +18,7 @@ package org.springframework.transaction;
 
 import org.junit.After;
 import org.junit.Test;
-
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.*;
 
 import static org.junit.Assert.*;
 

@@ -16,15 +16,15 @@
 
 package org.springframework.jmx.export;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.junit.Test;
-
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jmx.support.ObjectNameManager;
 
-import static org.junit.Assert.*;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Rob Harrop

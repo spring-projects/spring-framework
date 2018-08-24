@@ -16,10 +16,10 @@
 
 package org.springframework.jca.support;
 
+import org.junit.Test;
+
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ManagedConnectionFactory;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

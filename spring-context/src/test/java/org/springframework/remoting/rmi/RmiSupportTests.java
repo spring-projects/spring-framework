@@ -16,26 +16,17 @@
 
 package org.springframework.remoting.rmi;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.rmi.ConnectException;
-import java.rmi.ConnectIOException;
-import java.rmi.MarshalException;
-import java.rmi.NoSuchObjectException;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.StubNotFoundException;
-import java.rmi.UnknownHostException;
-import java.rmi.UnmarshalException;
-
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.support.RemoteInvocation;
+
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.rmi.*;
 
 import static org.junit.Assert.*;
 

@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 
 /**
  * {@link DataSourceLookup} implementation based on a Spring {@link BeanFactory}.

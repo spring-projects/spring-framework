@@ -16,14 +16,14 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.util.NumberUtils;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * The power operator.

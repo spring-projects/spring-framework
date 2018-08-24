@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.support;
 
-import java.util.List;
+import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.util.WebUtils;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.springframework.web.servlet.FlashMap;
-import org.springframework.web.util.WebUtils;
+import java.util.List;
 
 /**
  * Store and retrieve {@link FlashMap} instances to and from the HTTP session.

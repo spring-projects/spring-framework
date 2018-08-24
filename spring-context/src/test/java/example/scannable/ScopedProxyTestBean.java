@@ -16,10 +16,10 @@
 
 package example.scannable;
 
-import java.util.concurrent.Future;
-
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.AsyncResult;
+
+import java.util.concurrent.Future;
 
 /**
  * @author Mark Fisher

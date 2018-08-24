@@ -16,15 +16,14 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.Collection;
-import java.util.Map;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Rendering-specific subtype of {@link ServerResponse} that exposes model and template data.

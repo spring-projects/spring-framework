@@ -16,13 +16,11 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
+import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.lang.Nullable;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.springframework.lang.Nullable;
-import org.springframework.web.util.UriUtils;
-import org.springframework.http.server.reactive.PathContainer.Segment;
 
 /**
  * A path element representing capturing a piece of the path as a variable. In the pattern

@@ -16,14 +16,11 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.util.Map;
-
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.impl.JobDetailImpl;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,6 +28,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Map;
 
 /**
  * A Spring {@link FactoryBean} for creating a Quartz {@link org.quartz.JobDetail}

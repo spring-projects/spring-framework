@@ -16,33 +16,22 @@
 
 package org.springframework.jms.listener.adapter;
 
-import javax.jms.BytesMessage;
-import javax.jms.Destination;
-import javax.jms.InvalidDestinationException;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.SimpleJmsHeaderMapper;
-import org.springframework.jms.support.converter.MessageConversionException;
-import org.springframework.jms.support.converter.MessageConverter;
-import org.springframework.jms.support.converter.MessagingMessageConverter;
-import org.springframework.jms.support.converter.SimpleMessageConverter;
-import org.springframework.jms.support.converter.SmartMessageConverter;
+import org.springframework.jms.support.converter.*;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
+
+import javax.jms.*;
+import java.lang.IllegalStateException;
 
 /**
  * An abstract JMS {@link MessageListener} adapter providing the necessary

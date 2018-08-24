@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.Arrays;
-
 import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
 
 /**
  * Assists with the creation of a {@link CorsConfiguration} instance mapped to

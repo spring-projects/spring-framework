@@ -18,7 +18,6 @@ package org.springframework.ejb.config;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -26,7 +25,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.beans.CollectingReaderEventListener;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Torsten Juergeleit

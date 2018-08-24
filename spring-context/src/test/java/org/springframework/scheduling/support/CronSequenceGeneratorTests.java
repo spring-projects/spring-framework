@@ -16,9 +16,9 @@
 
 package org.springframework.scheduling.support;
 
-import java.util.Date;
-
 import org.junit.Test;
+
+import java.util.Date;
 
 import static org.junit.Assert.*;
 

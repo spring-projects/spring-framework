@@ -16,19 +16,18 @@
 
 package org.springframework.jms.support.converter;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.oxm.Marshaller;
+import org.springframework.oxm.Unmarshaller;
+
 import javax.jms.BytesMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.oxm.Marshaller;
-import org.springframework.oxm.Unmarshaller;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.*;
 
 /**

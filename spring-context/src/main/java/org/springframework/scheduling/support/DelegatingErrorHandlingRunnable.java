@@ -16,10 +16,10 @@
 
 package org.springframework.scheduling.support;
 
-import java.lang.reflect.UndeclaredThrowableException;
-
 import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
+
+import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * Runnable wrapper that catches any exception or error thrown from its

@@ -16,16 +16,16 @@
 
 package org.springframework.expression.spel.support;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeLocator;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A simple implementation of {@link TypeLocator} that uses the context ClassLoader

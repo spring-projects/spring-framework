@@ -16,13 +16,14 @@
 
 package org.springframework.scheduling.config;
 
+import org.junit.Test;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ScheduledTaskRegistrar}.

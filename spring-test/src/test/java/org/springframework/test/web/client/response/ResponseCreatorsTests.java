@@ -16,14 +16,13 @@
 
 package org.springframework.test.web.client.response;
 
-import java.net.URI;
-
 import org.junit.Test;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.util.StreamUtils;
+
+import java.net.URI;
 
 import static org.junit.Assert.*;
 

@@ -16,15 +16,15 @@
 
 package org.springframework.context.event.test;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test utility to collect and assert events.

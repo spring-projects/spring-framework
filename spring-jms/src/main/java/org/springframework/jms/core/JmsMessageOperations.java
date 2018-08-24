@@ -16,9 +16,6 @@
 
 package org.springframework.jms.core;
 
-import java.util.Map;
-import javax.jms.Destination;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
@@ -26,6 +23,9 @@ import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.core.MessageReceivingOperations;
 import org.springframework.messaging.core.MessageRequestReplyOperations;
 import org.springframework.messaging.core.MessageSendingOperations;
+
+import javax.jms.Destination;
+import java.util.Map;
 
 /**
  * A specialization of {@link MessageSendingOperations}, {@link MessageReceivingOperations}

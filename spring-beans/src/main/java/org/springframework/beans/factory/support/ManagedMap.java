@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
 import org.springframework.lang.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Tag collection class used to hold managed Map values, which may

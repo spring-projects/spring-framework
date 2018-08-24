@@ -16,16 +16,16 @@
 
 package org.springframework.web.server.i18n;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * {@link LocaleContextResolver} implementation that simply uses the primary locale

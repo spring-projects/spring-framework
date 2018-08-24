@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.aspectj;
 
 import org.junit.Test;
-
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class SpringConfiguredWithAutoProxyingTests {

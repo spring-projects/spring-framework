@@ -16,16 +16,15 @@
 
 package org.springframework.cache.ehcache;
 
-import java.util.concurrent.Callable;
-
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.Callable;
 
 /**
  * {@link Cache} implementation on top of an {@link Ehcache} instance.

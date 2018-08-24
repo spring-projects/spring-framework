@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.sql.Connection;
-
 import org.springframework.util.Assert;
+
+import java.sql.Connection;
 
 /**
  * Simple implementation of the {@link ConnectionHandle} interface,

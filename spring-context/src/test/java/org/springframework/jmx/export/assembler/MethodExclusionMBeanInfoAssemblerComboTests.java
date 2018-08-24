@@ -16,12 +16,12 @@
 
 package org.springframework.jmx.export.assembler;
 
-import java.util.Properties;
+import org.junit.Test;
+
 import javax.management.MBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
-
-import org.junit.Test;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 

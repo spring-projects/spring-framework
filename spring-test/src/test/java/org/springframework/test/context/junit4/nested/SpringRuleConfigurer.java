@@ -18,7 +18,6 @@ package org.springframework.test.context.junit4.nested;
 
 import org.junit.ClassRule;
 import org.junit.Rule;
-
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 

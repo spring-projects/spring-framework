@@ -16,35 +16,25 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ScheduledFuture;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.springframework.messaging.Message;
-import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.stomp.StompHeaders;
-import org.springframework.messaging.simp.stomp.StompSessionHandler;
+import org.springframework.messaging.simp.stomp.*;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
-import org.springframework.web.socket.BinaryMessage;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.PongMessage;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.*;
 import org.springframework.web.socket.client.WebSocketClient;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ScheduledFuture;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

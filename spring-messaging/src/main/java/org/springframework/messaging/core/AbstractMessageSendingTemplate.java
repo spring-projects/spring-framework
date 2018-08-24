@@ -16,11 +16,8 @@
 
 package org.springframework.messaging.core;
 
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -30,6 +27,8 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.util.Assert;
+
+import java.util.Map;
 
 /**
  * Abstract base class for implementations of {@link MessageSendingOperations}.

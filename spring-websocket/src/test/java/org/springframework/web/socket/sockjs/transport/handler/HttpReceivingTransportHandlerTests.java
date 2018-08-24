@@ -17,7 +17,6 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.TextMessage;

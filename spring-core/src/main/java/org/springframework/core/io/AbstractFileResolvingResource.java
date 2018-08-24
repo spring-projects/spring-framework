@@ -16,18 +16,14 @@
 
 package org.springframework.core.io;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import org.springframework.util.ResourceUtils;
+
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.ReadableByteChannel;
-
-import org.springframework.util.ResourceUtils;
 
 /**
  * Abstract base class for resources which resolve URLs into File references,

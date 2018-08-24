@@ -16,10 +16,10 @@
 
 package org.springframework.cache.interceptor;
 
+import org.springframework.lang.Nullable;
+
 import java.lang.reflect.Method;
 import java.util.Collection;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Interface used by {@link CacheInterceptor}. Implementations know how to source

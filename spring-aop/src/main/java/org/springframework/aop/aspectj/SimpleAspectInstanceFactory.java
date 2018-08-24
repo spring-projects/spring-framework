@@ -16,12 +16,12 @@
 
 package org.springframework.aop.aspectj;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Implementation of {@link AspectInstanceFactory} that creates a new instance

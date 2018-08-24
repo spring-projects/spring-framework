@@ -16,16 +16,9 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Locale;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
@@ -34,7 +27,14 @@ import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Locale;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma

@@ -16,10 +16,10 @@
 
 package org.springframework.beans.propertyeditors;
 
+import org.springframework.util.StringUtils;
+
 import java.beans.PropertyEditorSupport;
 import java.util.UUID;
-
-import org.springframework.util.StringUtils;
 
 /**
  * Editor for {@code java.util.UUID}, translating UUID

@@ -16,17 +16,16 @@
 
 package org.springframework.http.client.support;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Base class for {@link org.springframework.web.client.RestTemplate}

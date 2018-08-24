@@ -16,17 +16,17 @@
 
 package org.springframework.remoting.jaxws;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.Executor;
+import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.HandlerResolver;
-
-import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import java.io.IOException;
+import java.net.URL;
+import java.util.concurrent.Executor;
 
 /**
  * Factory for locally defined JAX-WS {@link javax.xml.ws.Service} references.

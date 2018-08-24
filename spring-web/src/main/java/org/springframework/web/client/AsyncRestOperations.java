@@ -16,11 +16,6 @@
 
 package org.springframework.web.client;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Future;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +23,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.net.URI;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
 
 /**
  * Interface specifying a basic set of asynchronous RESTful operations.

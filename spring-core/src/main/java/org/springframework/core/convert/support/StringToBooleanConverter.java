@@ -16,10 +16,10 @@
 
 package org.springframework.core.convert.support;
 
+import org.springframework.core.convert.converter.Converter;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import org.springframework.core.convert.converter.Converter;
 
 /**
  * Converts String to a Boolean.

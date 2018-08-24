@@ -17,7 +17,6 @@
 package org.springframework.aop.aspectj;
 
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.support.ClassFilters;

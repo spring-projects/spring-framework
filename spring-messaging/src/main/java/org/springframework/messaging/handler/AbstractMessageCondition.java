@@ -16,10 +16,10 @@
 
 package org.springframework.messaging.handler;
 
+import org.springframework.lang.Nullable;
+
 import java.util.Collection;
 import java.util.Iterator;
-
-import org.springframework.lang.Nullable;
 
 /**
  * A base class for {@link MessageCondition} types providing implementations of

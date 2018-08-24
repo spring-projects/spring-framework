@@ -16,6 +16,13 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketExtension;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -23,13 +30,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketExtension;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
 /**
  * @author Rossen Stoyanchev

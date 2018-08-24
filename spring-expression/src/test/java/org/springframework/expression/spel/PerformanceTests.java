@@ -17,7 +17,6 @@
 package org.springframework.expression.spel;
 
 import org.junit.Test;
-
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -25,7 +24,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 ///CLOVER:OFF
 

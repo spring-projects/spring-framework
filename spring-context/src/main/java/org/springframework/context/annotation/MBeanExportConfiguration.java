@@ -16,10 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.util.Map;
-import javax.management.MBeanServer;
-import javax.naming.NamingException;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -36,6 +32,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import javax.management.MBeanServer;
+import javax.naming.NamingException;
+import java.util.Map;
 
 /**
  * {@code @Configuration} class that registers a {@link AnnotationMBeanExporter} bean.

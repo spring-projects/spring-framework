@@ -16,7 +16,12 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.util.UrlPathHelper;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -24,13 +29,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
-import org.springframework.web.filter.GenericFilterBean;
-import org.springframework.web.util.UrlPathHelper;
+import java.io.IOException;
 
 /**
  * A filter that wraps the {@link HttpServletResponse} and overrides its

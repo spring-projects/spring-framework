@@ -16,11 +16,11 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.context.i18n.LocaleContextHolder;
+
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.context.i18n.LocaleContextHolder;
 
 /**
  * Servlet listener that exposes the request to the current thread,

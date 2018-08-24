@@ -16,10 +16,10 @@
 
 package org.springframework.web.jsf;
 
+import org.springframework.lang.Nullable;
+
 import javax.faces.application.NavigationHandler;
 import javax.faces.context.FacesContext;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for JSF NavigationHandler implementations that want

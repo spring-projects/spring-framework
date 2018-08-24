@@ -16,10 +16,10 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.util.Assert;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.springframework.util.Assert;
 
 /**
  * Abstract support class for RequestAttributes implementations,

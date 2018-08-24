@@ -15,11 +15,11 @@
  */
 package org.springframework.messaging.simp.stomp;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.reactor.AbstractNioBufferReactorNettyCodec;
+
+import java.nio.ByteBuffer;
+import java.util.List;
 
 /**
  * Simple delegation to StompDecoder and StompEncoder.

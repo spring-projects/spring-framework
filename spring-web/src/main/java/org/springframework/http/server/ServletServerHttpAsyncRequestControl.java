@@ -16,16 +16,16 @@
 
 package org.springframework.http.server;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A {@link ServerHttpAsyncRequestControl} to use on Servlet containers (Servlet 3.0+).

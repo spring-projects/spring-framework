@@ -16,9 +16,9 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
-import java.lang.reflect.Method;
-
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
+
+import java.lang.reflect.Method;
 
 /**
  * A factory for {@link InvocableHandlerMethod} that is suitable to process

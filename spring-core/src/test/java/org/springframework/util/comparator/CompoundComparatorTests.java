@@ -16,11 +16,11 @@
 
 package org.springframework.util.comparator;
 
-import java.util.Comparator;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.util.Comparator;
 
 /**
  * Test for {@link CompoundComparator}.

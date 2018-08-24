@@ -16,9 +16,9 @@
 
 package com.foo;
 
-import java.util.List;
-
 import org.springframework.beans.factory.FactoryBean;
+
+import java.util.List;
 
 public class ComponentFactoryBean implements FactoryBean<Component> {
 	private Component parent;

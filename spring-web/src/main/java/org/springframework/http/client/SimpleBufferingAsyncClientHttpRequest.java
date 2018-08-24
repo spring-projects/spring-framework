@@ -16,17 +16,17 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
-
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.Callable;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses

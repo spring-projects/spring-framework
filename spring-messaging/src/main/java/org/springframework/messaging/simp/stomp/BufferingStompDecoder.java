@@ -16,17 +16,17 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * An extension of {@link org.springframework.messaging.simp.stomp.StompDecoder}

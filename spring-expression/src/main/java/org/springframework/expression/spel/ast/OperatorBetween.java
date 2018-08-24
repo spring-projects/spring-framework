@@ -16,14 +16,14 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.util.List;
-
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
+
+import java.util.List;
 
 /**
  * Represents the between operator. The left operand to between must be a single value and

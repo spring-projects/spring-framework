@@ -16,29 +16,18 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.PersistJobDataAfterExecution;
-import org.quartz.Scheduler;
+import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
-
-import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that exposes a

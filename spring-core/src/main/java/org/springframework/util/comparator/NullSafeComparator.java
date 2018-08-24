@@ -16,10 +16,10 @@
 
 package org.springframework.util.comparator;
 
-import java.util.Comparator;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Comparator;
 
 /**
  * A Comparator that will safely compare nulls to be lower or higher than

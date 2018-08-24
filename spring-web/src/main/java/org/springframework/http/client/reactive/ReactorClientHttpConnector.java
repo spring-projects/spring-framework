@@ -16,16 +16,15 @@
 
 package org.springframework.http.client.reactive;
 
-import java.net.URI;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
+import org.springframework.http.HttpMethod;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClient;
 import reactor.ipc.netty.http.client.HttpClientOptions;
 import reactor.ipc.netty.options.ClientOptions;
 
-import org.springframework.http.HttpMethod;
+import java.net.URI;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Reactor-Netty implementation of {@link ClientHttpConnector}.

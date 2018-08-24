@@ -16,29 +16,15 @@
 
 package org.springframework.jca.cci;
 
-import java.sql.SQLException;
-import javax.resource.NotSupportedException;
-import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
-import javax.resource.cci.ConnectionSpec;
-import javax.resource.cci.IndexedRecord;
-import javax.resource.cci.Interaction;
-import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.MappedRecord;
-import javax.resource.cci.Record;
-import javax.resource.cci.RecordFactory;
-import javax.resource.cci.ResultSet;
-
 import org.junit.Test;
-
 import org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter;
 import org.springframework.jca.cci.connection.NotSupportedRecordFactory;
-import org.springframework.jca.cci.core.CciTemplate;
-import org.springframework.jca.cci.core.ConnectionCallback;
-import org.springframework.jca.cci.core.InteractionCallback;
-import org.springframework.jca.cci.core.RecordCreator;
-import org.springframework.jca.cci.core.RecordExtractor;
+import org.springframework.jca.cci.core.*;
+
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
+import javax.resource.cci.*;
+import java.sql.SQLException;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

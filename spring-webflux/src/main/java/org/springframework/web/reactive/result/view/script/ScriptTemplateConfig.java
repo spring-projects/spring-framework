@@ -16,12 +16,11 @@
 
 package org.springframework.web.reactive.result.view.script;
 
-import java.nio.charset.Charset;
+import org.springframework.lang.Nullable;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
-
-import org.springframework.lang.Nullable;
+import java.nio.charset.Charset;
 
 /**
  * Interface to be implemented by objects that configure and manage a

@@ -16,17 +16,17 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Iterator;
-import java.util.List;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An {@link AsyncClientHttpRequest} wrapper that enriches it proceeds the actual

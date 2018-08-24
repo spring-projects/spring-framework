@@ -16,16 +16,12 @@
 
 package org.springframework.messaging.support;
 
+import org.springframework.lang.Nullable;
+import org.springframework.messaging.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-
-import org.springframework.lang.Nullable;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.SubscribableChannel;
 
 /**
  * A {@link SubscribableChannel} that sends messages to each of its subscribers.

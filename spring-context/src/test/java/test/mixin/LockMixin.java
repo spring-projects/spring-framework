@@ -17,7 +17,6 @@
 package test.mixin;
 
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
 /**

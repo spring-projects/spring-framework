@@ -16,10 +16,10 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.concurrent.Callable;
-
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.concurrent.Callable;
 
 /**
  * Intercepts concurrent request handling, where the concurrent result is

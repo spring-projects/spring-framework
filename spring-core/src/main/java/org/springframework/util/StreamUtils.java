@@ -16,19 +16,10 @@
 
 package org.springframework.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-
 import org.springframework.lang.Nullable;
+
+import java.io.*;
+import java.nio.charset.Charset;
 
 /**
  * Simple utility methods for dealing with streams. The copy methods of this class are

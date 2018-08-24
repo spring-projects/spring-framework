@@ -16,13 +16,12 @@
 
 package org.springframework.orm.hibernate5;
 
-import javax.persistence.PersistenceException;
-
 import org.hibernate.HibernateException;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+
+import javax.persistence.PersistenceException;
 
 /**
  * {@link PersistenceExceptionTranslator} capable of translating {@link HibernateException}

@@ -16,13 +16,6 @@
 
 package org.springframework.test.web.servlet.request;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import javax.servlet.ServletContext;
-import javax.servlet.http.Part;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
@@ -33,6 +26,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.Part;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Default builder for {@link MockMultipartHttpServletRequest}.

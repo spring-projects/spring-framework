@@ -16,10 +16,6 @@
 
 package org.springframework.web.servlet.support;
 
-import java.beans.PropertyEditor;
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.context.NoSuchMessageException;
@@ -30,6 +26,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.util.HtmlUtils;
+
+import java.beans.PropertyEditor;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Simple adapter to expose the bind status of a field or object.

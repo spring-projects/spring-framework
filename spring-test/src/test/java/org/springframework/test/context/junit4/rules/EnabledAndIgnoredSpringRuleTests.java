@@ -20,7 +20,6 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
 import org.springframework.test.context.junit4.EnabledAndIgnoredSpringRunnerTests;
 
 /**

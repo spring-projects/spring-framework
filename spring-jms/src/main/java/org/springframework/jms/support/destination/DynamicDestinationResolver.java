@@ -16,14 +16,10 @@
 
 package org.springframework.jms.support.destination;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.jms.*;
 
 /**
  * Simple {@link DestinationResolver} implementation resolving destination names

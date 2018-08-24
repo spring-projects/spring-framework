@@ -16,9 +16,9 @@
 
 package org.springframework.validation.beanvalidation;
 
-import javax.validation.ValidationException;
-
 import org.apache.commons.logging.LogFactory;
+
+import javax.validation.ValidationException;
 
 /**
  * {@link LocalValidatorFactoryBean} subclass that simply turns

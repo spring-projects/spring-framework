@@ -19,7 +19,6 @@ package org.springframework.cache.transaction;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.tests.transaction.CallCountingTransactionManager;

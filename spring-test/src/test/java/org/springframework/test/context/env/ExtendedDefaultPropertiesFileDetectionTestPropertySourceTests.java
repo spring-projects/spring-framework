@@ -17,7 +17,6 @@
 package org.springframework.test.context.env;
 
 import org.junit.Test;
-
 import org.springframework.test.context.TestPropertySource;
 
 /**

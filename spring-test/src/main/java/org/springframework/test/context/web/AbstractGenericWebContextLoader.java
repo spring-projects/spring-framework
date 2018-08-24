@@ -16,11 +16,8 @@
 
 package org.springframework.test.context.web;
 
-import javax.servlet.ServletContext;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -34,6 +31,8 @@ import org.springframework.test.context.support.AbstractContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+
+import javax.servlet.ServletContext;
 
 /**
  * Abstract, generic extension of {@link AbstractContextLoader} that loads a

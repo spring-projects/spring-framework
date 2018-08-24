@@ -17,19 +17,12 @@
 package org.springframework.cache.config;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.CacheTestUtils;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.interceptor.CacheErrorHandler;
-import org.springframework.cache.interceptor.CacheInterceptor;
-import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.cache.interceptor.NamedCacheResolver;
-import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
-import org.springframework.cache.interceptor.SimpleCacheResolver;
+import org.springframework.cache.interceptor.*;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;

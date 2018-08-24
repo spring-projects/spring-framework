@@ -16,23 +16,19 @@
 
 package org.springframework.web.util;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
+
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-
-import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
+import java.util.*;
 
 /**
  * {@link javax.servlet.http.HttpServletRequest} wrapper that caches all content read from

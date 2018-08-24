@@ -16,9 +16,6 @@
 
 package org.springframework.web.socket.client.jetty;
 
-import java.net.URI;
-import java.util.Arrays;
-
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
@@ -28,7 +25,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.socket.WebSocketHandler;
@@ -38,7 +34,10 @@ import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import static org.junit.Assert.*;
+import java.net.URI;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link JettyWebSocketClient}.

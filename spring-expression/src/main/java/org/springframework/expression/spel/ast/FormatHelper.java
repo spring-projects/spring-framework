@@ -16,11 +16,11 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.util.List;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.util.List;
 
 /**
  * Utility methods (formatters, etc) used during parsing and evaluation.

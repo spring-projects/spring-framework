@@ -16,6 +16,14 @@
 
 package org.springframework.format.support;
 
+import org.junit.Test;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.format.*;
+import org.springframework.format.annotation.NumberFormat;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,20 +32,6 @@ import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
-import org.junit.Test;
-
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.format.AnnotationFormatterFactory;
-import org.springframework.format.Formatter;
-import org.springframework.format.FormatterRegistrar;
-import org.springframework.format.FormatterRegistry;
-import org.springframework.format.Parser;
-import org.springframework.format.Printer;
-import org.springframework.format.annotation.NumberFormat;
 
 import static org.junit.Assert.*;
 

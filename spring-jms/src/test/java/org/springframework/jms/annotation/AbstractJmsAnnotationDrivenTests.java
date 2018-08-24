@@ -16,21 +16,12 @@
 
 package org.springframework.jms.annotation;
 
-import java.lang.reflect.Method;
-import javax.jms.JMSException;
-import javax.jms.Session;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.jms.StubTextMessage;
-import org.springframework.jms.config.JmsListenerContainerTestFactory;
-import org.springframework.jms.config.JmsListenerEndpoint;
-import org.springframework.jms.config.JmsListenerEndpointRegistry;
-import org.springframework.jms.config.MethodJmsListenerEndpoint;
-import org.springframework.jms.config.SimpleJmsListenerEndpoint;
+import org.springframework.jms.config.*;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.lang.Nullable;
@@ -41,8 +32,13 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import javax.jms.JMSException;
+import javax.jms.Session;
+import java.lang.reflect.Method;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 /**
  *

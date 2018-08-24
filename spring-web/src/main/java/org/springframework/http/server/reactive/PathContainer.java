@@ -15,10 +15,10 @@
  */
 package org.springframework.http.server.reactive;
 
+import org.springframework.util.MultiValueMap;
+
 import java.nio.charset.Charset;
 import java.util.List;
-
-import org.springframework.util.MultiValueMap;
 
 /**
  * Structured path representation.

@@ -18,7 +18,6 @@ package org.springframework.scheduling.quartz;
 
 import org.quartz.SchedulerContext;
 import org.quartz.spi.TriggerFiredBundle;
-
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;

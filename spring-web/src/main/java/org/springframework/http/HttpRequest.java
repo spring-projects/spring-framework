@@ -16,9 +16,9 @@
 
 package org.springframework.http;
 
-import java.net.URI;
-
 import org.springframework.lang.Nullable;
+
+import java.net.URI;
 
 /**
  * Represents an HTTP request message, consisting of

@@ -16,10 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.concurrent.Future;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
@@ -28,14 +24,12 @@ import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
-
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.concurrent.FailureCallback;
-import org.springframework.util.concurrent.FutureAdapter;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
-import org.springframework.util.concurrent.SuccessCallback;
+import org.springframework.util.concurrent.*;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.concurrent.Future;
 
 
 /**

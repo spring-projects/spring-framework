@@ -15,16 +15,15 @@
  */
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.ServletContextResource;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 

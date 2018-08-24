@@ -16,12 +16,12 @@
 
 package org.springframework.core.convert.support;
 
-import java.beans.PropertyEditorSupport;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.beans.PropertyEditorSupport;
 
 /**
  * Adapter that exposes a {@link java.beans.PropertyEditor} for any given

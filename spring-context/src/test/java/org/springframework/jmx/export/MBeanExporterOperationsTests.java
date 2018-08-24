@@ -16,6 +16,12 @@
 
 package org.springframework.jmx.export;
 
+import org.junit.Test;
+import org.springframework.jmx.AbstractMBeanServerTests;
+import org.springframework.jmx.JmxTestBean;
+import org.springframework.jmx.export.naming.ObjectNamingStrategy;
+import org.springframework.jmx.support.ObjectNameManager;
+
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanInfo;
 import javax.management.ObjectName;
@@ -23,14 +29,8 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanInfoSupport;
 import javax.management.modelmbean.RequiredModelMBean;
 
-import org.junit.Test;
-
-import org.springframework.jmx.AbstractMBeanServerTests;
-import org.springframework.jmx.JmxTestBean;
-import org.springframework.jmx.export.naming.ObjectNamingStrategy;
-import org.springframework.jmx.support.ObjectNameManager;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop

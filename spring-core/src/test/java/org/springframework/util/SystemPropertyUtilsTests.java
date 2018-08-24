@@ -16,11 +16,11 @@
 
 package org.springframework.util;
 
-import java.util.Map;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop

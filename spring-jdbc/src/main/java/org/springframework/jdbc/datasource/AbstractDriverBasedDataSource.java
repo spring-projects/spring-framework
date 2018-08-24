@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.datasource;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Abstract base class for JDBC {@link javax.sql.DataSource} implementations

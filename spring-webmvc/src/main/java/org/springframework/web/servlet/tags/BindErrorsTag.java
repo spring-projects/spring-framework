@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.tags;
 
+import org.springframework.lang.Nullable;
+import org.springframework.validation.Errors;
+
 import javax.servlet.ServletException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
-
-import org.springframework.lang.Nullable;
-import org.springframework.validation.Errors;
 
 /**
  * JSP tag that evaluates content if there are binding errors

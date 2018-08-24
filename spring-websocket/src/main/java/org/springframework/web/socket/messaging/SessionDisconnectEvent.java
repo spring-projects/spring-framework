@@ -16,12 +16,12 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.security.Principal;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
+
+import java.security.Principal;
 
 /**
  * Event raised when the session of a WebSocket client using a Simple Messaging

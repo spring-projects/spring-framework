@@ -16,11 +16,11 @@
 
 package org.springframework.mail.javamail;
 
-import java.beans.PropertyEditorSupport;
+import org.springframework.util.StringUtils;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
-import org.springframework.util.StringUtils;
+import java.beans.PropertyEditorSupport;
 
 /**
  * Editor for {@code java.mail.internet.InternetAddress},

@@ -16,6 +16,13 @@
 
 package org.springframework.http.converter.json;
 
+import org.junit.Test;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
+import org.springframework.http.MockHttpInputMessage;
+import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -24,14 +31,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.Test;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.MediaType;
-import org.springframework.http.MockHttpInputMessage;
-import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import static org.junit.Assert.*;
 

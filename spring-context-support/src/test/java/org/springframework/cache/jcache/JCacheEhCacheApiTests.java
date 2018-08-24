@@ -16,16 +16,15 @@
 
 package org.springframework.cache.jcache;
 
+import org.junit.After;
+import org.junit.Before;
+import org.springframework.cache.AbstractValueAdaptingCacheTests;
+
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.MutableConfiguration;
 import javax.cache.spi.CachingProvider;
-
-import org.junit.After;
-import org.junit.Before;
-
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
 
 /**
  * @author Stephane Nicoll

@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.SQLException;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.lang.Nullable;
+
+import java.sql.SQLException;
 
 /**
  * Strategy interface for translating between {@link SQLException SQLExceptions}

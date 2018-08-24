@@ -16,20 +16,14 @@
 
 package org.springframework.mock.web.test;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import org.springframework.util.Assert;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
-
-import org.springframework.util.Assert;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.

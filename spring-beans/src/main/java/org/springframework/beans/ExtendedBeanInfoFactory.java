@@ -16,12 +16,12 @@
 
 package org.springframework.beans;
 
+import org.springframework.core.Ordered;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.lang.reflect.Method;
-
-import org.springframework.core.Ordered;
 
 /**
  * {@link BeanInfoFactory} implementation that evaluates whether bean classes have

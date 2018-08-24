@@ -16,9 +16,6 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -30,6 +27,9 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TestWebSocketSession;
+
+import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

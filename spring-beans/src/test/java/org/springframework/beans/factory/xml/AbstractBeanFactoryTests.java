@@ -16,23 +16,18 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.beans.PropertyEditorSupport;
-import java.util.StringTokenizer;
-
 import org.junit.Test;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyBatchUpdateException;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanIsNotAFactoryException;
-import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.tests.sample.beans.LifecycleBean;
 import org.springframework.tests.sample.beans.MustBeInitialized;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
+
+import java.beans.PropertyEditorSupport;
+import java.util.StringTokenizer;
 
 import static org.junit.Assert.*;
 

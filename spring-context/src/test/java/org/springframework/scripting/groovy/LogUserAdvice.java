@@ -16,11 +16,11 @@
 
 package org.springframework.scripting.groovy;
 
-import java.lang.reflect.Method;
-
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Method;
 
 public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
 

@@ -16,14 +16,14 @@
 
 package org.springframework.beans.propertyeditors;
 
+import org.junit.Test;
+import org.springframework.util.ClassUtils;
+
 import java.beans.PropertyEditor;
 import java.io.File;
 
-import org.junit.Test;
-
-import org.springframework.util.ClassUtils;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Thomas Risberg

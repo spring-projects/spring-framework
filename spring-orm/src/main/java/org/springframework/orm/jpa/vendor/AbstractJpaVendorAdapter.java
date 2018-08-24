@@ -16,13 +16,13 @@
 
 package org.springframework.orm.jpa.vendor;
 
-import java.util.Map;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaVendorAdapter;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import java.util.Map;
 
 /**
  * Abstract {@link JpaVendorAdapter} implementation that defines common properties,

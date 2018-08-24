@@ -16,11 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -31,6 +26,11 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 import org.springframework.web.server.i18n.LocaleContextResolver;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Default implementation of {@link HandlerStrategies.Builder}.

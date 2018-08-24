@@ -16,18 +16,17 @@
 
 package org.springframework.web.servlet.view.document;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.pdf.PdfWriter;
-
 import org.springframework.web.servlet.view.AbstractView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * Abstract superclass for PDF views, using Bruno Lowagie's

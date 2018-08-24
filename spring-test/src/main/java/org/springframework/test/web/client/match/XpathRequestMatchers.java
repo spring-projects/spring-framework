@@ -16,19 +16,17 @@
 
 package org.springframework.test.web.client.match;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.xml.xpath.XPathExpressionException;
-
 import org.hamcrest.Matcher;
-import org.w3c.dom.Node;
-
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
+import org.w3c.dom.Node;
+
+import javax.xml.xpath.XPathExpressionException;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Factory methods for request content {@code RequestMatcher}'s using an XPath

@@ -16,11 +16,11 @@
 
 package org.springframework.test.context.junit4;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Simple {@link RunListener} which tracks how many times certain JUnit callback

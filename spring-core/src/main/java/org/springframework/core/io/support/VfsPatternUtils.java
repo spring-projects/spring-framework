@@ -16,13 +16,13 @@
 
 package org.springframework.core.io.support;
 
+import org.springframework.core.io.VfsUtils;
+import org.springframework.lang.Nullable;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.net.URL;
-
-import org.springframework.core.io.VfsUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Artificial class used for accessing the {@link VfsUtils} methods

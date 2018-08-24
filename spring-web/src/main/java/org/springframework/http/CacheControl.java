@@ -16,10 +16,10 @@
 
 package org.springframework.http;
 
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * A builder for creating "Cache-Control" HTTP response headers.

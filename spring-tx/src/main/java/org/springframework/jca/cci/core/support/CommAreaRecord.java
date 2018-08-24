@@ -16,13 +16,13 @@
 
 package org.springframework.jca.cci.core.support;
 
+import org.springframework.util.FileCopyUtils;
+
+import javax.resource.cci.Record;
+import javax.resource.cci.Streamable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import javax.resource.cci.Record;
-import javax.resource.cci.Streamable;
-
-import org.springframework.util.FileCopyUtils;
 
 /**
  * CCI Record implementation for a COMMAREA, holding a byte array.

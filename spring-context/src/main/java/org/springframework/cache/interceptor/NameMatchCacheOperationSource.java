@@ -16,18 +16,17 @@
 
 package org.springframework.cache.interceptor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.PatternMatchUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.PatternMatchUtils;
 
 /**
  * Simple {@link CacheOperationSource} implementation that allows attributes to be matched

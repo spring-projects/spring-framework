@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.core.support;
 
+import org.springframework.jdbc.core.InterruptibleBatchPreparedStatementSetter;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import org.springframework.jdbc.core.InterruptibleBatchPreparedStatementSetter;
 
 /**
  * Abstract implementation of the {@link InterruptibleBatchPreparedStatementSetter}

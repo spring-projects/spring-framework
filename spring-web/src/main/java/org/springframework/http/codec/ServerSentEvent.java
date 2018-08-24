@@ -16,10 +16,10 @@
 
 package org.springframework.http.codec;
 
-import java.time.Duration;
-
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.lang.Nullable;
+
+import java.time.Duration;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web support.

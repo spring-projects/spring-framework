@@ -16,18 +16,10 @@
 
 package org.springframework.http.converter;
 
-import java.io.ByteArrayInputStream;
-import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -38,10 +30,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.StringUtils;
 
+import java.io.ByteArrayInputStream;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for {@link ResourceRegionHttpMessageConverter} class.

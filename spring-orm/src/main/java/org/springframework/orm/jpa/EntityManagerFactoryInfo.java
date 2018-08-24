@@ -16,13 +16,13 @@
 
 package org.springframework.orm.jpa;
 
+import org.springframework.lang.Nullable;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Metadata interface for a Spring-managed JPA {@link EntityManagerFactory}.

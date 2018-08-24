@@ -16,9 +16,9 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.Optional;
-
 import org.springframework.util.Assert;
+
+import java.util.Optional;
 
 /**
  * Represents a function that evaluates on a given {@link ServerRequest}.

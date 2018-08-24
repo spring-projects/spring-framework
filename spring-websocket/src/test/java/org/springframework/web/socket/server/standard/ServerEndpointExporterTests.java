@@ -16,6 +16,13 @@
 
 package org.springframework.web.socket.server.standard;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+
 import javax.servlet.ServletContext;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
@@ -23,15 +30,8 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerEndpoint;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture for {@link ServerEndpointExporter}.

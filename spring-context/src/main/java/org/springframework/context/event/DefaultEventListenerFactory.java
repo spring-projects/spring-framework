@@ -16,10 +16,10 @@
 
 package org.springframework.context.event;
 
-import java.lang.reflect.Method;
-
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
+
+import java.lang.reflect.Method;
 
 /**
  * Default {@link EventListenerFactory} implementation that supports the

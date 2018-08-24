@@ -16,11 +16,11 @@
 
 package org.springframework.web.reactive.accept;
 
-import java.util.List;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.List;
 
 /**
  * Strategy to resolve the requested media types for a {@code ServerWebExchange}.

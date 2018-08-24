@@ -16,11 +16,11 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.lang.Nullable;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 /**
  * Specialization of {@link ConfigurableEnvironment} allowing initialization of

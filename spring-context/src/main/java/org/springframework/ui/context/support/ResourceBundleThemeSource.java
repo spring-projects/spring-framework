@@ -16,12 +16,8 @@
 
 package org.springframework.ui.context.support;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
@@ -30,6 +26,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link ThemeSource} implementation that looks up an individual

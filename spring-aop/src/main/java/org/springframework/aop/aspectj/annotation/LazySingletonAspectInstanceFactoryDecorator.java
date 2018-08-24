@@ -16,10 +16,10 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.io.Serializable;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * Decorator to cause a {@link MetadataAwareAspectInstanceFactory} to instantiate only once.

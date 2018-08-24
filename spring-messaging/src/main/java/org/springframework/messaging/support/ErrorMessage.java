@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.support;
 
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+
+import java.util.Map;
 
 /**
  * A {@link GenericMessage} with a {@link Throwable} payload.

@@ -16,17 +16,17 @@
 
 package org.springframework.jmx.support;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Helper class that aggregates a {@link javax.management.NotificationListener},

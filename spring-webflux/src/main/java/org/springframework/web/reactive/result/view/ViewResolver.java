@@ -1,8 +1,8 @@
 package org.springframework.web.reactive.result.view;
 
-import java.util.Locale;
-
 import reactor.core.publisher.Mono;
+
+import java.util.Locale;
 
 /**
  * Contract to resolve a view name to a {@link View} instance. The view name may

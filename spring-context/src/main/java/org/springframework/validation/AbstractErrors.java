@@ -16,15 +16,11 @@
 
 package org.springframework.validation;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.EmptyStackException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Abstract implementation of the {@link Errors} interface. Provides common

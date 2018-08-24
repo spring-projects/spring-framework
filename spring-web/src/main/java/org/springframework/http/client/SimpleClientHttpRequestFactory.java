@@ -16,17 +16,13 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.Proxy;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.net.*;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses standard JDK facilities.

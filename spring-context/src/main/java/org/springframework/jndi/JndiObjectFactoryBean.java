@@ -16,14 +16,8 @@
 
 package org.springframework.jndi;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import javax.naming.Context;
-import javax.naming.NamingException;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
@@ -36,6 +30,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that looks up a

@@ -16,12 +16,12 @@
 
 package org.springframework.test.context.junit4.annotation.meta;
 
+import org.springframework.test.context.ActiveProfiles;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Custom configuration annotation that is itself meta-annotated with {@link

@@ -16,14 +16,13 @@
 
 package org.springframework.util.xml;
 
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.sax.SAXResult;
-
+import org.springframework.lang.Nullable;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ext.LexicalHandler;
 
-import org.springframework.lang.Nullable;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.sax.SAXResult;
 
 /**
  * Implementation of the {@code Result} tagging interface for StAX writers. Can be constructed with

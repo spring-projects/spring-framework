@@ -16,10 +16,10 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-
 import org.springframework.http.HttpRequest;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.io.IOException;
 
 /**
  * Represents the context of a client-side HTTP request execution.

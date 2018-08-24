@@ -16,10 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.ServletContext;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
@@ -27,6 +23,10 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
+
+import javax.servlet.ServletContext;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Configures a request handler for serving static resources by forwarding

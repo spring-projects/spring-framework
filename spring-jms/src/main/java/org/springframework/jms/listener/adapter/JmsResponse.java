@@ -16,13 +16,13 @@
 
 package org.springframework.jms.listener.adapter;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Session;
-
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Session;
 
 /**
  * Return type of any JMS listener method used to indicate the actual response

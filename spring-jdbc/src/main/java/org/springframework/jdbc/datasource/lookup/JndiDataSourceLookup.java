@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
+import org.springframework.jndi.JndiLocatorSupport;
+
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-
-import org.springframework.jndi.JndiLocatorSupport;
 
 /**
  * JNDI-based {@link DataSourceLookup} implementation.

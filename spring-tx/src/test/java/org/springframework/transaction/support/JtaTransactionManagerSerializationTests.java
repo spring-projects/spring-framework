@@ -16,17 +16,16 @@
 
 package org.springframework.transaction.support;
 
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-
 import org.junit.Test;
-
 import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.SerializationTestUtils;
 
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
+
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Rod Johnson

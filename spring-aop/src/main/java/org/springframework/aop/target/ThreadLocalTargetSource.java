@@ -16,15 +16,15 @@
 
 package org.springframework.aop.target;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.NamedThreadLocal;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Alternative to an object pool. This {@link org.springframework.aop.TargetSource}

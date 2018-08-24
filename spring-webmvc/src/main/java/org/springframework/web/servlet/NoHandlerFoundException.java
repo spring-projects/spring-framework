@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet;
 
+import org.springframework.http.HttpHeaders;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.http.HttpHeaders;
 
 /**
  * By default when the DispatcherServlet can't find a handler for a request it

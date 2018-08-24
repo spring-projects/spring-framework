@@ -16,13 +16,13 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Common delegate methods for Spring's internal {@link PropertyDescriptor} implementations.

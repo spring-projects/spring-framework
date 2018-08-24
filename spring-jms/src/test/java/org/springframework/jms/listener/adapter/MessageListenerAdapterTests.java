@@ -16,27 +16,16 @@
 
 package org.springframework.jms.listener.adapter;
 
-import java.io.ByteArrayInputStream;
-import java.io.Serializable;
-import javax.jms.BytesMessage;
-import javax.jms.IllegalStateException;
-import javax.jms.InvalidDestinationException;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
-import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.QueueSender;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+
+import javax.jms.*;
+import javax.jms.IllegalStateException;
+import java.io.ByteArrayInputStream;
+import java.io.Serializable;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

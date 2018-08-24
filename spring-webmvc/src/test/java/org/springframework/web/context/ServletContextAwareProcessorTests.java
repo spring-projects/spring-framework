@@ -16,14 +16,13 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 import static org.junit.Assert.*;
 

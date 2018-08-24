@@ -16,12 +16,11 @@
 
 package org.springframework.http.client.reactive;
 
-import java.net.URI;
-import java.util.function.Function;
-
+import org.springframework.http.HttpMethod;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpMethod;
+import java.net.URI;
+import java.util.function.Function;
 
 /**
  * Abstraction over HTTP clients driving the underlying HTTP client to connect

@@ -16,9 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
@@ -26,6 +23,9 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * Decrement operator.  Can be used in a prefix or postfix form. This will throw

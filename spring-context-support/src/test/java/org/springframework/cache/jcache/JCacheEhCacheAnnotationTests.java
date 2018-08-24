@@ -16,29 +16,24 @@
 
 package org.springframework.cache.jcache;
 
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.cache.configuration.MutableConfiguration;
-import javax.cache.spi.CachingProvider;
-
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.config.AbstractCacheAnnotationTests;
-import org.springframework.cache.config.AnnotatedClassCacheableService;
-import org.springframework.cache.config.CacheableService;
-import org.springframework.cache.config.DefaultCacheableService;
-import org.springframework.cache.config.SomeCustomKeyGenerator;
+import org.springframework.cache.config.*;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.cache.configuration.MutableConfiguration;
+import javax.cache.spi.CachingProvider;
 
 /**
  * @author Stephane Nicoll

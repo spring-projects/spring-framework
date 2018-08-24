@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.handler;
 
+import org.springframework.beans.BeansException;
+import org.springframework.util.CollectionUtils;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import org.springframework.beans.BeansException;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerMapping}

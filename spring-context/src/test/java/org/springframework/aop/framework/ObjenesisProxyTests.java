@@ -17,13 +17,12 @@
 package org.springframework.aop.framework;
 
 import org.junit.Test;
-
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Integration test for Objenesis proxy creation.

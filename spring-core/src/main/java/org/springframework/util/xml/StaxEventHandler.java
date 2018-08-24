@@ -16,9 +16,11 @@
 
 package org.springframework.util.xml;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import org.springframework.lang.Nullable;
+import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
+import org.xml.sax.ext.LexicalHandler;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventFactory;
@@ -26,12 +28,9 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Namespace;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.Locator;
-import org.xml.sax.ext.LexicalHandler;
-
-import org.springframework.lang.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * SAX {@link org.xml.sax.ContentHandler} and {@link LexicalHandler}

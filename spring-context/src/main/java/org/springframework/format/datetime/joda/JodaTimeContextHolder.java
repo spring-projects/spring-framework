@@ -16,12 +16,11 @@
 
 package org.springframework.format.datetime.joda;
 
-import java.util.Locale;
-
 import org.joda.time.format.DateTimeFormatter;
-
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
+
+import java.util.Locale;
 
 /**
  * A holder for a thread-local {@link JodaTimeContext}

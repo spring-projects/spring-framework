@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.Map;
-import javax.servlet.ServletRequest;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.ServletRequest;
+import java.util.Map;
 
 /**
  * Subclass of {@link ServletRequestDataBinder} that adds URI template variables

@@ -16,15 +16,15 @@
 
 package org.springframework.format.datetime;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Configures basic date formatting for use with Spring, primarily for

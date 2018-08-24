@@ -16,26 +16,15 @@
 
 package org.springframework.orm.jpa.vendor;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.dialect.*;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
-
-import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.dialect.DB2Dialect;
-import org.hibernate.dialect.DerbyTenSevenDialect;
-import org.hibernate.dialect.H2Dialect;
-import org.hibernate.dialect.HSQLDialect;
-import org.hibernate.dialect.InformixDialect;
-import org.hibernate.dialect.MySQL5Dialect;
-import org.hibernate.dialect.Oracle12cDialect;
-import org.hibernate.dialect.PostgreSQL95Dialect;
-import org.hibernate.dialect.SQLServer2012Dialect;
-import org.hibernate.dialect.SybaseDialect;
-
-import org.springframework.lang.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate

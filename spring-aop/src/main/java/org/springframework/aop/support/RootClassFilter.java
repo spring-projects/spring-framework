@@ -16,9 +16,9 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
-
 import org.springframework.aop.ClassFilter;
+
+import java.io.Serializable;
 
 /**
  * Simple ClassFilter implementation that passes classes (and optionally subclasses)

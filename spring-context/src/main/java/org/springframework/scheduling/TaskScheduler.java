@@ -16,12 +16,12 @@
 
 package org.springframework.scheduling;
 
+import org.springframework.lang.Nullable;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Task scheduler interface that abstracts the scheduling of

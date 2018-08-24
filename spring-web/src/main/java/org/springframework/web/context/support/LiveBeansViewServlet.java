@@ -16,13 +16,13 @@
 
 package org.springframework.web.context.support;
 
-import java.io.IOException;
+import org.springframework.context.support.LiveBeansView;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.context.support.LiveBeansView;
+import java.io.IOException;
 
 /**
  * Servlet variant of {@link LiveBeansView}'s MBean exposure.

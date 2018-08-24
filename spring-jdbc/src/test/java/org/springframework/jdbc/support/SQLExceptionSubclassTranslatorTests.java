@@ -16,21 +16,13 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.SQLException;
-
 import org.junit.Test;
-
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.PermissionDeniedDataAccessException;
-import org.springframework.dao.QueryTimeoutException;
-import org.springframework.dao.RecoverableDataAccessException;
-import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.dao.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 
-import static org.junit.Assert.*;
+import java.sql.SQLException;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Thomas Risberg

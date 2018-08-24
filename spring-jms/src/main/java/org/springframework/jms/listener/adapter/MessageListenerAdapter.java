@@ -16,12 +16,6 @@
 
 package org.springframework.jms.listener.adapter;
 
-import java.lang.reflect.InvocationTargetException;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Session;
-
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.listener.SubscriptionNameProvider;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -30,6 +24,12 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.Session;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Message listener adapter that delegates the handling of messages to target

@@ -16,6 +16,10 @@
 
 package org.springframework.http;
 
+import org.junit.Test;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.util.UriTemplate;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -23,11 +27,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.Test;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.web.util.UriTemplate;
 
 import static org.junit.Assert.*;
 

@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate5;
 
 import org.hibernate.HibernateException;
-
 import org.springframework.dao.UncategorizedDataAccessException;
 import org.springframework.lang.Nullable;
 

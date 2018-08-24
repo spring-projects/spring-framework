@@ -18,7 +18,6 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-
 import org.springframework.util.StopWatch;
 
 /**

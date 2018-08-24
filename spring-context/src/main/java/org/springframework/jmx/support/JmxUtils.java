@@ -16,27 +16,20 @@
 
 package org.springframework.jmx.support;
 
-import java.beans.PropertyDescriptor;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
-import java.util.Hashtable;
-import java.util.List;
-import javax.management.DynamicMBean;
-import javax.management.JMX;
-import javax.management.MBeanParameterInfo;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import javax.management.*;
+import java.beans.PropertyDescriptor;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Collection of generic utility methods to support Spring JMX.

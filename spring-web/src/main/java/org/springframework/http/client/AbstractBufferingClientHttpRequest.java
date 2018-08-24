@@ -16,11 +16,11 @@
 
 package org.springframework.http.client;
 
+import org.springframework.http.HttpHeaders;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import org.springframework.http.HttpHeaders;
 
 /**
  * Base implementation of {@link ClientHttpRequest} that buffers output

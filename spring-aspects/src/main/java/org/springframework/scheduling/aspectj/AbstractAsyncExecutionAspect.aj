@@ -16,14 +16,13 @@
 
 package org.springframework.scheduling.aspectj;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
-
 import org.springframework.aop.interceptor.AsyncExecutionAspectSupport;
 import org.springframework.core.task.AsyncTaskExecutor;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * Abstract aspect that routes selected methods asynchronously.

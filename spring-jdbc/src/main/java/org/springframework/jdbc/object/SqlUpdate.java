@@ -16,9 +16,6 @@
 
 package org.springframework.jdbc.object;
 
-import java.util.Map;
-import javax.sql.DataSource;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
@@ -26,6 +23,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.jdbc.support.KeyHolder;
+
+import javax.sql.DataSource;
+import java.util.Map;
 
 /**
  * Reusable operation object representing a SQL update.

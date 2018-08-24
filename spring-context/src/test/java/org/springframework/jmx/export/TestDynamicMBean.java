@@ -16,14 +16,7 @@
 
 package org.springframework.jmx.export;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.DynamicMBean;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanConstructorInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanNotificationInfo;
-import javax.management.MBeanOperationInfo;
+import javax.management.*;
 
 /**
  * @author Rob Harrop

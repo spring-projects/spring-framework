@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.core.namedparam;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.lang.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class that provides helper methods for the use of {@link SqlParameterSource}

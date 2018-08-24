@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc;
 
-import java.sql.SQLException;
-
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+
+import java.sql.SQLException;
 
 /**
  * Exception thrown when SQL specified is invalid. Such exceptions always have

@@ -18,7 +18,6 @@ package org.springframework.cache.config;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;

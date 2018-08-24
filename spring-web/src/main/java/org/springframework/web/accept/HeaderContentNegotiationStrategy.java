@@ -16,15 +16,15 @@
 
 package org.springframework.web.accept;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A {@code ContentNegotiationStrategy} that checks the 'Accept' request header.

@@ -16,9 +16,9 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-
 import org.springframework.http.HttpRequest;
+
+import java.io.IOException;
 
 /**
  * Intercepts client-side HTTP requests. Implementations of this interface can be {@linkplain

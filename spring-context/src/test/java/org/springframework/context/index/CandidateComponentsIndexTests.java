@@ -16,15 +16,15 @@
 
 package org.springframework.context.index;
 
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.Test;
-
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link CandidateComponentsIndex}.

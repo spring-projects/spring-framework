@@ -16,12 +16,12 @@
 
 package org.springframework.http.codec;
 
-import java.util.List;
-
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+
+import java.util.List;
 
 /**
  * Defines a common interface for configuring either client or server HTTP

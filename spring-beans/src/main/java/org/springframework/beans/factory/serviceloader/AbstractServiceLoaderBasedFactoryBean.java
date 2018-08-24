@@ -16,13 +16,13 @@
 
 package org.springframework.beans.factory.serviceloader;
 
-import java.util.ServiceLoader;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.util.ServiceLoader;
 
 /**
  * Abstract base class for FactoryBeans operating on the

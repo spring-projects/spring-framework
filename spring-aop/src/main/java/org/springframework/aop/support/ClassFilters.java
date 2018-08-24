@@ -16,11 +16,11 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.io.Serializable;
 
 /**
  * Static utility methods for composing {@link ClassFilter ClassFilters}.

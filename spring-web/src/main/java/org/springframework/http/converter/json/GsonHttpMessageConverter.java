@@ -16,14 +16,13 @@
 
 package org.springframework.http.converter.json;
 
+import com.google.gson.Gson;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
-
-import com.google.gson.Gson;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}

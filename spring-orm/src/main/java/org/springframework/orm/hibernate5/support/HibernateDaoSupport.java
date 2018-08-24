@@ -18,7 +18,6 @@ package org.springframework.orm.hibernate5.support;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.support.DaoSupport;
 import org.springframework.lang.Nullable;

@@ -16,13 +16,12 @@
 
 package org.springframework.aop.support;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 

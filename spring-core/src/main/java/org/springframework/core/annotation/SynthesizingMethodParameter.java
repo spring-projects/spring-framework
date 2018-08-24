@@ -16,13 +16,13 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.core.MethodParameter;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-
-import org.springframework.core.MethodParameter;
 
 /**
  * A {@link MethodParameter} variant which synthesizes annotations that

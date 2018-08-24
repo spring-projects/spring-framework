@@ -16,13 +16,9 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.mockito.Mockito;
-
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -36,7 +32,9 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import static org.junit.Assert.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link WebSocketAnnotationMethodMessageHandler}.

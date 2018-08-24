@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.web;
 
-import java.util.Set;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
@@ -27,6 +25,8 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.Set;
 
 /**
  * {@code WebMergedContextConfiguration} encapsulates the <em>merged</em>

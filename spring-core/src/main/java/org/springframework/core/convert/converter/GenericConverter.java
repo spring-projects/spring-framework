@@ -16,11 +16,11 @@
 
 package org.springframework.core.convert.converter;
 
-import java.util.Set;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Set;
 
 /**
  * Generic converter interface for converting between two or more types.

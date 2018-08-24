@@ -16,16 +16,11 @@
 
 package org.springframework.scripting.support;
 
+import javax.script.*;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
-import javax.script.SimpleBindings;
 
 /**
  * Common operations for dealing with a JSR-223 {@link ScriptEngine}.

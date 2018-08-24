@@ -16,20 +16,15 @@
 
 package org.springframework.core.io.buffer;
 
+import io.netty.buffer.*;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.ByteBufOutputStream;
-import io.netty.buffer.CompositeByteBuf;
-import io.netty.buffer.Unpooled;
-
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Implementation of the {@code DataBuffer} interface that wraps a Netty

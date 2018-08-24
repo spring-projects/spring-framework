@@ -16,11 +16,11 @@
 
 package org.springframework.core.type.filter;
 
-import java.io.IOException;
-
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+
+import java.io.IOException;
 
 /**
  * Type filter that exposes a

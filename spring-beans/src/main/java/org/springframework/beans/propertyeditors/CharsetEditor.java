@@ -16,10 +16,10 @@
 
 package org.springframework.beans.propertyeditors;
 
+import org.springframework.util.StringUtils;
+
 import java.beans.PropertyEditorSupport;
 import java.nio.charset.Charset;
-
-import org.springframework.util.StringUtils;
 
 /**
  * Editor for {@code java.nio.charset.Charset}, translating charset

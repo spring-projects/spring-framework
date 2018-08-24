@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Method;
-
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.lang.reflect.Method;
 
 /**
  * Object representing the override of a method on a managed object by the IoC

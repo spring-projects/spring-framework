@@ -16,12 +16,12 @@
 
 package org.springframework.jms.core;
 
+import org.springframework.jms.JmsException;
+import org.springframework.lang.Nullable;
+
 import javax.jms.Destination;
 import javax.jms.Message;
 import javax.jms.Queue;
-
-import org.springframework.jms.JmsException;
-import org.springframework.lang.Nullable;
 
 /**
  * Specifies a basic set of JMS operations.

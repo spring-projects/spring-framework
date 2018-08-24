@@ -16,12 +16,11 @@
 
 package org.springframework.beans.propertyeditors;
 
+import org.junit.Test;
+import org.springframework.util.ClassUtils;
+
 import java.beans.PropertyEditor;
 import java.net.URI;
-
-import org.junit.Test;
-
-import org.springframework.util.ClassUtils;
 
 import static org.junit.Assert.*;
 

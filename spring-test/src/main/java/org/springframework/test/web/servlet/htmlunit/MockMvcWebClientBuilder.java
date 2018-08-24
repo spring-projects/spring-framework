@@ -17,7 +17,6 @@
 package org.springframework.test.web.servlet.htmlunit;
 
 import com.gargoylesoftware.htmlunit.WebClient;
-
 import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;

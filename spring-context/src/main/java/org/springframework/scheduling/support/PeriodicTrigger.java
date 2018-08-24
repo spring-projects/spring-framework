@@ -16,13 +16,13 @@
 
 package org.springframework.scheduling.support;
 
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A trigger for periodic task execution. The period may be applied as either

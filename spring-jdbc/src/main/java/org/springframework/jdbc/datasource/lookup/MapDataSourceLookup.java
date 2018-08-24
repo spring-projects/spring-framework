@@ -16,14 +16,13 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.sql.DataSource;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Simple {@link DataSourceLookup} implementation that relies on a map for doing lookups.

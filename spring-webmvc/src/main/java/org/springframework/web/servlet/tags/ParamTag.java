@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.tags;
 
+import org.springframework.lang.Nullable;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
-
-import org.springframework.lang.Nullable;
 
 /**
  * JSP tag for collecting name-value parameters and passing them to a

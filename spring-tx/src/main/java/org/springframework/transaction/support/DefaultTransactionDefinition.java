@@ -16,11 +16,11 @@
 
 package org.springframework.transaction.support;
 
-import java.io.Serializable;
-
 import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
+
+import java.io.Serializable;
 
 /**
  * Default implementation of the {@link TransactionDefinition} interface,

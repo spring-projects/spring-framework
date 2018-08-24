@@ -17,7 +17,6 @@
 package org.springframework.format.datetime.joda;
 
 import org.joda.time.format.DateTimeFormatter;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 

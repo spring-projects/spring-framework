@@ -16,12 +16,12 @@
 
 package org.springframework.jms.listener.endpoint;
 
+import org.springframework.jca.endpoint.AbstractMessageEndpointFactory;
+
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.resource.ResourceException;
 import javax.resource.spi.UnavailableException;
-
-import org.springframework.jca.endpoint.AbstractMessageEndpointFactory;
 
 /**
  * JMS-specific implementation of the JCA 1.7

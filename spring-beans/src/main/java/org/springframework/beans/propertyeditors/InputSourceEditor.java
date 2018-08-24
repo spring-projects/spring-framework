@@ -16,14 +16,13 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.beans.PropertyEditorSupport;
-import java.io.IOException;
-
-import org.xml.sax.InputSource;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.util.Assert;
+import org.xml.sax.InputSource;
+
+import java.beans.PropertyEditorSupport;
+import java.io.IOException;
 
 /**
  * Editor for {@code org.xml.sax.InputSource}, converting from a

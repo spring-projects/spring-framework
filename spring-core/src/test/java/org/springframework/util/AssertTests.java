@@ -16,16 +16,16 @@
 
 package org.springframework.util;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.function.Supplier;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import static java.util.Collections.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
 
 /**
  * Unit tests for the {@link Assert} class.

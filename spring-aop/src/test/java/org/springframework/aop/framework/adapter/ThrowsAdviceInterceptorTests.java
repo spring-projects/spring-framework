@@ -16,20 +16,21 @@
 
 package org.springframework.aop.framework.adapter;
 
+import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
+import org.springframework.aop.ThrowsAdvice;
+import org.springframework.tests.aop.advice.MethodCounter;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 
-import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
-
-import org.springframework.aop.ThrowsAdvice;
-import org.springframework.tests.aop.advice.MethodCounter;
-
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Rod Johnson

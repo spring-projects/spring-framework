@@ -16,14 +16,14 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.beans.PropertyEditor;
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.PageContext;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.BindStatus;
+
+import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.PageContext;
+import java.beans.PropertyEditor;
 
 /**
  * Bind tag, supporting evaluation of binding errors for a certain

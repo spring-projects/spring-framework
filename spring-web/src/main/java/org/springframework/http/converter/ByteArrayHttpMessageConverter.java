@@ -16,14 +16,14 @@
 
 package org.springframework.http.converter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write byte arrays.

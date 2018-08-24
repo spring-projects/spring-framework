@@ -16,11 +16,11 @@
 
 package org.springframework.core;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Juergen Hoeller

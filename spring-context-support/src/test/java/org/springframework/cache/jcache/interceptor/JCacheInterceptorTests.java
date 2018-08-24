@@ -16,10 +16,7 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import java.lang.reflect.Method;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
@@ -28,6 +25,8 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.NamedCacheResolver;
 import org.springframework.cache.jcache.AbstractJCacheTests;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 

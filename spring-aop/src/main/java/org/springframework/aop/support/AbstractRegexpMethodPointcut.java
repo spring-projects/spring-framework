@@ -16,15 +16,15 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * Abstract base regular expression pointcut bean. JavaBean properties are:

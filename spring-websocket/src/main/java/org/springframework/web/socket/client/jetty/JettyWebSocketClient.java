@@ -16,17 +16,9 @@
 
 package org.springframework.web.socket.client.jetty;
 
-import java.net.URI;
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-
 import org.springframework.context.Lifecycle;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -44,6 +36,13 @@ import org.springframework.web.socket.adapter.jetty.WebSocketToJettyExtensionCon
 import org.springframework.web.socket.client.AbstractWebSocketClient;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * Initiates WebSocket requests to a WebSocket server programmatically

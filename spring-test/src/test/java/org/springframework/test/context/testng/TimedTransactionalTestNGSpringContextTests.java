@@ -16,11 +16,10 @@
 
 package org.springframework.test.context.testng;
 
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-import org.springframework.test.context.ContextConfiguration;
-
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * Timed integration tests for

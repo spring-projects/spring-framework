@@ -16,9 +16,9 @@
 
 package org.springframework.test.context.junit4;
 
-import java.lang.annotation.Inherited;
-
 import org.springframework.test.context.ContextConfiguration;
+
+import java.lang.annotation.Inherited;
 
 /**
  * Extension of {@link SpringJUnit4ClassRunnerAppCtxTests} which verifies that

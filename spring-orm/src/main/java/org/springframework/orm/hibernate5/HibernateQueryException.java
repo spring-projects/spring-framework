@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate5;
 
 import org.hibernate.QueryException;
-
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**

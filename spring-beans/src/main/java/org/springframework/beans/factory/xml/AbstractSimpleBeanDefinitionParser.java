@@ -16,14 +16,13 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Attr;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 
 /**
  * Convenient base class for when there exists a one-to-one mapping

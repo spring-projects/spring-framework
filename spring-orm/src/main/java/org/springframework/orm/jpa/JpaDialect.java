@@ -16,15 +16,15 @@
 
 package org.springframework.orm.jpa;
 
-import java.sql.SQLException;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import java.sql.SQLException;
 
 /**
  * SPI strategy that encapsulates certain functionality that standard JPA 2.1 does

@@ -16,26 +16,20 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.BatchUpdateException;
-import java.sql.DataTruncation;
-import java.sql.SQLException;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.dao.CannotSerializeTransactionException;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DeadlockLoserDataAccessException;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.lang.Nullable;
 
-import static org.junit.Assert.*;
+import java.sql.BatchUpdateException;
+import java.sql.DataTruncation;
+import java.sql.SQLException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rod Johnson

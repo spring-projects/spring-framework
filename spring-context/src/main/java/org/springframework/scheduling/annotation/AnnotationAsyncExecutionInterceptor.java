@@ -16,13 +16,13 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.lang.reflect.Method;
-import java.util.concurrent.Executor;
-
 import org.springframework.aop.interceptor.AsyncExecutionInterceptor;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Method;
+import java.util.concurrent.Executor;
 
 /**
  * Specialization of {@link AsyncExecutionInterceptor} that delegates method execution to

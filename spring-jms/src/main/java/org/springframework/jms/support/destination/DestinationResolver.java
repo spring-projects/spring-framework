@@ -16,11 +16,11 @@
 
 package org.springframework.jms.support.destination;
 
+import org.springframework.lang.Nullable;
+
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for resolving JMS destinations.

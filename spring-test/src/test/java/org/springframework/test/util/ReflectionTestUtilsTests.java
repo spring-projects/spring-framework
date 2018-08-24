@@ -21,16 +21,12 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.test.util.subpackage.Component;
-import org.springframework.test.util.subpackage.LegacyEntity;
-import org.springframework.test.util.subpackage.Person;
-import org.springframework.test.util.subpackage.PersonEntity;
-import org.springframework.test.util.subpackage.StaticFields;
+import org.springframework.test.util.subpackage.*;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
 import static org.springframework.test.util.ReflectionTestUtils.*;
 

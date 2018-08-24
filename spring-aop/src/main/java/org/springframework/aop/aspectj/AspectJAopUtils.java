@@ -17,7 +17,6 @@
 package org.springframework.aop.aspectj;
 
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.BeforeAdvice;

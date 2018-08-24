@@ -16,17 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -37,6 +28,9 @@ import org.springframework.tests.beans.CollectingReaderEventListener;
 import org.springframework.tests.sample.beans.CustomEnum;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+
+import java.lang.reflect.Proxy;
+import java.util.*;
 
 import static org.junit.Assert.*;
 

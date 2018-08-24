@@ -16,13 +16,13 @@
 
 package org.springframework.messaging.support;
 
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
+
+import java.util.Map;
 
 /**
  * A builder for creating a {@link GenericMessage}

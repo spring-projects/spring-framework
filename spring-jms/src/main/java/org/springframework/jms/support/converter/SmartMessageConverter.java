@@ -16,11 +16,11 @@
 
 package org.springframework.jms.support.converter;
 
+import org.springframework.lang.Nullable;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-
-import org.springframework.lang.Nullable;
 
 /**
  * An extended {@link MessageConverter} SPI with conversion hint support.

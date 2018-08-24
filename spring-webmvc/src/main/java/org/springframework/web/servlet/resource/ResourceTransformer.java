@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.core.io.Resource;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 /**
  * An abstraction for transforming the content of a resource.

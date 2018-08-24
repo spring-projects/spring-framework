@@ -16,12 +16,11 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.function.Function;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.server.support.ServerRequestWrapper;
+import reactor.core.publisher.Mono;
+
+import java.util.function.Function;
 
 /**
  * Represents a function that filters a {@linkplain HandlerFunction handler function}.

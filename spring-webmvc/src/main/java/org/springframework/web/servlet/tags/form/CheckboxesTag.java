@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
-
 import org.springframework.web.bind.WebDataBinder;
+
+import javax.servlet.jsp.JspException;
 
 /**
  * Databinding-aware JSP tag for rendering multiple HTML '{@code input}'

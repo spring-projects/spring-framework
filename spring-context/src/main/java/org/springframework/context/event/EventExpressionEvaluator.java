@@ -16,10 +16,6 @@
 
 package org.springframework.context.event;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
@@ -30,6 +26,10 @@ import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Utility class handling the SpEL expression parsing. Meant to be used

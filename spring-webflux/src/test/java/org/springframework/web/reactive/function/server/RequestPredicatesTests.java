@@ -16,17 +16,17 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.net.URI;
-import java.util.Collections;
-import java.util.function.Function;
-
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.pattern.PathPatternParser;
 
-import static org.junit.Assert.*;
+import java.net.URI;
+import java.util.Collections;
+import java.util.function.Function;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma

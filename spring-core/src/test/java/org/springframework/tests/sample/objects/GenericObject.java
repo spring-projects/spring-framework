@@ -16,9 +16,9 @@
 
 package org.springframework.tests.sample.objects;
 
-import java.util.List;
-
 import org.springframework.core.io.Resource;
+
+import java.util.List;
 
 public class GenericObject<T> {
 

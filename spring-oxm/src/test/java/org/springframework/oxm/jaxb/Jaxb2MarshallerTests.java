@@ -54,23 +54,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.inOrder;
-import static org.mockito.BDDMockito.isA;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.reset;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 import static org.xmlunit.diff.ComparisonType.XML_STANDALONE;
-import static org.xmlunit.diff.DifferenceEvaluators.Default;
-import static org.xmlunit.diff.DifferenceEvaluators.chain;
-import static org.xmlunit.diff.DifferenceEvaluators.downgradeDifferencesToEqual;
+import static org.xmlunit.diff.DifferenceEvaluators.*;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**

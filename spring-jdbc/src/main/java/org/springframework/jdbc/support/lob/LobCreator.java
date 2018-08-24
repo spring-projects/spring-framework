@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.support.lob;
 
+import org.springframework.lang.Nullable;
+
 import java.io.Closeable;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Interface that abstracts potentially database-specific creation of large binary

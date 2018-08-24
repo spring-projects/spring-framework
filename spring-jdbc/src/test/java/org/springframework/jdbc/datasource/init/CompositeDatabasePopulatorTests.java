@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.datasource.init;
 
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.junit.Test;
 
 import static org.mockito.Mockito.*;
 

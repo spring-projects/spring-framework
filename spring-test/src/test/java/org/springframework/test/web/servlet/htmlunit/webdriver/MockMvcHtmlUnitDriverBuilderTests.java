@@ -16,15 +16,11 @@
 
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-
 import com.gargoylesoftware.htmlunit.util.Cookie;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,6 +35,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;

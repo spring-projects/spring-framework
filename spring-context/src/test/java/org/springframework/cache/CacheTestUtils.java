@@ -16,11 +16,11 @@
 
 package org.springframework.cache;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.SimpleCacheManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 

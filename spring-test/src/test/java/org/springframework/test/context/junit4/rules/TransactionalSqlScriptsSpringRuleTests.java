@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4.rules;
 
-import java.util.concurrent.TimeUnit;
-
 import org.junit.ClassRule;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
@@ -26,9 +24,10 @@ import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.junit.runners.MethodSorters;
-
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.TransactionalSqlScriptsTests;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class is an extension of {@link TransactionalSqlScriptsTests}

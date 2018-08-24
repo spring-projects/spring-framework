@@ -16,21 +16,20 @@
 
 package org.springframework.scripting.bsh;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-
 import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.Primitive;
 import bsh.XThis;
-
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * Utility methods for handling BeanShell-scripted objects.

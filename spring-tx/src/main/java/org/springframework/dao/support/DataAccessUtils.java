@@ -16,8 +16,6 @@
 
 package org.springframework.dao.support;
 
-import java.util.Collection;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -26,6 +24,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
+
+import java.util.Collection;
 
 /**
  * Miscellaneous utility methods for DAO implementations.

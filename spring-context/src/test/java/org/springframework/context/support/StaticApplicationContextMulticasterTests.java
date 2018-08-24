@@ -16,19 +16,10 @@
 
 package org.springframework.context.support;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.context.ACATester;
-import org.springframework.context.AbstractApplicationContextTests;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.BeanThatListens;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.*;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
@@ -37,7 +28,11 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for static application context with custom application event multicaster.

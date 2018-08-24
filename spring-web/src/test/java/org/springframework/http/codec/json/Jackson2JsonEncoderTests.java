@@ -16,27 +16,28 @@
 
 package org.springframework.http.codec.json;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import static java.util.Collections.*;
 import org.junit.Test;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.http.codec.json.Jackson2JsonEncoder.*;
-import static org.springframework.http.codec.json.JacksonViewBean.*;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.ServerSentEvent;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
+import java.util.Map;
+
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.http.codec.json.Jackson2JsonEncoder.JSON_VIEW_HINT;
+import static org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
+import static org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
 
 /**
  * @author Sebastien Deleuze

@@ -16,10 +16,10 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyChangeEvent;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.beans.PropertyChangeEvent;
 
 /**
  * Exception thrown on a type mismatch when trying to set a bean property.

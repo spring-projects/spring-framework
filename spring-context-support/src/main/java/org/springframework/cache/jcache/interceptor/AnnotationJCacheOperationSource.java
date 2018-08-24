@@ -16,23 +16,16 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import javax.cache.annotation.CacheDefaults;
-import javax.cache.annotation.CacheKeyGenerator;
-import javax.cache.annotation.CacheMethodDetails;
-import javax.cache.annotation.CachePut;
-import javax.cache.annotation.CacheRemove;
-import javax.cache.annotation.CacheRemoveAll;
-import javax.cache.annotation.CacheResolverFactory;
-import javax.cache.annotation.CacheResult;
-
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import javax.cache.annotation.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementation of the {@link JCacheOperationSource} interface that reads

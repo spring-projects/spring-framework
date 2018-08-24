@@ -16,9 +16,9 @@
 
 package org.springframework.jca.cci;
 
-import java.sql.SQLException;
-
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+
+import java.sql.SQLException;
 
 /**
  * Exception thrown when a ResultSet has been accessed in an invalid fashion.

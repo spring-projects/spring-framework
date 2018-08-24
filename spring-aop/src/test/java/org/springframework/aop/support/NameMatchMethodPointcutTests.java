@@ -18,7 +18,6 @@ package org.springframework.aop.support;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.tests.aop.interceptor.NopInterceptor;

@@ -16,9 +16,9 @@
 
 package org.springframework.jms.listener;
 
-import javax.jms.Session;
-
 import org.springframework.jms.connection.JmsResourceHolder;
+
+import javax.jms.Session;
 
 /**
  * JmsResourceHolder marker subclass that indicates local exposure,

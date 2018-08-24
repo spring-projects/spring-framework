@@ -16,9 +16,9 @@
 
 package org.springframework.jca.work;
 
-import javax.resource.spi.work.Work;
-
 import org.springframework.util.Assert;
+
+import javax.resource.spi.work.Work;
 
 /**
  * Simple Work adapter that delegates to a given Runnable.

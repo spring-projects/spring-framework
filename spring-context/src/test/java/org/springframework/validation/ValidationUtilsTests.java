@@ -17,7 +17,6 @@
 package org.springframework.validation;
 
 import org.junit.Test;
-
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 

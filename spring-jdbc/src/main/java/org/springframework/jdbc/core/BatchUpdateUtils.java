@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.lang.Nullable;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Generic utility methods for working with JDBC batch statements. Mainly for internal use

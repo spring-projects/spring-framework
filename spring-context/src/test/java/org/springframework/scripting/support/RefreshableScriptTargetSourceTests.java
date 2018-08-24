@@ -17,10 +17,9 @@
 package org.springframework.scripting.support;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.BeanFactory;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Rick Evans

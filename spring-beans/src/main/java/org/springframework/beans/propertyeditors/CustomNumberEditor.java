@@ -16,12 +16,12 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.beans.PropertyEditorSupport;
-import java.text.NumberFormat;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
+
+import java.beans.PropertyEditorSupport;
+import java.text.NumberFormat;
 
 /**
  * Property editor for any Number subclass such as Short, Integer, Long,

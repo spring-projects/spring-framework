@@ -18,7 +18,6 @@ package org.springframework.cache.aspectj;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.config.AbstractCacheAnnotationTests;
 import org.springframework.cache.config.CacheableService;

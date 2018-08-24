@@ -16,15 +16,15 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import java.security.Principal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link WebRequest} adapter for a JSF {@link javax.faces.context.FacesContext}.

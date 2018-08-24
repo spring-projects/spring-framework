@@ -16,10 +16,10 @@
 
 package org.springframework.validation.support;
 
-import java.util.Map;
-
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.validation.BindingResult;
+
+import java.util.Map;
 
 /**
  * Subclass of {@link org.springframework.ui.ExtendedModelMap} that automatically removes

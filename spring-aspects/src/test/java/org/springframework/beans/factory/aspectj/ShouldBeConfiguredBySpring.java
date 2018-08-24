@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.aspectj;
 
-import java.io.Serializable;
-
 import org.springframework.beans.factory.annotation.Configurable;
+
+import java.io.Serializable;
 
 @Configurable("configuredBean")
 @SuppressWarnings("serial")

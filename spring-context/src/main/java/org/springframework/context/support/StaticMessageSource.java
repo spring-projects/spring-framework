@@ -16,12 +16,12 @@
 
 package org.springframework.context.support;
 
+import org.springframework.util.Assert;
+
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import org.springframework.util.Assert;
 
 /**
  * Simple implementation of {@link org.springframework.context.MessageSource}

@@ -16,15 +16,14 @@
 
 package org.springframework.aop.framework;
 
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Test;
-
 import org.springframework.aop.SpringProxy;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.*;
 

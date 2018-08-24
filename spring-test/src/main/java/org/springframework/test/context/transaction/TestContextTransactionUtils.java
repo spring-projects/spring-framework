@@ -16,13 +16,8 @@
 
 package org.springframework.test.context.transaction;
 
-import java.util.Map;
-
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -36,6 +31,9 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import javax.sql.DataSource;
+import java.util.Map;
 
 /**
  * Utility methods for working with transactions and data access related beans

@@ -16,9 +16,9 @@
 
 package org.springframework.test.context.web;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.web.context.ServletContextAware;
+
+import javax.servlet.ServletContext;
 
 /**
  * Introduced to investigate claims in SPR-11145.

@@ -16,14 +16,14 @@
 
 package org.springframework.messaging.converter;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * A {@link MessageConverter} that supports MIME type "text/plain" with the

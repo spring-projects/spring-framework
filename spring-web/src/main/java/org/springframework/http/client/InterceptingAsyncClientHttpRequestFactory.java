@@ -16,12 +16,12 @@
 
 package org.springframework.http.client;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
+
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-
-import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 
 /**
  * Wrapper for a {@link AsyncClientHttpRequestFactory} that has support for

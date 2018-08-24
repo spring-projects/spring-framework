@@ -3,11 +3,11 @@
  */
 package org.springframework.tests.aop.advice;
 
+import org.springframework.aop.ThrowsAdvice;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
-
-import org.springframework.aop.ThrowsAdvice;
 
 @SuppressWarnings("serial")
 public class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {

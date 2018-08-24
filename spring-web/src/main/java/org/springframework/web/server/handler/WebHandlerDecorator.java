@@ -16,11 +16,10 @@
 
 package org.springframework.web.server.handler;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
+import reactor.core.publisher.Mono;
 
 /**
  * {@link WebHandler} that decorates and delegates to another.

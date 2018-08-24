@@ -16,18 +16,17 @@
 
 package org.springframework.cache.aspectj;
 
-import java.lang.reflect.Method;
+import org.aspectj.lang.annotation.RequiredTypes;
+import org.aspectj.lang.annotation.SuppressAjWarnings;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.cache.interceptor.CacheOperationInvoker;
+import org.springframework.cache.jcache.interceptor.JCacheAspectSupport;
+
 import javax.cache.annotation.CachePut;
 import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheRemoveAll;
 import javax.cache.annotation.CacheResult;
-
-import org.aspectj.lang.annotation.RequiredTypes;
-import org.aspectj.lang.annotation.SuppressAjWarnings;
-import org.aspectj.lang.reflect.MethodSignature;
-
-import org.springframework.cache.interceptor.CacheOperationInvoker;
-import org.springframework.cache.jcache.interceptor.JCacheAspectSupport;
+import java.lang.reflect.Method;
 
 /**
  * Concrete AspectJ cache aspect using JSR-107 standard annotations.

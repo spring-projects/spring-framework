@@ -16,13 +16,9 @@
 
 package org.springframework.web.bind.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.http.converter.HttpMessageConverter;
+
+import java.lang.annotation.*;
 
 /**
  * Annotation indicating a method parameter should be bound to the body of the web request.

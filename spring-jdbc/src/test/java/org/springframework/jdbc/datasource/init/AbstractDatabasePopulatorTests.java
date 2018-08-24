@@ -16,17 +16,18 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.junit.Test;
-
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Abstract base class for integration tests for {@link ResourceDatabasePopulator}

@@ -15,9 +15,9 @@
  */
 package org.springframework.beans.factory.support.security.support;
 
-import java.util.Properties;
-
 import org.springframework.beans.factory.FactoryBean;
+
+import java.util.Properties;
 
 /**
  * @author Costin Leau

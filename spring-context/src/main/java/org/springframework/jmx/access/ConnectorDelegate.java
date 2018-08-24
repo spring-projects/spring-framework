@@ -16,19 +16,18 @@
 
 package org.springframework.jmx.access;
 
-import java.io.IOException;
-import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.jmx.support.JmxUtils;
+import org.springframework.lang.Nullable;
+
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.jmx.MBeanServerNotFoundException;
-import org.springframework.jmx.support.JmxUtils;
-import org.springframework.lang.Nullable;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Internal helper class for managing a JMX connector.

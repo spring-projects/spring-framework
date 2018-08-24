@@ -16,16 +16,15 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.core.task.NoOpRunnable;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

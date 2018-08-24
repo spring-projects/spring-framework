@@ -16,16 +16,15 @@
 
 package org.springframework.cache.ehcache;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Status;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 /**
  * CacheManager backed by an EhCache {@link net.sf.ehcache.CacheManager}.

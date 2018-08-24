@@ -16,21 +16,17 @@
 
 package org.springframework.util;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.CoreMatchers.*;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.*;
+
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
-import static org.springframework.util.ObjectUtils.*;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 /**
  * Unit tests for {@link ObjectUtils}.

@@ -16,26 +16,21 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.io.IOException;
-
 import org.junit.Test;
-import test.mixin.Lockable;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.autoproxy.target.AbstractBeanFactoryBasedTargetSourceCreator;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
-import org.springframework.aop.target.CommonsPool2TargetSource;
-import org.springframework.aop.target.LazyInitTargetSource;
-import org.springframework.aop.target.PrototypeTargetSource;
-import org.springframework.aop.target.ThreadLocalTargetSource;
+import org.springframework.aop.target.*;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.CountingTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
+import test.mixin.Lockable;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 

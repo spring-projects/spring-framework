@@ -16,16 +16,16 @@
 
 package org.springframework.mock.http.client;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Mock implementation of {@link ClientHttpRequest}.

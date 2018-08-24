@@ -16,27 +16,11 @@
 
 package org.springframework.format.datetime.joda;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.MonthDay;
-import org.joda.time.Period;
-import org.joda.time.YearMonth;
+import org.joda.time.*;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
@@ -46,7 +30,9 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
-import static org.hamcrest.Matchers.*;
+import java.util.*;
+
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 
 /**

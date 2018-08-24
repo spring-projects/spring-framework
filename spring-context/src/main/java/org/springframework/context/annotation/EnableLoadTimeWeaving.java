@@ -16,14 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.context.weaving.DefaultContextLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
+
+import java.lang.annotation.*;
 
 /**
  * Activates a Spring {@link LoadTimeWeaver} for this application context, available as

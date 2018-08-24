@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.support.incrementer;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 
 /**
  * Base implementation of {@link DataFieldMaxValueIncrementer} that delegates

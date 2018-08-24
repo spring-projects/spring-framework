@@ -16,16 +16,15 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.lang.reflect.Method;
-
 import org.junit.Test;
-
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Juergen Hoeller

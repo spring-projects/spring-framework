@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -24,8 +26,6 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Miscellaneous utility methods for number conversion and parsing.

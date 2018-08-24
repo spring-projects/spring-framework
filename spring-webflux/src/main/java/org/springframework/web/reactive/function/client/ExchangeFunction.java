@@ -16,9 +16,8 @@
 
 package org.springframework.web.reactive.function.client;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
 
 /**
  * Represents a function that exchanges a {@linkplain ClientRequest request} for a (delayed)

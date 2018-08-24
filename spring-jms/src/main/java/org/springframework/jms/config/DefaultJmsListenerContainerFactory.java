@@ -16,12 +16,12 @@
 
 package org.springframework.jms.config;
 
-import java.util.concurrent.Executor;
-
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.backoff.BackOff;
+
+import java.util.concurrent.Executor;
 
 /**
  * A {@link JmsListenerContainerFactory} implementation to build a regular

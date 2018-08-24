@@ -16,13 +16,13 @@
 
 package org.springframework.cache.transaction;
 
-import java.util.Collection;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Collection;
 
 /**
  * Proxy for a target {@link CacheManager}, exposing transaction-aware {@link Cache} objects

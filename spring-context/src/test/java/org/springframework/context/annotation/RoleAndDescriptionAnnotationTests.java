@@ -17,13 +17,12 @@
 package org.springframework.context.annotation;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.role.ComponentWithRole;
 import org.springframework.context.annotation.role.ComponentWithoutRole;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests the use of the @Role and @Description annotation on @Bean methods and @Component classes.

@@ -16,12 +16,12 @@
 
 package org.springframework.web.client;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 
 /**
  * Common base class for exceptions that contain actual HTTP response data.

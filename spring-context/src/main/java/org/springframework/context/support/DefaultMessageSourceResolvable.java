@@ -16,12 +16,12 @@
 
 package org.springframework.context.support;
 
-import java.io.Serializable;
-
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.io.Serializable;
 
 /**
  * Default implementation of the {@link MessageSourceResolvable} interface.

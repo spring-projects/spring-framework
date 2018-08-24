@@ -16,16 +16,11 @@
 
 package org.springframework.test.context.transaction;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.mockito.BDDMockito;
-
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
@@ -36,9 +31,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.transaction.annotation.Propagation.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 
 /**
  * Unit tests for {@link TransactionalTestExecutionListener}.

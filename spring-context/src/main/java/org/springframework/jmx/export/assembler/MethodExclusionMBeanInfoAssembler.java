@@ -16,17 +16,11 @@
 
 package org.springframework.jmx.export.assembler;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * {@code AbstractReflectiveMBeanInfoAssembler} subclass that allows

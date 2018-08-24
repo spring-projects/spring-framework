@@ -18,7 +18,6 @@ package org.springframework.aop.config;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;

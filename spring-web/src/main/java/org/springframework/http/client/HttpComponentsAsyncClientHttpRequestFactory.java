@@ -16,10 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.net.URI;
-
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.Configurable;
@@ -30,11 +26,14 @@ import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.protocol.HttpContext;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Asynchronous extension of the {@link HttpComponentsClientHttpRequestFactory}. Uses

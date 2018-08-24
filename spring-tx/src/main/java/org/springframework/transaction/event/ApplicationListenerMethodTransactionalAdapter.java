@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.event;
 
-import java.lang.reflect.Method;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.context.event.EventListener;
@@ -26,6 +24,8 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.lang.reflect.Method;
 
 /**
  * {@link GenericApplicationListener} adapter that delegates the processing of

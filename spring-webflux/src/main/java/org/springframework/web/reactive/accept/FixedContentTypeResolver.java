@@ -16,14 +16,13 @@
 
 package org.springframework.web.reactive.accept;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Resolver that always resolves to a fixed list of media types. This can be

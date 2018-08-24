@@ -16,9 +16,9 @@
 
 package org.springframework.tests.aop.advice;
 
-import java.lang.reflect.Method;
-
 import org.springframework.aop.MethodBeforeAdvice;
+
+import java.lang.reflect.Method;
 
 /**
  * Simple before advice example that we can use for counting checks.

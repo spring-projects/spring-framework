@@ -16,13 +16,13 @@
 
 package org.springframework.jms.config;
 
-import javax.jms.MessageListener;
-
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.lang.Nullable;
+
+import javax.jms.MessageListener;
 
 /**
  * Base model for a JMS listener endpoint

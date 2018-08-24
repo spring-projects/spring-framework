@@ -16,11 +16,11 @@
 
 package org.springframework.mock.web.test;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspWriter;
 
 /**
  * Mock implementation of the {@link javax.servlet.jsp.JspWriter} class.

@@ -19,7 +19,7 @@ package org.springframework.beans;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link PropertyMatches}.

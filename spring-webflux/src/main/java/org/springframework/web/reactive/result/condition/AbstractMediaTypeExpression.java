@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.condition;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.NotAcceptableStatusException;

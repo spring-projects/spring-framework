@@ -16,16 +16,15 @@
 
 package org.springframework.web.servlet.view.document;
 
-import java.io.IOException;
-import java.util.Map;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.web.servlet.view.AbstractView;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Workbook;
-
-import org.springframework.web.servlet.view.AbstractView;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Convenient superclass for Excel document views in traditional XLS format.

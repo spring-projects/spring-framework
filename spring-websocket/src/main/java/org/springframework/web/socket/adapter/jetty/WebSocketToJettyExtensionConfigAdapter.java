@@ -16,11 +16,10 @@
 
 package org.springframework.web.socket.adapter.jetty;
 
-import java.util.Map;
-
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
-
 import org.springframework.web.socket.WebSocketExtension;
+
+import java.util.Map;
 
 /**
  * @author Rossen Stoyanchev

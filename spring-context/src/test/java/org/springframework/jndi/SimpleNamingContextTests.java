@@ -16,6 +16,13 @@
 
 package org.springframework.jndi;
 
+import org.junit.Test;
+import org.springframework.tests.mock.jndi.SimpleNamingContext;
+import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
+
+import javax.naming.*;
+import javax.naming.spi.InitialContextFactory;
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -23,20 +30,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.naming.Binding;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NameClassPair;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.spi.InitialContextFactory;
-import javax.sql.DataSource;
-
-import org.junit.Test;
-
-import org.springframework.tests.mock.jndi.SimpleNamingContext;
-import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 
 import static org.junit.Assert.*;
 

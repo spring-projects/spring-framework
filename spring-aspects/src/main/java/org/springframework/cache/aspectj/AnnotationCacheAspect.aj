@@ -16,11 +16,7 @@
 
 package org.springframework.cache.aspectj;
 
-import org.springframework.cache.annotation.AnnotationCacheOperationSource;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
+import org.springframework.cache.annotation.*;
 
 /**
  * Concrete AspectJ cache aspect using Spring's @{@link Cacheable} annotation.

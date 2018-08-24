@@ -16,17 +16,17 @@
 
 package org.springframework.context.annotation.configuration;
 
-import javax.annotation.Resource;
-
 import org.junit.Test;
-
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import static org.junit.Assert.*;
-import static org.springframework.beans.factory.config.BeanDefinition.*;
+import javax.annotation.Resource;
+
+import static org.junit.Assert.assertNotNull;
+import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
+import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
 /**
  * @author Marcin Piela

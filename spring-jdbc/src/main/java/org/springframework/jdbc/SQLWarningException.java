@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc;
 
-import java.sql.SQLWarning;
-
 import org.springframework.dao.UncategorizedDataAccessException;
+
+import java.sql.SQLWarning;
 
 /**
  * Exception thrown when we're not ignoring {@link java.sql.SQLWarning SQLWarnings}.

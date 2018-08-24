@@ -16,20 +16,19 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.List;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A simple {@code ResourceResolver} that tries to find a resource under the given

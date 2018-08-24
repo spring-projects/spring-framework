@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import org.junit.Test;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -25,12 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 import static org.springframework.core.GenericTypeResolver.*;
-import static org.springframework.util.ReflectionUtils.*;
+import static org.springframework.util.ReflectionUtils.findMethod;
 
 /**
  * @author Juergen Hoeller

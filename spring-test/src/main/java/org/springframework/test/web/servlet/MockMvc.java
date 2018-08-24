@@ -16,12 +16,6 @@
 
 package org.springframework.test.web.servlet;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.ServletContext;
-
 import org.springframework.beans.Mergeable;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockFilterChain;
@@ -31,6 +25,12 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.ServletContext;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <strong>Main entry point for server-side Spring MVC test support.</strong>

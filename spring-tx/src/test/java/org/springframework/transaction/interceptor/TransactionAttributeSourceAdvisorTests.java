@@ -16,11 +16,10 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.util.Properties;
-
 import org.junit.Test;
-
 import org.springframework.util.SerializationTestUtils;
+
+import java.util.Properties;
 
 /**
  * @author Rod Johnson

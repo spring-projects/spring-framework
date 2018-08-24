@@ -16,21 +16,16 @@
 
 package org.springframework.mock.web;
 
-import java.util.Map;
-import java.util.Set;
+import org.junit.Test;
+import org.springframework.http.MediaType;
+
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRegistration;
+import java.util.Map;
+import java.util.Set;
 
-import org.junit.Test;
-
-import org.springframework.http.MediaType;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

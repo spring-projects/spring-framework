@@ -16,16 +16,16 @@
 
 package org.springframework.mail.javamail;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.activation.FileTypeMap;
-import javax.activation.MimetypesFileTypeMap;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
+
+import javax.activation.FileTypeMap;
+import javax.activation.MimetypesFileTypeMap;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Spring-configurable {@code FileTypeMap} implementation that will read

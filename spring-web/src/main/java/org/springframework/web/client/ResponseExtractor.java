@@ -16,10 +16,10 @@
 
 package org.springframework.web.client;
 
-import java.io.IOException;
-
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
 
 /**
  * Generic callback interface used by {@link RestTemplate}'s retrieval methods

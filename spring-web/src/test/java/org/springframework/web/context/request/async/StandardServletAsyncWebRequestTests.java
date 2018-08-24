@@ -17,25 +17,17 @@
 package org.springframework.web.context.request.async;
 
 
-import java.util.function.Consumer;
-
-import javax.servlet.AsyncEvent;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockAsyncContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import javax.servlet.AsyncEvent;
+import java.util.function.Consumer;
+
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.verify;
 

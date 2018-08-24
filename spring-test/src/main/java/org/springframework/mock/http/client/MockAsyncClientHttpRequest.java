@@ -16,13 +16,13 @@
 
 package org.springframework.mock.http.client;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * An extension of {@link MockClientHttpRequest} that also implements

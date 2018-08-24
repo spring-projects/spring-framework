@@ -16,10 +16,6 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -35,6 +31,10 @@ import org.springframework.web.socket.sockjs.transport.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 /**
  * Base class for HTTP transport handlers that push messages to connected clients.

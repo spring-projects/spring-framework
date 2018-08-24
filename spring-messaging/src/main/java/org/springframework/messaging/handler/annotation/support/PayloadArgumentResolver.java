@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
-import java.lang.annotation.Annotation;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
@@ -31,12 +29,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
-import org.springframework.validation.SmartValidator;
-import org.springframework.validation.Validator;
+import org.springframework.validation.*;
 import org.springframework.validation.annotation.Validated;
+
+import java.lang.annotation.Annotation;
 
 /**
  * A resolver to extract and convert the payload of a message using a

@@ -16,19 +16,18 @@
 
 package org.springframework.ejb.access;
 
-import java.rmi.ConnectException;
-import java.rmi.RemoteException;
+import org.junit.Test;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.jndi.JndiTemplate;
+import org.springframework.remoting.RemoteAccessException;
+
 import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.naming.Context;
 import javax.naming.NamingException;
-
-import org.junit.Test;
-
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.jndi.JndiTemplate;
-import org.springframework.remoting.RemoteAccessException;
+import java.rmi.ConnectException;
+import java.rmi.RemoteException;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

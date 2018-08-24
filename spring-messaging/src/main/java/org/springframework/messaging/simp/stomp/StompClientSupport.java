@@ -16,13 +16,13 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.util.Arrays;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
+
+import java.util.Arrays;
 
 /**
  * Base class for STOMP client implementations.

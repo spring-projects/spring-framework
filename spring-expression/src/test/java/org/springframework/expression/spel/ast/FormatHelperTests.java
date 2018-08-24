@@ -16,13 +16,12 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.util.Arrays;
-
 import org.junit.Test;
-
 import org.springframework.core.convert.TypeDescriptor;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Andy Wilkinson

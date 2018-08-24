@@ -16,10 +16,6 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-
 import org.quartz.SchedulerConfigException;
 import org.quartz.impl.jdbcjobstore.JobStoreCMT;
 import org.quartz.impl.jdbcjobstore.SimpleSemaphore;
@@ -27,11 +23,14 @@ import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.SchedulerSignaler;
 import org.quartz.utils.ConnectionProvider;
 import org.quartz.utils.DBConnectionManager;
-
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.lang.Nullable;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Subclass of Quartz's JobStoreCMT class that delegates to a Spring-managed

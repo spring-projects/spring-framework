@@ -17,12 +17,12 @@
 package org.springframework.test.web.servlet.request;
 
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Rossen Stoyanchev

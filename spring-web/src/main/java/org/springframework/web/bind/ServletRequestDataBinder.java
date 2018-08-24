@@ -16,13 +16,13 @@
 
 package org.springframework.web.bind;
 
-import javax.servlet.ServletRequest;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.ServletRequest;
 
 /**
  * Special {@link org.springframework.validation.DataBinder} to perform data binding

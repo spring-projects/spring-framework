@@ -16,17 +16,16 @@
 
 package org.springframework.context.event;
 
-import java.lang.reflect.Constructor;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.lang.reflect.Constructor;
 
 /**
  * {@link MethodInterceptor Interceptor} that publishes an

@@ -15,12 +15,6 @@
  */
 package org.springframework.web.servlet.view.groovy;
 
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import javax.servlet.ServletContext;
-
 import groovy.text.Template;
 import groovy.text.TemplateEngine;
 import groovy.text.markup.MarkupTemplateEngine;
@@ -28,7 +22,6 @@ import groovy.text.markup.TemplateConfiguration;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -40,8 +33,15 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.ServletContext;
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Brian Clozel

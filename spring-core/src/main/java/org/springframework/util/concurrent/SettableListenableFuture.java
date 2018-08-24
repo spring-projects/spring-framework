@@ -16,14 +16,10 @@
 
 package org.springframework.util.concurrent;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.*;
 
 /**
  * A {@link ListenableFuture} whose value can be set via {@link #set(Object)}

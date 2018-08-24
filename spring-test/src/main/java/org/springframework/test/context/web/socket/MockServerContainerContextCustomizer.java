@@ -16,13 +16,13 @@
 
 package org.springframework.test.context.web.socket;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.ServletContext;
 
 /**
  * {@link ContextCustomizer} that instantiates a new {@link MockServerContainer}

@@ -16,14 +16,14 @@
 
 package org.springframework.expression.spel.support;
 
-import java.lang.reflect.Constructor;
-
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Constructor;
 
 /**
  * A simple ConstructorExecutor implementation that runs a constructor using reflective

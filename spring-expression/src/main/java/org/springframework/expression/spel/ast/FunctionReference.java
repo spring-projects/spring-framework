@@ -16,9 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -34,6 +31,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined

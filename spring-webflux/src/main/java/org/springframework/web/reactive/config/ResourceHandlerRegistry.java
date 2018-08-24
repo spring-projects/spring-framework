@@ -16,12 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
@@ -29,6 +23,8 @@ import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
 import org.springframework.web.server.WebHandler;
+
+import java.util.*;
 
 /**
  * Stores registrations of resource handlers for serving static resources such

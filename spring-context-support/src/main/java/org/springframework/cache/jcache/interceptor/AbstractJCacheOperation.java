@@ -16,23 +16,19 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import javax.cache.annotation.CacheInvocationParameter;
-import javax.cache.annotation.CacheKey;
-import javax.cache.annotation.CacheMethodDetails;
-import javax.cache.annotation.CacheValue;
-
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ExceptionTypeFilter;
 
-import static java.util.Arrays.*;
+import javax.cache.annotation.CacheInvocationParameter;
+import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.CacheMethodDetails;
+import javax.cache.annotation.CacheValue;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
+
+import static java.util.Arrays.asList;
 
 /**
  * A base {@link JCacheOperation} implementation.

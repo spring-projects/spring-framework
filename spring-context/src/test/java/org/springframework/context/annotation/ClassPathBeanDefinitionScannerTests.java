@@ -16,14 +16,9 @@
 
 package org.springframework.context.annotation;
 
-import example.scannable.CustomComponent;
-import example.scannable.FooService;
-import example.scannable.FooServiceImpl;
-import example.scannable.NamedStubDao;
-import example.scannable.StubFooDao;
+import example.scannable.*;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
-
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;

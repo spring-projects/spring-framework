@@ -16,15 +16,15 @@
 
 package org.springframework.jdbc.core.support;
 
-import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.jdbc.core.ResultSetExtractor;
+
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Abstract ResultSetExtractor implementation that assumes streaming of LOB data.

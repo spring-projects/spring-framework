@@ -16,25 +16,15 @@
 
 package org.springframework.format.datetime.standard;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.MonthDay;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.Period;
-import java.time.YearMonth;
-import java.time.ZonedDateTime;
+import org.springframework.format.FormatterRegistrar;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.EnumMap;
 import java.util.Map;
-
-import org.springframework.format.FormatterRegistrar;
-import org.springframework.format.FormatterRegistry;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 /**
  * Configures the JSR-310 <code>java.time</code> formatting system for use with Spring.

@@ -16,20 +16,15 @@
 
 package org.springframework.util.xml;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.ProcessingInstruction;
-import org.w3c.dom.Text;
+import org.springframework.util.Assert;
+import org.w3c.dom.*;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
-import org.springframework.util.Assert;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * SAX {@code ContentHandler} that transforms callback calls to DOM {@code Node}s.

@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc;
 
-import java.sql.SQLException;
-
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.lang.Nullable;
+
+import java.sql.SQLException;
 
 /**
  * Fatal exception thrown when we can't connect to an RDBMS using JDBC.

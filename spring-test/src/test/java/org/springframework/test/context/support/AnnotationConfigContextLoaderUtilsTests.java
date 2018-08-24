@@ -16,16 +16,16 @@
 
 package org.springframework.test.context.support;
 
+import org.junit.Test;
+import org.springframework.context.annotation.Configuration;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
-import org.springframework.context.annotation.Configuration;
-
 import static org.junit.Assert.*;
-import static org.springframework.test.context.support.AnnotationConfigContextLoaderUtils.*;
+import static org.springframework.test.context.support.AnnotationConfigContextLoaderUtils.detectDefaultConfigurationClasses;
 
 /**
  * Unit tests for {@link AnnotationConfigContextLoaderUtils}.

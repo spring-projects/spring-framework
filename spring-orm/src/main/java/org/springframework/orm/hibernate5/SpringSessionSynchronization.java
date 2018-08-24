@@ -19,7 +19,6 @@ package org.springframework.orm.hibernate5;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.support.TransactionSynchronization;

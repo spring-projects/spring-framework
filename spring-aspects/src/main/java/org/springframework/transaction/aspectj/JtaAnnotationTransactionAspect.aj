@@ -16,10 +16,7 @@
 
 package org.springframework.transaction.aspectj;
 
-import javax.transaction.Transactional;
-
 import org.aspectj.lang.annotation.RequiredTypes;
-
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 
 /**

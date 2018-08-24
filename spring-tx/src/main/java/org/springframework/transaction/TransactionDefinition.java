@@ -16,9 +16,9 @@
 
 package org.springframework.transaction;
 
-import java.sql.Connection;
-
 import org.springframework.lang.Nullable;
+
+import java.sql.Connection;
 
 /**
  * Interface that defines Spring-compliant transaction properties.

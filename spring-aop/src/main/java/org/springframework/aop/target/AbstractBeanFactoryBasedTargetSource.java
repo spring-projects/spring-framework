@@ -16,15 +16,14 @@
 
 package org.springframework.aop.target;
 
-import java.io.Serializable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.ObjectUtils;
+
+import java.io.Serializable;
 
 /**
  * Base class for {@link org.springframework.aop.TargetSource} implementations

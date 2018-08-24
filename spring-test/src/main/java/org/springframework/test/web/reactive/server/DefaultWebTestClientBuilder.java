@@ -16,10 +16,6 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.function.Consumer;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -31,6 +27,10 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.util.UriBuilderFactory;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Default implementation of {@link WebTestClient.Builder}.

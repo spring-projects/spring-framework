@@ -16,10 +16,10 @@
 
 package org.springframework.core;
 
+import org.junit.Test;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 

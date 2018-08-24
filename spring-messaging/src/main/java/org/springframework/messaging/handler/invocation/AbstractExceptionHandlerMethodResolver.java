@@ -16,16 +16,16 @@
 
 package org.springframework.messaging.handler.invocation;
 
+import org.springframework.core.ExceptionDepthComparator;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.core.ExceptionDepthComparator;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Cache exception handling method mappings and provide options to look up a method

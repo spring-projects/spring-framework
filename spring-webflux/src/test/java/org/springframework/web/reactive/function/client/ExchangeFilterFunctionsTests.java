@@ -16,16 +16,15 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.net.URI;
-
 import org.junit.Test;
+import org.springframework.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpHeaders;
+import java.net.URI;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpMethod.*;
+import static org.mockito.Mockito.mock;
+import static org.springframework.http.HttpMethod.GET;
 
 /**
  * @author Arjen Poutsma

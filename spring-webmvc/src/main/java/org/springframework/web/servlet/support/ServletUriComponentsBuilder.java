@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.support;
 
-import java.util.Enumeration;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -31,6 +28,9 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 
 /**
  * UriComponentsBuilder with additional static factory methods to create links

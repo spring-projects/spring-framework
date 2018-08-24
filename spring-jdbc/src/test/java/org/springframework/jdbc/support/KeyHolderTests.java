@@ -16,20 +16,19 @@
 
 package org.springframework.jdbc.support;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link KeyHolder} and {@link GeneratedKeyHolder}.

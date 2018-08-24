@@ -15,13 +15,12 @@
  */
 package org.springframework.web.util;
 
+import org.junit.Test;
+import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.Test;
-
-import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
 import static java.util.Collections.singletonMap;
 import static junit.framework.TestCase.assertEquals;

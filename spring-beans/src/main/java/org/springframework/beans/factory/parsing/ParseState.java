@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.parsing;
 
-import java.util.Stack;
-
 import org.springframework.lang.Nullable;
+
+import java.util.Stack;
 
 /**
  * Simple {@link Stack}-based structure for tracking the logical position during

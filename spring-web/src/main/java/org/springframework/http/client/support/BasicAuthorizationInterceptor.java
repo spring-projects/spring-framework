@@ -16,9 +16,6 @@
 
 package org.springframework.http.client.support;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -26,6 +23,9 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * {@link ClientHttpRequestInterceptor} to apply a BASIC authorization header.

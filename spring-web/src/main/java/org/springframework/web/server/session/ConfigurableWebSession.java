@@ -15,12 +15,11 @@
  */
 package org.springframework.web.server.session;
 
-import java.time.Instant;
-import java.util.function.Supplier;
-
+import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.server.WebSession;
+import java.time.Instant;
+import java.util.function.Supplier;
 
 /**
  * Extend {@link WebSession} with management operations meant for internal use

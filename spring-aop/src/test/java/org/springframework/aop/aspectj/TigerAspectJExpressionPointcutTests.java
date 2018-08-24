@@ -16,19 +16,19 @@
 
 package org.springframework.aop.aspectj;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.tests.sample.beans.TestBean;
+import test.annotation.EmptySpringAnnotation;
+import test.annotation.transaction.Tx;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import test.annotation.EmptySpringAnnotation;
-import test.annotation.transaction.Tx;
-
-import org.springframework.tests.sample.beans.TestBean;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Java5-specific {@link AspectJExpressionPointcutTests}.

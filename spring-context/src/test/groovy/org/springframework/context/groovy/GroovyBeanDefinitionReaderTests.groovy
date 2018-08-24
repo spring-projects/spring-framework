@@ -17,7 +17,6 @@
 package org.springframework.context.groovy
 
 import org.junit.Test
-
 import org.springframework.aop.SpringProxy
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.config.Scope
@@ -26,7 +25,8 @@ import org.springframework.context.support.GenericApplicationContext
 import org.springframework.context.support.GenericGroovyApplicationContext
 import org.springframework.stereotype.Component
 
-import static groovy.test.GroovyAssert.*
+import static groovy.test.GroovyAssert.shouldFail
+import static org.junit.Assert.*
 
 /**
  * @author Jeff Brown

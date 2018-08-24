@@ -16,12 +16,12 @@
 
 package org.springframework.web.reactive.function;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Exception thrown to indicate that a {@code Content-Type} is not supported.

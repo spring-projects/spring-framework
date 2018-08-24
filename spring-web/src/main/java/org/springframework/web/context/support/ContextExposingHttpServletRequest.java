@@ -16,14 +16,14 @@
 
 package org.springframework.web.context.support;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * HttpServletRequest decorator that makes all Spring beans in a

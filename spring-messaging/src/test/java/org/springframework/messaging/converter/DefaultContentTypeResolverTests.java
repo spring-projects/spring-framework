@@ -16,18 +16,18 @@
 
 package org.springframework.messaging.converter;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test fixture for {@link org.springframework.messaging.converter.DefaultContentTypeResolver}.

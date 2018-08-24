@@ -16,8 +16,8 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import java.util.List;
 import javax.persistence.spi.PersistenceUnitInfo;
+import java.util.List;
 
 /**
  * Extension of the standard JPA PersistenceUnitInfo interface, for advanced collaboration

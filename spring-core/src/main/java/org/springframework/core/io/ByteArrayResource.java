@@ -16,13 +16,13 @@
 
 package org.springframework.core.io;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * {@link Resource} implementation for a given byte array.

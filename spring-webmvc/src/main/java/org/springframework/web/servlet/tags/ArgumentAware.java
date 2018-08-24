@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.tags;
 
-import javax.servlet.jsp.JspTagException;
-
 import org.springframework.lang.Nullable;
+
+import javax.servlet.jsp.JspTagException;
 
 /**
  * Allows implementing tag to utilize nested {@code spring:argument} tags.

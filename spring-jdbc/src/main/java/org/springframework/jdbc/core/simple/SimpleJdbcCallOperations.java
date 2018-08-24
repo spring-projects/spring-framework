@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.core.simple;
 
-import java.util.Map;
-
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+
+import java.util.Map;
 
 /**
  * Interface specifying the API for a Simple JDBC Call implemented by {@link SimpleJdbcCall}.

@@ -16,25 +16,16 @@
 
 package org.springframework.oxm.support;
 
-import java.io.IOException;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.sax.SAXSource;
-
-import org.xml.sax.ContentHandler;
-import org.xml.sax.DTDHandler;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.ext.LexicalHandler;
-
 import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
+import org.xml.sax.*;
+import org.xml.sax.ext.LexicalHandler;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.sax.SAXSource;
+import java.io.IOException;
 
 /**
  * {@link Source} implementation that uses a {@link Marshaller}.Can be constructed with a

@@ -16,12 +16,12 @@
 
 package org.springframework.remoting.rmi;
 
+import org.springframework.lang.Nullable;
+import org.springframework.remoting.support.RemoteInvocation;
+
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-
-import org.springframework.lang.Nullable;
-import org.springframework.remoting.support.RemoteInvocation;
 
 /**
  * Interface for RMI invocation handlers instances on the server,

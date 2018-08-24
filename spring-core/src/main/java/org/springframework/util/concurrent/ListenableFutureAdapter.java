@@ -16,9 +16,9 @@
 
 package org.springframework.util.concurrent;
 
-import java.util.concurrent.ExecutionException;
-
 import org.springframework.lang.Nullable;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Abstract class that adapts a {@link ListenableFuture} parameterized over S into a

@@ -16,25 +16,20 @@
 
 package org.springframework.remoting.jaxws;
 
+import org.springframework.beans.factory.*;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
+import javax.jws.WebService;
+import javax.xml.ws.Endpoint;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.WebServiceProvider;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import javax.jws.WebService;
-import javax.xml.ws.Endpoint;
-import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.WebServiceProvider;
-
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.CannotLoadBeanClassException;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Abstract exporter for JAX-WS services, autodetecting annotated service beans

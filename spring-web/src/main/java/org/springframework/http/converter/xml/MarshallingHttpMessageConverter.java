@@ -16,10 +16,6 @@
 
 package org.springframework.http.converter.xml;
 
-import java.io.IOException;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -31,6 +27,10 @@ import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.util.Assert;
+
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import java.io.IOException;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}

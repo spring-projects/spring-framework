@@ -16,14 +16,9 @@
 
 package org.springframework.jms.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.messaging.handler.annotation.MessageMapping;
+
+import java.lang.annotation.*;
 
 /**
  * Annotation that marks a method to be the target of a JMS message listener on the

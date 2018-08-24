@@ -16,18 +16,17 @@
 
 package org.springframework.orm.hibernate5;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import org.hibernate.Filter;
 import org.hibernate.LockMode;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.DetachedCriteria;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.lang.Nullable;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Interface that specifies a basic set of Hibernate operations,

@@ -16,10 +16,10 @@
 
 package org.springframework.expression;
 
-import java.util.List;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
+
+import java.util.List;
 
 /**
  * A method resolver attempts locate a method and returns a command executor that can be

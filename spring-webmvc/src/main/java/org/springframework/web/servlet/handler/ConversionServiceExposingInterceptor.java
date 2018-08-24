@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.io.IOException;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.util.Assert;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.core.convert.ConversionService;
-import org.springframework.util.Assert;
+import java.io.IOException;
 
 /**
  * Interceptor that places the configured {@link ConversionService} in request scope

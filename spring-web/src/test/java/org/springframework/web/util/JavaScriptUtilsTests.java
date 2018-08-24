@@ -16,11 +16,11 @@
 
 package org.springframework.web.util;
 
-import java.io.UnsupportedEncodingException;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.io.UnsupportedEncodingException;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for {@link JavaScriptUtils}.

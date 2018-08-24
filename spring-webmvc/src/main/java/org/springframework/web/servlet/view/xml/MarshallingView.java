@@ -16,19 +16,19 @@
 
 package org.springframework.web.servlet.view.xml;
 
-import java.io.ByteArrayOutputStream;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBElement;
-import javax.xml.transform.stream.StreamResult;
-
 import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBElement;
+import javax.xml.transform.stream.StreamResult;
+import java.io.ByteArrayOutputStream;
+import java.util.Map;
 
 /**
  * Spring-MVC {@link View} that allows for response context to be rendered as the result

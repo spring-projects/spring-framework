@@ -16,18 +16,17 @@
 
 package org.springframework.transaction.jta;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
+
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
 
 /**
  * Adapter that implements the JTA {@link javax.transaction.Synchronization}

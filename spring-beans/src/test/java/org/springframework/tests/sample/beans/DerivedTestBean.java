@@ -16,10 +16,10 @@
 
 package org.springframework.tests.sample.beans;
 
-import java.io.Serializable;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
+
+import java.io.Serializable;
 
 /**
  * @author Juergen Hoeller

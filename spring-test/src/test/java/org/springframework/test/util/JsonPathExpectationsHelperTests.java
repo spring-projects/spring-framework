@@ -20,7 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.Is.is;
 
 /**
  * Unit tests for {@link JsonPathExpectationsHelper}.

@@ -16,14 +16,14 @@
 
 package org.springframework.mock.web.test;
 
+import org.springframework.util.Assert;
+
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-
-import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.FilterConfig} interface.

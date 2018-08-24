@@ -16,14 +16,14 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * An adapter for a target {@link javax.sql.DataSource}, applying the current

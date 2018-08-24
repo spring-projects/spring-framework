@@ -16,21 +16,15 @@
 
 package org.springframework.jca.cci;
 
-import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
-import javax.resource.cci.Interaction;
-import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.Record;
-import javax.resource.cci.RecordFactory;
-
 import org.junit.Test;
-
 import org.springframework.jca.cci.core.RecordCreator;
 import org.springframework.jca.cci.object.MappingRecordOperation;
 import org.springframework.jca.cci.object.SimpleRecordOperation;
 
-import static org.junit.Assert.*;
+import javax.resource.ResourceException;
+import javax.resource.cci.*;
+
+import static org.junit.Assert.assertSame;
 import static org.mockito.BDDMockito.*;
 
 /**

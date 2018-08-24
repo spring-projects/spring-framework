@@ -16,9 +16,9 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.beans.PropertyEditorSupport;
-
 import org.springframework.util.StringUtils;
+
+import java.beans.PropertyEditorSupport;
 
 /**
  * Editor for {@code java.util.Locale}, to directly populate a Locale property.

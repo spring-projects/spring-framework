@@ -16,10 +16,10 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.beans.PropertyEditorSupport;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.beans.PropertyEditorSupport;
 
 /**
  * Editor for a {@link Character}, to populate a property

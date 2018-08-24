@@ -16,9 +16,9 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletConfig;
-
 import org.springframework.beans.factory.Aware;
+
+import javax.servlet.ServletConfig;
 
 /**
  * Interface to be implemented by any object that wishes to be notified of the

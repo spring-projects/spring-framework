@@ -18,7 +18,7 @@ package org.springframework.test.context.web;
 
 import org.junit.Test;
 
-import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
  * Introduced to investigate claims in SPR-11145.

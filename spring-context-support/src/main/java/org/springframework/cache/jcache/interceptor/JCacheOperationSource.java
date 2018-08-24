@@ -16,9 +16,9 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import java.lang.reflect.Method;
-
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Method;
 
 /**
  * Interface used by {@link JCacheInterceptor}. Implementations know how to source

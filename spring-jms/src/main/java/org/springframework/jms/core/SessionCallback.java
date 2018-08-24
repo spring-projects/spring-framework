@@ -16,10 +16,10 @@
 
 package org.springframework.jms.core;
 
+import org.springframework.lang.Nullable;
+
 import javax.jms.JMSException;
 import javax.jms.Session;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Callback for executing any number of operations on a provided {@link Session}.

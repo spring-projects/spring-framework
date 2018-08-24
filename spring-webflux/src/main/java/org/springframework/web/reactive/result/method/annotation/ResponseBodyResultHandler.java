@@ -16,10 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.List;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -29,6 +25,9 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 /**
  * {@code HandlerResultHandler} that handles return values from methods annotated

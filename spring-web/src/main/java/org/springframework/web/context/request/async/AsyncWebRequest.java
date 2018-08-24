@@ -16,10 +16,10 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.function.Consumer;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.function.Consumer;
 
 /**
  * Extends {@link NativeWebRequest} with methods for asynchronous request processing.

@@ -16,12 +16,12 @@
 
 package org.springframework.beans.propertyeditors;
 
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
 import java.beans.PropertyEditorSupport;
 import java.util.Locale;
 import java.util.ResourceBundle;
-
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link java.beans.PropertyEditor} implementation for standard JDK

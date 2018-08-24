@@ -16,13 +16,13 @@
 
 package org.springframework.mail;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
+
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Exception thrown when a mail sending error is encountered.

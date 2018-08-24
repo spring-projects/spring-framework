@@ -16,15 +16,14 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
-import java.io.File;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
-
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.http.server.reactive.TomcatHttpHandlerAdapter;
 import org.springframework.util.Assert;
+
+import java.io.File;
 
 /**
  * @author Rossen Stoyanchev

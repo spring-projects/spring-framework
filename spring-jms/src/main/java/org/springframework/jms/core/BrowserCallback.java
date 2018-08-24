@@ -16,11 +16,11 @@
 
 package org.springframework.jms.core;
 
+import org.springframework.lang.Nullable;
+
 import javax.jms.JMSException;
 import javax.jms.QueueBrowser;
 import javax.jms.Session;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Callback for browsing the messages in a JMS queue.

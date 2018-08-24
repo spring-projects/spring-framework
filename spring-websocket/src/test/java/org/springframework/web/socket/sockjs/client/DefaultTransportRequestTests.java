@@ -16,17 +16,11 @@
 
 package org.springframework.web.socket.sockjs.client;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Date;
-import java.util.concurrent.ExecutionException;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -34,6 +28,11 @@ import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

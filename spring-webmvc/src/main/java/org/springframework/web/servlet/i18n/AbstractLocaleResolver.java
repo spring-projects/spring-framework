@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.i18n;
 
-import java.util.Locale;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.LocaleResolver;
+
+import java.util.Locale;
 
 /**
  * Abstract base class for {@link LocaleResolver} implementations.

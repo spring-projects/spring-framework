@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.core.namedparam;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * {@link SqlParameterSource} implementation that holds a given Map of parameters.

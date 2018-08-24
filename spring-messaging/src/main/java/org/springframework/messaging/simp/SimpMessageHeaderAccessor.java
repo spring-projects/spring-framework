@@ -16,10 +16,6 @@
 
 package org.springframework.messaging.simp;
 
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.IdTimestampMessageHeaderInitializer;
@@ -27,6 +23,10 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A base class for working with message headers in simple messaging protocols that

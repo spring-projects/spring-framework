@@ -16,16 +16,15 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * @author Arjen Poutsma

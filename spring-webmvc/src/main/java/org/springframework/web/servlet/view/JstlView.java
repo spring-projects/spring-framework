@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.view;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.context.MessageSource;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.support.RequestContext;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Specialization of {@link InternalResourceView} for JSTL pages,

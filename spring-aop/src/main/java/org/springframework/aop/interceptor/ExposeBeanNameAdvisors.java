@@ -18,7 +18,6 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;

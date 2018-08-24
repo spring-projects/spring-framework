@@ -16,18 +16,18 @@
 
 package org.springframework.jca.cci.object;
 
-import java.sql.SQLException;
-import javax.resource.ResourceException;
-import javax.resource.cci.ConnectionFactory;
-import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.Record;
-import javax.resource.cci.RecordFactory;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.jca.cci.core.RecordCreator;
 import org.springframework.jca.cci.core.RecordExtractor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.resource.ResourceException;
+import javax.resource.cci.ConnectionFactory;
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.Record;
+import javax.resource.cci.RecordFactory;
+import java.sql.SQLException;
 
 /**
  * EIS operation object that expects mapped input and output objects,

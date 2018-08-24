@@ -16,9 +16,9 @@
 
 package org.springframework.jndi;
 
-import javax.naming.NamingException;
-
 import org.springframework.core.env.PropertySource;
+
+import javax.naming.NamingException;
 
 /**
  * {@link PropertySource} implementation that reads properties from an underlying Spring

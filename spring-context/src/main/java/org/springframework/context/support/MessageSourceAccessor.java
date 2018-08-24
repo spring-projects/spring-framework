@@ -16,13 +16,13 @@
 
 package org.springframework.context.support;
 
-import java.util.Locale;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.lang.Nullable;
+
+import java.util.Locale;
 
 /**
  * Helper class for easy access to messages from a MessageSource,

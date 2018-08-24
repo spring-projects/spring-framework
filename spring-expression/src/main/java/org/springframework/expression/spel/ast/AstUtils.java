@@ -16,12 +16,12 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.expression.PropertyAccessor;
+import org.springframework.lang.Nullable;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.springframework.expression.PropertyAccessor;
-import org.springframework.lang.Nullable;
 
 /**
  * Utilities methods for use in the Ast classes.

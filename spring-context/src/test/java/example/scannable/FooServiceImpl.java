@@ -16,11 +16,6 @@
 
 package example.scannable;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.Future;
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +32,11 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import javax.annotation.PostConstruct;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * @author Mark Fisher

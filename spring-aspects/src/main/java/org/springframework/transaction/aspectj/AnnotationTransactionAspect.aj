@@ -17,7 +17,6 @@
 package org.springframework.transaction.aspectj;
 
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Concrete AspectJ transaction aspect using Spring's

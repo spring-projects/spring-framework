@@ -16,15 +16,15 @@
 
 package org.springframework.cache.jcache;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 /**
  * {@link org.springframework.cache.CacheManager} implementation

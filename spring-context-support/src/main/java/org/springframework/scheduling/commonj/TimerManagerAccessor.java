@@ -16,16 +16,15 @@
 
 package org.springframework.scheduling.commonj;
 
-import javax.naming.NamingException;
-
 import commonj.timers.TimerManager;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.Lifecycle;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.naming.NamingException;
 
 /**
  * Base class for classes that are accessing a CommonJ {@link commonj.timers.TimerManager}

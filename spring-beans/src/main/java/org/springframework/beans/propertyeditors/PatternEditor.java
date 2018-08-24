@@ -16,10 +16,10 @@
 
 package org.springframework.beans.propertyeditors;
 
+import org.springframework.lang.Nullable;
+
 import java.beans.PropertyEditorSupport;
 import java.util.regex.Pattern;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Editor for {@code java.util.regex.Pattern}, to directly populate a Pattern property.

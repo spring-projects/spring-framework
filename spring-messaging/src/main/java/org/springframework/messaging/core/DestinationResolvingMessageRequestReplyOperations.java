@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.core;
 
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
+
+import java.util.Map;
 
 /**
  * Extends {@link MessageRequestReplyOperations} and adds operations for sending and

@@ -16,10 +16,10 @@
 
 package org.springframework.mock.env;
 
-import java.util.Properties;
-
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
+
+import java.util.Properties;
 
 /**
  * Simple {@link PropertySource} implementation for use in testing. Accepts

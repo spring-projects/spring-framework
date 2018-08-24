@@ -16,11 +16,11 @@
 
 package org.springframework.web.socket;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
  * General test utilities for manipulating the {@link ContextLoader}.

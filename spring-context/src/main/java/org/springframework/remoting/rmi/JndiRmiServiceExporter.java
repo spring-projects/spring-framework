@@ -16,15 +16,15 @@
 
 package org.springframework.remoting.rmi;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jndi.JndiTemplate;
+
+import javax.naming.NamingException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Properties;
-import javax.naming.NamingException;
-
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jndi.JndiTemplate;
 
 /**
  * Service exporter which binds RMI services to JNDI.

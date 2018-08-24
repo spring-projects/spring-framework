@@ -16,13 +16,13 @@
 
 package org.springframework.core.env;
 
+import org.junit.Test;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
-
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class SimpleCommandLineParserTests {
 

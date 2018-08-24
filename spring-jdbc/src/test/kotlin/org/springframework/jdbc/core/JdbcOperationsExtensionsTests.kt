@@ -24,7 +24,8 @@ import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
-import java.sql.*
+import java.sql.JDBCType
+import java.sql.ResultSet
 
 /**
  * Mock object based tests for [JdbcOperations] Kotlin extensions

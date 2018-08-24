@@ -16,11 +16,11 @@
 
 package org.springframework.scheduling.support;
 
-import java.util.Date;
-import java.util.TimeZone;
-
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
+
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * {@link Trigger} implementation for cron expressions.

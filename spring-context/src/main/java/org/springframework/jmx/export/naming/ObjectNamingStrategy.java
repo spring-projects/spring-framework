@@ -16,10 +16,10 @@
 
 package org.springframework.jmx.export.naming;
 
+import org.springframework.lang.Nullable;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface that encapsulates the creation of {@code ObjectName} instances.

@@ -16,12 +16,11 @@
 
 package org.springframework.core.io.buffer.support;
 
-import java.nio.charset.StandardCharsets;
-
 import org.junit.Test;
-
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

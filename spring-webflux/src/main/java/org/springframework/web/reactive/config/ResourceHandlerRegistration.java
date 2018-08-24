@@ -16,9 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -26,6 +23,9 @@ import org.springframework.http.CacheControl;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Assist with creating and configuring a static resources handler.

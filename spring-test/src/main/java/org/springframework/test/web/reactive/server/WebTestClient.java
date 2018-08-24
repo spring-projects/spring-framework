@@ -16,17 +16,7 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import org.reactivestreams.Publisher;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.format.FormatterRegistry;
@@ -53,6 +43,15 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
+
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Main entry point for testing WebFlux server endpoints with an API similar to

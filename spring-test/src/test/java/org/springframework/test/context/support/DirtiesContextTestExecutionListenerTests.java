@@ -16,23 +16,22 @@
 
 package org.springframework.test.context.support;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import org.junit.Test;
-
 import org.mockito.BDDMockito;
-
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.*;
-import static org.springframework.test.annotation.DirtiesContext.HierarchyMode.*;
-import static org.springframework.test.annotation.DirtiesContext.MethodMode.*;
+import static org.springframework.test.annotation.DirtiesContext.HierarchyMode.CURRENT_LEVEL;
+import static org.springframework.test.annotation.DirtiesContext.HierarchyMode.EXHAUSTIVE;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFORE_METHOD;
 
 /**
  * Unit tests for {@link DirtiesContextBeforeModesTestExecutionListener}.

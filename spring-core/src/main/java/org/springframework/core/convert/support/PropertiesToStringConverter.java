@@ -16,11 +16,11 @@
 
 package org.springframework.core.convert.support;
 
+import org.springframework.core.convert.converter.Converter;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-
-import org.springframework.core.convert.converter.Converter;
 
 /**
  * Converts from a Properties to a String by calling {@link Properties#store(java.io.OutputStream, String)}.

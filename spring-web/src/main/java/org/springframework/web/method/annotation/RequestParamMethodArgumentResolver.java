@@ -16,13 +16,6 @@
 
 package org.springframework.web.method.annotation;
 
-import java.beans.PropertyEditor;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
@@ -46,6 +39,13 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.multipart.support.MultipartResolutionDelegate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
+import java.beans.PropertyEditor;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Resolves method arguments annotated with @{@link RequestParam}, arguments of

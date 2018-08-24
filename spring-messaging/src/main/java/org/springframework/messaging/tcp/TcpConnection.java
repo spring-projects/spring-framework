@@ -16,10 +16,10 @@
 
 package org.springframework.messaging.tcp;
 
-import java.io.Closeable;
-
 import org.springframework.messaging.Message;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.io.Closeable;
 
 /**
  * A contract for sending messages and managing a TCP connection.

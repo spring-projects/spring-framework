@@ -16,11 +16,11 @@
 
 package org.springframework.web.socket.adapter.standard;
 
+import org.springframework.web.socket.WebSocketExtension;
+
+import javax.websocket.Extension;
 import java.util.ArrayList;
 import java.util.List;
-import javax.websocket.Extension;
-
-import org.springframework.web.socket.WebSocketExtension;
 
 /**
  * Adapt an instance of {@link org.springframework.web.socket.WebSocketExtension} to

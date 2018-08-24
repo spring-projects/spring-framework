@@ -16,9 +16,9 @@
 
 package org.springframework.remoting.soap;
 
-import javax.xml.namespace.QName;
-
 import org.springframework.remoting.RemoteInvocationFailureException;
+
+import javax.xml.namespace.QName;
 
 /**
  * RemoteInvocationFailureException subclass that provides the details

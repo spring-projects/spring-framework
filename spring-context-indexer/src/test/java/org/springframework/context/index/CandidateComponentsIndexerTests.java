@@ -16,49 +16,35 @@
 
 package org.springframework.context.index;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import javax.annotation.ManagedBean;
-import javax.inject.Named;
-import javax.persistence.Converter;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
-
-import org.springframework.context.index.sample.AbstractController;
-import org.springframework.context.index.sample.MetaControllerIndexed;
-import org.springframework.context.index.sample.SampleComponent;
-import org.springframework.context.index.sample.SampleController;
-import org.springframework.context.index.sample.SampleMetaController;
-import org.springframework.context.index.sample.SampleMetaIndexedController;
-import org.springframework.context.index.sample.SampleNone;
-import org.springframework.context.index.sample.SampleRepository;
-import org.springframework.context.index.sample.SampleService;
+import org.springframework.context.index.sample.*;
 import org.springframework.context.index.sample.cdi.SampleManagedBean;
 import org.springframework.context.index.sample.cdi.SampleNamed;
 import org.springframework.context.index.sample.jpa.SampleConverter;
 import org.springframework.context.index.sample.jpa.SampleEmbeddable;
 import org.springframework.context.index.sample.jpa.SampleEntity;
 import org.springframework.context.index.sample.jpa.SampleMappedSuperClass;
-import org.springframework.context.index.sample.type.Repo;
-import org.springframework.context.index.sample.type.SampleRepo;
-import org.springframework.context.index.sample.type.SampleSmartRepo;
-import org.springframework.context.index.sample.type.SampleSpecializedRepo;
-import org.springframework.context.index.sample.type.SmartRepo;
-import org.springframework.context.index.sample.type.SpecializedRepo;
+import org.springframework.context.index.sample.type.*;
 import org.springframework.context.index.test.TestCompiler;
 import org.springframework.stereotype.Component;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.context.index.Metadata.*;
+import javax.annotation.ManagedBean;
+import javax.inject.Named;
+import javax.persistence.Converter;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
+import static org.springframework.context.index.Metadata.hasComponent;
 
 /**
  * Tests for {@link CandidateComponentsIndexer}.

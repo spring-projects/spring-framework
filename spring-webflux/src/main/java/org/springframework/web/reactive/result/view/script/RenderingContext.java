@@ -16,10 +16,10 @@
 
 package org.springframework.web.reactive.result.view.script;
 
+import org.springframework.context.ApplicationContext;
+
 import java.util.Locale;
 import java.util.function.Function;
-
-import org.springframework.context.ApplicationContext;
 
 /**
  * Context passed to {@link ScriptTemplateView} render function.

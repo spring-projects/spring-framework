@@ -16,9 +16,9 @@
 
 package org.springframework.jca.cci;
 
-import javax.resource.ResourceException;
-
 import org.springframework.dao.DataAccessResourceFailureException;
+
+import javax.resource.ResourceException;
 
 /**
  * Fatal exception thrown when we can't connect to an EIS using CCI.

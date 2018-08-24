@@ -16,6 +16,13 @@
 
 package org.springframework.web.reactive.function.server;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRange;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.support.ServerRequestWrapper;
+
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -24,16 +31,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRange;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.server.support.ServerRequestWrapper;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma

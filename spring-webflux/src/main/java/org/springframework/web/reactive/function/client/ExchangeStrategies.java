@@ -16,12 +16,12 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Defines the strategies for invoking {@link ExchangeFunction}s. An instance of

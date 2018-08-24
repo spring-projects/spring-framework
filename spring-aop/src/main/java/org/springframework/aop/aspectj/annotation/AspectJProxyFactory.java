@@ -16,12 +16,7 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.aspectj.lang.reflect.PerClauseKind;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
@@ -30,6 +25,10 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * AspectJ-based proxy factory, allowing for programmatic building

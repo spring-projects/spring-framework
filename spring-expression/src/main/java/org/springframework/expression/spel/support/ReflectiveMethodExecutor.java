@@ -16,9 +16,6 @@
 
 package org.springframework.expression.spel.support;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -27,6 +24,9 @@ import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.TypedValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * @author Andy Clement

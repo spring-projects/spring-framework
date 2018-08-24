@@ -16,19 +16,18 @@
 
 package org.springframework.http.server.reactive;
 
-import java.util.function.Function;
-
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import reactor.core.Scannable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
 import reactor.util.context.Context;
 
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import java.util.function.Function;
 
 /**
  * Given a write function that accepts a source {@code Publisher<T>} to write

@@ -16,13 +16,13 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import java.util.Comparator;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJAopUtils;
 import org.springframework.aop.aspectj.AspectJPrecedenceInformation;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
+
+import java.util.Comparator;
 
 /**
  * Orders AspectJ advice/advisors by precedence (<i>not</i> invocation order).

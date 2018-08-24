@@ -17,7 +17,6 @@
 package org.springframework.scheduling.commonj;
 
 import commonj.work.Work;
-
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.util.Assert;
 

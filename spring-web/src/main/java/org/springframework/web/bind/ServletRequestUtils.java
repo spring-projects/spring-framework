@@ -16,9 +16,9 @@
 
 package org.springframework.web.bind;
 
-import javax.servlet.ServletRequest;
-
 import org.springframework.lang.Nullable;
+
+import javax.servlet.ServletRequest;
 
 /**
  * Parameter extraction methods, for an approach distinct from data binding,

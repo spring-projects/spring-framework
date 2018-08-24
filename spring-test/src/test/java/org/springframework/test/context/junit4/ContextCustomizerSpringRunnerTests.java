@@ -16,11 +16,8 @@
 
 package org.springframework.test.context.junit4;
 
-import java.util.List;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextCustomizer;
@@ -28,8 +25,10 @@ import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.junit4.ContextCustomizerSpringRunnerTests.CustomTestContextBootstrapper;
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 
-import static java.util.Collections.*;
-import static org.junit.Assert.*;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
 
 /**
  * JUnit 4 based integration test which verifies support of

@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Method;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -28,6 +26,8 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.lang.reflect.Method;
 
 /**
  * Basic {@link AutowireCandidateResolver} that performs a full generic type

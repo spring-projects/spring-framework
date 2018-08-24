@@ -16,16 +16,16 @@
 
 package org.springframework.transaction.jta;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import javax.transaction.Synchronization;
-
 import com.ibm.wsspi.uow.UOWAction;
 import com.ibm.wsspi.uow.UOWActionException;
 import com.ibm.wsspi.uow.UOWException;
 import com.ibm.wsspi.uow.UOWManager;
+
+import javax.transaction.Synchronization;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Juergen Hoeller

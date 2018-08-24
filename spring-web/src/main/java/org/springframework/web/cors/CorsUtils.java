@@ -16,10 +16,10 @@
 
 package org.springframework.web.cors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Utility class for CORS request handling based on the

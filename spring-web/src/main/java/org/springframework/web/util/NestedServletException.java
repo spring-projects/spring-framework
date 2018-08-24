@@ -16,10 +16,10 @@
 
 package org.springframework.web.util;
 
-import javax.servlet.ServletException;
-
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.lang.Nullable;
+
+import javax.servlet.ServletException;
 
 /**
  * Subclass of {@link ServletException} that properly handles a root cause in terms

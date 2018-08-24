@@ -15,11 +15,6 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -31,9 +26,12 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.springframework.http.RequestEntity.get;
-import static org.springframework.http.RequestEntity.options;
-import static org.springframework.http.RequestEntity.post;
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.springframework.http.RequestEntity.*;
 
 /**
  * Base class for integration tests with {@code @RequestMapping methods}.

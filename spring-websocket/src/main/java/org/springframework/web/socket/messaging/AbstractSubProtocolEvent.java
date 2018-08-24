@@ -16,12 +16,12 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.security.Principal;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
+
+import java.security.Principal;
 
 /**
  * A base class for events for a message received from a WebSocket client and

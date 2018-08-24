@@ -16,25 +16,19 @@
 
 package org.springframework.remoting.rmi;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.SocketException;
-import java.rmi.ConnectException;
-import java.rmi.ConnectIOException;
-import java.rmi.NoSuchObjectException;
-import java.rmi.RemoteException;
-import java.rmi.StubNotFoundException;
-import java.rmi.UnknownHostException;
-
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.SocketException;
+import java.rmi.*;
 
 /**
  * Factored-out methods for performing invocations within an RMI client.

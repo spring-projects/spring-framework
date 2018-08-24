@@ -19,7 +19,6 @@ package org.springframework.test.web.reactive.server.samples.bind;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.test.web.reactive.server.WebTestClient;

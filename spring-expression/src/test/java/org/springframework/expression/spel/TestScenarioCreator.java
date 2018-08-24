@@ -16,11 +16,11 @@
 
 package org.springframework.expression.spel;
 
-import java.util.GregorianCalendar;
-
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+
+import java.util.GregorianCalendar;
 
 /**
  * Builds an evaluation context for test expressions.

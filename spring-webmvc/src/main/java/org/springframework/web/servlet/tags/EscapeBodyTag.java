@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.io.IOException;
+import org.springframework.web.util.JavaScriptUtils;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
-
-import org.springframework.web.util.JavaScriptUtils;
+import java.io.IOException;
 
 /**
  * Custom JSP tag to escape its enclosed body content,

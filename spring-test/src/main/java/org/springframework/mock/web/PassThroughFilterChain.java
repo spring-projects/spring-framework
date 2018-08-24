@@ -16,16 +16,11 @@
 
 package org.springframework.mock.web;
 
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.servlet.*;
+import java.io.IOException;
 
 /**
  * Implementation of the {@link javax.servlet.FilterConfig} interface which

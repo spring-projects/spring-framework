@@ -16,12 +16,13 @@
 
 package org.springframework.jndi;
 
+import org.junit.Test;
+
 import javax.naming.Context;
 import javax.naming.NameNotFoundException;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.*;
 
 /**

@@ -16,10 +16,10 @@
 
 package org.springframework.core.io.buffer.support;
 
-import java.nio.charset.Charset;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.Assert;
+
+import java.nio.charset.Charset;
 
 /**
  * Utility class for working with {@link DataBuffer}s in tests.

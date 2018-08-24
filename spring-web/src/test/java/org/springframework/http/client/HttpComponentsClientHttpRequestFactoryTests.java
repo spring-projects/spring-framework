@@ -16,8 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.net.URI;
-
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -28,6 +26,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
+
+import java.net.URI;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

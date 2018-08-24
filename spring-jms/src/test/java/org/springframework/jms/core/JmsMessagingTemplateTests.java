@@ -16,29 +16,14 @@
 
 package org.springframework.jms.core;
 
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageFormatException;
-import javax.jms.MessageNotWriteableException;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentCaptor;
-import org.mockito.BDDMockito;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
 import org.springframework.jms.InvalidDestinationException;
 import org.springframework.jms.MessageNotReadableException;
 import org.springframework.jms.StubTextMessage;
@@ -50,8 +35,15 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 
+import javax.jms.*;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
+
+import java.lang.IllegalStateException;
 
 /**
  * @author Stephane Nicoll

@@ -16,9 +16,9 @@
 
 package org.springframework.web;
 
-import java.util.List;
-
 import org.springframework.http.MediaType;
+
+import java.util.List;
 
 /**
  * Exception thrown when the request handler cannot generate a response that is acceptable by the client.

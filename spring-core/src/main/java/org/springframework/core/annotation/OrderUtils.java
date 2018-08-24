@@ -16,10 +16,10 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.annotation.Annotation;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.lang.annotation.Annotation;
 
 /**
  * General utility for determining the order of an object based on its type declaration.

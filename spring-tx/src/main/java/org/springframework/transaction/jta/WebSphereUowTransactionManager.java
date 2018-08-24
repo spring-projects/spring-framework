@@ -16,33 +16,16 @@
 
 package org.springframework.transaction.jta;
 
-import java.util.List;
-import javax.naming.NamingException;
-
 import com.ibm.websphere.uow.UOWSynchronizationRegistry;
-import com.ibm.wsspi.uow.UOWAction;
-import com.ibm.wsspi.uow.UOWActionException;
-import com.ibm.wsspi.uow.UOWException;
-import com.ibm.wsspi.uow.UOWManager;
-import com.ibm.wsspi.uow.UOWManagerFactory;
-
+import com.ibm.wsspi.uow.*;
 import org.springframework.lang.Nullable;
-import org.springframework.transaction.IllegalTransactionStateException;
-import org.springframework.transaction.InvalidTimeoutException;
-import org.springframework.transaction.NestedTransactionNotSupportedException;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.SmartTransactionObject;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionSynchronizationUtils;
+import org.springframework.transaction.*;
+import org.springframework.transaction.support.*;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+
+import javax.naming.NamingException;
+import java.util.List;
 
 /**
  * WebSphere-specific PlatformTransactionManager implementation that delegates

@@ -18,13 +18,14 @@ package org.springframework.web.socket.handler;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.willThrow;
 
 /**
  * Test fixture for {@link ExceptionWebSocketHandlerDecorator}.

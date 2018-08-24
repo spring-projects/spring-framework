@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
+import org.springframework.lang.Nullable;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Collections;
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.lang.Nullable;
 
 /**
  * A holder for a {@link RequestCondition} useful when the type of the request

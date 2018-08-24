@@ -16,13 +16,13 @@
 
 package org.springframework.format.support;
 
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorSupport;
-
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.Formatter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorSupport;
 
 /**
  * Adapter that bridges between {@link Formatter} and {@link PropertyEditor}.

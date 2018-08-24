@@ -16,14 +16,14 @@
 
 package org.springframework.jdbc.core.support;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.Assert;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Abstract {@link PreparedStatementCallback} implementation that manages a {@link LobCreator}.

@@ -17,11 +17,10 @@
 package org.springframework.beans.factory.support;
 
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop

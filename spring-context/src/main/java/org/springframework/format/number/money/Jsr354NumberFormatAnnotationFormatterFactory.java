@@ -16,15 +16,6 @@
 
 package org.springframework.format.number.money;
 
-import java.text.ParseException;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.Locale;
-import java.util.Set;
-import javax.money.CurrencyUnit;
-import javax.money.Monetary;
-import javax.money.MonetaryAmount;
-
 import org.springframework.context.support.EmbeddedValueResolutionSupport;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Formatter;
@@ -36,6 +27,15 @@ import org.springframework.format.number.CurrencyStyleFormatter;
 import org.springframework.format.number.NumberStyleFormatter;
 import org.springframework.format.number.PercentStyleFormatter;
 import org.springframework.util.StringUtils;
+
+import javax.money.CurrencyUnit;
+import javax.money.Monetary;
+import javax.money.MonetaryAmount;
+import java.text.ParseException;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Formats {@link javax.money.MonetaryAmount} fields annotated

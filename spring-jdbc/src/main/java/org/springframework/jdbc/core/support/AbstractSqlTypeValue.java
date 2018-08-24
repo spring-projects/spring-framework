@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.core.support;
 
+import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.lang.Nullable;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import org.springframework.jdbc.core.SqlTypeValue;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract implementation of the SqlTypeValue interface, for convenient

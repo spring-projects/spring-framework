@@ -16,16 +16,16 @@
 
 package org.springframework.instrument.classloading.jboss;
 
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * {@link LoadTimeWeaver} implementation for JBoss's instrumentable ClassLoader.

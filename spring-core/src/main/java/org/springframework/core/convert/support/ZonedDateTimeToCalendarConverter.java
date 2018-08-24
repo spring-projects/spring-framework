@@ -16,11 +16,11 @@
 
 package org.springframework.core.convert.support;
 
+import org.springframework.core.convert.converter.Converter;
+
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
-import org.springframework.core.convert.converter.Converter;
 
 /**
  * Simple converter from Java 8's {@link java.time.ZonedDateTime} to {@link java.util.Calendar}.

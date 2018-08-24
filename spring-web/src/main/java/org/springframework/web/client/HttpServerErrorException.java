@@ -16,11 +16,11 @@
 
 package org.springframework.web.client;
 
-import java.nio.charset.Charset;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
+
+import java.nio.charset.Charset;
 
 /**
  * Exception thrown when an HTTP 5xx is received.

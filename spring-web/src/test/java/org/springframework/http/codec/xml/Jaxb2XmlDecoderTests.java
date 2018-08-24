@@ -16,30 +16,22 @@
 
 package org.springframework.http.codec.xml;
 
-import java.util.Collections;
-import java.util.List;
-import javax.xml.namespace.QName;
-import javax.xml.stream.events.XMLEvent;
-
 import org.junit.Test;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
-import org.springframework.http.codec.xml.jaxb.XmlRootElement;
-import org.springframework.http.codec.xml.jaxb.XmlRootElementWithName;
-import org.springframework.http.codec.xml.jaxb.XmlRootElementWithNameAndNamespace;
-import org.springframework.http.codec.xml.jaxb.XmlType;
-import org.springframework.http.codec.xml.jaxb.XmlTypeWithName;
-import org.springframework.http.codec.xml.jaxb.XmlTypeWithNameAndNamespace;
+import org.springframework.http.codec.xml.jaxb.*;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import javax.xml.namespace.QName;
+import javax.xml.stream.events.XMLEvent;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze

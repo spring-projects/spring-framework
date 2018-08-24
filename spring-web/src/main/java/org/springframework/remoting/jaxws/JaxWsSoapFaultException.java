@@ -16,11 +16,11 @@
 
 package org.springframework.remoting.jaxws;
 
+import org.springframework.remoting.soap.SoapFaultException;
+
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.soap.SOAPFaultException;
-
-import org.springframework.remoting.soap.SoapFaultException;
 
 /**
  * Spring SoapFaultException adapter for the JAX-WS

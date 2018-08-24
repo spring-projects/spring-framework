@@ -16,9 +16,9 @@
 
 package org.springframework.web.multipart.support;
 
-import javax.servlet.ServletException;
-
 import org.springframework.web.multipart.MultipartResolver;
+
+import javax.servlet.ServletException;
 
 /**
  * Raised when the part of a "multipart/form-data" request identified by its

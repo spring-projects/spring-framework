@@ -16,14 +16,6 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
@@ -32,6 +24,14 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspTagException;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Custom JSP tag to look up a message in the scope of this page. Messages are

@@ -16,13 +16,12 @@
 
 package org.springframework.web.cors;
 
+import org.junit.Test;
+import org.springframework.http.HttpMethod;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-
-import org.junit.Test;
-
-import org.springframework.http.HttpMethod;
 
 import static org.junit.Assert.*;
 

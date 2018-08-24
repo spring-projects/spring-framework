@@ -16,13 +16,12 @@
 
 package org.springframework.core.io.buffer;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
-
 import org.springframework.util.Assert;
+
+import java.nio.ByteBuffer;
 
 /**
  * Implementation of the {@code DataBufferFactory} interface based on a

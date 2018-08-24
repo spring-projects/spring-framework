@@ -17,11 +17,12 @@
 package org.springframework.context.groovy
 
 import org.junit.Test
-
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.context.support.GenericGroovyApplicationContext
 
-import static groovy.test.GroovyAssert.*
+import static groovy.test.GroovyAssert.shouldFail
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 /**
  * @author Jeff Brown

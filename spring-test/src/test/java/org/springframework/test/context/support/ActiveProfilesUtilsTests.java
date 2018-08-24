@@ -16,6 +16,12 @@
 
 package org.springframework.test.context.support;
 
+import org.junit.Test;
+import org.springframework.core.annotation.AnnotationConfigurationException;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ActiveProfilesResolver;
+import org.springframework.util.StringUtils;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,15 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
-
-import org.springframework.core.annotation.AnnotationConfigurationException;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ActiveProfilesResolver;
-import org.springframework.util.StringUtils;
-
-import static org.junit.Assert.*;
-import static org.springframework.test.context.support.ActiveProfilesUtils.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.springframework.test.context.support.ActiveProfilesUtils.resolveActiveProfiles;
 
 /**
  * Unit tests for {@link ActiveProfilesUtils} involving resolution of active bean

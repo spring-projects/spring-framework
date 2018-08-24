@@ -16,20 +16,10 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.sql.DataSource;
-
 import org.junit.Test;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerContext;
-import org.quartz.SchedulerFactory;
+import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.SchedulerRepository;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -40,6 +30,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.TestBean;
+
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

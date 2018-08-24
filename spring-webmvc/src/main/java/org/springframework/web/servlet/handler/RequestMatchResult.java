@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.Map;
-
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+
+import java.util.Map;
 
 /**
  * Container for the result from request pattern matching via

@@ -16,11 +16,11 @@
 
 package org.springframework.core.env;
 
-import java.util.Collections;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.Collections;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link CompositePropertySource}.

@@ -1,8 +1,8 @@
 package org.springframework.jdbc.datasource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.DataSource;
 
 public class TestDataSourceWrapper extends AbstractDataSource {
 

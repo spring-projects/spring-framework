@@ -16,9 +16,9 @@
 
 package org.springframework.core;
 
-import java.io.IOException;
-
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
 
 /**
  * Subclass of {@link IOException} that properly handles a root cause,

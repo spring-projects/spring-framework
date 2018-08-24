@@ -16,11 +16,11 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpRequest;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.io.IOException;
 
 /**
  * Represents a client-side asynchronous HTTP request. Created via an

@@ -16,6 +16,16 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.web.socket.*;
+import org.springframework.web.socket.adapter.NativeWebSocketSession;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
+import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -24,20 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketExtension;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.NativeWebSocketSession;
-import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
-import org.springframework.web.socket.sockjs.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
 /**
  * A SockJS session for use with the WebSocket transport.

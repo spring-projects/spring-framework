@@ -16,13 +16,13 @@
 
 package org.springframework.ui;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.core.Conventions;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Implementation of {@link java.util.Map} for use when building model data for use

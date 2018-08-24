@@ -16,9 +16,9 @@
 
 package org.springframework.core.convert.support;
 
-import java.nio.charset.Charset;
-
 import org.springframework.core.convert.converter.Converter;
+
+import java.nio.charset.Charset;
 
 /**
  * Convert a String to a {@link Charset}.

@@ -16,11 +16,10 @@
 
 package org.springframework.orm.hibernate5;
 
-import java.sql.SQLException;
-
 import org.hibernate.JDBCException;
-
 import org.springframework.dao.UncategorizedDataAccessException;
+
+import java.sql.SQLException;
 
 /**
  * Hibernate-specific subclass of UncategorizedDataAccessException,

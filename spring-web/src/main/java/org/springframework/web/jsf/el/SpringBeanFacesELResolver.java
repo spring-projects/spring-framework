@@ -16,17 +16,17 @@
 
 package org.springframework.web.jsf.el;
 
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
+import org.springframework.lang.Nullable;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.jsf.FacesContextUtils;
+
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
 import javax.el.PropertyNotWritableException;
 import javax.faces.context.FacesContext;
-
-import org.springframework.lang.Nullable;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.jsf.FacesContextUtils;
+import java.beans.FeatureDescriptor;
+import java.util.Iterator;
 
 /**
  * JSF {@code ELResolver} that delegates to the Spring root {@code WebApplicationContext},

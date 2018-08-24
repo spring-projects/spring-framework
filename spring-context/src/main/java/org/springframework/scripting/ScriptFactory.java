@@ -16,9 +16,9 @@
 
 package org.springframework.scripting;
 
-import java.io.IOException;
-
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
 
 /**
  * Script definition interface, encapsulating the configuration

@@ -16,18 +16,12 @@
 
 package org.springframework.test.context.junit.jupiter;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.lang.annotation.*;
 
 /**
  * {@code @SpringJUnitConfig} is a <em>composed annotation</em> that combines

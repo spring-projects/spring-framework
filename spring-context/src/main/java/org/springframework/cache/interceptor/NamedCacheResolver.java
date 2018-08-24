@@ -17,11 +17,11 @@
 package org.springframework.cache.interceptor;
 
 
+import org.springframework.cache.CacheManager;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-import org.springframework.cache.CacheManager;
 
 /**
  * A {@link CacheResolver} that forces the resolution to a configurable

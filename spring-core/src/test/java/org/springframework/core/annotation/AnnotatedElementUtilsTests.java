@@ -16,34 +16,31 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.internal.ArrayComparisonFailure;
+import org.junit.rules.ExpectedException;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Indexed;
+import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
+
+import javax.annotation.Resource;
+import java.lang.annotation.*;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Resource;
 
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.internal.ArrayComparisonFailure;
-import org.junit.rules.ExpectedException;
-
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Indexed;
-import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
-
-import static java.util.Arrays.*;
-import static java.util.stream.Collectors.*;
-import static org.hamcrest.Matchers.*;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
 import static org.junit.Assert.*;
 import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 import static org.springframework.core.annotation.AnnotationUtilsTests.*;

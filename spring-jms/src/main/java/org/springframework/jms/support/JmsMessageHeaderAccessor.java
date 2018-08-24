@@ -16,13 +16,13 @@
 
 package org.springframework.jms.support;
 
-import java.util.List;
-import java.util.Map;
-import javax.jms.Destination;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
+
+import javax.jms.Destination;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A {@link org.springframework.messaging.support.MessageHeaderAccessor}

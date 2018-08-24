@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.util.Collection;
-import java.util.Map;
-import javax.servlet.jsp.JspException;
-
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.support.BindStatus;
+
+import javax.servlet.jsp.JspException;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Databinding-aware JSP tag that renders an HTML '{@code select}'

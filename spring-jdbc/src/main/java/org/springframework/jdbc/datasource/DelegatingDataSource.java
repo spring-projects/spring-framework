@@ -16,15 +16,15 @@
 
 package org.springframework.jdbc.datasource;
 
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
-import javax.sql.DataSource;
-
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * JDBC {@link javax.sql.DataSource} implementation that delegates all calls

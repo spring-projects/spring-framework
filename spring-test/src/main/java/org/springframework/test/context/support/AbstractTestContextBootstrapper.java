@@ -16,45 +16,23 @@
 
 package org.springframework.test.context.support;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.lang.Nullable;
-import org.springframework.test.context.BootstrapContext;
-import org.springframework.test.context.CacheAwareContextLoaderDelegate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextConfigurationAttributes;
-import org.springframework.test.context.ContextCustomizer;
-import org.springframework.test.context.ContextCustomizerFactory;
-import org.springframework.test.context.ContextHierarchy;
-import org.springframework.test.context.ContextLoader;
-import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.test.context.SmartContextLoader;
-import org.springframework.test.context.TestContext;
-import org.springframework.test.context.TestContextBootstrapper;
-import org.springframework.test.context.TestExecutionListener;
-import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.*;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.*;
 
 /**
  * Abstract implementation of the {@link TestContextBootstrapper} interface which

@@ -17,7 +17,6 @@
 package org.springframework.http.converter.json;
 
 import com.fasterxml.jackson.databind.ser.FilterProvider;
-
 import org.springframework.lang.Nullable;
 
 /**

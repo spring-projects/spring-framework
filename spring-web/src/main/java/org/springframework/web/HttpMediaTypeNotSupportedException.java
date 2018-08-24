@@ -16,10 +16,10 @@
 
 package org.springframework.web;
 
-import java.util.List;
-
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+
+import java.util.List;
 
 /**
  * Exception thrown when a client POSTs, PUTs, or PATCHes content of a type

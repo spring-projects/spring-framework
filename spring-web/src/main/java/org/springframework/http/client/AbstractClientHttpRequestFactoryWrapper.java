@@ -16,11 +16,11 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Abstract base class for {@link ClientHttpRequestFactory} implementations

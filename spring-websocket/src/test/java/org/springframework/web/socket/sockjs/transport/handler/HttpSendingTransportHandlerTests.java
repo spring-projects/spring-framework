@@ -16,11 +16,8 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.util.Date;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
@@ -32,6 +29,8 @@ import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSess
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.util.UriUtils;
+
+import java.util.Date;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

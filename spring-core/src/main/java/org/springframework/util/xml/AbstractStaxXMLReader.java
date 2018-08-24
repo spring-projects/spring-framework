@@ -16,21 +16,15 @@
 
 package org.springframework.util.xml;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
+import org.xml.sax.*;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-import org.xml.sax.SAXParseException;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Abstract base class for SAX {@code XMLReader} implementations that use StAX as a basis.

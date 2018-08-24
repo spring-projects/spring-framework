@@ -16,31 +16,12 @@
 
 package org.springframework.jms.core;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.List;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TemporaryQueue;
-import javax.jms.TextMessage;
-import javax.naming.Context;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.jms.InvalidClientIDException;
 import org.springframework.jms.InvalidDestinationException;
 import org.springframework.jms.InvalidSelectorException;
-import org.springframework.jms.JmsException;
-import org.springframework.jms.JmsSecurityException;
+import org.springframework.jms.*;
 import org.springframework.jms.MessageEOFException;
 import org.springframework.jms.MessageFormatException;
 import org.springframework.jms.MessageNotReadableException;
@@ -48,7 +29,6 @@ import org.springframework.jms.MessageNotWriteableException;
 import org.springframework.jms.ResourceAllocationException;
 import org.springframework.jms.TransactionInProgressException;
 import org.springframework.jms.TransactionRolledBackException;
-import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.connection.TransactionAwareConnectionFactoryProxy;
@@ -59,6 +39,12 @@ import org.springframework.jms.support.destination.JndiDestinationResolver;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import javax.jms.*;
+import javax.naming.Context;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

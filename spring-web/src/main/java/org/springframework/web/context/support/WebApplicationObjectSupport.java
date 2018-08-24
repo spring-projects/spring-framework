@@ -16,9 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import java.io.File;
-import javax.servlet.ServletContext;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.lang.Nullable;
@@ -26,6 +23,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.ServletContext;
+import java.io.File;
 
 /**
  * Convenient superclass for application objects running in a {@link WebApplicationContext}.

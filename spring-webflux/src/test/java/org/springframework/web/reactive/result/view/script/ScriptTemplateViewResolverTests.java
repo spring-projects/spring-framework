@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.view.script;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.springframework.beans.DirectFieldAccessor;
 
 /**

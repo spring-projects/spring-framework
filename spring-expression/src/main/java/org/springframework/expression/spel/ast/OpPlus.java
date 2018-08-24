@@ -16,9 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
@@ -30,6 +27,9 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * The plus operator will:

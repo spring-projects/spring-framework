@@ -16,13 +16,13 @@
 
 package org.springframework.web.reactive.result.view;
 
-import java.util.Collection;
-import java.util.Map;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Public API for HTML rendering. Supported as a return value in Spring WebFlux

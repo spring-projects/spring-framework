@@ -16,17 +16,17 @@
 
 package org.springframework.orm.jpa;
 
-import java.io.Serializable;
-import java.sql.SQLException;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import java.io.Serializable;
+import java.sql.SQLException;
 
 /**
  * Default implementation of the {@link JpaDialect} interface.

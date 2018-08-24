@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.lang.Nullable;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * An interface used by {@link JdbcTemplate} for mapping rows of a

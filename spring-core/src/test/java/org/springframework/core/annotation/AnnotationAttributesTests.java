@@ -16,16 +16,15 @@
 
 package org.springframework.core.annotation;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;

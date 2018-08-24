@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.object;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-
 import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.lang.Nullable;
+
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * SQL "function" wrapper for a query that returns a single row of results.

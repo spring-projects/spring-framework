@@ -16,12 +16,12 @@
 package org.springframework.web.socket.config.annotation;
 
 
+import org.springframework.lang.Nullable;
+import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.springframework.lang.Nullable;
-import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 
 /**
  * Configure the processing of messages received from and sent to WebSocket clients.

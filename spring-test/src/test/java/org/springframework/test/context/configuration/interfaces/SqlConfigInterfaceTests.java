@@ -17,12 +17,11 @@
 package org.springframework.test.context.configuration.interfaces;
 
 import org.junit.Test;
-
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Sam Brannen

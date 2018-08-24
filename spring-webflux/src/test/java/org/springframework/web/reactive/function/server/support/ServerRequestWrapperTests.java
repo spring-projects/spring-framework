@@ -16,17 +16,16 @@
 
 package org.springframework.web.reactive.function.server.support;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.reactive.function.server.ServerRequest;
+
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.http.HttpMethod;
-import org.springframework.web.reactive.function.server.ServerRequest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;

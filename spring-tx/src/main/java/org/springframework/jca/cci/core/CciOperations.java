@@ -16,11 +16,11 @@
 
 package org.springframework.jca.cci.core;
 
-import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.Record;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.lang.Nullable;
+
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.Record;
 
 /**
  * Interface that specifies a basic set of CCI operations on an EIS.

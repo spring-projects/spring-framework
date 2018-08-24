@@ -16,11 +16,11 @@
 
 package org.springframework.web.server;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Exception for errors that fit response status 415 (unsupported media type).

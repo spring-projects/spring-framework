@@ -16,14 +16,9 @@
 
 package org.springframework.format.number;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Locale;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -33,7 +28,11 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.util.StringValueResolver;
 import org.springframework.validation.DataBinder;
 
-import static org.junit.Assert.*;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Locale;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Keith Donald

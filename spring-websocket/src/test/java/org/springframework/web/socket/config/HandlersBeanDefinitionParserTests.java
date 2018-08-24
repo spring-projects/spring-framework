@@ -16,15 +16,7 @@
 
 package org.springframework.web.socket.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.server.ServerHttpRequest;
@@ -52,15 +44,14 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
 import org.springframework.web.socket.sockjs.transport.TransportType;
-import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
-import org.springframework.web.socket.sockjs.transport.handler.EventSourceTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.HtmlFileTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.JsonpPollingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.JsonpReceivingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.XhrPollingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.XhrReceivingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.XhrStreamingTransportHandler;
+import org.springframework.web.socket.sockjs.transport.handler.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;

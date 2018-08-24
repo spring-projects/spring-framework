@@ -16,18 +16,6 @@
 
 package org.springframework.jca.work;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import javax.naming.NamingException;
-import javax.resource.spi.BootstrapContext;
-import javax.resource.spi.work.ExecutionContext;
-import javax.resource.spi.work.Work;
-import javax.resource.spi.work.WorkException;
-import javax.resource.spi.work.WorkListener;
-import javax.resource.spi.work.WorkManager;
-import javax.resource.spi.work.WorkRejectedException;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
@@ -41,6 +29,13 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
+
+import javax.naming.NamingException;
+import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.work.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * {@link org.springframework.core.task.TaskExecutor} implementation

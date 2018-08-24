@@ -16,9 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -26,6 +23,9 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.i18n.LocaleContextResolver;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Defines the strategies to be used for processing {@link HandlerFunction}s. An instance of

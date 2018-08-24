@@ -16,36 +16,24 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import org.junit.Test;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.support.*;
+import org.springframework.core.io.Resource;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import java.util.*;
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.prefs.PreferencesFactory;
 
-import org.junit.Test;
-
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.beans.factory.support.ManagedSet;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.io.Resource;
-import org.springframework.tests.sample.beans.IndexedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
-
 import static org.junit.Assert.*;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
  * Unit tests for various {@link PropertyResourceConfigurer} implementations including:

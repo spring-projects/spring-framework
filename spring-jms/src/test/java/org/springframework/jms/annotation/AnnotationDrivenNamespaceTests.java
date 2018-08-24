@@ -16,18 +16,17 @@
 
 package org.springframework.jms.annotation;
 
-import javax.jms.JMSException;
-import javax.jms.MessageListener;
-
 import org.hamcrest.core.Is;
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
+
+import javax.jms.JMSException;
+import javax.jms.MessageListener;
 
 /**
  * @author Stephane Nicoll

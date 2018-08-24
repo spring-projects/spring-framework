@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.mvc.support;
 
-import java.util.Collection;
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.FlashMap;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * A specialization of the {@link Model} interface that controllers can use to

@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.tags;
 
-import javax.servlet.jsp.JspException;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.util.HtmlUtils;
+
+import javax.servlet.jsp.JspException;
 
 /**
  * Superclass for tags that output content that might get HTML-escaped.

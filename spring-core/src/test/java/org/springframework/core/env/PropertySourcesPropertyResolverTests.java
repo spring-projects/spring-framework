@@ -16,15 +16,14 @@
 
 package org.springframework.core.env;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.mock.env.MockPropertySource;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.core.convert.ConverterNotFoundException;
-import org.springframework.mock.env.MockPropertySource;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;

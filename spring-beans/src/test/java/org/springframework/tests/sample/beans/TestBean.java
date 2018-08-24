@@ -16,22 +16,13 @@
 
 package org.springframework.tests.sample.beans;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.util.ObjectUtils;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Simple test bean used for testing bean factories, the AOP framework etc.

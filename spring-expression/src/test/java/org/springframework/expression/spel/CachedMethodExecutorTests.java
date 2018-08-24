@@ -18,14 +18,13 @@ package org.springframework.expression.spel;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.ast.MethodReference;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test for caching in {@link MethodReference} (SPR-10657).

@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc;
 
-import java.io.IOException;
-
 import org.springframework.dao.DataRetrievalFailureException;
+
+import java.io.IOException;
 
 /**
  * Exception to be thrown when a LOB could not be retrieved.

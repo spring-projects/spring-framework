@@ -16,8 +16,6 @@
 
 package org.springframework.expression.spel.support;
 
-import java.beans.PropertyEditor;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.factory.BeanFactory;
@@ -27,6 +25,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.TypeConverter;
+
+import java.beans.PropertyEditor;
 
 /**
  * Copied from Spring Integration for purposes of reproducing

@@ -16,16 +16,16 @@
 
 package org.springframework.test.util;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import org.junit.Test;
-
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import static org.junit.Assert.*;
-import static org.springframework.test.util.MetaAnnotationUtils.*;
+import static org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
+import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptor;
 
 /**
  * Unit tests for {@link MetaAnnotationUtils} that verify support for overridden

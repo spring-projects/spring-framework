@@ -16,19 +16,19 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import javax.cache.annotation.CacheInvocationParameter;
-import javax.cache.annotation.CacheMethodDetails;
-
 import org.junit.Test;
-
 import org.springframework.cache.jcache.AbstractJCacheTests;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.*;
+import javax.cache.annotation.CacheInvocationParameter;
+import javax.cache.annotation.CacheMethodDetails;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Stephane Nicoll

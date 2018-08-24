@@ -16,12 +16,12 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.http.server.reactive.ContextPathCompositeHandler;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Rossen Stoyanchev

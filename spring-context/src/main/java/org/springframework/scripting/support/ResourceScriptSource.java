@@ -16,12 +16,8 @@
 
 package org.springframework.scripting.support;
 
-import java.io.IOException;
-import java.io.Reader;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.lang.Nullable;
@@ -29,6 +25,9 @@ import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.io.Reader;
 
 /**
  * {@link org.springframework.scripting.ScriptSource} implementation

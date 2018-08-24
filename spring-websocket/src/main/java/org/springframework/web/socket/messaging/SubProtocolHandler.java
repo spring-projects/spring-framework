@@ -16,14 +16,14 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.util.List;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+
+import java.util.List;
 
 /**
  * A contract for handling WebSocket messages as part of a higher level protocol, referred

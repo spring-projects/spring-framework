@@ -16,9 +16,9 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.JMSException;
-
 import org.springframework.jms.JmsException;
+
+import javax.jms.JMSException;
 
 /**
  * Exception thrown when a synchronized local transaction failed to complete

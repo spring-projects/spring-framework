@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import javax.sql.DataSource;
-
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 
 /**
  * A builder that provides a convenient API for constructing an embedded database.

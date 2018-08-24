@@ -16,14 +16,14 @@
 
 package org.springframework.beans.propertyeditors;
 
+import org.springframework.lang.Nullable;
+
 import java.beans.PropertyEditorSupport;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Custom {@link java.beans.PropertyEditor} for {@link Properties} objects.

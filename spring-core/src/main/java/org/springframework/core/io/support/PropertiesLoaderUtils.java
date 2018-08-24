@@ -16,6 +16,10 @@
 
 package org.springframework.core.io.support;
 
+import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
+import org.springframework.util.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -23,14 +27,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.Properties;
-
-import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.DefaultPropertiesPersister;
-import org.springframework.util.PropertiesPersister;
-import org.springframework.util.ResourceUtils;
 
 /**
  * Convenient utility methods for loading of {@code java.util.Properties},

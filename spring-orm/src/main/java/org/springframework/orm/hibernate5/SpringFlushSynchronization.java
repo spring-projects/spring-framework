@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate5;
 
 import org.hibernate.Session;
-
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 
 /**

@@ -16,13 +16,13 @@
 
 package org.springframework.util.xml;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
+import javax.xml.stream.events.XMLEvent;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
-import javax.xml.stream.events.XMLEvent;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Implementation of {@code XMLEventReader} based on a list of {@link XMLEvent}s.

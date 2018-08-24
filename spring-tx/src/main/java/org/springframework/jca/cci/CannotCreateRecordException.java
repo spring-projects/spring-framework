@@ -16,9 +16,9 @@
 
 package org.springframework.jca.cci;
 
-import javax.resource.ResourceException;
-
 import org.springframework.dao.DataAccessResourceFailureException;
+
+import javax.resource.ResourceException;
 
 /**
  * Exception thrown when the creating of a CCI Record failed

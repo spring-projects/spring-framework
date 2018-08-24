@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.object;
 
+import org.springframework.lang.Nullable;
+
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-import javax.sql.DataSource;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Reusable query in which concrete subclasses must implement the abstract

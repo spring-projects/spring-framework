@@ -16,24 +16,23 @@
 
 package org.springframework.web.servlet.view.tiles3;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
-import javax.servlet.ServletContext;
-
 import org.apache.tiles.request.ApplicationResource;
 import org.apache.tiles.request.locale.URLApplicationResource;
 import org.apache.tiles.request.servlet.ServletApplicationContext;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
+
+import javax.servlet.ServletContext;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Locale;
 
 /**
  * Spring-specific subclass of the Tiles ServletApplicationContext.

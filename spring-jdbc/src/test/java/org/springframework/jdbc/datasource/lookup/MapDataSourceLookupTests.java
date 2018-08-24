@@ -16,15 +16,16 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.sql.DataSource;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.*;
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Rick Evans

@@ -16,6 +16,12 @@
 
 package org.springframework.jdbc.support.lob;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.FileCopyUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -25,13 +31,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.lang.Nullable;
-import org.springframework.util.FileCopyUtils;
 
 /**
  * {@link LobCreator} implementation based on temporary LOBs,

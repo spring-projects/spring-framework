@@ -18,7 +18,8 @@ package org.springframework.beans.factory.parsing;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link PassThroughSourceExtractor}.

@@ -16,9 +16,9 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.concurrent.Callable;
-
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.concurrent.Callable;
 
 /**
  * Sends a 503 (SERVICE_UNAVAILABLE) in case of a timeout if the response is not

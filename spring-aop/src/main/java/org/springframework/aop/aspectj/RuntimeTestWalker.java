@@ -16,30 +16,20 @@
 
 package org.springframework.aop.aspectj;
 
-import java.lang.reflect.Field;
-
 import org.aspectj.weaver.ReferenceType;
 import org.aspectj.weaver.ReferenceTypeDelegate;
 import org.aspectj.weaver.ResolvedType;
-import org.aspectj.weaver.ast.And;
-import org.aspectj.weaver.ast.Call;
-import org.aspectj.weaver.ast.FieldGetCall;
-import org.aspectj.weaver.ast.HasAnnotation;
-import org.aspectj.weaver.ast.ITestVisitor;
-import org.aspectj.weaver.ast.Instanceof;
-import org.aspectj.weaver.ast.Literal;
-import org.aspectj.weaver.ast.Not;
-import org.aspectj.weaver.ast.Or;
-import org.aspectj.weaver.ast.Test;
+import org.aspectj.weaver.ast.*;
 import org.aspectj.weaver.internal.tools.MatchingContextBasedTest;
 import org.aspectj.weaver.reflect.ReflectionBasedReferenceTypeDelegate;
 import org.aspectj.weaver.reflect.ReflectionVar;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ShadowMatch;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Field;
 
 /**
  * This class encapsulates some AspectJ internal knowledge that should be

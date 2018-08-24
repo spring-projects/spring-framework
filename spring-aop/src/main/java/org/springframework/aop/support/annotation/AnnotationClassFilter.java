@@ -16,11 +16,11 @@
 
 package org.springframework.aop.support.annotation;
 
-import java.lang.annotation.Annotation;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
+
+import java.lang.annotation.Annotation;
 
 /**
  * Simple ClassFilter that looks for a specific Java 5 annotation

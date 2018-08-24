@@ -16,14 +16,13 @@
 
 package org.springframework.jca.cci.core;
 
-import java.sql.SQLException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.Interaction;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.lang.Nullable;
+import java.sql.SQLException;
 
 /**
  * Generic callback interface for code that operates on a CCI Interaction.

@@ -16,17 +16,8 @@
 
 package org.springframework.jmx.access;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Arrays;
-import java.util.Map;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.remote.JMXServiceURL;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.JmxException;
@@ -34,6 +25,14 @@ import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.support.NotificationListenerHolder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.remote.JMXServiceURL;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Registrar object that associates a specific {@link javax.management.NotificationListener}

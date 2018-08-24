@@ -16,19 +16,19 @@
 
 package org.springframework.web.servlet.support;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.TimeZone;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.MessageSourceResourceBundle;
+import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.lang.Nullable;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
-
-import org.springframework.context.MessageSource;
-import org.springframework.context.support.MessageSourceResourceBundle;
-import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.lang.Nullable;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.TimeZone;
 
 /**
  * Helper class for preparing JSTL views,

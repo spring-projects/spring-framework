@@ -86,6 +86,7 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 		}
 	}
 
+
 	@Override
 	public void afterCompletion(int status) {
 		if (shouldUnbindAtCompletion()) {

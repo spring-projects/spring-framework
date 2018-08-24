@@ -16,13 +16,13 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import javax.persistence.spi.ClassTransformer;
-
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.persistence.spi.ClassTransformer;
 
 /**
  * Subclass of {@link MutablePersistenceUnitInfo} that adds instrumentation hooks based on

@@ -16,15 +16,14 @@
 
 package org.springframework.web.reactive.function;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A combination of functions that can populate a {@link ReactiveHttpOutputMessage} body.

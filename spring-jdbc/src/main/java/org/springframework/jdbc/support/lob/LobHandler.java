@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.support.lob;
 
+import org.springframework.lang.Nullable;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Abstraction for handling large binary fields and large text fields in

@@ -16,18 +16,18 @@
 
 package org.springframework.ejb.access;
 
+import org.junit.Test;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.jndi.JndiTemplate;
+
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
-import org.junit.Test;
-
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.jndi.JndiTemplate;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.*;
 
 /**

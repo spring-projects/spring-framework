@@ -15,12 +15,12 @@
  */
 package org.springframework.web.reactive.socket;
 
-import java.nio.charset.StandardCharsets;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Representation of a WebSocket message.

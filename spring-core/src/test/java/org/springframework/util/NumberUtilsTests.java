@@ -16,12 +16,12 @@
 
 package org.springframework.util;
 
+import org.junit.Test;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.util.Locale;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 

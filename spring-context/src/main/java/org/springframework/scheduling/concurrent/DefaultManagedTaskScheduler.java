@@ -16,14 +16,14 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.Properties;
-import java.util.concurrent.ScheduledExecutorService;
-import javax.naming.NamingException;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.lang.Nullable;
+
+import javax.naming.NamingException;
+import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * JNDI-based variant of {@link ConcurrentTaskScheduler}, performing a default lookup for

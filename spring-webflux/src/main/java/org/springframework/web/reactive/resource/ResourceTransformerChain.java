@@ -16,10 +16,9 @@
 
 package org.springframework.web.reactive.resource;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.Resource;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 /**
  * A contract for invoking a chain of {@link ResourceTransformer}s where each resolver

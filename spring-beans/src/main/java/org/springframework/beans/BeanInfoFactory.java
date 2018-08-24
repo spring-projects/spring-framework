@@ -16,10 +16,10 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for creating {@link BeanInfo} instances for Spring beans.

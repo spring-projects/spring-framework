@@ -16,15 +16,14 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import java.lang.instrument.ClassFileTransformer;
-import java.security.ProtectionDomain;
-import javax.persistence.spi.ClassTransformer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.persistence.spi.ClassTransformer;
+import java.lang.instrument.ClassFileTransformer;
+import java.security.ProtectionDomain;
 
 /**
  * Simple adapter that implements the {@code java.lang.instrument.ClassFileTransformer}

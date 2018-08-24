@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.core.io.Resource;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 /**
  * A contract for invoking a chain of {@link ResourceTransformer}s where each resolver

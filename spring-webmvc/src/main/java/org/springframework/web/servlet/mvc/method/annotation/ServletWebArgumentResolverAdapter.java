@@ -18,11 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebArgumentResolver;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.*;
 import org.springframework.web.method.annotation.AbstractWebArgumentResolverAdapter;
 
 /**

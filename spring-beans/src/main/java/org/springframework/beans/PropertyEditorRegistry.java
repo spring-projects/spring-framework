@@ -16,9 +16,9 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyEditor;
-
 import org.springframework.lang.Nullable;
+
+import java.beans.PropertyEditor;
 
 /**
  * Encapsulates methods for registering JavaBeans {@link PropertyEditor PropertyEditors}.

@@ -16,6 +16,16 @@
 
 package org.springframework.web.reactive.result.view.script;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.context.ApplicationContextException;
+import org.springframework.context.support.StaticApplicationContext;
+
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,19 +33,9 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
 
 import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import static org.mockito.BDDMockito.*;
-
-import org.springframework.beans.DirectFieldAccessor;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.context.support.StaticApplicationContext;
 
 /**
  * Unit tests for {@link ScriptTemplateView}.

@@ -16,14 +16,13 @@
 
 package org.springframework.http.converter.json;
 
-import java.text.SimpleDateFormat;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+
+import java.text.SimpleDateFormat;
 
 /**
  * A {@link FactoryBean} for creating a Google Gson 2.x {@link Gson} instance.

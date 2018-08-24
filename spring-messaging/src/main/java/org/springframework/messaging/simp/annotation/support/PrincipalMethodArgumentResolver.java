@@ -16,12 +16,12 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
-import java.security.Principal;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+
+import java.security.Principal;
 
 /**
  * @author Rossen Stoyanchev

@@ -16,14 +16,9 @@
 
 package org.springframework.build.gradle
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.api.Task
+import org.gradle.api.*
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-
 
 /**
  * Gradle plugin that detects identically named, non-empty packages split across multiple

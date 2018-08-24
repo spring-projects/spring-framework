@@ -16,13 +16,13 @@
 
 package org.springframework.jmx.export.annotation;
 
-import javax.management.MXBean;
-
 import org.junit.Test;
-
 import org.springframework.jmx.support.JmxUtils;
 
-import static org.junit.Assert.*;
+import javax.management.MXBean;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller

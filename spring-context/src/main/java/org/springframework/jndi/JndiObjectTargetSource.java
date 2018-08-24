@@ -16,10 +16,10 @@
 
 package org.springframework.jndi;
 
-import javax.naming.NamingException;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.lang.Nullable;
+
+import javax.naming.NamingException;
 
 /**
  * AOP {@link org.springframework.aop.TargetSource} that provides

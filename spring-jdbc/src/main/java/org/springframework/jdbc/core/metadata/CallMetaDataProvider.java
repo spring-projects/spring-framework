@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.core.metadata;
 
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
+
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
-
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying the API to be implemented by a class providing call metadata.

@@ -16,12 +16,12 @@
 
 package org.springframework.web.context.request;
 
-import javax.faces.context.FacesContext;
-
 import org.springframework.core.NamedInheritableThreadLocal;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import javax.faces.context.FacesContext;
 
 /**
  * Holder class to expose the web request in the form of a thread-bound

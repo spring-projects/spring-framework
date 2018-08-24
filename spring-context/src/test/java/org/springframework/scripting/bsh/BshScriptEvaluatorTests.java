@@ -16,17 +16,16 @@
 
 package org.springframework.scripting.bsh;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.scripting.support.StaticScriptSource;
 
-import static org.junit.Assert.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Juergen Hoeller

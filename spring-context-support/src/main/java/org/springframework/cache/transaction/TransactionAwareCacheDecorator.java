@@ -16,13 +16,13 @@
 
 package org.springframework.cache.transaction;
 
-import java.util.concurrent.Callable;
-
 import org.springframework.cache.Cache;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.Callable;
 
 /**
  * Cache decorator which synchronizes its {@link #put}, {@link #evict} and {@link #clear}

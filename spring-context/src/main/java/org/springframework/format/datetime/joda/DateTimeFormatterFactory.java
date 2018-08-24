@@ -16,16 +16,15 @@
 
 package org.springframework.format.datetime.joda;
 
-import java.util.TimeZone;
-
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.util.TimeZone;
 
 /**
  * Factory that creates a Joda-Time {@link DateTimeFormatter}.

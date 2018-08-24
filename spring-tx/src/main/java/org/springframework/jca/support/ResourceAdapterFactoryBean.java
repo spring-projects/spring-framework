@@ -16,17 +16,17 @@
 
 package org.springframework.jca.support;
 
-import javax.resource.ResourceException;
-import javax.resource.spi.BootstrapContext;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.XATerminator;
-import javax.resource.spi.work.WorkManager;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+
+import javax.resource.ResourceException;
+import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.XATerminator;
+import javax.resource.spi.work.WorkManager;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that bootstraps

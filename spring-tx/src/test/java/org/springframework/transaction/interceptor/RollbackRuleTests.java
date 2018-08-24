@@ -16,13 +16,12 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.IOException;
-
 import org.junit.Test;
-
 import org.springframework.beans.FatalBeanException;
 
-import static org.hamcrest.CoreMatchers.*;
+import java.io.IOException;
+
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
 
 /**

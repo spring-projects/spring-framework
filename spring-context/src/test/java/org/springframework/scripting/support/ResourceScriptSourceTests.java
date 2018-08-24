@@ -16,16 +16,16 @@
 
 package org.springframework.scripting.support;
 
-import java.io.IOException;
-
 import org.junit.Test;
-
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StreamUtils;
 
+import java.io.IOException;
+
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Rick Evans

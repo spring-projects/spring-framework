@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import org.springframework.util.Assert;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@link SqlParameterSource} implementations.

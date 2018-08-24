@@ -16,10 +16,10 @@
 
 package org.springframework.jndi;
 
-import javax.naming.NamingException;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.naming.NamingException;
 
 /**
  * Convenient superclass for classes that can locate any number of JNDI objects.

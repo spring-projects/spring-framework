@@ -16,9 +16,8 @@
 
 package org.springframework.transaction.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.w3c.dom.Element;
 
 /**
  * {@code NamespaceHandler} allowing for the configuration of

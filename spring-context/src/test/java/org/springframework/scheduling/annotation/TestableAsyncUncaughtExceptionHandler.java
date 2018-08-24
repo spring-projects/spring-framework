@@ -16,13 +16,14 @@
 
 package org.springframework.scheduling.annotation;
 
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * A {@link AsyncUncaughtExceptionHandler} implementation used for testing purposes.

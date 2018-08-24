@@ -16,16 +16,16 @@
 
 package org.springframework.jca.cci.core.support;
 
-import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
-import javax.resource.cci.ConnectionSpec;
-
 import org.springframework.dao.support.DaoSupport;
 import org.springframework.jca.cci.CannotGetCciConnectionException;
 import org.springframework.jca.cci.connection.ConnectionFactoryUtils;
 import org.springframework.jca.cci.core.CciTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.resource.cci.Connection;
+import javax.resource.cci.ConnectionFactory;
+import javax.resource.cci.ConnectionSpec;
 
 /**
  * Convenient super class for CCI-based data access objects.

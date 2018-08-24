@@ -16,14 +16,14 @@
 
 package org.springframework.jca.cci.connection;
 
+import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.ConnectionSpec;
-
-import org.springframework.core.NamedThreadLocal;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * An adapter for a target CCI {@link javax.resource.cci.ConnectionFactory},

@@ -16,16 +16,8 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -33,6 +25,13 @@ import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MultiValueMap;
+
+import java.io.ByteArrayOutputStream;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Decodes one or more STOMP frames contained in a {@link ByteBuffer}.

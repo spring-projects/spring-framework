@@ -16,11 +16,11 @@
 
 package org.springframework.context.index;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * A {@link StereotypesProvider} that extract a stereotype for each

@@ -16,12 +16,11 @@
 
 package org.springframework.aop.config;
 
-import java.lang.reflect.Method;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.BeanFactory;
+
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

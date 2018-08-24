@@ -16,15 +16,11 @@
 
 package org.springframework.web.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StreamTokenizer;
+import org.junit.Test;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 

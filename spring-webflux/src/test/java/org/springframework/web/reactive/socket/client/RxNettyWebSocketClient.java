@@ -16,13 +16,6 @@
 
 package org.springframework.web.reactive.socket.client;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.reactivex.netty.protocol.http.HttpHandlerNames;
@@ -32,12 +25,6 @@ import io.reactivex.netty.protocol.http.ws.WebSocketConnection;
 import io.reactivex.netty.protocol.http.ws.client.WebSocketRequest;
 import io.reactivex.netty.protocol.http.ws.client.WebSocketResponse;
 import io.reactivex.netty.threads.RxEventLoopProvider;
-import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
-import rx.Observable;
-import rx.RxReactiveStreams;
-
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.ObjectUtils;
@@ -45,6 +32,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
+import rx.Observable;
+import rx.RxReactiveStreams;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * {@link WebSocketClient} implementation for use with RxNetty.

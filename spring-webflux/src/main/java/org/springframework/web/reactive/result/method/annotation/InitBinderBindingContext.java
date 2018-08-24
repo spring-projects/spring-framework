@@ -16,10 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -29,6 +25,10 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Extends {@link BindingContext} with {@code @InitBinder} method initialization.

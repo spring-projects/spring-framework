@@ -15,17 +15,17 @@
  */
 package org.springframework.web.servlet.view.tiles3;
 
-import java.util.Locale;
-
 import org.apache.tiles.request.Request;
 import org.apache.tiles.request.render.Renderer;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
-import static org.junit.Assert.*;
+import java.util.Locale;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.*;
 
 /**

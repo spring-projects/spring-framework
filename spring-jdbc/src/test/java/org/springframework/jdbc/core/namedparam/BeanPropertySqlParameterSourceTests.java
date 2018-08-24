@@ -16,12 +16,11 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import org.junit.Test;
+import org.springframework.tests.sample.beans.TestBean;
+
 import java.sql.Types;
 import java.util.Arrays;
-
-import org.junit.Test;
-
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
 

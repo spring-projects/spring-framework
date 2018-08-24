@@ -16,11 +16,11 @@
 
 package org.springframework.jndi;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.springframework.core.SpringProperties;
 import org.springframework.lang.Nullable;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 /**
  * {@link JndiLocatorSupport} subclass with public lookup methods,

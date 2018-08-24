@@ -16,19 +16,9 @@
 
 package org.springframework.tests.beans;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import org.springframework.beans.factory.parsing.*;
 
-import org.springframework.beans.factory.parsing.AliasDefinition;
-import org.springframework.beans.factory.parsing.ComponentDefinition;
-import org.springframework.beans.factory.parsing.DefaultsDefinition;
-import org.springframework.beans.factory.parsing.ImportDefinition;
-import org.springframework.beans.factory.parsing.ReaderEventListener;
+import java.util.*;
 
 /**
  * @author Rob Harrop

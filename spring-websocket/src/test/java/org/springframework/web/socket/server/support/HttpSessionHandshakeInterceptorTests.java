@@ -16,19 +16,19 @@
 
 package org.springframework.web.socket.server.support;
 
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.springframework.mock.web.test.MockHttpSession;
+import org.springframework.web.socket.AbstractHttpRequestTests;
+import org.springframework.web.socket.WebSocketHandler;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import org.springframework.mock.web.test.MockHttpSession;
-import org.springframework.web.socket.AbstractHttpRequestTests;
-import org.springframework.web.socket.WebSocketHandler;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test fixture for {@link HttpSessionHandshakeInterceptor}.

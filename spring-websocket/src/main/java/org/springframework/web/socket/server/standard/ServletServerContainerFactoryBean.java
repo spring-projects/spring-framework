@@ -16,15 +16,15 @@
 
 package org.springframework.web.socket.server.standard;
 
-import javax.servlet.ServletContext;
-import javax.websocket.WebSocketContainer;
-import javax.websocket.server.ServerContainer;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
+
+import javax.servlet.ServletContext;
+import javax.websocket.WebSocketContainer;
+import javax.websocket.server.ServerContainer;
 
 /**
  * A {@link FactoryBean} for configuring {@link javax.websocket.server.ServerContainer}.

@@ -16,16 +16,15 @@
 
 package org.springframework.aop.support;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-
 import org.aopalliance.aop.Advice;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 /**
  * Abstract BeanFactory-based PointcutAdvisor that allows for any Advice

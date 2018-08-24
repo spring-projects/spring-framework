@@ -15,12 +15,11 @@
  */
 package org.springframework.web.servlet.view.groovy;
 
-import java.util.Locale;
-
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.springframework.beans.DirectFieldAccessor;
+
+import java.util.Locale;
 
 /**
  * Unit tests for

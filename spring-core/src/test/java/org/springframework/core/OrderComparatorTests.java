@@ -16,9 +16,9 @@
 
 package org.springframework.core;
 
-import java.util.Comparator;
-
 import org.junit.Test;
+
+import java.util.Comparator;
 
 import static org.junit.Assert.assertEquals;
 

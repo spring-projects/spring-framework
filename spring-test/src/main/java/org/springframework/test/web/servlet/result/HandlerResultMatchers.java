@@ -16,10 +16,7 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.lang.reflect.Method;
-
 import org.hamcrest.Matcher;
-
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.ClassUtils;
@@ -29,7 +26,9 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import static org.hamcrest.MatcherAssert.*;
+import java.lang.reflect.Method;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**

@@ -17,7 +17,6 @@
 package org.springframework.http.client;
 
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 
 /**

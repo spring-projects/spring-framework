@@ -18,7 +18,7 @@ package org.springframework.jdbc.support;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link JdbcUtils}.

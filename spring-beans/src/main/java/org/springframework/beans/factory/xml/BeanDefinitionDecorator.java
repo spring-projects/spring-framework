@@ -16,9 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Node;
-
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.w3c.dom.Node;
 
 /**
  * Interface used by the {@link DefaultBeanDefinitionDocumentReader}

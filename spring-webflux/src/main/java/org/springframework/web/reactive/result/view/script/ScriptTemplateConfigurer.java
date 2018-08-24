@@ -16,10 +16,9 @@
 
 package org.springframework.web.reactive.result.view.script;
 
-import java.nio.charset.Charset;
-
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
+import java.nio.charset.Charset;
 
 /**
  * An implementation of the Spring WebFlux {@link ScriptTemplateConfig} for

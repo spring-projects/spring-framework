@@ -16,12 +16,12 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * Convenient class for building up pointcuts. All methods return

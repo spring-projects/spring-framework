@@ -16,15 +16,15 @@
 
 package org.springframework.core.io.support;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Properties;
-
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Subclass of {@link PropertiesPropertySource} that loads a {@link Properties} object

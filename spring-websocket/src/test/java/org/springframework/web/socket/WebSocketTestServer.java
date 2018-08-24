@@ -16,10 +16,10 @@
 
 package org.springframework.web.socket;
 
+import org.springframework.web.context.WebApplicationContext;
+
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
-
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Contract for a test server to use for WebSocket integration tests.

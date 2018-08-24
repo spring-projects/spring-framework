@@ -16,9 +16,9 @@
 
 package org.springframework.test.web.client;
 
-import java.io.IOException;
-
 import org.springframework.http.client.ClientHttpRequest;
+
+import java.io.IOException;
 
 /**
  * A contract for matching requests to expectations.

@@ -16,11 +16,11 @@
 
 package org.springframework.jmx.export.naming;
 
-import javax.management.ObjectName;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import javax.management.ObjectName;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop

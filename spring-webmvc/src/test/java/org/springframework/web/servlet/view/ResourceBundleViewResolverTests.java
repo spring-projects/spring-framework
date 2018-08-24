@@ -16,16 +16,8 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockServletContext;
@@ -33,10 +25,15 @@ import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
 
-import static org.hamcrest.CoreMatchers.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Locale;
+import java.util.Map;
+import java.util.MissingResourceException;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Rod Johnson

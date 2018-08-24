@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.datasource;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Simple implementation of the standard JDBC {@link javax.sql.DataSource} interface,

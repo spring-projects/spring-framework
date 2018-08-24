@@ -16,10 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import javax.servlet.ServletException;
-
 import org.junit.After;
-
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.lang.Nullable;
@@ -30,7 +27,9 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
-import static org.junit.Assert.*;
+import javax.servlet.ServletException;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Base class for tests using on the DispatcherServlet and HandlerMethod infrastructure classes:

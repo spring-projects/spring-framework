@@ -16,10 +16,10 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Extension of the {@code Map} interface that stores multiple values.

@@ -3,7 +3,7 @@
  */
 package org.springframework.expression.spel.testresources;
 
-import java.awt.Color;
+import java.awt.*;
 
 ///CLOVER:OFF
 public class Fruit {

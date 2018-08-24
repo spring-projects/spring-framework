@@ -16,14 +16,14 @@
 
 package org.springframework.cache.jcache.interceptor;
 
+import org.springframework.cache.interceptor.CacheResolver;
+import org.springframework.cache.interceptor.KeyGenerator;
+
+import javax.cache.annotation.CacheInvocationParameter;
+import javax.cache.annotation.CacheMethodDetails;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
-import javax.cache.annotation.CacheInvocationParameter;
-import javax.cache.annotation.CacheMethodDetails;
-
-import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.cache.interceptor.KeyGenerator;
 
 /**
  * A base {@link JCacheOperation} that operates with a key.

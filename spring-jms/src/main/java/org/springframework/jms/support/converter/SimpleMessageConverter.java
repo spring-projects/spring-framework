@@ -16,19 +16,13 @@
 
 package org.springframework.jms.support.converter;
 
+import org.springframework.util.ObjectUtils;
+
+import javax.jms.*;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
-import org.springframework.util.ObjectUtils;
 
 /**
  * A simple message converter which is able to handle TextMessages, BytesMessages,

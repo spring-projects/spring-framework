@@ -16,13 +16,12 @@
 
 package org.springframework.test.context.junit4.statements;
 
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runners.model.Statement;
-
 import org.springframework.test.annotation.TestAnnotationUtils;
+
+import java.lang.reflect.Method;
 
 /**
  * {@code SpringRepeat} is a custom JUnit {@link Statement} which adds support

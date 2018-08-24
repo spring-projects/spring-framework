@@ -16,9 +16,9 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.concurrent.Callable;
-
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.concurrent.Callable;
 
 /**
  * Abstract adapter class for the {@link CallableProcessingInterceptor} interface,

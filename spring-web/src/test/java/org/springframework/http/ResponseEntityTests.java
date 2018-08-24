@@ -16,13 +16,13 @@
 
 package org.springframework.http;
 
+import org.hamcrest.Matchers;
+import org.junit.Test;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import org.hamcrest.Matchers;
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 

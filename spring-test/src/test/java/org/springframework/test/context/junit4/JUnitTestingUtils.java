@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import java.lang.reflect.Constructor;
-
 import org.junit.experimental.ParallelComputer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.Computer;
@@ -25,8 +23,9 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
-
 import org.springframework.beans.BeanUtils;
+
+import java.lang.reflect.Constructor;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;

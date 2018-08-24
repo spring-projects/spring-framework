@@ -16,11 +16,11 @@
 
 package org.springframework.remoting.jaxws;
 
-import javax.xml.ws.BindingProvider;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.Assert;
+
+import javax.xml.ws.BindingProvider;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} for a specific port of a

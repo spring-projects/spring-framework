@@ -16,15 +16,14 @@
 
 package org.springframework.web.cors;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.*;
 

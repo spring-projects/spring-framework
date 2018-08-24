@@ -16,22 +16,21 @@
 
 package org.springframework.web.socket.server.standard;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.glassfish.tyrus.core.TyrusUpgradeResponse;
 import org.glassfish.tyrus.core.Utils;
 import org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler;
 import org.glassfish.tyrus.spi.WebSocketEngine.UpgradeInfo;
 import org.glassfish.tyrus.spi.Writer;
-
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A WebSocket {@code RequestUpgradeStrategy} for Oracle's GlassFish 4.1 and higher.

@@ -16,16 +16,16 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
+import org.springframework.util.StringUtils;
+import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.context.ServletContextAware;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.util.StringUtils;
-import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.context.ServletContextAware;
+import java.io.IOException;
 
 /**
  * An {@link HttpRequestHandler} for serving static files using the Servlet container's "default" Servlet.

@@ -16,16 +16,8 @@
 
 package org.springframework.web.servlet.view.groovy;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.Locale;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import groovy.text.Template;
 import groovy.text.markup.MarkupTemplateEngine;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -35,6 +27,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.springframework.web.util.NestedServletException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * An {@link AbstractTemplateView} subclass based on Groovy XML/XHTML markup templates.

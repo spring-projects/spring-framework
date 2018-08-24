@@ -18,8 +18,10 @@ package org.springframework.web.reactive.function.server
 
 import org.junit.Test
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.HttpHeaders.*
-import org.springframework.http.HttpMethod.*
+import org.springframework.http.HttpHeaders.ACCEPT
+import org.springframework.http.HttpHeaders.CONTENT_TYPE
+import org.springframework.http.HttpMethod.PATCH
+import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.*
 import org.springframework.web.reactive.function.server.MockServerRequest.builder
 import org.springframework.web.reactive.function.server.ServerResponse.ok

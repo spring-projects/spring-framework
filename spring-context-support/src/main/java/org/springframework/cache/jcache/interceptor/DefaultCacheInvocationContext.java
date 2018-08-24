@@ -16,14 +16,14 @@
 
 package org.springframework.cache.jcache.interceptor;
 
+import org.springframework.cache.interceptor.CacheOperationInvocationContext;
+
+import javax.cache.annotation.CacheInvocationContext;
+import javax.cache.annotation.CacheInvocationParameter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
-import javax.cache.annotation.CacheInvocationContext;
-import javax.cache.annotation.CacheInvocationParameter;
-
-import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 
 /**
  * The default {@link CacheOperationInvocationContext} implementation used

@@ -16,14 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.Properties;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +27,15 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Properties;
+
 import static java.lang.String.format;
 import static org.junit.Assert.*;
-import static org.springframework.util.ClassUtils.*;
+import static org.springframework.util.ClassUtils.convertClassNameToResourcePath;
 
 /**
  * @author Mark Fisher

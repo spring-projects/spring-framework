@@ -16,13 +16,12 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.jms.Session;
-import javax.resource.spi.ResourceAdapter;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanWrapper;
+
+import javax.jms.Session;
+import javax.resource.spi.ResourceAdapter;
 
 /**
  * Default implementation of the {@link JmsActivationSpecFactory} interface.

@@ -16,12 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.PathContainer.Element;
 import org.springframework.http.server.reactive.PathContainer.Segment;
@@ -31,6 +25,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a parsed path pattern. Includes a chain of path elements

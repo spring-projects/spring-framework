@@ -16,13 +16,12 @@
 
 package org.springframework.jca.cci.core;
 
-import java.sql.SQLException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Record;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.lang.Nullable;
+import java.sql.SQLException;
 
 /**
  * Callback interface for extracting a result object from a CCI Record instance.

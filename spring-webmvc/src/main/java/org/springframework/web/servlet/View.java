@@ -16,13 +16,12 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Map;
+import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
+import java.util.Map;
 
 /**
  * MVC View for a web interaction. Implementations are responsible for rendering

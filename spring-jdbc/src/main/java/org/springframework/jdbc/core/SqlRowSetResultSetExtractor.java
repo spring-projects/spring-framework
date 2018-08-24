@@ -16,14 +16,14 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
-
-import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * {@link ResultSetExtractor} implementation that returns a Spring {@link SqlRowSet}

@@ -16,24 +16,7 @@
 
 package org.springframework.core.convert.support;
 
-import java.awt.Color;
-import java.awt.SystemColor;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.junit.Test;
-
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -49,9 +32,15 @@ import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
-import static java.util.Comparator.*;
-import static java.util.stream.Collectors.*;
-import static org.hamcrest.Matchers.*;
+import java.awt.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.*;
+import java.util.List;
+
+import static java.util.Comparator.naturalOrder;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.*;
 
 /**

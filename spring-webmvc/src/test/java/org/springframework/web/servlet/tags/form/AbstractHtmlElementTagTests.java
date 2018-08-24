@@ -16,30 +16,25 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Collections;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.JspException;
-
 import org.junit.Before;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.servlet.support.JspAwareRequestContext;
-import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.web.servlet.support.RequestContextUtils;
-import org.springframework.web.servlet.support.RequestDataValueProcessor;
-import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
+import org.springframework.web.servlet.support.*;
 import org.springframework.web.servlet.tags.AbstractTagTests;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.JspException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Rob Harrop

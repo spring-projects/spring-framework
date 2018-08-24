@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.simp;
 
-import java.util.Collections;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.Collections;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for SimpMessageHeaderAccessor.

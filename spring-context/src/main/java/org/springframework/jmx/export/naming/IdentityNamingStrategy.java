@@ -16,14 +16,14 @@
 
 package org.springframework.jmx.export.naming;
 
-import java.util.Hashtable;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.util.Hashtable;
 
 /**
  * An implementation of the {@code ObjectNamingStrategy} interface that

@@ -16,14 +16,14 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.lang.Nullable;
+
+import javax.sql.DataSource;
 
 /**
  * A subclass of {@link EmbeddedDatabaseFactory} that implements {@link FactoryBean}

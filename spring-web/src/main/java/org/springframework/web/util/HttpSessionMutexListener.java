@@ -16,9 +16,9 @@
 
 package org.springframework.web.util;
 
-import java.io.Serializable;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+import java.io.Serializable;
 
 /**
  * Servlet HttpSessionListener that automatically exposes the session mutex

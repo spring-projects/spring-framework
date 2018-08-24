@@ -16,27 +16,14 @@
 
 package org.springframework.context.event;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executor;
-
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.BeanThatBroadcasts;
-import org.springframework.context.BeanThatListens;
-import org.springframework.context.PayloadApplicationEvent;
+import org.springframework.context.*;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
@@ -46,6 +33,12 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.tests.sample.beans.TestBean;
+
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executor;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

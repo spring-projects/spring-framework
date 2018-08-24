@@ -16,24 +16,12 @@
 
 package org.springframework.jmx.export.annotation;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableMBeanExport;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.MBeanExportConfiguration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.context.annotation.*;
 import org.springframework.jmx.export.MBeanExporterTests;
 import org.springframework.jmx.export.TestDynamicMBean;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
@@ -42,7 +30,11 @@ import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.jmx.support.RegistrationPolicy;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.Assert.*;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Tests for {@link EnableMBeanExport} and {@link MBeanExportConfiguration}.

@@ -16,16 +16,15 @@
 
 package org.springframework.web.reactive.socket.client;
 
-import java.net.URI;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.List;
 
 /**
  * Base class for {@link WebSocketClient} implementations.

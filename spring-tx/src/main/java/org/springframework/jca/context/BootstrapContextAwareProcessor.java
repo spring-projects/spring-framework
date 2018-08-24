@@ -16,11 +16,11 @@
 
 package org.springframework.jca.context;
 
-import javax.resource.spi.BootstrapContext;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.lang.Nullable;
+
+import javax.resource.spi.BootstrapContext;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}

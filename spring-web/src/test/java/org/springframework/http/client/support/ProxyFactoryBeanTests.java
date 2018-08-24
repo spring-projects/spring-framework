@@ -16,13 +16,13 @@
 
 package org.springframework.http.client.support;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Arjen Poutsma

@@ -16,15 +16,14 @@
 
 package org.springframework.ejb.access;
 
-import java.lang.reflect.Proxy;
+import org.junit.Test;
+import org.springframework.jndi.JndiTemplate;
+
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
 import javax.naming.NamingException;
-
-import org.junit.Test;
-
-import org.springframework.jndi.JndiTemplate;
+import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

@@ -16,9 +16,6 @@
 
 package org.springframework.test.context.support;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
@@ -31,7 +28,10 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.junit.Assert.assertArrayEquals;
 
 /**
  * JUnit 4 based unit test which verifies proper

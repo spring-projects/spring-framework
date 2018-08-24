@@ -16,29 +16,12 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import example.profilescan.DevComponent;
 import example.profilescan.ProfileAnnotatedComponent;
 import example.profilescan.ProfileMetaAnnotatedComponent;
-import example.scannable.AutowiredQualifierFooService;
-import example.scannable.CustomStereotype;
-import example.scannable.DefaultNamedComponent;
-import example.scannable.FooDao;
-import example.scannable.FooService;
-import example.scannable.FooServiceImpl;
-import example.scannable.MessageBean;
-import example.scannable.NamedComponent;
-import example.scannable.NamedStubDao;
-import example.scannable.ScopedProxyTestBean;
-import example.scannable.ServiceInvocationCounter;
-import example.scannable.StubFooDao;
+import example.scannable.*;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.index.CandidateComponentsTestClassLoader;
@@ -54,7 +37,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
-import static org.hamcrest.CoreMatchers.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 /**

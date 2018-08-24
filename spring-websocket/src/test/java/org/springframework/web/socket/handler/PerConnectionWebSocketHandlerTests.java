@@ -17,13 +17,12 @@
 package org.springframework.web.socket.handler;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for {@link PerConnectionWebSocketHandler}.

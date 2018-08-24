@@ -1,12 +1,11 @@
 package org.springframework.context.support;
 
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.ClassUtils;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link GenericXmlApplicationContext}.

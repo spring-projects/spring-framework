@@ -16,10 +16,10 @@
 
 package org.springframework.core.type.classreading;
 
-import java.io.IOException;
-
 import org.springframework.core.type.AbstractClassMetadataMemberClassTests;
 import org.springframework.core.type.ClassMetadata;
+
+import java.io.IOException;
 
 /**
  * @author Chris Beams

@@ -16,20 +16,21 @@
 
 package org.springframework.test.context.support;
 
-import java.util.List;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.test.context.support.ContextLoaderUtils.*;
+import java.util.List;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.springframework.test.context.support.ContextLoaderUtils.resolveContextConfigurationAttributes;
 
 /**
  * Unit tests for {@link ContextLoaderUtils} involving {@link ContextConfigurationAttributes}.

@@ -16,6 +16,14 @@
 
 package org.springframework.cache.annotation;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.springframework.cache.interceptor.CacheEvictOperation;
+import org.springframework.cache.interceptor.CacheOperation;
+import org.springframework.cache.interceptor.CacheableOperation;
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,16 +34,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import org.springframework.cache.interceptor.CacheEvictOperation;
-import org.springframework.cache.interceptor.CacheOperation;
-import org.springframework.cache.interceptor.CacheableOperation;
-import org.springframework.core.annotation.AliasFor;
-
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
 /**

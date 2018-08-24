@@ -16,14 +16,13 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
-
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * Convenient base class for Advisors that are also static pointcuts.

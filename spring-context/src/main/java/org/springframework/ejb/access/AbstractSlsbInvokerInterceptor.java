@@ -16,16 +16,15 @@
 
 package org.springframework.ejb.access;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import javax.naming.Context;
-import javax.naming.NamingException;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.jndi.JndiObjectLocator;
 import org.springframework.lang.Nullable;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Base class for AOP interceptors invoking local or remote Stateless Session Beans.

@@ -16,13 +16,6 @@
 
 package org.springframework.jmx.export.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Set;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.annotation.AnnotationBeanUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -34,6 +27,13 @@ import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * Implementation of the {@code JmxAttributeSource} interface that

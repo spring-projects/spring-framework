@@ -16,15 +16,14 @@
 
 package org.springframework.aop.support;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.util.ReflectionUtils;
+
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * Convenient implementation of the

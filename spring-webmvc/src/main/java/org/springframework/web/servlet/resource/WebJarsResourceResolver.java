@@ -16,13 +16,12 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
-import org.webjars.WebJarAssetLocator;
-
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
+import org.webjars.WebJarAssetLocator;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * A {@code ResourceResolver} that delegates to the chain to locate a resource and then

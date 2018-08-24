@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.support.rowset;
 
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.lang.Nullable;
+
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * The default implementation of Spring's {@link SqlRowSetMetaData} interface, wrapping

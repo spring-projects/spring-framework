@@ -16,10 +16,6 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
-import java.lang.annotation.Annotation;
-import java.security.Principal;
-import java.util.Map;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -43,6 +39,10 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringUtils;
+
+import java.lang.annotation.Annotation;
+import java.security.Principal;
+import java.util.Map;
 
 /**
  * A {@link HandlerMethodReturnValueHandler} for sending to destinations specified in a

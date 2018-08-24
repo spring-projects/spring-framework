@@ -16,11 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
-import javax.net.ssl.SSLException;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelConfig;
 import io.netty.channel.ChannelInitializer;
@@ -35,12 +30,16 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.net.ssl.SSLException;
+import java.io.IOException;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation

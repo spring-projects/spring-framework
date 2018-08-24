@@ -16,10 +16,9 @@
 
 package org.springframework.web.server;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import reactor.core.publisher.Mono;
 
 /**
  * Contract to handle a web request.

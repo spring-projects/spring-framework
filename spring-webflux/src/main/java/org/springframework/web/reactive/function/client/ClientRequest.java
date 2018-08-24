@@ -16,18 +16,17 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.net.URI;
-import java.util.function.Consumer;
-
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.function.Consumer;
 
 /**
  * Represents a typed, immutable, client-side HTTP request, as executed by the

@@ -16,10 +16,10 @@
 
 package org.springframework.aop.target;
 
-import java.io.Serializable;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * {@link org.springframework.aop.TargetSource} implementation that

@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.theme;
 
+import org.springframework.lang.Nullable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.web.servlet.ThemeResolver} implementation

@@ -16,17 +16,15 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

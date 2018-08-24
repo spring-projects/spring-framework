@@ -16,9 +16,9 @@
 
 package org.springframework.context.event;
 
-import java.lang.reflect.Method;
-
 import org.springframework.context.ApplicationListener;
+
+import java.lang.reflect.Method;
 
 /**
  * Strategy interface for creating {@link ApplicationListener} for methods

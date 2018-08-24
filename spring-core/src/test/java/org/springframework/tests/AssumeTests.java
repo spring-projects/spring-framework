@@ -16,17 +16,18 @@
 
 package org.springframework.tests;
 
-import java.util.Arrays;
-
 import org.junit.After;
 import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Test;
 
-import static java.util.stream.Collectors.*;
+import java.util.Arrays;
+
+import static java.util.stream.Collectors.joining;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.tests.Assume.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.springframework.tests.Assume.TEST_GROUPS_SYSTEM_PROPERTY;
 import static org.springframework.tests.TestGroup.*;
 
 /**

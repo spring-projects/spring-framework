@@ -17,7 +17,6 @@
 package org.springframework.test.context.junit4;
 
 import org.junit.runner.RunWith;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;

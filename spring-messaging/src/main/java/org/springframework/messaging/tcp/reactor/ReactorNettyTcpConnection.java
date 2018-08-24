@@ -18,15 +18,14 @@ package org.springframework.messaging.tcp.reactor;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelPipeline;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.tcp.TcpConnection;
+import org.springframework.util.concurrent.ListenableFuture;
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.NettyInbound;
 import reactor.ipc.netty.NettyOutbound;
 import reactor.ipc.netty.NettyPipeline;
-
-import org.springframework.messaging.Message;
-import org.springframework.messaging.tcp.TcpConnection;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Reactor Netty based implementation of {@link TcpConnection}.

@@ -16,18 +16,14 @@
 
 package org.springframework.web.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.FastByteArrayOutputStream;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.FastByteArrayOutputStream;
+import java.io.*;
 
 /**
  * {@link javax.servlet.http.HttpServletResponse} wrapper that caches all content written to

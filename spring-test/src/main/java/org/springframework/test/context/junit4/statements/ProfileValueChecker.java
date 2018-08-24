@@ -16,17 +16,16 @@
 
 package org.springframework.test.context.junit4.statements;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-
 import org.junit.AssumptionViolatedException;
 import org.junit.runners.model.Statement;
-
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.util.Assert;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * {@code ProfileValueChecker} is a custom JUnit {@link Statement} that checks

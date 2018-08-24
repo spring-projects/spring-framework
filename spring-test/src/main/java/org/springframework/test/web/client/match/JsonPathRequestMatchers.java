@@ -16,16 +16,15 @@
 
 package org.springframework.test.web.client.match;
 
-import java.io.IOException;
-import java.text.ParseException;
-
 import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
-
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
+
+import java.io.IOException;
+import java.text.ParseException;
 
 /**
  * Factory for assertions on the request content using

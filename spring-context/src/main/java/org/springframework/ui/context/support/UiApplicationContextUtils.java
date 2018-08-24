@@ -18,7 +18,6 @@ package org.springframework.ui.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.ThemeSource;

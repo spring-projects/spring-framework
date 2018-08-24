@@ -15,9 +15,9 @@
  */
 package org.springframework.http.server.reactive;
 
-import java.net.URI;
-
 import org.junit.Test;
+
+import java.net.URI;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;

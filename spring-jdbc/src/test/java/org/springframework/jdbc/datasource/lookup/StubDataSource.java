@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
+import org.springframework.jdbc.datasource.AbstractDataSource;
+
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import org.springframework.jdbc.datasource.AbstractDataSource;
 
 /**
  * Stub, do-nothing DataSource implementation.

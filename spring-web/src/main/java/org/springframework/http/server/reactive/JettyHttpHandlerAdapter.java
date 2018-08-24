@@ -16,16 +16,15 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import org.eclipse.jetty.server.HttpOutput;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.server.HttpOutput;
-
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for writing

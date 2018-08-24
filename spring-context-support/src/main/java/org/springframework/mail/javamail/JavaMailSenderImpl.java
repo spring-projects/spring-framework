@@ -16,29 +16,15 @@
 
 package org.springframework.mail.javamail;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import javax.activation.FileTypeMap;
-import javax.mail.AuthenticationFailedException;
-import javax.mail.MessagingException;
-import javax.mail.NoSuchProviderException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.MimeMessage;
-
 import org.springframework.lang.Nullable;
-import org.springframework.mail.MailAuthenticationException;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailParseException;
-import org.springframework.mail.MailPreparationException;
-import org.springframework.mail.MailSendException;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.*;
 import org.springframework.util.Assert;
+
+import javax.activation.FileTypeMap;
+import javax.mail.*;
+import javax.mail.internet.MimeMessage;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * Production implementation of the {@link JavaMailSender} interface,

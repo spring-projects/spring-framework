@@ -1,7 +1,8 @@
-import javax.script.*
-import org.springframework.web.reactive.result.view.script.RenderingContext
-import org.springframework.context.support.ResourceBundleMessageSource
 import org.springframework.beans.factory.getBean
+import org.springframework.context.support.ResourceBundleMessageSource
+import org.springframework.web.reactive.result.view.script.RenderingContext
+import javax.script.ScriptEngineManager
+import javax.script.SimpleBindings
 
 fun render(template: String, model: Map<String, Any>, renderingContext: RenderingContext): String {
 	val engine = ScriptEngineManager().getEngineByName("kotlin")

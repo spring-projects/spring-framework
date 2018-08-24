@@ -16,14 +16,9 @@
 
 package org.springframework.context.support;
 
-import java.security.AccessControlException;
-import java.security.Permission;
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.Profile;
@@ -31,9 +26,13 @@ import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.StandardEnvironmentTests;
 import org.springframework.stereotype.Component;
 
+import java.security.AccessControlException;
+import java.security.Permission;
+import java.util.Map;
+
 import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests integration between Environment and SecurityManagers. See SPR-9970.

@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Extension of MethodOverride that represents an arbitrary

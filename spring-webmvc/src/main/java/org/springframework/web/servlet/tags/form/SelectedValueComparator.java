@@ -16,14 +16,14 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.support.BindStatus;
+
 import java.beans.PropertyEditor;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * Utility class for testing whether a candidate value matches a {@link BindStatus#getValue data bound value}.

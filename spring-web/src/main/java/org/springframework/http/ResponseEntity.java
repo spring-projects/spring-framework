@@ -16,15 +16,15 @@
 
 package org.springframework.http;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Extension of {@link HttpEntity} that adds a {@link HttpStatus} status code.

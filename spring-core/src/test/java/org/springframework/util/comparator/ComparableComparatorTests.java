@@ -16,13 +16,13 @@
 
 package org.springframework.util.comparator;
 
-import java.util.Comparator;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.*;
+import java.util.Comparator;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link ComparableComparator}.

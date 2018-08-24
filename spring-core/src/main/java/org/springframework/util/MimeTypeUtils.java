@@ -16,19 +16,11 @@
 
 package org.springframework.util;
 
+import org.springframework.util.MimeType.SpecificityComparator;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import org.springframework.util.MimeType.SpecificityComparator;
+import java.util.*;
 
 /**
  * Miscellaneous {@link MimeType} utility methods.

@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.support;
 
+import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * Default implementation of the {@link KeyHolder} interface, to be used for

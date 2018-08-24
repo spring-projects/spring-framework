@@ -17,10 +17,9 @@
 package org.springframework.core.io.support;
 
 import org.junit.Test;
-
 import org.springframework.core.io.Resource;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for the {@link ResourceRegion} class.

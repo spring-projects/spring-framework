@@ -16,27 +16,12 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.Calendar;
-import org.quartz.JobDetail;
-import org.quartz.JobListener;
-import org.quartz.ListenerManager;
-import org.quartz.ObjectAlreadyExistsException;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SchedulerListener;
-import org.quartz.Trigger;
-import org.quartz.TriggerListener;
+import org.quartz.*;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.xml.XMLSchedulingDataProcessor;
-
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
@@ -44,6 +29,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+
+import java.util.*;
 
 /**
  * Common base class for accessing a Quartz Scheduler, i.e. for registering jobs,

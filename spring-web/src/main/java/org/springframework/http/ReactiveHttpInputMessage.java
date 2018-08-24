@@ -17,9 +17,8 @@
 package org.springframework.http;
 
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.io.buffer.DataBuffer;
+import reactor.core.publisher.Flux;
 
 /**
  * An "reactive" HTTP input message that exposes the input as {@link Publisher}.

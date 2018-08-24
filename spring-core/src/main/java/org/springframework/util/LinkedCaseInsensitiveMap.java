@@ -16,15 +16,10 @@
 
 package org.springframework.util;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.lang.Nullable;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * {@link LinkedHashMap} variant that stores String keys in a case-insensitive

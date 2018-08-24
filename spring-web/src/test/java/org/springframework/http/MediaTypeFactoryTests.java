@@ -17,7 +17,6 @@
 package org.springframework.http;
 
 import org.junit.Test;
-
 import org.springframework.core.io.Resource;
 
 import static org.junit.Assert.*;

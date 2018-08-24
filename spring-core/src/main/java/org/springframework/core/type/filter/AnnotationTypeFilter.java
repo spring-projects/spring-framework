@@ -16,14 +16,14 @@
 
 package org.springframework.core.type.filter;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Inherited;
-
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
 
 /**
  * A simple filter which matches classes with a given annotation,

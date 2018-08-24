@@ -16,15 +16,15 @@
 
 package org.springframework.web.jsf;
 
-import java.util.Collection;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.web.context.WebApplicationContext;
+
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
-
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.web.context.WebApplicationContext;
+import java.util.Collection;
 
 /**
  * JSF PhaseListener implementation that delegates to one or more Spring-managed

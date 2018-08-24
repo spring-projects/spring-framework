@@ -16,10 +16,9 @@
 
 package org.springframework.http.codec.multipart;
 
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import reactor.core.publisher.Flux;
 
 /**
  * Representation for a part in a "multipart/form-data" request.

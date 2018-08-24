@@ -18,7 +18,6 @@ package org.springframework.aop.target.dynamic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.TargetSource;
 
 /**

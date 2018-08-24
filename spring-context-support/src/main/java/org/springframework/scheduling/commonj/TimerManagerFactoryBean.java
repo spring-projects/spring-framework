@@ -16,18 +16,17 @@
 
 package org.springframework.scheduling.commonj;
 
-import java.util.LinkedList;
-import java.util.List;
-import javax.naming.NamingException;
-
 import commonj.timers.Timer;
 import commonj.timers.TimerManager;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.Lifecycle;
 import org.springframework.lang.Nullable;
+
+import javax.naming.NamingException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that retrieves a

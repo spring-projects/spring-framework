@@ -16,10 +16,10 @@
 
 package org.springframework.beans;
 
-import java.util.Map;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
+
+import java.util.Map;
 
 /**
  * Common interface for classes that can access named properties

@@ -16,16 +16,11 @@
 
 package org.springframework.web.socket;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+
+import java.util.*;
 
 /**
  * An {@link org.springframework.http.HttpHeaders} variant that adds support for

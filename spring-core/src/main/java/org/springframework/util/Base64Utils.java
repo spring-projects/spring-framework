@@ -16,11 +16,11 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-
-import org.springframework.lang.Nullable;
 
 /**
  * A simple utility class for Base64 encoding and decoding.

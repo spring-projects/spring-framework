@@ -16,12 +16,12 @@
 
 package org.springframework.web.socket.server.support;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+
+import javax.servlet.ServletContext;
 
 /**
  * An extension of {@link SimpleUrlHandlerMapping} that is also a

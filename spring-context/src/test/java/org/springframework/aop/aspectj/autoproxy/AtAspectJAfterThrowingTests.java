@@ -16,15 +16,14 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import java.io.IOException;
-
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 

@@ -16,15 +16,14 @@
 
 package org.springframework.core.type.filter;
 
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
 
 /**
  * Type filter that is aware of traversing over hierarchy.

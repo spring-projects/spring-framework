@@ -16,12 +16,7 @@
 
 package org.springframework.test.context.junit.jupiter;
 
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.api.extension.ContainerExecutionCondition;
-import org.junit.jupiter.api.extension.ContainerExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestExecutionCondition;
-import org.junit.jupiter.api.extension.TestExtensionContext;
+import org.junit.jupiter.api.extension.*;
 
 /**
  * {@code EnabledIfCondition} is a composite {@link ContainerExecutionCondition}

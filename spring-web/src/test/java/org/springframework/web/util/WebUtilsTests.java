@@ -16,19 +16,14 @@
 
 package org.springframework.web.util;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.MultiValueMap;
+
+import java.util.*;
 
 import static org.junit.Assert.*;
 

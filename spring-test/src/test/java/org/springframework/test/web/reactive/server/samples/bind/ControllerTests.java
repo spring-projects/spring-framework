@@ -18,7 +18,6 @@ package org.springframework.test.web.reactive.server.samples.bind;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

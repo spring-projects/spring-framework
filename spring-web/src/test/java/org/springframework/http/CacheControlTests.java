@@ -19,9 +19,9 @@ package org.springframework.http;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Brian Clozel

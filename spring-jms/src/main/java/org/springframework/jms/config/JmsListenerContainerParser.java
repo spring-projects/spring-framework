@@ -16,16 +16,15 @@
 
 package org.springframework.jms.config;
 
-import javax.jms.Session;
-
-import org.w3c.dom.Element;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
+
+import javax.jms.Session;
 
 /**
  * Parser for the JMS {@code <listener-container>} element.

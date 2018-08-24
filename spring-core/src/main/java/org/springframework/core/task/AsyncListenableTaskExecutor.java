@@ -16,9 +16,9 @@
 
 package org.springframework.core.task;
 
-import java.util.concurrent.Callable;
-
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.Callable;
 
 /**
  * Extension of the {@link AsyncTaskExecutor} interface, adding the capability to submit

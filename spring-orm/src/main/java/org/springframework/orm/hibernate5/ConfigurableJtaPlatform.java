@@ -16,20 +16,13 @@
 
 package org.springframework.orm.hibernate5;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
-import javax.transaction.UserTransaction;
-
 import org.hibernate.TransactionException;
 import org.hibernate.engine.transaction.jta.platform.spi.JtaPlatform;
-
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.jta.UserTransactionAdapter;
 import org.springframework.util.Assert;
+
+import javax.transaction.*;
 
 /**
  * Implementation of Hibernate 5's JtaPlatform SPI, exposing passed-in {@link TransactionManager},

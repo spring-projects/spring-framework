@@ -16,11 +16,6 @@
 
 package org.springframework.web.reactive.result.view;
 
-import java.util.Locale;
-import java.util.function.Function;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -28,6 +23,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
+import reactor.core.publisher.Mono;
+
+import java.util.Locale;
+import java.util.function.Function;
 
 /**
  * A {@link ViewResolver} that allow direct resolution of symbolic view names

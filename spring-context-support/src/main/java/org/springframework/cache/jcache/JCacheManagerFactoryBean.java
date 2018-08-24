@@ -16,16 +16,16 @@
 
 package org.springframework.cache.jcache;
 
-import java.net.URI;
-import java.util.Properties;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import java.net.URI;
+import java.util.Properties;
 
 /**
  * {@link FactoryBean} for a JCache {@link javax.cache.CacheManager},

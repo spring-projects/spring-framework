@@ -16,23 +16,22 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.text.ParseException;
-import java.util.Date;
-import java.util.Map;
-import java.util.TimeZone;
-
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.impl.triggers.CronTriggerImpl;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * A Spring {@link FactoryBean} for creating a Quartz {@link org.quartz.CronTrigger}

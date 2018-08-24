@@ -16,9 +16,9 @@
 
 package org.springframework.scheduling.config;
 
-import java.util.concurrent.ScheduledFuture;
-
 import org.springframework.lang.Nullable;
+
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * A representation of a scheduled task,

@@ -16,10 +16,10 @@
 
 package org.springframework.instrument.classloading;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.Enumeration;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 

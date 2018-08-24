@@ -17,12 +17,7 @@
 package org.springframework.expression.spel;
 
 import org.junit.Test;
-
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.EvaluationException;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ParseException;
-import org.springframework.expression.ParserContext;
+import org.springframework.expression.*;
 import org.springframework.expression.common.CompositeStringExpression;
 import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;

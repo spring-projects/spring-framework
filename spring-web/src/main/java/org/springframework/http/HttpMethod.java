@@ -16,10 +16,10 @@
 
 package org.springframework.http;
 
+import org.springframework.lang.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Java 5 enumeration of HTTP request methods. Intended for use

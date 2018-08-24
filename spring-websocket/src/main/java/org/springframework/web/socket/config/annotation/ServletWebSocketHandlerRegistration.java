@@ -16,8 +16,6 @@
 
 package org.springframework.web.socket.config.annotation;
 
-import java.util.Arrays;
-
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -29,6 +27,8 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
+
+import java.util.Arrays;
 
 /**
  * A helper class for configuring {@link WebSocketHandler} request handling

@@ -16,20 +16,19 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.util.concurrent.Callable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.hamcrest.Matcher;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.util.concurrent.Callable;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 /**
  * Factory for assertions on the request.

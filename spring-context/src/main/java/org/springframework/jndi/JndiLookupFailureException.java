@@ -16,9 +16,9 @@
 
 package org.springframework.jndi;
 
-import javax.naming.NamingException;
-
 import org.springframework.core.NestedRuntimeException;
+
+import javax.naming.NamingException;
 
 /**
  * RuntimeException to be thrown in case of JNDI lookup failures,

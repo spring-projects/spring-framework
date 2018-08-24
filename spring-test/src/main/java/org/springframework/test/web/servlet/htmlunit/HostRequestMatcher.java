@@ -16,12 +16,12 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
+import com.gargoylesoftware.htmlunit.WebRequest;
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.gargoylesoftware.htmlunit.WebRequest;
 
 /**
  * A {@link WebRequestMatcher} that allows matching on the host and optionally

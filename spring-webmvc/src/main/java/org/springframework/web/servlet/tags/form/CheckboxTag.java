@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.util.Collection;
-import javax.servlet.jsp.JspException;
-
 import org.springframework.web.bind.WebDataBinder;
+
+import javax.servlet.jsp.JspException;
+import java.util.Collection;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '{@code input}'

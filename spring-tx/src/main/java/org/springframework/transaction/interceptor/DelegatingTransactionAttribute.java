@@ -16,9 +16,9 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.Serializable;
-
 import org.springframework.transaction.support.DelegatingTransactionDefinition;
+
+import java.io.Serializable;
 
 /**
  * {@link TransactionAttribute} implementation that delegates all calls to a given target

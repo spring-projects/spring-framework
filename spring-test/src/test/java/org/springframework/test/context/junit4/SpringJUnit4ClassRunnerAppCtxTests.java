@@ -16,13 +16,8 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -37,6 +32,10 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.GenericXmlContextLoader;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import static org.junit.Assert.*;
 

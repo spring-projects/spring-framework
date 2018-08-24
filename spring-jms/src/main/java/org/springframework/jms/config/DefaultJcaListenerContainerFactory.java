@@ -16,13 +16,13 @@
 
 package org.springframework.jms.config;
 
-import javax.resource.spi.ResourceAdapter;
-
 import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
 import org.springframework.jms.listener.endpoint.JmsActivationSpecFactory;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.lang.Nullable;
+
+import javax.resource.spi.ResourceAdapter;
 
 /**
  * A {@link JmsListenerContainerFactory} implementation to build a

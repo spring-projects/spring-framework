@@ -16,11 +16,8 @@
 
 package org.springframework.test.context.support;
 
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
@@ -30,6 +27,8 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
+
+import java.lang.reflect.Method;
 
 /**
  * Abstract base class for {@code TestExecutionListener} implementations that

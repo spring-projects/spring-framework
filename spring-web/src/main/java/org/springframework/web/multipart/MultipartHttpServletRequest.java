@@ -16,11 +16,11 @@
 
 package org.springframework.web.multipart;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Provides additional methods for dealing with multipart content within a

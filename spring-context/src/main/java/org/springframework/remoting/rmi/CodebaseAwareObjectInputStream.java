@@ -16,12 +16,12 @@
 
 package org.springframework.remoting.rmi;
 
+import org.springframework.core.ConfigurableObjectInputStream;
+import org.springframework.lang.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.rmi.server.RMIClassLoader;
-
-import org.springframework.core.ConfigurableObjectInputStream;
-import org.springframework.lang.Nullable;
 
 /**
  * Special ObjectInputStream subclass that falls back to a specified codebase

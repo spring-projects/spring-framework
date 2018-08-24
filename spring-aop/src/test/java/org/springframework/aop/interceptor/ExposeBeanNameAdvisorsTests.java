@@ -17,7 +17,6 @@
 package org.springframework.aop.interceptor;
 
 import org.junit.Test;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.NamedBean;
 import org.springframework.tests.sample.beans.ITestBean;

@@ -16,14 +16,9 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.security.Principal;
-
 import io.reactivex.netty.protocol.http.HttpHandlerNames;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.ws.server.WebSocketHandshaker;
-import reactor.core.publisher.Mono;
-import rx.RxReactiveStreams;
-
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.RxNettyServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -33,6 +28,10 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+import rx.RxReactiveStreams;
+
+import java.security.Principal;
 
 /**
  * A {@link RequestUpgradeStrategy} for use with RxNetty.

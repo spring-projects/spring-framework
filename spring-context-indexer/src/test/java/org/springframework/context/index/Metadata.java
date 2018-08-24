@@ -16,12 +16,12 @@
 
 package org.springframework.context.index;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 
 /**
  * Hamcrest {@link org.hamcrest.Matcher Matcher} to help test {@link CandidateComponentsMetadata}.

@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.web.socket;
 
-import javax.websocket.server.ServerContainer;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
-import static org.junit.Assert.*;
+import javax.websocket.server.ServerContainer;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests that validate support for {@link ServletServerContainerFactoryBean}

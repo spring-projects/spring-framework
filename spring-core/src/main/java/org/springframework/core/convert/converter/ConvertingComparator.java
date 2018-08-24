@@ -16,12 +16,12 @@
 
 package org.springframework.core.convert.converter;
 
-import java.util.Comparator;
-import java.util.Map;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.comparator.Comparators;
+
+import java.util.Comparator;
+import java.util.Map;
 
 /**
  * A {@link Comparator} that converts values before they are compared.

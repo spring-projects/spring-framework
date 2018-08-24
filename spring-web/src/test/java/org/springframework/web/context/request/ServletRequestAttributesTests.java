@@ -16,15 +16,14 @@
 
 package org.springframework.web.context.request;
 
-import java.io.Serializable;
-import java.math.BigInteger;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpSession;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.io.Serializable;
+import java.math.BigInteger;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

@@ -16,10 +16,10 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.time.Duration;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.Duration;
 
 /**
  * {@code ExchangeResult} variant with the response body decoded as

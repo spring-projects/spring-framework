@@ -16,15 +16,15 @@
 
 package org.springframework.instrument.classloading;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Subclass of ShadowingClassLoader that overrides attempts to

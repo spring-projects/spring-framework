@@ -16,11 +16,6 @@
 
 package org.springframework.orm.hibernate5;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Properties;
-import javax.sql.DataSource;
-
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
@@ -30,7 +25,6 @@ import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -45,6 +39,11 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * {@link FactoryBean} that creates a Hibernate

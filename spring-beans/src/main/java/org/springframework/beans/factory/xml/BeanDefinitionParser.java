@@ -16,10 +16,9 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.lang.Nullable;
+import org.w3c.dom.Element;
 
 /**
  * Interface used by the {@link DefaultBeanDefinitionDocumentReader} to handle custom,

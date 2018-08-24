@@ -16,12 +16,6 @@
 
 package org.springframework.format.datetime;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.context.support.EmbeddedValueResolutionSupport;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Formatter;
@@ -29,6 +23,8 @@ import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.StringUtils;
+
+import java.util.*;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation using a {@link DateFormatter}.

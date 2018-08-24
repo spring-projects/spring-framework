@@ -16,13 +16,8 @@
 
 package org.springframework.jmx;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Before;
-
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -30,7 +25,12 @@ import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.MBeanTestUtils;
 
-import static org.junit.Assert.*;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * <strong>Note:</strong> certain tests throughout this hierarchy require the presence of

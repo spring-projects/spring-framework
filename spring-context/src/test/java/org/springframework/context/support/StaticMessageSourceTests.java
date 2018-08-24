@@ -16,26 +16,21 @@
 
 package org.springframework.context.support;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
+import org.springframework.context.*;
+import org.springframework.core.io.ClassPathResource;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.context.ACATester;
-import org.springframework.context.AbstractApplicationContextTests;
-import org.springframework.context.BeanThatListens;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.NoSuchMessageException;
-import org.springframework.core.io.ClassPathResource;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rod Johnson

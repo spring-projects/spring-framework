@@ -16,15 +16,15 @@
 
 package org.springframework.web.reactive.result.view;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
+
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Default implementation of {@link Rendering.RedirectBuilder}.

@@ -16,11 +16,11 @@
 
 package org.springframework.mail.javamail;
 
+import org.springframework.lang.Nullable;
+
 import javax.activation.FileTypeMap;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Special subclass of the standard JavaMail {@link MimeMessage}, carrying a

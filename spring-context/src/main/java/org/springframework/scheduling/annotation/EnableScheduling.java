@@ -16,17 +16,13 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.concurrent.Executor;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
+import java.lang.annotation.*;
+import java.util.concurrent.Executor;
 
 /**
  * Enables Spring's scheduled task execution capability, similar to

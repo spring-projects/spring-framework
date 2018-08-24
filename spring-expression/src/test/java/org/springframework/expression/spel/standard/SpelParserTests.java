@@ -17,7 +17,6 @@
 package org.springframework.expression.spel.standard;
 
 import org.junit.Test;
-
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionException;
 import org.springframework.expression.ParseException;

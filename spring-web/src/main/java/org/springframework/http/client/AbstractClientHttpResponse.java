@@ -16,9 +16,9 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-
 import org.springframework.http.HttpStatus;
+
+import java.io.IOException;
 
 /**
  * Abstract base for {@link ClientHttpResponse}.

@@ -16,31 +16,21 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.List;
-
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.http.CacheControl;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.http.CacheControl;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.servlet.resource.AppCacheManifestTransformer;
-import org.springframework.web.servlet.resource.CachingResourceResolver;
-import org.springframework.web.servlet.resource.CachingResourceTransformer;
-import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
-import org.springframework.web.servlet.resource.PathResourceResolver;
-import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
-import org.springframework.web.servlet.resource.ResourceResolver;
-import org.springframework.web.servlet.resource.ResourceTransformer;
-import org.springframework.web.servlet.resource.VersionResourceResolver;
-import org.springframework.web.servlet.resource.WebJarsResourceResolver;
+import org.springframework.web.servlet.resource.*;
+
+import java.util.List;
 
 import static org.junit.Assert.*;
 

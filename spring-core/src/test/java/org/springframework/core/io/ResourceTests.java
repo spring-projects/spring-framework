@@ -16,21 +16,17 @@
 
 package org.springframework.core.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.springframework.util.FileCopyUtils;
+
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.util.HashSet;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import org.springframework.util.FileCopyUtils;
-
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
 
 /**

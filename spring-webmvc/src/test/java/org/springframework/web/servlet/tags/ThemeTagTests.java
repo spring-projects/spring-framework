@@ -16,21 +16,21 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.util.Arrays;
-import java.util.List;
+import org.junit.Test;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.web.servlet.support.RequestContext;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
+import java.util.Arrays;
+import java.util.List;
 
-import org.junit.Test;
-
-import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.web.servlet.support.RequestContext;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller

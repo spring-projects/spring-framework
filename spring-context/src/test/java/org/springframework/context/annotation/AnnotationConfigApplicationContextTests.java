@@ -16,11 +16,7 @@
 
 package org.springframework.context.annotation;
 
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +26,13 @@ import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
 
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.springframework.util.StringUtils.*;
+import static org.springframework.util.StringUtils.uncapitalize;
 
 /**
  * @author Chris Beams

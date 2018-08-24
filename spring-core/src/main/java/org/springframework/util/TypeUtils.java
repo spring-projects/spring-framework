@@ -16,12 +16,12 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Utility to work with Java 5 generic type parameters.

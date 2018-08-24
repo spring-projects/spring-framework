@@ -16,12 +16,12 @@
 
 package org.springframework.http.converter.json;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * {@link HttpInputMessage} that can eventually stores a Jackson view that will be used

@@ -16,13 +16,6 @@
 
 package org.springframework.test.util;
 
-import java.io.StringReader;
-import java.util.Map;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-
 import org.hamcrest.Matcher;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -32,7 +25,14 @@ import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.Diff;
 import org.xmlunit.diff.ElementSelectors;
 
-import static org.hamcrest.MatcherAssert.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import java.io.StringReader;
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * A helper class for assertions on XML content.

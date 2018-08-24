@@ -17,7 +17,6 @@
 package org.springframework.web.socket.sockjs.client;
 
 import org.eclipse.jetty.client.HttpClient;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.JettyWebSocketTestServer;

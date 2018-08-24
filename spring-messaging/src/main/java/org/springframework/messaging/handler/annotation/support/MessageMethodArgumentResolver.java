@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
-import java.lang.reflect.Type;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
@@ -29,6 +27,8 @@ import org.springframework.messaging.handler.invocation.HandlerMethodArgumentRes
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Type;
 
 /**
  * {@code HandlerMethodArgumentResolver} for {@link Message} method arguments.

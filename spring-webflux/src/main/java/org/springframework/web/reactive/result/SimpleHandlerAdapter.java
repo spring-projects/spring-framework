@@ -16,16 +16,15 @@
 
 package org.springframework.web.reactive.result;
 
-import java.lang.reflect.Method;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
+import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
 
 /**
  * HandlerAdapter that allows using the plain {@link WebHandler} contract with

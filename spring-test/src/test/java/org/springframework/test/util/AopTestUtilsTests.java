@@ -17,13 +17,13 @@
 package org.springframework.test.util;
 
 import org.junit.Test;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
-import static org.springframework.test.util.AopTestUtils.*;
+import static org.springframework.test.util.AopTestUtils.getTargetObject;
+import static org.springframework.test.util.AopTestUtils.getUltimateTargetObject;
 
 /**
  * Unit tests for {@link AopTestUtils}.

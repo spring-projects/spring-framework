@@ -16,19 +16,18 @@
 
 package org.springframework.test.context.junit4.rules;
 
-import java.util.concurrent.TimeUnit;
-
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.TimedTransactionalSpringRunnerTests;
 
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import java.util.concurrent.TimeUnit;
+
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * This class is an extension of {@link TimedTransactionalSpringRunnerTests}

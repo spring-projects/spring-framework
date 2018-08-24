@@ -16,15 +16,15 @@
 
 package org.springframework.mock.web;
 
+import org.springframework.lang.Nullable;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.BodyContent;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.BodyContent;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Mock implementation of the {@link javax.servlet.jsp.tagext.BodyContent} class.

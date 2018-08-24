@@ -16,17 +16,16 @@
 
 package org.springframework.jmx.support;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.lang.Nullable;
+
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
 
 /**
  * {@link FactoryBean} that obtains an {@link javax.management.MBeanServer} reference

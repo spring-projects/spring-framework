@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.List;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
@@ -30,6 +28,8 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+
+import java.util.List;
 
 /**
  * Defines callback methods to customize the Java-based configuration for

@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.core;
 
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
+
+import java.util.Map;
 
 /**
  * An extension of {@link AbstractMessagingTemplate} that adds operations for sending

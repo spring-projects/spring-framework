@@ -16,11 +16,11 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Helper class that allows for specifying a method to invoke in a declarative

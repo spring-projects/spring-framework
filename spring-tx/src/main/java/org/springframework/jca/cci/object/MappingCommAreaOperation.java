@@ -16,15 +16,15 @@
 
 package org.springframework.jca.cci.object;
 
-import java.io.IOException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.jca.cci.core.support.CommAreaRecord;
+
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.jca.cci.core.support.CommAreaRecord;
+import java.io.IOException;
 
 /**
  * EIS operation object for access to COMMAREA records.

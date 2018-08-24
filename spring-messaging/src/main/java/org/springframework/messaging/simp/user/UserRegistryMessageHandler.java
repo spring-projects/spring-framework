@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.simp.user;
 
-import java.util.concurrent.ScheduledFuture;
-
 import org.springframework.context.ApplicationListener;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -30,6 +28,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * {@code MessageHandler} that handles user registry broadcasts from other

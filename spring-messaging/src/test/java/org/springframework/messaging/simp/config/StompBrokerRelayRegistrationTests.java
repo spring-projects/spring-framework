@@ -17,13 +17,13 @@
 package org.springframework.messaging.simp.config;
 
 import org.junit.Test;
-
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for

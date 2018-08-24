@@ -16,14 +16,10 @@
 
 package org.springframework.instrument.classloading.weblogic;
 
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-
 import org.springframework.util.Assert;
+
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.reflect.*;
 
 /**
  * Reflective wrapper around a WebLogic 10 class loader. Used to

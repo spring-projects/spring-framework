@@ -17,7 +17,6 @@
 package org.springframework.expression.spel;
 
 import org.junit.Test;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.expression.spel.support.StandardTypeConverter;

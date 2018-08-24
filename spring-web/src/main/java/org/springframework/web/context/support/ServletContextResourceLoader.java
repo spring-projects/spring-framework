@@ -16,10 +16,10 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+
+import javax.servlet.ServletContext;
 
 /**
  * ResourceLoader implementation that resolves paths as ServletContext

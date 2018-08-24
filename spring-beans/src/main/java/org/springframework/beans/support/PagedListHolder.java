@@ -16,14 +16,14 @@
 
 package org.springframework.beans.support;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * PagedListHolder is a simple state holder for handling lists of objects,

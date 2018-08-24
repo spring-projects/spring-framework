@@ -16,19 +16,10 @@
 
 package org.springframework.http.converter.feed;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
 import com.rometools.rome.feed.WireFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.WireFeedInput;
 import com.rometools.rome.io.WireFeedOutput;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -36,6 +27,10 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.StringUtils;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Abstract base class for Atom and RSS Feed message converters, using the

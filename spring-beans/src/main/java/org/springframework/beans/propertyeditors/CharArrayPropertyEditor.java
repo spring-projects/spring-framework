@@ -16,9 +16,9 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.beans.PropertyEditorSupport;
-
 import org.springframework.lang.Nullable;
+
+import java.beans.PropertyEditorSupport;
 
 /**
  * Editor for char arrays. Strings will simply be converted to

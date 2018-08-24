@@ -16,15 +16,15 @@
 
 package org.springframework.test.context.configuration.interfaces;
 
-import java.util.List;
-
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.configuration.interfaces.BootstrapWithTestInterface.CustomTestContextBootstrapper;
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 
-import static java.util.Collections.*;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
 
 /**
  * @author Sam Brannen

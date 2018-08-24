@@ -16,12 +16,12 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.jms.Session;
-
 import org.springframework.core.Constants;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.lang.Nullable;
+
+import javax.jms.Session;
 
 /**
  * Common configuration object for activating a JMS message endpoint.

@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.core.simple;
 
-import java.util.Map;
-
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
+
+import java.util.Map;
 
 /**
  * Interface specifying the API for a Simple JDBC Insert implemented by {@link SimpleJdbcInsert}.

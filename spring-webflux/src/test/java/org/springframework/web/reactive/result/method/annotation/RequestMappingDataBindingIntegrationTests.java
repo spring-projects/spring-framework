@@ -16,13 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Optional;
-
 import org.junit.Test;
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -34,15 +28,15 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import reactor.core.publisher.Mono;
 
-import static org.junit.Assert.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Data binding and type conversion related integration tests for

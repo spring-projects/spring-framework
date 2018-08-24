@@ -16,12 +16,6 @@
 
 package org.springframework.jms.remoting;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageFormatException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.JmsUtils;
@@ -31,6 +25,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
+
+import javax.jms.*;
 
 /**
  * JMS message listener that exports the specified service bean as a

@@ -16,16 +16,7 @@
 
 package org.springframework.web.reactive.result.view;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
@@ -34,6 +25,10 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * {@code View} that writes model attribute(s) with an {@link HttpMessageWriter}.

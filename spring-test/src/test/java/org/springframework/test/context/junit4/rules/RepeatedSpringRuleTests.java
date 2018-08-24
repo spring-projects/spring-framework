@@ -16,10 +16,6 @@
 
 package org.springframework.test.context.junit4.rules;
 
-import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -27,11 +23,14 @@ import org.junit.Test;
 import org.junit.runner.Runner;
 import org.junit.runners.JUnit4;
 import org.junit.runners.Parameterized.Parameters;
-
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.RepeatedSpringRunnerTests;
+
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class is an extension of {@link RepeatedSpringRunnerTests}

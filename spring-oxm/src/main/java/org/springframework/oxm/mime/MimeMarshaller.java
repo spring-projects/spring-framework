@@ -16,12 +16,12 @@
 
 package org.springframework.oxm.mime;
 
-import java.io.IOException;
-import javax.xml.transform.Result;
-
 import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.XmlMappingException;
+
+import javax.xml.transform.Result;
+import java.io.IOException;
 
 /**
  * Subinterface of {@link Marshaller} that can use MIME attachments to optimize

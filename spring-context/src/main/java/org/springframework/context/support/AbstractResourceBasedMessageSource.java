@@ -16,12 +16,12 @@
 
 package org.springframework.context.support;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Abstract base class for {@code MessageSource} implementations based on

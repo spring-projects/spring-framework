@@ -16,10 +16,10 @@
 
 package org.springframework.messaging.simp.user;
 
-import java.util.Set;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Set;
 
 /**
  * Contains the result from parsing a "user" destination from a source message

@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.function.Supplier;
-
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+
+import java.util.function.Supplier;
 
 /**
  * Programmatic means of constructing

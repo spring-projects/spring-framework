@@ -16,12 +16,11 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.reflect.Method;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
+
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 

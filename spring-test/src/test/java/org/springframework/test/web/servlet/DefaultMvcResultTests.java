@@ -17,10 +17,9 @@ package org.springframework.test.web.servlet;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for {@link DefaultMvcResult}.

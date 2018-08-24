@@ -16,13 +16,7 @@
 
 package org.springframework.context.support;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -34,8 +28,14 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ResourceTestBean;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Keith Donald

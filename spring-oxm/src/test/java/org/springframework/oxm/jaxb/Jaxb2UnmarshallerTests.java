@@ -16,20 +16,7 @@
 
 package org.springframework.oxm.jaxb;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import javax.xml.bind.JAXBElement;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
@@ -38,8 +25,20 @@ import org.springframework.oxm.jaxb.test.Flights;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.xml.StaxUtils;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import javax.xml.bind.JAXBElement;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Arjen Poutsma

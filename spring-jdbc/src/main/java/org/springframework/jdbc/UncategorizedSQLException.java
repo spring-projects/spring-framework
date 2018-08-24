@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc;
 
-import java.sql.SQLException;
-
 import org.springframework.dao.UncategorizedDataAccessException;
+
+import java.sql.SQLException;
 
 /**
  * Exception thrown when we can't classify a SQLException into

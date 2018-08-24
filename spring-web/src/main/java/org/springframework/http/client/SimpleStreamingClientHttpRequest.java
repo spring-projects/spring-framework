@@ -16,16 +16,16 @@
 
 package org.springframework.http.client;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StreamUtils;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
-import org.springframework.util.StreamUtils;
 
 /**
  * {@link ClientHttpRequest} implementation that uses standard JDK facilities to

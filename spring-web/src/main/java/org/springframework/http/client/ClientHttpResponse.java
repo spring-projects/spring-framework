@@ -16,11 +16,11 @@
 
 package org.springframework.http.client;
 
-import java.io.Closeable;
-import java.io.IOException;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
+
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * Represents a client-side HTTP response.

@@ -16,11 +16,12 @@
 
 package org.springframework.test.context;
 
-import java.lang.reflect.Method;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * JUnit 4 based unit tests for {@link TestContextManager}, which verify proper

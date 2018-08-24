@@ -30,7 +30,7 @@ public interface SpelNode {
 
 	/**
 	 * Evaluate the expression node in the context of the supplied expression state
-	 * and return the value.
+	 * and return the value.ExpressionState
 	 * @param expressionState the current expression state (includes the context)
 	 * @return the value of this node evaluated against the specified state
 	 */

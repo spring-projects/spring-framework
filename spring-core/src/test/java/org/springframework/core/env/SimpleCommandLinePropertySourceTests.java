@@ -16,12 +16,12 @@
 
 package org.springframework.core.env;
 
-import java.util.List;
-
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link SimpleCommandLinePropertySource}.

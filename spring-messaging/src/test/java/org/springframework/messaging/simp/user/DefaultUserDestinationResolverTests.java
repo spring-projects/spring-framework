@@ -16,14 +16,8 @@
 
 package org.springframework.messaging.simp.user;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.security.Principal;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -31,6 +25,13 @@ import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
+
+import java.security.Principal;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for

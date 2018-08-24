@@ -16,10 +16,10 @@
 
 package org.springframework.validation.support;
 
-import java.util.Map;
-
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.validation.BindingResult;
+
+import java.util.Map;
 
 /**
  * Subclass of {@link ConcurrentModel} that automatically removes

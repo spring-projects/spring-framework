@@ -16,15 +16,15 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.cors.CorsUtils;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.cors.CorsUtils;
 
 /**
  * A logical conjunction (' && ') request condition that matches a request against

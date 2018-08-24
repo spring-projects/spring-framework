@@ -16,12 +16,12 @@
 
 package org.springframework.mail.javamail;
 
-import java.util.Date;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
 import org.springframework.mail.MailMessage;
 import org.springframework.mail.MailParseException;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.util.Date;
 
 /**
  * Implementation of the MailMessage interface for a JavaMail MIME message,

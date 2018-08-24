@@ -16,11 +16,11 @@
 
 package org.springframework.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * {@code ClassLoader} that does <i>not</i> always delegate to the parent loader

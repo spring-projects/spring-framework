@@ -16,15 +16,6 @@
 
 package org.springframework.oxm.jaxb;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -37,6 +28,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import javax.xml.bind.annotation.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper class for {@link Jaxb2Marshaller} that scans given packages for classes marked with JAXB2 annotations.

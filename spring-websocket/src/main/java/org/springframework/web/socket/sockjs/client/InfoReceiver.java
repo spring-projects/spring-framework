@@ -16,10 +16,10 @@
 
 package org.springframework.web.socket.sockjs.client;
 
-import java.net.URI;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+
+import java.net.URI;
 
 /**
  * A component that can execute the SockJS "Info" request that needs to be

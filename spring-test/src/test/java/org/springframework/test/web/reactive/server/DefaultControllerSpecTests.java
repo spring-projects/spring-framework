@@ -16,10 +16,7 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.util.function.Consumer;
-
 import org.junit.Test;
-
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -32,6 +29,8 @@ import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
+
+import java.util.function.Consumer;
 
 import static org.junit.Assert.assertNotNull;
 

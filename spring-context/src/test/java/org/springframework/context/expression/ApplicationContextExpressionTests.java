@@ -16,22 +16,9 @@
 
 package org.springframework.context.expression;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.Serializable;
-import java.net.URI;
-import java.net.URL;
-import java.security.AccessControlException;
-import java.security.Permission;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,6 +44,13 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+
+import java.io.*;
+import java.net.URI;
+import java.net.URL;
+import java.security.AccessControlException;
+import java.security.Permission;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 

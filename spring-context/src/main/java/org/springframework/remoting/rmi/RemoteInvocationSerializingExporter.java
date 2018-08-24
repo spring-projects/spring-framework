@@ -16,19 +16,15 @@
 
 package org.springframework.remoting.rmi;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.rmi.RemoteException;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.io.*;
+import java.rmi.RemoteException;
 
 /**
  * Abstract base class for remote service exporters that explicitly deserialize

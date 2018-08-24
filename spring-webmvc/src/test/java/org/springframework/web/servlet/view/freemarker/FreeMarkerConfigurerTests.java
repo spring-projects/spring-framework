@@ -16,26 +16,21 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Properties;
-
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.junit.Test;
-
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.*;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.ui.freemarker.SpringTemplateLoader;
 
-import static org.hamcrest.Matchers.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Properties;
+
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.*;
 
 /**

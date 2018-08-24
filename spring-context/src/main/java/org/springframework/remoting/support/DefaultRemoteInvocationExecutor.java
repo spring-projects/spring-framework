@@ -16,9 +16,9 @@
 
 package org.springframework.remoting.support;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.springframework.util.Assert;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Default implementation of the {@link RemoteInvocationExecutor} interface.

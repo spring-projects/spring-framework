@@ -16,14 +16,8 @@
 
 package org.springframework.test.context.jdbc;
 
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Set;
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
@@ -42,12 +36,12 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.*;
+
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Set;
 
 /**
  * {@code TestExecutionListener} that provides support for executing SQL

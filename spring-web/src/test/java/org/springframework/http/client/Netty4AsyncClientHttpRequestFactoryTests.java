@@ -21,7 +21,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 
 /**

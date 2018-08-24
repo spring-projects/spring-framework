@@ -16,12 +16,11 @@
 
 package org.springframework.jndi;
 
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
+
+import java.util.Properties;
 
 /**
  * Convenient superclass for JNDI accessors, providing "jndiTemplate"

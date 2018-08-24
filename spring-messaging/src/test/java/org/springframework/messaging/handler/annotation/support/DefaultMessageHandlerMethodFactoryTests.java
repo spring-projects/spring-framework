@@ -16,20 +16,10 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import javax.validation.Valid;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
-
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
@@ -46,6 +36,10 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+
+import javax.validation.Valid;
+import java.lang.reflect.Method;
+import java.util.*;
 
 import static org.junit.Assert.*;
 

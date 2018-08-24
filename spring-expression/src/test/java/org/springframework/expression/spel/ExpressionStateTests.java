@@ -16,12 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import java.util.EmptyStackException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Test;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -29,6 +24,10 @@ import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
+
+import java.util.EmptyStackException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 

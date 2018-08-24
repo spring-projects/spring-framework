@@ -20,7 +20,6 @@ import org.apache.tiles.TilesException;
 import org.apache.tiles.preparer.ViewPreparer;
 import org.apache.tiles.preparer.factory.PreparerFactory;
 import org.apache.tiles.request.Request;
-
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 

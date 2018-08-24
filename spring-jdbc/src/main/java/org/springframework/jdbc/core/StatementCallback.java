@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.lang.Nullable;
+
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Generic callback interface for code that operates on a JDBC Statement.

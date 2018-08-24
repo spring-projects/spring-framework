@@ -17,7 +17,6 @@
 package org.springframework.http.converter.feed;
 
 import com.rometools.rome.feed.rss.Channel;
-
 import org.springframework.http.MediaType;
 
 /**

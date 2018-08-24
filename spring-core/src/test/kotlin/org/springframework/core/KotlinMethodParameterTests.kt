@@ -16,12 +16,11 @@
 
 package org.springframework.core
 
-import java.lang.reflect.Method
-
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-
-import org.junit.Assert.*
+import java.lang.reflect.Method
 
 /**
  * Tests for Kotlin support in [MethodParameter].

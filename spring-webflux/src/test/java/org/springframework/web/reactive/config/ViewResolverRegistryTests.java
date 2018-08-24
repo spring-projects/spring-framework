@@ -17,7 +17,6 @@ package org.springframework.web.reactive.config;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.Ordered;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.web.context.support.StaticWebApplicationContext;

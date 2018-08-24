@@ -16,9 +16,6 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
@@ -29,6 +26,9 @@ import org.springframework.messaging.handler.annotation.support.AnnotationExcept
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.web.method.ControllerAdviceBean;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A sub-class of {@link SimpAnnotationMethodMessageHandler} to provide support

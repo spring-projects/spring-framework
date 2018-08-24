@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.support;
 
-import java.util.UUID;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.IdGenerator;
+
+import java.util.UUID;
 
 /**
  * A {@link org.springframework.messaging.support.MessageHeaderInitializer MessageHeaderInitializer}

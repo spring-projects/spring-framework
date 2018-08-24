@@ -16,22 +16,21 @@
 
 package org.springframework.test.context.junit.jupiter;
 
-import java.lang.reflect.Method;
-import java.util.Optional;
-
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.TestExtensionContext;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Method;
+import java.util.Optional;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;

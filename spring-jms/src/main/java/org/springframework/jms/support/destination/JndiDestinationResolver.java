@@ -16,18 +16,14 @@
 
 package org.springframework.jms.support.destination;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.naming.NamingException;
-
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.jms.*;
+import javax.naming.NamingException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link DestinationResolver} implementation which interprets destination names

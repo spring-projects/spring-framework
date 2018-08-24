@@ -17,7 +17,6 @@
 package org.springframework.web.cors.reactive;
 
 import org.junit.Test;
-
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;

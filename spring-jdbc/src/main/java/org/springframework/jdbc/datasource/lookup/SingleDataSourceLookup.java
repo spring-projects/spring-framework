@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import javax.sql.DataSource;
-
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 
 /**
  * An implementation of the DataSourceLookup that simply wraps a

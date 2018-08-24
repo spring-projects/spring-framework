@@ -16,17 +16,16 @@
 
 package org.springframework.expression.spel.standard;
 
+import org.junit.Test;
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.junit.Test;
-
-import org.springframework.expression.Expression;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mark Fisher

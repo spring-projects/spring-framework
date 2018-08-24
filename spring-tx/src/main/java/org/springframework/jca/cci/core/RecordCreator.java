@@ -16,11 +16,11 @@
 
 package org.springframework.jca.cci.core;
 
+import org.springframework.dao.DataAccessException;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
-
-import org.springframework.dao.DataAccessException;
 
 /**
  * Callback interface for creating a CCI Record instance,

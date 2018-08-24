@@ -16,9 +16,6 @@
 
 package org.springframework.jms.config;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -38,6 +35,9 @@ import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * A {@link JmsListenerEndpoint} providing the method to invoke to process

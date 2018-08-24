@@ -17,11 +17,10 @@
 package org.springframework.transaction.interceptor;
 
 
-import java.io.IOException;
-
 import org.junit.Test;
-
 import org.springframework.transaction.TransactionDefinition;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 

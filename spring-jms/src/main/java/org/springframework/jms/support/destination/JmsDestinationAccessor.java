@@ -16,15 +16,11 @@
 
 package org.springframework.jms.support.destination;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
-
 import org.springframework.jms.support.JmsAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.jms.*;
 
 /**
  * Base class for {@link org.springframework.jms.core.JmsTemplate} and other

@@ -16,11 +16,10 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.io.Reader;
-
 import org.junit.Test;
-
 import org.springframework.util.ClassUtils;
+
+import java.io.Reader;
 
 import static org.junit.Assert.*;
 

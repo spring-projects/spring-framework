@@ -16,10 +16,6 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-
 import org.springframework.context.Lifecycle;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -37,6 +33,9 @@ import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSockJsSession;
+
+import javax.servlet.ServletContext;
+import java.util.Map;
 
 /**
  * WebSocket-based {@link TransportHandler}. Uses {@link SockJsWebSocketHandler} and

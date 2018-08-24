@@ -16,19 +16,18 @@
 
 package org.springframework.orm.jpa;
 
-import java.lang.reflect.Proxy;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-import javax.persistence.TransactionRequiredException;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.orm.jpa.domain.Person;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
+import javax.persistence.TransactionRequiredException;
+import java.lang.reflect.Proxy;
+import java.util.List;
 
 import static org.junit.Assert.*;
 

@@ -16,9 +16,9 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.concurrent.ThreadFactory;
-
 import org.springframework.util.CustomizableThreadCreator;
+
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Implementation of the {@link java.util.concurrent.ThreadFactory} interface,

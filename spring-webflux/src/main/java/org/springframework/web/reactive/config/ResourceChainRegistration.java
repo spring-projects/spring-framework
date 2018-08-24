@@ -16,22 +16,15 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.reactive.resource.CachingResourceResolver;
-import org.springframework.web.reactive.resource.CachingResourceTransformer;
-import org.springframework.web.reactive.resource.CssLinkResourceTransformer;
-import org.springframework.web.reactive.resource.PathResourceResolver;
-import org.springframework.web.reactive.resource.ResourceResolver;
-import org.springframework.web.reactive.resource.ResourceTransformer;
-import org.springframework.web.reactive.resource.VersionResourceResolver;
-import org.springframework.web.reactive.resource.WebJarsResourceResolver;
+import org.springframework.web.reactive.resource.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Assists with the registration of resource resolvers and transformers.

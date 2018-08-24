@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.lang.Nullable;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Implement this interface when parameters need to be customized based

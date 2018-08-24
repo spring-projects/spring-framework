@@ -16,12 +16,13 @@
 
 package org.springframework.util;
 
-import java.io.File;
-
 import org.junit.After;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.io.File;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rob Harrop

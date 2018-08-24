@@ -16,32 +16,9 @@
 
 package org.springframework.web.socket.server.standard;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.websocket.DeploymentException;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.Extension;
-import javax.websocket.WebSocketContainer;
-
-import org.glassfish.tyrus.core.ComponentProviderService;
-import org.glassfish.tyrus.core.RequestContext;
-import org.glassfish.tyrus.core.TyrusEndpointWrapper;
-import org.glassfish.tyrus.core.TyrusUpgradeResponse;
-import org.glassfish.tyrus.core.TyrusWebSocketEngine;
-import org.glassfish.tyrus.core.Version;
+import org.glassfish.tyrus.core.*;
 import org.glassfish.tyrus.server.TyrusServerContainer;
 import org.glassfish.tyrus.spi.WebSocketEngine.UpgradeInfo;
-
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -52,7 +29,20 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
-import static org.glassfish.tyrus.spi.WebSocketEngine.UpgradeStatus.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.websocket.*;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
+import static org.glassfish.tyrus.spi.WebSocketEngine.UpgradeStatus.SUCCESS;
 
 /**
  * A base class for {@code RequestUpgradeStrategy} implementations on top of

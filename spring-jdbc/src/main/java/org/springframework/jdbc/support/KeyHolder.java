@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.support;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface for retrieving keys, typically used for auto-generated keys

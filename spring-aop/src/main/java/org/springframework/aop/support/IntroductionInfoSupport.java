@@ -16,6 +16,10 @@
 
 package org.springframework.aop.support;
 
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.IntroductionInfo;
+import org.springframework.util.ClassUtils;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -24,11 +28,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.aop.IntroductionInfo;
-import org.springframework.util.ClassUtils;
 
 /**
  * Support for implementations of {@link org.springframework.aop.IntroductionInfo}.

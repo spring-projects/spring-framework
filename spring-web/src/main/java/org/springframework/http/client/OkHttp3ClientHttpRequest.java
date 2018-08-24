@@ -16,14 +16,13 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.net.URI;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * {@link ClientHttpRequest} implementation based on OkHttp 3.x.

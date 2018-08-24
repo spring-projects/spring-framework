@@ -16,13 +16,12 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /**
  * Implementations of {@link ExchangeFilterFunction} that provide various useful request filter

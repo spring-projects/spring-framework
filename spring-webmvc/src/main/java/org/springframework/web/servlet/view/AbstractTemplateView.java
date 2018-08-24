@@ -16,14 +16,14 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Enumeration;
-import java.util.Map;
+import org.springframework.web.servlet.support.RequestContext;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.springframework.web.servlet.support.RequestContext;
+import java.util.Enumeration;
+import java.util.Map;
 
 /**
  * Adapter base class for template-based view technologies such as FreeMarker,

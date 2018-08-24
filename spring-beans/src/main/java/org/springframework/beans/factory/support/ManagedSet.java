@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
 import org.springframework.lang.Nullable;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Tag collection class used to hold managed Set values, which may

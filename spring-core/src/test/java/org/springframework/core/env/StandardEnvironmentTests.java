@@ -16,17 +16,16 @@
 
 package org.springframework.core.env;
 
+import org.junit.Test;
+import org.springframework.core.SpringProperties;
+import org.springframework.mock.env.MockPropertySource;
+
 import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-
-import org.junit.Test;
-
-import org.springframework.core.SpringProperties;
-import org.springframework.mock.env.MockPropertySource;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;

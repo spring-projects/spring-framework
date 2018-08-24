@@ -16,13 +16,13 @@
 
 package org.springframework.test.context.support;
 
-import java.util.Properties;
-
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
+
+import java.util.Properties;
 
 /**
  * Concrete implementation of {@link AbstractGenericContextLoader} that reads

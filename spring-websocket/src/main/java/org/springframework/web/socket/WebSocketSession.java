@@ -16,6 +16,9 @@
 
 package org.springframework.web.socket;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -23,9 +26,6 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 
 /**
  * A WebSocket session abstraction. Allows sending messages over a WebSocket

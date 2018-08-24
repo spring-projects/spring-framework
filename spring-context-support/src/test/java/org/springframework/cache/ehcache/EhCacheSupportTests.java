@@ -21,13 +21,8 @@ import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.constructs.blocking.BlockingCache;
-import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
-import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
-import net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory;
-import net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache;
+import net.sf.ehcache.constructs.blocking.*;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 
 import static org.junit.Assert.*;

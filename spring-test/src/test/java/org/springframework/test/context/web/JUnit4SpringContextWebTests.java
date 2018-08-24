@@ -16,11 +16,7 @@
 
 package org.springframework.test.context.web;
 
-import java.io.File;
-import javax.servlet.ServletContext;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +29,9 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
+
+import javax.servlet.ServletContext;
+import java.io.File;
 
 import static org.junit.Assert.*;
 

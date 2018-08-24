@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -32,6 +29,9 @@ import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.util.UrlPathHelper;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Convenience methods for use in MVC namespace BeanDefinitionParsers.

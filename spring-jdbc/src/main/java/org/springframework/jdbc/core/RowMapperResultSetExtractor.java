@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.util.Assert;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.util.Assert;
 
 /**
  * Adapter implementation of the ResultSetExtractor interface that delegates

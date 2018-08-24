@@ -16,15 +16,14 @@
 
 package org.springframework.http.client;
 
-import java.net.URI;
-
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
+
+import java.net.URI;
 
 import static org.junit.Assert.*;
 

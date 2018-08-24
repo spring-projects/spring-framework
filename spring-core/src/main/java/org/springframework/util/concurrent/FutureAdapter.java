@@ -16,13 +16,13 @@
 
 package org.springframework.util.concurrent;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Abstract class that adapts a {@link Future} parameterized over S into a {@code Future}

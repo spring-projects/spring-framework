@@ -16,18 +16,17 @@
 
 package org.springframework.test.context;
 
-import java.lang.reflect.Constructor;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.lang.reflect.Constructor;
+import java.util.Set;
 
 /**
  * {@code BootstrapUtils} is a collection of utility methods to assist with

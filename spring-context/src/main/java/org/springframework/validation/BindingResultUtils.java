@@ -16,10 +16,10 @@
 
 package org.springframework.validation;
 
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Map;
 
 /**
  * Convenience methods for looking up BindingResults in a model Map.

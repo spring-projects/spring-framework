@@ -16,12 +16,12 @@
 
 package org.springframework.tests;
 
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.junit.AssumptionViolatedException;
 
-import static org.junit.Assume.*;
+import java.util.Set;
+
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Provides utility methods that allow JUnit tests to {@link org.junit.Assume} certain

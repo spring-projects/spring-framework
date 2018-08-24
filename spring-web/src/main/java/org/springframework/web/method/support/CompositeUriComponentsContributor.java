@@ -16,17 +16,13 @@
 
 package org.springframework.web.method.support;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.*;
 
 /**
  * A {@link UriComponentsContributor} containing a list of other contributors

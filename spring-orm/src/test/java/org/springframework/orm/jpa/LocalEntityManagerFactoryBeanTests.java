@@ -16,18 +16,19 @@
 
 package org.springframework.orm.jpa;
 
-import java.util.Map;
-import java.util.Properties;
+import org.junit.After;
+import org.junit.Test;
+
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.ProviderUtil;
+import java.util.Map;
+import java.util.Properties;
 
-import org.junit.After;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * @author Rod Johnson

@@ -16,20 +16,14 @@
 
 package org.springframework.jmx.support;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.JMException;
-import javax.management.MBeanServer;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.management.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Provides supporting infrastructure for registering MBeans with an

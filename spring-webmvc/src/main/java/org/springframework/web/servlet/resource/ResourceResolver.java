@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * A strategy for resolving a request to a server-side resource.

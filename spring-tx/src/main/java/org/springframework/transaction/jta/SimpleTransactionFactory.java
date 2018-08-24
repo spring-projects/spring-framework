@@ -16,13 +16,13 @@
 
 package org.springframework.transaction.jta;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link TransactionFactory} strategy interface,

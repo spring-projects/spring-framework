@@ -16,13 +16,13 @@
 
 package org.springframework.format.datetime.standard;
 
+import org.junit.Test;
+
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
-import org.junit.Test;
-
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Phillip Webb

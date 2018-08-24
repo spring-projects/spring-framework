@@ -15,8 +15,6 @@
  */
 package org.springframework.web.reactive.socket.server.support;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerAdapter;
@@ -24,6 +22,7 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.WebSocketService;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 /**
  * {@link HandlerAdapter} that allows using a {@link WebSocketHandler} with the

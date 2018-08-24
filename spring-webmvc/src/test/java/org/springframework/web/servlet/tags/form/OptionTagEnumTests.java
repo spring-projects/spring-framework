@@ -16,15 +16,16 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.Tag;
-
 import org.junit.Test;
 import org.springframework.tests.sample.beans.CustomEnum;
 import org.springframework.tests.sample.beans.GenericBean;
 import org.springframework.web.servlet.support.BindStatus;
 
-import static org.junit.Assert.*;
+import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.Tag;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller

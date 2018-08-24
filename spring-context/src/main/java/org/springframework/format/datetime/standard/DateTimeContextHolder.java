@@ -16,11 +16,11 @@
 
 package org.springframework.format.datetime.standard;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
+
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  * A holder for a thread-local user {@link DateTimeContext}.

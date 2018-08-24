@@ -16,19 +16,18 @@
 
 package org.springframework.validation;
 
-import java.beans.PropertyEditorSupport;
-import java.util.Map;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.tests.sample.beans.FieldAccessBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import java.beans.PropertyEditorSupport;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 

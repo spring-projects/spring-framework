@@ -16,11 +16,11 @@
 
 package org.springframework.validation.beanvalidation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorFactory;
-
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorFactory;
 
 /**
  * JSR-303 {@link ConstraintValidatorFactory} implementation that delegates to a

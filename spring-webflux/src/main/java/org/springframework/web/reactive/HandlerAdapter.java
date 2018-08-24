@@ -16,11 +16,10 @@
 
 package org.springframework.web.reactive;
 
-import java.util.function.Function;
-
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.server.ServerWebExchange;
+import java.util.function.Function;
 
 /**
  * Contract that decouples the {@link DispatcherHandler} from the details of

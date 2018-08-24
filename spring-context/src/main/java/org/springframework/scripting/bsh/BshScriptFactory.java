@@ -16,10 +16,7 @@
 
 package org.springframework.scripting.bsh;
 
-import java.io.IOException;
-
 import bsh.EvalError;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
@@ -28,6 +25,8 @@ import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import java.io.IOException;
 
 /**
  * {@link org.springframework.scripting.ScriptFactory} implementation

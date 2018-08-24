@@ -16,25 +16,16 @@
 
 package org.springframework.format.datetime.joda;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.ReadableInstant;
-import org.joda.time.ReadablePartial;
+import org.joda.time.*;
 import org.joda.time.format.DateTimeFormatter;
-
 import org.springframework.context.support.EmbeddedValueResolutionSupport;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.StringUtils;
+
+import java.util.*;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation using Joda-Time.

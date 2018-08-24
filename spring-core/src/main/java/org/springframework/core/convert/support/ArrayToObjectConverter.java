@@ -16,14 +16,14 @@
 
 package org.springframework.core.convert.support;
 
-import java.lang.reflect.Array;
-import java.util.Collections;
-import java.util.Set;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Array;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Converts an array to an Object by returning the first array element

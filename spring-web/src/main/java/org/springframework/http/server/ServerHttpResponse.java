@@ -16,12 +16,12 @@
 
 package org.springframework.http.server;
 
+import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.HttpStatus;
+
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
-
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.HttpStatus;
 
 /**
  * Represents a server-side HTTP response.

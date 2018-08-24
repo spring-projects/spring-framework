@@ -16,11 +16,6 @@
 
 package org.springframework.expression.spel.support;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.util.List;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
@@ -31,6 +26,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MethodInvoker;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate

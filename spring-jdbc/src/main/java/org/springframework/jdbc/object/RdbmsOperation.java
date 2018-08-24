@@ -16,24 +16,19 @@
 
 package org.springframework.jdbc.object;
 
-import java.sql.ResultSet;
-import java.sql.Types;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.Types;
+import java.util.*;
 
 /**
  * An "RDBMS operation" is a multi-threaded, reusable object representing a query,

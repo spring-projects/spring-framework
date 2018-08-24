@@ -16,12 +16,12 @@
 
 package org.springframework.core.serializer.support;
 
-import java.io.ByteArrayOutputStream;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.serializer.DefaultSerializer;
 import org.springframework.core.serializer.Serializer;
 import org.springframework.util.Assert;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * A {@link Converter} that delegates to a

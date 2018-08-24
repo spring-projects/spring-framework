@@ -16,19 +16,19 @@
 
 package org.springframework.core.io.support;
 
+import org.junit.Ignore;
+import org.junit.Test;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import org.springframework.core.io.Resource;
-import org.springframework.util.StringUtils;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * If this test case fails, uncomment diagnostics in the

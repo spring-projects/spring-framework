@@ -16,10 +16,10 @@
 
 package org.springframework.web.util;
 
+import org.springframework.util.Assert;
+
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
-
-import org.springframework.util.Assert;
 
 /**
  * Utility class for tag library related code, exposing functionality

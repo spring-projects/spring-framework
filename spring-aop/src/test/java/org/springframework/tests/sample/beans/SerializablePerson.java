@@ -16,9 +16,9 @@
 
 package org.springframework.tests.sample.beans;
 
-import java.io.Serializable;
-
 import org.springframework.util.ObjectUtils;
+
+import java.io.Serializable;
 
 /**
  * Serializable implementation of the Person interface.

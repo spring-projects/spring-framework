@@ -16,10 +16,10 @@
 
 package example.scannable;
 
-import java.util.concurrent.Future;
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Indexed;
+
+import java.util.concurrent.Future;
 
 /**
  * @author Mark Fisher

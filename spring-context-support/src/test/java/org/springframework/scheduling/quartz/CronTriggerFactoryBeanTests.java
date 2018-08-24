@@ -16,12 +16,12 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.text.ParseException;
-
 import org.junit.Test;
 import org.quartz.CronTrigger;
 
-import static org.junit.Assert.*;
+import java.text.ParseException;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Stephane Nicoll

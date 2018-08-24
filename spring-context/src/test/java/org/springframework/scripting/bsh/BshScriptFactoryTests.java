@@ -16,28 +16,23 @@
 
 package org.springframework.scripting.bsh;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.scripting.Calculator;
-import org.springframework.scripting.ConfigurableMessenger;
-import org.springframework.scripting.Messenger;
-import org.springframework.scripting.ScriptCompilationException;
-import org.springframework.scripting.ScriptSource;
-import org.springframework.scripting.TestBeanAwareMessenger;
+import org.springframework.scripting.*;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.tests.sample.beans.TestBean;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Rob Harrop

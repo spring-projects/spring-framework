@@ -16,14 +16,14 @@
 
 package org.springframework.context.index;
 
+import org.springframework.core.io.Resource;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.springframework.core.io.Resource;
 
 /**
  * A test {@link ClassLoader} that can be used in testing context to control the

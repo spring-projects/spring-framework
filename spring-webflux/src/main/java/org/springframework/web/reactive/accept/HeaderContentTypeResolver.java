@@ -15,12 +15,12 @@
  */
 package org.springframework.web.reactive.accept;
 
-import java.util.List;
-
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.List;
 
 /**
  * Resolver that looks at the 'Accept' header of the request.

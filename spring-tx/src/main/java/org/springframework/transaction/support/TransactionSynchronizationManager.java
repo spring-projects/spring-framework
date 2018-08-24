@@ -16,21 +16,14 @@
 
 package org.springframework.transaction.support;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.*;
 
 /**
  * Central delegate that manages resources and transaction synchronizations per thread.
@@ -231,6 +224,7 @@ public abstract class TransactionSynchronizationManager {
 	 */
 	@Nullable
 	private static Object doUnbindResource(Object actualKey) {
+		//如果这一步没有map，即之前没有绑定
 		Map<Object, Object> map = resources.get();
 		if (map == null) {
 			return null;
@@ -240,10 +234,12 @@ public abstract class TransactionSynchronizationManager {
 		if (map.isEmpty()) {
 			resources.remove();
 		}
+		// value 为空，或者被标记成空 很有可能是这一步
 		// Transparently suppress a ResourceHolder that was marked as void...
 		if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
 			value = null;
 		}
+		//如果下边这一步能够过去，则不会抛异常，必须value 不是 null，如果还有这个问题，可以把logback.xml 级别改为 trace
 		if (value != null && logger.isTraceEnabled()) {
 			logger.trace("Removed value [" + value + "] for key [" + actualKey + "] from thread [" +
 					Thread.currentThread().getName() + "]");

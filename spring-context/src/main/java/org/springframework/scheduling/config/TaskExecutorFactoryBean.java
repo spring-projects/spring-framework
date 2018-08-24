@@ -16,8 +16,6 @@
 
 package org.springframework.scheduling.config;
 
-import java.util.concurrent.RejectedExecutionHandler;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -26,6 +24,8 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.StringUtils;
+
+import java.util.concurrent.RejectedExecutionHandler;
 
 /**
  * {@link FactoryBean} for creating {@link ThreadPoolTaskExecutor} instances,

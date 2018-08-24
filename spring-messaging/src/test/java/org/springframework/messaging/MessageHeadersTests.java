@@ -16,16 +16,11 @@
 
 package org.springframework.messaging;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.junit.Test;
-
 import org.springframework.util.SerializationTestUtils;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.*;
 

@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * An adapter for a target JDBC {@link javax.sql.DataSource}, applying the specified

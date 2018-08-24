@@ -16,10 +16,10 @@
 
 package org.springframework.ui;
 
+import org.springframework.lang.Nullable;
+
 import java.util.Collection;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Java-5-specific interface that defines a holder for model attributes.

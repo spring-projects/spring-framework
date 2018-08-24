@@ -16,11 +16,11 @@
 
 package org.springframework.aop.aspectj;
 
-import java.util.List;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+
+import java.util.List;
 
 /**
  * Utility methods for working with AspectJ proxies.

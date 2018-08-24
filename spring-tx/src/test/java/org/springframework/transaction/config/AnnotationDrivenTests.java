@@ -16,12 +16,9 @@
 
 package org.springframework.transaction.config;
 
-import java.io.Serializable;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +27,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.SerializationTestUtils;
+
+import java.io.Serializable;
 
 import static org.junit.Assert.*;
 

@@ -16,17 +16,7 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.SQLDataException;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.SQLInvalidAuthorizationSpecException;
-import java.sql.SQLNonTransientConnectionException;
-import java.sql.SQLRecoverableException;
-import java.sql.SQLSyntaxErrorException;
-import java.sql.SQLTimeoutException;
-import java.sql.SQLTransactionRollbackException;
-import java.sql.SQLTransientConnectionException;
+import java.sql.*;
 
 /**
  * Class to generate Java 6 SQLException subclasses for testing purposes.

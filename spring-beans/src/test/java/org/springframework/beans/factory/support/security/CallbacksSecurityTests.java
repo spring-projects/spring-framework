@@ -16,33 +16,10 @@
 
 package org.springframework.beans.factory.support.security;
 
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.Permissions;
-import java.security.Policy;
-import java.security.Principal;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-import java.security.ProtectionDomain;
-import java.util.PropertyPermission;
-import java.util.Set;
-import javax.security.auth.AuthPermission;
-import javax.security.auth.Subject;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.SmartFactoryBean;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -52,6 +29,14 @@ import org.springframework.beans.factory.support.security.support.CustomCallback
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+
+import javax.security.auth.AuthPermission;
+import javax.security.auth.Subject;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.security.*;
+import java.util.PropertyPermission;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 

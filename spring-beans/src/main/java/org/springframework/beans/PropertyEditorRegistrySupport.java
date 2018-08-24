@@ -16,6 +16,14 @@
 
 package org.springframework.beans;
 
+import org.springframework.beans.propertyeditors.*;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceArrayPropertyEditor;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.xml.sax.InputSource;
+
 import java.beans.PropertyEditor;
 import java.io.File;
 import java.io.InputStream;
@@ -27,55 +35,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
-
-import org.xml.sax.InputSource;
-
-import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
-import org.springframework.beans.propertyeditors.CharArrayPropertyEditor;
-import org.springframework.beans.propertyeditors.CharacterEditor;
-import org.springframework.beans.propertyeditors.CharsetEditor;
-import org.springframework.beans.propertyeditors.ClassArrayEditor;
-import org.springframework.beans.propertyeditors.ClassEditor;
-import org.springframework.beans.propertyeditors.CurrencyEditor;
-import org.springframework.beans.propertyeditors.CustomBooleanEditor;
-import org.springframework.beans.propertyeditors.CustomCollectionEditor;
-import org.springframework.beans.propertyeditors.CustomMapEditor;
-import org.springframework.beans.propertyeditors.CustomNumberEditor;
-import org.springframework.beans.propertyeditors.FileEditor;
-import org.springframework.beans.propertyeditors.InputSourceEditor;
-import org.springframework.beans.propertyeditors.InputStreamEditor;
-import org.springframework.beans.propertyeditors.LocaleEditor;
-import org.springframework.beans.propertyeditors.PathEditor;
-import org.springframework.beans.propertyeditors.PatternEditor;
-import org.springframework.beans.propertyeditors.PropertiesEditor;
-import org.springframework.beans.propertyeditors.ReaderEditor;
-import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
-import org.springframework.beans.propertyeditors.TimeZoneEditor;
-import org.springframework.beans.propertyeditors.URIEditor;
-import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.beans.propertyeditors.UUIDEditor;
-import org.springframework.beans.propertyeditors.ZoneIdEditor;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourceArrayPropertyEditor;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 
 /**
  * Base implementation of the {@link PropertyEditorRegistry} interface.

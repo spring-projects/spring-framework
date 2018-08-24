@@ -16,11 +16,11 @@
 
 package org.springframework.util.concurrent;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

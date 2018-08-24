@@ -16,8 +16,8 @@
 
 package org.springframework.oxm;
 
-import java.io.IOException;
 import javax.xml.transform.Result;
+import java.io.IOException;
 
 /**
  * Defines the contract for Object XML Mapping Marshallers. Implementations of this interface

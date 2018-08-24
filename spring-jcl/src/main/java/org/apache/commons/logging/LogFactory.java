@@ -16,9 +16,6 @@
 
 package org.apache.commons.logging;
 
-import java.io.Serializable;
-import java.util.logging.LogRecord;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.ExtendedLogger;
@@ -26,6 +23,9 @@ import org.apache.logging.log4j.spi.LoggerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
+
+import java.io.Serializable;
+import java.util.logging.LogRecord;
 
 /**
  * A minimal incarnation of Apache Commons Logging's {@code LogFactory} API,

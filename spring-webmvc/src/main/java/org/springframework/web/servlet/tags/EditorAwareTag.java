@@ -16,11 +16,10 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.beans.PropertyEditor;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.jsp.JspException;
-
-import org.springframework.lang.Nullable;
+import java.beans.PropertyEditor;
 
 /**
  * Interface to be implemented by JSP tags that expose a

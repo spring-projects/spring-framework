@@ -16,13 +16,13 @@
 
 package org.springframework.dao.annotation;
 
-import java.lang.annotation.Annotation;
-
 import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
+
+import java.lang.annotation.Annotation;
 
 /**
  * Bean post-processor that automatically applies persistence exception translation to any

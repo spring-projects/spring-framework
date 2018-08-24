@@ -16,19 +16,18 @@
 
 package org.springframework.web.reactive.result.view.freemarker;
 
-import java.io.IOException;
-import java.util.List;
-
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Configures FreeMarker for web usage via the "configLocation" and/or

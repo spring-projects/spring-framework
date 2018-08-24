@@ -16,15 +16,15 @@
 
 package org.springframework.core.type;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.MultiValueMap;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.util.MultiValueMap;
 
 /**
  * {@link AnnotationMetadata} implementation that uses standard reflection

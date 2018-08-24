@@ -16,10 +16,10 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.util.Collection;
 import java.util.Collections;
-
-import org.springframework.lang.Nullable;
 
 /**
  * A simple instance filter that checks if a given instance match based on

@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Properties;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.CollectionFactory;
 import org.springframework.lang.Nullable;
+
+import java.util.Properties;
 
 /**
  * Factory for {@link java.util.Properties} that reads from a YAML source,

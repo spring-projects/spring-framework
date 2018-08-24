@@ -18,7 +18,7 @@ package org.springframework.beans.factory.parsing;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Rick Evans

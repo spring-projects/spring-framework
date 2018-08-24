@@ -16,11 +16,7 @@
 
 package org.springframework.http.converter.xml;
 
-import javax.xml.transform.Result;
-import javax.xml.transform.stream.StreamSource;
-
 import org.junit.Test;
-
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
@@ -31,6 +27,9 @@ import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.UnmarshallingFailureException;
+
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamSource;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;

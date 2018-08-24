@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
 import org.junit.runners.JUnit4;
 import org.junit.runners.Parameterized.Parameters;
-
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.FailingBeforeAndAfterMethodsSpringRunnerTests;
@@ -32,7 +31,7 @@ import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 /**
  * This class is an extension of {@link FailingBeforeAndAfterMethodsSpringRunnerTests}

@@ -16,11 +16,10 @@
 
 package org.springframework.format.datetime.joda;
 
-import java.util.Locale;
-
 import org.joda.time.format.DateTimeFormatter;
-
 import org.springframework.format.Printer;
+
+import java.util.Locale;
 
 /**
  * Prints Long instances using a Joda {@link DateTimeFormatter}.

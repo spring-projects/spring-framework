@@ -16,9 +16,9 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyChangeEvent;
-
 import org.springframework.lang.Nullable;
+
+import java.beans.PropertyChangeEvent;
 
 /**
  * Superclass for exceptions related to a property access,

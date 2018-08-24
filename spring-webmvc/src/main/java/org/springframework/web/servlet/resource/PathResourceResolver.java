@@ -16,18 +16,18 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A simple {@code ResourceResolver} that tries to find a resource under the given

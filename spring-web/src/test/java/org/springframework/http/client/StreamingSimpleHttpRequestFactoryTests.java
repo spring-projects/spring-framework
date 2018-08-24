@@ -16,21 +16,20 @@
 
 package org.springframework.http.client;
 
+import org.junit.Ignore;
+import org.junit.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Random;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 

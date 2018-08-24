@@ -16,14 +16,13 @@
 
 package org.springframework.cache.caffeine;
 
-import java.util.concurrent.Callable;
-import java.util.function.Function;
-
 import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 /**
  * Spring {@link org.springframework.cache.Cache} adapter implementation

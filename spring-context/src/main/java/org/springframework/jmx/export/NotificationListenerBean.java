@@ -16,11 +16,11 @@
 
 package org.springframework.jmx.export;
 
-import javax.management.NotificationListener;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.support.NotificationListenerHolder;
 import org.springframework.util.Assert;
+
+import javax.management.NotificationListener;
 
 /**
  * Helper class that aggregates a {@link javax.management.NotificationListener},

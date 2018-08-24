@@ -22,7 +22,6 @@ import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 

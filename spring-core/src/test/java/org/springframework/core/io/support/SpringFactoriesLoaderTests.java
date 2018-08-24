@@ -16,12 +16,13 @@
 
 package org.springframework.core.io.support;
 
+import org.junit.Test;
+
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link SpringFactoriesLoader}.

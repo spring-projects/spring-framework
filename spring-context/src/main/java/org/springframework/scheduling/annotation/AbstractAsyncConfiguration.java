@@ -16,9 +16,6 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.util.Collection;
-import java.util.concurrent.Executor;
-
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +24,9 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Collection;
+import java.util.concurrent.Executor;
 
 /**
  * Abstract base {@code Configuration} class providing common structure for enabling

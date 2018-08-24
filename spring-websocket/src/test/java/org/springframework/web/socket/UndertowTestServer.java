@@ -16,31 +16,20 @@
 
 package org.springframework.web.socket;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
-import io.undertow.servlet.api.DeploymentInfo;
-import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.FilterInfo;
-import io.undertow.servlet.api.InstanceFactory;
-import io.undertow.servlet.api.InstanceHandle;
+import io.undertow.servlet.api.*;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.xnio.OptionMap;
 import org.xnio.Xnio;
 
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.DispatcherServlet;
+import javax.servlet.*;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
-import static io.undertow.servlet.Servlets.defaultContainer;
-import static io.undertow.servlet.Servlets.deployment;
-import static io.undertow.servlet.Servlets.servlet;
+import static io.undertow.servlet.Servlets.*;
 
 /**
  * Undertow-based {@link WebSocketTestServer}.

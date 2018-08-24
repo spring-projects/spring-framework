@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.lang.Nullable;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Callback interface used by {@link JdbcTemplate}'s query methods.

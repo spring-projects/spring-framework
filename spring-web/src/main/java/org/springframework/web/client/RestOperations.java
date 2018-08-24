@@ -16,17 +16,13 @@
 
 package org.springframework.web.client;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
+import org.springframework.lang.Nullable;
+
 import java.net.URI;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying a basic set of RESTful operations.

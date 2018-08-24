@@ -16,11 +16,11 @@
 
 package org.springframework.aop.aspectj;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Test;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Additional parameter name discover tests that need Java 5.

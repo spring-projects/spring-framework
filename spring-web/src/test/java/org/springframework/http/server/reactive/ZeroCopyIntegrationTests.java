@@ -16,12 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.File;
-import java.net.URI;
-
 import org.junit.Test;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -31,6 +26,10 @@ import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.Mono;
+
+import java.io.File;
+import java.net.URI;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

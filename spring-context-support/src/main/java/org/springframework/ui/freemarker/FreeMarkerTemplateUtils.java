@@ -16,11 +16,11 @@
 
 package org.springframework.ui.freemarker;
 
-import java.io.IOException;
-import java.io.StringWriter;
-
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+
+import java.io.IOException;
+import java.io.StringWriter;
 
 /**
  * Utility class for working with FreeMarker.

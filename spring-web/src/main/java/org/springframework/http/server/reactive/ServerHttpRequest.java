@@ -16,14 +16,14 @@
 
 package org.springframework.http.server.reactive;
 
-import java.net.InetSocketAddress;
-
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
+
+import java.net.InetSocketAddress;
 
 /**
  * Represents a reactive server-side HTTP request

@@ -16,15 +16,15 @@
 
 package org.springframework.context.expression;
 
-import java.lang.reflect.Method;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Stephane Nicoll

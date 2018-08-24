@@ -16,12 +16,11 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
-
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.Pointcut;
 import org.springframework.lang.Nullable;
+
+import java.io.Serializable;
 
 /**
  * Convenient Pointcut-driven Advisor implementation.

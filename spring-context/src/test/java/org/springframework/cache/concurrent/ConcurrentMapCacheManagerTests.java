@@ -17,7 +17,6 @@
 package org.springframework.cache.concurrent;
 
 import org.junit.Test;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 

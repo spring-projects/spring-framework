@@ -16,9 +16,9 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.util.ResourceBundle;
-
 import org.junit.Test;
+
+import java.util.ResourceBundle;
 
 import static org.junit.Assert.*;
 

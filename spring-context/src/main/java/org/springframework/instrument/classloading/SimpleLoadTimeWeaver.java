@@ -16,10 +16,10 @@
 
 package org.springframework.instrument.classloading;
 
-import java.lang.instrument.ClassFileTransformer;
-
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.lang.instrument.ClassFileTransformer;
 
 /**
  * {@code LoadTimeWeaver} that builds and exposes a

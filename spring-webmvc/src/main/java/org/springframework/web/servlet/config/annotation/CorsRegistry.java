@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import org.springframework.web.cors.CorsConfiguration;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.web.cors.CorsConfiguration;
 
 /**
  * {@code CorsRegistry} assists with the registration of {@link CorsConfiguration}

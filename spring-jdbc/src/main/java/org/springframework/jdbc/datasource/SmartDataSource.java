@@ -16,8 +16,8 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.sql.Connection;
 import javax.sql.DataSource;
+import java.sql.Connection;
 
 /**
  * Extension of the {@code javax.sql.DataSource} interface, to be

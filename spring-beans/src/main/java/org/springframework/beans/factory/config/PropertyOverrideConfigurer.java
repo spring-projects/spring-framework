@@ -16,15 +16,15 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.BeanInitializationException;
+
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.BeanInitializationException;
 
 /**
  * Property resource configurer that overrides bean property values in an application

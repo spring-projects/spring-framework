@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 
 /**
  * Used to {@linkplain #setDatabasePopulator set up} a database during

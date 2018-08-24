@@ -16,21 +16,21 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.util.ContentCachingResponseWrapper;
+import org.springframework.web.util.WebUtils;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.http.HttpMethod;
-import org.springframework.util.Assert;
-import org.springframework.util.DigestUtils;
-import org.springframework.web.util.ContentCachingResponseWrapper;
-import org.springframework.web.util.WebUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 
 /**
  * {@link javax.servlet.Filter} that generates an {@code ETag} value based on the

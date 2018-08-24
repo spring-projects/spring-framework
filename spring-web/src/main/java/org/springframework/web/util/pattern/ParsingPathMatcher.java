@@ -16,6 +16,11 @@
 
 package org.springframework.web.util.pattern;
 
+import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.PathMatcher;
+import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,11 +28,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
-
-import org.springframework.http.server.reactive.PathContainer;
-import org.springframework.lang.Nullable;
-import org.springframework.util.PathMatcher;
-import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 
 /**
  * {@link PathMatcher} implementation for path patterns parsed

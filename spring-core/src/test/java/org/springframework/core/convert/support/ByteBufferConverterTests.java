@@ -16,15 +16,14 @@
 
 package org.springframework.core.convert.support;
 
-import java.nio.ByteBuffer;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.convert.converter.Converter;
 
+import java.nio.ByteBuffer;
+
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link ByteBufferConverter}.

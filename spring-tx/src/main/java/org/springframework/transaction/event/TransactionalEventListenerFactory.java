@@ -16,12 +16,12 @@
 
 package org.springframework.transaction.event;
 
-import java.lang.reflect.Method;
-
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.EventListenerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
+
+import java.lang.reflect.Method;
 
 /**
  * {@link EventListenerFactory} implementation that handles {@link TransactionalEventListener}

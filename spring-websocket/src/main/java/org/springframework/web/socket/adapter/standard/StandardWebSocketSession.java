@@ -16,6 +16,17 @@
 
 package org.springframework.web.socket.adapter.standard;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.socket.*;
+import org.springframework.web.socket.adapter.AbstractWebSocketSession;
+
+import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
+import javax.websocket.Extension;
+import javax.websocket.Session;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -24,23 +35,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.Extension;
-import javax.websocket.Session;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.socket.BinaryMessage;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.PingMessage;
-import org.springframework.web.socket.PongMessage;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketExtension;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.AbstractWebSocketSession;
 
 /**
  * A {@link WebSocketSession} for use with the standard WebSocket for Java API.

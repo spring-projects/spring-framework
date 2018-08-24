@@ -16,13 +16,12 @@
 
 package org.springframework.test.context.junit4.statements;
 
-import java.lang.reflect.Method;
-import java.util.concurrent.TimeoutException;
-
 import org.junit.runners.model.Statement;
-
 import org.springframework.test.annotation.TestAnnotationUtils;
 import org.springframework.util.Assert;
+
+import java.lang.reflect.Method;
+import java.util.concurrent.TimeoutException;
 
 /**
  * {@code SpringFailOnTimeout} is a custom JUnit {@link Statement} which adds

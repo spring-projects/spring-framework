@@ -16,6 +16,12 @@
 
 package org.springframework.web.reactive.function.server;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Mono;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -24,13 +30,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.Set;
-
-import reactor.core.publisher.Mono;
-
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.BodyInserters;
 
 /**
  * Resource-based implementation of {@link HandlerFunction}.

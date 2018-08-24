@@ -16,16 +16,16 @@
 
 package org.springframework.expression.spel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import org.junit.Test;
-
 import org.springframework.expression.spel.ast.InlineList;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.Collections;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test usage of inline lists.

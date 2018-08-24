@@ -16,10 +16,6 @@
 
 package org.springframework.scripting.config;
 
-import java.util.List;
-
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -33,6 +29,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
+
+import java.util.List;
 
 /**
  * BeanDefinitionParser implementation for the '{@code <lang:groovy/>}',

@@ -16,11 +16,11 @@
 
 package org.springframework.validation.beanvalidation;
 
-import java.util.Locale;
-import javax.validation.MessageInterpolator;
-
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.util.Assert;
+
+import javax.validation.MessageInterpolator;
+import java.util.Locale;
 
 /**
  * Delegates to a target {@link MessageInterpolator} implementation but enforces Spring's

@@ -16,11 +16,11 @@
 
 package org.springframework.util.concurrent;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Helper class for {@link ListenableFuture} implementations that maintains a

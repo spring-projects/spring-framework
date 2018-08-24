@@ -16,11 +16,11 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.io.Serializable;
-
 import org.springframework.aop.aspectj.SingletonAspectInstanceFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
+
+import java.io.Serializable;
 
 /**
  * Implementation of {@link MetadataAwareAspectInstanceFactory} that is backed

@@ -16,13 +16,10 @@
 
 package org.springframework.test.context.jdbc;
 
-import javax.sql.DataSource;
-
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
@@ -31,7 +28,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
+import javax.sql.DataSource;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Transactional integration tests for {@link Sql @Sql} support with

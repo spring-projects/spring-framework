@@ -16,14 +16,14 @@
 
 package org.springframework.tests;
 
+import org.springframework.util.StringUtils;
+
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.util.StringUtils;
-
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 /**
  * A test group used to limit when certain tests are run.

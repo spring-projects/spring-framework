@@ -16,13 +16,13 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Simple factory for shared List instances. Allows for central setup

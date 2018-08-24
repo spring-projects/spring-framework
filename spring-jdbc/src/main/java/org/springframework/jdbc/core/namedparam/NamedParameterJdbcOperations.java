@@ -16,18 +16,14 @@
 
 package org.springframework.jdbc.core.namedparam;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.lang.Nullable;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface specifying a basic set of JDBC operations allowing the use

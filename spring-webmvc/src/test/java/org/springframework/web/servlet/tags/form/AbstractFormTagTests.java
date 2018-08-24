@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.tests.sample.beans.TestBean;
+
+import javax.servlet.jsp.JspException;
 
 /**
  * @author Rob Harrop

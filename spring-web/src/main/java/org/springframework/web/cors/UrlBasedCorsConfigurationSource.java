@@ -16,16 +16,16 @@
 
 package org.springframework.web.cors;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Provide a per request {@link CorsConfiguration} instance based on a

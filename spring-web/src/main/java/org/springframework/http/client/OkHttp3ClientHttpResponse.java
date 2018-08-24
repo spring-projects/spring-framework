@@ -16,16 +16,15 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * {@link ClientHttpResponse} implementation based on OkHttp 3.x.

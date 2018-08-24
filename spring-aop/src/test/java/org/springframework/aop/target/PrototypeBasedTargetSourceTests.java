@@ -17,7 +17,6 @@
 package org.springframework.aop.target;
 
 import org.junit.Test;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -26,7 +25,8 @@ import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests relating to the abstract {@link AbstractPrototypeBasedTargetSource}

@@ -16,18 +16,17 @@
 
 package org.springframework.test.context.support;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.BootstrapTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Unit tests for {@link BootstrapTestUtils} involving {@link ApplicationContextInitializer}s.

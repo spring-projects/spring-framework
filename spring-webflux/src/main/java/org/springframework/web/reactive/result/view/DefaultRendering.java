@@ -16,13 +16,13 @@
 
 package org.springframework.web.reactive.result.view;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Default implementation of {@link Rendering}.

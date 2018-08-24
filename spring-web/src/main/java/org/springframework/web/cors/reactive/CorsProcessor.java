@@ -16,11 +16,10 @@
 
 package org.springframework.web.cors.reactive;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 /**
  * A strategy that takes a reactive HTTP exchange and a {@link CorsConfiguration} and

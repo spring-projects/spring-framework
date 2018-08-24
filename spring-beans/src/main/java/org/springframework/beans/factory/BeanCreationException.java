@@ -16,14 +16,14 @@
 
 package org.springframework.beans.factory;
 
+import org.springframework.beans.FatalBeanException;
+import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
+
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.springframework.beans.FatalBeanException;
-import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when a BeanFactory encounters an error when

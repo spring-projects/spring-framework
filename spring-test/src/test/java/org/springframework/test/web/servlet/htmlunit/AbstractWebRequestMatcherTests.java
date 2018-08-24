@@ -16,12 +16,13 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
+import com.gargoylesoftware.htmlunit.WebRequest;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.gargoylesoftware.htmlunit.WebRequest;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Abstract base class for testing {@link WebRequestMatcher} implementations.

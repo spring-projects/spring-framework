@@ -16,16 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorSupport;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.Tag;
-
 import org.junit.Test;
-
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.mock.web.test.MockBodyContent;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -34,6 +25,14 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.support.BindStatus;
+
+import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.Tag;
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorSupport;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 

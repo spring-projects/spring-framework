@@ -16,16 +16,15 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 /**
  * A {@link org.springframework.web.servlet.resource.ResourceTransformer} that checks a

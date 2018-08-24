@@ -16,12 +16,12 @@
 
 package org.springframework.oxm.mime;
 
-import java.io.IOException;
-import javax.xml.transform.Source;
-
 import org.springframework.lang.Nullable;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.XmlMappingException;
+
+import javax.xml.transform.Source;
+import java.io.IOException;
 
 /**
  * Subinterface of {@link org.springframework.oxm.Unmarshaller} that can use MIME attachments

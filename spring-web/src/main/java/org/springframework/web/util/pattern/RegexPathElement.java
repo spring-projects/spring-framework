@@ -16,14 +16,13 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
+import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.springframework.web.util.pattern.PathPattern.MatchingContext;
-import org.springframework.http.server.reactive.PathContainer.Segment;
 
 /**
  * A regex path element. Used to represent any complicated element of the path.

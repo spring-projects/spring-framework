@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.tests.sample.beans.TestBean;
+
 import java.util.Collections;
 import java.util.List;
-
-import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Test class for Spring's ability to create objects using static

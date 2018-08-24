@@ -18,7 +18,6 @@ package org.springframework.scripting.support;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -32,7 +31,7 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Rick Evans

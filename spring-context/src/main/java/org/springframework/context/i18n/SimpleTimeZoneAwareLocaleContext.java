@@ -16,10 +16,10 @@
 
 package org.springframework.context.i18n;
 
+import org.springframework.lang.Nullable;
+
 import java.util.Locale;
 import java.util.TimeZone;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Simple implementation of the {@link TimeZoneAwareLocaleContext} interface,

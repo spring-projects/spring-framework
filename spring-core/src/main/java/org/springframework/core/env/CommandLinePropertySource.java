@@ -16,11 +16,11 @@
 
 package org.springframework.core.env;
 
-import java.util.Collection;
-import java.util.List;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Abstract base class for {@link PropertySource} implementations backed by command line

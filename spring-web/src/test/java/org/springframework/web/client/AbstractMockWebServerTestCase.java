@@ -16,11 +16,6 @@
 
 package org.springframework.web.client;
 
-import java.io.EOFException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -29,8 +24,12 @@ import okio.Buffer;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
-
 import org.springframework.http.MediaType;
+
+import java.io.EOFException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 

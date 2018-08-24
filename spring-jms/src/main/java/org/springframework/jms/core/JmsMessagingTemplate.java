@@ -16,12 +16,6 @@
 
 package org.springframework.jms.core;
 
-import java.util.Map;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Session;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.InvalidDestinationException;
 import org.springframework.jms.JmsException;
@@ -36,6 +30,12 @@ import org.springframework.messaging.core.AbstractMessagingTemplate;
 import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.util.Assert;
+
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Session;
+import java.util.Map;
 
 /**
  * An implementation of {@link JmsMessageOperations}.

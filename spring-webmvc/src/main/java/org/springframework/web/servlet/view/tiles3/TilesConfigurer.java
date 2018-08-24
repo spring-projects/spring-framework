@@ -16,18 +16,6 @@
 
 package org.springframework.web.servlet.view.tiles3;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import javax.el.ArrayELResolver;
-import javax.el.BeanELResolver;
-import javax.el.CompositeELResolver;
-import javax.el.ListELResolver;
-import javax.el.MapELResolver;
-import javax.el.ResourceBundleELResolver;
-import javax.servlet.ServletContext;
-import javax.servlet.jsp.JspFactory;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tiles.TilesContainer;
@@ -57,7 +45,6 @@ import org.apache.tiles.request.ApplicationContextAware;
 import org.apache.tiles.request.ApplicationResource;
 import org.apache.tiles.startup.DefaultTilesInitializer;
 import org.apache.tiles.startup.TilesInitializer;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -67,6 +54,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ServletContextAware;
+
+import javax.el.*;
+import javax.servlet.ServletContext;
+import javax.servlet.jsp.JspFactory;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Helper class to configure Tiles 3.x for the Spring Framework. See

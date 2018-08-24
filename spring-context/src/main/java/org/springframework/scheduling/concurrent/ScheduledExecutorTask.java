@@ -16,9 +16,9 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.lang.Nullable;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * JavaBean that describes a scheduled executor task, consisting of the

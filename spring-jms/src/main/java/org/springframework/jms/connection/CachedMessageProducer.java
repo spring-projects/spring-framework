@@ -16,17 +16,9 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.CompletionListener;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.QueueSender;
-import javax.jms.Topic;
-import javax.jms.TopicPublisher;
-
 import org.springframework.lang.Nullable;
+
+import javax.jms.*;
 
 /**
  * JMS MessageProducer decorator that adapts calls to a shared MessageProducer

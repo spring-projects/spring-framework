@@ -16,13 +16,12 @@
 
 package org.springframework.scheduling.support;
 
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
-
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.NumberUtils;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 

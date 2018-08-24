@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -32,6 +30,8 @@ import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 
 /**
  * Abstract {@linkplain Transactional transactional} extension of

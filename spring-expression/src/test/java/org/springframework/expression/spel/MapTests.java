@@ -16,16 +16,12 @@
 
 package org.springframework.expression.spel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.junit.Test;
 import org.springframework.expression.spel.ast.InlineMap;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+
+import java.util.*;
 
 import static org.junit.Assert.*;
 

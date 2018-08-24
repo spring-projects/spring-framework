@@ -16,13 +16,12 @@
 
 package org.springframework.web.context.support;
 
-import java.util.Map;
-import javax.servlet.ServletContext;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.web.context.ServletContextAware;
+
+import javax.servlet.ServletContext;
+import java.util.Map;
 
 /**
  * Exporter that takes Spring-defined objects and exposes them as

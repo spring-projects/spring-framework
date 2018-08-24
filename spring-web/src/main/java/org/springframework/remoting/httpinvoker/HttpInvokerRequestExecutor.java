@@ -16,10 +16,10 @@
 
 package org.springframework.remoting.httpinvoker;
 
-import java.io.IOException;
-
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
+
+import java.io.IOException;
 
 /**
  * Strategy interface for actual execution of an HTTP invoker request.

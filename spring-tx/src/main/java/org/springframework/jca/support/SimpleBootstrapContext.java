@@ -16,16 +16,16 @@
 
 package org.springframework.jca.support;
 
-import java.util.Timer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.UnavailableException;
 import javax.resource.spi.XATerminator;
 import javax.resource.spi.work.WorkContext;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.TransactionSynchronizationRegistry;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import java.util.Timer;
 
 /**
  * Simple implementation of the JCA 1.7 {@link javax.resource.spi.BootstrapContext}

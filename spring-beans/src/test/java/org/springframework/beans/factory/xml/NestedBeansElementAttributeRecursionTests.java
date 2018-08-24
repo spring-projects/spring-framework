@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.xml;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -26,7 +25,7 @@ import org.springframework.tests.sample.beans.TestBean;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for propagating enclosing beans element defaults to nested beans elements.

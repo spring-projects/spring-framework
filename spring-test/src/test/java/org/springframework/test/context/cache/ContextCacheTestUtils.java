@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.cache;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Collection of utility methods for testing scenarios involving the

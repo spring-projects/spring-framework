@@ -16,16 +16,15 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.SchedulerConfigException;
 import org.quartz.spi.ThreadPool;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Quartz ThreadPool adapter that delegates to a Spring-managed

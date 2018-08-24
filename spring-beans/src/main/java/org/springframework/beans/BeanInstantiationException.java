@@ -16,10 +16,10 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when instantiation of a bean failed.

@@ -16,12 +16,12 @@
 
 package org.springframework.core.env;
 
+import org.springframework.lang.Nullable;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Read-only {@code Map<String, String>} implementation that is backed by system

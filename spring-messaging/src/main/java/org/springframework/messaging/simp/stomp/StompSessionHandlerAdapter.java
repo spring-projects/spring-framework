@@ -16,9 +16,9 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.lang.reflect.Type;
-
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Type;
 
 /**
  * Abstract adapter class for {@link StompSessionHandler} with mostly empty

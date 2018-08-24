@@ -16,13 +16,13 @@
 
 package org.springframework.jca.cci.object;
 
-import javax.resource.cci.ConnectionFactory;
-import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.Record;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.resource.cci.ConnectionFactory;
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.Record;
 
 /**
  * EIS operation object that accepts a passed-in CCI input Record

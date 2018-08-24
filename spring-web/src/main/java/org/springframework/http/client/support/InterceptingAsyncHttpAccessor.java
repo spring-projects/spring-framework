@@ -16,10 +16,10 @@
 
 package org.springframework.http.client.support;
 
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.util.CollectionUtils;
 
 /**
  * The HTTP accessor that extends the base {@link AsyncHttpAccessor} with

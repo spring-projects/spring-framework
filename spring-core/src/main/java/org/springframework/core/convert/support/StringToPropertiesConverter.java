@@ -16,11 +16,11 @@
 
 package org.springframework.core.convert.support;
 
+import org.springframework.core.convert.converter.Converter;
+
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
-
-import org.springframework.core.convert.converter.Converter;
 
 /**
  * Converts a String to a Properties by calling Properties#load(java.io.InputStream).

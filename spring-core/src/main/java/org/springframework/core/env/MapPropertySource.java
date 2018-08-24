@@ -16,9 +16,9 @@
 
 package org.springframework.core.env;
 
-import java.util.Map;
-
 import org.springframework.util.StringUtils;
+
+import java.util.Map;
 
 /**
  * {@link PropertySource} that reads keys and values from a {@code Map} object.

@@ -16,13 +16,9 @@
 
 package org.springframework.web.context.request;
 
-import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
@@ -34,6 +30,9 @@ import org.springframework.mock.web.test.MockHttpSession;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
+
+import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 

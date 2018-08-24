@@ -16,14 +16,13 @@
 
 package org.springframework.jmx.export;
 
-import javax.management.ObjectName;
-
 import org.junit.Test;
-
 import org.springframework.jmx.AbstractJmxTests;
 import org.springframework.jmx.IJmxTestBean;
 
-import static org.junit.Assert.*;
+import javax.management.ObjectName;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop

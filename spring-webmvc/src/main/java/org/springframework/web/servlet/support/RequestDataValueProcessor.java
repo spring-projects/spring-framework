@@ -16,11 +16,10 @@
 
 package org.springframework.web.servlet.support;
 
-import java.util.Map;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.lang.Nullable;
+import java.util.Map;
 
 /**
  * A contract for inspecting and potentially modifying request data values such

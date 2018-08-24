@@ -16,12 +16,9 @@
 
 package org.springframework.test.context.support;
 
-import java.util.Map;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -32,7 +29,9 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.hamcrest.CoreMatchers.*;
+import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

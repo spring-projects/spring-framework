@@ -16,10 +16,10 @@
 
 package org.springframework.aop.interceptor;
 
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.lang.reflect.Method;
 
 /**
  * A default {@link AsyncUncaughtExceptionHandler} that simply logs the exception.

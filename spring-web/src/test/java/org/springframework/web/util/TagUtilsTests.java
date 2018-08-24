@@ -16,11 +16,11 @@
 
 package org.springframework.web.util;
 
+import org.junit.Test;
+
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 

@@ -16,6 +16,8 @@
 
 package org.springframework.format.number;
 
+import org.springframework.lang.Nullable;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -23,8 +25,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Currency;
 import java.util.Locale;
-
-import org.springframework.lang.Nullable;
 
 /**
  * A BigDecimal formatter for number values in currency style.

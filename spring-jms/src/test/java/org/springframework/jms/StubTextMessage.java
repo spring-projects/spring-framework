@@ -16,11 +16,11 @@
 
 package org.springframework.jms;
 
-import java.util.Enumeration;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import java.util.Enumeration;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Stub JMS Message implementation intended for testing purposes only.

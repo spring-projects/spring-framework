@@ -16,14 +16,14 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.AbstractCacheResolver;
 import org.springframework.cache.interceptor.BasicOperation;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheResolver;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A simple {@link CacheResolver} that resolves the exception cache

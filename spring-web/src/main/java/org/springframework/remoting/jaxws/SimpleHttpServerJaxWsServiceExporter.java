@@ -16,22 +16,21 @@
 
 package org.springframework.remoting.jaxws;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import javax.jws.WebService;
-import javax.xml.ws.Endpoint;
-import javax.xml.ws.WebServiceProvider;
-
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.lang.UsesSunHttpServer;
 import org.springframework.util.Assert;
+
+import javax.jws.WebService;
+import javax.xml.ws.Endpoint;
+import javax.xml.ws.WebServiceProvider;
+import java.net.InetSocketAddress;
+import java.util.List;
 
 /**
  * Simple exporter for JAX-WS services, autodetecting annotated service beans

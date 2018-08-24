@@ -16,13 +16,12 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Locale;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.context.i18n.LocaleContext;
-import org.springframework.lang.Nullable;
+import java.util.Locale;
 
 /**
  * Extension of {@link LocaleResolver}, adding support for a rich locale context

@@ -16,21 +16,18 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.lang.annotation.*;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
 import static org.junit.Assert.*;
-import static org.springframework.core.annotation.AnnotatedElementUtils.*;
+import static org.springframework.core.annotation.AnnotatedElementUtils.findAllMergedAnnotations;
+import static org.springframework.core.annotation.AnnotatedElementUtils.getAllMergedAnnotations;
 
 /**
  * Unit tests that verify support for finding multiple composed annotations on

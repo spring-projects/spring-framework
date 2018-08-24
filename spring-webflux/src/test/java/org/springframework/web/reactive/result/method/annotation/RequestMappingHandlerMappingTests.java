@@ -16,6 +16,16 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.reactive.result.method.RequestMappingInfo;
+import org.springframework.web.util.pattern.PathPattern;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,26 +34,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.reactive.result.method.RequestMappingInfo;
-import org.springframework.web.util.pattern.PathPattern;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link RequestMappingHandlerMapping}.

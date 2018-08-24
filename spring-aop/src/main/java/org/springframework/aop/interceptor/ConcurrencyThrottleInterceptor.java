@@ -16,12 +16,11 @@
 
 package org.springframework.aop.interceptor;
 
-import java.io.Serializable;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.util.ConcurrencyThrottleSupport;
+
+import java.io.Serializable;
 
 /**
  * Interceptor that throttles concurrent access, blocking invocations

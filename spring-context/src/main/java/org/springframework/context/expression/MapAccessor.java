@@ -16,8 +16,6 @@
 
 package org.springframework.context.expression;
 
-import java.util.Map;
-
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -26,6 +24,8 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompilablePropertyAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Map;
 
 /**
  * EL property accessor that knows how to traverse the keys

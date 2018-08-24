@@ -16,12 +16,11 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Locale;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
+import java.util.Locale;
 
 /**
  * Interface for web-based locale resolution strategies that allows for

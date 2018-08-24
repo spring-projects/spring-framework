@@ -16,9 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -28,6 +25,9 @@ import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiPropertySource;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.ConfigurableWebEnvironment;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 /**
  * {@link Environment} implementation to be used by {@code Servlet}-based web

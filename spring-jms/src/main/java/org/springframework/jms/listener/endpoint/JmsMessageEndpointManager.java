@@ -16,9 +16,6 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.jms.MessageListener;
-import javax.resource.ResourceException;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.MessageListenerContainer;
@@ -26,6 +23,9 @@ import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.lang.Nullable;
+
+import javax.jms.MessageListener;
+import javax.resource.ResourceException;
 
 /**
  * Extension of the generic JCA 1.5

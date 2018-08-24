@@ -16,10 +16,10 @@
 
 package org.springframework.core;
 
+import org.springframework.lang.Nullable;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Interface to discover parameter names for methods and constructors.

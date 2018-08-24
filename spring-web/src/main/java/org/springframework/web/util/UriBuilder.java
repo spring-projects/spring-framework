@@ -15,11 +15,11 @@
  */
 package org.springframework.web.util;
 
-import java.net.URI;
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
+
+import java.net.URI;
+import java.util.Map;
 
 /**
  * Builder-style methods to prepare and expand a URI template with variables.

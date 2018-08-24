@@ -16,14 +16,6 @@
 
 package org.springframework.jndi.support;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -33,6 +25,10 @@ import org.springframework.core.ResolvableType;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.jndi.TypeMismatchNamingException;
 import org.springframework.lang.Nullable;
+
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
+import java.util.*;
 
 /**
  * Simple JNDI-based implementation of Spring's

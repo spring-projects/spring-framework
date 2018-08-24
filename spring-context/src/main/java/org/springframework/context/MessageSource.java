@@ -16,9 +16,9 @@
 
 package org.springframework.context;
 
-import java.util.Locale;
-
 import org.springframework.lang.Nullable;
+
+import java.util.Locale;
 
 /**
  * Strategy interface for resolving messages, with support for the parameterization

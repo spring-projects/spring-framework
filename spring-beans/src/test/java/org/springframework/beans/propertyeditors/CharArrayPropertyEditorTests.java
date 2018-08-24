@@ -16,9 +16,9 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.beans.PropertyEditor;
-
 import org.junit.Test;
+
+import java.beans.PropertyEditor;
 
 import static org.junit.Assert.*;
 

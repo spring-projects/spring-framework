@@ -16,11 +16,11 @@
 
 package org.springframework.format.datetime.standard;
 
+import org.springframework.format.Printer;
+
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Locale;
-
-import org.springframework.format.Printer;
 
 /**
  * {@link Printer} implementation for a JSR-310 {@link java.time.temporal.TemporalAccessor},

@@ -16,16 +16,16 @@
 
 package org.springframework.http.client;
 
-import java.net.URI;
-import java.util.Arrays;
-
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.FileCopyUtils;
 
-import static org.junit.Assert.*;
+import java.net.URI;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BufferingClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 

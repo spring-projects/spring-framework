@@ -16,25 +16,16 @@
 
 package org.springframework.mock.web;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import javax.servlet.http.Cookie;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StreamUtils;
+
+import javax.servlet.http.Cookie;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.*;
 
 import static org.junit.Assert.*;
 

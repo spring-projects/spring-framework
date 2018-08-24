@@ -16,13 +16,13 @@
 
 package org.springframework.test.context;
 
+import org.junit.Test;
+
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
-
-import org.junit.Test;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toCollection;

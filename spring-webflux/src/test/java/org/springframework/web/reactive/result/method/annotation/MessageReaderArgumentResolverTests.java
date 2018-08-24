@@ -16,28 +16,10 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-import rx.Observable;
-import rx.Single;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
@@ -56,9 +38,21 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+import rx.Observable;
+import rx.Single;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
 
 /**

@@ -16,11 +16,11 @@
 
 package org.springframework.dao.support;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementation of {@link PersistenceExceptionTranslator} that supports chaining,

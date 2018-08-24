@@ -16,9 +16,9 @@
 
 package org.springframework.core.task;
 
-import java.io.Serializable;
-
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * {@link TaskExecutor} implementation that executes each task <i>synchronously</i>

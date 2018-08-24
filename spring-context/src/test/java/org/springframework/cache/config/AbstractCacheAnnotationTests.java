@@ -16,21 +16,21 @@
 
 package org.springframework.cache.config;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.UUID;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.hamcrest.Matchers.*;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
 
 /**

@@ -16,11 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.util.Arrays;
-
 import org.junit.Test;
-import org.xml.sax.InputSource;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -30,6 +26,9 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
+import org.xml.sax.InputSource;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 

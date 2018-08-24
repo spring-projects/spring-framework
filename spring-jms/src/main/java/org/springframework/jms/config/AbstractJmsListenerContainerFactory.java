@@ -16,17 +16,16 @@
 
 package org.springframework.jms.config;
 
-import javax.jms.ConnectionFactory;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
+
+import javax.jms.ConnectionFactory;
 
 /**
  * Base {@link JmsListenerContainerFactory} for Spring's base container implementation.

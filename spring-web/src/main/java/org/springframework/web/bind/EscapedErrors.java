@@ -16,15 +16,15 @@
 
 package org.springframework.web.bind;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.util.HtmlUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Errors wrapper that adds automatic HTML escaping to the wrapped instance,

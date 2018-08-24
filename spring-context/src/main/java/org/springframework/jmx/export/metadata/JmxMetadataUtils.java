@@ -16,10 +16,10 @@
 
 package org.springframework.jmx.export.metadata;
 
-import javax.management.modelmbean.ModelMBeanNotificationInfo;
-
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import javax.management.modelmbean.ModelMBeanNotificationInfo;
 
 /**
  * Utility methods for converting Spring JMX metadata into their plain JMX equivalents.

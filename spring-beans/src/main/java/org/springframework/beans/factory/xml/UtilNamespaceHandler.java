@@ -16,22 +16,16 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.beans.factory.config.*;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import org.w3c.dom.Element;
-
-import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
-import org.springframework.beans.factory.config.ListFactoryBean;
-import org.springframework.beans.factory.config.MapFactoryBean;
-import org.springframework.beans.factory.config.PropertiesFactoryBean;
-import org.springframework.beans.factory.config.PropertyPathFactoryBean;
-import org.springframework.beans.factory.config.SetFactoryBean;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link NamespaceHandler} for the {@code util} namespace.

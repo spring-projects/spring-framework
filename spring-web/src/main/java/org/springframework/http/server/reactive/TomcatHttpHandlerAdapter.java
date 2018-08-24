@@ -16,18 +16,17 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import org.apache.catalina.connector.CoyoteInputStream;
+import org.apache.catalina.connector.CoyoteOutputStream;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.connector.CoyoteInputStream;
-import org.apache.catalina.connector.CoyoteOutputStream;
-
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Tomcat APIs for reading

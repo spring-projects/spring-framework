@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.CollectionUtils;
@@ -27,6 +24,9 @@ import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link WebMvcConfigurer} that delegates to one or more others.

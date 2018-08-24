@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import java.sql.Connection;
-import javax.sql.DataSource;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
 
 /**
  * Utility methods for executing a {@link DatabasePopulator}.

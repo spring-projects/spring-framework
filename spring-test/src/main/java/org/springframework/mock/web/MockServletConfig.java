@@ -16,15 +16,15 @@
 
 package org.springframework.mock.web;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.ServletConfig} interface.

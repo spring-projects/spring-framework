@@ -16,54 +16,33 @@
 
 package org.springframework.oxm.castor;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Map;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
-
 import org.exolab.castor.mapping.Mapping;
 import org.exolab.castor.mapping.MappingException;
 import org.exolab.castor.util.ObjectFactory;
-import org.exolab.castor.xml.IDResolver;
-import org.exolab.castor.xml.MarshalException;
+import org.exolab.castor.xml.*;
 import org.exolab.castor.xml.Marshaller;
-import org.exolab.castor.xml.ResolverException;
-import org.exolab.castor.xml.UnmarshalHandler;
 import org.exolab.castor.xml.Unmarshaller;
-import org.exolab.castor.xml.ValidationException;
-import org.exolab.castor.xml.XMLClassDescriptorResolver;
-import org.exolab.castor.xml.XMLContext;
-import org.exolab.castor.xml.XMLException;
-import org.w3c.dom.Node;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.ext.LexicalHandler;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
-import org.springframework.oxm.MarshallingFailureException;
-import org.springframework.oxm.UncategorizedMappingException;
-import org.springframework.oxm.UnmarshallingFailureException;
-import org.springframework.oxm.ValidationFailureException;
-import org.springframework.oxm.XmlMappingException;
+import org.springframework.oxm.*;
 import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.oxm.support.SaxResourceUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.util.xml.StaxUtils;
+import org.w3c.dom.Node;
+import org.xml.sax.*;
+import org.xml.sax.ext.LexicalHandler;
+
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.*;
+import java.util.Map;
 
 /**
  * Implementation of the {@code Marshaller} interface for Castor. By default, Castor does

@@ -16,14 +16,14 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.lang.Nullable;
+
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Convert an Object to {@code java.util.Optional<T>} if necessary using the

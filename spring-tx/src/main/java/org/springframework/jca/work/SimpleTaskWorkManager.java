@@ -16,24 +16,11 @@
 
 package org.springframework.jca.work;
 
-import javax.resource.spi.work.ExecutionContext;
-import javax.resource.spi.work.Work;
-import javax.resource.spi.work.WorkAdapter;
-import javax.resource.spi.work.WorkCompletedException;
-import javax.resource.spi.work.WorkEvent;
-import javax.resource.spi.work.WorkException;
-import javax.resource.spi.work.WorkListener;
-import javax.resource.spi.work.WorkManager;
-import javax.resource.spi.work.WorkRejectedException;
-
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.core.task.TaskRejectedException;
-import org.springframework.core.task.TaskTimeoutException;
+import org.springframework.core.task.*;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.resource.spi.work.*;
 
 /**
  * Simple JCA 1.7 {@link javax.resource.spi.work.WorkManager} implementation that

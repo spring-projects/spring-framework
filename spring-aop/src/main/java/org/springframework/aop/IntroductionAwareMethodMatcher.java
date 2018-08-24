@@ -16,9 +16,9 @@
 
 package org.springframework.aop;
 
-import java.lang.reflect.Method;
-
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Method;
 
 /**
  * A specialized type of {@link MethodMatcher} that takes into account introductions

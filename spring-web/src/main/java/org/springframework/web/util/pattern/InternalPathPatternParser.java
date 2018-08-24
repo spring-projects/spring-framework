@@ -16,14 +16,12 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
+import org.springframework.lang.Nullable;
+import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
-
-import org.springframework.lang.Nullable;
-import org.springframework.web.util.UriUtils;
-import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
 
 /**
  * Parser for URI template patterns. It breaks the path pattern into a number of

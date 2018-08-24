@@ -16,16 +16,10 @@
 
 package org.springframework.jmx.export.notification;
 
-import javax.management.AttributeChangeNotification;
-import javax.management.MBeanException;
-import javax.management.MalformedObjectNameException;
-import javax.management.Notification;
-import javax.management.ObjectName;
-import javax.management.RuntimeOperationsException;
-
 import org.junit.Test;
-
 import org.springframework.jmx.export.SpringModelMBean;
+
+import javax.management.*;
 
 import static org.junit.Assert.*;
 

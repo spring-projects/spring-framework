@@ -16,12 +16,12 @@
 
 package org.springframework.instrument.classloading.websphere;
 
+import org.springframework.util.FileCopyUtils;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.security.CodeSource;
-
-import org.springframework.util.FileCopyUtils;
 
 /**
  * Adapter that implements WebSphere 7.0 ClassPreProcessPlugin interface,

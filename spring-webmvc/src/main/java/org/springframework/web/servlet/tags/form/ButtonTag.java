@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
-
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
+
+import javax.servlet.jsp.JspException;
 
 /**
  * An HTML button tag. This tag is provided for completeness if the application

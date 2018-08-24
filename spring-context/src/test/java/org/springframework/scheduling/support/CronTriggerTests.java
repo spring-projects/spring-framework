@@ -16,22 +16,16 @@
 
 package org.springframework.scheduling.support;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
 import org.springframework.scheduling.TriggerContext;
 
-import static org.junit.Assert.*;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer

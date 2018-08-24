@@ -16,11 +16,11 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A holder for a {@link RequestCondition} useful when the type of the request

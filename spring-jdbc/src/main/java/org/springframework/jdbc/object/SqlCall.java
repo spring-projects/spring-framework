@@ -16,16 +16,16 @@
 
 package org.springframework.jdbc.object;
 
-import java.util.List;
-import java.util.Map;
-import javax.sql.DataSource;
-
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
+import java.util.List;
+import java.util.Map;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based

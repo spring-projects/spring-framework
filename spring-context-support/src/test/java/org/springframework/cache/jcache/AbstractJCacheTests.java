@@ -16,13 +16,9 @@
 
 package org.springframework.cache.jcache;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -32,6 +28,9 @@ import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.jcache.interceptor.SimpleExceptionCacheResolver;
 import org.springframework.cache.support.SimpleCacheManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Stephane Nicoll

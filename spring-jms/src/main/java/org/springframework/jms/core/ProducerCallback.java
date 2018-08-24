@@ -16,11 +16,11 @@
 
 package org.springframework.jms.core;
 
+import org.springframework.lang.Nullable;
+
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Callback for sending a message to a JMS destination.

@@ -16,11 +16,6 @@
 
 package org.springframework.http.client.reactive;
 
-import java.util.Collection;
-
-import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.client.HttpClientResponse;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +24,10 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Flux;
+import reactor.ipc.netty.http.client.HttpClientResponse;
+
+import java.util.Collection;
 
 /**
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.

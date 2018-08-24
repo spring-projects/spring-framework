@@ -1,11 +1,11 @@
 package org.springframework.cache.jcache.support;
 
-import java.lang.annotation.Annotation;
+import org.springframework.cache.interceptor.SimpleKey;
+
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyInvocationContext;
 import javax.cache.annotation.GeneratedCacheKey;
-
-import org.springframework.cache.interceptor.SimpleKey;
+import java.lang.annotation.Annotation;
 
 /**
  * A simple test key generator that only takes the first key arguments into

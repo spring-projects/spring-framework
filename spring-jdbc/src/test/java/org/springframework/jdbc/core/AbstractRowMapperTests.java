@@ -16,14 +16,6 @@
 
 package org.springframework.jdbc.core;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.DatePerson;
 import org.springframework.jdbc.core.test.Person;
@@ -31,7 +23,10 @@ import org.springframework.jdbc.core.test.SpacePerson;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
-import static org.junit.Assert.*;
+import java.math.BigDecimal;
+import java.sql.*;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.*;
 
 /**

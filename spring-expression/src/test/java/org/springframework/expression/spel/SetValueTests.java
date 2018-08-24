@@ -16,16 +16,15 @@
 
 package org.springframework.expression.spel;
 
-import java.util.Collection;
-import java.util.Set;
-
 import org.junit.Test;
-
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+
+import java.util.Collection;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 

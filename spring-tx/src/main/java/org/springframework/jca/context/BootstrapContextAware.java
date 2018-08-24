@@ -16,9 +16,9 @@
 
 package org.springframework.jca.context;
 
-import javax.resource.spi.BootstrapContext;
-
 import org.springframework.beans.factory.Aware;
+
+import javax.resource.spi.BootstrapContext;
 
 /**
  * Interface to be implemented by any object that wishes to be

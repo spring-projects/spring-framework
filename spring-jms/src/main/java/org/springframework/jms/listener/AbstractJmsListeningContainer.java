@@ -16,12 +16,6 @@
 
 package org.springframework.jms.listener;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import javax.jms.Connection;
-import javax.jms.JMSException;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.SmartLifecycle;
@@ -31,6 +25,12 @@ import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Common base class for all containers which need to implement listening

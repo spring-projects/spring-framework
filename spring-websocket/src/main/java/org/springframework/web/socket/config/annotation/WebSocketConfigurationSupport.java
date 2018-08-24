@@ -16,15 +16,15 @@
 
 package org.springframework.web.socket.config.annotation;
 
-import java.util.Date;
-import java.util.concurrent.ScheduledFuture;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
+
+import java.util.Date;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * Configuration support for WebSocket request handling.

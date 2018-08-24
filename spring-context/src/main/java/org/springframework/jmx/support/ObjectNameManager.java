@@ -16,9 +16,9 @@
 
 package org.springframework.jmx.support;
 
-import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.util.Hashtable;
 
 /**
  * Helper class for the creation of {@link javax.management.ObjectName} instances.

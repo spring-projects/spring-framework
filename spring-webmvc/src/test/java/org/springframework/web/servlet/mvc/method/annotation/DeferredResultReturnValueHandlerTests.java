@@ -16,11 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.concurrent.CompletableFuture;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -33,6 +30,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.StandardServletAsyncWebRequest;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.*;
 import static org.springframework.web.method.ResolvableMethod.*;

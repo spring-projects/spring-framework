@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Locale;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+
+import java.util.Locale;
 
 /**
  * Abstract base class for URL-based views. Provides a consistent way of

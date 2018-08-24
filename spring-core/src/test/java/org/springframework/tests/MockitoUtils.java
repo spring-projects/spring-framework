@@ -16,14 +16,15 @@
 
 package org.springframework.tests;
 
-import java.util.List;
-
 import org.mockito.Mockito;
 import org.mockito.internal.util.MockUtil;
 import org.mockito.invocation.Invocation;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import java.util.List;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * General test utilities for use with {@link Mockito}.

@@ -16,16 +16,16 @@
 
 package org.springframework.tests;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link TestGroup}.

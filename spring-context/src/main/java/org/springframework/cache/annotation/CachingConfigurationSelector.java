@@ -16,13 +16,13 @@
 
 package org.springframework.cache.annotation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AdviceModeImportSelector;
 import org.springframework.context.annotation.AutoProxyRegistrar;
 import org.springframework.util.ClassUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Selects which implementation of {@link AbstractCachingConfiguration} should be used

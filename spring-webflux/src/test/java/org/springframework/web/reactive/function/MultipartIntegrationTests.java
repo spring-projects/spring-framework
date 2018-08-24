@@ -16,12 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
-import java.util.Map;
-
 import org.junit.Test;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +33,10 @@ import org.springframework.web.reactive.function.server.AbstractRouterFunctionIn
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;

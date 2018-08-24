@@ -16,8 +16,6 @@
 
 package org.springframework.context.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -29,6 +27,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.weaving.AspectJWeavingEnabler;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.w3c.dom.Element;
 
 /**
  * Parser for the &lt;context:load-time-weaver/&gt; element.

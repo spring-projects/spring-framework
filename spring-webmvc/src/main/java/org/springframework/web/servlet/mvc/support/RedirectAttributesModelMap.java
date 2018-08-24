@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.mvc.support;
 
-import java.util.Collection;
-import java.util.Map;
-
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.DataBinder;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * A {@link ModelMap} implementation of {@link RedirectAttributes} that formats

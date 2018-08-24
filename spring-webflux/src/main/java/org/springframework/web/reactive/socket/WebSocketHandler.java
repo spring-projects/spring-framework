@@ -16,10 +16,10 @@
 
 package org.springframework.web.reactive.socket;
 
+import reactor.core.publisher.Mono;
+
 import java.util.Collections;
 import java.util.List;
-
-import reactor.core.publisher.Mono;
 
 /**
  * Handler for a WebSocket session.

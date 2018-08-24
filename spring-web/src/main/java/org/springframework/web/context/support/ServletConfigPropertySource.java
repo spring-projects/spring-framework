@@ -16,11 +16,11 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.StringUtils;
+
+import javax.servlet.ServletConfig;
 
 /**
  * {@link PropertySource} that reads init parameters from a {@link ServletConfig} object.

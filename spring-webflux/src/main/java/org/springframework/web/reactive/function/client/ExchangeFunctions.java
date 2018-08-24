@@ -16,12 +16,11 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.util.logging.Level;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
+
+import java.util.logging.Level;
 
 /**
  * Exposes request-response exchange functionality, such as to

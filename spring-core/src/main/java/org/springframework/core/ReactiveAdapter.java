@@ -16,12 +16,11 @@
 
 package org.springframework.core;
 
-import java.util.function.Function;
-
 import org.reactivestreams.Publisher;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.function.Function;
 
 /**
  * Adapt a Reactive Streams {@link Publisher} to and from an async/reactive type

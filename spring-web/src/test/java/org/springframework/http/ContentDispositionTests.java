@@ -16,6 +16,9 @@
 
 package org.springframework.http;
 
+import org.junit.Test;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -23,9 +26,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Unit tests for {@link ContentDisposition}

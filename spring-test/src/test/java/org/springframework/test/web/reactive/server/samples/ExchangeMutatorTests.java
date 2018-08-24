@@ -15,12 +15,8 @@
  */
 package org.springframework.test.web.reactive.server.samples;
 
-import java.security.Principal;
-
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.lang.Nullable;
 import org.springframework.test.web.reactive.server.MockServerConfigurer;
@@ -33,6 +29,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import reactor.core.publisher.Mono;
+
+import java.security.Principal;
 
 /**
  * Samples tests that demonstrate applying ServerWebExchange initialization.

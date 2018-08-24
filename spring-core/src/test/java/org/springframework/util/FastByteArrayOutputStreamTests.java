@@ -16,12 +16,12 @@
 
 package org.springframework.util;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 
