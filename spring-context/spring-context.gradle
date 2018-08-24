@@ -28,6 +28,7 @@ dependencies {
 	testCompile("org.codehaus.groovy:groovy-test:${groovyVersion}")
 	testCompile("org.apache.commons:commons-pool2:2.6.0")
 	testCompile("javax.inject:javax.inject-tck:1")
+	testCompile("org.awaitility:awaitility:3.1.2")
 	testRuntime("javax.xml.bind:jaxb-api:2.3.0")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
 	testRuntime("org.javamoney:moneta:1.3")
