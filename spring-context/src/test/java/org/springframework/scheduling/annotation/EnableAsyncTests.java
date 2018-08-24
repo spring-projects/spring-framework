@@ -182,6 +182,7 @@ public class EnableAsyncTests {
 		asyncBean.work();
 		// Assert
 		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
 				   .timeout(500, TimeUnit.MILLISECONDS)
 				   .await(() -> asyncBean.getThreadOfExecution() != null);
 		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
@@ -199,6 +200,7 @@ public class EnableAsyncTests {
 		asyncBean.work();
 		// Assert
 		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
 				   .timeout(500, TimeUnit.MILLISECONDS)
 				   .await(() -> asyncBean.getThreadOfExecution() != null);
 		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
@@ -236,6 +238,7 @@ public class EnableAsyncTests {
 		// Act
 		asyncBean.work();
 		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
 				   .timeout(500, TimeUnit.MILLISECONDS)
 				   .await(() -> asyncBean.getThreadOfExecution() != null);
 		// Assert
@@ -258,6 +261,7 @@ public class EnableAsyncTests {
 		asyncBean.fail();
 		// Assert
 		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
 				   .timeout(500, TimeUnit.MILLISECONDS)
 				   .await(() -> exceptionHandler.assertCalledWith(method, UnsupportedOperationException.class));
 		ctx.close();
@@ -271,6 +275,7 @@ public class EnableAsyncTests {
 		// Act
 		asyncBean.work();
 		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
 				   .timeout(500, TimeUnit.MILLISECONDS)
 				   .await(() -> asyncBean.getThreadOfExecution() != null);
 		// Assert
@@ -286,6 +291,7 @@ public class EnableAsyncTests {
 		// Act
 		asyncBean.work();
 		AsyncAssert.get()
+				   .polling(10, TimeUnit.MILLISECONDS)
 				   .timeout(500, TimeUnit.MILLISECONDS)
 				   .await(() -> asyncBean.getThreadOfExecution() != null);
 		// Assert
