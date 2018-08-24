@@ -14,6 +14,7 @@ package org.springframework.util.asyncassert;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -38,6 +39,7 @@ public class AsyncAssert {
 
 	/**
 	 * static factory method
+	 *
 	 * @return new instance of the AsyncAssert
 	 */
 	public static AsyncAssert get() {
@@ -60,7 +62,7 @@ public class AsyncAssert {
 	 * Set up timeout settings
 	 *
 	 * @param amount how long to wait for conditions
-	 * @param unit unit of time
+	 * @param unit   unit of time
 	 * @return AsyncAssert with new settings of timeout
 	 */
 	public AsyncAssert timeout(long amount, TimeUnit unit) {

@@ -183,7 +183,7 @@ public class EnableAsyncTests {
 		// Assert
 		AsyncAssert.get()
 				   .timeout(500, TimeUnit.MILLISECONDS)
-				   .await(()-> asyncBean.getThreadOfExecution()!=null);
+				   .await(() -> asyncBean.getThreadOfExecution() != null);
 		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
 		ctx.close();
 	}

@@ -21,6 +21,7 @@ package org.springframework.util.asyncassert;
  * @author Korovin Anatoliy
  */
 public class AsyncAssertInternalException extends RuntimeException {
+
 	public AsyncAssertInternalException(Exception e) {
 		super(e);
 	}

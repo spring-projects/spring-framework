@@ -412,7 +412,7 @@ public class AsyncExecutionTests {
 		// Assert
 		AsyncAssert.get()
 				   .timeout(1, TimeUnit.SECONDS)
-				   .await(()->listenerCalled == 2);
+				   .await(() -> listenerCalled == 2);
 		assertEquals(2, listenerCalled);
 		assertEquals(2, listenerConstructed);
 	}
