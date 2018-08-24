@@ -157,7 +157,7 @@ import org.springframework.web.util.UrlPathHelper;
  * <ul>
  * <li>a {@link ContentNegotiationManager}
  * <li>a {@link DefaultFormattingConversionService}
- * <li>a {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}
+ * <li>an {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}
  * if a JSR-303 implementation is available on the classpath
  * <li>a range of {@link HttpMessageConverter HttpMessageConverters} depending on the third-party
  * libraries available on the classpath.
