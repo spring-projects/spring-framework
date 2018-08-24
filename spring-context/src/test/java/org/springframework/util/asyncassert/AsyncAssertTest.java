@@ -41,6 +41,7 @@ public class AsyncAssertTest {
 				   .polling(10, TimeUnit.MILLISECONDS)
 				   .timeout(1, TimeUnit.SECONDS)
 				   .await(() -> variable.get() == 1);
+		assertEquals(variable.get(), 1);
 	}
 
 
@@ -84,6 +85,7 @@ public class AsyncAssertTest {
 		AsyncAssert.get()
 				   .timeout(1, TimeUnit.SECONDS)
 				   .await(() -> assertEquals(variable.get(), 1));
+		assertEquals(variable.get(), 1);
 	}
 
 	@Test(expected = AsyncAssertTimeoutException.class)

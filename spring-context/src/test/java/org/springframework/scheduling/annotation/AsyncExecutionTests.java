@@ -371,6 +371,7 @@ public class AsyncExecutionTests {
 		AsyncAssert.get()
 				   .timeout(1, TimeUnit.SECONDS)
 				   .await(() -> listenerCalled == 1);
+		assertEquals(listenerCalled, 1);
 	}
 
 	@Test
