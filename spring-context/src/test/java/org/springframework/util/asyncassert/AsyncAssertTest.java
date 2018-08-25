@@ -15,12 +15,12 @@
  */
 package org.springframework.util.asyncassert;
 
-import org.junit.Test;
-
-import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Korovin Anatoliy
@@ -35,8 +35,8 @@ public class AsyncAssertTest {
 		asyncIncrement(variable, 50);
 		// Assert
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(1, TimeUnit.SECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> variable.get() == 1);
 		assertEquals(variable.get(), 1);
 	}
@@ -47,8 +47,8 @@ public class AsyncAssertTest {
 		AtomicInteger variable = new AtomicInteger(0);
 		// Assert
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(1, TimeUnit.SECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> variable.get() == 1);
 	}
 
@@ -60,8 +60,8 @@ public class AsyncAssertTest {
 		asyncIncrement(variable, 50);
 		// Assert
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(15, TimeUnit.MILLISECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(15, ChronoUnit.MILLIS)
 				   .await(() -> variable.get() == 1);
 	}
 
@@ -72,6 +72,18 @@ public class AsyncAssertTest {
 	}
 
 	@Test
+	public void testAwaitWithoutPollingSettings() {
+		// Arrange
+		AtomicInteger variable = new AtomicInteger(0);
+		// Act
+		asyncIncrement(variable, 5);
+		// Assert
+		AsyncAssert.get()
+				   .timeout(1, ChronoUnit.SECONDS)
+				   .await(() -> variable.get() == 1);
+	}
+
+	@Test
 	public void testWithAssert() throws Exception {
 		// Arrange
 		AtomicInteger variable = new AtomicInteger(0);
@@ -79,7 +91,7 @@ public class AsyncAssertTest {
 		asyncIncrement(variable, 50);
 		// Assert
 		AsyncAssert.get()
-				   .timeout(1, TimeUnit.SECONDS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> assertEquals(variable.get(), 1));
 		assertEquals(variable.get(), 1);
 	}
@@ -92,8 +104,8 @@ public class AsyncAssertTest {
 		asyncIncrement(variable, 100);
 		// Assert
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(50, TimeUnit.MILLISECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(50, ChronoUnit.MILLIS)
 				   .await(() -> assertEquals(variable.get(), 1));
 	}
 
@@ -103,8 +115,8 @@ public class AsyncAssertTest {
 		AtomicInteger variable = new AtomicInteger(0);
 		// Assert
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(50, TimeUnit.MILLISECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(50, ChronoUnit.MILLIS)
 				   .await(() -> assertEquals(variable.get(), 1));
 	}
 
@@ -112,7 +124,8 @@ public class AsyncAssertTest {
 		new Thread(() -> {
 			try {
 				Thread.sleep(timeout);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			variable.incrementAndGet();

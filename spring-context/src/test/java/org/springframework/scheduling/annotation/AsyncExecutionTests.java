@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -378,7 +378,7 @@ public class AsyncExecutionTests {
 		context.refresh();
 		// Assert
 		AsyncAssert.get()
-				   .timeout(1, TimeUnit.SECONDS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> listenerCalled == 1);
 		assertEquals(listenerCalled, 1);
 	}
@@ -398,7 +398,7 @@ public class AsyncExecutionTests {
 		context.close();
 		// Assert
 		AsyncAssert.get()
-				   .timeout(1, TimeUnit.SECONDS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> listenerCalled == 2);
 		assertEquals(2, listenerCalled);
 		assertEquals(1, listenerConstructed);
@@ -421,7 +421,7 @@ public class AsyncExecutionTests {
 		context.close();
 		// Assert
 		AsyncAssert.get()
-				   .timeout(1, TimeUnit.SECONDS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> listenerCalled == 2);
 		assertEquals(2, listenerCalled);
 		assertEquals(2, listenerConstructed);

@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
@@ -65,8 +66,8 @@ public class SimpleThreadScopeTests {
 		thread2.start();
 
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(500, TimeUnit.MILLISECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(500, ChronoUnit.MILLIS)
 				   .await(() -> beans[0] != null & beans[1] != null);
 
 		assertNotSame(beans[0], beans[1]);

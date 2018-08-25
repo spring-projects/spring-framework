@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
@@ -118,8 +119,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
 
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(1, TimeUnit.SECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(future::isDone);
 		assertNull(outcome);
 		assertThreadNamePrefix(task);
@@ -132,8 +133,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
 
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(1, TimeUnit.SECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> future.isDone() && outcome != null);
 		assertSame(RuntimeException.class, outcome.getClass());
 	}
@@ -183,8 +184,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
 
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(1, TimeUnit.SECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> future.isDone() && outcome != null);
 		assertEquals(THREAD_NAME_PREFIX, outcome.toString().substring(0, THREAD_NAME_PREFIX.length()));
 	}
@@ -195,8 +196,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		ListenableFuture<String> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
 		AsyncAssert.get()
-				   .polling(10, TimeUnit.MILLISECONDS)
-				   .timeout(1, TimeUnit.SECONDS)
+				   .polling(10, ChronoUnit.MILLIS)
+				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> future.isDone() && outcome != null);
 		assertSame(RuntimeException.class, outcome.getClass());
 	}

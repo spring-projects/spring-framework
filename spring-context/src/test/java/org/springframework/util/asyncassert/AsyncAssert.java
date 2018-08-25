@@ -15,6 +15,9 @@ package org.springframework.util.asyncassert;
  * limitations under the License.
  */
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -27,11 +30,10 @@ import org.junit.Assert;
  */
 public class AsyncAssert {
 
-	private TimeInterval timeout;
-	private TimeInterval pollingInterval;
+	private Duration timeout;
+	private Duration pollingInterval;
 
-	private static final TimeInterval DEFAULT_POLLING_TIME =
-			new TimeInterval(10, TimeUnit.MILLISECONDS);
+	private static final Duration DEFAULT_POLLING_TIME = Duration.ofMillis(10);
 
 	private AsyncAssert() {
 		this.pollingInterval = DEFAULT_POLLING_TIME;
@@ -53,8 +55,8 @@ public class AsyncAssert {
 	 * @param unit   unit of time
 	 * @return AsyncAssert with new settings of polling.
 	 */
-	public AsyncAssert polling(long amount, TimeUnit unit) {
-		this.pollingInterval = new TimeInterval(amount, unit);
+	public AsyncAssert polling(long amount, ChronoUnit unit) {
+		this.pollingInterval = Duration.of(amount, unit);
 		return this;
 	}
 
@@ -65,8 +67,8 @@ public class AsyncAssert {
 	 * @param unit   unit of time
 	 * @return AsyncAssert with new settings of timeout
 	 */
-	public AsyncAssert timeout(long amount, TimeUnit unit) {
-		this.timeout = new TimeInterval(amount, unit);
+	public AsyncAssert timeout(long amount, ChronoUnit unit) {
+		this.timeout = Duration.of(amount, unit);
 		return this;
 	}
 
@@ -85,7 +87,8 @@ public class AsyncAssert {
 			try {
 				if (condition.get()) return;
 				Thread.sleep(getPollingIntervalInMillis());
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 				Assert.fail("Condition supplier threw an exception");
 			}
@@ -107,7 +110,8 @@ public class AsyncAssert {
 				Thread.sleep(getPollingIntervalInMillis());
 				runnableWithThrows.run();
 				return;
-			} catch (Throwable t) {
+			}
+			catch (Throwable t) {
 				//ignore
 			}
 		}
@@ -123,10 +127,10 @@ public class AsyncAssert {
 	}
 
 	private long getPollingIntervalInMillis() {
-		return this.pollingInterval.getUnit().toMillis(this.pollingInterval.getAmount());
+		return this.pollingInterval.toMillis();
 	}
 
 	private long getTimeoutInMillis() {
-		return this.timeout.getUnit().toMillis(this.timeout.getAmount());
+		return this.timeout.toMillis();
 	}
 }
