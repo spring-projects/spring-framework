@@ -17,8 +17,6 @@ package org.springframework.util.asyncassert;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.junit.Assert;

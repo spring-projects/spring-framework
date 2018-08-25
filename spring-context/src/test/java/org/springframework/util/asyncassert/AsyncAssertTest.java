@@ -81,6 +81,7 @@ public class AsyncAssertTest {
 		AsyncAssert.get()
 				   .timeout(1, ChronoUnit.SECONDS)
 				   .await(() -> variable.get() == 1);
+		assertEquals(variable.get(), 1);
 	}
 
 	@Test

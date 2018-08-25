@@ -17,7 +17,6 @@
 package org.springframework.context.support;
 
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
