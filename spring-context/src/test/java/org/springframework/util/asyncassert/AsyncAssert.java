@@ -18,9 +18,9 @@ package org.springframework.util.asyncassert;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import org.junit.Assert;
+
 /**
- * Created on 23.08.2018.
- *
  * Utility class for testing asynchronous events.
  *
  * @author Korovin Anatoliy
@@ -87,10 +87,10 @@ public class AsyncAssert {
 				Thread.sleep(getPollingIntervalInMillis());
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new AsyncAssertInternalException(e);
+				Assert.fail("Condition supplier threw an exception");
 			}
 		}
-		throw new AsyncAssertTimeoutException("Time limit exception.");
+		Assert.fail("Time limit exception.");
 	}
 
 	/**
@@ -111,12 +111,12 @@ public class AsyncAssert {
 				//ignore
 			}
 		}
-		throw new AsyncAssertTimeoutException("Time limit exception.");
+		Assert.fail("Time limit exception.");
 	}
 
 	private long evaluateEndTime() {
 		if (timeout == null) {
-			throw new AsyncAssertInternalException("Not found timeout settings for the AwaitAssert");
+			Assert.fail("Not found timeout settings for the AwaitAssert");
 		}
 		long startTime = System.currentTimeMillis();
 		return startTime + getTimeoutInMillis();

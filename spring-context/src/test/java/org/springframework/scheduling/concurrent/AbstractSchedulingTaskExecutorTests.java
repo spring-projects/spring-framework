@@ -16,16 +16,22 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.util.asyncassert.AsyncAssert;
 import org.springframework.util.concurrent.ListenableFuture;
-
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -87,7 +93,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		Future<?> future = executor.submit(task);
 		try {
 			future.get(1000, TimeUnit.MILLISECONDS);
-		} catch (ExecutionException ex) {
+		}
+		catch (ExecutionException ex) {
 			assertTrue(future.isDone());
 			throw ex;
 		}
@@ -217,7 +224,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	private void await(CountDownLatch latch) {
 		try {
 			latch.await(1000, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException ex) {
+		}
+		catch (InterruptedException ex) {
 			throw new IllegalStateException(ex);
 		}
 		assertEquals("latch did not count down,", 0, latch.getCount());
@@ -244,7 +252,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 			lastThread = Thread.currentThread();
 			try {
 				Thread.sleep(10);
-			} catch (InterruptedException ex) {
+			}
+			catch (InterruptedException ex) {
 			}
 			if (expectedRunCount >= 0) {
 				if (actualRunCount.incrementAndGet() > expectedRunCount) {
@@ -270,7 +279,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		public String call() throws Exception {
 			try {
 				Thread.sleep(10);
-			} catch (InterruptedException ex) {
+			}
+			catch (InterruptedException ex) {
 			}
 			if (expectedRunCount >= 0) {
 				if (actualRunCount.incrementAndGet() > expectedRunCount) {

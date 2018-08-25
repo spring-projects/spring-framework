@@ -16,12 +16,13 @@
 
 package org.springframework.context.support;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.asyncassert.AsyncAssert;
-
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 

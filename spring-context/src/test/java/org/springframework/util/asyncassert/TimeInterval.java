@@ -18,8 +18,6 @@ package org.springframework.util.asyncassert;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created on 23.08.2018.
- *
  * @author Korovin Anatoliy
  */
 class TimeInterval {

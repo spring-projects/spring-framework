@@ -16,8 +16,6 @@
 package org.springframework.util.asyncassert;
 
 /**
- * Created on 23.08.2018.
- *
  * @author Korovin Anatoliy
  */
 public interface RunnableWithThrows {

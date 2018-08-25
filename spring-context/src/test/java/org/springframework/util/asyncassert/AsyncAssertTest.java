@@ -23,12 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created on 23.08.2018.
- *
  * @author Korovin Anatoliy
  */
 public class AsyncAssertTest {
-
 
 	@Test
 	public void testAwait() {
@@ -44,8 +41,7 @@ public class AsyncAssertTest {
 		assertEquals(variable.get(), 1);
 	}
 
-
-	@Test(expected = AsyncAssertTimeoutException.class)
+	@Test(expected = AssertionError.class)
 	public void testAwaitFail() {
 		// Arrange
 		AtomicInteger variable = new AtomicInteger(0);
@@ -56,7 +52,7 @@ public class AsyncAssertTest {
 				   .await(() -> variable.get() == 1);
 	}
 
-	@Test(expected = AsyncAssertTimeoutException.class)
+	@Test(expected = AssertionError.class)
 	public void testAwaitWithTimeoutException() {
 		// Arrange
 		AtomicInteger variable = new AtomicInteger(0);
@@ -69,7 +65,7 @@ public class AsyncAssertTest {
 				   .await(() -> variable.get() == 1);
 	}
 
-	@Test(expected = AsyncAssertInternalException.class)
+	@Test(expected = AssertionError.class)
 	public void testWithoutTimeout() throws Exception {
 		AsyncAssert.get()
 				   .await(() -> true);
@@ -88,7 +84,7 @@ public class AsyncAssertTest {
 		assertEquals(variable.get(), 1);
 	}
 
-	@Test(expected = AsyncAssertTimeoutException.class)
+	@Test(expected = AssertionError.class)
 	public void testWithAssertWithTimeout() throws Exception {
 		// Arrange
 		AtomicInteger variable = new AtomicInteger(0);
@@ -101,7 +97,7 @@ public class AsyncAssertTest {
 				   .await(() -> assertEquals(variable.get(), 1));
 	}
 
-	@Test(expected = AsyncAssertTimeoutException.class)
+	@Test(expected = AssertionError.class)
 	public void testWithAssertWithFail() throws Exception {
 		// Arrange
 		AtomicInteger variable = new AtomicInteger(0);

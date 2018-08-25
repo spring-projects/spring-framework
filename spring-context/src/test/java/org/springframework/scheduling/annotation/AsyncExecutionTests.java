@@ -16,9 +16,20 @@
 
 package org.springframework.scheduling.annotation;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
@@ -31,16 +42,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.asyncassert.AsyncAssert;
 import org.springframework.util.concurrent.ListenableFuture;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -79,35 +80,40 @@ public class AsyncExecutionTests {
 		try {
 			asyncTest.returnSomething(0).get();
 			fail("Should have thrown ExecutionException");
-		} catch (ExecutionException ex) {
+		}
+		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
 		try {
 			asyncTest.returnSomething(-1).get();
 			fail("Should have thrown ExecutionException");
-		} catch (ExecutionException ex) {
+		}
+		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IOException);
 		}
 
 		try {
 			asyncTest.returnSomethingListenable(0).get();
 			fail("Should have thrown ExecutionException");
-		} catch (ExecutionException ex) {
+		}
+		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
 		try {
 			asyncTest.returnSomethingListenable(-1).get();
 			fail("Should have thrown ExecutionException");
-		} catch (ExecutionException ex) {
+		}
+		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IOException);
 		}
 
 		try {
 			asyncTest.returnSomethingCompletable(0).get();
 			fail("Should have thrown ExecutionException");
-		} catch (ExecutionException ex) {
+		}
+		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 	}
@@ -191,21 +197,24 @@ public class AsyncExecutionTests {
 		try {
 			asyncTest.returnSomething(0).get();
 			fail("Should have thrown ExecutionException");
-		} catch (ExecutionException ex) {
+		}
+		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
 		try {
 			asyncTest.returnSomethingListenable(0).get();
 			fail("Should have thrown ExecutionException");
-		} catch (ExecutionException ex) {
+		}
+		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
 		try {
 			asyncTest.returnSomethingCompletable(0).get();
 			fail("Should have thrown ExecutionException");
-		} catch (ExecutionException ex) {
+		}
+		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 	}
@@ -447,7 +456,8 @@ public class AsyncExecutionTests {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			if (i == 0) {
 				throw new IllegalArgumentException();
-			} else if (i < 0) {
+			}
+			else if (i < 0) {
 				return AsyncResult.forExecutionException(new IOException());
 			}
 			return AsyncResult.forValue(Integer.toString(i));
@@ -458,7 +468,8 @@ public class AsyncExecutionTests {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			if (i == 0) {
 				throw new IllegalArgumentException();
-			} else if (i < 0) {
+			}
+			else if (i < 0) {
 				return AsyncResult.forExecutionException(new IOException());
 			}
 			return new AsyncResult<>(Integer.toString(i));
