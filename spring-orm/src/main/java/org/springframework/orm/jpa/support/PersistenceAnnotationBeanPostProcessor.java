@@ -468,7 +468,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	protected EntityManagerFactory getPersistenceUnit(@Nullable String unitName) {
 		if (this.persistenceUnits != null) {
 			String unitNameForLookup = (unitName != null ? unitName : "");
-			if ("".equals(unitNameForLookup)) {
+			if (unitNameForLookup.isEmpty()) {
 				unitNameForLookup = this.defaultPersistenceUnitName;
 			}
 			String jndiName = this.persistenceUnits.get(unitNameForLookup);
@@ -501,7 +501,7 @@ public class PersistenceAnnotationBeanPostProcessor
 		Map<String, String> contexts = (extended ? this.extendedPersistenceContexts : this.persistenceContexts);
 		if (contexts != null) {
 			String unitNameForLookup = (unitName != null ? unitName : "");
-			if ("".equals(unitNameForLookup)) {
+			if (unitNameForLookup.isEmpty()) {
 				unitNameForLookup = this.defaultPersistenceUnitName;
 			}
 			String jndiName = contexts.get(unitNameForLookup);
@@ -533,10 +533,10 @@ public class PersistenceAnnotationBeanPostProcessor
 			throws NoSuchBeanDefinitionException {
 
 		String unitNameForLookup = (unitName != null ? unitName : "");
-		if ("".equals(unitNameForLookup)) {
+		if (unitNameForLookup.isEmpty()) {
 			unitNameForLookup = this.defaultPersistenceUnitName;
 		}
-		if (!"".equals(unitNameForLookup)) {
+		if (!unitNameForLookup.isEmpty()) {
 			return findNamedEntityManagerFactory(unitNameForLookup, requestingBeanName);
 		}
 		else {
