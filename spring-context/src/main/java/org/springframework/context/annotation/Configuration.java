@@ -86,11 +86,12 @@ import org.springframework.stereotype.Component;
  * Spring XML's {@code <context:component-scan/>} element) and therefore may also take
  * advantage of {@link Autowired @Autowired}/{@link javax.inject.Inject @Inject}
  * like any regular {@code @Component}. In particular, if a single constructor is present
- * autowiring semantics will be applied transparently:
+ * autowiring semantics will be applied transparently for that constructor:
  *
  * <pre class="code">
  * &#064;Configuration
  * public class AppConfig {
+ *
  *     private final SomeBean someBean;
  *
  *     public AppConfig(SomeBean someBean) {
@@ -120,7 +121,7 @@ import org.springframework.stereotype.Component;
  *
  * Externalized values may be looked up by injecting the Spring
  * {@link org.springframework.core.env.Environment} into a {@code @Configuration}
- * class as usual (e.g. using the {@code @Autowired} annotation):
+ * class &mdash; for example, using the {@code @Autowired} annotation:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -180,8 +181,8 @@ import org.springframework.stereotype.Component;
  * PropertySourcesPlaceholderConfigurer}, usually enabled via XML with
  * {@code <context:property-placeholder/>}.  See the section below on composing
  * {@code @Configuration} classes with Spring XML using {@code @ImportResource},
- * see {@link Value @Value} Javadoc, and see {@link Bean @Bean} Javadoc for details on working with
- * {@code BeanFactoryPostProcessor} types such as
+ * see {@link Value @Value} Javadoc, and see {@link Bean @Bean} Javadoc for details
+ * on working with {@code BeanFactoryPostProcessor} types such as
  * {@code PropertySourcesPlaceholderConfigurer}.
  *
  * <h2>Composing {@code @Configuration} classes</h2>
@@ -189,9 +190,9 @@ import org.springframework.stereotype.Component;
  * <h3>With the {@code @Import} annotation</h3>
  *
  * <p>{@code @Configuration} classes may be composed using the {@link Import @Import} annotation,
- * not unlike the way that {@code <import>} works in Spring XML. Because
+ * similar to the way that {@code <import>} works in Spring XML. Because
  * {@code @Configuration} objects are managed as Spring beans within the container,
- * imported configurations may be injected the usual way (e.g. via constructor injection):
+ * imported configurations may be injected &mdash; for example, via constructor injection:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -277,7 +278,7 @@ import org.springframework.stereotype.Component;
  * {@code <bean>} definitions within Spring XML files. It is also possible to
  * import Spring XML configuration files into {@code @Configuration} classes using
  * the {@link ImportResource @ImportResource} annotation. Bean definitions imported from
- * XML can be injected the usual way (e.g. using the {@code Inject} annotation):
+ * XML can be injected &mdash; for example, using the {@code @Inject} annotation:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -338,12 +339,12 @@ import org.springframework.stereotype.Component;
  * <h2>Testing support for {@code @Configuration} classes</h2>
  *
  * The Spring <em>TestContext framework</em> available in the {@code spring-test} module
- * provides the {@code @ContextConfiguration} annotation, which as of Spring 3.1 can
- * accept an array of {@code @Configuration} {@code Class} objects:
+ * provides the {@code @ContextConfiguration} annotation which can accept an array of
+ * {@code @Configuration} {@code Class} objects:
  *
  * <pre class="code">
- * &#064;RunWith(SpringJUnit4ClassRunner.class)
- * &#064;ContextConfiguration(classes={AppConfig.class, DatabaseConfig.class})
+ * &#064;RunWith(SpringRunner.class)
+ * &#064;ContextConfiguration(classes = {AppConfig.class, DatabaseConfig.class})
  * public class MyTests {
  *
  *     &#064;Autowired MyBean myBean;
@@ -356,7 +357,9 @@ import org.springframework.stereotype.Component;
  *     }
  * }</pre>
  *
- * See TestContext framework reference documentation for details.
+ * <p>See the
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/testing.html#testcontext-framework">TestContext framework</a>
+ * reference documentation for details.
  *
  * <h2>Enabling built-in Spring features using {@code @Enable} annotations</h2>
  *
