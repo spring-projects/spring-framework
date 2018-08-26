@@ -30,7 +30,7 @@ import org.springframework.jdbc.core.JdbcOperations;
  * @author Thomas Risberg
  * @since 3.0
  */
-public class NamedParameterBatchUpdateUtils extends BatchUpdateUtils {
+public abstract class NamedParameterBatchUpdateUtils extends BatchUpdateUtils {
 
 	public static int[] executeBatchUpdateWithNamedParameters(final ParsedSql parsedSql,
 			final SqlParameterSource[] batchArgs, JdbcOperations jdbcOperations) {
