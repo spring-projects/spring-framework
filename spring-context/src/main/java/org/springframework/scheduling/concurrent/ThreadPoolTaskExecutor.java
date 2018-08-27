@@ -336,11 +336,12 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
-		ExecutorService executor = getThreadPoolExecutor();
+		ExecutorService executor = super.getThreadPoolExecutor();
+		CompletionService<T> completionService = new ExecutorCompletionService<>(executor);
+
 		try {
-			return executor.submit(task);
-		}
-		catch (RejectedExecutionException ex) {
+			return completionService.submit(task);
+		} catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
 		}
 	}
