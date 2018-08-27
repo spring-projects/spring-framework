@@ -48,6 +48,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  * @param <T> the type of objects in the input stream
  */
@@ -119,9 +120,10 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			HttpHeaders headers = message.getHeaders();
 			if (headers.getContentLength() < 0 && !headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
 				return Mono.from(body)
-						.flatMap(dataBuffer -> {
-							headers.setContentLength(dataBuffer.readableByteCount());
-							return message.writeWith(Mono.just(dataBuffer));
+						.defaultIfEmpty(message.bufferFactory().wrap(new byte[0]))
+						.flatMap(buffer -> {
+							headers.setContentLength(buffer.readableByteCount());
+							return message.writeWith(Mono.just(buffer));
 						});
 			}
 		}
