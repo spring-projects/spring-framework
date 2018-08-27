@@ -16,13 +16,13 @@
 
 package org.springframework.context.support;
 
-import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
 
+import org.awaitility.Awaitility;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.asyncassert.AsyncAssert;
 
 import static org.junit.Assert.*;
 
@@ -48,27 +48,18 @@ public class SimpleThreadScopeTests {
 
 	@Test
 	public void getMultipleInstances() throws Exception {
+		// Arrange
 		final TestBean[] beans = new TestBean[2];
-		Thread thread1 = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				beans[0] = applicationContext.getBean("threadScopedObject", TestBean.class);
-			}
-		});
-		Thread thread2 = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				beans[1] = applicationContext.getBean("threadScopedObject", TestBean.class);
-			}
-		});
+		Thread thread1 = new Thread(() -> beans[0] = applicationContext.getBean("threadScopedObject", TestBean.class));
+		Thread thread2 = new Thread(() -> beans[1] = applicationContext.getBean("threadScopedObject", TestBean.class));
+		// Act
 		thread1.start();
 		thread2.start();
-
-		AsyncAssert.get()
-				   .polling(10, ChronoUnit.MILLIS)
-				   .timeout(500, ChronoUnit.MILLIS)
-				   .await(() -> beans[0] != null & beans[1] != null);
-
+		// Assert
+		Awaitility.await()
+				  .pollInterval(10, TimeUnit.MILLISECONDS)
+				  .atMost(500, TimeUnit.MILLISECONDS)
+				  .until(() -> beans[0] != null & beans[1] != null);
 		assertNotSame(beans[0], beans[1]);
 	}
 

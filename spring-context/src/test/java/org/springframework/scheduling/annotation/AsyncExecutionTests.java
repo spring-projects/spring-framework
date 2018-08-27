@@ -20,14 +20,15 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.awaitility.Awaitility;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -40,7 +41,6 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.util.asyncassert.AsyncAssert;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.junit.Assert.*;
@@ -377,9 +377,10 @@ public class AsyncExecutionTests {
 		// Act
 		context.refresh();
 		// Assert
-		AsyncAssert.get()
-				   .timeout(1, ChronoUnit.SECONDS)
-				   .await(() -> listenerCalled == 1);
+		Awaitility.await()
+				  .atMost(1, TimeUnit.SECONDS)
+				  .pollInterval(10, TimeUnit.MILLISECONDS)
+				  .until(() -> listenerCalled == 1);
 		assertEquals(listenerCalled, 1);
 	}
 
@@ -397,9 +398,10 @@ public class AsyncExecutionTests {
 		context.refresh();
 		context.close();
 		// Assert
-		AsyncAssert.get()
-				   .timeout(1, ChronoUnit.SECONDS)
-				   .await(() -> listenerCalled == 2);
+		Awaitility.await()
+				  .atMost(1, TimeUnit.SECONDS)
+				  .pollInterval(10, TimeUnit.MILLISECONDS)
+				  .until(() -> listenerCalled == 2);
 		assertEquals(2, listenerCalled);
 		assertEquals(1, listenerConstructed);
 	}
@@ -420,9 +422,10 @@ public class AsyncExecutionTests {
 		context.refresh();
 		context.close();
 		// Assert
-		AsyncAssert.get()
-				   .timeout(1, ChronoUnit.SECONDS)
-				   .await(() -> listenerCalled == 2);
+		Awaitility.await()
+				  .atMost(1, TimeUnit.SECONDS)
+				  .pollInterval(10, TimeUnit.MILLISECONDS)
+				  .until(() -> listenerCalled == 2);
 		assertEquals(2, listenerCalled);
 		assertEquals(2, listenerConstructed);
 	}
