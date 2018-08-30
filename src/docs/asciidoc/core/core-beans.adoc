@@ -8420,7 +8420,7 @@ the `Environment` or ,declaratively, by using the `spring.profiles.default` prop
 
 
 [[beans-property-source-abstraction]]
-=== `PropertySource` abstraction
+=== `PropertySource` Abstraction
 
 Spring's `Environment` abstraction provides search operations over a configurable
 hierarchy of property sources. Consider the following listing:
