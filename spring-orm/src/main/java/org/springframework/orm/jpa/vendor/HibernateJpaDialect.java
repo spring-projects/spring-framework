@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,10 +113,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 * Hibernate Session, that is, whether to apply a transaction-specific
 	 * isolation level and/or the transaction's read-only flag to the underlying
 	 * JDBC Connection.
-	 * <p>Default is "true" on Hibernate EntityManager 4.x (with its 'on-close'
-	 * connection release mode.
-	 * <p>If you turn this flag off, JPA transaction management will not support
-	 * per-transaction isolation levels anymore. It will not call
+	 * <p>Default is "true". If you turn this flag off, JPA transaction management
+	 * will not support per-transaction isolation levels anymore. It will not call
 	 * {@code Connection.setReadOnly(true)} for read-only transactions anymore either.
 	 * If this flag is turned off, no cleanup of a JDBC Connection is required after
 	 * a transaction, since no Connection settings will get modified.
