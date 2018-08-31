@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.util.ObjectUtils;
 public abstract class Operator extends SpelNodeImpl {
 
 	private final String operatorName;
-	
+
 	// The descriptors of the runtime operand values are used if the discovered declared
 	// descriptors are not providing enough information (for example a generic type
 	// whose accessors seem to only be returning 'Object' - the actual descriptors may
@@ -70,7 +70,8 @@ public abstract class Operator extends SpelNodeImpl {
 	}
 
 	/**
-	 * String format for all operators is the same '(' [operand] [operator] [operand] ')'
+	 * String format for all operators is the same
+	 * {@code '(' [operand] [operator] [operand] ')'}.
 	 */
 	@Override
 	public String toStringAST() {
@@ -100,8 +101,8 @@ public abstract class Operator extends SpelNodeImpl {
 		return (dc.areNumbers && dc.areCompatible);
 	}
 
-	/** 
-	 * Numeric comparison operators share very similar generated code, only differing in 
+	/**
+	 * Numeric comparison operators share very similar generated code, only differing in
 	 * two comparison instructions.
 	 */
 	protected void generateComparisonCode(MethodVisitor mv, CodeFlow cf, int compInstruction1, int compInstruction2) {
@@ -113,14 +114,14 @@ public abstract class Operator extends SpelNodeImpl {
 		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(
 				leftDesc, rightDesc, this.leftActualDescriptor, this.rightActualDescriptor);
 		char targetType = dc.compatibleType;  // CodeFlow.toPrimitiveTargetDesc(leftDesc);
-		
+
 		cf.enterCompilationScope();
 		getLeftOperand().generateCode(mv, cf);
 		cf.exitCompilationScope();
 		if (unboxLeft) {
 			CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 		}
-	
+
 		cf.enterCompilationScope();
 		getRightOperand().generateCode(mv, cf);
 		cf.exitCompilationScope();
@@ -136,11 +137,11 @@ public abstract class Operator extends SpelNodeImpl {
 			mv.visitJumpInsn(compInstruction1, elseTarget);
 		}
 		else if (targetType == 'F') {
-			mv.visitInsn(FCMPG);		
+			mv.visitInsn(FCMPG);
 			mv.visitJumpInsn(compInstruction1, elseTarget);
 		}
 		else if (targetType == 'J') {
-			mv.visitInsn(LCMP);		
+			mv.visitInsn(LCMP);
 			mv.visitJumpInsn(compInstruction1, elseTarget);
 		}
 		else if (targetType == 'I') {
@@ -212,6 +213,10 @@ public abstract class Operator extends SpelNodeImpl {
 			return left.toString().equals(right.toString());
 		}
 
+		if (left instanceof Boolean && right instanceof Boolean) {
+			return left.equals(right);
+		}
+
 		if (ObjectUtils.nullSafeEquals(left, right)) {
 			return true;
 		}
@@ -225,7 +230,7 @@ public abstract class Operator extends SpelNodeImpl {
 
 		return false;
 	}
-	
+
 
 	/**
 	 * A descriptor comparison encapsulates the result of comparing descriptor
@@ -248,7 +253,7 @@ public abstract class Operator extends SpelNodeImpl {
 			this.areCompatible = areCompatible;
 			this.compatibleType = compatibleType;
 		}
-		
+
 		/**
 		 * Return an object that indicates whether the input descriptors are compatible.
 		 * <p>A declared descriptor is what could statically be determined (e.g. from looking
@@ -271,7 +276,7 @@ public abstract class Operator extends SpelNodeImpl {
 
 			boolean leftNumeric = CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(ld);
 			boolean rightNumeric = CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(rd);
-			
+
 			// If the declared descriptors aren't providing the information, try the actual descriptors
 			if (!leftNumeric && !ObjectUtils.nullSafeEquals(ld, leftActualDescriptor)) {
 				ld = leftActualDescriptor;
@@ -281,7 +286,7 @@ public abstract class Operator extends SpelNodeImpl {
 				rd = rightActualDescriptor;
 				rightNumeric = CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(rd);
 			}
-			
+
 			if (leftNumeric && rightNumeric) {
 				if (CodeFlow.areBoxingCompatible(ld, rd)) {
 					return new DescriptorComparison(true, true, CodeFlow.toPrimitiveTargetDesc(ld));
@@ -292,7 +297,7 @@ public abstract class Operator extends SpelNodeImpl {
 			}
 			else {
 				return DescriptorComparison.NOT_NUMBERS;
-			}		
+			}
 		}
 	}
 
