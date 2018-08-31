@@ -70,7 +70,7 @@ public class SpringValidatorAdapterTests {
 	@Before
 	public void setupSpringValidatorAdapter() {
 		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} is must be between {2} and {1}");
-		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value with {1}");
+		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value as {1}");
 		messageSource.addMessage("password", Locale.ENGLISH, "Password");
 		messageSource.addMessage("confirmPassword", Locale.ENGLISH, "Password(Confirm)");
 	}
@@ -107,7 +107,7 @@ public class SpringValidatorAdapterTests {
 
 		assertThat(errors.getFieldErrorCount("password"), is(1));
 		assertThat(messageSource.getMessage(errors.getFieldError("password"), Locale.ENGLISH),
-				is("Password must be same value with Password(Confirm)"));
+				is("Password must be same value as Password(Confirm)"));
 	}
 
 	@Test  // SPR-13406
@@ -122,7 +122,7 @@ public class SpringValidatorAdapterTests {
 		assertThat(errors.getFieldErrorCount("email"), is(1));
 		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
 		assertThat(messageSource.getMessage(errors.getFieldError("email"), Locale.ENGLISH),
-				is("email must be same value with confirmEmail"));
+				is("email must be same value as confirmEmail"));
 		assertThat(messageSource.getMessage(errors.getFieldError("confirmEmail"), Locale.ENGLISH),
 				is("Email required"));
 	}
@@ -141,7 +141,7 @@ public class SpringValidatorAdapterTests {
 		assertThat(errors.getFieldErrorCount("email"), is(1));
 		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
 		assertThat(messageSource.getMessage(errors.getFieldError("email"), Locale.ENGLISH),
-				is("email must be same value with confirmEmail"));
+				is("email must be same value as confirmEmail"));
 		assertThat(messageSource.getMessage(errors.getFieldError("confirmEmail"), Locale.ENGLISH),
 				is("Email required"));
 	}
@@ -354,13 +354,13 @@ public class SpringValidatorAdapterTests {
 
 		private Integer id;
 
-		@javax.validation.constraints.NotNull
+		@NotNull
 		private String name;
 
-		@javax.validation.constraints.NotNull
+		@NotNull
 		private Integer age;
 
-		@javax.validation.constraints.NotNull
+		@NotNull
 		private Parent parent;
 
 		public Integer getId() {
