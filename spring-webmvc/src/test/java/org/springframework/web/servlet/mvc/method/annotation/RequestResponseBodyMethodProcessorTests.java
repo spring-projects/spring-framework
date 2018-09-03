@@ -377,12 +377,12 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		assertContentDisposition(processor, false, "/hello.json", "whitelisted extension");
 		assertContentDisposition(processor, false, "/hello.pdf", "registered extension");
-		assertContentDisposition(processor, true, "/hello.dataless", "uknown extension");
+		assertContentDisposition(processor, true, "/hello.dataless", "unknown extension");
 
 		// path parameters
 		assertContentDisposition(processor, false, "/hello.json;a=b", "path param shouldn't cause issue");
-		assertContentDisposition(processor, true, "/hello.json;a=b;setup.dataless", "uknown ext in path params");
-		assertContentDisposition(processor, true, "/hello.dataless;a=b;setup.json", "uknown ext in filename");
+		assertContentDisposition(processor, true, "/hello.json;a=b;setup.dataless", "unknown ext in path params");
+		assertContentDisposition(processor, true, "/hello.dataless;a=b;setup.json", "unknown ext in filename");
 		assertContentDisposition(processor, false, "/hello.json;a=b;setup.json", "whitelisted extensions");
 
 		// encoded dot
