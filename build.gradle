@@ -41,7 +41,7 @@ ext {
 	groovyVersion        = "2.4.15"
 	hsqldbVersion        = "2.4.1"
 	jackson2Version      = "2.9.6"
-	jettyVersion         = "9.4.11.v20180605"
+	jettyVersion         = "9.4.12.v20180830"
 	junitJupiterVersion  = "5.0.3"
 	junitPlatformVersion = "1.0.3"
 	junitVintageVersion  = "4.12.3"
