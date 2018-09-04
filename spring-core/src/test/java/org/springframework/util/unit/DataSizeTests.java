@@ -43,7 +43,7 @@ public class DataSizeTests {
 	}
 
 	@Test
-	public void ofKilobytesToKiloBbtes() {
+	public void ofKilobytesToKilobytes() {
 		assertEquals(1024, DataSize.ofKilobytes(1024).toKilobytes());
 	}
 
