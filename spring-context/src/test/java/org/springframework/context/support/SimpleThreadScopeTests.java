@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,17 +39,17 @@ public class SimpleThreadScopeTests {
 	@Test
 	public void getFromScope() throws Exception {
 		String name = "threadScopedObject";
-		TestBean bean = (TestBean) this.applicationContext.getBean(name);
+		TestBean bean = this.applicationContext.getBean(name, TestBean.class);
 		assertNotNull(bean);
 		assertSame(bean, this.applicationContext.getBean(name));
-		TestBean bean2 = (TestBean) this.applicationContext.getBean(name);
+		TestBean bean2 = this.applicationContext.getBean(name, TestBean.class);
 		assertSame(bean, bean2);
 	}
 
 	@Test
 	public void getMultipleInstances() throws Exception {
 		// Arrange
-		final TestBean[] beans = new TestBean[2];
+		TestBean[] beans = new TestBean[2];
 		Thread thread1 = new Thread(() -> beans[0] = applicationContext.getBean("threadScopedObject", TestBean.class));
 		Thread thread2 = new Thread(() -> beans[1] = applicationContext.getBean("threadScopedObject", TestBean.class));
 		// Act
@@ -57,9 +57,9 @@ public class SimpleThreadScopeTests {
 		thread2.start();
 		// Assert
 		Awaitility.await()
-				  .pollInterval(10, TimeUnit.MILLISECONDS)
-				  .atMost(500, TimeUnit.MILLISECONDS)
-				  .until(() -> beans[0] != null & beans[1] != null);
+					.atMost(500, TimeUnit.MILLISECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> (beans[0] != null) && (beans[1] != null));
 		assertNotSame(beans[0], beans[1]);
 	}
 

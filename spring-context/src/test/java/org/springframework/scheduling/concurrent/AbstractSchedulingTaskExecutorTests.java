@@ -119,9 +119,9 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
 		// Assert
 		Awaitility.await()
-				  .atMost(1, TimeUnit.SECONDS)
-				  .pollInterval(10, TimeUnit.MILLISECONDS)
-				  .until(future::isDone);
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(future::isDone);
 		assertNull(outcome);
 		assertThreadNamePrefix(task);
 	}
@@ -133,10 +133,10 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
 
 		Awaitility.await()
-				  .dontCatchUncaughtExceptions()
-				  .atMost(1, TimeUnit.SECONDS)
-				  .pollInterval(10, TimeUnit.MILLISECONDS)
-				  .until(() -> future.isDone() && outcome != null);
+					.dontCatchUncaughtExceptions()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> future.isDone() && outcome != null);
 		assertSame(RuntimeException.class, outcome.getClass());
 	}
 
@@ -186,9 +186,9 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
 		// Assert
 		Awaitility.await()
-				  .atMost(1, TimeUnit.SECONDS)
-				  .pollInterval(10, TimeUnit.MILLISECONDS)
-				  .until(() -> future.isDone() && outcome != null);
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> future.isDone() && outcome != null);
 		assertEquals(THREAD_NAME_PREFIX, outcome.toString().substring(0, THREAD_NAME_PREFIX.length()));
 	}
 
@@ -200,10 +200,10 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
 		// Assert
 		Awaitility.await()
-				  .dontCatchUncaughtExceptions()
-				  .atMost(1, TimeUnit.SECONDS)
-				  .pollInterval(10, TimeUnit.MILLISECONDS)
-				  .until(() -> future.isDone() && outcome != null);
+					.dontCatchUncaughtExceptions()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> future.isDone() && outcome != null);
 		assertSame(RuntimeException.class, outcome.getClass());
 	}
 

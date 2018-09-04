@@ -378,10 +378,11 @@ public class AsyncExecutionTests {
 		context.refresh();
 		// Assert
 		Awaitility.await()
-				  .atMost(1, TimeUnit.SECONDS)
-				  .pollInterval(10, TimeUnit.MILLISECONDS)
-				  .until(() -> listenerCalled == 1);
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> listenerCalled == 1);
 		assertEquals(listenerCalled, 1);
+		context.close();
 	}
 
 	@Test
@@ -399,9 +400,9 @@ public class AsyncExecutionTests {
 		context.close();
 		// Assert
 		Awaitility.await()
-				  .atMost(1, TimeUnit.SECONDS)
-				  .pollInterval(10, TimeUnit.MILLISECONDS)
-				  .until(() -> listenerCalled == 2);
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> listenerCalled == 2);
 		assertEquals(2, listenerCalled);
 		assertEquals(1, listenerConstructed);
 	}
@@ -423,9 +424,9 @@ public class AsyncExecutionTests {
 		context.close();
 		// Assert
 		Awaitility.await()
-				  .atMost(1, TimeUnit.SECONDS)
-				  .pollInterval(10, TimeUnit.MILLISECONDS)
-				  .until(() -> listenerCalled == 2);
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> listenerCalled == 2);
 		assertEquals(2, listenerCalled);
 		assertEquals(2, listenerConstructed);
 	}
