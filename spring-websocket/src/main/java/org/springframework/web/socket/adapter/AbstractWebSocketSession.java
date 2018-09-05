@@ -24,7 +24,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.Assert;
+import org.springframework.util.IdGenerator;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
@@ -42,7 +44,10 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSession {
 
+	protected static final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
+
 	protected static final Log logger = LogFactory.getLog(NativeWebSocketSession.class);
+
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
