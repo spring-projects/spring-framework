@@ -39,22 +39,22 @@ public final class DataSize implements Comparable<DataSize> {
 	private static final Pattern PATTERN = Pattern.compile("^([+\\-]?\\d+)([a-zA-Z]{0,2})$");
 
 	/**
-	 * Bytes per KiloByte.
+	 * Bytes per Kilobyte.
 	 */
 	private static long BYTES_PER_KB = 1024;
 
 	/**
-	 * Bytes per MegaByte.
+	 * Bytes per Megabyte.
 	 */
 	private static long BYTES_PER_MB = BYTES_PER_KB * 1024;
 
 	/**
-	 * Bytes per GigaByte.
+	 * Bytes per Gigabyte.
 	 */
 	private static long BYTES_PER_GB = BYTES_PER_MB * 1024;
 
 	/**
-	 * Bytes per TeraByte.
+	 * Bytes per Terabyte.
 	 */
 	private static long BYTES_PER_TB = BYTES_PER_GB * 1024;
 
@@ -78,38 +78,38 @@ public final class DataSize implements Comparable<DataSize> {
 
 	/**
 	 * Obtain a {@link DataSize} representing the specified number of kilobytes.
-	 * @param kiloBytes the number of kilobytes, positive or negative
+	 * @param kilobytes the number of kilobytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
-	public static DataSize ofKiloBytes(long kiloBytes) {
-		return new DataSize(Math.multiplyExact(kiloBytes, BYTES_PER_KB));
+	public static DataSize ofKilobytes(long kilobytes) {
+		return new DataSize(Math.multiplyExact(kilobytes, BYTES_PER_KB));
 	}
 
 	/**
 	 * Obtain a {@link DataSize} representing the specified number of megabytes.
-	 * @param megaBytes the number of megabytes, positive or negative
+	 * @param megabytes the number of megabytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
-	public static DataSize ofMegaBytes(long megaBytes) {
-		return new DataSize(Math.multiplyExact(megaBytes, BYTES_PER_MB));
+	public static DataSize ofMegabytes(long megabytes) {
+		return new DataSize(Math.multiplyExact(megabytes, BYTES_PER_MB));
 	}
 
 	/**
 	 * Obtain a {@link DataSize} representing the specified number of gigabytes.
-	 * @param gigaBytes the number of gigabytes, positive or negative
+	 * @param gigabytes the number of gigabytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
-	public static DataSize ofGigaBytes(long gigaBytes) {
-		return new DataSize(Math.multiplyExact(gigaBytes, BYTES_PER_GB));
+	public static DataSize ofGigabytes(long gigabytes) {
+		return new DataSize(Math.multiplyExact(gigabytes, BYTES_PER_GB));
 	}
 
 	/**
 	 * Obtain a {@link DataSize} representing the specified number of terabytes.
-	 * @param teraBytes the number of terabytes, positive or negative
+	 * @param terabytes the number of terabytes, positive or negative
 	 * @return a {@link DataSize}
 	 */
-	public static DataSize ofTeraBytes(long teraBytes) {
-		return new DataSize(Math.multiplyExact(teraBytes, BYTES_PER_TB));
+	public static DataSize ofTerabytes(long terabytes) {
+		return new DataSize(Math.multiplyExact(terabytes, BYTES_PER_TB));
 	}
 
 	/**
@@ -196,7 +196,7 @@ public final class DataSize implements Comparable<DataSize> {
 	 * Return the number of kilobytes in this instance.
 	 * @return the number of kilobytes
 	 */
-	public long toKiloBytes() {
+	public long toKilobytes() {
 		return this.bytes / BYTES_PER_KB;
 	}
 
@@ -204,7 +204,7 @@ public final class DataSize implements Comparable<DataSize> {
 	 * Return the number of megabytes in this instance.
 	 * @return the number of megabytes
 	 */
-	public long toMegaBytes() {
+	public long toMegabytes() {
 		return this.bytes / BYTES_PER_MB;
 	}
 
@@ -212,7 +212,7 @@ public final class DataSize implements Comparable<DataSize> {
 	 * Return the number of gigabytes in this instance.
 	 * @return the number of gigabytes
 	 */
-	public long toGigaBytes() {
+	public long toGigabytes() {
 		return this.bytes / BYTES_PER_GB;
 	}
 
@@ -220,7 +220,7 @@ public final class DataSize implements Comparable<DataSize> {
 	 * Return the number of terabytes in this instance.
 	 * @return the number of terabytes
 	 */
-	public long toTeraBytes() {
+	public long toTerabytes() {
 		return this.bytes / BYTES_PER_TB;
 	}
 

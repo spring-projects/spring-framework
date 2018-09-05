@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,7 @@ public class OpEQ extends Operator {
 		Object right = getRightOperand().getValueInternal(state).getValue();
 		this.leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
 		this.rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
-		return BooleanTypedValue.forValue(
-				equalityCheck(state.getEvaluationContext(), left, right));
+		return BooleanTypedValue.forValue(equalityCheck(state.getEvaluationContext(), left, right));
 	}
 
 	// This check is different to the one in the other numeric operators (OpLt/etc)

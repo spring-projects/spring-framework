@@ -247,7 +247,7 @@ class TypeConverterDelegate {
 						}
 					}
 					String trimmedValue = ((String) convertedValue).trim();
-					if (requiredType.isEnum() && "".equals(trimmedValue)) {
+					if (requiredType.isEnum() && trimmedValue.isEmpty()) {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}

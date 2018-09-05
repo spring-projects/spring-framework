@@ -162,7 +162,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
 						BindingResult bindingResult = (BindingResult) errors;
 						String nestedField = bindingResult.getNestedPath() + field;
-						if ("".equals(nestedField)) {
+						if (nestedField.isEmpty()) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
 							ObjectError error = new ObjectError(
 									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());

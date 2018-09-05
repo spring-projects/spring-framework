@@ -218,6 +218,10 @@ public abstract class Operator extends SpelNodeImpl {
 			return left.toString().equals(right.toString());
 		}
 
+		if (left instanceof Boolean && right instanceof Boolean) {
+			return left.equals(right);
+		}
+
 		if (ObjectUtils.nullSafeEquals(left, right)) {
 			return true;
 		}

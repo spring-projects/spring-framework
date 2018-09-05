@@ -32,24 +32,24 @@ public enum DataUnit {
 	BYTES("B", DataSize.ofBytes(1)),
 
 	/**
-	 * KiloBytes.
+	 * Kilobytes.
 	 */
-	KILOBYTES("KB", DataSize.ofKiloBytes(1)),
+	KILOBYTES("KB", DataSize.ofKilobytes(1)),
 
 	/**
-	 * MegaBytes.
+	 * Megabytes.
 	 */
-	MEGABYTES("MB", DataSize.ofMegaBytes(1)),
+	MEGABYTES("MB", DataSize.ofMegabytes(1)),
 
 	/**
-	 * GigaBytes.
+	 * Gigabytes.
 	 */
-	GIGABYTES("GB", DataSize.ofGigaBytes(1)),
+	GIGABYTES("GB", DataSize.ofGigabytes(1)),
 
 	/**
-	 * TeraBytes.
+	 * Terabytes.
 	 */
-	TERABYTES("TB", DataSize.ofTeraBytes(1));
+	TERABYTES("TB", DataSize.ofTerabytes(1));
 
 
 	private final String suffix;

@@ -116,8 +116,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		JsonEncoding encoding = getJsonEncoding(mimeType);
 
 		if (inputStream instanceof Mono) {
-			return Flux.from(inputStream).map(value ->
-					encodeValue(value, mimeType, bufferFactory, elementType, hints, encoding));
+			return Mono.from(inputStream).map(value ->
+					encodeValue(value, mimeType, bufferFactory, elementType, hints, encoding)).flux();
 		}
 
 		for (MediaType streamingMediaType : this.streamingMediaTypes) {
