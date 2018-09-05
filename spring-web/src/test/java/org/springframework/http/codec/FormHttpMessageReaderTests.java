@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -34,7 +40,7 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class FormHttpMessageReaderTests {
+public class FormHttpMessageReaderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final FormHttpMessageReader reader = new FormHttpMessageReader();
 
@@ -96,8 +102,25 @@ public class FormHttpMessageReaderTests {
 		assertNull("Invalid result", result.getFirst("name 3"));
 	}
 
+	@Test
+	public void readFormError() {
+		DataBuffer fooBuffer = stringBuffer("name=value");
+		Flux<DataBuffer> body =
+				Flux.just(fooBuffer).mergeWith(Flux.error(new RuntimeException()));
+		MockServerHttpRequest request = request(body);
+
+		Flux<MultiValueMap<String, String>> result = this.reader.read(null, request, null);
+		StepVerifier.create(result)
+				.expectError()
+				.verify();
+	}
+
 
 	private MockServerHttpRequest request(String body) {
+		return request(Mono.just(stringBuffer(body)));
+	}
+
+	private MockServerHttpRequest request(Publisher<? extends DataBuffer> body) {
 		return MockServerHttpRequest
 					.method(HttpMethod.GET, "/")
 					.header(HttpHeaders.CONTENT_TYPE,  MediaType.APPLICATION_FORM_URLENCODED_VALUE)

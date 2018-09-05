@@ -32,7 +32,7 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.springframework.core.ResolvableType.forClass;
 
 /**
  * @author Arjen Poutsma
@@ -70,6 +70,21 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 					}
 				})
 				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void decodeError() {
+		DataBuffer fooBuffer = stringBuffer("foo");
+		Flux<DataBuffer> source =
+				Flux.just(fooBuffer).mergeWith(Flux.error(new RuntimeException()));
+
+
+		Flux<Resource> result = this.decoder
+				.decode(source, forClass(Resource.class), null, Collections.emptyMap());
+
+		StepVerifier.create(result)
+				.expectError()
 				.verify();
 	}
 

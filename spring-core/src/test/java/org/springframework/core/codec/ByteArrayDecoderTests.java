@@ -29,9 +29,7 @@ import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -64,6 +62,21 @@ public class ByteArrayDecoderTests extends AbstractDataBufferAllocatingTestCase 
 				.consumeNextWith(bytes -> assertArrayEquals("foo".getBytes(), bytes))
 				.consumeNextWith(bytes -> assertArrayEquals("bar".getBytes(), bytes))
 				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void decodeError() {
+		DataBuffer fooBuffer = stringBuffer("foo");
+		Flux<DataBuffer> source =
+				Flux.just(fooBuffer).mergeWith(Flux.error(new RuntimeException()));
+		Flux<byte[]> output = this.decoder.decode(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, byte[].class),
+				null, Collections.emptyMap());
+
+		StepVerifier.create(output)
+				.consumeNextWith(bytes -> assertArrayEquals("foo".getBytes(), bytes))
+				.expectError()
 				.verify();
 	}
 

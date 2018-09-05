@@ -21,10 +21,12 @@ import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -57,9 +59,10 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readServerSentEvents() {
-		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(
-				"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
-				"id:c43\nevent:bar\nretry:456\ndata:baz\n\n");
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Mono.just(stringBuffer(
+						"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
+						"id:c43\nevent:bar\nretry:456\ndata:baz\n\n")));
 
 		Flux<ServerSentEvent> events = this.messageReader
 				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),
@@ -117,8 +120,9 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readString() {
-		String body = "data:foo\ndata:bar\n\ndata:baz\n\n";
-		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Mono.just(stringBuffer("data:foo\ndata:bar\n\ndata:baz\n\n")));
 
 		Flux<String> data = messageReader.read(ResolvableType.forClass(String.class),
 				request, Collections.emptyMap()).cast(String.class);
@@ -132,9 +136,10 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readPojo() {
-		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(
-				"data:{\"foo\": \"foofoo\", \"bar\": \"barbar\"}\n\n" +
-				"data:{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}\n\n");
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Mono.just(stringBuffer(
+						"data:{\"foo\": \"foofoo\", \"bar\": \"barbar\"}\n\n" +
+								"data:{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}\n\n")));
 
 		Flux<Pojo> data = messageReader.read(ResolvableType.forClass(Pojo.class), request,
 				Collections.emptyMap()).cast(Pojo.class);
@@ -155,7 +160,8 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 	@Test  // SPR-15331
 	public void decodeFullContentAsString() {
 		String body = "data:foo\ndata:bar\n\ndata:baz\n\n";
-		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Mono.just(stringBuffer(body)));
 
 		String actual = messageReader
 				.readMono(ResolvableType.forClass(String.class), request, Collections.emptyMap())
@@ -164,5 +170,26 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 		assertEquals(body, actual);
 	}
+
+	@Test
+	public void readError() {
+
+		Flux<DataBuffer> body =
+				Flux.just(stringBuffer("data:foo\ndata:bar\n\ndata:baz\n\n"))
+						.mergeWith(Flux.error(new RuntimeException()));
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(body);
+
+		Flux<String> data = messageReader.read(ResolvableType.forClass(String.class),
+				request, Collections.emptyMap()).cast(String.class);
+
+		StepVerifier.create(data)
+				.expectNextMatches(elem -> elem.equals("foo\nbar"))
+				.expectNextMatches(elem -> elem.equals("baz"))
+				.expectError()
+				.verify();
+	}
+
 
 }

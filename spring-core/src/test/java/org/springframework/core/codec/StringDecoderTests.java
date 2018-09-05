@@ -174,6 +174,22 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
+	public void decodeError() {
+		DataBuffer fooBuffer = stringBuffer("foo\n");
+		Flux<DataBuffer> source =
+				Flux.just(fooBuffer).mergeWith(Flux.error(new RuntimeException()));
+
+		Flux<String> output = this.decoder.decode(source,
+				ResolvableType.forClass(String.class), null, Collections.emptyMap());
+
+		StepVerifier.create(output)
+				.expectNext("foo")
+				.expectError()
+				.verify();
+
+	}
+
+	@Test
 	public void decodeToMono() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
 		Mono<String> output = this.decoder.decodeToMono(source,
