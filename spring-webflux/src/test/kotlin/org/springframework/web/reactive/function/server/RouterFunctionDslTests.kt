@@ -120,6 +120,11 @@ class RouterFunctionDslTests {
 				.verifyComplete()
 	}
 
+	@Test
+	fun emptyRouter() {
+		router { }
+	}
+
 
 	private fun sampleRouter() = router {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }

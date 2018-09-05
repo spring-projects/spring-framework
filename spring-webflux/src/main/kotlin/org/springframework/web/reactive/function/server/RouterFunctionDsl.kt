@@ -546,7 +546,12 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 */
 	override fun invoke(): RouterFunction<ServerResponse> {
 		init()
-		return routes.reduce(RouterFunction<ServerResponse>::and)
+		return if (routes.isEmpty()) {
+			RouterFunction<ServerResponse> { Mono.empty() }
+		}
+		else {
+			routes.reduce(RouterFunction<ServerResponse>::and)
+		}
 	}
 
 }
