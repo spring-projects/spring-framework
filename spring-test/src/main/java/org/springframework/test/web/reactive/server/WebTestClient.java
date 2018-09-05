@@ -57,6 +57,7 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
+import reactor.core.publisher.Flux;
 
 /**
  * Non-blocking, reactive client for testing web servers. It uses the reactive
@@ -599,6 +600,28 @@ public interface WebTestClient {
 		 * @return spec for decoding the response
 		 */
 		ResponseSpec exchange();
+
+		/**
+		 * Retrieve the response body without blocking the request. Useful for testing
+		 * a continuous, infinite stream (SSE).
+		 * @param typeReference a type reference describing the expected response body type
+		 * @param <T> the type of elements in the response
+		 * @return a flux containing the body, or a WebClientResponseException if the
+		 * status code is 4xx or 5xx
+		 *
+		 */
+		<T> Flux<T> retrieveBody(ParameterizedTypeReference<T> typeReference);
+
+		/**
+		 * Retrieve the response body without blocking the request. Useful for testing
+		 * a continuous, infinite stream (SSE)
+		 * @param typeReference a type reference describing the expected response body type
+		 * @param <T> the type of elements in the response
+		 * @return a flux containing the body, or a WebClientResponseException if the
+		 * status code is 4xx or 5xx
+		 *
+		 */
+		<T> Flux<T> retrieveBody(Class<T> typeReference);
 	}
 
 

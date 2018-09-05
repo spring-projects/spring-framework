@@ -285,6 +285,16 @@ class DefaultWebTestClient implements WebTestClient {
 			WiretapConnector.Info info = wiretapConnector.claimRequest(this.requestId);
 			return new DefaultResponseSpec(info, clientResponse, this.uriTemplate, getTimeout());
 		}
+
+		@Override
+		public <T> Flux<T> retrieveBody(Class<T> elementType) {
+			return this.bodySpec.retrieve().bodyToFlux(elementType);
+		}
+
+		@Override
+		public <T> Flux<T> retrieveBody(ParameterizedTypeReference<T> typeReference) {
+			return this.bodySpec.retrieve().bodyToFlux(typeReference);
+		}
 	}
 
 
