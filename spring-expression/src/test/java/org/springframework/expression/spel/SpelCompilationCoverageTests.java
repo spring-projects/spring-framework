@@ -4898,6 +4898,71 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertIsCompiled(exp);
 	}
 
+
+	@Test
+	public void elvisOperator_SPR17214() throws Exception {
+		SpelParserConfiguration spc = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelExpressionParser sep = new SpelExpressionParser(spc);
+
+		RecordHolder rh = null;
+		
+		expression = sep.parseExpression("record.get('abc')?:record.put('abc',expression.someLong?.longValue())");
+		rh = new RecordHolder();
+		assertNull(expression.getValue(rh));
+		assertEquals(3L,expression.getValue(rh));
+		assertCanCompile(expression);
+		rh = new RecordHolder();
+		assertNull(expression.getValue(rh));
+		assertEquals(3L,expression.getValue(rh));
+		
+		expression = sep.parseExpression("record.get('abc')?:record.put('abc',3L.longValue())");
+		rh = new RecordHolder();
+		assertNull(expression.getValue(rh));
+		assertEquals(3L,expression.getValue(rh));
+		assertCanCompile(expression);
+		rh = new RecordHolder();
+		assertNull(expression.getValue(rh));
+		assertEquals(3L,expression.getValue(rh));
+		
+		expression = sep.parseExpression("record.get('abc')?:record.put('abc',3L.longValue())");
+		rh = new RecordHolder();
+		assertNull(expression.getValue(rh));
+		assertEquals(3L,expression.getValue(rh));
+		assertCanCompile(expression);
+		rh = new RecordHolder();
+		assertNull(expression.getValue(rh));
+		assertEquals(3L,expression.getValue(rh));
+
+		expression = sep.parseExpression("record.get('abc')==null?record.put('abc',expression.someLong?.longValue()):null");
+		rh = new RecordHolder();
+		rh.expression.someLong=6L;
+		assertNull(expression.getValue(rh));
+		assertEquals(6L,rh.get("abc"));
+		assertNull(expression.getValue(rh));
+		assertCanCompile(expression);
+		rh = new RecordHolder();
+		rh.expression.someLong=6L;
+		assertNull(expression.getValue(rh));
+		assertEquals(6L,rh.get("abc"));
+		assertNull(expression.getValue(rh));
+	}
+
+	public static class RecordHolder {
+		public void add(String key, Long value) {
+			record.put(key, value);
+		}
+		public long get(String key) {
+			return record.get(key);
+		}
+		public Map<String,Long> record = new HashMap<>();
+		public LongHolder expression = new LongHolder();
+		
+	}
+
+	public static class LongHolder {
+		public Long someLong = 3L;
+	}
+
 	@Test
 	public void ternaryOperator_SPR15192() {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
