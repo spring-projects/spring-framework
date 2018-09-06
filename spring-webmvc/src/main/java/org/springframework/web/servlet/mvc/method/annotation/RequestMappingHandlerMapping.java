@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -218,6 +219,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		RequestMappingInfo info = createRequestMappingInfo(method);
+		if (info == null) {
+			info = createRequestMappingInfo(method, handlerType.getInterfaces());
+		}
 		if (info != null) {
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
 			if (typeInfo != null) {
@@ -257,6 +261,17 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
 		RequestCondition<?> condition = (element instanceof Class ?
 				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
+		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
+	}
+	
+	/**
+	 * support for methods that declared in interfaces and implemented in super class
+	 * @since 5.1
+	 */
+	@Nullable
+	private RequestMappingInfo createRequestMappingInfo(Method method, Class<?>[] ifcs) {
+		RequestMapping requestMapping = AnnotationUtils.searchOnInterfaces(method, RequestMapping.class, ifcs);
+		RequestCondition<?> condition = getCustomMethodCondition(method);
 		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
 	}
 

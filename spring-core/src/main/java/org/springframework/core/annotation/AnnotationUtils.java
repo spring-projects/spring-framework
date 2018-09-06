@@ -556,7 +556,7 @@ public abstract class AnnotationUtils {
 	}
 
 	@Nullable
-	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>... ifcs) {
+	public static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>... ifcs) {
 		for (Class<?> ifc : ifcs) {
 			Set<Method> annotatedMethods = getAnnotatedMethodsInBaseType(ifc);
 			if (!annotatedMethods.isEmpty()) {
