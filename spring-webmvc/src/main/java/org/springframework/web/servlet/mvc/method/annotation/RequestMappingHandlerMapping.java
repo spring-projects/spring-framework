@@ -263,9 +263,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
 		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
 	}
-	
+
 	/**
-	 * support for methods that declared in interfaces and implemented in super class
+	 * Support for methods that declared in interfaces and implemented in super class.
 	 * @since 5.1
 	 */
 	@Nullable
