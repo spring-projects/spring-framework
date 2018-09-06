@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,19 @@ import org.springframework.util.MimeType;
 public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
 
 	/**
+	 * Until https://github.com/FasterXML/jackson-core/issues/476 is resolved,
+	 * we need to ensure buffer recycling is off.
+	 */
+	private final JsonFactory jsonFactory;
+
+
+	/**
 	 * Constructor with a Jackson {@link ObjectMapper} to use.
 	 */
 	protected AbstractJackson2Decoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
+		this.jsonFactory = mapper.getFactory().copy()
+				.disable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING);
 	}
 
 
@@ -76,7 +85,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = tokenize(input, true);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, true);
 		return decodeInternal(tokens, elementType, mimeType, hints);
 	}
 
@@ -84,14 +93,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = tokenize(input, false);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, false);
 		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
-	}
-
-	private Flux<TokenBuffer> tokenize(Publisher<DataBuffer> input, boolean tokenizeArrayElements) {
-		Flux<DataBuffer> inputFlux = Flux.from(input);
-		JsonFactory factory = getObjectMapper().getFactory();
-		return Jackson2Tokenizer.tokenize(inputFlux, factory, tokenizeArrayElements);
 	}
 
 	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens, ResolvableType elementType,
