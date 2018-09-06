@@ -46,9 +46,9 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	private Consumer<HttpResources> globalResourcesConsumer;
 
 
-	private Supplier<ConnectionProvider> connectionProviderSupplier = () -> ConnectionProvider.elastic("http");
+	private Supplier<ConnectionProvider> connectionProviderSupplier = () -> ConnectionProvider.elastic("webflux");
 
-	private Supplier<LoopResources> loopResourcesSupplier = () -> LoopResources.create("reactor-http");
+	private Supplier<LoopResources> loopResourcesSupplier = () -> LoopResources.create("webflux-http");
 
 
 	@Nullable
@@ -166,6 +166,8 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 			if (this.globalResourcesConsumer != null) {
 				this.globalResourcesConsumer.accept(httpResources);
 			}
+			this.connectionProvider = httpResources;
+			this.loopResources = httpResources;
 		}
 		else {
 			if (this.loopResources == null) {
