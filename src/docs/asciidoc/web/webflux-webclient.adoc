@@ -94,7 +94,7 @@ concurrency. In this mode global resources remain active until the process exits
 If the server is timed with the process, there is typically no need for an explicit
 shutdown. However if the server can start or stop in-process, e.g. Spring MVC
 application deployed as a WAR, you can declare a Spring-managed bean of type
-`ReactorResourceFactory` with `globalResources=true` (the default) to ensure the Reactor
+`ReactorResourceFactory` with `useGlobalResources=true` (the default) to ensure the Reactor
 Netty global resources are shut down when the Spring `ApplicationContext` is closed:
 
 [source,java,intent=0]
