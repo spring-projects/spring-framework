@@ -40,11 +40,11 @@ import org.springframework.util.StringValueResolver;
  * within bean definition property values and {@code @Value} annotations against the current
  * Spring {@link Environment} and its set of {@link PropertySources}.
  *
- * <p>This class is designed as a general replacement for {@code PropertyPlaceholderConfigurer}
- * introduced in Spring 3.1. It is used by default to support the {@code property-placeholder}
- * element in working against the spring-context-3.1 or higher XSD, whereas spring-context
- * versions &lt;= 3.0 default to {@code PropertyPlaceholderConfigurer} to ensure backward
- * compatibility. See the spring-context XSD documentation for complete details.
+ * <p>This class is designed as a general replacement for {@code PropertyPlaceholderConfigurer}.
+ * It is used by default to support the {@code property-placeholder} element in working against
+ * the spring-context-3.1 or higher XSD; whereas, spring-context versions &lt;= 3.0 default to
+ * {@code PropertyPlaceholderConfigurer} to ensure backward compatibility. See the spring-context
+ * XSD documentation for complete details.
  *
  * <p>Any local properties (e.g. those added via {@link #setProperties}, {@link #setLocations}
  * et al.) are added as a {@code PropertySource}. Search precedence of local properties is

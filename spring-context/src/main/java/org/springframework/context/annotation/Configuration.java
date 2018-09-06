@@ -162,8 +162,8 @@ import org.springframework.stereotype.Component;
  *
  * <h3>Using the {@code @Value} annotation</h3>
  *
- * <p>Externalized values may be injected {@code @Configuration} classes using the
- * {@link Value @Value} annotation:
+ * <p>Externalized values may be injected into {@code @Configuration} classes using
+ * the {@link Value @Value} annotation:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -178,13 +178,23 @@ import org.springframework.stereotype.Component;
  *     }
  * }</pre>
  *
- * <p>This approach is most useful when using Spring's
+ * <p>This approach is often used in conjunction with Spring's
  * {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
- * PropertySourcesPlaceholderConfigurer}, usually enabled via XML with
- * {@code <context:property-placeholder/>}.  See the section below on composing
- * {@code @Configuration} classes with Spring XML using {@code @ImportResource},
- * see the {@link Value @Value} javadocs, and see the {@link Bean @Bean} javadocs for
- * details on working with {@code BeanFactoryPostProcessor} types such as
+ * PropertySourcesPlaceholderConfigurer} that can be enabled <em>automatically</em>
+ * in XML configuration via {@code <context:property-placeholder/>} or <em>explicitly</em>
+ * in a {@code @Configuration} class via a dedicated {@code static} {@code @Bean} method
+ * (see "a note on BeanFactoryPostProcessor-returning {@code @Bean} methods" of
+ * {@link Bean @Bean}'s javadocs for details). Note, however, that explicit registration
+ * of a {@code PropertySourcesPlaceholderConfigurer} via a {@code static} {@code @Bean}
+ * method is typically only required if you need to customize configuration such as the
+ * placeholder syntax, etc. Specifically, if no bean post-processor (such as a
+ * {@code PropertySourcesPlaceholderConfigurer}) has registered an <em>embedded value
+ * resolver</em> for the {@code ApplicationContext}, Spring will register a default
+ * <em>embedded value resolver</em> which resolves placeholders against property sources
+ * registered in the {@code Environment}. See the section below on composing
+ * {@code @Configuration} classes with Spring XML using {@code @ImportResource}; see
+ * the {@link Value @Value} javadocs; and see the {@link Bean @Bean} javadocs for details
+ * on working with {@code BeanFactoryPostProcessor} types such as
  * {@code PropertySourcesPlaceholderConfigurer}.
  *
  * <h2>Composing {@code @Configuration} classes</h2>
