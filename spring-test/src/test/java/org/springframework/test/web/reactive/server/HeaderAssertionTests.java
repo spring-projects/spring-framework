@@ -22,8 +22,6 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.function.Executable;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.http.CacheControl;
@@ -35,7 +33,7 @@ import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -53,11 +51,32 @@ public class HeaderAssertionTests {
 		headers.add("foo", "bar");
 		HeaderAssertions assertions = headerAssertions(headers);
 
-		assertDoesNotThrow(() -> assertions.valueEquals("foo", "bar"));
+		// Success
+		assertions.valueEquals("foo", "bar");
 
-		assertThrows(() -> assertions.valueEquals("what?!", "bar"), "Missing header expected");
-		assertThrows(() -> assertions.valueEquals("foo", "what?!"), "Wrong value expected");
-		assertThrows(() -> assertions.valueEquals("foo", "bar", "what?!"), "Wrong # of values expected");
+		try {
+			assertions.valueEquals("what?!", "bar");
+			fail("Missing header expected");
+		}
+		catch (AssertionError error) {
+			// expected
+		}
+
+		try {
+			assertions.valueEquals("foo", "what?!");
+			fail("Wrong value expected");
+		}
+		catch (AssertionError error) {
+			// expected
+		}
+
+		try {
+			assertions.valueEquals("foo", "bar", "what?!");
+			fail("Wrong # of values expected");
+		}
+		catch (AssertionError error) {
+			// expected
+		}
 	}
 
 	@Test
@@ -85,6 +104,7 @@ public class HeaderAssertionTests {
 		catch (AssertionError error) {
 			// expected
 		}
+
 	}
 
 	@Test
@@ -241,10 +261,6 @@ public class HeaderAssertionTests {
 
 		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, null);
 		return new HeaderAssertions(result, mock(WebTestClient.ResponseSpec.class));
-	}
-
-	public static AssertionError assertThrows(Executable executable, String message) {
-		return Assertions.assertThrows(AssertionError.class, executable, message);
 	}
 
 }
