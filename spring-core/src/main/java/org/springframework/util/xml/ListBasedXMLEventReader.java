@@ -29,20 +29,19 @@ import org.springframework.util.Assert;
  * of {@link XMLEvent} elements.
  *
  * @author Arjen Poutsma
+ * @author Andrzej Hołowko
  * @since 5.0
  */
 class ListBasedXMLEventReader extends AbstractXMLEventReader {
 
 	private final List<XMLEvent> events;
 
-	private int cursor = 0;
+	private int cursor = 0; // index of next element to return
 
-
-	public ListBasedXMLEventReader(List<XMLEvent> events) {
+	ListBasedXMLEventReader(List<XMLEvent> events) {
 		Assert.notNull(events, "XMLEvent List must not be null");
 		this.events = new ArrayList<>(events);
 	}
-
 
 	@Override
 	public boolean hasNext() {
@@ -74,6 +73,17 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 	public void close() {
 		super.close();
 		this.events.clear();
+	}
+
+	@Override
+	protected XMLEvent currentEvent() {
+		if (this.cursor == 0) {
+			throw new NoSuchElementException();
+		}
+		else {
+			final int currentCursor = this.cursor - 1;
+			return this.events.get(currentCursor);
+		}
 	}
 
 }

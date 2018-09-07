@@ -30,12 +30,12 @@ import org.springframework.util.ClassUtils;
  * Abstract base class for {@code XMLEventReader}s.
  *
  * @author Arjen Poutsma
+ * @author Andrzej Hołowko
  * @since 5.0
  */
 abstract class AbstractXMLEventReader implements XMLEventReader {
 
 	private boolean closed;
-
 
 	@Override
 	public Object next() {
@@ -56,7 +56,7 @@ abstract class AbstractXMLEventReader implements XMLEventReader {
 	@Override
 	public String getElementText() throws XMLStreamException {
 		checkIfClosed();
-		if (!peek().isStartElement()) {
+		if (!currentEvent().isStartElement()) {
 			throw new XMLStreamException("Not at START_ELEMENT");
 		}
 
@@ -141,5 +141,13 @@ abstract class AbstractXMLEventReader implements XMLEventReader {
 			throw new XMLStreamException("XMLEventReader has been closed");
 		}
 	}
+
+	/**
+	 * Returns the current {@link XMLEvent}, namely the recent event
+	 * returned by the {@link #nextEvent()} method.
+	 * @see XMLEvent
+	 * @throws NoSuchElementException when iteration hasn't started.
+	 */
+	protected abstract XMLEvent currentEvent();
 
 }

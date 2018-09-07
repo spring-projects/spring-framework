@@ -16,13 +16,20 @@
 
 package org.springframework.util.xml;
 
+import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
+import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
+import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
+import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
@@ -34,6 +41,7 @@ import org.junit.Test;
 
 /**
  * @author Arjen Poutsma
+ * @author Andrzej Hołowko
  */
 public class ListBasedXMLEventReaderTests {
 
@@ -53,6 +61,40 @@ public class ListBasedXMLEventReaderTests {
 		writer.add(reader);
 
 		assertThat(resultWriter.toString(), isSimilarTo(xml));
+	}
+
+	@Test
+	public void testGetElementText() throws Exception {
+		String xml = "<foo><bar>baz</bar></foo>";
+		List<XMLEvent> events = readEvents(xml);
+
+		ListBasedXMLEventReader reader = new ListBasedXMLEventReader(events);
+
+		assertEquals(START_DOCUMENT, reader.nextEvent().getEventType());
+		assertEquals(START_ELEMENT, reader.nextEvent().getEventType());
+		assertEquals(START_ELEMENT, reader.nextEvent().getEventType());
+		assertEquals("baz", reader.getElementText());
+		assertEquals(END_ELEMENT, reader.nextEvent().getEventType());
+		assertEquals(END_DOCUMENT, reader.nextEvent().getEventType());
+	}
+
+	@Test
+	public void testGetElementTextThrowsExceptionAtWrongPosition() throws Exception {
+		String xml = "<foo><bar>baz</bar></foo>";
+		List<XMLEvent> events = readEvents(xml);
+
+		ListBasedXMLEventReader reader = new ListBasedXMLEventReader(events);
+
+		assertEquals(START_DOCUMENT, reader.nextEvent().getEventType());
+
+		try {
+			reader.getElementText();
+			fail("Should have thrown XMLStreamException");
+		}
+		catch (XMLStreamException ex) {
+			// expected
+			assertEquals("Not at START_ELEMENT", ex.getMessage());
+		}
 	}
 
 	private List<XMLEvent> readEvents(String xml) throws XMLStreamException {
