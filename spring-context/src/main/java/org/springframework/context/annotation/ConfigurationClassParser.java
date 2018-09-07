@@ -90,9 +90,9 @@ import org.springframework.util.StringUtils;
  * another using the {@link Import} annotation).
  *
  * <p>This class helps separate the concern of parsing the structure of a Configuration
- * class from the concern of registering BeanDefinition objects based on the
- * content of that model (with the exception of {@code @ComponentScan} annotations which
- * need to be registered immediately).
+ * class from the concern of registering BeanDefinition objects based on the content of
+ * that model (with the exception of {@code @ComponentScan} annotations which need to be
+ * registered immediately).
  *
  * <p>This ASM-based implementation avoids reflection and eager class loading in order to
  * interoperate effectively with lazy class loading in a Spring ApplicationContext.
@@ -994,7 +994,7 @@ class ConfigurationClassParser {
 		private SourceClass getRelated(String className) throws IOException {
 			if (this.source instanceof Class) {
 				try {
-					Class<?> clazz = ((Class<?>) this.source).getClassLoader().loadClass(className);
+					Class<?> clazz = ClassUtils.forName(className, ((Class<?>) this.source).getClassLoader());
 					return asSourceClass(clazz);
 				}
 				catch (ClassNotFoundException ex) {
