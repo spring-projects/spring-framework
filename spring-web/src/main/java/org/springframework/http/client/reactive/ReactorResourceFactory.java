@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.client.reactive;
 
 import java.util.function.Consumer;
@@ -45,18 +46,15 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	@Nullable
 	private Consumer<HttpResources> globalResourcesConsumer;
 
-
 	private Supplier<ConnectionProvider> connectionProviderSupplier = () -> ConnectionProvider.elastic("webflux");
 
 	private Supplier<LoopResources> loopResourcesSupplier = () -> LoopResources.create("webflux-http");
-
 
 	@Nullable
 	private ConnectionProvider connectionProvider;
 
 	@Nullable
 	private LoopResources loopResources;
-
 
 	private boolean manageConnectionProvider = false;
 
@@ -74,6 +72,14 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 */
 	public void setUseGlobalResources(boolean useGlobalResources) {
 		this.useGlobalResources = useGlobalResources;
+	}
+
+	/**
+	 * Whether this factory exposes the global
+	 * {@link reactor.netty.http.HttpResources HttpResources} holder.
+	 */
+	public boolean isUseGlobalResources() {
+		return this.useGlobalResources;
 	}
 
 	/**
@@ -97,7 +103,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 * {@link #setConnectionProvider(ConnectionProvider)} is set.
 	 * @param supplier the supplier to use
 	 */
-	public void setConnectionProviderSupplier(@Nullable Supplier<ConnectionProvider> supplier) {
+	public void setConnectionProviderSupplier(Supplier<ConnectionProvider> supplier) {
 		this.connectionProviderSupplier = supplier;
 	}
 
@@ -109,7 +115,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 * {@link #setLoopResources(LoopResources)} is set.
 	 * @param supplier the supplier to use
 	 */
-	public void setLoopResourcesSupplier(@Nullable Supplier<LoopResources> supplier) {
+	public void setLoopResourcesSupplier(Supplier<LoopResources> supplier) {
 		this.loopResourcesSupplier = supplier;
 	}
 
@@ -118,8 +124,16 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 * {@link ConnectionProvider} instance.
 	 * @param connectionProvider the connection provider to use as is
 	 */
-	public void setConnectionProvider(@Nullable ConnectionProvider connectionProvider) {
+	public void setConnectionProvider(ConnectionProvider connectionProvider) {
 		this.connectionProvider = connectionProvider;
+	}
+
+	/**
+	 * Return the configured {@link ConnectionProvider}.
+	 */
+	public ConnectionProvider getConnectionProvider() {
+		Assert.state(this.connectionProvider != null, "ConnectionProvider not initialized yet");
+		return this.connectionProvider;
 	}
 
 	/**
@@ -127,41 +141,24 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 * {@link LoopResources} instance.
 	 * @param loopResources the loop resources to use as is
 	 */
-	public void setLoopResources(@Nullable LoopResources loopResources) {
+	public void setLoopResources(LoopResources loopResources) {
 		this.loopResources = loopResources;
-	}
-
-
-	/**
-	 * Whether this factory exposes the global
-	 * {@link reactor.netty.http.HttpResources HttpResources} holder.
-	 */
-	public boolean isUseGlobalResources() {
-		return this.useGlobalResources;
-	}
-
-	/**
-	 * Return the configured {@link ConnectionProvider}.
-	 */
-	public ConnectionProvider getConnectionProvider() {
-		Assert.notNull(this.connectionProvider, "ConnectionProvider not initialized yet via InitializingBean.");
-		return this.connectionProvider;
 	}
 
 	/**
 	 * Return the configured {@link LoopResources}.
 	 */
 	public LoopResources getLoopResources() {
-		Assert.notNull(this.loopResources, "LoopResources not initialized yet via InitializingBean.");
+		Assert.state(this.loopResources != null, "LoopResources not initialized yet");
 		return this.loopResources;
 	}
 
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (this.useGlobalResources) {
 			Assert.isTrue(this.loopResources == null && this.connectionProvider == null,
-					"'useGlobalResources' is mutually exclusive with explicitly configured resources.");
+					"'useGlobalResources' is mutually exclusive with explicitly configured resources");
 			HttpResources httpResources = HttpResources.get();
 			if (this.globalResourcesConsumer != null) {
 				this.globalResourcesConsumer.accept(httpResources);

@@ -692,7 +692,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void ternaryWithBooleanReturn() { // SPR-12271
+	public void ternaryWithBooleanReturn_SPR12271() {
 		expression = parser.parseExpression("T(Boolean).TRUE?'abc':'def'");
 		assertEquals("abc", expression.getValue());
 		assertCanCompile(expression);
@@ -4199,7 +4199,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void propertyReferenceVisibility() { // SPR-12771
+	public void propertyReferenceVisibility_SPR12771() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("httpServletRequest", HttpServlet3RequestFactory.getOne());
 		// Without a fix compilation was inserting a checkcast to a private type
@@ -4898,7 +4898,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertIsCompiled(exp);
 	}
 
-
 	@Test
 	public void elvisOperator_SPR17214() throws Exception {
 		SpelParserConfiguration spc = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
@@ -4945,22 +4944,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(rh));
 		assertEquals(6L,rh.get("abc"));
 		assertNull(expression.getValue(rh));
-	}
-
-	public static class RecordHolder {
-		public void add(String key, Long value) {
-			record.put(key, value);
-		}
-		public long get(String key) {
-			return record.get(key);
-		}
-		public Map<String,Long> record = new HashMap<>();
-		public LongHolder expression = new LongHolder();
-		
-	}
-
-	public static class LongHolder {
-		public Long someLong = 3L;
 	}
 
 	@Test
@@ -6123,6 +6106,28 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public String bar(String arg) {
 			return arg.toUpperCase();
 		}
+	}
+
+
+	public static class RecordHolder {
+
+		public Map<String,Long> record = new HashMap<>();
+
+		public LongHolder expression = new LongHolder();
+
+		public void add(String key, Long value) {
+			record.put(key, value);
+		}
+
+		public long get(String key) {
+			return record.get(key);
+		}
+	}
+
+
+	public static class LongHolder {
+
+		public Long someLong = 3L;
 	}
 
 }

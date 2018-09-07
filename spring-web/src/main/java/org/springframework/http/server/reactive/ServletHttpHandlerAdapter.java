@@ -156,7 +156,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 	@Override
 	public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
-
+		// Check for existing error attribute first
 		if (DispatcherType.ASYNC.equals(request.getDispatcherType())) {
 			Throwable ex = (Throwable) request.getAttribute(WRITE_ERROR_ATTRIBUTE_NAME);
 			throw new ServletException("Failed to create response content", ex);
@@ -179,9 +179,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			return;
 		}
 
-		ServerHttpResponse httpResponse =
-				createResponse(((HttpServletResponse) response), asyncContext, httpRequest);
-
+		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext, httpRequest);
 		if (httpRequest.getMethod() == HttpMethod.HEAD) {
 			httpResponse = new HttpHeadResponseDecorator(httpResponse);
 		}
@@ -247,7 +245,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		private final String logPrefix;
 
-
 		public HandlerResultAsyncListener(AtomicBoolean isCompleted, ServletServerHttpRequest httpRequest) {
 			this.isCompleted = isCompleted;
 			this.logPrefix = httpRequest.getLogPrefix();
@@ -287,7 +284,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		private final AtomicBoolean isCompleted;
 
 		private final String logPrefix;
-
 
 		public HandlerResultSubscriber(
 				AsyncContext asyncContext, AtomicBoolean isCompleted, ServletServerHttpRequest httpRequest) {
