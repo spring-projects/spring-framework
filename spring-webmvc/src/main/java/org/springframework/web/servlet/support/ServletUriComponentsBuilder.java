@@ -169,7 +169,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p>As of 4.3.15, this method replaces the contextPath with the value
 	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
-	 * {@code ForwardedHeaderFiller}.
+	 * {@code ForwardedHeaderFilter}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentContextPath() {
 		return fromContextPath(getCurrentRequest());
@@ -184,7 +184,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p>As of 4.3.15, this method replaces the contextPath with the value
 	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
-	 * {@code ForwardedHeaderFiller}.
+	 * {@code ForwardedHeaderFilter}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentServletMapping() {
 		return fromServletMapping(getCurrentRequest());
@@ -199,7 +199,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p>As of 4.3.15, this method replaces the contextPath with the value
 	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
-	 * {@code ForwardedHeaderFiller}.
+	 * {@code ForwardedHeaderFilter}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentRequestUri() {
 		return fromRequestUri(getCurrentRequest());
@@ -214,7 +214,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 *
 	 * <p>As of 4.3.15, this method replaces the contextPath with the value
 	 * of "X-Forwarded-Prefix" rather than prepending, thus aligning with
-	 * {@code ForwardedHeaderFiller}.
+	 * {@code ForwardedHeaderFilter}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentRequest() {
 		return fromRequest(getCurrentRequest());
