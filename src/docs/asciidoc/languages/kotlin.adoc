@@ -143,6 +143,10 @@ for serializing / deserializing JSON data is automatically registered when
 found in the classpath and a warning message will be logged if Jackson and Kotlin are
 detected without the Jackson Kotlin module present.
 
+Configuration classes can be
+https://kotlinlang.org/docs/reference/nested-classes.html[top level or nested but not inner]
+since the later requires a reference to the outer class.
+
 
 
 
