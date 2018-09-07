@@ -725,7 +725,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(context));
 
 		// Static references
-		expression = (SpelExpression)parser.parseExpression("#var?.propertya");
+		expression = (SpelExpression) parser.parseExpression("#var?.propertya");
 		context.setVariable("var", StaticsHelper.class);
 		assertEquals("sh",expression.getValue(context).toString());
 		context.setVariable("var", null);
@@ -737,7 +737,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(context));
 
 		// Single size primitive (boolean)
-		expression = (SpelExpression)parser.parseExpression("#var?.a");
+		expression = (SpelExpression) parser.parseExpression("#var?.a");
 		context.setVariable("var", new TestClass4());
 		assertFalse((Boolean)expression.getValue(context));
 		context.setVariable("var", null);
@@ -749,7 +749,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(context));
 
 		// Double slot primitives
-		expression = (SpelExpression)parser.parseExpression("#var?.four");
+		expression = (SpelExpression) parser.parseExpression("#var?.four");
 		context.setVariable("var", new Three());
 		assertEquals("0.04",expression.getValue(context).toString());
 		context.setVariable("var", null);
@@ -779,7 +779,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(context));
 
 		// Static method references
-		expression = (SpelExpression)parser.parseExpression("#var?.methoda()");
+		expression = (SpelExpression) parser.parseExpression("#var?.methoda()");
 		context.setVariable("var", StaticsHelper.class);
 		assertEquals("sh",expression.getValue(context).toString());
 		context.setVariable("var", null);
@@ -791,7 +791,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(context));
 
 		// Nullsafe guard on expression element evaluating to primitive/null
-		expression = (SpelExpression)parser.parseExpression("#var?.intValue()");
+		expression = (SpelExpression) parser.parseExpression("#var?.intValue()");
 		context.setVariable("var", 4);
 		assertEquals("4",expression.getValue(context).toString());
 		context.setVariable("var", null);
@@ -802,9 +802,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		context.setVariable("var", null);
 		assertNull(expression.getValue(context));
 
-
 		// Nullsafe guard on expression element evaluating to primitive/null
-		expression = (SpelExpression)parser.parseExpression("#var?.booleanValue()");
+		expression = (SpelExpression) parser.parseExpression("#var?.booleanValue()");
 		context.setVariable("var", false);
 		assertEquals("false",expression.getValue(context).toString());
 		context.setVariable("var", null);
@@ -816,7 +815,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(context));
 
 		// Nullsafe guard on expression element evaluating to primitive/null
-		expression = (SpelExpression)parser.parseExpression("#var?.booleanValue()");
+		expression = (SpelExpression) parser.parseExpression("#var?.booleanValue()");
 		context.setVariable("var", true);
 		assertEquals("true",expression.getValue(context).toString());
 		context.setVariable("var", null);
@@ -828,7 +827,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(context));
 
 		// Nullsafe guard on expression element evaluating to primitive/null
-		expression = (SpelExpression)parser.parseExpression("#var?.longValue()");
+		expression = (SpelExpression) parser.parseExpression("#var?.longValue()");
 		context.setVariable("var", 5L);
 		assertEquals("5",expression.getValue(context).toString());
 		context.setVariable("var", null);
@@ -840,7 +839,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(context));
 
 		// Nullsafe guard on expression element evaluating to primitive/null
-		expression = (SpelExpression)parser.parseExpression("#var?.floatValue()");
+		expression = (SpelExpression) parser.parseExpression("#var?.floatValue()");
 		context.setVariable("var", 3f);
 		assertEquals("3.0",expression.getValue(context).toString());
 		context.setVariable("var", null);
@@ -852,7 +851,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertNull(expression.getValue(context));
 
 		// Nullsafe guard on expression element evaluating to primitive/null
-		expression = (SpelExpression)parser.parseExpression("#var?.shortValue()");
+		expression = (SpelExpression) parser.parseExpression("#var?.shortValue()");
 		context.setVariable("var", (short)8);
 		assertEquals("8",expression.getValue(context).toString());
 		context.setVariable("var", null);
@@ -4904,7 +4903,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		SpelExpressionParser sep = new SpelExpressionParser(spc);
 
 		RecordHolder rh = null;
-		
+
 		expression = sep.parseExpression("record.get('abc')?:record.put('abc',expression.someLong?.longValue())");
 		rh = new RecordHolder();
 		assertNull(expression.getValue(rh));
@@ -4913,7 +4912,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		rh = new RecordHolder();
 		assertNull(expression.getValue(rh));
 		assertEquals(3L,expression.getValue(rh));
-		
+
 		expression = sep.parseExpression("record.get('abc')?:record.put('abc',3L.longValue())");
 		rh = new RecordHolder();
 		assertNull(expression.getValue(rh));
@@ -4922,7 +4921,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		rh = new RecordHolder();
 		assertNull(expression.getValue(rh));
 		assertEquals(3L,expression.getValue(rh));
-		
+
 		expression = sep.parseExpression("record.get('abc')?:record.put('abc',3L.longValue())");
 		rh = new RecordHolder();
 		assertNull(expression.getValue(rh));
