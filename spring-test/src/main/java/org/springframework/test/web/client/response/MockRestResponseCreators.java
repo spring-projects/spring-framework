@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.client.response;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.core.io.Resource;
@@ -114,6 +115,17 @@ public abstract class MockRestResponseCreators {
 	 */
 	public static DefaultResponseCreator withStatus(HttpStatus status) {
 		return new DefaultResponseCreator(status);
+	}
+
+	/**
+	 * {@code ResponseCreator} with an internal application {@code IOException}. For example,
+	 * one could use this to simulate a {@code SocketTimeoutException}.
+	 * @param e the {@code Exception} to be thrown at HTTP call time.
+	 */
+	public static ResponseCreator withException(IOException e) {
+		return request -> {
+			throw e;
+		};
 	}
 
 }
