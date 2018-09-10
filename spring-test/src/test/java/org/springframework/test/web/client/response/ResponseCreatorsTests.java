@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.client.response;
 
+import java.net.SocketTimeoutException;
 import java.net.URI;
 
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpResponse;
+import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,6 +124,12 @@ public class ResponseCreatorsTests {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 		assertThat(response.getHeaders().isEmpty()).isTrue();
 		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test(expected = SocketTimeoutException.class)
+	public void withException() throws Exception {
+		ResponseCreator responseCreator = MockRestResponseCreators.withException(new SocketTimeoutException());
+		responseCreator.createResponse(null);
 	}
 
 }
