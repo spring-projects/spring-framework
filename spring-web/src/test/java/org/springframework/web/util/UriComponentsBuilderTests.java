@@ -36,13 +36,15 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link org.springframework.web.util.UriComponentsBuilder}.
+ * Unit tests for {@link UriComponentsBuilder}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @author Oliver Gierke
- * @author David Eckel
+ * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author David Eckel
  */
 public class UriComponentsBuilderTests {
 
@@ -917,16 +919,19 @@ public class UriComponentsBuilderTests {
 	public void uriComponentsNotEqualAfterNormalization() {
 		UriComponents uri1 = UriComponentsBuilder.fromUriString("http://test.com").build().normalize();
 		UriComponents uri2 = UriComponentsBuilder.fromUriString("http://test.com/").build();
+
 		assertTrue(uri1.getPathSegments().isEmpty());
 		assertTrue(uri2.getPathSegments().isEmpty());
 		assertNotEquals(uri1, uri2);
 	}
 
 	@Test  // SPR-17256
-	public void uriComponentsWithQueryParamClone() {
-		UriComponentsBuilder.fromUriString("http://localhost:8081")
+	public void uriComponentsWithMergedQueryParams() {
+		String uri = UriComponentsBuilder.fromUriString("http://localhost:8081")
 				.uriComponents(UriComponentsBuilder.fromUriString("/{path}?sort={sort}").build())
-				.queryParam("sort", "another_value").build();
+				.queryParam("sort", "another_value").build().toString();
+
+		assertEquals("http://localhost:8081/{path}?sort={sort}&sort=another_value", uri);
 	}
 
 }
