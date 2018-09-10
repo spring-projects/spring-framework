@@ -47,7 +47,7 @@ dependencies {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
-	optional("org.xmlunit:xmlunit-matchers:2.6.1")
+	optional("org.xmlunit:xmlunit-matchers:2.6.2")
 	optional("org.skyscreamer:jsonassert:1.5.0")
 	optional("com.jayway.jsonpath:json-path:2.4.0")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -59,7 +59,7 @@ dependencies {
 	testCompile("javax.cache:cache-api:1.1.0")
 	testCompile("javax.ejb:javax.ejb-api:3.2")
 	testCompile("javax.interceptor:javax.interceptor-api:1.2.2")
-	testCompile("javax.mail:javax.mail-api:1.6.1")
+	testCompile("javax.mail:javax.mail-api:1.6.2")
 	testCompile("org.hibernate:hibernate-core:5.2.17.Final")
 	testCompile("org.hibernate:hibernate-validator:6.0.12.Final")
 	// Enable use of the JUnit Platform Runner

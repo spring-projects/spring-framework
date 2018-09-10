@@ -66,7 +66,7 @@ dependencies {
 		exclude group: "xom", module: "xom"
 		exclude group: "xerces", module: "xercesImpl"
 	}
-	testCompile("org.xmlunit:xmlunit-matchers:2.6.1")
+	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
 	testCompile("io.projectreactor:reactor-core")
 	testCompile("io.reactivex:rxjava:${rxjavaVersion}")
 	testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
