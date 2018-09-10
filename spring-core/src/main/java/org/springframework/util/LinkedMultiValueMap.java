@@ -119,7 +119,6 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	public Map<K, V> toSingleValueMap() {
 		LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<>(this.targetMap.size());
 		this.targetMap.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
-
 		return singleValueMap;
 	}
 
@@ -193,7 +192,10 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	/**
 	 * Create a deep copy of this Map.
 	 * @return a copy of this Map, including a copy of each value-holding List entry
+	 * (consistently using an independent modifiable {@link LinkedList} for each entry)
+	 * along the lines of {@code MultiValueMap.addAll} semantics
 	 * @since 4.2
+	 * @see #addAll(MultiValueMap)
 	 * @see #clone()
 	 */
 	public LinkedMultiValueMap<K, V> deepCopy() {
@@ -205,7 +207,11 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	/**
 	 * Create a regular copy of this Map.
 	 * @return a shallow copy of this Map, reusing this Map's value-holding List entries
+	 * (even if some entries are shared or unmodifiable) along the lines of standard
+	 * {@code Map.put} semantics
 	 * @since 4.2
+	 * @see #put(Object, List)
+	 * @see #putAll(Map)
 	 * @see LinkedMultiValueMap#LinkedMultiValueMap(Map)
 	 * @see #deepCopy()
 	 */

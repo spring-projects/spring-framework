@@ -922,4 +922,11 @@ public class UriComponentsBuilderTests {
 		assertNotEquals(uri1, uri2);
 	}
 
+	@Test  // SPR-17256
+	public void uriComponentsWithQueryParamClone() {
+		UriComponentsBuilder.fromUriString("http://localhost:8081")
+				.uriComponents(UriComponentsBuilder.fromUriString("/{path}?sort={sort}").build())
+				.queryParam("sort", "another_value").build();
+	}
+
 }
