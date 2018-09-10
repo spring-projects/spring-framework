@@ -129,7 +129,7 @@ public class ResponseCreatorsTests {
 	@Test(expected = SocketTimeoutException.class)
 	public void withException() throws Exception {
 		ResponseCreator responseCreator = MockRestResponseCreators.withException(new SocketTimeoutException());
-		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+		responseCreator.createResponse(null);
 	}
 
 }
