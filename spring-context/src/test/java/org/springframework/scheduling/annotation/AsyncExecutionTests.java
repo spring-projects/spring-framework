@@ -381,7 +381,6 @@ public class AsyncExecutionTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> listenerCalled == 1);
-		assertEquals(listenerCalled, 1);
 		context.close();
 	}
 
@@ -403,7 +402,6 @@ public class AsyncExecutionTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> listenerCalled == 2);
-		assertEquals(2, listenerCalled);
 		assertEquals(1, listenerConstructed);
 	}
 
@@ -427,7 +425,6 @@ public class AsyncExecutionTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> listenerCalled == 2);
-		assertEquals(2, listenerCalled);
 		assertEquals(2, listenerConstructed);
 	}
 
