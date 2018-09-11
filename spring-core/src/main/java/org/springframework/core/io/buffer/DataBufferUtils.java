@@ -64,26 +64,6 @@ public abstract class DataBufferUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Read the given {@code InputStream} into a <strong>read-once</strong> {@code Flux} of
-	 * {@code DataBuffer}s. Closes the input stream when the flux is terminated.
-	 * <p>The resulting {@code Flux} can only be subscribed to once. See
-	 * {@link #readInputStream(Callable, DataBufferFactory, int)} for a variant that supports
-	 * multiple subscriptions.
-	 * @param inputStream the input stream to read from
-	 * @param dataBufferFactory the factory to create data buffers with
-	 * @param bufferSize the maximum size of the data buffers
-	 * @return a flux of data buffers read from the given channel
-	 * @deprecated as of Spring 5.0.3, in favor of
-	 * {@link #readInputStream(Callable, DataBufferFactory, int)}, to be removed in Spring 5.1
-	 */
-	@Deprecated
-	public static Flux<DataBuffer> read(
-			InputStream inputStream, DataBufferFactory dataBufferFactory, int bufferSize) {
-
-		return readInputStream(() -> inputStream, dataBufferFactory, bufferSize);
-	}
-
-	/**
 	 * Obtain a {@link InputStream} from the given supplier, and read it into a {@code Flux}
 	 * of {@code DataBuffer}s. Closes the input stream when the flux is terminated.
 	 * @param inputStreamSupplier the supplier for the input stream to read from
@@ -97,26 +77,6 @@ public abstract class DataBufferUtils {
 		Assert.notNull(inputStreamSupplier, "'inputStreamSupplier' must not be null");
 
 		return readByteChannel(() -> Channels.newChannel(inputStreamSupplier.call()), dataBufferFactory, bufferSize);
-	}
-
-	/**
-	 * Read the given {@code ReadableByteChannel} into a <strong>read-once</strong> {@code Flux}
-	 * of {@code DataBuffer}s. Closes the channel when the flux is terminated.
-	 * <p>The resulting {@code Flux} can only be subscribed to once. See
-	 * {@link #readByteChannel(Callable, DataBufferFactory, int)} for a variant that supports
-	 * multiple subscriptions.
-	 * @param channel the channel to read from
-	 * @param dataBufferFactory the factory to create data buffers with
-	 * @param bufferSize the maximum size of the data buffers
-	 * @return a flux of data buffers read from the given channel
-	 * @deprecated as of Spring 5.0.3, in favor of
-	 * {@link #readByteChannel(Callable, DataBufferFactory, int)}, to be removed in Spring 5.1
-	 */
-	@Deprecated
-	public static Flux<DataBuffer> read(
-			ReadableByteChannel channel, DataBufferFactory dataBufferFactory, int bufferSize) {
-
-		return readByteChannel(() -> channel, dataBufferFactory, bufferSize);
 	}
 
 	/**
@@ -143,50 +103,6 @@ public abstract class DataBufferUtils {
 				},
 				DataBufferUtils::closeChannel
 		);
-	}
-
-	/**
-	 * Read the given {@code AsynchronousFileChannel} into a <strong>read-once</strong> {@code Flux}
-	 * of {@code DataBuffer}s. Closes the channel when the flux is terminated.
-	 * <p>The resulting {@code Flux} can only be subscribed to once. See
-	 * {@link #readAsynchronousFileChannel(Callable, DataBufferFactory, int)} for a variant that
-	 * supports multiple subscriptions.
-	 * @param channel the channel to read from
-	 * @param dataBufferFactory the factory to create data buffers with
-	 * @param bufferSize the maximum size of the data buffers
-	 * @return a flux of data buffers read from the given channel
-	 * @deprecated as of Spring 5.0.3, in favor of
-	 * {@link #readAsynchronousFileChannel(Callable, DataBufferFactory, int)}, to be removed in
-	 * Spring 5.1
-	 */
-	@Deprecated
-	public static Flux<DataBuffer> read(
-			AsynchronousFileChannel channel, DataBufferFactory dataBufferFactory, int bufferSize) {
-
-		return readAsynchronousFileChannel(() -> channel, dataBufferFactory, bufferSize);
-	}
-
-	/**
-	 * Read the given {@code AsynchronousFileChannel} into a <strong>read-once</strong> {@code Flux}
-	 * of {@code DataBuffer}s, starting at the given position. Closes the channel when the flux is
-	 * terminated.
-	 * <p>The resulting {@code Flux} can only be subscribed to once. See
-	 * {@link #readAsynchronousFileChannel(Callable, long, DataBufferFactory, int)} for a variant
-	 * that supports multiple subscriptions.
-	 * @param channel the channel to read from
-	 * @param position the position to start reading from
-	 * @param dataBufferFactory the factory to create data buffers with
-	 * @param bufferSize the maximum size of the data buffers
-	 * @return a flux of data buffers read from the given channel
-	 * @deprecated as of Spring 5.0.3, in favor of
-	 * {@link #readAsynchronousFileChannel(Callable, long, DataBufferFactory, int)}, to be removed
-	 * in Spring 5.1
-	 */
-	@Deprecated
-	public static Flux<DataBuffer> read(
-			AsynchronousFileChannel channel, long position, DataBufferFactory dataBufferFactory, int bufferSize) {
-
-		return readAsynchronousFileChannel(() -> channel, position, dataBufferFactory, bufferSize);
 	}
 
 	/**
