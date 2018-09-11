@@ -34,7 +34,7 @@ ext {
 	hsqldbVersion        = "2.4.1"
 	jackson2Version      = "2.9.6"
 	jettyVersion         = "9.4.12.v20180830"
-	junit5Version        = "5.3.0"
+	junit5Version        = "5.3.1"
 	kotlinVersion        = "1.2.61"
 	log4jVersion         = "2.11.1"
 	nettyVersion         = "4.1.29.Final"
