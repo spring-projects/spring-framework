@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -349,6 +350,11 @@ public abstract class RequestPredicates {
 		}
 	}
 
+	private static void restoreAttributes(ServerRequest request, Map<String, Object> attributes) {
+		request.attributes().clear();
+		request.attributes().putAll(attributes);
+	}
+
 
 	private static class HttpMethodPredicate implements RequestPredicate {
 
@@ -518,8 +524,14 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public boolean test(ServerRequest t) {
-			return (this.left.test(t) && this.right.test(t));
+		public boolean test(ServerRequest request) {
+			Map<String, Object> oldAttributes = new HashMap<>(request.attributes());
+
+			if (this.left.test(request) && this.right.test(request)) {
+				return true;
+			}
+			restoreAttributes(request, oldAttributes);
+			return false;
 		}
 
 		@Override
@@ -532,7 +544,6 @@ public abstract class RequestPredicates {
 			return String.format("(%s && %s)", this.left, this.right);
 		}
 	}
-
 
 	/**
 	 * {@link RequestPredicate} for where either {@code left} or {@code right} predicates
@@ -552,8 +563,20 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public boolean test(ServerRequest t) {
-			return (this.left.test(t) || this.right.test(t));
+		public boolean test(ServerRequest request) {
+			Map<String, Object> oldAttributes = new HashMap<>(request.attributes());
+
+			if (this.left.test(request)) {
+				return true;
+			}
+			else {
+				restoreAttributes(request, oldAttributes);
+				if (this.right.test(request)) {
+					return true;
+				}
+			}
+			restoreAttributes(request, oldAttributes);
+			return false;
 		}
 
 		@Override
