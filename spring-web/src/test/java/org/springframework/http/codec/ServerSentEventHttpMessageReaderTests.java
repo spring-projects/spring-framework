@@ -176,7 +176,7 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 		Flux<DataBuffer> body =
 				Flux.just(stringBuffer("data:foo\ndata:bar\n\ndata:baz\n\n"))
-						.mergeWith(Flux.error(new RuntimeException()));
+						.concatWith(Flux.error(new RuntimeException()));
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(body);

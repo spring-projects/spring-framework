@@ -68,7 +68,7 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 	public void decodeError() {
 		DataBuffer fooBuffer = stringBuffer("foo");
 		Flux<DataBuffer> source =
-				Flux.just(fooBuffer).mergeWith(Flux.error(new RuntimeException()));
+				Flux.just(fooBuffer).concatWith(Flux.error(new RuntimeException()));
 		Flux<ByteBuffer> output = this.decoder.decode(source,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null, Collections.emptyMap());

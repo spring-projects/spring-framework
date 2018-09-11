@@ -106,7 +106,7 @@ public class FormHttpMessageReaderTests extends AbstractDataBufferAllocatingTest
 	public void readFormError() {
 		DataBuffer fooBuffer = stringBuffer("name=value");
 		Flux<DataBuffer> body =
-				Flux.just(fooBuffer).mergeWith(Flux.error(new RuntimeException()));
+				Flux.just(fooBuffer).concatWith(Flux.error(new RuntimeException()));
 		MockServerHttpRequest request = request(body);
 
 		Flux<MultiValueMap<String, String>> result = this.reader.read(null, request, null);
