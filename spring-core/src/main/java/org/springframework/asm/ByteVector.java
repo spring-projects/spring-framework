@@ -327,7 +327,7 @@ public class ByteVector {
    * Puts an array of bytes into this byte vector. The byte vector is automatically enlarged if
    * necessary.
    *
-   * @param byteArrayValue an array of bytes. May be <tt>null</tt> to put <tt>byteLength</tt> null
+   * @param byteArrayValue an array of bytes. May be {@literal null} to put {@code byteLength} null
    *     bytes into this byte vector.
    * @param byteOffset index of the first byte of byteArrayValue that must be copied.
    * @param byteLength number of bytes of byteArrayValue that must be copied.

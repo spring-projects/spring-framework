@@ -435,7 +435,7 @@ public class Label {
    *
    * @param code the bytecode of the method.
    * @param bytecodeOffset the bytecode offset of this label.
-   * @return <tt>true</tt> if a blank that was left for this label was too small to store the
+   * @return {@literal true} if a blank that was left for this label was too small to store the
    *     offset. In such a case the corresponding jump instruction is replaced with an equivalent
    *     ASM specific instruction using an unsigned two bytes offset. These ASM specific
    *     instructions are later replaced with standard bytecode instructions with wider offsets (4

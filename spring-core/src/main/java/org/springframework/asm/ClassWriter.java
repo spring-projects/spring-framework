@@ -123,7 +123,7 @@ public class ClassWriter extends ClassVisitor {
   /** The number_of_classes field of the InnerClasses attribute, or 0. */
   private int numberOfInnerClasses;
 
-  /** The 'classes' array of the InnerClasses attribute, or <tt>null</tt>. */
+  /** The 'classes' array of the InnerClasses attribute, or {@literal null}. */
   private ByteVector innerClasses;
 
   /** The class_index field of the EnclosingMethod attribute, or 0. */
@@ -138,34 +138,34 @@ public class ClassWriter extends ClassVisitor {
   /** The source_file_index field of the SourceFile attribute, or 0. */
   private int sourceFileIndex;
 
-  /** The debug_extension field of the SourceDebugExtension attribute, or <tt>null</tt>. */
+  /** The debug_extension field of the SourceDebugExtension attribute, or {@literal null}. */
   private ByteVector debugExtension;
 
   /**
    * The last runtime visible annotation of this class. The previous ones can be accessed with the
-   * {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeVisibleAnnotation;
 
   /**
    * The last runtime invisible annotation of this class. The previous ones can be accessed with the
-   * {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeInvisibleAnnotation;
 
   /**
    * The last runtime visible type annotation of this class. The previous ones can be accessed with
-   * the {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeVisibleTypeAnnotation;
 
   /**
    * The last runtime invisible type annotation of this class. The previous ones can be accessed
-   * with the {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * with the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeInvisibleTypeAnnotation;
 
-  /** The Module attribute of this class, or <tt>null</tt>. */
+  /** The Module attribute of this class, or {@literal null}. */
   private ModuleWriter moduleWriter;
 
   /** The host_class_index field of the NestHost attribute, or 0. */
@@ -174,12 +174,12 @@ public class ClassWriter extends ClassVisitor {
   /** The number_of_classes field of the NestMembers attribute, or 0. */
   private int numberOfNestMemberClasses;
 
-  /** The 'classes' array of the NestMembers attribute, or <tt>null</tt>. */
+  /** The 'classes' array of the NestMembers attribute, or {@literal null}. */
   private ByteVector nestMemberClasses;
 
   /**
    * The first non standard attribute of this class. The next ones can be accessed with the {@link
-   * Attribute#nextAttribute} field. May be <tt>null</tt>.
+   * Attribute#nextAttribute} field. May be {@literal null}.
    *
    * <p><b>WARNING</b>: this list stores the attributes in the <i>reverse</i> order of their visit.
    * firstAttribute is actually the last attribute visited in {@link #visitAttribute}. The {@link
@@ -234,7 +234,7 @@ public class ClassWriter extends ClassVisitor {
    *     maximum stack size nor the stack frames will be computed for these methods</i>.
    */
   public ClassWriter(final ClassReader classReader, final int flags) {
-    super(Opcodes.ASM6);
+    super(Opcodes.ASM7);
     symbolTable = classReader == null ? new SymbolTable(this) : new SymbolTable(this, classReader);
     if ((flags & COMPUTE_FRAMES) != 0) {
       this.compute = MethodWriter.COMPUTE_ALL_FRAMES;
@@ -298,7 +298,7 @@ public class ClassWriter extends ClassVisitor {
   }
 
   @Override
-  public void visitNestHostExperimental(final String nestHost) {
+  public void visitNestHost(final String nestHost) {
     nestHostClassIndex = symbolTable.addConstantClass(nestHost).index;
   }
 
@@ -355,7 +355,7 @@ public class ClassWriter extends ClassVisitor {
   }
 
   @Override
-  public void visitNestMemberExperimental(final String nestMember) {
+  public void visitNestMember(final String nestMember) {
     if (nestMemberClasses == null) {
       nestMemberClasses = new ByteVector();
     }
@@ -436,8 +436,10 @@ public class ClassWriter extends ClassVisitor {
    * Returns the content of the class file that was built by this ClassWriter.
    *
    * @return the binary content of the JVMS ClassFile structure that was built by this ClassWriter.
+   * @throws ClassTooLargeException if the constant pool of the class is too large.
+   * @throws MethodTooLargeException if the Code attribute of a method is too large.
    */
-  public byte[] toByteArray() {
+  public byte[] toByteArray() throws ClassTooLargeException, MethodTooLargeException {
     // First step: compute the size in bytes of the ClassFile structure.
     // The magic field uses 4 bytes, 10 mandatory fields (minor_version, major_version,
     // constant_pool_count, access_flags, this_class, super_class, interfaces_count, fields_count,
@@ -543,8 +545,9 @@ public class ClassWriter extends ClassVisitor {
     // IMPORTANT: this must be the last part of the ClassFile size computation, because the previous
     // statements can add attribute names to the constant pool, thereby changing its size!
     size += symbolTable.getConstantPoolLength();
-    if (symbolTable.getConstantPoolCount() > 0xFFFF) {
-      throw new IndexOutOfBoundsException("Class file too large!");
+    int constantPoolCount = symbolTable.getConstantPoolCount();
+    if (constantPoolCount > 0xFFFF) {
+      throw new ClassTooLargeException(symbolTable.getClassName(), constantPoolCount);
     }
 
     // Second step: allocate a ByteVector of the correct size (in order to avoid any array copy in
@@ -902,7 +905,7 @@ public class ClassWriter extends ClassVisitor {
    * @param owner the internal name of the method's owner class.
    * @param name the method's name.
    * @param descriptor the method's descriptor.
-   * @param isInterface <tt>true</tt> if <tt>owner</tt> is an interface.
+   * @param isInterface {@literal true} if {@code owner} is an interface.
    * @return the index of a new or already existing method reference item.
    */
   public int newMethod(

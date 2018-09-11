@@ -1105,15 +1105,15 @@ class Frame {
 
   /**
    * Merges the input frame of the given {@link Frame} with the input and output frames of this
-   * {@link Frame}. Returns <tt>true</tt> if the given frame has been changed by this operation (the
-   * input and output frames of this {@link Frame} are never changed).
+   * {@link Frame}. Returns {@literal true} if the given frame has been changed by this operation
+   * (the input and output frames of this {@link Frame} are never changed).
    *
    * @param symbolTable the type table to use to lookup and store type {@link Symbol}.
    * @param dstFrame the {@link Frame} whose input frame must be updated. This should be the frame
    *     of a successor, in the control flow graph, of the basic block corresponding to this frame.
    * @param catchTypeIndex if 'frame' corresponds to an exception handler basic block, the type
    *     table index of the caught exception type, otherwise 0.
-   * @return <tt>true</tt> if the input frame of 'frame' has been changed by this operation.
+   * @return {@literal true} if the input frame of 'frame' has been changed by this operation.
    */
   final boolean merge(
       final SymbolTable symbolTable, final Frame dstFrame, final int catchTypeIndex) {
@@ -1242,7 +1242,7 @@ class Frame {
 
   /**
    * Merges the type at the given index in the given abstract type array with the given type.
-   * Returns <tt>true</tt> if the type array has been modified by this operation.
+   * Returns {@literal true} if the type array has been modified by this operation.
    *
    * @param symbolTable the type table to use to lookup and store type {@link Symbol}.
    * @param sourceType the abstract type with which the abstract type array element must be merged.
@@ -1252,7 +1252,7 @@ class Frame {
    *     {@link #REFERENCE_KIND} or {@link #UNINITIALIZED_KIND} kind, with positive or null array
    *     dimensions.
    * @param dstIndex the index of the type that must be merged in dstTypes.
-   * @return <tt>true</tt> if the type array has been modified by this operation.
+   * @return {@literal true} if the type array has been modified by this operation.
    */
   private static boolean merge(
       final SymbolTable symbolTable,

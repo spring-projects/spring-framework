@@ -70,31 +70,31 @@ final class FieldWriter extends FieldVisitor {
 
   /**
    * The last runtime visible annotation of this field. The previous ones can be accessed with the
-   * {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeVisibleAnnotation;
 
   /**
    * The last runtime invisible annotation of this field. The previous ones can be accessed with the
-   * {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeInvisibleAnnotation;
 
   /**
    * The last runtime visible type annotation of this field. The previous ones can be accessed with
-   * the {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeVisibleTypeAnnotation;
 
   /**
    * The last runtime invisible type annotation of this field. The previous ones can be accessed
-   * with the {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * with the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeInvisibleTypeAnnotation;
 
   /**
    * The first non standard attribute of this field. The next ones can be accessed with the {@link
-   * Attribute#nextAttribute} field. May be <tt>null</tt>.
+   * Attribute#nextAttribute} field. May be {@literal null}.
    *
    * <p><b>WARNING</b>: this list stores the attributes in the <i>reverse</i> order of their visit.
    * firstAttribute is actually the last attribute visited in {@link #visitAttribute}. The {@link
@@ -114,8 +114,8 @@ final class FieldWriter extends FieldVisitor {
    * @param access the field's access flags (see {@link Opcodes}).
    * @param name the field's name.
    * @param descriptor the field's descriptor (see {@link Type}).
-   * @param signature the field's signature. May be <tt>null</tt>.
-   * @param constantValue the field's constant value. May be <tt>null</tt>.
+   * @param signature the field's signature. May be {@literal null}.
+   * @param constantValue the field's constant value. May be {@literal null}.
    */
   FieldWriter(
       final SymbolTable symbolTable,
@@ -124,7 +124,7 @@ final class FieldWriter extends FieldVisitor {
       final String descriptor,
       final String signature,
       final Object constantValue) {
-    super(Opcodes.ASM6);
+    super(Opcodes.ASM7);
     this.symbolTable = symbolTable;
     this.accessFlags = access;
     this.nameIndex = symbolTable.addConstantUtf8(name);

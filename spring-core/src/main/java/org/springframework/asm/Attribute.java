@@ -31,9 +31,9 @@ package org.springframework.asm;
  * A non standard class, field, method or code attribute, as defined in the Java Virtual Machine
  * Specification (JVMS).
  *
- * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7">JVMS
+ * @see <a href= "https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7">JVMS
  *     4.7</a>
- * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.3">JVMS
+ * @see <a href= "https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.3">JVMS
  *     4.7.3</a>
  * @author Eric Bruneton
  * @author Eugene Kuleshov
@@ -52,7 +52,7 @@ public class Attribute {
 
   /**
    * The next attribute in this attribute list (Attribute instances can be linked via this field to
-   * store a list of class, field, method or code attributes). May be <tt>null</tt>.
+   * store a list of class, field, method or code attributes). May be {@literal null}.
    */
   Attribute nextAttribute;
 
@@ -66,23 +66,23 @@ public class Attribute {
   }
 
   /**
-   * Returns <tt>true</tt> if this type of attribute is unknown. This means that the attribute
+   * Returns {@literal true} if this type of attribute is unknown. This means that the attribute
    * content can't be parsed to extract constant pool references, labels, etc. Instead, the
    * attribute content is read as an opaque byte array, and written back as is. This can lead to
    * invalid attributes, if the content actually contains constant pool references, labels, or other
    * symbolic references that need to be updated when there are changes to the constant pool, the
-   * method bytecode, etc. The default implementation of this method always returns <tt>true</tt>.
+   * method bytecode, etc. The default implementation of this method always returns {@literal true}.
    *
-   * @return <tt>true</tt> if this type of attribute is unknown.
+   * @return {@literal true} if this type of attribute is unknown.
    */
   public boolean isUnknown() {
     return true;
   }
 
   /**
-   * Returns <tt>true</tt> if this type of attribute is a code attribute.
+   * Returns {@literal true} if this type of attribute is a code attribute.
    *
-   * @return <tt>true</tt> if this type of attribute is a code attribute.
+   * @return {@literal true} if this type of attribute is a code attribute.
    */
   public boolean isCodeAttribute() {
     return false;
@@ -91,8 +91,8 @@ public class Attribute {
   /**
    * Returns the labels corresponding to this attribute.
    *
-   * @return the labels corresponding to this attribute, or <tt>null</tt> if this attribute is not a
-   *     code attribute that contains labels.
+   * @return the labels corresponding to this attribute, or {@literal null} if this attribute is not
+   *     a code attribute that contains labels.
    */
   protected Label[] getLabels() {
     return new Label[0];
@@ -114,8 +114,8 @@ public class Attribute {
    *     in {@link ClassReader#b}, or -1 if the attribute to be read is not a code attribute. The 6
    *     attribute header bytes (attribute_name_index and attribute_length) are not taken into
    *     account here.
-   * @param labels the labels of the method's code, or <tt>null</tt> if the attribute to be read is
-   *     not a code attribute.
+   * @param labels the labels of the method's code, or {@literal null} if the attribute to be read
+   *     is not a code attribute.
    * @return a <i>new</i> {@link Attribute} object corresponding to the specified bytes.
    */
   protected Attribute read(
@@ -138,7 +138,7 @@ public class Attribute {
    *
    * @param classWriter the class to which this attribute must be added. This parameter can be used
    *     to add the items that corresponds to this attribute to the constant pool of this class.
-   * @param code the bytecode of the method corresponding to this code attribute, or <tt>null</tt>
+   * @param code the bytecode of the method corresponding to this code attribute, or {@literal null}
    *     if this attribute is not a code attribute. Corresponds to the 'code' field of the Code
    *     attribute.
    * @param codeLength the length of the bytecode of the method corresponding to this code
@@ -197,8 +197,9 @@ public class Attribute {
    * attribute_length) per attribute. Also adds the attribute type names to the constant pool.
    *
    * @param symbolTable where the constants used in the attributes must be stored.
-   * @param code the bytecode of the method corresponding to these code attributes, or <tt>null</tt>
-   *     if they are not code attributes. Corresponds to the 'code' field of the Code attribute.
+   * @param code the bytecode of the method corresponding to these code attributes, or {@literal
+   *     null} if they are not code attributes. Corresponds to the 'code' field of the Code
+   *     attribute.
    * @param codeLength the length of the bytecode of the method corresponding to these code
    *     attributes, or 0 if they are not code attributes. Corresponds to the 'code_length' field of
    *     the Code attribute.
@@ -248,8 +249,9 @@ public class Attribute {
    * attribute.
    *
    * @param symbolTable where the constants used in the attributes must be stored.
-   * @param code the bytecode of the method corresponding to these code attributes, or <tt>null</tt>
-   *     if they are not code attributes. Corresponds to the 'code' field of the Code attribute.
+   * @param code the bytecode of the method corresponding to these code attributes, or {@literal
+   *     null} if they are not code attributes. Corresponds to the 'code' field of the Code
+   *     attribute.
    * @param codeLength the length of the bytecode of the method corresponding to these code
    *     attributes, or 0 if they are not code attributes. Corresponds to the 'code_length' field of
    *     the Code attribute.

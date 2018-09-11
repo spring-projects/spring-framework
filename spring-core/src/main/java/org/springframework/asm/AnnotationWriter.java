@@ -112,7 +112,7 @@ final class AnnotationWriter extends AnnotationVisitor {
       final boolean useNamedValues,
       final ByteVector annotation,
       final AnnotationWriter previousAnnotation) {
-    super(Opcodes.ASM6);
+    super(Opcodes.ASM7);
     this.symbolTable = symbolTable;
     this.useNamedValues = useNamedValues;
     this.annotation = annotation;

@@ -113,8 +113,8 @@ public class TypePath {
    * object.
    *
    * @param typePath a type path in string form, in the format used by {@link #toString()}. May be
-   *     <tt>null</tt> or empty.
-   * @return the corresponding TypePath object, or <tt>null</tt> if the path is empty.
+   *     {@literal null} or empty.
+   * @return the corresponding TypePath object, or {@literal null} if the path is empty.
    */
   public static TypePath fromString(final String typePath) {
     if (typePath == null || typePath.length() == 0) {
@@ -187,7 +187,7 @@ public class TypePath {
    * Puts the type_path JVMS structure corresponding to the given TypePath into the given
    * ByteVector.
    *
-   * @param typePath a TypePath instance, or <tt>null</tt> for empty paths.
+   * @param typePath a TypePath instance, or {@literal null} for empty paths.
    * @param output where the type path must be put.
    */
   static void put(final TypePath typePath, final ByteVector output) {

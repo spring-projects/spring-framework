@@ -322,35 +322,37 @@ final class MethodWriter extends MethodVisitor {
   /**
    * The first element in the exception handler list (used to generate the exception_table of the
    * Code attribute). The next ones can be accessed with the {@link Handler#nextHandler} field. May
-   * be <tt>null</tt>.
+   * be {@literal null}.
    */
   private Handler firstHandler;
 
   /**
    * The last element in the exception handler list (used to generate the exception_table of the
    * Code attribute). The next ones can be accessed with the {@link Handler#nextHandler} field. May
-   * be <tt>null</tt>.
+   * be {@literal null}.
    */
   private Handler lastHandler;
 
   /** The line_number_table_length field of the LineNumberTable code attribute. */
   private int lineNumberTableLength;
 
-  /** The line_number_table array of the LineNumberTable code attribute, or <tt>null</tt>. */
+  /** The line_number_table array of the LineNumberTable code attribute, or {@literal null}. */
   private ByteVector lineNumberTable;
 
   /** The local_variable_table_length field of the LocalVariableTable code attribute. */
   private int localVariableTableLength;
 
-  /** The local_variable_table array of the LocalVariableTable code attribute, or <tt>null</tt>. */
+  /**
+   * The local_variable_table array of the LocalVariableTable code attribute, or {@literal null}.
+   */
   private ByteVector localVariableTable;
 
   /** The local_variable_type_table_length field of the LocalVariableTypeTable code attribute. */
   private int localVariableTypeTableLength;
 
   /**
-   * The local_variable_type_table array of the LocalVariableTypeTable code attribute, or
-   * <tt>null</tt>.
+   * The local_variable_type_table array of the LocalVariableTypeTable code attribute, or {@literal
+   * null}.
    */
   private ByteVector localVariableTypeTable;
 
@@ -362,19 +364,19 @@ final class MethodWriter extends MethodVisitor {
 
   /**
    * The last runtime visible type annotation of the Code attribute. The previous ones can be
-   * accessed with the {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * accessed with the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastCodeRuntimeVisibleTypeAnnotation;
 
   /**
    * The last runtime invisible type annotation of the Code attribute. The previous ones can be
-   * accessed with the {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * accessed with the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastCodeRuntimeInvisibleTypeAnnotation;
 
   /**
    * The first non standard attribute of the Code attribute. The next ones can be accessed with the
-   * {@link Attribute#nextAttribute} field. May be <tt>null</tt>.
+   * {@link Attribute#nextAttribute} field. May be {@literal null}.
    *
    * <p><b>WARNING</b>: this list stores the attributes in the <i>reverse</i> order of their visit.
    * firstAttribute is actually the last attribute visited in {@link #visitAttribute}. The {@link
@@ -388,7 +390,7 @@ final class MethodWriter extends MethodVisitor {
   /** The number_of_exceptions field of the Exceptions attribute. */
   private final int numberOfExceptions;
 
-  /** The exception_index_table array of the Exceptions attribute, or <tt>null</tt>. */
+  /** The exception_index_table array of the Exceptions attribute, or {@literal null}. */
   private final int[] exceptionIndexTable;
 
   /** The signature_index field of the Signature attribute. */
@@ -396,13 +398,13 @@ final class MethodWriter extends MethodVisitor {
 
   /**
    * The last runtime visible annotation of this method. The previous ones can be accessed with the
-   * {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeVisibleAnnotation;
 
   /**
    * The last runtime invisible annotation of this method. The previous ones can be accessed with
-   * the {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeInvisibleAnnotation;
 
@@ -411,8 +413,8 @@ final class MethodWriter extends MethodVisitor {
 
   /**
    * The runtime visible parameter annotations of this method. Each array element contains the last
-   * annotation of a parameter (which can be <tt>null</tt> - the previous ones can be accessed with
-   * the {@link AnnotationWriter#previousAnnotation} field). May be <tt>null</tt>.
+   * annotation of a parameter (which can be {@literal null} - the previous ones can be accessed
+   * with the {@link AnnotationWriter#previousAnnotation} field). May be {@literal null}.
    */
   private AnnotationWriter[] lastRuntimeVisibleParameterAnnotations;
 
@@ -421,35 +423,35 @@ final class MethodWriter extends MethodVisitor {
 
   /**
    * The runtime invisible parameter annotations of this method. Each array element contains the
-   * last annotation of a parameter (which can be <tt>null</tt> - the previous ones can be accessed
-   * with the {@link AnnotationWriter#previousAnnotation} field). May be <tt>null</tt>.
+   * last annotation of a parameter (which can be {@literal null} - the previous ones can be
+   * accessed with the {@link AnnotationWriter#previousAnnotation} field). May be {@literal null}.
    */
   private AnnotationWriter[] lastRuntimeInvisibleParameterAnnotations;
 
   /**
    * The last runtime visible type annotation of this method. The previous ones can be accessed with
-   * the {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeVisibleTypeAnnotation;
 
   /**
    * The last runtime invisible type annotation of this method. The previous ones can be accessed
-   * with the {@link AnnotationWriter#previousAnnotation} field. May be <tt>null</tt>.
+   * with the {@link AnnotationWriter#previousAnnotation} field. May be {@literal null}.
    */
   private AnnotationWriter lastRuntimeInvisibleTypeAnnotation;
 
-  /** The default_value field of the AnnotationDefault attribute, or <tt>null</tt>. */
+  /** The default_value field of the AnnotationDefault attribute, or {@literal null}. */
   private ByteVector defaultValue;
 
   /** The parameters_count field of the MethodParameters attribute. */
   private int parametersCount;
 
-  /** The 'parameters' array of the MethodParameters attribute, or <tt>null</tt>. */
+  /** The 'parameters' array of the MethodParameters attribute, or {@literal null}. */
   private ByteVector parameters;
 
   /**
    * The first non standard attribute of this method. The next ones can be accessed with the {@link
-   * Attribute#nextAttribute} field. May be <tt>null</tt>.
+   * Attribute#nextAttribute} field. May be {@literal null}.
    *
    * <p><b>WARNING</b>: this list stores the attributes in the <i>reverse</i> order of their visit.
    * firstAttribute is actually the last attribute visited in {@link #visitAttribute}. The {@link
@@ -483,7 +485,7 @@ final class MethodWriter extends MethodVisitor {
   /**
    * The current basic block, i.e. the basic block of the last visited instruction. When {@link
    * #compute} is equal to {@link #COMPUTE_MAX_STACK_AND_LOCAL} or {@link #COMPUTE_ALL_FRAMES}, this
-   * field is <tt>null</tt> for unreachable code. When {@link #compute} is equal to {@link
+   * field is {@literal null} for unreachable code. When {@link #compute} is equal to {@link
    * #COMPUTE_MAX_STACK_AND_LOCAL_FROM_FRAMES} or {@link #COMPUTE_INSERTED_FRAMES}, this field stays
    * unchanged throughout the whole method (i.e. the whole code is seen as a single basic block;
    * indeed, the existing frames are sufficient by hypothesis to compute any intermediate frame -
@@ -579,8 +581,8 @@ final class MethodWriter extends MethodVisitor {
    * @param access the method's access flags (see {@link Opcodes}).
    * @param name the method's name.
    * @param descriptor the method's descriptor (see {@link Type}).
-   * @param signature the method's signature. May be <tt>null</tt>.
-   * @param exceptions the internal names of the method's exceptions. May be <tt>null</tt>.
+   * @param signature the method's signature. May be {@literal null}.
+   * @param exceptions the internal names of the method's exceptions. May be {@literal null}.
    * @param compute indicates what must be computed (see #compute).
    */
   MethodWriter(
@@ -591,7 +593,7 @@ final class MethodWriter extends MethodVisitor {
       final String signature,
       final String[] exceptions,
       final int compute) {
-    super(Opcodes.ASM6);
+    super(Opcodes.ASM7);
     this.symbolTable = symbolTable;
     this.accessFlags = "<init>".equals(name) ? access | Constants.ACC_CONSTRUCTOR : access;
     this.nameIndex = symbolTable.addConstantUtf8(name);
@@ -1289,9 +1291,13 @@ final class MethodWriter extends MethodVisitor {
     // Add the instruction to the bytecode of the method.
     Symbol constantSymbol = symbolTable.addConstant(value);
     int constantIndex = constantSymbol.index;
+    char firstDescriptorChar;
     boolean isLongOrDouble =
         constantSymbol.tag == Symbol.CONSTANT_LONG_TAG
-            || constantSymbol.tag == Symbol.CONSTANT_DOUBLE_TAG;
+            || constantSymbol.tag == Symbol.CONSTANT_DOUBLE_TAG
+            || (constantSymbol.tag == Symbol.CONSTANT_DYNAMIC_TAG
+                && ((firstDescriptorChar = constantSymbol.value.charAt(0)) == 'J'
+                    || firstDescriptorChar == 'D'));
     if (isLongOrDouble) {
       code.put12(Constants.LDC2_W, constantIndex);
     } else if (constantIndex >= 256) {
@@ -1843,7 +1849,7 @@ final class MethodWriter extends MethodVisitor {
   /**
    * Ends the visit of {@link #currentFrame} by writing it in the StackMapTable entries and by
    * updating the StackMapTable number_of_entries (except if the current frame is the first one,
-   * which is implicit in StackMapTable). Then resets {@link #currentFrame} to <tt>null</tt>.
+   * which is implicit in StackMapTable). Then resets {@link #currentFrame} to {@literal null}.
    */
   void visitFrameEnd() {
     if (previousFrame != null) {
@@ -2076,7 +2082,8 @@ final class MethodWriter extends MethodVisitor {
     // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
     if (code.length > 0) {
       if (code.length > 65535) {
-        throw new IndexOutOfBoundsException("Method code too large!");
+        throw new MethodTooLargeException(
+            symbolTable.getClassName(), name, descriptor, code.length);
       }
       symbolTable.addConstantUtf8(Constants.CODE);
       // The Code attribute has 6 header bytes, plus 2, 2, 4 and 2 bytes respectively for max_stack,

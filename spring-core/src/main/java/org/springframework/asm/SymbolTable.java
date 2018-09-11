@@ -99,7 +99,7 @@ final class SymbolTable {
   final ClassWriter classWriter;
 
   /**
-   * The ClassReader from which this SymbolTable was constructed, or <tt>null</tt> if it was
+   * The ClassReader from which this SymbolTable was constructed, or {@literal null} if it was
    * constructed from scratch.
    */
   private final ClassReader sourceClassReader;
@@ -161,7 +161,7 @@ final class SymbolTable {
    * be stored in the constant pool. This type table is used by the control flow and data flow
    * analysis algorithm used to compute stack map frames from scratch. This array stores {@link
    * Symbol#TYPE_TAG} and {@link Symbol#UNINITIALIZED_TYPE_TAG}) Symbol. The type symbol at index
-   * <tt>i</tt> has its {@link Symbol#index} equal to <tt>i</tt> (and vice versa).
+   * {@code i} has its {@link Symbol#index} equal to {@code i} (and vice versa).
    */
   private Entry[] typeTable;
 
@@ -203,6 +203,7 @@ final class SymbolTable {
     // method calls below), and to account for bootstrap method entries.
     entries = new Entry[constantPoolCount * 2];
     char[] charBuffer = new char[classReader.getMaxStringLength()];
+    boolean hasBootstrapMethods = false;
     int itemIndex = 1;
     while (itemIndex < constantPoolCount) {
       int itemOffset = classReader.getItem(itemIndex);
@@ -252,6 +253,7 @@ final class SymbolTable {
           break;
         case Symbol.CONSTANT_DYNAMIC_TAG:
         case Symbol.CONSTANT_INVOKE_DYNAMIC_TAG:
+          hasBootstrapMethods = true;
           nameAndTypeItemOffset =
               classReader.getItem(classReader.readUnsignedShort(itemOffset + 2));
           addConstantDynamicOrInvokeDynamicReference(
@@ -276,7 +278,23 @@ final class SymbolTable {
           (itemTag == Symbol.CONSTANT_LONG_TAG || itemTag == Symbol.CONSTANT_DOUBLE_TAG) ? 2 : 1;
     }
 
-    // Copy the BootstrapMethods 'bootstrap_methods' array binary content, if any.
+    // Copy the BootstrapMethods, if any.
+    if (hasBootstrapMethods) {
+      copyBootstrapMethods(classReader, charBuffer);
+    }
+  }
+
+  /**
+   * Read the BootstrapMethods 'bootstrap_methods' array binary content and add them as entries of
+   * the SymbolTable.
+   *
+   * @param classReader the ClassReader whose bootstrap methods must be copied to initialize the
+   *     SymbolTable.
+   * @param charBuffer a buffer used to read strings in the constant pool.
+   */
+  private void copyBootstrapMethods(final ClassReader classReader, final char[] charBuffer) {
+    // Find attributOffset of the 'bootstrap_methods' array.
+    byte[] inputBytes = classReader.b;
     int currentAttributeOffset = classReader.getFirstAttributeOffset();
     for (int i = classReader.readUnsignedShort(currentAttributeOffset - 2); i > 0; --i) {
       String attributeName = classReader.readUTF8(currentAttributeOffset, charBuffer);
@@ -313,8 +331,8 @@ final class SymbolTable {
   }
 
   /**
-   * @return the ClassReader from which this SymbolTable was constructed, or <tt>null</tt> if it was
-   *     constructed from scratch.
+   * @return the ClassReader from which this SymbolTable was constructed, or {@literal null} if it
+   *     was constructed from scratch.
    */
   ClassReader getSource() {
     return sourceClassReader;

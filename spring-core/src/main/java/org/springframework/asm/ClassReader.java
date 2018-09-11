@@ -187,6 +187,7 @@ public class ClassReader {
     int currentCpInfoIndex = 1;
     int currentCpInfoOffset = classFileOffset + 10;
     int currentMaxStringLength = 0;
+    boolean hasBootstrapMethods = false;
     // The offset of the other entries depend on the total size of all the previous entries.
     while (currentCpInfoIndex < constantPoolCount) {
       cpInfoOffsets[currentCpInfoIndex++] = currentCpInfoOffset + 1;
@@ -198,9 +199,12 @@ public class ClassReader {
         case Symbol.CONSTANT_INTEGER_TAG:
         case Symbol.CONSTANT_FLOAT_TAG:
         case Symbol.CONSTANT_NAME_AND_TYPE_TAG:
+          cpInfoSize = 5;
+          break;
         case Symbol.CONSTANT_INVOKE_DYNAMIC_TAG:
         case Symbol.CONSTANT_DYNAMIC_TAG:
           cpInfoSize = 5;
+          hasBootstrapMethods = true;
           break;
         case Symbol.CONSTANT_LONG_TAG:
         case Symbol.CONSTANT_DOUBLE_TAG:
@@ -236,29 +240,8 @@ public class ClassReader {
     this.header = currentCpInfoOffset;
 
     // Read the BootstrapMethods attribute, if any (only get the offset of each method).
-    int currentAttributeOffset = getFirstAttributeOffset();
-    int[] currentBootstrapMethodOffsets = null;
-    for (int i = readUnsignedShort(currentAttributeOffset - 2); i > 0; --i) {
-      // Read the attribute_info's attribute_name and attribute_length fields.
-      String attributeName = readUTF8(currentAttributeOffset, new char[maxStringLength]);
-      int attributeLength = readInt(currentAttributeOffset + 2);
-      currentAttributeOffset += 6;
-      if (Constants.BOOTSTRAP_METHODS.equals(attributeName)) {
-        // Read the num_bootstrap_methods field and create an array of this size.
-        currentBootstrapMethodOffsets = new int[readUnsignedShort(currentAttributeOffset)];
-        // Compute and store the offset of each 'bootstrap_methods' array field entry.
-        int currentBootstrapMethodOffset = currentAttributeOffset + 2;
-        for (int j = 0; j < currentBootstrapMethodOffsets.length; ++j) {
-          currentBootstrapMethodOffsets[j] = currentBootstrapMethodOffset;
-          // Skip the bootstrap_method_ref and num_bootstrap_arguments fields (2 bytes each),
-          // as well as the bootstrap_arguments array field (of size num_bootstrap_arguments * 2).
-          currentBootstrapMethodOffset +=
-              4 + readUnsignedShort(currentBootstrapMethodOffset + 2) * 2;
-        }
-      }
-      currentAttributeOffset += attributeLength;
-    }
-    this.bootstrapMethodOffsets = currentBootstrapMethodOffsets;
+    this.bootstrapMethodOffsets =
+        hasBootstrapMethods ? readBootstrapMethodsAttribute(currentMaxStringLength) : null;
   }
 
   /**
@@ -345,7 +328,7 @@ public class ClassReader {
    * Returns the internal of name of the super class (see {@link Type#getInternalName()}). For
    * interfaces, the super class is {@link Object}.
    *
-   * @return the internal name of the super class, or <tt>null</tt> for {@link Object} class.
+   * @return the internal name of the super class, or {@literal null} for {@link Object} class.
    * @see ClassVisitor#visit(int, int, String, String, String, String[])
    */
   public String getSuperName() {
@@ -538,7 +521,7 @@ public class ClassReader {
 
     // Visit the NestHost attribute.
     if (nestHostClass != null) {
-      classVisitor.visitNestHostExperimental(nestHostClass);
+      classVisitor.visitNestHost(nestHostClass);
     }
 
     // Visit the EnclosingMethod attribute.
@@ -648,7 +631,7 @@ public class ClassReader {
       int numberOfNestMembers = readUnsignedShort(nestMembersOffset);
       int currentNestMemberOffset = nestMembersOffset + 2;
       while (numberOfNestMembers-- > 0) {
-        classVisitor.visitNestMemberExperimental(readClass(currentNestMemberOffset, charBuffer));
+        classVisitor.visitNestMember(readClass(currentNestMemberOffset, charBuffer));
         currentNestMemberOffset += 2;
       }
     }
@@ -2775,7 +2758,7 @@ public class ClassReader {
    * @param annotationVisitor the visitor that must visit the element_value structure.
    * @param elementValueOffset the start offset in {@link #b} of the element_value structure to be
    *     read.
-   * @param elementName the name of the element_value structure to be read, or <tt>null</tt>.
+   * @param elementName the name of the element_value structure to be read, or {@literal null}.
    * @param charBuffer the buffer used to read strings in the constant pool.
    * @return the end offset of the JVMS 'element_value' structure.
    */
@@ -3223,6 +3206,41 @@ public class ClassReader {
   }
 
   /**
+   * Reads the BootstrapMethods attribute to compute the offset of each bootstrap method.
+   *
+   * @param maxStringLength a conservative estimate of the maximum length of the strings contained
+   *     in the constant pool of the class.
+   * @return the offsets of the bootstrap methods or null.
+   */
+  private int[] readBootstrapMethodsAttribute(final int maxStringLength) {
+    char[] charBuffer = new char[maxStringLength];
+    int currentAttributeOffset = getFirstAttributeOffset();
+    int[] currentBootstrapMethodOffsets = null;
+    for (int i = readUnsignedShort(currentAttributeOffset - 2); i > 0; --i) {
+      // Read the attribute_info's attribute_name and attribute_length fields.
+      String attributeName = readUTF8(currentAttributeOffset, charBuffer);
+      int attributeLength = readInt(currentAttributeOffset + 2);
+      currentAttributeOffset += 6;
+      if (Constants.BOOTSTRAP_METHODS.equals(attributeName)) {
+        // Read the num_bootstrap_methods field and create an array of this size.
+        currentBootstrapMethodOffsets = new int[readUnsignedShort(currentAttributeOffset)];
+        // Compute and store the offset of each 'bootstrap_methods' array field entry.
+        int currentBootstrapMethodOffset = currentAttributeOffset + 2;
+        for (int j = 0; j < currentBootstrapMethodOffsets.length; ++j) {
+          currentBootstrapMethodOffsets[j] = currentBootstrapMethodOffset;
+          // Skip the bootstrap_method_ref and num_bootstrap_arguments fields (2 bytes each),
+          // as well as the bootstrap_arguments array field (of size num_bootstrap_arguments * 2).
+          currentBootstrapMethodOffset +=
+              4 + readUnsignedShort(currentBootstrapMethodOffset + 2) * 2;
+        }
+        return currentBootstrapMethodOffsets;
+      }
+      currentAttributeOffset += attributeLength;
+    }
+    return null;
+  }
+
+  /**
    * Reads a non standard JVMS 'attribute' structure in {@link #b}.
    *
    * @param attributePrototypes prototypes of the attributes that must be parsed during the visit of
@@ -3236,8 +3254,8 @@ public class ClassReader {
    * @param codeAttributeOffset the start offset of the enclosing Code attribute in {@link #b}, or
    *     -1 if the attribute to be read is not a code attribute. The 6 attribute header bytes
    *     (attribute_name_index and attribute_length) are not taken into account here.
-   * @param labels the labels of the method's code, or <tt>null</tt> if the attribute to be read is
-   *     not a code attribute.
+   * @param labels the labels of the method's code, or {@literal null} if the attribute to be read
+   *     is not a code attribute.
    * @return the attribute that has been read.
    */
   private Attribute readAttribute(
