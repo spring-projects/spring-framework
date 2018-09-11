@@ -119,7 +119,8 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return Flux.from(this.body);
+		return Flux.from(this.body)
+				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -214,6 +215,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		public UndertowDataBuffer(DataBuffer dataBuffer, PooledByteBuffer pooledByteBuffer) {
 			this.dataBuffer = dataBuffer;
 			this.pooledByteBuffer = pooledByteBuffer;
+		}
+
+		@Override
+		public boolean isAllocated() {
+			return this.pooledByteBuffer.isOpen();
 		}
 
 		@Override

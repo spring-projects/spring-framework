@@ -29,7 +29,9 @@ import reactor.netty.Connection;
 import reactor.netty.http.server.HttpServerRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -153,6 +155,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		return this.request.remoteAddress();
 	}
 
+	@Override
 	@Nullable
 	protected SslInfo initSslInfo() {
 		SslHandler sslHandler = ((Connection) this.request).channel().pipeline().get(SslHandler.class);
@@ -165,7 +168,8 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.request.receive().retain().map(this.bufferFactory::wrap);
+		Flux<DataBuffer> body = this.request.receive().retain().map(this.bufferFactory::wrap);
+		return body.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 
 	@SuppressWarnings("unchecked")

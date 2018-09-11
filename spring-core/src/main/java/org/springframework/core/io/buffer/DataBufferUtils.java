@@ -101,8 +101,8 @@ public abstract class DataBufferUtils {
 									bufferSize);
 					return Flux.generate(generator);
 				},
-				DataBufferUtils::closeChannel
-		);
+				DataBufferUtils::closeChannel)
+				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 
 	/**
@@ -140,14 +140,16 @@ public abstract class DataBufferUtils {
 		DataBuffer dataBuffer = dataBufferFactory.allocateBuffer(bufferSize);
 		ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, bufferSize);
 
-		return Flux.using(channelSupplier,
+		Flux<DataBuffer> result = Flux.using(channelSupplier,
 				channel -> Flux.create(sink -> {
-							CompletionHandler<Integer, DataBuffer> completionHandler =
-									new AsynchronousFileChannelReadCompletionHandler(channel,
-											sink, position, dataBufferFactory, bufferSize);
-							channel.read(byteBuffer, position, dataBuffer, completionHandler);
-						}),
+					CompletionHandler<Integer, DataBuffer> completionHandler =
+							new AsynchronousFileChannelReadCompletionHandler(channel,
+									sink, position, dataBufferFactory, bufferSize);
+					channel.read(byteBuffer, position, dataBuffer, completionHandler);
+				}),
 				DataBufferUtils::closeChannel);
+
+		return result.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 
 	/**
@@ -391,12 +393,19 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Release the given data buffer, if it is a {@link PooledDataBuffer}.
+	 * Release the given data buffer, if it is a {@link PooledDataBuffer} and
+	 * has been {@linkplain PooledDataBuffer#isAllocated() allocated}.
 	 * @param dataBuffer the data buffer to release
 	 * @return {@code true} if the buffer was released; {@code false} otherwise.
 	 */
 	public static boolean release(@Nullable DataBuffer dataBuffer) {
-		return (dataBuffer instanceof PooledDataBuffer && ((PooledDataBuffer) dataBuffer).release());
+		if (dataBuffer instanceof PooledDataBuffer) {
+			PooledDataBuffer pooledDataBuffer = (PooledDataBuffer) dataBuffer;
+			if (pooledDataBuffer.isAllocated()) {
+				return pooledDataBuffer.release();
+			}
+		}
+		return false;
 	}
 
 	/**
