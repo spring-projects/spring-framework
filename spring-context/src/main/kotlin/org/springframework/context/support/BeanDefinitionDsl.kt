@@ -18,6 +18,7 @@ package org.springframework.context.support
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer
 import org.springframework.beans.factory.support.AbstractBeanDefinition
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.core.env.ConfigurableEnvironment
 import java.util.function.Supplier
@@ -167,11 +168,8 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 			}
 		}
 
-		when (name) {
-			null -> context.registerBean(T::class.java, customizer)
-			else -> context.registerBean(name, T::class.java, customizer)
-		}
-
+		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context);
+		context.registerBean(beanName, T::class.java, customizer)
 	}
 
 	/**
@@ -207,13 +205,8 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 		}
 
 
-		when (name) {
-			null -> context.registerBean(T::class.java,
-					Supplier { function.invoke() }, customizer)
-			else -> context.registerBean(name, T::class.java,
-					Supplier { function.invoke() }, customizer)
-		}
-
+		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context);
+		context.registerBean(beanName, T::class.java, Supplier { function.invoke() }, customizer)
 	}
 
 	/**
