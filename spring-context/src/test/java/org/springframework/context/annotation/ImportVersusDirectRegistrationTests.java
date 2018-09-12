@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
@@ -25,8 +26,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  */
 public class ImportVersusDirectRegistrationTests {
 
-	@Test
-	public void thingIsAvailableWhenOuterConfigurationIsRegisteredDirectly() {
+	@Test(expected = NoSuchBeanDefinitionException.class)
+	public void thingIsNotAvailableWhenOuterConfigurationIsRegisteredDirectly() {
 		try (AnnotationConfigApplicationContext directRegistration = new AnnotationConfigApplicationContext()) {
 			directRegistration.register(AccidentalLiteConfiguration.class);
 			directRegistration.refresh();
@@ -34,8 +35,8 @@ public class ImportVersusDirectRegistrationTests {
 		}
 	}
 
-	@Test
-	public void thingIsAvailableWhenOuterConfigurationIsRegisteredWithClassName() {
+	@Test(expected = NoSuchBeanDefinitionException.class)
+	public void thingIsNotAvailableWhenOuterConfigurationIsRegisteredWithClassName() {
 		try (AnnotationConfigApplicationContext directRegistration = new AnnotationConfigApplicationContext()) {
 			directRegistration.registerBeanDefinition("config",
 					new RootBeanDefinition(AccidentalLiteConfiguration.class.getName()));
@@ -44,8 +45,8 @@ public class ImportVersusDirectRegistrationTests {
 		}
 	}
 
-	@Test
-	public void thingIsAvailableWhenOuterConfigurationIsImported() {
+	@Test(expected = NoSuchBeanDefinitionException.class)
+	public void thingIsNotAvailableWhenOuterConfigurationIsImported() {
 		try (AnnotationConfigApplicationContext viaImport = new AnnotationConfigApplicationContext()) {
 			viaImport.register(Importer.class);
 			viaImport.refresh();

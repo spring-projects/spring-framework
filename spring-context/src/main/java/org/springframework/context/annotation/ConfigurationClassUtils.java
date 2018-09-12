@@ -119,7 +119,7 @@ abstract class ConfigurationClassUtils {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
-			return hasNestedConfigurationClass(metadata, metadataReaderFactory);
+			return false;
 		}
 
 		// It's a full or lite configuration candidate... Let's determine the order value, if any.
@@ -129,40 +129,6 @@ abstract class ConfigurationClassUtils {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Check whether the specified class declares a nested configuration class.
-	 */
-	private static boolean hasNestedConfigurationClass(
-			AnnotationMetadata metadata, MetadataReaderFactory metadataReaderFactory) {
-
-		// Potentially nested configuration classes...
-		if (metadata instanceof StandardAnnotationMetadata) {
-			Class<?> beanClass = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
-			for (Class<?> memberClass : beanClass.getDeclaredClasses()) {
-				if (isConfigurationCandidate(new StandardAnnotationMetadata(memberClass))) {
-					return true;
-				}
-			}
-		}
-		else {
-			for (String memberName : metadata.getMemberClassNames()) {
-				try {
-					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(memberName);
-					if (isConfigurationCandidate(metadataReader.getAnnotationMetadata())) {
-						return true;
-					}
-				}
-				catch (IOException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Could not find class file for introspecting configuration annotations: " +
-								memberName, ex);
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
