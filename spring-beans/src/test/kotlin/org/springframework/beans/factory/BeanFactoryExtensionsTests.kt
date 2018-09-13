@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.beans.factory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
+import org.springframework.core.ResolvableType
 
 /**
  * Mock object based tests for BeanFactory Kotlin extensions.
@@ -53,6 +55,12 @@ class BeanFactoryExtensionsTests {
 		val arg2 = "arg2"
 		bf.getBean<Foo>(arg1, arg2)
 		verify(bf, times(1)).getBean(Foo::class.java, arg1, arg2)
+	}
+
+	@Test
+	fun `getBeanProvider with reified type parameters`() {
+		bf.getBeanProvider<Foo>()
+		verify(bf, times(1)).getBeanProvider<ObjectProvider<Foo>>(ArgumentMatchers.any<ResolvableType>())
 	}
 
 	class Foo
