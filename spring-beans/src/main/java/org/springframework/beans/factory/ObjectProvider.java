@@ -17,8 +17,10 @@
 package org.springframework.beans.factory;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.BeansException;
@@ -35,6 +37,8 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 4.3
  * @param <T> the object type
+ * @see BeanFactory#getBeanProvider
+ * @see org.springframework.beans.factory.annotation.Autowired
  */
 public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 
@@ -137,8 +141,18 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	}
 
 	/**
-	 * Return an {@link Iterator} over resolved object instances.
-	 * <p>The default implementation delegates to {@link #stream()}.
+	 * Return a sequential {@link Stream} over lazily resolved object instances,
+	 * without specific ordering guarantees (but typically in registration order).
+	 * @since 5.1
+	 * @see #iterator()
+	 */
+	default Stream<T> stream() {
+		throw new UnsupportedOperationException("Multi-element access not supported");
+	}
+
+	/**
+	 * Return an {@link Iterator} over lazily resolved object instances,
+	 * without specific ordering guarantees (but typically in registration order).
 	 * @since 5.1
 	 * @see #stream()
 	 */
@@ -148,15 +162,17 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	}
 
 	/**
-	 * Return a sequential {@link Stream} over resolved object instances.
-	 * <p>The default implementation returns a stream of one element or an
-	 * empty stream if not available, resolved via {@link #getIfAvailable()}.
+	 * Return a {@link List} with fully resolved object instances,
+	 * potentially pre-ordered according to a common comparator.
+	 * <p>In a common Spring application context, this will be ordered
+	 * according to {@link org.springframework.core.Ordered} /
+	 * {@link org.springframework.core.annotation.Order} conventions,
+	 * analogous to multi-element injection points of list/array type.
 	 * @since 5.1
-	 * @see #iterator()
+	 * @see #stream()
 	 */
-	default Stream<T> stream() {
-		T instance = getIfAvailable();
-		return (instance != null ? Stream.of(instance) : Stream.empty());
+	default List<T> toList() {
+		return stream().collect(Collectors.toList());
 	}
 
 }

@@ -200,23 +200,6 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	}
 
 	/**
-	 * Return whether this descriptor allows for stream-style access to
-	 * result instances.
-	 * <p>By default, dependencies are strictly resolved to the declaration of
-	 * the injection point and therefore only resolve multiple entries if the
-	 * injection point is declared as an array, collection or map. This is
-	 * indicated by returning {@code false} here.
-	 * <p>Overriding this method to return {@code true} indicates that the
-	 * injection point declares the bean type but the resolution is meant to
-	 * end up in a {@link java.util.stream.Stream} for the declared bean type,
-	 * with the caller handling the multi-instance case for the injection point.
-	 * @since 5.1
-	 */
-	public boolean isStreamAccess() {
-		return false;
-	}
-
-	/**
 	 * Resolve the specified not-unique scenario: by default,
 	 * throwing a {@link NoUniqueBeanDefinitionException}.
 	 * <p>Subclasses may override this to select one of the instances or

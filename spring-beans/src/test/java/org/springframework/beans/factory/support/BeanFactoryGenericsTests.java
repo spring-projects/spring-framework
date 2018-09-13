@@ -53,6 +53,7 @@ import org.springframework.tests.sample.beans.GenericBean;
 import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.comparator.Comparators;
 
 import static org.junit.Assert.*;
 
@@ -134,7 +135,7 @@ public class BeanFactoryGenericsTests {
 	}
 
 	@Test
-	public void testGenericListPropertyWithOptionalAutowiring() throws MalformedURLException {
+	public void testGenericListPropertyWithOptionalAutowiring() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
@@ -846,6 +847,7 @@ public class BeanFactoryGenericsTests {
 	public void testGenericMatchingWithFullTypeDifferentiation() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+		bf.setDependencyComparator(Comparators.comparable());
 
 		bf.registerBeanDefinition("store1", new RootBeanDefinition(DoubleStore.class));
 		bf.registerBeanDefinition("store2", new RootBeanDefinition(FloatStore.class));
@@ -892,38 +894,51 @@ public class BeanFactoryGenericsTests {
 		assertSame(bf.getBean("store2"), floatStoreProvider.getIfAvailable());
 		assertSame(bf.getBean("store2"), floatStoreProvider.getIfUnique());
 
-		Set<Object> resolved = new HashSet<>();
+		List<NumberStore<?>> resolved = new ArrayList<>();
 		for (NumberStore<?> instance : numberStoreProvider) {
 			resolved.add(instance);
 		}
 		assertEquals(2, resolved.size());
-		assertTrue(resolved.contains(bf.getBean("store1")));
-		assertTrue(resolved.contains(bf.getBean("store2")));
+		assertSame(bf.getBean("store1"), resolved.get(0));
+		assertSame(bf.getBean("store2"), resolved.get(1));
 
-		resolved = numberStoreProvider.stream().collect(Collectors.toSet());
+		resolved = numberStoreProvider.stream().collect(Collectors.toList());
 		assertEquals(2, resolved.size());
-		assertTrue(resolved.contains(bf.getBean("store1")));
-		assertTrue(resolved.contains(bf.getBean("store2")));
+		assertSame(bf.getBean("store1"), resolved.get(0));
+		assertSame(bf.getBean("store2"), resolved.get(1));
 
-		resolved = new HashSet<>();
+		resolved = numberStoreProvider.toList();
+		assertEquals(2, resolved.size());
+		assertSame(bf.getBean("store2"), resolved.get(0));
+		assertSame(bf.getBean("store1"), resolved.get(1));
+
+		resolved = new ArrayList<>();
 		for (NumberStore<Double> instance : doubleStoreProvider) {
 			resolved.add(instance);
 		}
 		assertEquals(1, resolved.size());
 		assertTrue(resolved.contains(bf.getBean("store1")));
 
-		resolved = doubleStoreProvider.stream().collect(Collectors.toSet());
+		resolved = doubleStoreProvider.stream().collect(Collectors.toList());
 		assertEquals(1, resolved.size());
 		assertTrue(resolved.contains(bf.getBean("store1")));
 
-		resolved = new HashSet<>();
+		resolved = (List) doubleStoreProvider.toList();
+		assertEquals(1, resolved.size());
+		assertTrue(resolved.contains(bf.getBean("store1")));
+
+		resolved = new ArrayList<>();
 		for (NumberStore<Float> instance : floatStoreProvider) {
 			resolved.add(instance);
 		}
 		assertEquals(1, resolved.size());
 		assertTrue(resolved.contains(bf.getBean("store2")));
 
-		resolved = floatStoreProvider.stream().collect(Collectors.toSet());
+		resolved = floatStoreProvider.stream().collect(Collectors.toList());
+		assertEquals(1, resolved.size());
+		assertTrue(resolved.contains(bf.getBean("store2")));
+
+		resolved = (List) floatStoreProvider.toList();
 		assertEquals(1, resolved.size());
 		assertTrue(resolved.contains(bf.getBean("store2")));
 	}
@@ -991,7 +1006,12 @@ public class BeanFactoryGenericsTests {
 	}
 
 
-	public static class NumberStore<T extends Number> {
+	public static class NumberStore<T extends Number> implements Comparable<NumberStore> {
+
+		@Override
+		public int compareTo(NumberStore other) {
+			return getClass().getName().compareTo(other.getClass().getName()) * -1;
+		}
 	}
 
 
