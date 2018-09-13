@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -255,16 +254,13 @@ public abstract class AnnotationConfigUtils {
 			abd.setDependsOn(dependsOn.getStringArray("value"));
 		}
 
-		if (abd instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition absBd = (AbstractBeanDefinition) abd;
-			AnnotationAttributes role = attributesFor(metadata, Role.class);
-			if (role != null) {
-				absBd.setRole(role.getNumber("value").intValue());
-			}
-			AnnotationAttributes description = attributesFor(metadata, Description.class);
-			if (description != null) {
-				absBd.setDescription(description.getString("value"));
-			}
+		AnnotationAttributes role = attributesFor(metadata, Role.class);
+		if (role != null) {
+			abd.setRole(role.getNumber("value").intValue());
+		}
+		AnnotationAttributes description = attributesFor(metadata, Description.class);
+		if (description != null) {
+			abd.setDescription(description.getString("value"));
 		}
 	}
 
