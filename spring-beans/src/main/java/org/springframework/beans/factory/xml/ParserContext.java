@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -27,10 +24,15 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.lang.Nullable;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 /**
  * Context that gets passed along a bean definition parsing process,
  * encapsulating all relevant configuration as well as state.
  * Nested inside an {@link XmlReaderContext}.
+ *
+ * 在bean定义解析过程中传递的上下文，将所有相关配置以及state.Nested封装在{@link XmlReaderContext}中。
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

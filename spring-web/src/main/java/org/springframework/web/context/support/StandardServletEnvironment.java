@@ -16,9 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -28,6 +25,9 @@ import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiPropertySource;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.ConfigurableWebEnvironment;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 /**
  * {@link Environment} implementation to be used by {@code Servlet}-based web
@@ -44,13 +44,16 @@ import org.springframework.web.context.ConfigurableWebEnvironment;
  */
 public class StandardServletEnvironment extends StandardEnvironment implements ConfigurableWebEnvironment {
 
-	/** Servlet context init parameters property source name: {@value} */
+	/** Servlet context init parameters property source name: {@value}
+	 * Servlet上下文init参数属性源名称：{@ value}*/
 	public static final String SERVLET_CONTEXT_PROPERTY_SOURCE_NAME = "servletContextInitParams";
 
-	/** Servlet config init parameters property source name: {@value} */
+	/** Servlet config init parameters property source name: {@value}
+	 * Servlet配置init参数属性源名称：{@ value}*/
 	public static final String SERVLET_CONFIG_PROPERTY_SOURCE_NAME = "servletConfigInitParams";
 
-	/** JNDI property source name: {@value} */
+	/** JNDI property source name: {@value}
+	 * JNDI属性源名称：{@ value}*/
 	public static final String JNDI_PROPERTY_SOURCE_NAME = "jndiProperties";
 
 

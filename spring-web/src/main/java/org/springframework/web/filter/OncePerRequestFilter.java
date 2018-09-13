@@ -16,22 +16,26 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.util.WebUtils;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncUtils;
-import org.springframework.web.util.WebUtils;
+import java.io.IOException;
 
 /**
  * Filter base class that aims to guarantee a single execution per request
  * dispatch, on any servlet container. It provides a {@link #doFilterInternal}
  * method with HttpServletRequest and HttpServletResponse arguments.
+ *
+ * 过滤基类，旨在保证每个请求单次执行
+ * dispatch，在任何servlet容器上。 它提供了一个{@link #doFilterInternal}
+ * 使用HttpServletRequest和HttpServletResponse参数的方法。
  *
  * <p>As of Servlet 3.0, a filter may be invoked as part of a
  * {@link javax.servlet.DispatcherType#REQUEST REQUEST} or
@@ -70,6 +74,8 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * Suffix that gets appended to the filter name for the
 	 * "already filtered" request attribute.
 	 * @see #getAlreadyFilteredAttributeName
+	 *
+	 * 附加到“已过滤”请求属性的过滤器名称的后缀。 @see #getAlreadyFilteredAttributeName
 	 */
 	public static final String ALREADY_FILTERED_SUFFIX = ".FILTERED";
 
@@ -78,6 +84,9 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * This {@code doFilter} implementation stores a request attribute for
 	 * "already filtered", proceeding without filtering again if the
 	 * attribute is already there.
+	 *
+	 * 这个{@code doFilter}实现存储了“已经过滤”的请求属性，如果该属性已经存在，则不再进行过滤。
+	 *
 	 * @see #getAlreadyFilteredAttributeName
 	 * @see #shouldNotFilter
 	 * @see #doFilterInternal
@@ -92,12 +101,16 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+		// 获得filter name className + .FILTERED
 		String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();
 		boolean hasAlreadyFilteredAttribute = request.getAttribute(alreadyFilteredAttributeName) != null;
 
 		if (hasAlreadyFilteredAttribute || skipDispatch(httpRequest) || shouldNotFilter(httpRequest)) {
 
+			// request没有执行过此filter
+
 			// Proceed without invoking this filter...
+			// 在不调用此过滤器的情况下继续...
 			filterChain.doFilter(request, response);
 		}
 		else {
@@ -154,6 +167,9 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * <p>The default implementation takes the configured name of the concrete filter
 	 * instance and appends ".FILTERED". If the filter is not fully initialized,
 	 * it falls back to its class name.
+	 *
+	 * 返回标识已过滤请求的请求属性的名称。
+	 * <p>默认实现采用具体过滤器实例的已配置名称，并附加“.FILTERED”。 如果过滤器未完全初始化，则会回退到其类名。
 	 * @see #getFilterName
 	 * @see #ALREADY_FILTERED_SUFFIX
 	 */

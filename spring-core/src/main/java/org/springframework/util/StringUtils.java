@@ -16,24 +16,11 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TimeZone;
-
-import org.springframework.lang.Nullable;
+import java.util.*;
 
 /**
  * Miscellaneous {@link String} utility methods.
@@ -629,6 +616,10 @@ public abstract class StringUtils {
 	 * inner simple dots.
 	 * <p>The result is convenient for path comparison. For other uses,
 	 * notice that Windows separators ("\") are replaced by simple slashes.
+	 *
+	 * 通过抑制“path / ..”和内部简单点等序列来规范化路径。
+	 * <p>结果便于路径比较。 对于其他用途，请注意Windows分隔符（“\”）由简单斜杠替换。
+	 *
 	 * @param path the original path
 	 * @return the normalized path
 	 */
@@ -642,6 +633,11 @@ public abstract class StringUtils {
 		// first path element. This is necessary to correctly parse paths like
 		// "file:core/../core/io/Resource.class", where the ".." should just
 		// strip the first "core" directory while keeping the "file:" prefix.
+
+		// 从路径中去除前缀以进行分析，而不是将其视为一部分
+		// 第一个路径元素 这对于正确解析像这样的路径是必要的
+		//“file：core /../ core / io / Resource.class”，其中“..”应该只是
+		// 在保留“file：”前缀的同时删除第一个“核心”目录。
 		int prefixIndex = pathToUse.indexOf(':');
 		String prefix = "";
 		if (prefixIndex != -1) {
@@ -666,24 +662,29 @@ public abstract class StringUtils {
 			String element = pathArray[i];
 			if (CURRENT_PATH.equals(element)) {
 				// Points to current directory - drop it.
+				// 指向当前目录 - 删除它。
 			}
 			else if (TOP_PATH.equals(element)) {
 				// Registering top path found.
+				// 注册找到的顶级路径。
 				tops++;
 			}
 			else {
 				if (tops > 0) {
 					// Merging path element with element corresponding to top path.
+					// 将路径元素与对应于顶部路径的元素合并。
 					tops--;
 				}
 				else {
 					// Normal path element found.
+					// 找到正常路径元素。
 					pathElements.add(0, element);
 				}
 			}
 		}
 
 		// Remaining top paths need to be retained.
+		// 需要保留剩余的顶部路径。
 		for (int i = 0; i < tops; i++) {
 			pathElements.add(0, TOP_PATH);
 		}
@@ -1263,6 +1264,10 @@ public abstract class StringUtils {
 	/**
 	 * Convert a {@code Collection} into a delimited {@code String} (e.g. CSV).
 	 * <p>Useful for {@code toString()} implementations.
+	 *
+	 * 将{@code Collection}转换为分隔的{@code String}（例如CSV）。
+	 * <p>对{@code toString（）}实现很有用。
+	 *
 	 * @param coll the {@code Collection} to convert
 	 * @param delim the delimiter to use (typically a ",")
 	 * @return the delimited {@code String}

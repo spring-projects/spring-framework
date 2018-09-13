@@ -16,14 +16,13 @@
 
 package org.springframework.core.env;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.lang.Nullable;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of the {@link PropertySources} interface.
@@ -33,6 +32,10 @@ import org.springframework.lang.Nullable;
  * <p>Where <em>precedence</em> is mentioned in methods such as {@link #addFirst}
  * and {@link #addLast}, this is with regard to the order in which property sources
  * will be searched when resolving a given property with a {@link PropertyResolver}.
+ *
+ * {@link PropertySources}接口的默认实现。 允许操作包含的属性源，并提供用于复制现有{@code PropertySources}实例的构造函数。
+ * <p>在{@link #addFirst}和{@link #addLast}等方法中提到了<em>优先级</ em>，
+ * 这是关于在解析给定时搜索属性源的顺序 拥有{@link PropertyResolver}的财产。
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -56,6 +59,8 @@ public class MutablePropertySources implements PropertySources {
 	/**
 	 * Create a new {@code MutablePropertySources} from the given propertySources
 	 * object, preserving the original order of contained {@code PropertySource} objects.
+	 *
+	 * 从给定的propertySources对象创建一个新的{@code MutablePropertySources}，保留包含的{@code PropertySource}对象的原始顺序。
 	 */
 	public MutablePropertySources(PropertySources propertySources) {
 		this();
@@ -191,6 +196,8 @@ public class MutablePropertySources implements PropertySources {
 
 	/**
 	 * Ensure that the given property source is not being added relative to itself.
+	 *
+	 * 确保未相对于自身添加给定的属性源。
 	 */
 	protected void assertLegalRelativeAddition(String relativePropertySourceName, PropertySource<?> propertySource) {
 		String newPropertySourceName = propertySource.getName();

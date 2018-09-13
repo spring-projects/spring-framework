@@ -1867,6 +1867,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * and a chance to know about its owning bean factory (this object).
 	 * This means checking whether the bean implements InitializingBean or defines
 	 * a custom init method, and invoking the necessary callback(s) if it does.
+	 *
+	 * 给bean一个机会现在所有属性都被设置，并有机会了解它拥有的bean工厂（这个对象）。
+	 * 这意味着检查bean是否实现了InitializingBean或定义了一个自定义init方法，并调用了必要的回调（如果有）
+	 *
+	 *
 	 * @param beanName the bean name in the factory (for debugging purposes)
 	 * @param bean the new bean instance we may need to initialize
 	 * @param mbd the merged bean definition that the bean was created with

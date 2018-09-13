@@ -405,6 +405,7 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		//--------------关键方法------------
+		// 解析BeanDefinitionElement
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName)) {
@@ -469,6 +470,8 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse the bean definition itself, without regard to name or aliases. May return
 	 * {@code null} if problems occurred during the parsing of the bean definition.
+	 *
+	 * 解析bean定义本身，而不考虑名称或别名。 如果在解析bean定义期间出现问题，可能会返回{@code null}。
 	 */
 	@Nullable
 	public AbstractBeanDefinition parseBeanDefinitionElement(
@@ -486,6 +489,7 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		try {
+			// ---------------------关键方法-----------------------
 			//创建用于承载属性的AbstractBeanDefinition类型的GenericBeanDefinition
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
 

@@ -582,8 +582,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		//实例化BeanDefinitionDocumentReader
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
 
-		//在实例化BeanDefinitionDocumentReader时候会将BeanDefinitionRegistry传入
-		//记录加载前 BeanDefinition 的个数  BeanDefinition是放在一个Map中的
+		// 在实例化BeanDefinitionDocumentReader时候会将BeanDefinitionRegistry传入
+		// 记录加载前 BeanDefinition 的个数  BeanDefinition是放在一个Map中的
 		// Map<String, BeanDefinition>
 		int countBefore = getRegistry().getBeanDefinitionCount();
 

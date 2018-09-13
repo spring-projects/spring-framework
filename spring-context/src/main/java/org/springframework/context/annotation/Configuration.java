@@ -415,6 +415,13 @@ public @interface Configuration {
 	 * the name/id of the bean element will take precedence.
 	 * @return the suggested component name, if any (or empty String otherwise)
 	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
+	 *
+	 * 显式指定与此Configuration类关联的Spring bean定义的名称。
+	 * 如果未指定（常见情况），将自动生成bean名称。
+	 * 仅当通过组件扫描获取Configuration类或直接提供给{@link AnnotationConfigApplicationContext}时，自定义名称才适用。
+	 * 如果将Configuration类注册为传统的XML bean定义，则bean元素的名称/ id将优先。
+	 * @return建议的组件名称，如果有的话（否则为空字符串）
+	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
 	 */
 	@AliasFor(annotation = Component.class)
 	String value() default "";

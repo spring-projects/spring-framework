@@ -94,6 +94,10 @@ public interface PropertyResolver {
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding
 	 * property values as resolved by {@link #getProperty}. Unresolvable placeholders with
 	 * no default value are ignored and passed through unchanged.
+	 *
+	 * 解析给定文本中的$ {...}占位符，将其替换为{@link #getProperty}解析的相应属性值。
+	 * 没有默认值的无法解决的占位符将被忽略并传递不变。
+	 *
 	 * @param text the String to resolve
 	 * @return the resolved String (never {@code null})
 	 * @throws IllegalArgumentException if given text is {@code null}

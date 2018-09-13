@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.function.Supplier;
-
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+
+import java.util.function.Supplier;
 
 /**
  * Programmatic means of constructing
@@ -101,6 +101,9 @@ public class BeanDefinitionBuilder {
 	/**
 	 * Create a new {@code BeanDefinitionBuilder} used to construct a {@link RootBeanDefinition}.
 	 * @param beanClass the {@code Class} of the bean that the definition is being created for
+	 *
+	 * 创建一个用于构造{@link RootBeanDefinition}的新{@code BeanDefinitionBuilder}。
+	 *  @param beanClass 正在为其创建定义的bean的{@code Class}
 	 */
 	public static BeanDefinitionBuilder rootBeanDefinition(Class<?> beanClass) {
 		return rootBeanDefinition(beanClass, null);
@@ -290,6 +293,8 @@ public class BeanDefinitionBuilder {
 	/**
 	 * Append the specified bean name to the list of beans that this definition
 	 * depends on.
+	 *
+	 * 将指定的bean名称附加到此定义所依赖的bean列表中。
 	 */
 	public BeanDefinitionBuilder addDependsOn(String beanName) {
 		if (this.beanDefinition.getDependsOn() == null) {
