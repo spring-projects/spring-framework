@@ -97,7 +97,8 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 					if (logger.isDebugEnabled()) {
 						String s = Hints.getLogPrefix(hints) + "Parsed " +
 								(isEnableLoggingRequestDetails() ?
-										map.toString() : "parts " + map.keySet() + " (content masked)");
+										formatValue(map, logger.isTraceEnabled()) :
+										"parts " + map.keySet() + " (content masked)");
 						if (logger.isTraceEnabled()) {
 							logger.trace(s);
 						}

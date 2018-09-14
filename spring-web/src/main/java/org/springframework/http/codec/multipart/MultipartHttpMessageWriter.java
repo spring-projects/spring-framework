@@ -228,7 +228,8 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		if (logger.isDebugEnabled()) {
 			String s = Hints.getLogPrefix(hints) + "Encoding " +
 					(isEnableLoggingRequestDetails() ?
-							map.toString() : "parts " + map.keySet() + " (content masked)");
+							formatValue(map, logger.isTraceEnabled()) :
+							"parts " + map.keySet() + " (content masked)");
 			if (logger.isTraceEnabled()) {
 				logger.trace(s);
 			}

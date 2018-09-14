@@ -134,7 +134,8 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 			if (logger.isDebugEnabled()) {
 				String s = Hints.getLogPrefix(hints) + "Writing " +
 						(isEnableLoggingRequestDetails() ?
-								form.toString() : "form fields " + form.keySet() + " (content masked)");
+								formatValue(form, logger.isTraceEnabled()) :
+								"form fields " + form.keySet() + " (content masked)");
 				if (logger.isTraceEnabled()) {
 					logger.trace(s);
 				}
