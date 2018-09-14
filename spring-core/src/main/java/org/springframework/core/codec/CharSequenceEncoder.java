@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -68,15 +69,11 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		Charset charset = getCharset(mimeType);
 
 		return Flux.from(inputStream).map(charSequence -> {
-			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-				String logPrefix = Hints.getLogPrefix(hints);
-				String s = logPrefix + "Writing " + formatValue(charSequence, logger.isTraceEnabled());
-				if (logger.isTraceEnabled()) {
-					logger.trace(s);
-				}
-				else {
-					logger.debug(s);
-				}
+			if (!Hints.isLoggingSuppressed(hints)) {
+				LogFormatUtils.traceDebug(logger, traceOn -> {
+					String formatted = LogFormatUtils.formatValue(charSequence, !traceOn);
+					return Hints.getLogPrefix(hints) + "Writing " + formatted;
+				});
 			}
 			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
 			ByteBuffer byteBuffer = charset.encode(charBuffer);
@@ -93,14 +90,6 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 			charset = DEFAULT_CHARSET;
 		}
 		return charset;
-	}
-
-	private String formatValue(@Nullable Object value, boolean logFullValue) {
-		if (value == null) {
-			return "";
-		}
-		String s = value instanceof CharSequence ? "\"" + value + "\"" : value.toString();
-		return logFullValue || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
 	}
 
 

@@ -42,6 +42,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -107,16 +108,10 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 		return splitEvents.map(events -> {
 			Object value = unmarshal(events, outputClass);
-			if (logger.isDebugEnabled()) {
-				boolean traceOn = logger.isTraceEnabled();
-				String s = Hints.getLogPrefix(hints) + "Decoded [" + formatValue(value, traceOn) + "]";
-				if (traceOn) {
-					logger.trace(s);
-				}
-				else {
-					logger.debug(s);
-				}
-			}
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
+			});
 			return value;
 		});
 	}
@@ -211,14 +206,6 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 */
 	Flux<List<XMLEvent>> split(Flux<XMLEvent> xmlEventFlux, QName desiredName) {
 		return xmlEventFlux.flatMap(new SplitFunction(desiredName));
-	}
-
-	String formatValue(@Nullable Object value, boolean logFullValue) {
-		if (value == null) {
-			return "";
-		}
-		String s = value instanceof CharSequence ? "\"" + value + "\"" : value.toString();
-		return logFullValue || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
 	}
 
 

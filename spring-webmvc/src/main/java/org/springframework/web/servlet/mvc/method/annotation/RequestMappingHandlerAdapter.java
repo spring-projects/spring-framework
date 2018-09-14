@@ -38,6 +38,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -884,15 +885,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				Object result = asyncManager.getConcurrentResult();
 				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
 				asyncManager.clearConcurrentResult();
-				if (logger.isDebugEnabled()) {
-					String s = "Resume with async result [" + formatValue(result, logger.isTraceEnabled()) + "]";
-					if (logger.isTraceEnabled()) {
-						logger.trace(s);
-					}
-					else {
-						logger.debug(s);
-					}
-				}
+				LogFormatUtils.traceDebug(logger, traceOn -> {
+					String formatted = LogFormatUtils.formatValue(result, !traceOn);
+					return "Resume with async result [" + formatted + "]";
+				});
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
 
@@ -1022,14 +1018,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			}
 		}
 		return mav;
-	}
-
-	static String formatValue(@Nullable Object body, boolean logFullBody) {
-		if (body == null) {
-			return "";
-		}
-		String s = body instanceof CharSequence ? "\"" + body + "\"" : body.toString();
-		return logFullBody || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
 	}
 
 }

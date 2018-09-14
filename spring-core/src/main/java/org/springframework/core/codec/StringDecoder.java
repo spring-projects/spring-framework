@@ -33,6 +33,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -206,15 +207,10 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
 		DataBufferUtils.release(dataBuffer);
 		String value = charBuffer.toString();
-		if (logger.isDebugEnabled()) {
-			String s = Hints.getLogPrefix(hints) + "Decoded " + formatValue(value, logger.isTraceEnabled());
-			if (logger.isTraceEnabled()) {
-				logger.trace(s);
-			}
-			else {
-				logger.debug(s);
-			}
-		}
+		LogFormatUtils.traceDebug(logger, traceOn -> {
+			String formatted = LogFormatUtils.formatValue(value, !traceOn);
+			return Hints.getLogPrefix(hints) + "Decoded " + formatted;
+		});
 		return value;
 	}
 
@@ -225,14 +221,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		else {
 			return DEFAULT_CHARSET;
 		}
-	}
-
-	private String formatValue(@Nullable Object value, boolean logFullValue) {
-		if (value == null) {
-			return "";
-		}
-		String s = value instanceof CharSequence ? "\"" + value + "\"" : value.toString();
-		return logFullValue || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
 	}
 
 

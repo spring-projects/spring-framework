@@ -38,6 +38,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -115,15 +116,11 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		return tokens.map(tokenBuffer -> {
 			try {
 				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
-				if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-					boolean traceOn = logger.isTraceEnabled();
-					String s = Hints.getLogPrefix(hints) + "Decoded [" + formatValue(value, traceOn) + "]";
-					if (traceOn) {
-						logger.trace(s);
-					}
-					else {
-						logger.debug(s);
-					}
+				if (!Hints.isLoggingSuppressed(hints)) {
+					LogFormatUtils.traceDebug(logger, traceOn -> {
+						String formatted = LogFormatUtils.formatValue(value, !traceOn);
+						return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
+					});
 				}
 				return value;
 			}

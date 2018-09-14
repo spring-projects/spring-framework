@@ -19,7 +19,6 @@ package org.springframework.http.codec;
 import org.apache.commons.logging.Log;
 
 import org.springframework.http.HttpLogging;
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for {@link org.springframework.core.codec.Encoder},
@@ -54,22 +53,6 @@ public class LoggingCodecSupport {
 	 */
 	public boolean isEnableLoggingRequestDetails() {
 		return this.enableLoggingRequestDetails;
-	}
-
-	/**
-	 * Format the given value via {{toString()}}, either in full or truncated
-	 * if it has 100 or more characters.
-	 * @param value the value to format
-	 * @param logFullValue whether to log in full or truncate if necessary
-	 * @return the formatted value
-	 * @since 5.1
-	 */
-	protected String formatValue(@Nullable Object value, boolean logFullValue) {
-		if (value == null) {
-			return "";
-		}
-		String s = value instanceof CharSequence ? "\"" + value + "\"" : value.toString();
-		return logFullValue || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
 	}
 
 }

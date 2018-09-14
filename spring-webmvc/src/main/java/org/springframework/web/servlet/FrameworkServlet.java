@@ -1082,7 +1082,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		if (failureCause != null) {
 			if (!initialDispatch) {
 				// FORWARD/ERROR/ASYNC: minimal message (there should be enough context already)
-				logger.debug("Unresolved failure from \"" + dispatchType + "\" dispatch: " + failureCause);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Unresolved failure from \"" + dispatchType + "\" dispatch: " + failureCause);
+				}
 			}
 			else if (logger.isTraceEnabled()) {
 				logger.trace("Failed to complete request", failureCause);

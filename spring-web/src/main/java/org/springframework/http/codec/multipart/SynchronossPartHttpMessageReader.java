@@ -50,6 +50,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -95,17 +96,11 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 		return Flux.create(new SynchronossPartGenerator(message, this.bufferFactory, this.streamStorageFactory))
 				.doOnNext(part -> {
-					if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-						String s = Hints.getLogPrefix(hints) + "Parsed " +
+					if (!Hints.isLoggingSuppressed(hints)) {
+						LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Parsed " +
 								(isEnableLoggingRequestDetails() ?
-										formatValue(part, logger.isTraceEnabled()) :
-										"parts '" + part.name() + "' (content masked)");
-						if (logger.isTraceEnabled()) {
-							logger.trace(s);
-						}
-						else {
-							logger.debug(s);
-						}
+										LogFormatUtils.formatValue(part, !traceOn) :
+										"parts '" + part.name() + "' (content masked)"));
 					}
 				});
 	}

@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
@@ -223,17 +224,12 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);
 		}
 
-		if (logger.isDebugEnabled()) {
-			boolean traceOn = logger.isTraceEnabled();
-			String s = "Read \"" + contentType + "\" to [" +
-					RequestMappingHandlerAdapter.formatValue(body, traceOn) + "]";
-			if (traceOn) {
-				logger.trace(s);
-			}
-			else {
-				logger.debug(s);
-			}
-		}
+		MediaType selectedContentType = contentType;
+		Object theBody = body;
+		LogFormatUtils.traceDebug(logger, traceOn -> {
+			String formatted = LogFormatUtils.formatValue(theBody, !traceOn);
+			return "Read \"" + selectedContentType + "\" to [" + formatted + "]";
+		});
 
 		return body;
 	}

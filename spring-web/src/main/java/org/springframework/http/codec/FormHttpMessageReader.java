@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.lang.Nullable;
@@ -114,18 +115,10 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 	}
 
 	private void logFormData(MultiValueMap<String, String> formData, Map<String, Object> hints) {
-		if (logger.isDebugEnabled()) {
-			String s = Hints.getLogPrefix(hints) + "Read " +
-					(isEnableLoggingRequestDetails() ?
-							formatValue(formData, logger.isTraceEnabled()) :
-							"form fields " + formData.keySet() + " (content masked)");
-			if (logger.isTraceEnabled()) {
-				logger.trace(s);
-			}
-			else {
-				logger.debug(s);
-			}
-		}
+		LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Read " +
+				(isEnableLoggingRequestDetails() ?
+						LogFormatUtils.formatValue(formData, !traceOn) :
+						"form fields " + formData.keySet() + " (content masked)"));
 	}
 
 	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {

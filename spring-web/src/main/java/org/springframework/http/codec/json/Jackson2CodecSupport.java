@@ -125,12 +125,4 @@ public abstract class Jackson2CodecSupport {
 	@Nullable
 	protected abstract <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType);
 
-	String formatValue(@Nullable Object value, boolean logFullValue) {
-		if (value == null) {
-			return "";
-		}
-		String s = value instanceof CharSequence ? "\"" + value + "\"" : value.toString();
-		return logFullValue || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
-	}
-
 }

@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.LoggingCodecSupport;
@@ -237,7 +238,10 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		}
 
 		ServerWebExchange exchange = createExchange(request, response);
-		logExchange(exchange);
+
+		LogFormatUtils.traceDebug(logger, traceOn ->
+				exchange.getLogPrefix() + formatRequest(exchange.getRequest()) +
+						(traceOn ? ", headers=" + formatHeaders(exchange.getRequest().getHeaders()) : ""));
 
 		return getDelegate().handle(exchange)
 				.doOnSuccess(aVoid -> logResponse(exchange))
@@ -250,19 +254,6 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext);
 	}
 
-	private void logExchange(ServerWebExchange exchange) {
-		if (logger.isDebugEnabled()) {
-			String logPrefix = exchange.getLogPrefix();
-			ServerHttpRequest request = exchange.getRequest();
-			if (logger.isTraceEnabled()) {
-				logger.trace(logPrefix + formatRequest(request) + ", headers=" + formatHeaders(request.getHeaders()));
-			}
-			else {
-				logger.debug(logPrefix + formatRequest(request));
-			}
-		}
-	}
-
 	private String formatRequest(ServerHttpRequest request) {
 		String rawQuery = request.getURI().getRawQuery();
 		String query = StringUtils.hasText(rawQuery) ? "?" + rawQuery : "";
@@ -270,18 +261,11 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	private void logResponse(ServerWebExchange exchange) {
-		if (logger.isDebugEnabled()) {
-			String logPrefix = exchange.getLogPrefix();
-			ServerHttpResponse response = exchange.getResponse();
-			HttpStatus status = response.getStatusCode();
-			String message = "Completed " + (status != null ? status : "200 OK");
-			if (logger.isTraceEnabled()) {
-				logger.trace(logPrefix + message + ", headers=" + formatHeaders(response.getHeaders()));
-			}
-			else {
-				logger.debug(logPrefix + message);
-			}
-		}
+		LogFormatUtils.traceDebug(logger, traceOn -> {
+			HttpStatus status = exchange.getResponse().getStatusCode();
+			return exchange.getLogPrefix() + "Completed " + (status != null ? status : "200 OK") +
+					(traceOn ? ", headers=" + formatHeaders(exchange.getResponse().getHeaders()) : "");
+		});
 	}
 
 	private String formatHeaders(HttpHeaders responseHeaders) {
