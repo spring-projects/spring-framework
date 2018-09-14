@@ -157,7 +157,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @see #orderedStream()
 	 */
 	default Stream<T> stream() {
-		throw new UnsupportedOperationException("Multi-element access not supported");
+		throw new UnsupportedOperationException("Multi element access not supported");
 	}
 
 	/**
@@ -173,7 +173,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @see org.springframework.core.OrderComparator
 	 */
 	default Stream<T> orderedStream() {
-		throw new UnsupportedOperationException("Multi-element access not supported");
+		throw new UnsupportedOperationException("Ordered element access not supported");
 	}
 
 }
