@@ -17,10 +17,8 @@
 package org.springframework.beans.factory;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.BeansException;
@@ -141,17 +139,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	}
 
 	/**
-	 * Return a sequential {@link Stream} over lazily resolved object instances,
-	 * without specific ordering guarantees (but typically in registration order).
-	 * @since 5.1
-	 * @see #iterator()
-	 */
-	default Stream<T> stream() {
-		throw new UnsupportedOperationException("Multi-element access not supported");
-	}
-
-	/**
-	 * Return an {@link Iterator} over lazily resolved object instances,
+	 * Return an {@link Iterator} over all matching object instances,
 	 * without specific ordering guarantees (but typically in registration order).
 	 * @since 5.1
 	 * @see #stream()
@@ -162,17 +150,30 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	}
 
 	/**
-	 * Return a {@link List} with fully resolved object instances,
-	 * potentially pre-ordered according to a common comparator.
-	 * <p>In a common Spring application context, this will be ordered
-	 * according to {@link org.springframework.core.Ordered} /
-	 * {@link org.springframework.core.annotation.Order} conventions,
+	 * Return a sequential {@link Stream} over all matching object instances,
+	 * without specific ordering guarantees (but typically in registration order).
+	 * @since 5.1
+	 * @see #iterator()
+	 * @see #orderedStream()
+	 */
+	default Stream<T> stream() {
+		throw new UnsupportedOperationException("Multi-element access not supported");
+	}
+
+	/**
+	 * Return a sequential {@link Stream} over all matching object instances,
+	 * pre-ordered according to the factory's common order comparator.
+	 * <p>In a standard Spring application context, this will be ordered
+	 * according to {@link org.springframework.core.Ordered} conventions,
+	 * and in case of annotation-based configuration also considering the
+	 * {@link org.springframework.core.annotation.Order} annotation,
 	 * analogous to multi-element injection points of list/array type.
 	 * @since 5.1
 	 * @see #stream()
+	 * @see org.springframework.core.OrderComparator
 	 */
-	default List<T> toList() {
-		return stream().collect(Collectors.toList());
+	default Stream<T> orderedStream() {
+		throw new UnsupportedOperationException("Multi-element access not supported");
 	}
 
 }

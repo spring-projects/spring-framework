@@ -35,6 +35,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartFactoryBean;
+import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
@@ -244,6 +245,10 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			@Override
 			public Stream<T> stream() {
 				return Arrays.stream(getBeanNamesForType(requiredType)).map(name -> (T) getBean(name));
+			}
+			@Override
+			public Stream<T> orderedStream() {
+				return stream().sorted(OrderComparator.INSTANCE);
 			}
 		};
 	}

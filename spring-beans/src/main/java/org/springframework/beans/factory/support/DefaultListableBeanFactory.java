@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 
@@ -388,7 +387,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						.filter(bean -> !(bean instanceof NullBean));
 			}
 			@Override
-			public List<T> toList() {
+			public Stream<T> orderedStream() {
 				String[] beanNames = getBeanNamesForType(requiredType);
 				Map<String, T> matchingBeans = new LinkedHashMap<>(beanNames.length);
 				for (String beanName : beanNames) {
@@ -397,12 +396,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						matchingBeans.put(beanName, (T) beanInstance);
 					}
 				}
-				List<T> result = new ArrayList<>(matchingBeans.values());
-				Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
-				if (comparator != null) {
-					result.sort(comparator);
-				}
-				return result;
+				Stream<T> stream = matchingBeans.values().stream();
+				return stream.sorted(adaptOrderComparator(matchingBeans));
 			}
 		};
 	}
@@ -1267,16 +1262,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
-			Stream<Object> result = matchingBeans.keySet().stream()
+			Stream<Object> stream = matchingBeans.keySet().stream()
 					.map(name -> descriptor.resolveCandidate(name, type, this))
 					.filter(bean -> !(bean instanceof NullBean));
-			if (((StreamDependencyDescriptor) descriptor).isSorted()) {
-				Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
-				if (comparator != null) {
-					result = result.sorted(comparator);
-				}
+			if (((StreamDependencyDescriptor) descriptor).isOrdered()) {
+				stream = stream.sorted(adaptOrderComparator(matchingBeans));
 			}
-			return result;
+			return stream;
 		}
 		else if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
@@ -1373,6 +1365,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		else {
 			return comparator;
 		}
+	}
+
+	private Comparator<Object> adaptOrderComparator(Map<String, ?> matchingBeans) {
+		Comparator<Object> dependencyComparator = getDependencyComparator();
+		OrderComparator comparator = (dependencyComparator instanceof OrderComparator ?
+				(OrderComparator) dependencyComparator : OrderComparator.INSTANCE);
+		return comparator.withSourceProvider(createFactoryAwareOrderSourceProvider(matchingBeans));
 	}
 
 	private OrderComparator.OrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, ?> beans) {
@@ -1779,15 +1778,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	private static class StreamDependencyDescriptor extends DependencyDescriptor {
 
-		private final boolean sorted;
+		private final boolean ordered;
 
-		public StreamDependencyDescriptor(DependencyDescriptor original, boolean sorted) {
+		public StreamDependencyDescriptor(DependencyDescriptor original, boolean ordered) {
 			super(original);
-			this.sorted = sorted;
+			this.ordered = ordered;
 		}
 
-		public boolean isSorted() {
-			return this.sorted;
+		public boolean isOrdered() {
+			return this.ordered;
 		}
 	}
 
@@ -1897,22 +1896,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public Stream<Object> stream() {
-			DependencyDescriptor descriptorToUse = new StreamDependencyDescriptor(this.descriptor, false);
-			Object result = doResolveDependency(descriptorToUse, this.beanName, null, null);
-			Assert.state(result instanceof Stream, "Stream expected");
-			return (Stream<Object>) result;
+			return resolveStream(false);
+		}
+
+		@Override
+		public Stream<Object> orderedStream() {
+			return resolveStream(true);
 		}
 
 		@SuppressWarnings("unchecked")
-		@Override
-		public List<Object> toList() {
-			DependencyDescriptor descriptorToUse = new StreamDependencyDescriptor(this.descriptor, true);
+		private Stream<Object> resolveStream(boolean ordered) {
+			DependencyDescriptor descriptorToUse = new StreamDependencyDescriptor(this.descriptor, ordered);
 			Object result = doResolveDependency(descriptorToUse, this.beanName, null, null);
 			Assert.state(result instanceof Stream, "Stream expected");
-			return ((Stream<Object>) result).collect(Collectors.toList());
+			return (Stream<Object>) result;
 		}
 	}
 

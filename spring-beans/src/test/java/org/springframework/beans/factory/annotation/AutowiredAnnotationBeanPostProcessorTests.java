@@ -1289,15 +1289,13 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void testObjectProviderInjectionWithTargetPrimary() {
-		bf.setDependencyComparator(Comparators.comparable());
-
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectProviderInjectionBean.class));
-		RootBeanDefinition tb1 = new RootBeanDefinition(TestBean.class);
-		tb1.getPropertyValues().add("name", "yours");
+		RootBeanDefinition tb1 = new RootBeanDefinition(OrderedTestBean.class);
+		tb1.getPropertyValues().add("order", 1);
 		tb1.setPrimary(true);
 		bf.registerBeanDefinition("testBean1", tb1);
-		RootBeanDefinition tb2 = new RootBeanDefinition(TestBean.class);
-		tb2.getPropertyValues().add("name", "mine");
+		RootBeanDefinition tb2 = new RootBeanDefinition(OrderedTestBean.class);
+		tb2.getPropertyValues().add("order", 0);
 		tb2.setLazyInit(true);
 		bf.registerBeanDefinition("testBean2", tb2);
 
@@ -2885,7 +2883,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 
 		public List<TestBean> sortedTestBeans() {
-			return this.testBeanProvider.toList();
+			return this.testBeanProvider.orderedStream().collect(Collectors.toList());
 		}
 	}
 
@@ -2979,6 +2977,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Override
 		public boolean isSingleton() {
 			return true;
+		}
+	}
+
+
+	public static class OrderedTestBean extends TestBean implements Ordered {
+
+		private int order;
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+
+		@Override
+		public int getOrder() {
+			return this.order;
 		}
 	}
 
