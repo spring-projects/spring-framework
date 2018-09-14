@@ -168,7 +168,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	public void initialize() {
 		if (logger.isInfoEnabled()) {
-			logger.info("Initializing ExecutorService " + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+			logger.info("Initializing ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
 		if (!this.threadNamePrefixSet && this.beanName != null) {
 			setThreadNamePrefix(this.beanName + "-");
