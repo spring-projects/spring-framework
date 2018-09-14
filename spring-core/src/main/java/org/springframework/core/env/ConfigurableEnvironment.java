@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import java.util.Map;
  * <pre class="code">
  * ConfigurableEnvironment environment = new StandardEnvironment();
  * MutablePropertySources propertySources = environment.getPropertySources();
- * Map<String, String> myMap = new HashMap<String, String>();
+ * Map&lt;String, String&gt; myMap = new HashMap&lt;&gt;();
  * myMap.put("xyz", "myValue");
  * propertySources.addFirst(new MapPropertySource("MY_MAP", myMap));
  * </pre>
@@ -78,26 +78,26 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * <p>Any existing active profiles will be replaced with the given arguments; call
 	 * with zero arguments to clear the current set of active profiles. Use
 	 * {@link #addActiveProfile} to add a profile while preserving the existing set.
+	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
 	 * @see #addActiveProfile
 	 * @see #setDefaultProfiles
 	 * @see org.springframework.context.annotation.Profile
 	 * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
-	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
 	 */
 	void setActiveProfiles(String... profiles);
 
 	/**
 	 * Add a profile to the current set of active profiles.
-	 * @see #setActiveProfiles
 	 * @throws IllegalArgumentException if the profile is null, empty or whitespace-only
+	 * @see #setActiveProfiles
 	 */
 	void addActiveProfile(String profile);
 
 	/**
 	 * Specify the set of profiles to be made active by default if no other profiles
 	 * are explicitly made active through {@link #setActiveProfiles}.
-	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
 	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
+	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
 	 */
 	void setDefaultProfiles(String... profiles);
 
@@ -119,21 +119,6 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	MutablePropertySources getPropertySources();
 
 	/**
-	 * Return the value of {@link System#getenv()} if allowed by the current
-	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
-	 * to access individual keys using calls to {@link System#getenv(String)}.
-	 * <p>Note that most {@link Environment} implementations will include this system
-	 * environment map as a default {@link PropertySource} to be searched. Therefore, it
-	 * is recommended that this method not be used directly unless bypassing other
-	 * property sources is expressly intended.
-	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
-	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
-	 * to a property, {@code null} will be returned and an INFO-level log message will be
-	 * issued noting the exception.
-	 */
-	Map<String, Object> getSystemEnvironment();
-
-	/**
 	 * Return the value of {@link System#getProperties()} if allowed by the current
 	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
 	 * to access individual keys using calls to {@link System#getProperty(String)}.
@@ -147,6 +132,21 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * issued noting the exception.
 	 */
 	Map<String, Object> getSystemProperties();
+
+	/**
+	 * Return the value of {@link System#getenv()} if allowed by the current
+	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
+	 * to access individual keys using calls to {@link System#getenv(String)}.
+	 * <p>Note that most {@link Environment} implementations will include this system
+	 * environment map as a default {@link PropertySource} to be searched. Therefore, it
+	 * is recommended that this method not be used directly unless bypassing other
+	 * property sources is expressly intended.
+	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
+	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
+	 * to a property, {@code null} will be returned and an INFO-level log message will be
+	 * issued noting the exception.
+	 */
+	Map<String, Object> getSystemEnvironment();
 
 	/**
 	 * Append the given parent environment's active profiles, default profiles and

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Base class for classes that are setting up a
- * {@code java.util.concurrent.ExecutorService}
- * (typically a {@link java.util.concurrent.ThreadPoolExecutor}).
+ * Base class for setting up a {@link java.util.concurrent.ExecutorService}
+ * (typically a {@link java.util.concurrent.ThreadPoolExecutor} or
+ * {@link java.util.concurrent.ScheduledThreadPoolExecutor}).
  * Defines common configuration settings and common lifecycle handling.
  *
  * @author Juergen Hoeller
@@ -40,6 +40,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.util.concurrent.ExecutorService
  * @see java.util.concurrent.Executors
  * @see java.util.concurrent.ThreadPoolExecutor
+ * @see java.util.concurrent.ScheduledThreadPoolExecutor
  */
 @SuppressWarnings("serial")
 public abstract class ExecutorConfigurationSupport extends CustomizableThreadFactory
@@ -162,7 +163,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	public void initialize() {
 		if (logger.isInfoEnabled()) {
-			logger.info("Initializing ExecutorService " + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+			logger.info("Initializing ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
 		if (!this.threadNamePrefixSet && this.beanName != null) {
 			setThreadNamePrefix(this.beanName + "-");
