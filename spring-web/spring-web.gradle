@@ -29,6 +29,7 @@ dependencies {
 	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 	optional("io.netty:netty-all")
 	optional("io.projectreactor.netty:reactor-netty")
+	optional("io.undertow:undertow-core:${undertowVersion}")
 	optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	optional("org.eclipse.jetty:jetty-server") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
@@ -36,7 +37,7 @@ dependencies {
 	optional("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
-	optional("io.undertow:undertow-core:${undertowVersion}")
+	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.1")
 	optional("com.squareup.okhttp3:okhttp:3.11.0")
 	optional("org.apache.httpcomponents:httpclient:4.5.6") {
 		exclude group: "commons-logging", module: "commons-logging"
@@ -62,7 +63,6 @@ dependencies {
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.1")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
 		exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
