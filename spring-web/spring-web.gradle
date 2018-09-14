@@ -28,6 +28,7 @@ dependencies {
 	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 	optional("io.netty:netty-all")
 	optional("io.projectreactor.ipc:reactor-netty")
+	optional("io.undertow:undertow-core:${undertowVersion}")
 	optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
@@ -35,7 +36,6 @@ dependencies {
 	optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
-	optional("io.undertow:undertow-core:${undertowVersion}")
 	optional("com.squareup.okhttp3:okhttp:3.10.0")
 	optional("org.apache.httpcomponents:httpclient:4.5.5") {
 		exclude group: "commons-logging", module: "commons-logging"
@@ -80,5 +80,5 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
 	testRuntime("javax.json:javax.json-api:1.1.2")
-	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.8")
+	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.9")
 }
