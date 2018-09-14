@@ -70,7 +70,13 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		return Flux.from(inputStream).map(charSequence -> {
 			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 				String logPrefix = Hints.getLogPrefix(hints);
-				logger.debug(logPrefix + "Writing '" + charSequence + "'");
+				String s = logPrefix + "Writing " + formatValue(charSequence, logger.isTraceEnabled());
+				if (logger.isTraceEnabled()) {
+					logger.trace(s);
+				}
+				else {
+					logger.debug(s);
+				}
 			}
 			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
 			ByteBuffer byteBuffer = charset.encode(charBuffer);
@@ -88,6 +94,15 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		}
 		return charset;
 	}
+
+	private String formatValue(@Nullable Object value, boolean logFullValue) {
+		if (value == null) {
+			return "";
+		}
+		String s = value instanceof CharSequence ? "\"" + value + "\"" : value.toString();
+		return logFullValue || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
+	}
+
 
 	/**
 	 * Create a {@code CharSequenceEncoder} that supports only "text/plain".

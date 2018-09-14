@@ -79,7 +79,14 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		try {
 			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-				logger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
+				boolean traceOn = logger.isTraceEnabled();
+				String s = Hints.getLogPrefix(hints) + "Encoding [" + formatValue(value, traceOn) + "]";
+				if (traceOn) {
+					logger.trace(s);
+				}
+				else {
+					logger.debug(s);
+				}
 			}
 			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
 			OutputStream outputStream = buffer.asOutputStream();
@@ -95,6 +102,14 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 		catch (JAXBException ex) {
 			return Flux.error(new CodecException("Invalid JAXB configuration", ex));
 		}
+	}
+
+	String formatValue(@Nullable Object value, boolean logFullValue) {
+		if (value == null) {
+			return "";
+		}
+		String s = value instanceof CharSequence ? "\"" + value + "\"" : value.toString();
+		return logFullValue || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
 	}
 
 }

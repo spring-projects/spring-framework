@@ -108,7 +108,14 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		return splitEvents.map(events -> {
 			Object value = unmarshal(events, outputClass);
 			if (logger.isDebugEnabled()) {
-				logger.debug(Hints.getLogPrefix(hints) + "Decoded [" + value + "]");
+				boolean traceOn = logger.isTraceEnabled();
+				String s = Hints.getLogPrefix(hints) + "Decoded [" + formatValue(value, traceOn) + "]";
+				if (traceOn) {
+					logger.trace(s);
+				}
+				else {
+					logger.debug(s);
+				}
 			}
 			return value;
 		});
@@ -204,6 +211,14 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 */
 	Flux<List<XMLEvent>> split(Flux<XMLEvent> xmlEventFlux, QName desiredName) {
 		return xmlEventFlux.flatMap(new SplitFunction(desiredName));
+	}
+
+	String formatValue(@Nullable Object value, boolean logFullValue) {
+		if (value == null) {
+			return "";
+		}
+		String s = value instanceof CharSequence ? "\"" + value + "\"" : value.toString();
+		return logFullValue || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
 	}
 
 

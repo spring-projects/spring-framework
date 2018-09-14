@@ -95,9 +95,15 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 				.collectMultimap(Part::name)
 				.doOnNext(map -> {
 					if (logger.isDebugEnabled()) {
-						String details = isEnableLoggingRequestDetails() ?
-								map.toString() : "parts " + map.keySet() + " (content masked)";
-						logger.debug(Hints.getLogPrefix(hints) + "Parsed " + details);
+						String s = Hints.getLogPrefix(hints) + "Parsed " +
+								(isEnableLoggingRequestDetails() ?
+										map.toString() : "parts " + map.keySet() + " (content masked)");
+						if (logger.isTraceEnabled()) {
+							logger.trace(s);
+						}
+						else {
+							logger.debug(s);
+						}
 					}
 				})
 				.map(this::toMultiValueMap);

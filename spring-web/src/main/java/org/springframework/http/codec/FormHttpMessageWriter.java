@@ -132,9 +132,15 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 
 		return Mono.from(inputStream).flatMap(form -> {
 			if (logger.isDebugEnabled()) {
-				String details = isEnableLoggingRequestDetails() ?
-						form.toString() : "form fields " + form.keySet() + " (content masked)";
-				logger.debug(Hints.getLogPrefix(hints) + "Writing " + details);
+				String s = Hints.getLogPrefix(hints) + "Writing " +
+						(isEnableLoggingRequestDetails() ?
+								form.toString() : "form fields " + form.keySet() + " (content masked)");
+				if (logger.isTraceEnabled()) {
+					logger.trace(s);
+				}
+				else {
+					logger.debug(s);
+				}
 			}
 			String value = serializeForm(form, charset);
 			ByteBuffer byteBuffer = charset.encode(value);

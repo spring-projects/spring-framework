@@ -207,7 +207,13 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		DataBufferUtils.release(dataBuffer);
 		String value = charBuffer.toString();
 		if (logger.isDebugEnabled()) {
-			logger.debug(Hints.getLogPrefix(hints) + "Decoded '" + value + "'");
+			String s = Hints.getLogPrefix(hints) + "Decoded " + formatValue(value, logger.isTraceEnabled());
+			if (logger.isTraceEnabled()) {
+				logger.trace(s);
+			}
+			else {
+				logger.debug(s);
+			}
 		}
 		return value;
 	}
@@ -219,6 +225,14 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		else {
 			return DEFAULT_CHARSET;
 		}
+	}
+
+	private String formatValue(@Nullable Object value, boolean logFullValue) {
+		if (value == null) {
+			return "";
+		}
+		String s = value instanceof CharSequence ? "\"" + value + "\"" : value.toString();
+		return logFullValue || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
 	}
 
 

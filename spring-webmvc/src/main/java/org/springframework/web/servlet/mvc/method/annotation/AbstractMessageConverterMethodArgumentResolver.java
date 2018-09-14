@@ -224,8 +224,15 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Read \"" + contentType + "\" to " +
-					"[" + (body instanceof String ? "\"" + body + "\"" : body) + "]");
+			boolean traceOn = logger.isTraceEnabled();
+			String s = "Read \"" + contentType + "\" to [" +
+					RequestMappingHandlerAdapter.formatValue(body, traceOn) + "]";
+			if (traceOn) {
+				logger.trace(s);
+			}
+			else {
+				logger.debug(s);
+			}
 		}
 
 		return body;

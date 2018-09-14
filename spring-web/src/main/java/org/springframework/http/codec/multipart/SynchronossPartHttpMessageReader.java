@@ -96,9 +96,14 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 		return Flux.create(new SynchronossPartGenerator(message, this.bufferFactory, this.streamStorageFactory))
 				.doOnNext(part -> {
 					if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-						String details = isEnableLoggingRequestDetails() ?
-								part.toString() : "parts '" + part.name() + "' (content masked)";
-						logger.debug(Hints.getLogPrefix(hints) + "Parsed " + details);
+						String s = Hints.getLogPrefix(hints) + "Parsed " + (isEnableLoggingRequestDetails() ?
+								part.toString() : "parts '" + part.name() + "' (content masked)");
+						if (logger.isTraceEnabled()) {
+							logger.trace(s);
+						}
+						else {
+							logger.debug(s);
+						}
 					}
 				});
 	}

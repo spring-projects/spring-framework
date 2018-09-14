@@ -142,7 +142,14 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			ResolvableType elementType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
 
 		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-			logger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
+			boolean traceOn = logger.isTraceEnabled();
+			String s = Hints.getLogPrefix(hints) + "Encoding [" + formatValue(value, traceOn) + "]";
+			if (traceOn) {
+				logger.trace(s);
+			}
+			else {
+				logger.debug(s);
+			}
 		}
 
 		JavaType javaType = getJavaType(elementType.getType(), null);

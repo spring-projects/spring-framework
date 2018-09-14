@@ -116,7 +116,14 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			try {
 				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
 				if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-					logger.debug(Hints.getLogPrefix(hints) +"Decoded [" + value + "]");
+					boolean traceOn = logger.isTraceEnabled();
+					String s = Hints.getLogPrefix(hints) + "Decoded [" + formatValue(value, traceOn) + "]";
+					if (traceOn) {
+						logger.trace(s);
+					}
+					else {
+						logger.debug(s);
+					}
 				}
 				return value;
 			}

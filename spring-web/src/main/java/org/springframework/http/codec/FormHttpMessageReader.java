@@ -108,13 +108,24 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 					String body = charBuffer.toString();
 					DataBufferUtils.release(buffer);
 					MultiValueMap<String, String> formData = parseFormData(charset, body);
-					if (logger.isDebugEnabled()) {
-						String details = isEnableLoggingRequestDetails() ?
-								formData.toString() : "form fields " + formData.keySet() + " (content masked)";
-						logger.debug(Hints.getLogPrefix(hints) + "Read " + details);
-					}
+					logFormData(formData, hints);
 					return formData;
 				});
+	}
+
+	private void logFormData(MultiValueMap<String, String> formData, Map<String, Object> hints) {
+		if (logger.isDebugEnabled()) {
+			String s = Hints.getLogPrefix(hints) + "Read " +
+					(isEnableLoggingRequestDetails() ?
+							formatValue(formData, logger.isTraceEnabled()) :
+							"form fields " + formData.keySet() + " (content masked)");
+			if (logger.isTraceEnabled()) {
+				logger.trace(s);
+			}
+			else {
+				logger.debug(s);
+			}
+		}
 	}
 
 	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {

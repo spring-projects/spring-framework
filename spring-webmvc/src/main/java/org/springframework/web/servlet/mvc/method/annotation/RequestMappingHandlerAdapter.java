@@ -885,8 +885,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
 				asyncManager.clearConcurrentResult();
 				if (logger.isDebugEnabled()) {
-					String formatted = AbstractMessageConverterMethodProcessor.formatValue(result);
-					logger.debug("Resume with async result [" + formatted + "]");
+					String s = "Resume with async result [" + formatValue(result, logger.isTraceEnabled()) + "]";
+					if (logger.isTraceEnabled()) {
+						logger.trace(s);
+					}
+					else {
+						logger.debug(s);
+					}
 				}
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
@@ -1017,6 +1022,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			}
 		}
 		return mav;
+	}
+
+	static String formatValue(@Nullable Object body, boolean logFullBody) {
+		if (body == null) {
+			return "";
+		}
+		String s = body instanceof CharSequence ? "\"" + body + "\"" : body.toString();
+		return logFullBody || s.length() < 100 ? s : s.substring(0, 100) + " (truncated)...";
 	}
 
 }

@@ -226,9 +226,15 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 		outputMessage.getHeaders().setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params));
 
 		if (logger.isDebugEnabled()) {
-			String details = isEnableLoggingRequestDetails() ?
-					map.toString() : "parts " + map.keySet() + " (content masked)";
-			logger.debug(Hints.getLogPrefix(hints) + "Encoding " + details);
+			String s = Hints.getLogPrefix(hints) + "Encoding " +
+					(isEnableLoggingRequestDetails() ?
+							map.toString() : "parts " + map.keySet() + " (content masked)");
+			if (logger.isTraceEnabled()) {
+				logger.trace(s);
+			}
+			else {
+				logger.debug(s);
+			}
 		}
 
 		Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())
