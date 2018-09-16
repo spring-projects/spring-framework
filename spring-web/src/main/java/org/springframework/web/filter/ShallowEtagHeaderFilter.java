@@ -19,6 +19,7 @@ package org.springframework.web.filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.regex.Pattern;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -62,6 +63,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	private static final String DIRECTIVE_NO_STORE = "no-store";
 
 	private static final String STREAMING_ATTRIBUTE = ShallowEtagHeaderFilter.class.getName() + ".STREAMING";
+
+	private static final Pattern WEAK_PATTERN = Pattern.compile("^W/");
 
 
 	private boolean writeWeakETag = false;
@@ -127,7 +130,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			rawResponse.setHeader(HEADER_ETAG, responseETag);
 			String requestETag = request.getHeader(HEADER_IF_NONE_MATCH);
 			if (requestETag != null && ("*".equals(requestETag) || responseETag.equals(requestETag) ||
-					responseETag.replaceFirst("^W/", "").equals(requestETag.replaceFirst("^W/", "")))) {
+					WEAK_PATTERN.matcher(responseETag).replaceFirst("").equals(WEAK_PATTERN.matcher(requestETag).replaceFirst("")))) {
 				rawResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			}
 			else {

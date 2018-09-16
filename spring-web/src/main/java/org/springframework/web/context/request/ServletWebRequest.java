@@ -80,6 +80,8 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
+	private static final Pattern WEAK_PATTERN = Pattern.compile("^W/");
+
 	private boolean notModified = false;
 
 
@@ -293,7 +295,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
 			while (etagMatcher.find()) {
 				if (StringUtils.hasLength(etagMatcher.group()) &&
-						etag.replaceFirst("^W/", "").equals(etagMatcher.group(3))) {
+						WEAK_PATTERN.matcher(etag).replaceFirst("").equals(etagMatcher.group(3))) {
 					this.notModified = true;
 					break;
 				}

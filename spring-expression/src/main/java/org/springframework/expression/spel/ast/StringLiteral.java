@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.util.regex.Pattern;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
@@ -29,13 +31,18 @@ import org.springframework.expression.spel.CodeFlow;
  */
 public class StringLiteral extends Literal {
 
+	private static final Pattern SINGLE_QUOTES_PATTERN = Pattern.compile("''");
+
+	private static final Pattern DOUBLE_QUOTES_PATTERN = Pattern.compile("\"\"");
+
 	private final TypedValue value;
 
 
 	public StringLiteral(String payload, int pos, String value) {
 		super(payload,pos);
 		value = value.substring(1, value.length() - 1);
-		this.value = new TypedValue(value.replaceAll("''", "'").replaceAll("\"\"", "\""));
+		value = SINGLE_QUOTES_PATTERN.matcher(value).replaceAll("'");
+		this.value = new TypedValue(DOUBLE_QUOTES_PATTERN.matcher(value).replaceAll("\""));
 		this.exitTypeDescriptor = "Ljava/lang/String";
 	}
 

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,6 +77,8 @@ import org.springframework.util.StringUtils;
  * @param <T> the result type
  */
 public class BeanPropertyRowMapper<T> implements RowMapper<T> {
+
+	private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -292,7 +295,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
-			String field = lowerCaseName(column.replaceAll(" ", ""));
+			String field = lowerCaseName(SPACE_PATTERN.matcher(column).replaceAll(""));
 			PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(field) : null);
 			if (pd != null) {
 				try {
