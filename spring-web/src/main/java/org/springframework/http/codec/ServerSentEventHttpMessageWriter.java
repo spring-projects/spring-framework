@@ -199,8 +199,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (this.encoder instanceof HttpMessageEncoder) {
-			HttpMessageEncoder<?> httpEncoder = (HttpMessageEncoder<?>) this.encoder;
-			return httpEncoder.getEncodeHints(actualType, elementType, mediaType, request, response);
+			HttpMessageEncoder<?> encoder = (HttpMessageEncoder<?>) this.encoder;
+			return encoder.getEncodeHints(actualType, elementType, mediaType, request, response);
 		}
 		return Collections.emptyMap();
 	}

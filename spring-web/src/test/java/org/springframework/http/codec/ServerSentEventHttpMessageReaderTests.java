@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link ServerSentEventHttpMessageReader}.
+ *
  * @author Sebastien Deleuze
  */
 public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAllocatingTestCase {
@@ -42,24 +44,21 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void cantRead() {
-		assertFalse(messageReader.canRead(ResolvableType.forClass(Object.class),
-				new MediaType("foo", "bar")));
+		assertFalse(messageReader.canRead(ResolvableType.forClass(Object.class), new MediaType("foo", "bar")));
 		assertFalse(messageReader.canRead(ResolvableType.forClass(Object.class), null));
 	}
 
 	@Test
 	public void canRead() {
-		assertTrue(messageReader.canRead(ResolvableType.forClass(Object.class),
-				new MediaType("text", "event-stream")));
-		assertTrue(messageReader.canRead(ResolvableType.forClass(ServerSentEvent.class),
-				new MediaType("foo", "bar")));
+		assertTrue(messageReader.canRead(ResolvableType.forClass(Object.class), new MediaType("text", "event-stream")));
+		assertTrue(messageReader.canRead(ResolvableType.forClass(ServerSentEvent.class), new MediaType("foo", "bar")));
 	}
 
 	@Test
 	public void readServerSentEvents() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(
 				"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
-			 	"id:c43\nevent:bar\nretry:456\ndata:baz\n\n");
+				"id:c43\nevent:bar\nretry:456\ndata:baz\n\n");
 
 		Flux<ServerSentEvent> events = this.messageReader
 				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),

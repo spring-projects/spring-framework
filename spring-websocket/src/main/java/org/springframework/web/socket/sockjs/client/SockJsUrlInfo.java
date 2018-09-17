@@ -68,7 +68,7 @@ public class SockJsUrlInfo {
 
 	public String getSessionId() {
 		if (this.sessionId == null) {
-			this.sessionId = getUuid().toString().replace("-","");
+			this.sessionId = getUuid().toString().replace("-", "");
 		}
 		return this.sessionId;
 	}
