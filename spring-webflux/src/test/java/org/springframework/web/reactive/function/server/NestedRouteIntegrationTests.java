@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.util.Map;
 
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpMethod;
@@ -46,8 +47,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	protected RouterFunction<?> routerFunction() {
 		NestedHandler nestedHandler = new NestedHandler();
 		return nest(path("/foo/"),
-					route(GET("/bar"), nestedHandler::bar)
-					.andRoute(GET("/baz"), nestedHandler::baz))
+					route(GET("/bar"), nestedHandler::pattern)
+					.andRoute(GET("/baz"), nestedHandler::pattern))
 				.andNest(GET("/{foo}"),
 					route(GET("/bar"), nestedHandler::variables).and(
 					nest(GET("/{bar}"),
@@ -63,7 +64,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/bar", String.class);
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("bar", result.getBody());
+		assertEquals("/foo/bar", result.getBody());
 	}
 
 	@Test
@@ -72,7 +73,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/baz", String.class);
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("baz", result.getBody());
+		assertEquals("/foo/baz", result.getBody());
 	}
 
 	@Test
@@ -81,7 +82,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 				restTemplate.getForEntity("http://localhost:" + port + "/1/2/3", String.class);
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("{foo=1, bar=2, baz=3}", result.getBody());
+		assertEquals("/{foo}/{bar}/{baz}\n{foo=1, bar=2, baz=3}", result.getBody());
 	}
 
 	// SPR-16868
@@ -91,7 +92,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 				restTemplate.getForEntity("http://localhost:" + port + "/1/bar", String.class);
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("{foo=1}", result.getBody());
+		assertEquals("/{foo}/bar\n{foo=1}", result.getBody());
 
 	}
 
@@ -102,7 +103,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 				restTemplate.getForEntity("http://localhost:" + port + "/qux/quux", String.class);
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("{qux=qux}", result.getBody());
+		assertEquals("/{qux}/quux\n{qux=qux}", result.getBody());
 
 	}
 
@@ -120,12 +121,9 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 
 	private static class NestedHandler {
 
-		public Mono<ServerResponse> bar(ServerRequest request) {
-			return ServerResponse.ok().syncBody("bar");
-		}
-
-		public Mono<ServerResponse> baz(ServerRequest request) {
-			return ServerResponse.ok().syncBody("baz");
+		public Mono<ServerResponse> pattern(ServerRequest request) {
+			String pattern = matchingPattern(request);
+			return ServerResponse.ok().syncBody(pattern);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -136,8 +134,18 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 			assertTrue( (pathVariables.equals(attributePathVariables))
 					|| (pathVariables.isEmpty() && (attributePathVariables == null)));
 
-			Mono<String> responseBody = Mono.just(pathVariables.toString());
+			String pattern = matchingPattern(request);
+			Flux<String> responseBody;
+			if (!pattern.isEmpty()) {
+				responseBody = Flux.just(pattern, "\n", pathVariables.toString());
+			} else {
+				responseBody = Flux.just(pathVariables.toString());
+			}
 			return ServerResponse.ok().body(responseBody, String.class);
+		}
+
+		private String matchingPattern(ServerRequest request) {
+			return (String) request.attributes().getOrDefault(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, "");
 		}
 
 	}
