@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import org.springframework.web.util.TagUtils;
 import org.springframework.web.util.UriUtils;
 
 /**
- * JSP tag for creating URLs. Modeled after the JSTL c:url tag with backwards
- * compatibility in mind.
+ * The {@code <url>} tag creates URLs. Modeled after the JSTL {@code c:url} tag with
+ * backwards compatibility in mind.
  *
  * <p>Enhancements to the JSTL functionality include:
  * <ul>
@@ -65,7 +65,8 @@ import org.springframework.web.util.UriUtils;
  * <pre class="code">&lt;spring:url value="/url/path/{variableName}"&gt;
  *   &lt;spring:param name="variableName" value="more than JSTL c:url" /&gt;
  * &lt;/spring:url&gt;</pre>
- * Results in:
+ *
+ * <p>The above results in:
  * {@code /currentApplicationContext/url/path/more%20than%20JSTL%20c%3Aurl}
  *
  * @author Scott Andrews
@@ -100,7 +101,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 
 	/**
-	 * Sets the value of the URL
+	 * Set the value of the URL.
 	 */
 	public void setValue(String value) {
 		if (value.contains(URL_TYPE_ABSOLUTE)) {
@@ -118,7 +119,8 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	}
 
 	/**
-	 * Set the context path for the URL. Defaults to the current context
+	 * Set the context path for the URL.
+	 * Defaults to the current context.
 	 */
 	public void setContext(String context) {
 		if (context.startsWith("/")) {
@@ -130,16 +132,16 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	}
 
 	/**
-	 * Set the variable name to expose the URL under. Defaults to rendering the
-	 * URL to the current JspWriter
+	 * Set the variable name to expose the URL under.
+	 * Defaults to rendering the URL to the current JspWriter.
 	 */
 	public void setVar(String var) {
 		this.var = var;
 	}
 
 	/**
-	 * Set the scope to export the URL variable to. This attribute has no
-	 * meaning unless var is also defined.
+	 * Set the scope to export the URL variable to.
+	 * This attribute has no meaning unless {@code var} is also defined.
 	 */
 	public void setScope(String scope) {
 		this.scope = TagUtils.getScope(scope);
@@ -179,7 +181,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		if (this.var == null) {
 			// print the url to the writer
 			try {
-				pageContext.getOut().print(url);
+				this.pageContext.getOut().print(url);
 			}
 			catch (IOException ex) {
 				throw new JspException(ex);
@@ -187,7 +189,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		}
 		else {
 			// store the url as a variable
-			pageContext.setAttribute(var, url, scope);
+			this.pageContext.setAttribute(this.var, url, this.scope);
 		}
 		return EVAL_PAGE;
 	}
@@ -198,8 +200,8 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @return the URL value as a String
 	 */
 	String createUrl() throws JspException {
-		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
-		HttpServletResponse response = (HttpServletResponse) pageContext.getResponse();
+		HttpServletRequest request = (HttpServletRequest) this.pageContext.getRequest();
+		HttpServletResponse response = (HttpServletResponse) this.pageContext.getResponse();
 
 		StringBuilder url = new StringBuilder();
 		if (this.type == UrlType.CONTEXT_RELATIVE) {
@@ -250,7 +252,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	protected String createQueryString(List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
 			throws JspException {
 
-		String encoding = pageContext.getResponse().getCharacterEncoding();
+		String encoding = this.pageContext.getResponse().getCharacterEncoding();
 		StringBuilder qs = new StringBuilder();
 		for (Param param : params) {
 			if (!usedParams.contains(param.getName()) && StringUtils.hasLength(param.getName())) {
@@ -287,7 +289,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	protected String replaceUriTemplateParams(String uri, List<Param> params, Set<String> usedParams)
 			throws JspException {
 
-		String encoding = pageContext.getResponse().getCharacterEncoding();
+		String encoding = this.pageContext.getResponse().getCharacterEncoding();
 		for (Param param : params) {
 			String template = URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 			if (uri.contains(template)) {
