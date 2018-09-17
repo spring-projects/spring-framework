@@ -16,6 +16,7 @@
 
 package org.springframework.context.support
 
+import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer
 import org.springframework.beans.factory.support.AbstractBeanDefinition
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
@@ -97,11 +98,13 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	 * Scope enum constants.
 	 */
 	enum class Scope {
+
 		/**
 		 * Scope constant for the standard singleton scope
 		 * @see org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 		 */
 		SINGLETON,
+
 		/**
 		 * Scope constant for the standard singleton scope
 		 * @see org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
@@ -119,11 +122,13 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 		 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_NO
 		 */
 		NO,
+
 		/**
 		 * Autowire constant that indicates autowiring bean properties by name
 		 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_NAME
 		 */
 		BY_NAME,
+
 		/**
 		 * Autowire constant that indicates autowiring bean properties by type
 		 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE
@@ -138,6 +143,41 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 
 	}
 
+
+	/**
+	 * Role enum constants.
+	 */
+	enum class Role {
+
+		/**
+		 * Role hint indicating that a [BeanDefinition] is a major part
+		 * of the application. Typically corresponds to a user-defined bean.
+		 * @see org.springframework.beans.factory.config.BeanDefinition.ROLE_APPLICATION
+		 */
+		APPLICATION,
+
+		/**
+		 * Role hint indicating that a [BeanDefinition] is a supporting
+		 * part of some larger configuration, typically an outer
+		 * [org.springframework.beans.factory.parsing.ComponentDefinition].
+		 * [SUPPORT] beans are considered important enough to be aware of
+		 * when looking more closely at a particular
+		 * [org.springframework.beans.factory.parsing.ComponentDefinition],
+		 * but not when looking at the overall configuration of an application.
+		 * @see org.springframework.beans.factory.config.BeanDefinition.ROLE_SUPPORT
+		 */
+		SUPPORT,
+
+		/**
+		 * Role hint indicating that a [BeanDefinition] is providing an
+		 * entirely background role and has no relevance to the end-user. This hint is
+		 * used when registering beans that are completely part of the internal workings
+		 * of a [org.springframework.beans.factory.parsing.ComponentDefinition].
+		 * @see org.springframework.beans.factory.config.BeanDefinition.ROLE_INFRASTRUCTURE
+		 */
+		INFRASTRUCTURE
+	}
+
 	/**
 	 * Declare a bean definition from the given bean class which can be inferred when possible.
 	 *
@@ -148,6 +188,10 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	 * @param autowireMode Set the autowire mode, `Autowire.CONSTRUCTOR` by default
 	 * @param isAutowireCandidate Set whether this bean is a candidate for getting
 	 * autowired into some other bean.
+	 * @param initMethodName Set the name of the initializer method
+	 * @param destroyMethodName Set the name of the destroy method
+	 * @param description Set a human-readable description of this bean definition
+	 * @param role Set the role hint for this bean definition
 	 * @see GenericApplicationContext.registerBean
 	 * @see org.springframework.beans.factory.config.BeanDefinition
 	 */
@@ -156,13 +200,21 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 									  isLazyInit: Boolean? = null,
 									  isPrimary: Boolean? = null,
 									  autowireMode: Autowire = Autowire.CONSTRUCTOR,
-									  isAutowireCandidate: Boolean? = null) {
+									  isAutowireCandidate: Boolean? = null,
+									  initMethodName: String? = null,
+									  destroyMethodName: String? = null,
+									  description: String? = null,
+									  role: Role = Role.APPLICATION) {
 
 		val customizer = BeanDefinitionCustomizer { bd ->
 			scope?.let { bd.scope = scope.name.toLowerCase() }
 			isLazyInit?.let { bd.isLazyInit = isLazyInit }
 			isPrimary?.let { bd.isPrimary = isPrimary }
 			isAutowireCandidate?.let { bd.isAutowireCandidate = isAutowireCandidate }
+			initMethodName?.let { bd.initMethodName = initMethodName }
+			destroyMethodName?.let { bd.destroyMethodName = destroyMethodName }
+			description?.let { bd.description = description }
+			bd.role = role.ordinal
 			if (bd is AbstractBeanDefinition) {
 				bd.autowireMode = autowireMode.ordinal
 			}
@@ -182,6 +234,10 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	 * @param autowireMode Set the autowire mode, `Autowire.NO` by default
 	 * @param isAutowireCandidate Set whether this bean is a candidate for getting
 	 * autowired into some other bean.
+	 * @param initMethodName Set the name of the initializer method
+	 * @param destroyMethodName Set the name of the destroy method
+	 * @param description Set a human-readable description of this bean definition
+	 * @param role Set the role hint for this bean definition
 	 * @param function the bean supplier function
 	 * @see GenericApplicationContext.registerBean
 	 * @see org.springframework.beans.factory.config.BeanDefinition
@@ -192,6 +248,10 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 									  isPrimary: Boolean? = null,
 									  autowireMode: Autowire = Autowire.NO,
 									  isAutowireCandidate: Boolean? = null,
+									  initMethodName: String? = null,
+									  destroyMethodName: String? = null,
+									  description: String? = null,
+									  role: Role = Role.APPLICATION,
 									  crossinline function: () -> T) {
 
 		val customizer = BeanDefinitionCustomizer { bd ->
@@ -199,6 +259,10 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 			isLazyInit?.let { bd.isLazyInit = isLazyInit }
 			isPrimary?.let { bd.isPrimary = isPrimary }
 			isAutowireCandidate?.let { bd.isAutowireCandidate = isAutowireCandidate }
+			initMethodName?.let { bd.initMethodName = initMethodName }
+			destroyMethodName?.let { bd.destroyMethodName = destroyMethodName }
+			description?.let { bd.description = description }
+			bd.role = role.ordinal
 			if (bd is AbstractBeanDefinition) {
 				bd.autowireMode = autowireMode.ordinal
 			}
