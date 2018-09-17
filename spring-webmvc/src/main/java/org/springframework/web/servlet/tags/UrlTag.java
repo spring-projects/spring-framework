@@ -166,7 +166,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 
 	/**
-	 * Sets the value of the URL.
+	 * Set the value of the URL.
 	 */
 	public void setValue(String value) {
 		if (value.contains(URL_TYPE_ABSOLUTE)) {
@@ -184,7 +184,8 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	}
 
 	/**
-	 * Set the context path for the URL. Defaults to the current context
+	 * Set the context path for the URL.
+	 * Defaults to the current context.
 	 */
 	public void setContext(String context) {
 		if (context.startsWith("/")) {
@@ -204,8 +205,8 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	}
 
 	/**
-	 * Set the scope to export the URL variable to. This attribute has no
-	 * meaning unless var is also defined.
+	 * Set the scope to export the URL variable to.
+	 * This attribute has no meaning unless {@code var} is also defined.
 	 */
 	public void setScope(String scope) {
 		this.scope = TagUtils.getScope(scope);
@@ -375,7 +376,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 					String value = param.getValue();
 					try {
 						uri = uri.replace(template,
-								(value != null ? UriUtils.encodePathSegment(param.getValue(), encoding) : ""));
+								(value != null ? UriUtils.encodePathSegment(value, encoding) : ""));
 					}
 					catch (UnsupportedCharsetException ex) {
 						throw new JspException(ex);
