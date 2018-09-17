@@ -34,6 +34,8 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link ServerSentEventHttpMessageReader}.
+ *
  * @author Sebastien Deleuze
  */
 public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAllocatingTestCase {
@@ -44,17 +46,14 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void cantRead() {
-		assertFalse(messageReader.canRead(ResolvableType.forClass(Object.class),
-				new MediaType("foo", "bar")));
+		assertFalse(messageReader.canRead(ResolvableType.forClass(Object.class), new MediaType("foo", "bar")));
 		assertFalse(messageReader.canRead(ResolvableType.forClass(Object.class), null));
 	}
 
 	@Test
 	public void canRead() {
-		assertTrue(messageReader.canRead(ResolvableType.forClass(Object.class),
-				new MediaType("text", "event-stream")));
-		assertTrue(messageReader.canRead(ResolvableType.forClass(ServerSentEvent.class),
-				new MediaType("foo", "bar")));
+		assertTrue(messageReader.canRead(ResolvableType.forClass(Object.class), new MediaType("text", "event-stream")));
+		assertTrue(messageReader.canRead(ResolvableType.forClass(ServerSentEvent.class), new MediaType("foo", "bar")));
 	}
 
 	@Test
@@ -120,7 +119,6 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readString() {
-
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Mono.just(stringBuffer("data:foo\ndata:bar\n\ndata:baz\n\n")));
 
@@ -173,7 +171,6 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readError() {
-
 		Flux<DataBuffer> body =
 				Flux.just(stringBuffer("data:foo\ndata:bar\n\ndata:baz\n\n"))
 						.concatWith(Flux.error(new RuntimeException()));
@@ -190,6 +187,5 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 				.expectError()
 				.verify();
 	}
-
 
 }

@@ -41,6 +41,7 @@ import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ServerSentEventHttpMessageWriter}.
+ *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
@@ -48,14 +49,12 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 	private static final Map<String, Object> HINTS = Collections.emptyMap();
 
-
 	private ServerSentEventHttpMessageWriter messageWriter =
 			new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder());
 
 
 	@Test
 	public void canWrite() {
-
 		assertTrue(this.messageWriter.canWrite(forClass(Object.class), null));
 		assertFalse(this.messageWriter.canWrite(forClass(Object.class), new MediaType("foo", "bar")));
 
@@ -69,7 +68,6 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 	@Test
 	public void writeServerSentEvent() {
-
 		ServerSentEvent<?> event = ServerSentEvent.builder().data("bar").id("c42").event("foo")
 				.comment("bla\nbla bla\nbla bla bla").retry(Duration.ofMillis(123L)).build();
 
@@ -134,7 +132,6 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 	@Test  // SPR-14899
 	public void writePojoWithPrettyPrint() {
-
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().indentOutput(true).build();
 		this.messageWriter = new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder(mapper));
 
@@ -172,8 +169,8 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		testWrite(source, MediaType.TEXT_EVENT_STREAM, response, clazz);
 	}
 
-	private <T> void testWrite(Publisher<T> source, MediaType mediaType, MockServerHttpResponse response,
-			Class<T> clazz) {
+	private <T> void testWrite(
+			Publisher<T> source, MediaType mediaType, MockServerHttpResponse response, Class<T> clazz) {
 
 		this.messageWriter.write(source, forClass(clazz), mediaType, response, HINTS)
 				.block(Duration.ofMillis(5000));
