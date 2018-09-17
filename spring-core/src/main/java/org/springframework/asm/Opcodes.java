@@ -38,6 +38,7 @@ package org.springframework.asm;
  * @author Eric Bruneton
  * @author Eugene Kuleshov
  */
+// DontCheck(InterfaceIsType): can't be fixed (for backward binary compatibility).
 public interface Opcodes {
 
   // ASM API versions.
