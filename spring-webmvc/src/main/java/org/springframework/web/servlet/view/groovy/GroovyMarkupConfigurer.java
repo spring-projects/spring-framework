@@ -194,7 +194,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	protected URL resolveTemplate(ClassLoader classLoader, String templatePath) throws IOException {
 		MarkupTemplateEngine.TemplateResource resource = MarkupTemplateEngine.TemplateResource.parse(templatePath);
 		Locale locale = LocaleContextHolder.getLocale();
-		URL url = classLoader.getResource(resource.withLocale(locale.toString().replace("-", "_")).toString());
+		URL url = classLoader.getResource(resource.withLocale(StringUtils.replace(locale.toString(), "-", "_")).toString());
 		if (url == null) {
 			url = classLoader.getResource(resource.withLocale(locale.getLanguage()).toString());
 		}

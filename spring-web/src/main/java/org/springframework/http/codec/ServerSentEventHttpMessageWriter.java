@@ -38,6 +38,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code HttpMessageWriter} for {@code "text/event-stream"} responses.
@@ -135,7 +136,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				writeField("retry", retry.toMillis(), sb);
 			}
 			if (comment != null) {
-				sb.append(':').append(comment.replaceAll("\\n", "\n:")).append("\n");
+				sb.append(':').append(StringUtils.replace(comment, "\n", "\n:")).append("\n");
 			}
 			if (data != null) {
 				sb.append("data:");
@@ -164,7 +165,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 		if (data instanceof String) {
 			String text = (String) data;
-			return Flux.from(encodeText(text.replaceAll("\\n", "\ndata:") + "\n", mediaType, factory));
+			return Flux.from(encodeText(StringUtils.replace(text, "\n", "\ndata:") + "\n", mediaType, factory));
 		}
 
 		if (this.encoder == null) {

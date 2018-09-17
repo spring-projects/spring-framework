@@ -318,12 +318,19 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		}
 		// We will perform this validation...
 		etag = padEtagIfNecessary(etag);
-		for (String clientETag : ifNoneMatch) {
+		if (etag.startsWith("W/")) {
+			etag = etag.substring(2);
+		}
+		for (String clientEtag : ifNoneMatch) {
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-			if (StringUtils.hasLength(clientETag) &&
-					clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))) {
-				this.notModified = true;
-				break;
+			if (StringUtils.hasLength(clientEtag)) {
+				if (clientEtag.startsWith("W/")) {
+					clientEtag = clientEtag.substring(2);
+				}
+				if (clientEtag.equals(etag)) {
+					this.notModified = true;
+					break;
+				}
 			}
 		}
 		return true;

@@ -38,7 +38,7 @@ import org.springframework.web.util.TagUtils;
 import org.springframework.web.util.UriUtils;
 
 /**
- * The {@code <url>} tag creates URLs. Modeled after the JSTL c:url tag with
+ * The {@code <url>} tag creates URLs. Modeled after the JSTL {@code c:url} tag with
  * backwards compatibility in mind.
  *
  * <p>Enhancements to the JSTL functionality include:
@@ -361,7 +361,8 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 				usedParams.add(param.getName());
 				String value = param.getValue();
 				try {
-					uri = uri.replace(template, (value != null ? UriUtils.encodePath(value, encoding) : ""));
+					uri = StringUtils.replace(uri, template,
+							(value != null ? UriUtils.encodePath(value, encoding) : ""));
 				}
 				catch (UnsupportedCharsetException ex) {
 					throw new JspException(ex);
@@ -373,7 +374,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 					usedParams.add(param.getName());
 					String value = param.getValue();
 					try {
-						uri = uri.replace(template,
+						uri = StringUtils.replace(uri, template,
 								(value != null ? UriUtils.encodePathSegment(param.getValue(), encoding) : ""));
 					}
 					catch (UnsupportedCharsetException ex) {
