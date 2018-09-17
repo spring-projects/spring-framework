@@ -28,8 +28,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Container for the base URL of a SockJS endpoint with additional helper methods
- * to derive related SockJS URLs as the {@link #getInfoUrl() info} URL and
- * {@link #getTransportUrl(TransportType) transport} URLs.
+ * to derive related SockJS URLs: specifically, the {@link #getInfoUrl() info}
+ * and {@link #getTransportUrl(TransportType) transport} URLs.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
