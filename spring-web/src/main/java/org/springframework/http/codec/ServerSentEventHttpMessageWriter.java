@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -53,6 +54,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 	private static final List<MediaType> WRITABLE_MEDIA_TYPES = Collections.singletonList(MediaType.TEXT_EVENT_STREAM);
 
+	private static final Pattern LINE_FEED_PATTERN = Pattern.compile("\\n");
 
 	@Nullable
 	private final Encoder<?> encoder;
@@ -135,7 +137,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				writeField("retry", retry.toMillis(), sb);
 			}
 			if (comment != null) {
-				sb.append(':').append(comment.replaceAll("\\n", "\n:")).append("\n");
+				sb.append(':').append(LINE_FEED_PATTERN.matcher(comment).replaceAll("\n:")).append("\n");
 			}
 			if (data != null) {
 				sb.append("data:");
@@ -164,7 +166,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 		if (data instanceof String) {
 			String text = (String) data;
-			return Flux.from(encodeText(text.replaceAll("\\n", "\ndata:") + "\n", mediaType, factory));
+			return Flux.from(encodeText(LINE_FEED_PATTERN.matcher(text).replaceAll("\ndata:") + "\n", mediaType, factory));
 		}
 
 		if (this.encoder == null) {

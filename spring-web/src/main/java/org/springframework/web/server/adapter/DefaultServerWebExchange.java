@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import reactor.core.publisher.Mono;
 
@@ -75,6 +76,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	private static final Mono<MultiValueMap<String, Part>> EMPTY_MULTIPART_DATA =
 			Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, Part>(0)))
 					.cache();
+
+	private static final Pattern WEAK_PATTERN = Pattern.compile("^W/");
 
 
 	private final ServerHttpRequest request;
@@ -321,7 +324,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		for (String clientETag : ifNoneMatch) {
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
 			if (StringUtils.hasLength(clientETag) &&
-					clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))) {
+					WEAK_PATTERN.matcher(clientETag).replaceFirst("").equals(WEAK_PATTERN.matcher(etag).replaceFirst(""))) {
 				this.notModified = true;
 				break;
 			}

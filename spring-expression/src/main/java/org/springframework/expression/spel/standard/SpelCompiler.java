@@ -20,6 +20,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,6 +74,8 @@ public final class SpelCompiler implements Opcodes {
 	// A compiler is created for each classloader, it manages a child class loader of that
 	// classloader and the child is used to load the compiled expressions.
 	private static final Map<ClassLoader, SpelCompiler> compilers = new ConcurrentReferenceHashMap<>();
+
+	private static final Pattern SLASH_PATTERN = Pattern.compile("/");
 
 	// The child ClassLoader used to load the compiled expression classes
 	private ChildClassLoader ccl;
@@ -181,7 +184,7 @@ public final class SpelCompiler implements Opcodes {
 		byte[] data = cw.toByteArray();
 		// TODO need to make this conditionally occur based on a debug flag
 		// dump(expressionToCompile.toStringAST(), clazzName, data);
-		return loadClass(clazzName.replaceAll("/", "."), data);
+		return loadClass(SLASH_PATTERN.matcher(clazzName).replaceAll("."), data);
 	}
 
 	/**
