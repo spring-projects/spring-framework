@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,6 +201,27 @@ public class NestedConfigurationClassTests {
 		assertNotEquals(l2i1.toString(), l2i2.toString());
 	}
 
+	@Test
+	public void twoLevelsOnNonAnnotatedBaseClass() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(L0ConfigConcrete.class);
+		ctx.refresh();
+
+		assertFalse(ctx.getBeanFactory().containsSingleton("l0ConfigConcrete"));
+		Object l0i1 = ctx.getBean(L0ConfigConcrete.class);
+		Object l0i2 = ctx.getBean(L0ConfigConcrete.class);
+		assertTrue(l0i1 == l0i2);
+
+		Object l1i1 = ctx.getBean(L0ConfigConcrete.L1ConfigEmpty.class);
+		Object l1i2 = ctx.getBean(L0ConfigConcrete.L1ConfigEmpty.class);
+		assertTrue(l1i1 != l1i2);
+
+		Object l2i1 = ctx.getBean(L0ConfigConcrete.L1ConfigEmpty.L2ConfigEmpty.class);
+		Object l2i2 = ctx.getBean(L0ConfigConcrete.L1ConfigEmpty.L2ConfigEmpty.class);
+		assertTrue(l2i1 == l2i2);
+		assertNotEquals(l2i1.toString(), l2i2.toString());
+	}
+
 
 	@Configuration
 	@Lazy
@@ -363,6 +384,26 @@ public class NestedConfigurationClassTests {
 			protected static class L2ConfigEmpty {
 			}
 		}
+	}
+
+
+	static class L0ConfigBase {
+
+		@Component
+		@Scope("prototype")
+		static class L1ConfigEmpty {
+
+			@Component
+			@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+			protected static class L2ConfigEmpty {
+			}
+		}
+	}
+
+
+	@Component
+	@Lazy
+	static class L0ConfigConcrete extends L0ConfigBase {
 	}
 
 }
