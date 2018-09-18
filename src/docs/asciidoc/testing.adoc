@@ -190,7 +190,7 @@ Framework>> instead.
 [[integration-testing]]
 == Integration Testing
 
-This section covers (most of the rest of this chapter) covers integration testing for
+This section (most of the rest of this chapter) covers integration testing for
 Spring applications. It includes the following topics:
 
 * <<integration-testing-overview>>
@@ -466,7 +466,7 @@ file:
 		// class body...
 	}
 ----
-<1> Referring to a XML file.
+<1> Referring to an XML file.
 ====
 
 The following example shows a `@ContextConfiguration` annotation that refers to a class:
@@ -1291,7 +1291,7 @@ configuration class:
 <1> Specify the configuration class.
 ====
 
-The following example shows how to use the `@SpringJUnitConfig` annotation to specify a
+The following example shows how to use the `@SpringJUnitConfig` annotation to specify
 the location of a configuration file:
 
 ====
@@ -1532,7 +1532,7 @@ configuration of individual JUnit 4 based test classes, as follows:
 ----
 ====
 
-If we writ tests that use JUnit Jupiter, we can reduce code duplication even further,
+If we write tests that use JUnit Jupiter, we can reduce code duplication even further,
 since annotations in JUnit 5 can also be used as meta-annotations.
 Consider the following example:
 
@@ -2373,7 +2373,7 @@ configuration file and the superclass's configuration file:
 ====
 
 Similarly, in the next example, which uses annotated classes, the
-`ApplicationContext` for `ExtendedTest` are loaded from the `BaseConfig` and
+`ApplicationContext` for `ExtendedTest` is loaded from the `BaseConfig` and
 `ExtendedConfig` classes, in that order. Beans defined in `ExtendedConfig` can, therefore,
 override (that is, replace) those defined in `BaseConfig`.
 The following example shows how one class can extend another and use both its own
@@ -2401,7 +2401,7 @@ configuration class and the superclass's configuration class:
 ====
 
 In the next example, which uses context initializers, the `ApplicationContext` for
-`ExtendedTest` are initialized by using `BaseInitializer` and
+`ExtendedTest` is initialized by using `BaseInitializer` and
 `ExtendedInitializer`. Note, however, that the order in which the initializers are
 invoked depends on whether they implement Spring's `Ordered` interface or are annotated
 with Spring's `@Order` annotation or the standard `@Priority` annotation.
@@ -2809,7 +2809,7 @@ is loaded by using the specified resource protocol. Resource location wildcards 
 `**/*.properties`) are not permitted: Each location must evaluate to exactly one
 `.properties` or `.xml` resource.
 
-The folowing example uses a test properties file:
+The following example uses a test properties file:
 
 ====
 [source,java,indent=0]
@@ -3549,7 +3549,7 @@ request-scoped and session-scoped beans by following these steps:
   `WebApplicationContext` (with dependency injection).
 . Perform assertions against the mocks.
 
-The nexxt code snippet shows the XML configuration for a login use case. Note
+The next code snippet shows the XML configuration for a login use case. Note
 that the `userService` bean has a dependency on a request-scoped `loginAction` bean.
 Also, the `LoginAction` is instantiated by using <<core.adoc#expressions,SpEL expressions>> that
 retrieve the username and password from the current HTTP request. In our test, we
@@ -4232,7 +4232,7 @@ of individual attributes in {api-spring-framework}/test/context/jdbc/Sql.html[`@
 [[testcontext-executing-sql-declaratively-tx]]
 *Transaction management for `@Sql`*
 
-By default, the `SqlScriptsTestExecutionListener` infer the desired transaction
+By default, the `SqlScriptsTestExecutionListener` infers the desired transaction
 semantics for scripts configured by using `@Sql`. Specifically, SQL scripts are run
 without a transaction, within an existing Spring-managed transaction (for example, a
 transaction managed by the `TransactionalTestExecutionListener` for a test annotated with
@@ -4453,7 +4453,7 @@ of `AbstractJUnit4SpringContextTests` that adds some convenience functionality f
 access. This class expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager`
 bean to be defined in the `ApplicationContext`. When you extend
 `AbstractTransactionalJUnit4SpringContextTests`, you can access a `protected` `jdbcTemplate`
-instance variable that you can used to run SQL statements to query the database. You can use such
+instance variable that you can use to run SQL statements to query the database. You can use such
 queries to confirm database state both before and after running
 database-related application code, and Spring ensures that such queries run in the scope of
 the same transaction as the application code. When used in conjunction with an ORM tool,
@@ -4702,7 +4702,7 @@ of `AbstractTestNGSpringContextTests` that adds some convenience functionality f
 access. This class expects a `javax.sql.DataSource` bean and a `PlatformTransactionManager`
 bean to be defined in the `ApplicationContext`. When you extend
 `AbstractTransactionalTestNGSpringContextTests`, you can access a `protected` `jdbcTemplate`
-instance variable that you can used to execute SQL statements to query the database. You can use such
+instance variable that you can use to execute SQL statements to query the database. You can use such
 queries to confirm database state both before and after running
 database-related application code, and Spring ensures that such queries run in the scope of
 the same transaction as the application code. When used in conjunction with an ORM tool,
@@ -4749,7 +4749,7 @@ integration tests, see <<spring-mvc-test-vs-end-to-end-integration-tests>>.
 [[spring-mvc-test-server]]
 ==== Server-Side Tests
 
-You can write a plain unit test for a Spring MVC controller bt using JUnit or TestNG.
+You can write a plain unit test for a Spring MVC controller by using JUnit or TestNG.
 To do so, instantiate the controller, inject it with mocked or stubbed dependencies, and call
 its methods (passing `MockHttpServletRequest`, `MockHttpServletResponse`, and others, as necessary).
 However, when writing such a unit test, much remains untested: for example, request
@@ -5022,7 +5022,7 @@ You can specify query parameters in URI template style, as the following example
 ----
 ====
 
-You can also add Servlet request parameters that represent either query of form parameters,
+You can also add Servlet request parameters that represent either query or form parameters,
 as the following example shows:
 
 ====
@@ -5232,7 +5232,7 @@ with an actual client and server running.
 The easiest way to think about this is by starting with a blank `MockHttpServletRequest`.
 Whatever you add to it is what the request becomes. Things that may catch you by surprise
 are that there is no context path by default; no `jsessionid` cookie; no forwarding, error,
-or async dispatches; andm, therefore, no actual JSP rendering. Instead, "`forwarded`" and
+or async dispatches; and, therefore, no actual JSP rendering. Instead, "`forwarded`" and
 "`redirected`" URLs are saved in the `MockHttpServletResponse` and can be asserted with
 expectations.
 

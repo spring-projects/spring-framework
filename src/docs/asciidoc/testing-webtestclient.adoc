@@ -44,7 +44,7 @@ on the builder to customize the default WebFlux Java configuration.
 [[webtestclient-fn-config]]
 === Bind to Router Function
 
-The folloiwng example shows how to set up a server from a
+The following example shows how to set up a server from a
 <<web-reactive.adoc#webflux-fn,RouterFunction>>:
 
 ====
