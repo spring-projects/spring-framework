@@ -2567,7 +2567,7 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testSingletonLookupByNameIsFastEnough() {
-		// Assume.group(TestGroup.PERFORMANCE);
+		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
@@ -2584,7 +2584,7 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testSingletonLookupByTypeIsFastEnough() {
-		// Assume.group(TestGroup.PERFORMANCE);
+		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));

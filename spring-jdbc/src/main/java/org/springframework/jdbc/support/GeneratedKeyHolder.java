@@ -26,12 +26,12 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
 
 /**
- * Default implementation of the {@link KeyHolder} interface, to be used for
+ * The standard implementation of the {@link KeyHolder} interface, to be used for
  * holding auto-generated keys (as potentially returned by JDBC insert statements).
  *
- * <p>Create an instance of this class for each insert operation, and pass
- * it to the corresponding {@link org.springframework.jdbc.core.JdbcTemplate}
- * or {org.springframework.jdbc.object.SqlUpdate} methods.
+ * <p>Create an instance of this class for each insert operation, and pass it
+ * to the corresponding {@link org.springframework.jdbc.core.JdbcTemplate} or
+ * {@link org.springframework.jdbc.object.SqlUpdate} methods.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
