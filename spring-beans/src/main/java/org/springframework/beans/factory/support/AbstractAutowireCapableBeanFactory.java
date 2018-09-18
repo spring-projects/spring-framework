@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -151,6 +152,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private final ConcurrentMap<Class<?>, PropertyDescriptor[]> filteredPropertyDescriptorsCache =
 			new ConcurrentHashMap<Class<?>, PropertyDescriptor[]>(256);
 
+
+	/** Concurrency access lock on beanPostProcessors */
+	private final ReentrantLock beanPostProcessorsLock = new ReentrantLock();
 
 	/**
 	 * Create a new AbstractAutowireCapableBeanFactory.
@@ -403,11 +407,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Object result = existingBean;
-		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			result = processor.postProcessBeforeInitialization(result, beanName);
-			if (result == null) {
-				return result;
+		beanPostProcessorsLock.lock();
+		try {
+			for (BeanPostProcessor processor : getBeanPostProcessors()) {
+				result = processor.postProcessBeforeInitialization(result, beanName);
+				if (result == null) {
+					return result;
+				}
 			}
+		} finally {
+			beanPostProcessorsLock.unlock();
 		}
 		return result;
 	}
@@ -417,18 +426,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Object result = existingBean;
-		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			result = processor.postProcessAfterInitialization(result, beanName);
-			if (result == null) {
-				return result;
+		beanPostProcessorsLock.lock();
+		try {
+			for (BeanPostProcessor processor : getBeanPostProcessors()) {
+				result = processor.postProcessAfterInitialization(result, beanName);
+				if (result == null) {
+					return result;
+				}
 			}
+		} finally {
+			beanPostProcessorsLock.unlock();
 		}
 		return result;
 	}
 
 	@Override
 	public void destroyBean(Object existingBean) {
-		new DisposableBeanAdapter(existingBean, getBeanPostProcessors(), getAccessControlContext()).destroy();
+		beanPostProcessorsLock.lock();
+		try {
+			new DisposableBeanAdapter(existingBean, getBeanPostProcessors(), getAccessControlContext()).destroy();
+		} finally {
+			beanPostProcessorsLock.unlock();
+		}
 	}
 
 
@@ -609,15 +628,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
 		if (targetType != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-			for (BeanPostProcessor bp : getBeanPostProcessors()) {
-				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
-					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
-					Class<?> predicted = ibp.predictBeanType(targetType, beanName);
-					if (predicted != null && (typesToMatch.length != 1 || FactoryBean.class != typesToMatch[0] ||
-							FactoryBean.class.isAssignableFrom(predicted))) {
-						return predicted;
+			beanPostProcessorsLock.lock();
+			try {
+				for (BeanPostProcessor bp : getBeanPostProcessors()) {
+					if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
+						SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+						Class<?> predicted = ibp.predictBeanType(targetType, beanName);
+						if (predicted != null && (typesToMatch.length != 1 || FactoryBean.class != typesToMatch[0] ||
+								FactoryBean.class.isAssignableFrom(predicted))) {
+							return predicted;
+						}
 					}
 				}
+			} finally {
+				beanPostProcessorsLock.unlock();
 			}
 		}
 		return targetType;
@@ -877,19 +901,34 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object getEarlyBeanReference(String beanName, RootBeanDefinition mbd, Object bean) {
 		Object exposedObject = bean;
 		if (bean != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-			for (BeanPostProcessor bp : getBeanPostProcessors()) {
-				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
-					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
-					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
-					if (exposedObject == null) {
-						return null;
+			beanPostProcessorsLock.lock();
+			try {
+				for (BeanPostProcessor bp : getBeanPostProcessors()) {
+					if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
+						SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+						exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
+						if (exposedObject == null) {
+							return null;
+						}
 					}
 				}
+			} finally {
+				beanPostProcessorsLock.unlock();
 			}
 		}
 		return exposedObject;
 	}
 
+
+	@Override
+	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+		beanPostProcessorsLock.lock();
+		try {
+			super.addBeanPostProcessor(beanPostProcessor);
+		} finally {
+			beanPostProcessorsLock.unlock();
+		}
+	}
 
 	//---------------------------------------------------------------------
 	// Implementation methods
@@ -991,11 +1030,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see MergedBeanDefinitionPostProcessor#postProcessMergedBeanDefinition
 	 */
 	protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class<?> beanType, String beanName) {
-		for (BeanPostProcessor bp : getBeanPostProcessors()) {
-			if (bp instanceof MergedBeanDefinitionPostProcessor) {
-				MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
-				bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
+		beanPostProcessorsLock.lock();
+		try {
+			for (BeanPostProcessor bp : getBeanPostProcessors()) {
+				if (bp instanceof MergedBeanDefinitionPostProcessor) {
+					MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
+					bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
+				}
 			}
+		} finally {
+			beanPostProcessorsLock.unlock();			
 		}
 	}
 
@@ -1036,14 +1080,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation
 	 */
 	protected Object applyBeanPostProcessorsBeforeInstantiation(Class<?> beanClass, String beanName) {
-		for (BeanPostProcessor bp : getBeanPostProcessors()) {
-			if (bp instanceof InstantiationAwareBeanPostProcessor) {
-				InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
-				Object result = ibp.postProcessBeforeInstantiation(beanClass, beanName);
-				if (result != null) {
-					return result;
+		beanPostProcessorsLock.lock();
+		try {
+			for (BeanPostProcessor bp : getBeanPostProcessors()) {
+				if (bp instanceof InstantiationAwareBeanPostProcessor) {
+					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+					Object result = ibp.postProcessBeforeInstantiation(beanClass, beanName);
+					if (result != null) {
+						return result;
+					}
 				}
 			}
+		} finally {
+			beanPostProcessorsLock.unlock();
 		}
 		return null;
 	}
@@ -1117,14 +1166,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		if (beanClass != null && hasInstantiationAwareBeanPostProcessors()) {
-			for (BeanPostProcessor bp : getBeanPostProcessors()) {
-				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
-					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
-					Constructor<?>[] ctors = ibp.determineCandidateConstructors(beanClass, beanName);
-					if (ctors != null) {
-						return ctors;
+			beanPostProcessorsLock.lock();
+			try {
+				for (BeanPostProcessor bp : getBeanPostProcessors()) {
+					if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
+						SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+						Constructor<?>[] ctors = ibp.determineCandidateConstructors(beanClass, beanName);
+						if (ctors != null) {
+							return ctors;
+						}
 					}
 				}
+			} finally {
+				beanPostProcessorsLock.unlock();
 			}
 		}
 		return null;
@@ -1225,14 +1279,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		boolean continueWithPropertyPopulation = true;
 
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-			for (BeanPostProcessor bp : getBeanPostProcessors()) {
-				if (bp instanceof InstantiationAwareBeanPostProcessor) {
-					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
-					if (!ibp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
-						continueWithPropertyPopulation = false;
-						break;
+			beanPostProcessorsLock.lock();
+			try {
+				for (BeanPostProcessor bp : getBeanPostProcessors()) {
+					if (bp instanceof InstantiationAwareBeanPostProcessor) {
+						InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+						if (!ibp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
+							continueWithPropertyPopulation = false;
+							break;
+						}
 					}
 				}
+			} finally {
+				beanPostProcessorsLock.unlock();
 			}
 		}
 
@@ -1263,14 +1322,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (hasInstAwareBpps || needsDepCheck) {
 			PropertyDescriptor[] filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
 			if (hasInstAwareBpps) {
-				for (BeanPostProcessor bp : getBeanPostProcessors()) {
-					if (bp instanceof InstantiationAwareBeanPostProcessor) {
-						InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
-						pvs = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
-						if (pvs == null) {
-							return;
+				beanPostProcessorsLock.lock();
+				try {
+					for (BeanPostProcessor bp : getBeanPostProcessors()) {
+						if (bp instanceof InstantiationAwareBeanPostProcessor) {
+							InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+							pvs = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
+							if (pvs == null) {
+								return;
+							}
 						}
 					}
+				} finally {
+					beanPostProcessorsLock.unlock();
 				}
 			}
 			if (needsDepCheck) {
