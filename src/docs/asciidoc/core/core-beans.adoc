@@ -1,6 +1,7 @@
 [[beans]]
-= The IoC container
+= The IoC Container
 
+This chapter covers Spring's Inversion of Control (IoC) container.
 
 
 
@@ -143,7 +144,7 @@ The following example shows the basic structure of XML-based configuration metad
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-		<bean id="..." class="...">                                       <1> <2>
+		<bean id="..." class="..."> <1> <2>
 			<!-- collaborators and configuration for this bean go here -->
 		</bean>
 
@@ -2136,6 +2137,7 @@ modes:
 
 [[beans-factory-autowiring-modes-tbl]]
 .Autowiring modes
+[cols="20%,80%"]
 |===
 | Mode| Explanation
 
@@ -2568,6 +2570,7 @@ The following table describes the supported scopes:
 
 [[beans-factory-scopes-tbl]]
 .Bean scopes
+[cols="20%,80%"]
 |===
 | Scope| Description
 
@@ -2957,7 +2960,7 @@ understand the "`why`" as well as the "`how`" behind it:
 		<!-- an HTTP Session-scoped bean exposed as a proxy -->
 		<bean id="userPreferences" class="com.something.UserPreferences" scope="session">
 			<!-- instructs the container to proxy the surrounding bean -->
-			<aop:scoped-proxy/>                                                       <1>
+			<aop:scoped-proxy/> <1>
 		</bean>
 
 		<!-- a singleton-scoped bean injected with a proxy to the above bean -->
@@ -4565,7 +4568,7 @@ references and values even when you use the class outside of a container.
 
 
 [[beans-autowired-annotation]]
-=== @Autowired
+=== Using `@Autowired`
 
 NOTE: JSR 330's `@Inject` annotation can be used in place of Spring's `@Autowired` annotation
 in the examples included in this section. See <<beans-standard-annotations,here>> for more details.
@@ -5007,13 +5010,13 @@ The following example shows corresponding bean definitions.
 		<context:annotation-config/>
 
 		<bean class="example.SimpleMovieCatalog">
-			<qualifier value="main"/>                         <1>
+			<qualifier value="main"/> <1>
 
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
 		<bean class="example.SimpleMovieCatalog">
-			<qualifier value="action"/>                       <2>
+			<qualifier value="action"/> <2>
 
 			<!-- inject any dependencies required by this bean -->
 		</bean>
@@ -5201,7 +5204,7 @@ following example:
 	public class MovieRecommender {
 
 		@Autowired
-		@Offline                               <1>
+		@Offline <1>
 		private MovieCatalog offlineCatalog;
 
 		// ...
@@ -5217,7 +5220,7 @@ Now the bean definition only needs a qualifier `type`, as shown in the following
 [subs="verbatim,quotes"]
 ----
 	<bean class="example.SimpleMovieCatalog">
-		<qualifier type="Offline"/>              <1>
+		<qualifier type="Offline"/> <1>
 		<!-- inject any dependencies required by this bean -->
 	</bean>
 ----
@@ -5459,7 +5462,7 @@ demonstrated in the following example:
 
 		private MovieFinder movieFinder;
 
-		@Resource(name="myMovieFinder")                        <1>
+		@Resource(name="myMovieFinder") <1>
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
@@ -5516,7 +5519,7 @@ named customerPreferenceDao and then falls back to a primary type match for the 
 		private CustomerPreferenceDao customerPreferenceDao;
 
 		@Resource
-		private ApplicationContext context;                 <1>
+		private ApplicationContext context; <1>
 
 		public MovieRecommender() {
 		}
@@ -5630,7 +5633,7 @@ annotation. For example, the `@Service` annotation mentioned <<beans-stereotype-
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@Component                         <1>
+	@Component <1>
 	public @interface Service {
 
 		// ....
@@ -8181,7 +8184,7 @@ the following example shows:
 	public class AppConfig {
 
 		@Bean("dataSource")
-		@Profile("development")                                               <1>
+		@Profile("development") <1>
 		public DataSource standaloneDataSource() {
 			return new EmbeddedDatabaseBuilder()
 				.setType(EmbeddedDatabaseType.HSQL)
@@ -8191,7 +8194,7 @@ the following example shows:
 		}
 
 		@Bean("dataSource")
-		**@Profile("production")**
+		@Profile("production") <2>
 		public DataSource jndiDataSource() throws Exception {
 			Context ctx = new InitialContext();
 			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
@@ -8199,6 +8202,7 @@ the following example shows:
 	}
 ----
 <1> The `standaloneDataSource` method is available only in the `development` profile.
+<2> The `jndiDataSource` method is available only in the `production` profile.
 ====
 
 [NOTE]
@@ -8416,7 +8420,7 @@ the `Environment` or ,declaratively, by using the `spring.profiles.default` prop
 
 
 [[beans-property-source-abstraction]]
-=== `PropertySource` abstraction
+=== `PropertySource` Abstraction
 
 Spring's `Environment` abstraction provides search operations over a configurable
 hierarchy of property sources. Consider the following listing:
@@ -8895,6 +8899,7 @@ The following table describes the standard events that Spring provides:
 
 [[beans-ctx-events-tbl]]
 .Built-in Events
+[cols="30%,70%"]
 |===
 | Event| Explanation
 
@@ -9460,6 +9465,7 @@ The following table lists features provided by the `BeanFactory` and
 
 [[context-introduction-ctx-vs-beanfactory-feature-matrix]]
 .Feature Matrix
+[cols="50%,25%,25%"]
 |===
 | Feature | `BeanFactory` | `ApplicationContext`
 
