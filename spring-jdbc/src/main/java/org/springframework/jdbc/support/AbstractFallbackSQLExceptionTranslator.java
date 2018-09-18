@@ -114,7 +114,7 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	 * @return the message {@code String} to use
 	 */
 	protected String buildMessage(String task, @Nullable String sql, SQLException ex) {
-		return task + "; " + (sql != null ? "SQL [" + sql : "]; " + "") + ex.getMessage();
+		return task + "; " + (sql != null ? ("SQL [" + sql + "]; ") : "") + ex.getMessage();
 	}
 
 }
