@@ -145,7 +145,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final List<StringValueResolver> embeddedValueResolvers = new CopyOnWriteArrayList<StringValueResolver>();
 
 	/** BeanPostProcessors to apply in createBean */
-	private final List<BeanPostProcessor> beanPostProcessors = new CopyOnWriteArrayList<BeanPostProcessor>();
+	private volatile List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
 
 	/** Indicates whether any InstantiationAwareBeanPostProcessors have been registered */
 	private volatile boolean hasInstantiationAwareBeanPostProcessors;
@@ -845,8 +845,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
+		// Local copy set into volatile field, as an alternative to CopyOnWriteArrayList
+		// (which doesn't support Iterator.remove for our getBeanPostProcessors result List)
+		List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
+		beanPostProcessors.addAll(this.beanPostProcessors);
 		// Remove from old position, if any
-		this.beanPostProcessors.remove(beanPostProcessor);
+		beanPostProcessors.remove(beanPostProcessor);
 		// Track whether it is instantiation/destruction aware
 		if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
 			this.hasInstantiationAwareBeanPostProcessors = true;
@@ -855,7 +859,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			this.hasDestructionAwareBeanPostProcessors = true;
 		}
 		// Add to end of list
-		this.beanPostProcessors.add(beanPostProcessor);
+		beanPostProcessors.add(beanPostProcessor);
+		this.beanPostProcessors = beanPostProcessors;
 	}
 
 	@Override

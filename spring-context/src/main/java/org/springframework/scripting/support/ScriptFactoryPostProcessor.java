@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,8 +136,8 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @since 2.0
  */
-public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter implements
-		BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean, Ordered {
+public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
+		implements BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean, Ordered {
 
 	/**
 	 * The {@link org.springframework.core.io.Resource}-style prefix that denotes
@@ -159,6 +159,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	private static final String SCRIPT_FACTORY_NAME_PREFIX = "scriptFactory.";
 
 	private static final String SCRIPTED_OBJECT_NAME_PREFIX = "scriptedObject.";
+
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -221,7 +222,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		// since those are only meant to apply to beans defined in the original factory.
 		for (Iterator<BeanPostProcessor> it = this.scriptBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
 			if (it.next() instanceof AopInfrastructureBean) {
-				it.remove();
+				it.remove();  // effectively deprecated: use List.removeIf on Java 8+
 			}
 		}
 	}
@@ -235,6 +236,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	public int getOrder() {
 		return Integer.MIN_VALUE;
 	}
+
 
 	@Override
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
@@ -274,8 +276,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			if (ex instanceof BeanCreationException &&
 					((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Could not determine scripted object type for bean '" + beanName + "': "
-							+ ex.getMessage());
+					logger.trace("Could not determine scripted object type for bean '" + beanName + "': " +
+							ex.getMessage());
 				}
 			}
 			else {

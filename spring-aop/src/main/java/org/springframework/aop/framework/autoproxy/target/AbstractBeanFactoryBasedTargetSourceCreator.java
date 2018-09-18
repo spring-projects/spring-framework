@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 		// since those are only meant to apply to beans defined in the original factory.
 		for (Iterator<BeanPostProcessor> it = internalBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
 			if (it.next() instanceof AopInfrastructureBean) {
-				it.remove();
+				it.remove();  // effectively deprecated: use List.removeIf on Java 8+
 			}
 		}
 
