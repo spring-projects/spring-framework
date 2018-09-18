@@ -88,7 +88,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Create a SQL error code translator for the given DataSource.
 	 * Invoking this constructor will cause a Connection to be obtained
 	 * from the DataSource to get the meta-data.
-	 * @param dataSource DataSource to use to find meta-data and establish
+	 * @param dataSource the DataSource to use to find meta-data and establish
 	 * which error codes are usable
 	 * @see SQLErrorCodesFactory
 	 */
@@ -125,7 +125,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Set the DataSource for this translator.
 	 * <p>Setting this property will cause a Connection to be obtained from
 	 * the DataSource to get the meta-data.
-	 * @param dataSource DataSource to use to find meta-data and establish
+	 * @param dataSource the DataSource to use to find meta-data and establish
 	 * which error codes are usable
 	 * @see SQLErrorCodesFactory#getErrorCodes(javax.sql.DataSource)
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
@@ -176,9 +176,9 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 		}
 
 		// First, try custom translation from overridden method.
-		DataAccessException dex = customTranslate(task, sql, sqlEx);
-		if (dex != null) {
-			return dex;
+		DataAccessException dae = customTranslate(task, sql, sqlEx);
+		if (dae != null) {
+			return dae;
 		}
 
 		// Next, try the custom SQLException translator, if available.
@@ -213,14 +213,13 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 				CustomSQLErrorCodesTranslation[] customTranslations = this.sqlErrorCodes.getCustomTranslations();
 				if (customTranslations != null) {
 					for (CustomSQLErrorCodesTranslation customTranslation : customTranslations) {
-						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0) {
-							if (customTranslation.getExceptionClass() != null) {
-								DataAccessException customException = createCustomException(
-										task, sql, sqlEx, customTranslation.getExceptionClass());
-								if (customException != null) {
-									logTranslation(task, sql, sqlEx, true);
-									return customException;
-								}
+						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0 &&
+								customTranslation.getExceptionClass() != null) {
+							DataAccessException customException = createCustomException(
+									task, sql, sqlEx, customTranslation.getExceptionClass());
+							if (customException != null) {
+								logTranslation(task, sql, sqlEx, true);
+								return customException;
 							}
 						}
 					}
@@ -285,65 +284,65 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	}
 
 	/**
-	 * Subclasses can override this method to attempt a custom mapping from SQLException
-	 * to DataAccessException.
+	 * Subclasses can override this method to attempt a custom mapping from
+	 * {@link SQLException} to {@link DataAccessException}.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem. May be {@code null}.
+	 * @param sql the SQL query or update that caused the problem (may be {@code null})
 	 * @param sqlEx the offending SQLException
-	 * @return null if no custom translation was possible, otherwise a DataAccessException
-	 * resulting from custom translation. This exception should include the sqlEx parameter
-	 * as a nested root cause. This implementation always returns null, meaning that
-	 * the translator always falls back to the default error codes.
+	 * @return {@code null} if no custom translation applies, otherwise a {@link DataAccessException}
+	 * resulting from custom translation. This exception should include the {@code sqlEx} parameter
+	 * as a nested root cause. This implementation always returns {@code null}, meaning that the
+	 * translator always falls back to the default error codes.
 	 */
 	protected DataAccessException customTranslate(String task, String sql, SQLException sqlEx) {
 		return null;
 	}
 
 	/**
-	 * Create a custom DataAccessException, based on a given exception
-	 * class from a CustomSQLErrorCodesTranslation definition.
+	 * Create a custom {@link DataAccessException}, based on a given exception
+	 * class from a {@link CustomSQLErrorCodesTranslation} definition.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem. May be {@code null}.
+	 * @param sql the SQL query or update that caused the problem (may be {@code null})
 	 * @param sqlEx the offending SQLException
 	 * @param exceptionClass the exception class to use, as defined in the
-	 * CustomSQLErrorCodesTranslation definition
-	 * @return null if the custom exception could not be created, otherwise
-	 * the resulting DataAccessException. This exception should include the
-	 * sqlEx parameter as a nested root cause.
+	 * {@link CustomSQLErrorCodesTranslation} definition
+	 * @return {@code null} if the custom exception could not be created, otherwise
+	 * the resulting {@link DataAccessException}. This exception should include the
+	 * {@code sqlEx} parameter as a nested root cause.
 	 * @see CustomSQLErrorCodesTranslation#setExceptionClass
 	 */
 	protected DataAccessException createCustomException(
 			String task, String sql, SQLException sqlEx, Class<?> exceptionClass) {
 
-		// find appropriate constructor
+		// Find appropriate constructor for the given exception class
 		try {
 			int constructorType = 0;
 			Constructor<?>[] constructors = exceptionClass.getConstructors();
 			for (Constructor<?> constructor : constructors) {
 				Class<?>[] parameterTypes = constructor.getParameterTypes();
-				if (parameterTypes.length == 1 && String.class == parameterTypes[0]) {
-					if (constructorType < MESSAGE_ONLY_CONSTRUCTOR)
-						constructorType = MESSAGE_ONLY_CONSTRUCTOR;
+				if (parameterTypes.length == 1 && String.class == parameterTypes[0] &&
+						constructorType < MESSAGE_ONLY_CONSTRUCTOR) {
+					constructorType = MESSAGE_ONLY_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 2 && String.class == parameterTypes[0] &&
-						Throwable.class == parameterTypes[1]) {
-					if (constructorType < MESSAGE_THROWABLE_CONSTRUCTOR)
-						constructorType = MESSAGE_THROWABLE_CONSTRUCTOR;
+						Throwable.class == parameterTypes[1] &&
+						constructorType < MESSAGE_THROWABLE_CONSTRUCTOR) {
+					constructorType = MESSAGE_THROWABLE_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 2 && String.class == parameterTypes[0] &&
-						SQLException.class == parameterTypes[1]) {
-					if (constructorType < MESSAGE_SQLEX_CONSTRUCTOR)
-						constructorType = MESSAGE_SQLEX_CONSTRUCTOR;
+						SQLException.class == parameterTypes[1] &&
+						constructorType < MESSAGE_SQLEX_CONSTRUCTOR) {
+					constructorType = MESSAGE_SQLEX_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 3 && String.class == parameterTypes[0] &&
-						String.class == parameterTypes[1] && Throwable.class == parameterTypes[2]) {
-					if (constructorType < MESSAGE_SQL_THROWABLE_CONSTRUCTOR)
-						constructorType = MESSAGE_SQL_THROWABLE_CONSTRUCTOR;
+						String.class == parameterTypes[1] && Throwable.class == parameterTypes[2] &&
+						constructorType < MESSAGE_SQL_THROWABLE_CONSTRUCTOR) {
+					constructorType = MESSAGE_SQL_THROWABLE_CONSTRUCTOR;
 				}
 				if (parameterTypes.length == 3 && String.class == parameterTypes[0] &&
-						String.class == parameterTypes[1] && SQLException.class == parameterTypes[2]) {
-					if (constructorType < MESSAGE_SQL_SQLEX_CONSTRUCTOR)
-						constructorType = MESSAGE_SQL_SQLEX_CONSTRUCTOR;
+						String.class == parameterTypes[1] && SQLException.class == parameterTypes[2] &&
+						constructorType < MESSAGE_SQL_SQLEX_CONSTRUCTOR) {
+					constructorType = MESSAGE_SQL_SQLEX_CONSTRUCTOR;
 				}
 			}
 
