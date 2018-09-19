@@ -105,6 +105,24 @@ public class AnnotationConfigApplicationContextTests {
 		}
 	}
 
+	@Test
+	public void getBeanByTypeAmbiguityRaisesException() {
+		ApplicationContext context = new AnnotationConfigApplicationContext(TwoTestBeanConfig.class);
+
+		try {
+			context.getBean(TestBean.class);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			assertThat(ex.getMessage(),
+					allOf(
+							containsString("No qualifying bean of type '" + TestBean.class.getName() + "'"),
+							containsString("tb1"),
+							containsString("tb2")
+					)
+			);
+		}
+	}
+
 	/**
 	 * Tests that Configuration classes are registered according to convention
 	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator#generateBeanName
@@ -363,14 +381,6 @@ public class AnnotationConfigApplicationContextTests {
 
 	@Configuration("customConfigBeanName")
 	static class ConfigWithCustomName {
-
-		@Bean
-		public TestBean testBean() {
-			return new TestBean();
-		}
-	}
-
-	static class ConfigMissingAnnotation {
 
 		@Bean
 		public TestBean testBean() {

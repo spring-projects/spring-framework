@@ -381,8 +381,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @param beanName the name of the bean (may be {@code null})
 	 * @param beanClass the class of the bean (resolving a public constructor
 	 * to be autowired, possibly simply the default constructor)
-	 * @param customizers one or more callbacks for customizing the
-	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @param customizers one or more callbacks for customizing the factory's
+	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)
 	 */
