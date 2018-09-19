@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.socket.server.support;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Collections;
@@ -274,7 +275,8 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		HttpHeaders headers = request.getHeaders();
 		Mono<Principal> principal = exchange.getPrincipal();
 		String logPrefix = exchange.getLogPrefix();
-		return new HandshakeInfo(uri, headers, principal, protocol, attributes, logPrefix);
+		InetSocketAddress remoteAddress = request.getRemoteAddress();
+		return new HandshakeInfo(uri, headers, principal, protocol, remoteAddress, attributes, logPrefix);
 	}
 
 }
