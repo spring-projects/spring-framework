@@ -32,7 +32,7 @@ ext {
 	freemarkerVersion    = "2.3.28"
 	groovyVersion        = "2.5.2"
 	hsqldbVersion        = "2.4.1"
-	jackson2Version      = "2.9.6"
+	jackson2Version      = "2.9.7"
 	jettyVersion         = "9.4.12.v20180830"
 	junit5Version        = "5.3.1"
 	kotlinVersion        = "1.2.70"
