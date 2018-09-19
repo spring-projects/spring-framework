@@ -143,6 +143,19 @@ class BeanDefinitionDslTests {
 		val barbar = context.getBean<BarBar>()
 		assertEquals(2, barbar.foos.size)
 	}
+
+	@Test  // SPR-17292
+	fun `Declare beans leveraging constructor injection`() {
+		val beans = beans {
+			bean<Bar>()
+			bean<Baz>()
+		}
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
+		context.getBean<Baz>()
+	}
 	
 }
 

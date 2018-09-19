@@ -18,7 +18,6 @@ package org.springframework.context.support
 
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer
-import org.springframework.beans.factory.support.AbstractBeanDefinition
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.core.env.ConfigurableEnvironment
@@ -113,38 +112,6 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	}
 
 	/**
-	 * Autowire enum constants.
-	 */
-	enum class Autowire {
-
-		/**
-		 * Autowire constant that indicates no externally defined autowiring
-		 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_NO
-		 */
-		NO,
-
-		/**
-		 * Autowire constant that indicates autowiring bean properties by name
-		 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_NAME
-		 */
-		BY_NAME,
-
-		/**
-		 * Autowire constant that indicates autowiring bean properties by type
-		 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE
-		 */
-		BY_TYPE,
-
-		/**
-		 * Autowire constant that indicates autowiring the greediest constructor that can be satisfied
-		 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR
-		 */
-		CONSTRUCTOR
-
-	}
-
-
-	/**
 	 * Role enum constants.
 	 */
 	enum class Role {
@@ -181,11 +148,13 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	/**
 	 * Declare a bean definition from the given bean class which can be inferred when possible.
 	 *
+	 * <p>The preferred constructor (Kotlin primary constructor and standard public constructors)
+	 * are evaluated for autowiring before falling back to default instantiation.
+	 *
 	 * @param name the name of the bean
 	 * @param scope Override the target scope of this bean, specifying a new scope name.
 	 * @param isLazyInit Set whether this bean should be lazily initialized.
 	 * @param isPrimary Set whether this bean is a primary autowire candidate.
-	 * @param autowireMode Set the autowire mode, `Autowire.CONSTRUCTOR` by default
 	 * @param isAutowireCandidate Set whether this bean is a candidate for getting
 	 * autowired into some other bean.
 	 * @param initMethodName Set the name of the initializer method
@@ -199,7 +168,6 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 									  scope: Scope? = null,
 									  isLazyInit: Boolean? = null,
 									  isPrimary: Boolean? = null,
-									  autowireMode: Autowire = Autowire.CONSTRUCTOR,
 									  isAutowireCandidate: Boolean? = null,
 									  initMethodName: String? = null,
 									  destroyMethodName: String? = null,
@@ -215,9 +183,6 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 			destroyMethodName?.let { bd.destroyMethodName = destroyMethodName }
 			description?.let { bd.description = description }
 			bd.role = role.ordinal
-			if (bd is AbstractBeanDefinition) {
-				bd.autowireMode = autowireMode.ordinal
-			}
 		}
 
 		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context);
@@ -231,7 +196,6 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	 * @param scope Override the target scope of this bean, specifying a new scope name.
 	 * @param isLazyInit Set whether this bean should be lazily initialized.
 	 * @param isPrimary Set whether this bean is a primary autowire candidate.
-	 * @param autowireMode Set the autowire mode, `Autowire.NO` by default
 	 * @param isAutowireCandidate Set whether this bean is a candidate for getting
 	 * autowired into some other bean.
 	 * @param initMethodName Set the name of the initializer method
@@ -246,7 +210,6 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 									  scope: Scope? = null,
 									  isLazyInit: Boolean? = null,
 									  isPrimary: Boolean? = null,
-									  autowireMode: Autowire = Autowire.NO,
 									  isAutowireCandidate: Boolean? = null,
 									  initMethodName: String? = null,
 									  destroyMethodName: String? = null,
@@ -263,9 +226,6 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 			destroyMethodName?.let { bd.destroyMethodName = destroyMethodName }
 			description?.let { bd.description = description }
 			bd.role = role.ordinal
-			if (bd is AbstractBeanDefinition) {
-				bd.autowireMode = autowireMode.ordinal
-			}
 		}
 
 
