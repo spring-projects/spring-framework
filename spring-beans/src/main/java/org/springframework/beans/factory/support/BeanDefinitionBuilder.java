@@ -69,9 +69,7 @@ public final class BeanDefinitionBuilder {
 	 * @param instanceSupplier a callback for creating an instance of the bean
 	 * @since 5.0
 	 */
-	public static <T> BeanDefinitionBuilder genericBeanDefinition(
-			@Nullable Class<T> beanClass, Supplier<T> instanceSupplier) {
-
+	public static <T> BeanDefinitionBuilder genericBeanDefinition(Class<T> beanClass, Supplier<T> instanceSupplier) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder(new GenericBeanDefinition());
 		builder.beanDefinition.setBeanClass(beanClass);
 		builder.beanDefinition.setInstanceSupplier(instanceSupplier);

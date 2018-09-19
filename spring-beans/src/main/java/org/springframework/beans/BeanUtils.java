@@ -122,11 +122,9 @@ public abstract class BeanUtils {
 			return instantiateClass(clazz.getDeclaredConstructor());
 		}
 		catch (NoSuchMethodException ex) {
-			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(clazz)) {
-				Constructor<T> ctor = findPrimaryConstructor(clazz);
-				if (ctor != null) {
-					return instantiateClass(ctor);
-				}
+			Constructor<T> ctor = findPrimaryConstructor(clazz);
+			if (ctor != null) {
+				return instantiateClass(ctor);
 			}
 			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
