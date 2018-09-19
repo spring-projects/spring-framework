@@ -158,7 +158,7 @@ public class WebSocketMessage {
 		/**
 		 * WebSocket pong.
 		 */
-		PONG;
+		PONG
 	}
 
 }

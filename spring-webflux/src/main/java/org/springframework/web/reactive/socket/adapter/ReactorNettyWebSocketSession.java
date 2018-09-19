@@ -43,7 +43,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class ReactorNettyWebSocketSession
 		extends NettyWebSocketSessionSupport<ReactorNettyWebSocketSession.WebSocketConnection> {
 
-
 	public ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
 			HandshakeInfo info, NettyDataBufferFactory bufferFactory) {
 
@@ -54,7 +53,7 @@ public class ReactorNettyWebSocketSession
 	@Override
 	public Flux<WebSocketMessage> receive() {
 		return getDelegate().getInbound()
-				.aggregateFrames(DEFAULT_FRAME_MAX_SIZE)
+				.aggregateFrames(receiveFrameMaxSize())
 				.receiveFrames()
 				.map(super::toMessage)
 				.doOnNext(message -> {
