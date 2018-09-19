@@ -172,7 +172,7 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 									  initMethodName: String? = null,
 									  destroyMethodName: String? = null,
 									  description: String? = null,
-									  role: Role = Role.APPLICATION) {
+									  role: Role? = null) {
 
 		val customizer = BeanDefinitionCustomizer { bd ->
 			scope?.let { bd.scope = scope.name.toLowerCase() }
@@ -182,7 +182,7 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 			initMethodName?.let { bd.initMethodName = initMethodName }
 			destroyMethodName?.let { bd.destroyMethodName = destroyMethodName }
 			description?.let { bd.description = description }
-			bd.role = role.ordinal
+			role?. let { bd.role = role.ordinal }
 		}
 
 		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context);
@@ -214,7 +214,7 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 									  initMethodName: String? = null,
 									  destroyMethodName: String? = null,
 									  description: String? = null,
-									  role: Role = Role.APPLICATION,
+									  role: Role? = null,
 									  crossinline function: () -> T) {
 
 		val customizer = BeanDefinitionCustomizer { bd ->
@@ -225,7 +225,7 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 			initMethodName?.let { bd.initMethodName = initMethodName }
 			destroyMethodName?.let { bd.destroyMethodName = destroyMethodName }
 			description?.let { bd.description = description }
-			bd.role = role.ordinal
+			role?. let { bd.role = role.ordinal }
 		}
 
 
