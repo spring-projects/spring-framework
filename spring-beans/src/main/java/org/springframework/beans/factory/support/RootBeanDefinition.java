@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -333,6 +334,18 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	public ResolvableType getResolvableType() {
 		ResolvableType targetType = this.targetType;
 		return (targetType != null ? targetType : ResolvableType.forClass(getBeanClass()));
+	}
+
+	/**
+	 * Determine preferred constructors to use for default construction, if any.
+	 * Constructor arguments will be autowired if necessary.
+	 * @return one or more preferred constructors, or {@code null} if none
+	 * (in which case the regular no-arg default constructor will be called)
+	 * @since 5.1
+	 */
+	@Nullable
+	public Constructor<?>[] getPreferredConstructors() {
+		return null;
 	}
 
 	/**
