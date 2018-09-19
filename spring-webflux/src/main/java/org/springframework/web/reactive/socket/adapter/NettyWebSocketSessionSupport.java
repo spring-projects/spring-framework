@@ -26,6 +26,7 @@ import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.ObjectUtils;
@@ -50,6 +51,9 @@ public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketS
 	protected static final int DEFAULT_FRAME_MAX_SIZE = 64 * 1024;
 
 
+	@Value("${spring.web.reactive.socket.receiveFrameMaxSize:0}")
+	private int receiveFrameMaxSize;
+
 	private static final Map<Class<?>, WebSocketMessage.Type> messageTypes;
 
 	static {
@@ -71,6 +75,9 @@ public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketS
 		return (NettyDataBufferFactory) super.bufferFactory();
 	}
 
+	protected int receiveFrameMaxSize() {
+		return this.receiveFrameMaxSize > 0 ? this.receiveFrameMaxSize : DEFAULT_FRAME_MAX_SIZE;
+	}
 
 	protected WebSocketMessage toMessage(WebSocketFrame frame) {
 		DataBuffer payload = bufferFactory().wrap(frame.content());
