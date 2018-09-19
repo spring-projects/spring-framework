@@ -32,11 +32,7 @@ import org.springframework.lang.Nullable;
  * @author Rossen Stoyanchev
  * @since 5.1
  */
-public final class LogFormatUtils {
-
-	private LogFormatUtils() {
-	}
-
+public abstract class LogFormatUtils {
 
 	/**
 	 * Format the given value via {@code toString()}, quoting it if it is a
