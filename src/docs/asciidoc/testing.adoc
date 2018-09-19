@@ -1354,7 +1354,7 @@ the location of a configuration file:
 		// class body...
 	}
 ----
-<1>Specify the location of a configuration file.
+<1> Specify the location of a configuration file.
 ====
 
 See <<testcontext-ctx-management>> as well as the Javadoc for
