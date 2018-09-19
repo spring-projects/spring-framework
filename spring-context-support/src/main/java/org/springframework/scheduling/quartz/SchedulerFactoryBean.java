@@ -193,9 +193,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	private Map<String, ?> schedulerContextMap;
 
 	@Nullable
-	private ApplicationContext applicationContext;
-
-	@Nullable
 	private String applicationContextSchedulerContextKey;
 
 	@Nullable
@@ -212,6 +209,9 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	private boolean exposeSchedulerInRepository = false;
 
 	private boolean waitForJobsToCompleteOnShutdown = false;
+
+	@Nullable
+	private ApplicationContext applicationContext;
 
 	@Nullable
 	private Scheduler scheduler;
@@ -564,10 +564,10 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 		CollectionUtils.mergePropertiesIntoMap(this.quartzProperties, mergedProps);
 		if (this.dataSource != null) {
-			mergedProps.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
+			mergedProps.setProperty(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
 		}
 		if (this.schedulerName != null) {
-			mergedProps.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
+			mergedProps.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
 		}
 
 		schedulerFactory.initialize(mergedProps);
