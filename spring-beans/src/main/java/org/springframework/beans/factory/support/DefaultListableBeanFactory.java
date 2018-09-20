@@ -1459,7 +1459,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				candidates.put(candidateName, beanInstance);
 			}
 		}
-		else if (containsSingleton(candidateName)) {
+		else if (containsSingleton(candidateName) || (descriptor instanceof StreamDependencyDescriptor &&
+				((StreamDependencyDescriptor) descriptor).isOrdered())) {
 			Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
 			candidates.put(candidateName, (beanInstance instanceof NullBean ? null : beanInstance));
 		}

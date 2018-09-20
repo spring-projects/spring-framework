@@ -71,7 +71,6 @@ import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.SerializationTestUtils;
-import org.springframework.util.comparator.Comparators;
 
 import static org.junit.Assert.*;
 
@@ -1290,12 +1289,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testObjectProviderInjectionWithTargetPrimary() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectProviderInjectionBean.class));
-		RootBeanDefinition tb1 = new RootBeanDefinition(OrderedTestBean.class);
-		tb1.getPropertyValues().add("order", 1);
+		RootBeanDefinition tb1 = new RootBeanDefinition(TestBeanFactory.class);
+		tb1.setFactoryMethodName("newTestBean1");
 		tb1.setPrimary(true);
 		bf.registerBeanDefinition("testBean1", tb1);
-		RootBeanDefinition tb2 = new RootBeanDefinition(OrderedTestBean.class);
-		tb2.getPropertyValues().add("order", 0);
+		RootBeanDefinition tb2 = new RootBeanDefinition(TestBeanFactory.class);
+		tb2.setFactoryMethodName("newTestBean2");
 		tb2.setLazyInit(true);
 		bf.registerBeanDefinition("testBean2", tb2);
 
@@ -1321,8 +1320,27 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(bf.getBean("testBean2"), testBeans.get(1));
 		testBeans = bean.sortedTestBeans();
 		assertEquals(2, testBeans.size());
-		assertSame(bf.getBean("testBean1"), testBeans.get(1));
 		assertSame(bf.getBean("testBean2"), testBeans.get(0));
+		assertSame(bf.getBean("testBean1"), testBeans.get(1));
+	}
+
+	@Test
+	public void testObjectProviderInjectionWithUnresolvedOrderedStream() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectProviderInjectionBean.class));
+		RootBeanDefinition tb1 = new RootBeanDefinition(TestBeanFactory.class);
+		tb1.setFactoryMethodName("newTestBean1");
+		tb1.setPrimary(true);
+		bf.registerBeanDefinition("testBean1", tb1);
+		RootBeanDefinition tb2 = new RootBeanDefinition(TestBeanFactory.class);
+		tb2.setFactoryMethodName("newTestBean2");
+		tb2.setLazyInit(true);
+		bf.registerBeanDefinition("testBean2", tb2);
+
+		ObjectProviderInjectionBean bean = (ObjectProviderInjectionBean) bf.getBean("annotatedBean");
+		List<?> testBeans = bean.sortedTestBeans();
+		assertEquals(2, testBeans.size());
+		assertSame(bf.getBean("testBean2"), testBeans.get(0));
+		assertSame(bf.getBean("testBean1"), testBeans.get(1));
 	}
 
 	@Test
@@ -2981,21 +2999,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class OrderedTestBean extends TestBean implements Ordered {
-
-		private int order;
-
-		public void setOrder(int order) {
-			this.order = order;
-		}
-
-		@Override
-		public int getOrder() {
-			return this.order;
-		}
-	}
-
-
 	public static class OrderedNestedTestBean extends NestedTestBean implements Ordered {
 
 		private int order;
@@ -3858,6 +3861,20 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		public static SelfInjectingFactoryBean create() {
 			return new SelfInjectingFactoryBean();
+		}
+	}
+
+
+	public static class TestBeanFactory {
+
+		@Order(1)
+		public static TestBean newTestBean1() {
+			return new TestBean();
+		}
+
+		@Order(0)
+		public static TestBean newTestBean2() {
+			return new TestBean();
 		}
 	}
 
