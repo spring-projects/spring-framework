@@ -230,15 +230,14 @@ shows:
 		};
 
 		ClientHttpConnector connector =
-				new JettyClientHttpConnector(resourceFactory(), customizer); <2>
+				new JettyClientHttpConnector(resourceFactory(), customizer); // <1>
 
-		return WebClient.builder().clientConnector(connector).build(); <3>
+		return WebClient.builder().clientConnector(connector).build(); // <2>
 	}
 ----
 
-<1> Create resource factory for shared resources.
-<2> Use the `JettyClientHttpConnector` constructor with resource factory.
-<3> Plug the connector into the `WebClient.Builder`.
+<1> Use the `JettyClientHttpConnector` constructor with resource factory.
+<2> Plug the connector into the `WebClient.Builder`.
 ====
 
 
