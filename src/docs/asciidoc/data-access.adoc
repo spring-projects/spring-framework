@@ -2321,7 +2321,7 @@ tedious API.
 
 
 [[jdbc-choose-style]]
-==== Choosing an Approach for JDBC Database Access
+=== Choosing an Approach for JDBC Database Access
 
 You can choose among several approaches to form the basis for your JDBC database access.
 In addition to three flavors of `JdbcTemplate`, a new `SimpleJdbcInsert` and
@@ -2351,7 +2351,7 @@ advanced features require a JDBC 3.0 driver.
 
 
 [[jdbc-packages]]
-==== Package Hierarchy
+=== Package Hierarchy
 
 The Spring Framework's JDBC abstraction framework consists of four different packages:
 
@@ -2389,7 +2389,7 @@ exceptions be propagated to the caller. See <<jdbc-SQLExceptionTranslator>>.
 [[jdbc-core]]
 === Using the JDBC Core Classes to Control Basic JDBC Processing and Error Handling
 
-This section covers how to use the JDBC core classes to cotrol basic JDBC processing,
+This section covers how to use the JDBC core classes to control basic JDBC processing,
 including error handling. It includes the following topics:
 
 * <<jdbc-JdbcTemplate>>

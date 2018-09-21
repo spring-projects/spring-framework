@@ -18,7 +18,7 @@ for example, Spring MVC controllers with the reactive `WebClient`.
 
 
 [[webflux-new-framework]]
-=== Motivation
+== Motivation
 
 Why was Spring WebFlux created?
 
@@ -41,7 +41,7 @@ WebFlux to offer functional web endpoints alongside annotated controllers.
 
 
 [[webflux-why-reactive]]
-=== Define "`Reactive`"
+== Define "`Reactive`"
 
 We touched on "`non-blocking`" and "`functional`" but what does reactive mean?
 
