@@ -1,7 +1,7 @@
 [[webtestclient]]
 = WebTestClient
 
-`WebTestClient` is a thin shell around <<web-reactive.adoc#webflux-webclient, WebClient>>,
+`WebTestClient` is a thin shell around <<web-reactive.adoc#webflux-client, WebClient>>,
 using it to perform requests and exposing a dedicated, fluent API for verifying responses.
 `WebTestClient` binds to a WebFlux application by using a
 <<testing.adoc#mock-objects-web-reactive,mock request and response>>, or it can test any
@@ -140,9 +140,9 @@ are readily available following `bindToServer`. For all others, you need to use
 [[webtestclient-tests]]
 == Writing Tests
 
-`WebTestClient` is a thin shell around <<web-reactive.adoc#webflux-webclient,WebClient>>.
-It provides an identical API up to the point of performing a request by using `exchange()`.
-What follows after `exchange()` is a chained API workflow to verify responses.
+`WebTestClient` provides an API identical to <<web-reactive.adoc#webflux-client,WebClient>>
+up to the point of performing a request by using `exchange()`. What follows after
+`exchange()` is a chained API workflow to verify responses.
 
 Typically, you start by asserting the response status and headers, as follows:
 

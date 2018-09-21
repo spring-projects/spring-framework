@@ -1264,7 +1264,7 @@ programming model in JUnit 5):
 * <<integration-testing-annotations-junit-jupiter-springjunitconfig>>
 * <<integration-testing-annotations-junit-jupiter-springjunitwebconfig>>
 * <<integration-testing-annotations-junit-jupiter-enabledif>>
-* <<integration-testing-annotations-junit-jupiter=-disabledif>>
+* <<integration-testing-annotations-junit-jupiter-disabledif>>
 
 
 
@@ -1406,7 +1406,7 @@ example, you can create a custom `@EnabledOnMac` annotation as follows:
 
 
 
-[[integration-testing-annotations-junit-jupiter=-disabledif]]
+[[integration-testing-annotations-junit-jupiter-disabledif]]
 ===== `@DisabledIf`
 
 `@DisabledIf` is used to signal that the annotated JUnit Jupiter test class or test
@@ -1627,8 +1627,9 @@ configuration of individual JUnit Jupiter based test methods, as follows:
 ----
 ====
 
-For further details, see the <<core.adoc#annotation-programming-model,Spring
-Annotation Programming Model>>.
+For further details, see the
+https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
+wiki page.
 
 
 
@@ -1670,9 +1671,8 @@ in turn, manages a `TestContext` that holds the context of the current test. The
 and delegates to `TestExecutionListener` implementations, which instrument the actual
 test execution by providing dependency injection, managing transactions, and so on. A
 `SmartContextLoader` is responsible for loading an `ApplicationContext` for a given test
-class. See the {api-spring-framework}[Javadoc] and the Spring test suite for further
-information and examples of various implementations.
-
+class. See the {api-spring-framework}/test/context/package-summary.html[Javadoc] and the
+Spring test suite for further information and examples of various implementations.
 
 
 ===== `TestContext`
@@ -3860,7 +3860,7 @@ of `PlatformTransactionManager` within the test's `ApplicationContext`, you can 
 qualifier by using `@Transactional("myTxMgr")` or `@Transactional(transactionManager =
 "myTxMgr")`, or `TransactionManagementConfigurer` can be implemented by an
 `@Configuration` class. Consult the
-{api-spring-framework}/test/context/transaction/TestContextTransactionUtils.html#retrieveTransactionManager[Javadoc
+{api-spring-framework}/test/context/transaction/TestContextTransactionUtils.html#retrieveTransactionManager-org.springframework.test.context.TestContext-java.lang.String-[Javadoc
 for `TestContextTransactionUtils.retrieveTransactionManager()`] for details on the
 algorithm used to look up a transaction manager in the test's `ApplicationContext`.
 
@@ -5295,8 +5295,8 @@ when using HTML-based views. This integration lets you:
 * Easily test HTML pages by using tools such as
   http://htmlunit.sourceforge.net/[HtmlUnit],
   http://seleniumhq.org/projects/webdriver/[WebDriver], and
-  http://www.gebish.org/manual/current/testing.html#spock_junit__testng[Geb] without the
-  need to deploy to a Servlet container.
+  http://www.gebish.org/manual/current/#spock-junit-testng[Geb] without the need to
+  deploy to a Servlet container.
 * Test JavaScript within pages.
 * Optionally, test using mock services to speed up testing.
 * Share logic between in-container end-to-end tests and out-of-container integration tests.
