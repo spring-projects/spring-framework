@@ -208,16 +208,17 @@ The following example shows how to customize Jetty `HttpClient` settings:
 By default, `HttpClient` creates its own resources (`Executor`, `ByteBufferPool`, `Scheduler`),
 which remain active until the process exits or `stop()` is called.
 
-You can share resources between multiple instances of the Jetty client (and server) and ensure that the
-resources are shut down when the Spring `ApplicationContext` is closed by declaring a
-Spring-managed bean of type `JettyResourceFactory`, as the following example shows:
+You can share resources between multiple instances of the Jetty client (and server) and
+ensure that the resources are shut down when the Spring `ApplicationContext` is closed by
+declaring a Spring-managed bean of type `JettyResourceFactory`, as the following example
+shows:
 
 ====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
 	@Bean
-	public JettyResourceFactory resourceFactory() {
+	public JettyResourceFactory resourceFactory() { <1>
 		return new JettyResourceFactory();
 	}
 
@@ -229,13 +230,13 @@ Spring-managed bean of type `JettyResourceFactory`, as the following example sho
 		};
 
 		ClientHttpConnector connector =
-				new JettyClientHttpConnector(resourceFactory(), customizer); // <2>
+				new JettyClientHttpConnector(resourceFactory(), customizer); <2>
 
-		return WebClient.builder().clientConnector(connector).build(); // <3>
+		return WebClient.builder().clientConnector(connector).build(); <3>
 	}
 ----
 
-<1> Create shared resources.
+<1> Create resource factory for shared resources.
 <2> Use the `JettyClientHttpConnector` constructor with resource factory.
 <3> Plug the connector into the `WebClient.Builder`.
 ====

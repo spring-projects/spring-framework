@@ -758,7 +758,7 @@ configuration scenarios:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@DirtiesContext
+	@DirtiesContext <1>
 	public class ContextDirtyingTests {
 		// some tests that result in the Spring container being dirtied
 	}

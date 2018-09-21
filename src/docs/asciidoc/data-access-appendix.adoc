@@ -37,16 +37,19 @@ are available to you:
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			xmlns:aop="http://www.springframework.org/schema/aop"
-			xmlns:tx="http://www.springframework.org/schema/tx" xsi:schemaLocation=" <1>
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:tx="http://www.springframework.org/schema/tx" <1>
+		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd <2>
-			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"> <!-- bean definitions here -->
+			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+		<!-- bean definitions here -->
 
 	</beans>
 ----
-<1> Specify the namespace.
+<1> Declare usage of the `tx` namespace.
 <2> Specify the location (with other schema locations).
 ====
 
@@ -77,12 +80,15 @@ the correct schema so that the elements in the `jdbc` namespace are available to
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:jdbc="http://www.springframework.org/schema/jdbc" xsi:schemaLocation=" <2>
+		xmlns:jdbc="http://www.springframework.org/schema/jdbc" <1>
+		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd"> <!-- bean definitions here --> <2>
+			http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd"> <2>
+
+		<!-- bean definitions here -->
 
 	</beans>
 ----
-<1> Specify the namespace.
+<1> Declare usage of the `jdbc` namespace.
 <2> Specify the location (with other schema locations).
 ====

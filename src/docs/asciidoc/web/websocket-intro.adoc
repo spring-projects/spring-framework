@@ -11,16 +11,17 @@ to upgrade or, in this case, to switch to the WebSocket protocol. The following 
 shows such an interaction:
 
 ====
-[subs="quotes"]
+[source,yaml,indent=0]
+[subs="verbatim,quotes"]
 ----
-GET /spring-websocket-portfolio/portfolio HTTP/1.1
-Host: localhost:8080
-Upgrade: websocket <1>
-Connection: Upgrade <2>
-Sec-WebSocket-Key: Uc9l9TMkWGbHFD2qnFHltg==
-Sec-WebSocket-Protocol: v10.stomp, v11.stomp
-Sec-WebSocket-Version: 13
-Origin: http://localhost:8080
+	GET /spring-websocket-portfolio/portfolio HTTP/1.1
+	Host: localhost:8080
+	Upgrade: websocket <1>
+	Connection: Upgrade <2>
+	Sec-WebSocket-Key: Uc9l9TMkWGbHFD2qnFHltg==
+	Sec-WebSocket-Protocol: v10.stomp, v11.stomp
+	Sec-WebSocket-Version: 13
+	Origin: http://localhost:8080
 ----
 <1> The `Upgrade` header.
 <2> Using the `Upgrade` connection.
@@ -30,14 +31,16 @@ Instead of the usual 200 status code, a server with WebSocket support returns ou
 similar to the following:
 
 ====
-[subs="quotes"]
+[source,yaml,indent=0]
+[subs="verbatim,quotes"]
 ----
-**HTTP/1.1 101 Switching Protocols**
-Upgrade: websocket
-Connection: Upgrade
-Sec-WebSocket-Accept: 1qVdfYHU9hPOl4JYYNXF623Gzn0=
-Sec-WebSocket-Protocol: v10.stomp
+	HTTP/1.1 101 Switching Protocols <1>
+	Upgrade: websocket
+	Connection: Upgrade
+	Sec-WebSocket-Accept: 1qVdfYHU9hPOl4JYYNXF623Gzn0=
+	Sec-WebSocket-Protocol: v10.stomp
 ----
+<1> Protocol switch
 ====
 
 After a successful handshake, the TCP socket underlying the HTTP upgrade request remains

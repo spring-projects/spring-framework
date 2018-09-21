@@ -2359,19 +2359,19 @@ specific controller. This typically lists the names of model attributes or types
 model attributes that should be transparently stored in the session for subsequent
 requests to access.
 
-The following example uses a `@SessionAttributes` annotation:
+The following example uses the `@SessionAttributes` annotation:
 
 ====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	@SessionAttributes("pet")
+	@SessionAttributes("pet") <1>
 	public class EditPetForm {
 		// ...
 	}
 ----
-<1> Using a `@SessionAttributes` annotation.
+<1> Using the `@SessionAttributes` annotation.
 ====
 
 On the first request, when a model attribute with the name, `pet`, is added to the model,
@@ -2394,13 +2394,14 @@ storage, as the following example shows:
 			if (errors.hasErrors) {
 				// ...
 			}
-				status.setComplete();
+				status.setComplete(); <2>
 				// ...
 			}
 		}
 	}
 ----
-<1> Clearing the `Pet` value from storage.
+<1> Storing the `Pet` value in the Servlet session.
+<2> Clearing the `Pet` value from the Servlet session.
 ====
 
 
@@ -2449,11 +2450,11 @@ or `HandlerInterceptor`):
 [subs="verbatim,quotes"]
 ----
 	@GetMapping("/")
-	public String handle(@RequestAttribute Client client) {
+	public String handle(@RequestAttribute Client client) { <1>
 		// ...
 	}
 ----
-<1> Using a `@RequestAttribute` annotation.
+<1> Using the `@RequestAttribute` annotation.
 ====
 
 
