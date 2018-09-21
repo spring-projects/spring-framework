@@ -1556,7 +1556,7 @@ applies to transactions). See <<core.adoc#aop,AOP>> for detailed coverage of the
 configuration and AOP in general.
 
 The following code shows the simple profiling aspect discussed earlier:
-.
+
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3221,16 +3221,14 @@ connection are made.
 To configure a `DriverManagerDataSource`:
 
 . Obtain a connection with `DriverManagerDataSource` as you typically obtain a JDBC
-connection.
-. Specify the fully qualified classname of the JDBC driver so that the
-`DriverManager` can load the driver class.
-. Provide a URL that varies between JDBC
-drivers. (See the documentation for your driver for the correct value.)
-. Provide
-a username and a password to connect to the database.
+  connection.
+. Specify the fully qualified classname of the JDBC driver so that the `DriverManager`
+  can load the driver class.
+. Provide a URL that varies between JDBC drivers. (See the documentation for your driver
+  for the correct value.)
+. Provide a username and a password to connect to the database.
 
-The following example shows how to
-configure a `DriverManagerDataSource` in Java:
+The following example shows how to configure a `DriverManagerDataSource` in Java:
 
 ====
 [source,java,indent=0]
@@ -3246,6 +3244,7 @@ configure a `DriverManagerDataSource` in Java:
 
 The following example shows the corresponding XML configuration:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3258,6 +3257,7 @@ The following example shows the corresponding XML configuration:
 
 	<context:property-placeholder location="jdbc.properties"/>
 ----
+====
 
 The next two examples show the basic connectivity and configuration for DBCP and C3P0.
 To learn about more options that help control the pooling features, see the product
@@ -3506,14 +3506,15 @@ The following example shows a batch update using named parameters:
 ----
 ====
 
-For an SQL statement that uses the classic `?` placeholders, you pass in a list containing an
-object array with the update values. This object array must have one entry for each
-placeholder in the SQL statement, and they must be in the same order as they are defined
-in the SQL statement.
+For an SQL statement that uses the classic `?` placeholders, you pass in a list
+containing an object array with the update values. This object array must have one entry
+for each placeholder in the SQL statement, and they must be in the same order as they are
+defined in the SQL statement.
 
-The following example is the same as the preceding example, except that it uses classic JDBC "?" placeholders:
+The following example is the same as the preceding example, except that it uses classic
+JDBC `?` placeholders:
 
-===
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3542,9 +3543,9 @@ The following example is the same as the preceding example, except that it uses 
 ----
 ====
 
-All of the batch update methods that we described earlier return an `int` array containing the number of
-affected rows for each batch entry. This count is reported by the JDBC driver. If the
-count is not available, the JDBC driver returns a value of `-2`.
+All of the batch update methods that we described earlier return an `int` array
+containing the number of affected rows for each batch entry. This count is reported by
+the JDBC driver. If the count is not available, the JDBC driver returns a value of `-2`.
 
 [NOTE]
 ====
@@ -4271,6 +4272,7 @@ thread-safe after it is compiled, so, as long as these instances are created whe
 is initialized, they can be kept as instance variables and be reused. The following
 example shows how to define such a class:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4285,6 +4287,7 @@ example shows how to define such a class:
 		return actorMappingQuery.findObject(id);
 	}
 ----
+====
 
 The method in the preceding example retrieves the customer with the `id` that is passed in as the
 only parameter. Since we want only one object to be returned, we call the `findObject` convenience
@@ -6802,7 +6805,10 @@ preamble of the XML configuration file. The following example shows how to do so
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:oxm="http://www.springframework.org/schema/oxm" xsi:schemaLocation="http://www.springframework.org/schema/beans <1> http://www.springframework.org/schema/beans/spring-beans.xsd **http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd"**>
+		xmlns:oxm="http://www.springframework.org/schema/oxm"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd"> <1>
 ----
 <1> Reference the `oxm` schema.
 ====
