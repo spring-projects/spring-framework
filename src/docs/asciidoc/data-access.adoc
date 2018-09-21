@@ -6805,12 +6805,13 @@ preamble of the XML configuration file. The following example shows how to do so
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:oxm="http://www.springframework.org/schema/oxm"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd"> <1>
+		xmlns:oxm="http://www.springframework.org/schema/oxm" <1>
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd"> <2>
 ----
 <1> Reference the `oxm` schema.
+<2> Specify the `oxm` schema location.
 ====
 
 Currently, the schema makes the following elements available:
