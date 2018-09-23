@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -40,10 +41,13 @@ import org.springframework.util.Assert;
  */
 public class PassThroughFilterChain implements FilterChain {
 
+	@Nullable
 	private Filter filter;
 
+	@Nullable
 	private FilterChain nextFilterChain;
 
+	@Nullable
 	private Servlet servlet;
 
 
