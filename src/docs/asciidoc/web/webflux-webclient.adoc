@@ -129,7 +129,7 @@ instances use shared resources, as the following example shows:
 	@Bean
 	public ReactorResourceFactory resourceFactory() {
 		ReactorResourceFactory factory = new ReactorResourceFactory();
-		factory.setGlobalResources(false); // <1>
+		factory.setGlobalResources(false); <1>
 		return factory;
 	}
 
@@ -141,9 +141,9 @@ instances use shared resources, as the following example shows:
 		};
 
 		ClientHttpConnector connector =
-				new ReactorClientHttpConnector(resourceFactory(), mapper); // <2>
+				new ReactorClientHttpConnector(resourceFactory(), mapper); <2>
 
-		return WebClient.builder().clientConnector(connector).build(); // <3>
+		return WebClient.builder().clientConnector(connector).build(); <3>
 	}
 ----
 <1> Create resources independent of global ones.
@@ -218,7 +218,7 @@ shows:
 [subs="verbatim,quotes"]
 ----
 	@Bean
-	public JettyResourceFactory resourceFactory() { <1>
+	public JettyResourceFactory resourceFactory() {
 		return new JettyResourceFactory();
 	}
 
@@ -230,12 +230,11 @@ shows:
 		};
 
 		ClientHttpConnector connector =
-				new JettyClientHttpConnector(resourceFactory(), customizer); // <1>
+				new JettyClientHttpConnector(resourceFactory(), customizer); <1>
 
-		return WebClient.builder().clientConnector(connector).build(); // <2>
+		return WebClient.builder().clientConnector(connector).build(); <2>
 	}
 ----
-
 <1> Use the `JettyClientHttpConnector` constructor with resource factory.
 <2> Plug the connector into the `WebClient.Builder`.
 ====
@@ -587,8 +586,8 @@ WebClient client = webClient.mutate()
 
 To test code that uses the `WebClient`, you can use a mock web server, such as the
 https://github.com/square/okhttp#mockwebserver[OkHttp MockWebServer]. To see an example
-of its use, check
+of its use, check out
 https://github.com/spring-projects/spring-framework/blob/master/spring-webflux/src/test/java/org/springframework/web/reactive/function/client/WebClientIntegrationTests.java[`WebClientIntegrationTests`]
-in the Spring Framework tests or the
+in the Spring Framework test suite or the
 https://github.com/square/okhttp/tree/master/samples/static-server[`static-server`]
 sample in the OkHttp repository.
