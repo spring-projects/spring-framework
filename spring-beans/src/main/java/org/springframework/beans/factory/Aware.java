@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ package org.springframework.beans.factory;
  * functionality. Rather, processing must be done explicitly, for example
  * in a {@link org.springframework.beans.factory.config.BeanPostProcessor BeanPostProcessor}.
  * Refer to {@link org.springframework.context.support.ApplicationContextAwareProcessor}
- * and {@link org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory}
+ * and {@link org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean(
+ * String, Object, org.springframework.beans.factory.support.RootBeanDefinition)}
  * for examples of processing {@code *Aware} interface callbacks.
  *
  * @author Chris Beams
