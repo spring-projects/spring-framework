@@ -5894,7 +5894,7 @@ in effect, disables automatic detection of classes annotated with `@Component`, 
 
 Spring components can also contribute bean definition metadata to the container. You can do
 this with the same `@Bean` annotation used to define bean metadata within `@Configuration`
-annotated classes. The following example show how to do so:
+annotated classes. The following example shows how to do so:
 
 ====
 [source,java,indent=0]
@@ -5923,7 +5923,7 @@ factory method and other bean definition properties, such as a qualifier value t
 the `@Qualifier` annotation. Other method-level annotations that can be specified are
 `@Scope`, `@Lazy`, and custom qualifier annotations.
 
-TIP: In addition to its role for component initialization, you can also place the `@Lazy` annotation may
+TIP: In addition to its role for component initialization, you can also place the `@Lazy` annotation
 on injection points marked with `@Autowired` or `@Inject`. In this context, it
 leads to the injection of a lazy-resolution proxy.
 
