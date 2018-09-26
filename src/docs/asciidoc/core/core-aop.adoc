@@ -1328,7 +1328,8 @@ If the first parameter is of the `JoinPoint`, `ProceedingJoinPoint`, or
 of the `argNames` attribute. For example, if you modify the preceding advice to receive
 the join point object, the `argNames` attribute need not include it:
 +
-====[source,java,indent=0]
+====
+[source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@Before(value="com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)",
@@ -1751,7 +1752,7 @@ Assume that you have a `SystemArchitecture` aspect as described in <<aop-common-
 Then declaring a pointcut inside an aspect is very similar to declaring a top-level pointcut,
 as the following example shows:
 
-===
+====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -2564,18 +2565,18 @@ something like the following:
 [source,java,indent=0]
 [subs="verbatim"]
 ----
-	@Pointcut(execution(* get*()))
+	@Pointcut("execution(* get*())")
 	public void propertyAccess() {}
 
-	@Pointcut(execution(org.xyz.Account+ *(..))
+	@Pointcut("execution(org.xyz.Account+ *(..))")
 	public void operationReturningAnAccount() {}
 
-	@Pointcut(propertyAccess() && operationReturningAnAccount())
+	@Pointcut("propertyAccess() && operationReturningAnAccount()")
 	public void accountPropertyAccess() {}
 ----
 ====
 
-In the XML style I can declare the first two pointcuts:
+In the XML style you can declare the first two pointcuts:
 
 [source,xml,indent=0]
 [subs="verbatim"]
@@ -2862,7 +2863,7 @@ See the {api-spring-framework}/aop/aspectj/annotation/AspectJProxyFactory.html[J
 == Using AspectJ with Spring Applications
 
 Everything we have covered so far in this chapter is pure Spring AOP. In this section,
-we look at how you can use the AspectJ compileror weaver instead of or in
+we look at how you can use the AspectJ compiler or weaver instead of or in
 addition to Spring AOP if your needs go beyond the facilities offered by Spring AOP
 alone.
 
@@ -2910,7 +2911,7 @@ following example shows:
 When used as a marker interface in this way, Spring configures new instances of the
 annotated type (`Account`, in this case) by using a bean definition (typically
 prototype-scoped) with the same name as the fully-qualified type name
-()`com.xyz.myapp.domain.Account`). Since the default name for a bean is the
+(`com.xyz.myapp.domain.Account`). Since the default name for a bean is the
 fully-qualified name of its type, a convenient way to declare the prototype definition
 is to omit the `id` attribute, as the following example shows:
 

@@ -1719,7 +1719,7 @@ transactional advice on the way out, you can swap the value of the profiling
 aspect bean's `order` property so that it is higher than the transactional advice's
 order value.
 
-You configure additional aspects in similar fashion.
+You can configure additional aspects in similar fashion.
 
 
 
@@ -1765,7 +1765,7 @@ The `@Transactional` annotation on a class specifies the default transaction sem
 for the execution of any public method in the class.
 
 The `@Transactional` annotation on a method within the class overrides the default
-transaction semantics given by the class annotation (if present). You can annotation any method,
+transaction semantics given by the class annotation (if present). You can annotate any method,
 regardless of visibility.
 
 To weave your applications with the `AnnotationTransactionAspect`, you must either build
@@ -2133,14 +2133,14 @@ specific to each technology.
 [[dao-exceptions]]
 === Consistent Exception Hierarchy
 
-Spring provides a convenient translation from technology-specific exceptions,, such as
+Spring provides a convenient translation from technology-specific exceptions, such as
 `SQLException` to its own exception class hierarchy, which has `DataAccessException` as
 the root exception. These exceptions wrap the original exception so that there is never any
 risk that you might lose any information about what might have gone wrong.
 
 In addition to JDBC exceptions, Spring can also wrap JPA- and Hibernate-specific exceptions,
 converting them to a set of focused runtime exceptions.
-This lets you handle most non-recoverablepersistence exceptions
+This lets you handle most non-recoverable persistence exceptions
 in only the appropriate layers, without having annoying boilerplate
 catch-and-throw blocks and exception declarations in your DAOs. (You can still trap
 and handle exceptions anywhere you need to though.) As mentioned above, JDBC
@@ -2190,7 +2190,7 @@ Any DAO or repository implementation needs access to a persistence resource,
 depending on the persistence technology used. For example, a JDBC-based repository
 needs access to a JDBC `DataSource`, and a JPA-based repository needs access to an
 `EntityManager`. The easiest way to accomplish this is to have this resource dependency
-injected by using one of the `@Autowired,`, `@Inject`, `@Resource` or `@PersistenceContext`
+injected by using one of the `@Autowired`, `@Inject`, `@Resource` or `@PersistenceContext`
 annotations. The following example works for a JPA repository:
 
 ====
@@ -3643,7 +3643,7 @@ layer's initialization method. For this example, the initializing method is the
 you can create a new instance and set the table name by using the `withTableName` method.
 Configuration methods for this class follow the `fluid` style that returns the instance
 of the `SimpleJdbcInsert`, which lets you chain all configuration methods. The following
-example uses only one configuration method (we shows examples of multiple methods later):
+example uses only one configuration method (we show examples of multiple methods later):
 
 ====
 [source,java,indent=0]
@@ -3672,7 +3672,7 @@ example uses only one configuration method (we shows examples of multiple method
 ----
 ====
 
-The `execute` method used here takes a plain `java.utils.Map` as its only parameter. The
+The `execute` method used here takes a plain `java.util.Map` as its only parameter. The
 important thing to note here is that the keys used for the `Map` must match the column
 names of the table, as defined in the database. This is because we read the metadata
 to construct the actual insert statement.
@@ -4401,7 +4401,7 @@ example, the `StoredProcedure` class is an inner class. However, if you need to 
 parameters, but an output parameter is declared as a date type by using the
 `SqlOutParameter` class. The `execute()` method runs the procedure and extracts the
 returned date from the results `Map`. The results `Map` has an entry for each declared
-output parameter (in this case, only one) byusing the parameter name as the key.
+output parameter (in this case, only one) by using the parameter name as the key.
 The following listing shows our custom StoredProcedure class:
 
 ====
@@ -5029,7 +5029,7 @@ inadvertently attempts to recreate additional instances of the same database. Th
 happen quite easily if an XML configuration file or `@Configuration` class is responsible
 for creating an embedded database and the corresponding configuration is then reused
 across multiple testing scenarios within the same test suite (that is, within the same JVM
-process) –- for example, integration tests against embedded databases whose
+process) -- for example, integration tests against embedded databases whose
 `ApplicationContext` configuration differs only with regard to which bean definition
 profiles are active.
 
@@ -5205,7 +5205,7 @@ Some suggestions for how to implement this include:
 * Have your cache or a separate component that initializes the cache implement
   `Lifecycle` or `SmartLifecycle`. When the application context starts, you can
   automatically start a `SmartLifecycle` by setting its `autoStartup` flag, and you can
-  manually start a `Lifecycle`by calling `ConfigurableApplicationContext.start()`
+  manually start a `Lifecycle` by calling `ConfigurableApplicationContext.start()`
   on the enclosing context.
 * Use a Spring `ApplicationEvent` or similar custom observer mechanism to trigger the
   cache initialization. `ContextRefreshedEvent` is always published by the context when
@@ -5593,7 +5593,7 @@ focus on adding business logic, which is the real value of your application.
 NOTE: Before you continue, we are strongly encourage you to read <<transaction-declarative>>
 if you have not already done so.
 
-You cN annotate the service layer with `@Transactional` annotations and instruct the
+You can annotate the service layer with `@Transactional` annotations and instruct the
 Spring container to find these annotations and provide transactional semantics for
 these annotated methods. The following example shows how to do so:
 
@@ -6355,7 +6355,7 @@ a non-invasiveness perspective and can feel more natural to JPA developers.
 [[orm-jpa-tx]]
 ==== Spring-driven JPA transactions
 
-NOTE: We strongly encourag you to read <<transaction-declarative>>, if you have not already done
+NOTE: We strongly encourage you to read <<transaction-declarative>>, if you have not already done
 so, to get more detailed coverage of Spring's declarative transaction support.
 
 The recommended strategy for JPA is local transactions through JPA's native transaction
@@ -6635,7 +6635,7 @@ wraps a different XML representation, as the following table indicates:
 | `java.io.File`, `java.io.InputStream`, or `java.io.Reader`
 |===
 
-Even though there are two separate marshalling interfaces ( `Marshaller` and
+Even though there are two separate marshalling interfaces (`Marshaller` and
 `Unmarshaller`), all implementations in Spring-WS implement both in one class.
 This means that you can wire up one marshaller class and refer to it both as a
 marshaller and as an unmarshaller in your `applicationContext.xml`.
