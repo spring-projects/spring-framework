@@ -239,7 +239,12 @@ public abstract class AbstractApplicationEventMulticaster
 								beanFactory.getBean(listenerBeanName, ApplicationListener.class);
 						if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
 							if (retriever != null) {
-								retriever.applicationListenerBeans.add(listenerBeanName);
+								if (beanFactory.isSingleton(listenerBeanName)) {
+									retriever.applicationListeners.add(listener);
+								}
+								else {
+									retriever.applicationListenerBeans.add(listenerBeanName);
+								}
 							}
 							allListeners.add(listener);
 						}
@@ -252,6 +257,10 @@ public abstract class AbstractApplicationEventMulticaster
 			}
 		}
 		AnnotationAwareOrderComparator.sort(allListeners);
+		if (retriever != null && retriever.applicationListenerBeans.isEmpty()) {
+			retriever.applicationListeners.clear();
+			retriever.applicationListeners.addAll(allListeners);
+		}
 		return allListeners;
 	}
 
@@ -385,7 +394,9 @@ public abstract class AbstractApplicationEventMulticaster
 					}
 				}
 			}
-			AnnotationAwareOrderComparator.sort(allListeners);
+			if (!this.preFiltered || !this.applicationListenerBeans.isEmpty()) {
+				AnnotationAwareOrderComparator.sort(allListeners);
+			}
 			return allListeners;
 		}
 	}
