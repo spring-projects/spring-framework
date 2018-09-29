@@ -22,6 +22,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 /**
+ * ResourceLoader 的扩展，它支持根据指定的资源路径匹配模式每次返回**多个** Resource 实例
+ *
  * Strategy interface for resolving a location pattern (for example,
  * an Ant-style path pattern) into Resource objects.
  *
@@ -57,12 +59,14 @@ public interface ResourcePatternResolver extends ResourceLoader {
 	 * Pseudo URL prefix for all matching resources from the class path: "classpath*:"
 	 * This differs from ResourceLoader's classpath URL prefix in that it
 	 * retrieves all matching resources for a given name (e.g. "/beans.xml"),
-	 * for example in the root of all deployed JAR files.
+	 * for example in the root of all deployed JAR files. 所有的 Jar
 	 * @see org.springframework.core.io.ResourceLoader#CLASSPATH_URL_PREFIX
 	 */
-	String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
+	String CLASSPATH_ALL_URL_PREFIX = "classpath*:"; // CLASSPATH URL 前缀。默认为："classpath*:" ，和 ResourceLoader 的 "classpath:" 不同。
 
 	/**
+     * 返回多个 Resource 对象
+     *
 	 * Resolve the given location pattern into Resource objects.
 	 * <p>Overlapping resource entries that point to the same physical
 	 * resource should be avoided, as far as possible. The result should

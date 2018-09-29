@@ -35,9 +35,12 @@ package org.springframework.core.io;
  * @see DefaultResourceLoader
  * @see org.springframework.context.support.FileSystemXmlApplicationContext
  */
+@SuppressWarnings("JavadocReference")
 public class FileSystemResourceLoader extends DefaultResourceLoader {
 
 	/**
+     * 返回 FileSystemContextResource
+     *
 	 * Resolve resource paths as file system paths.
 	 * <p>Note: Even if a given path starts with a slash, it will get
 	 * interpreted as relative to the current VM working directory.
@@ -48,9 +51,11 @@ public class FileSystemResourceLoader extends DefaultResourceLoader {
 	 */
 	@Override
 	protected Resource getResourceByPath(String path) {
+	    // 截取首 /
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
+		// 创建 FileSystemContextResource 类型的资源
 		return new FileSystemContextResource(path);
 	}
 

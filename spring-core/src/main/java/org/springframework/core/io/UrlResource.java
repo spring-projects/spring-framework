@@ -16,20 +16,15 @@
 
 package org.springframework.core.io;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.*;
 
 /**
  * {@link Resource} implementation for {@code java.net.URL} locators.
@@ -57,7 +52,6 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * Cleaned URL (with normalized path), used for comparisons.
 	 */
 	private final URL cleanedUrl;
-
 
 	/**
 	 * Create a new {@code UrlResource} based on the given URI object.
