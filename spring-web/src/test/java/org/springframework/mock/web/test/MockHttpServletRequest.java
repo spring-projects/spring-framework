@@ -581,7 +581,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Adds all provided parameters <strong>without</strong> replacing any
+	 * Add all provided parameters <strong>without</strong> replacing any
 	 * existing values. To replace existing values, use
 	 * {@link #setParameters(java.util.Map)}.
 	 */
@@ -610,7 +610,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Removes all existing parameters.
+	 * Remove all existing parameters.
 	 */
 	public void removeAllParameters() {
 		this.parameters.clear();
@@ -1042,8 +1042,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Remove already registered values for the specified HTTP header, if any.
-	 * @since 5.1.1
+	 * Remove already registered entries for the specified HTTP header, if any.
+	 * @since 4.3.20
 	 */
 	public void removeHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
