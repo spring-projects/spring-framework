@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a constructor, field, setter method or config method as to be autowired by
- * Spring's dependency injection facilities.
+ * Spring's dependency injection facilities. This is an alternative to the JSR-330
+ * {@link javax.inject.Inject} annotation, adding required-vs-optional semantics.
  *
  * <p>Only one constructor (at max) of any given bean class may declare this annotation
  * with the 'required' parameter set to {@code true}, indicating <i>the</i> constructor
