@@ -356,15 +356,13 @@ public abstract class AbstractApplicationEventMulticaster
 	 */
 	private class ListenerRetriever {
 
-		public final Set<ApplicationListener<?>> applicationListeners;
+		public final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
-		public final Set<String> applicationListenerBeans;
+		public final Set<String> applicationListenerBeans = new LinkedHashSet<>();
 
 		private final boolean preFiltered;
 
 		public ListenerRetriever(boolean preFiltered) {
-			this.applicationListeners = new LinkedHashSet<>();
-			this.applicationListenerBeans = new LinkedHashSet<>();
 			this.preFiltered = preFiltered;
 		}
 
