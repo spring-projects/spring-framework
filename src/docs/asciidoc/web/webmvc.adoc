@@ -1486,13 +1486,13 @@ and security (see next section for more details) also become more difficult.
 To completely disable the use of file extensions, you must set both of the following:
 
 * `useSuffixPatternMatching(false)`, see <<mvc-config-path-matching,PathMatchConfigurer>>
-* `favorPathExtension(false)`, see <<mvc-config-content-negotiation,ContentNeogiationConfigurer>>
+* `favorPathExtension(false)`, see <<mvc-config-content-negotiation,ContentNegotiationConfigurer>>
 
 URL-based content negotiation can still be useful (for example, when typing a URL in a
 browser). To enable that, we recommend a query parameter-based strategy to avoid most of
 the issues that come with file extensions. Alternatively, if you must use file extensions, consider
 restricting them to a list of explicitly registered extensions through the
-`mediaTypes` property of <<mvc-config-content-negotiation,ContentNeogiationConfigurer>>.
+`mediaTypes` property of <<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
 
 
 
@@ -3936,7 +3936,7 @@ The MVC configuration exposes the following options related to asynchronous requ
 
 You can configure the following:
 
-* Default timeout value for async requests, whichm if not set, depends
+* Default timeout value for async requests, which if not set, depends
 on the underlying Servlet container (for example, 10 seconds on Tomcat).
 * `AsyncTaskExecutor` to use for blocking writes when streaming with
 <<mvc-ann-async-reactive-types>> and for executing `Callable` instances returned from
