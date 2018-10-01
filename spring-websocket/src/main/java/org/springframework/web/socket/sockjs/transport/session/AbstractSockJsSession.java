@@ -58,8 +58,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	/**
 	 * Log category to use on network IO exceptions after a client has gone away.
-	 * <p>The Servlet API does not provide notifications when a client disconnects;
-	 * see <a href="https://java.net/jira/browse/SERVLET_SPEC-44">SERVLET_SPEC-44</a>.
+	 * <p>Servlet containers dn't expose a a client disconnected callback, see
+	 * <a href="https://github.com/eclipse-ee4j/servlet-api/issues/44">eclipse-ee4j/servlet-api#44</a>.
 	 * Therefore network IO failures may occur simply because a client has gone away,
 	 * and that can fill the logs with unnecessary stack traces.
 	 * <p>We make a best effort to identify such network failures, on a per-server

@@ -211,7 +211,7 @@ Undertow (and WildFly).
 
 NOTE: A request to overcome the preceding limitation in the Java WebSocket API has been
 created and can be followed at
-https://github.com/eclipse-ee4j/websocket-api/issues/211[WEBSOCKET_SPEC-211].
+https://github.com/eclipse-ee4j/websocket-api/issues/211[eclipse-ee4j/websocket-api#211].
 Tomcat, Undertow, and WebSphere provide their own API alternatives that
 make it possible to do this, and it is also possible with Jetty. We are hopeful
 that more servers will do the same.
@@ -745,7 +745,7 @@ allows exiting the Servlet container thread, processing a request, and continuin
 to write to the response from another thread.
 
 A specific issue is that the Servlet API does not provide notifications for a client
-that has gone away. See https://java.net/jira/browse/SERVLET_SPEC-44[SERVLET_SPEC-44].
+that has gone away. See https://github.com/eclipse-ee4j/servlet-api/issues/44[eclipse-ee4j/servlet-api#44].
 However, Servlet containers raise an exception on subsequent attempts to write
 to the response. Since Spring's SockJS Service supports server-sent heartbeats (every
 25 seconds by default), that means a client disconnect is usually detected within that

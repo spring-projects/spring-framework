@@ -59,8 +59,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	/**
 	 * Dedicated log category for disconnected client exceptions.
-	 * <p>Servlet containers do not expose a notification when a client disconnects,
-	 * e.g. <a href="https://java.net/jira/browse/SERVLET_SPEC-44">SERVLET_SPEC-44</a>.
+	 * <p>Servlet containers dn't expose a a client disconnected callback, see
+	 * <a href="https://github.com/eclipse-ee4j/servlet-api/issues/44">eclipse-ee4j/servlet-api#44</a>.
 	 * <p>To avoid filling logs with unnecessary stack traces, we make an
 	 * effort to identify such network failures on a per-server basis, and then
 	 * log under a separate log category a simple one-line message at DEBUG level
