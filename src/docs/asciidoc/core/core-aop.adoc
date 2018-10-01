@@ -3492,7 +3492,7 @@ The AspectJ LTW infrastructure is configured by using one or more `META-INF/aop.
 files that are on the Java classpath (either directly or, more typically, in jar files).
 
 The structure and contents of this file is detailed in the LTW part http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
-documentation]. Because the aop.xml file is 100% AspectJ, we do not describe it futher here.
+documentation]. Because the aop.xml file is 100% AspectJ, we do not describe it further here.
 
 
 [[aop-aj-ltw-libraries]]
