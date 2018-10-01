@@ -104,7 +104,7 @@ Spring supports operations (notably, union and intersection) on pointcuts.
 Union means the methods that either pointcut matches.
 Intersection means the methods that both pointcuts match.
 Union is usually more useful.
-You can compse pointcuts by using the static methods in the
+You can compose pointcuts by using the static methods in the
 `org.springframework.aop.support.Pointcuts` class or by using the
 `ComposablePointcut` class in the same package. However, using AspectJ pointcut
 expressions is usually a simpler approach.
