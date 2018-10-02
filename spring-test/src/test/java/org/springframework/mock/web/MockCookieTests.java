@@ -30,16 +30,21 @@ import static org.junit.Assert.*;
  * @since 5.1
  */
 public class MockCookieTests {
-	
+
 	@Rule
-	public ExpectedException exception = ExpectedException.none();
+	public final ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void constructCookie() {
 		MockCookie cookie = new MockCookie("SESSION", "123");
 
-		assertEquals("SESSION", cookie.getName());
-		assertEquals("123", cookie.getValue());
+		assertCookie(cookie, "SESSION", "123");
+		assertNull(cookie.getDomain());
+		assertEquals(-1, cookie.getMaxAge());
+		assertNull(cookie.getPath());
+		assertFalse(cookie.isHttpOnly());
+		assertFalse(cookie.getSecure());
+		assertNull(cookie.getSameSite());
 	}
 
 	@Test
@@ -51,12 +56,22 @@ public class MockCookieTests {
 	}
 
 	@Test
-	public void parseValidHeader() {
+	public void parseHeaderWithoutAttributes() {
+		MockCookie cookie;
+
+		cookie = MockCookie.parse("SESSION=123");
+		assertCookie(cookie, "SESSION", "123");
+
+		cookie = MockCookie.parse("SESSION=123;");
+		assertCookie(cookie, "SESSION", "123");
+	}
+
+	@Test
+	public void parseHeaderWithAttributes() {
 		MockCookie cookie = MockCookie.parse(
 				"SESSION=123; Domain=example.com; Max-Age=60; Path=/; Secure; HttpOnly; SameSite=Lax");
 
-		assertEquals("SESSION", cookie.getName());
-		assertEquals("123", cookie.getValue());
+		assertCookie(cookie, "SESSION", "123");
 		assertEquals("example.com", cookie.getDomain());
 		assertEquals(60, cookie.getMaxAge());
 		assertEquals("/", cookie.getPath());
@@ -68,40 +83,22 @@ public class MockCookieTests {
 	@Test
 	public void parseInvalidHeader() {
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("Invalid Set-Cookie header value 'BOOM'");
+		exception.expectMessage("Invalid Set-Cookie header 'BOOM'");
 		MockCookie.parse("BOOM");
 	}
 
 	@Test
 	public void parseInvalidAttribute() {
-		String header = "foo=bar; Path=";
+		String header = "SESSION=123; Path=";
 
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage("No value in attribute 'Path' for Set-Cookie header '" + header + "'");
 		MockCookie.parse(header);
 	}
 
-	@Test
-	public void testCookieParsing() {
-		MockCookie m = MockCookie.parse("foo=bar");
-		testCookie("foo", "bar", m);
-		m = MockCookie.parse("foo=bar;");
-		assertFalse(m.isHttpOnly());
-		assertFalse(m.getSecure());
-		testCookie("foo", "bar", m);
-		m = MockCookie.parse("foo=bar; HttpOnly");
-		testCookie("foo", "bar", m);
-		assertTrue(m.isHttpOnly());
-		assertFalse(m.getSecure());
-		m = MockCookie.parse("foo=bar; Secure");
-		testCookie("foo", "bar", m);
-		assertTrue(m.getSecure());
-		assertFalse(m.isHttpOnly());
-	}
-
-	private void testCookie(String name, String value, MockCookie mockCookie) {
-		assertEquals(name, mockCookie.getName());
-		assertEquals(value, mockCookie.getValue());
+	private void assertCookie(MockCookie cookie, String name, String value) {
+		assertEquals(name, cookie.getName());
+		assertEquals(value, cookie.getValue());
 	}
 
 }

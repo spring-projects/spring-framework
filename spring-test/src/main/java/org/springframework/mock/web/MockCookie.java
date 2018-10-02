@@ -75,7 +75,7 @@ public class MockCookie extends Cookie {
 	 */
 	public static MockCookie parse(String setCookieHeader) {
 		String[] cookieParts = setCookieHeader.split("\\s*=\\s*", 2);
-		Assert.isTrue(cookieParts.length == 2, () -> "Invalid Set-Cookie header value '" + setCookieHeader + "'");
+		Assert.isTrue(cookieParts.length == 2, () -> "Invalid Set-Cookie header '" + setCookieHeader + "'");
 
 		String name = cookieParts[0];
 		String[] valueAndAttributes = cookieParts[1].split("\\s*;\\s*", 2);
