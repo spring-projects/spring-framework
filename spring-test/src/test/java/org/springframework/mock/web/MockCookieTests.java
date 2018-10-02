@@ -81,6 +81,13 @@ public class MockCookieTests {
 	}
 
 	@Test
+	public void parseNullHeader() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage("Set-Cookie header must not be null");
+		MockCookie.parse(null);
+	}
+
+	@Test
 	public void parseInvalidHeader() {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage("Invalid Set-Cookie header 'BOOM'");

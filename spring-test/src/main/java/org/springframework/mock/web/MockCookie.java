@@ -70,10 +70,11 @@ public class MockCookie extends Cookie {
 
 	/**
 	 * Factory method that parses the value of a "Set-Cookie" header.
-	 * @param setCookieHeader the "Set-Cookie" value
+	 * @param setCookieHeader the "Set-Cookie" value; never {@code null} or empty
 	 * @return the created cookie
 	 */
 	public static MockCookie parse(String setCookieHeader) {
+		Assert.notNull(setCookieHeader, "Set-Cookie header must not be null");
 		String[] cookieParts = setCookieHeader.split("\\s*=\\s*", 2);
 		Assert.isTrue(cookieParts.length == 2, () -> "Invalid Set-Cookie header '" + setCookieHeader + "'");
 
