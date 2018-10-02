@@ -16,7 +16,9 @@
 
 package org.springframework.mock.web;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.*;
 
@@ -24,8 +26,13 @@ import static org.junit.Assert.*;
  * Unit tests for {@link MockCookie}.
  *
  * @author Vedran Pavic
+ * @author Sam Brannen
+ * @since 5.1
  */
 public class MockCookieTests {
+	
+	@Rule
+	public ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void constructCookie() {
@@ -58,9 +65,20 @@ public class MockCookieTests {
 		assertEquals("Lax", cookie.getSameSite());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void parseInvalidHeader() {
-		MockCookie.parse("invalid");
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage("Invalid Set-Cookie header value 'BOOM'");
+		MockCookie.parse("BOOM");
+	}
+
+	@Test
+	public void parseInvalidAttribute() {
+		String header = "foo=bar; Path=";
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage("No value in attribute 'Path' for Set-Cookie header '" + header + "'");
+		MockCookie.parse(header);
 	}
 
 }
