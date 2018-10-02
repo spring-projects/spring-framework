@@ -1595,7 +1595,7 @@ messages to it, and then forwards all messages received
 from the broker to clients through their WebSocket sessions. Essentially,
 it acts as a "`relay`" that forwards messages in both directions.
 
-NOTE: Add `io.projectreactor.netty:reactor-netty` and `io.netty:netty-all`
+NOTE: Add `io.projectreactor.ipc:reactor-netty` and `io.netty:netty-all`
 dependencies to your project for TCP connection management.
 
 Furthermore, application components (such as HTTP request handling methods,
