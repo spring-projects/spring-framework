@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.socket.adapter;
 
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -98,8 +97,7 @@ public class ReactorNettyWebSocketSession
 
 	@Override
 	public Mono<Void> close(CloseStatus status) {
-		WebSocketFrame closeFrame = new CloseWebSocketFrame(status.getCode(), status.getReason());
-		return getDelegate().getOutbound().sendObject(closeFrame).then();
+		return getDelegate().getOutbound().sendClose(status.getCode(), status.getReason());
 	}
 
 
