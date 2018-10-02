@@ -544,6 +544,29 @@ public class MockHttpServletRequestTests {
 		request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
 	}
 
+	@Test
+	public void testCookieParsing() {
+		MockCookie m = MockCookie.parse("foo=bar");
+		testCookie("foo", "bar", m);
+		m = MockCookie.parse("foo=bar;");
+		assertFalse(m.isHttpOnly());
+		assertFalse(m.getSecure());
+		testCookie("foo", "bar", m);
+		m = MockCookie.parse("foo=bar; HttpOnly");
+		testCookie("foo", "bar", m);
+		assertTrue(m.isHttpOnly());
+		assertFalse(m.getSecure());
+		m = MockCookie.parse("foo=bar; Secure");
+		testCookie("foo", "bar", m);
+		assertTrue(m.getSecure());
+		assertFalse(m.isHttpOnly());
+	}
+
+	private void testCookie(String name, String value, MockCookie mockCookie) {
+		assertEquals(name, mockCookie.getName());
+		assertEquals(value, mockCookie.getValue());
+	}
+
 
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
 		assertNotNull(enum1);

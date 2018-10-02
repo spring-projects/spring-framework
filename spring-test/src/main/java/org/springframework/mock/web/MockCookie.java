@@ -80,7 +80,7 @@ public class MockCookie extends Cookie {
 		String name = cookieParts[0];
 		String[] valueAndDirectives = cookieParts[1].split("\\s*;\\s*", 2);
 		String value = valueAndDirectives[0];
-		String[] directives = valueAndDirectives[1].split("\\s*;\\s*");
+		String[] directives = valueAndDirectives.length > 1 ? valueAndDirectives[1].split("\\s*;\\s*") : new String[0];
 
 		MockCookie cookie = new MockCookie(name, value);
 		for (String directive : directives) {
