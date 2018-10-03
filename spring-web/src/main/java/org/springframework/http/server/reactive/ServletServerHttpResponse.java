@@ -33,6 +33,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
@@ -62,11 +63,16 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	private final ServletServerHttpRequest request;
 
-
 	public ServletServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
 			DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request) throws IOException {
 
-		super(bufferFactory);
+		this(new HttpHeaders(), response, asyncContext, bufferFactory, bufferSize, request);
+	}
+
+	public ServletServerHttpResponse(HttpHeaders headers, HttpServletResponse response, AsyncContext asyncContext,
+			DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request) throws IOException {
+
+		super(bufferFactory, headers);
 
 		Assert.notNull(response, "HttpServletResponse must not be null");
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");

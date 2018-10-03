@@ -25,7 +25,6 @@ import java.nio.file.StandardOpenOption;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.server.handlers.CookieImpl;
-import io.undertow.util.HttpString;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.xnio.channels.Channels;
@@ -35,6 +34,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.lang.Nullable;
@@ -58,13 +58,19 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	private StreamSinkChannel responseChannel;
 
 
-	public UndertowServerHttpResponse(
+	UndertowServerHttpResponse(
 			HttpServerExchange exchange, DataBufferFactory bufferFactory, UndertowServerHttpRequest request) {
 
-		super(bufferFactory);
+		super(bufferFactory, createHeaders(exchange));
 		Assert.notNull(exchange, "HttpServerExchange must not be null");
 		this.exchange = exchange;
 		this.request = request;
+	}
+
+	private static HttpHeaders createHeaders(HttpServerExchange exchange) {
+		UndertowHeadersAdapter headersMap =
+				new UndertowHeadersAdapter(exchange.getResponseHeaders());
+		return new HttpHeaders(headersMap);
 	}
 
 
@@ -85,8 +91,6 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 
 	@Override
 	protected void applyHeaders() {
-		getHeaders().forEach((headerName, headerValues) ->
-				this.exchange.getResponseHeaders().addAll(HttpString.tryFromString(headerName), headerValues));
 	}
 
 	@Override

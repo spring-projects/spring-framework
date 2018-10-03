@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpHeaders;
 
 /**
  * Abstract base class for listener-based server responses, e.g. Servlet 3.1
@@ -39,6 +40,10 @@ public abstract class AbstractListenerServerHttpResponse extends AbstractServerH
 
 	public AbstractListenerServerHttpResponse(DataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
+	}
+
+	public AbstractListenerServerHttpResponse(DataBufferFactory dataBufferFactory, HttpHeaders headers) {
+		super(dataBufferFactory, headers);
 	}
 
 

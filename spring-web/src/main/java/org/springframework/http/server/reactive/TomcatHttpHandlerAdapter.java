@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import javax.servlet.AsyncContext;
@@ -27,17 +28,25 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.connector.CoyoteInputStream;
 import org.apache.catalina.connector.CoyoteOutputStream;
+import org.apache.catalina.connector.RequestFacade;
+import org.apache.catalina.connector.ResponseFacade;
+import org.apache.coyote.Request;
+import org.apache.coyote.Response;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Tomcat APIs for reading
  * from the request and writing to the response with {@link ByteBuffer}.
  *
  * @author Violeta Georgieva
+ * @author Brian Clozel
+ * @author Brian Clozel
  * @since 5.0
  * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
@@ -66,21 +75,39 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 				response, asyncContext, getDataBufferFactory(), getBufferSize(), request);
 	}
 
+	private static final class TomcatServerHttpRequest extends ServletServerHttpRequest {
 
-	private final class TomcatServerHttpRequest extends ServletServerHttpRequest {
+		private static final Field COYOTE_REQUEST_FIELD = ReflectionUtils.findField(RequestFacade.class, "request");
 
-		public TomcatServerHttpRequest(HttpServletRequest request, AsyncContext context,
+		private final int bufferSize;
+
+		private final DataBufferFactory factory;
+
+		static {
+			ReflectionUtils.makeAccessible(COYOTE_REQUEST_FIELD);
+		}
+
+		TomcatServerHttpRequest(HttpServletRequest request, AsyncContext context,
 				String servletPath, DataBufferFactory factory, int bufferSize)
 				throws IOException, URISyntaxException {
 
-			super(request, context, servletPath, factory, bufferSize);
+			super(createTomcatHttpHeaders(request), request, context, servletPath, factory, bufferSize);
+			this.factory = factory;
+			this.bufferSize = bufferSize;
+		}
+
+		private static HttpHeaders createTomcatHttpHeaders(HttpServletRequest request) {
+			Request tomcatRequest = ((org.apache.catalina.connector.Request) ReflectionUtils
+					.getField(COYOTE_REQUEST_FIELD, request)).getCoyoteRequest();
+			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders());
+			return new HttpHeaders(headers);
 		}
 
 		@Override
 		protected DataBuffer readFromInputStream() throws IOException {
 			boolean release = true;
-			int capacity = getBufferSize();
-			DataBuffer dataBuffer = getDataBufferFactory().allocateBuffer(capacity);
+			int capacity = this.bufferSize;
+			DataBuffer dataBuffer = this.factory.allocateBuffer(capacity);
 			try {
 				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, capacity);
 
@@ -111,10 +138,27 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 	private static final class TomcatServerHttpResponse extends ServletServerHttpResponse {
 
-		public TomcatServerHttpResponse(HttpServletResponse response, AsyncContext context,
+		private static final Field COYOTE_RESPONSE_FIELD = ReflectionUtils.findField(ResponseFacade.class, "response");
+
+		static {
+			ReflectionUtils.makeAccessible(COYOTE_RESPONSE_FIELD);
+		}
+
+		TomcatServerHttpResponse(HttpServletResponse response, AsyncContext context,
 				DataBufferFactory factory, int bufferSize, ServletServerHttpRequest request) throws IOException {
 
-			super(response, context, factory, bufferSize, request);
+			super(createTomcatHttpHeaders(response), response, context, factory, bufferSize, request);
+		}
+
+		private static HttpHeaders createTomcatHttpHeaders(HttpServletResponse response) {
+			Response tomcatResponse = ((org.apache.catalina.connector.Response) ReflectionUtils
+					.getField(COYOTE_RESPONSE_FIELD, response)).getCoyoteResponse();
+			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatResponse.getMimeHeaders());
+			return new HttpHeaders(headers);
+		}
+
+		@Override
+		protected void applyHeaders() {
 		}
 
 		@Override

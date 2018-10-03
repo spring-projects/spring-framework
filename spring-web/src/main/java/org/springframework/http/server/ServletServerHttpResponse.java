@@ -153,6 +153,9 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 			Assert.isInstanceOf(String.class, key, "Key must be a String-based header name");
 
 			Collection<String> values1 = servletResponse.getHeaders((String) key);
+			if (headersWritten) {
+				return new ArrayList<>(values1);
+			}
 			boolean isEmpty1 = CollectionUtils.isEmpty(values1);
 
 			List<String> values2 = super.get(key);

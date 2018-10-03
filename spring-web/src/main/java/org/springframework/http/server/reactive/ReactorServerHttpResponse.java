@@ -19,6 +19,7 @@ package org.springframework.http.server.reactive;
 import java.nio.file.Path;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -30,6 +31,7 @@ import reactor.netty.http.server.HttpServerResponse;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.util.Assert;
@@ -47,11 +49,16 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 
 	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory) {
-		super(bufferFactory);
+		super(bufferFactory, initHeaders(response));
 		Assert.notNull(response, "HttpServerResponse must not be null");
 		this.response = response;
 	}
 
+	private static HttpHeaders initHeaders(HttpServerResponse channel) {
+		channel.responseHeaders().remove(HttpHeaderNames.TRANSFER_ENCODING);
+		NettyHeadersAdapter headersMap = new NettyHeadersAdapter(channel.responseHeaders());
+		return new HttpHeaders(headersMap);
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -80,11 +87,9 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 	@Override
 	protected void applyHeaders() {
-		getHeaders().forEach((headerName, headerValues) -> {
-			for (String value : headerValues) {
-				this.response.responseHeaders().add(headerName, value);
-			}
-		});
+		if (getHeaders().getContentLength() == -1) {
+			this.response.chunkedTransfer(true);
+		}
 	}
 
 	@Override

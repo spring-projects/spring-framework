@@ -17,15 +17,21 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.server.HttpOutput;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpHeaders;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for writing
@@ -43,6 +49,12 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 
 	@Override
+	protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
+			throws IOException, URISyntaxException {
+		return new JettyServerHttpRequest(request, context, getServletPath(), getDataBufferFactory(), getBufferSize());
+	}
+
+	@Override
 	protected ServletServerHttpResponse createResponse(HttpServletResponse response,
 			AsyncContext context, ServletServerHttpRequest request) throws IOException {
 
@@ -50,14 +62,38 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 				response, context, getDataBufferFactory(), getBufferSize(), request);
 	}
 
+	private static final class JettyServerHttpRequest extends ServletServerHttpRequest {
+
+		JettyServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
+				String servletPath, DataBufferFactory bufferFactory, int bufferSize)
+				throws IOException, URISyntaxException {
+
+			super(createHeaders(request), request, asyncContext, servletPath, bufferFactory, bufferSize);
+		}
+
+		private static HttpHeaders createHeaders(HttpServletRequest request) {
+			HttpFields fields = ((Request) request).getMetaData().getFields();
+			return new HttpHeaders(new JettyHeadersAdapter(fields));
+		}
+	}
+
 
 	private static final class JettyServerHttpResponse extends ServletServerHttpResponse {
 
-		public JettyServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
+		JettyServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
 				DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request)
 				throws IOException {
 
-			super(response, asyncContext, bufferFactory, bufferSize, request);
+			super(createHeaders(response), response, asyncContext, bufferFactory, bufferSize, request);
+		}
+
+		private static HttpHeaders createHeaders(HttpServletResponse response) {
+			HttpFields fields = ((Response) response).getHttpFields();
+			return new HttpHeaders(new JettyHeadersAdapter(fields));
+		}
+
+		@Override
+		protected void applyHeaders() {
 		}
 
 		@Override
