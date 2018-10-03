@@ -18,11 +18,11 @@ package org.springframework.web.reactive.function.server.support;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
@@ -111,9 +111,11 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	}
 
 	private List<RouterFunction<?>> routerFunctions() {
-		SortedRouterFunctionsContainer container = new SortedRouterFunctionsContainer();
-		obtainApplicationContext().getAutowireCapableBeanFactory().autowireBean(container);
-		List<RouterFunction<?>> functions = container.routerFunctions;
+		List<RouterFunction<?>> functions = this.getApplicationContext()
+				.getBeanProvider(RouterFunction.class)
+				.orderedStream()
+				.map(router -> (RouterFunction<?>)router)
+				.collect(Collectors.toList());
 		return (!CollectionUtils.isEmpty(functions) ? functions : Collections.emptyList());
 	}
 
@@ -145,18 +147,6 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		}
 		else {
 			return Mono.empty();
-		}
-	}
-
-
-	private static class SortedRouterFunctionsContainer {
-
-		@Nullable
-		private List<RouterFunction<?>> routerFunctions;
-
-		@Autowired(required = false)
-		public void setRouterFunctions(List<RouterFunction<?>> routerFunctions) {
-			this.routerFunctions = routerFunctions;
 		}
 	}
 
