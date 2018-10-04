@@ -223,13 +223,13 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		String canonicalName = name;
 		// Handle aliasing...
 		String resolvedName;
+		// 循环，从 aliasMap 中，获取到最终的 beanName
 		do {
 			resolvedName = this.aliasMap.get(canonicalName);
 			if (resolvedName != null) {
 				canonicalName = resolvedName;
 			}
-		}
-		while (resolvedName != null);
+		} while (resolvedName != null);
 		return canonicalName;
 	}
 
