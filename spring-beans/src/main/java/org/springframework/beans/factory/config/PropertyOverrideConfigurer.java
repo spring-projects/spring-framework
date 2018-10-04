@@ -132,7 +132,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 					"': expected 'beanName" + this.beanNameSeparator + "property'");
 		}
 		String beanName = key.substring(0, separatorIndex);
-		String beanProperty = key.substring(separatorIndex+1);
+		String beanProperty = key.substring(separatorIndex + 1);
 		this.beanNames.add(beanName);
 		applyPropertyValue(factory, beanName, beanProperty, value);
 		if (logger.isDebugEnabled()) {
