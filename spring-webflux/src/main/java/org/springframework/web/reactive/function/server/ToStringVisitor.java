@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.Set;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * Implementation of {@link RouterFunctions.Visitor} that creates a formatted string representation
@@ -29,7 +32,7 @@ import org.springframework.core.io.Resource;
  * @author Arjen Poutsma
  * @since 5.0
  */
-class ToStringVisitor implements RouterFunctions.Visitor {
+class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visitor {
 
 	private static final String NEW_LINE = System.getProperty("line.separator", "\\n");
 
@@ -37,10 +40,15 @@ class ToStringVisitor implements RouterFunctions.Visitor {
 
 	private int indent = 0;
 
+	@Nullable
+	private String infix;
+
+	// RouterFunctions.Visitor
+
 	@Override
 	public void startNested(RequestPredicate predicate) {
 		indent();
-		this.builder.append(predicate);
+		predicate.accept(this);
 		this.builder.append(" => {");
 		this.builder.append(NEW_LINE);
 		this.indent++;
@@ -57,7 +65,7 @@ class ToStringVisitor implements RouterFunctions.Visitor {
 	@Override
 	public void route(RequestPredicate predicate, HandlerFunction<?> handlerFunction) {
 		indent();
-		this.builder.append(predicate);
+		predicate.accept(this);
 		this.builder.append(" -> ");
 		this.builder.append(handlerFunction);
 		this.builder.append(NEW_LINE);
@@ -81,6 +89,91 @@ class ToStringVisitor implements RouterFunctions.Visitor {
 			this.builder.append(' ');
 		}
 	}
+
+	// RequestPredicates.Visitor
+
+	@Override
+	public void method(Set<HttpMethod> methods) {
+		if (methods.size() == 1) {
+			this.builder.append(methods.iterator().next());
+		}
+		else {
+			this.builder.append(methods);
+		}
+		infix();
+	}
+
+	@Override
+	public void path(String pattern) {
+		this.builder.append(pattern);
+		infix();
+	}
+
+	@Override
+	public void pathExtension(String extension) {
+		this.builder.append(String.format("*.%s", extension));
+		infix();
+	}
+
+	@Override
+	public void header(String name, String value) {
+		this.builder.append(String.format("%s: %s", name, value));
+		infix();
+	}
+
+	@Override
+	public void queryParam(String name, String value) {
+		this.builder.append(String.format("?%s == %s", name, value));
+		infix();
+	}
+
+	@Override
+	public void startAnd() {
+		this.builder.append('(');
+		this.infix = "&&";
+	}
+
+	@Override
+	public void endAnd() {
+		this.builder.append(')');
+	}
+
+	@Override
+	public void startOr() {
+		this.builder.append('(');
+		this.infix = "||";
+	}
+
+	@Override
+	public void endOr() {
+		this.builder.append(')');
+	}
+
+	@Override
+	public void startNegate() {
+		this.builder.append("!(");
+
+	}
+
+	@Override
+	public void endNegate() {
+		this.builder.append(')');
+	}
+
+	@Override
+	public void unknown(RequestPredicate predicate) {
+		this.builder.append(predicate);
+	}
+
+	private void infix() {
+		if (this.infix != null) {
+			this.builder.append(' ');
+			this.builder.append(this.infix);
+			this.builder.append(' ');
+			this.infix = null;
+		}
+	}
+
 
 	@Override
 	public String toString() {

@@ -84,4 +84,15 @@ public interface RequestPredicate {
 		return (test(request) ? Optional.of(request) : Optional.empty());
 	}
 
+	/**
+	 * Accept the given visitor. Default implementation calls
+	 * {@link RequestPredicates.Visitor#unknown(RequestPredicate)}; composed {@code RequestPredicate}
+	 * implementations are expected to call {@code accept} for all components that make up this
+	 * request predicate.
+	 * @param visitor the visitor to accept
+	 */
+	default void accept(RequestPredicates.Visitor visitor) {
+		visitor.unknown(this);
+	}
+
 }

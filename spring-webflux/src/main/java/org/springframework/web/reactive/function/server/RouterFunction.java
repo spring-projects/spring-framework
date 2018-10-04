@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * Accept the given visitor. Default implementation calls
 	 * {@link RouterFunctions.Visitor#unknown(RouterFunction)}; composed {@code RouterFunction}
 	 * implementations are expected to call {@code accept} for all components that make up this
-	 * router function
+	 * router function.
 	 * @param visitor the visitor to accept
 	 */
 	default void accept(RouterFunctions.Visitor visitor) {
