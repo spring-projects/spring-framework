@@ -575,7 +575,34 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * {@link RequestPredicate} for where either {@code left} or {@code right} predicates
+	 * {@link RequestPredicate} that negates a delegate predicate.
+	 */
+	static class NegateRequestPredicate implements RequestPredicate {
+		private final RequestPredicate delegate;
+
+		public NegateRequestPredicate(RequestPredicate delegate) {
+			Assert.notNull(delegate, "Delegate must not be null");
+			this.delegate = delegate;
+		}
+
+		@Override
+		public boolean test(ServerRequest request) {
+			Map<String, Object> oldAttributes = new HashMap<>(request.attributes());
+			boolean result = !this.delegate.test(request);
+			if (!result) {
+				restoreAttributes(request, oldAttributes);
+			}
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return "!" + this.delegate.toString();
+		}
+	}
+
+	/**
+	 * {@link RequestPredicate} where either {@code left} or {@code right} predicates
 	 * may match.
 	 */
 	static class OrRequestPredicate implements RequestPredicate {
