@@ -205,8 +205,8 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	private Mono<Object> getDefaultValue(NamedValueInfo namedValueInfo, MethodParameter parameter,
 			BindingContext bindingContext, Model model, ServerWebExchange exchange) {
 
-		Object value = null;
-		try {
+		return Mono.fromSupplier(() -> {
+			Object value = null;
 			if (namedValueInfo.defaultValue != null) {
 				value = resolveStringValue(namedValueInfo.defaultValue);
 			}
@@ -216,11 +216,8 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 			value = handleNullValue(namedValueInfo.name, value, parameter.getNestedParameterType());
 			value = applyConversion(value, namedValueInfo, parameter, bindingContext, exchange);
 			handleResolvedValue(value, namedValueInfo.name, parameter, model, exchange);
-			return Mono.justOrEmpty(value);
-		}
-		catch (Throwable ex) {
-			return Mono.error(ex);
-		}
+			return value;
+		});
 	}
 
 	/**
