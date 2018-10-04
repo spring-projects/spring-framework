@@ -940,8 +940,11 @@ public abstract class RouterFunctions {
 								}
 								return this.routerFunction.route(nestedRequest)
 										.doOnNext(match -> {
-											serverRequest.attributes().clear();
-											serverRequest.attributes().putAll(nestedRequest.attributes());
+											if (nestedRequest != serverRequest) {
+												serverRequest.attributes().clear();
+												serverRequest.attributes()
+														.putAll(nestedRequest.attributes());
+											}
 										});
 							}
 					).orElseGet(Mono::empty);
