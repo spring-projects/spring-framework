@@ -707,7 +707,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					ReflectionUtils.makeAccessible(method);
 					method.invoke(bean, arguments);
 				}
-				catch (InvocationTargetException ex){
+				catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
 				}
 			}
