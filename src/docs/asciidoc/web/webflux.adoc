@@ -18,7 +18,7 @@ for example, Spring MVC controllers with the reactive `WebClient`.
 
 
 [[webflux-new-framework]]
-== Motivation
+== Overview
 
 Why was Spring WebFlux created?
 
@@ -41,7 +41,7 @@ WebFlux to offer functional web endpoints alongside annotated controllers.
 
 
 [[webflux-why-reactive]]
-== Define "`Reactive`"
+=== Define "`Reactive`"
 
 We touched on "`non-blocking`" and "`functional`" but what does reactive mean?
 
@@ -74,7 +74,7 @@ If a publisher cannot slow down, it has to decide whether to buffer, drop, or fa
 
 
 [[webflux-reactive-api]]
-== Reactive API
+=== Reactive API
 
 Reactive Streams plays an important role for interoperability. It is of interest to libraries
 and infrastructure components but less useful as an application API, because it is too
@@ -103,7 +103,7 @@ of RxJava or another reactive library. See <<webflux-reactive-libraries>> for mo
 
 
 [[webflux-programming-models]]
-== Programming Models
+=== Programming Models
 
 The `spring-web` module contains the reactive foundation that underlies Spring WebFlux,
 including HTTP abstractions, Reactive Streams <<webflux-httphandler,adapters>> for supported
@@ -125,7 +125,7 @@ annotations and being called back.
 
 
 [[webflux-framework-choice]]
-== Applicability
+=== Applicability
 
 Spring MVC or WebFlux?
 
@@ -181,7 +181,7 @@ unsure what benefits to look for, start by learning about how non-blocking I/O w
 
 
 [[webflux-server-choice]]
-== Servers
+=== Servers
 
 Spring WebFlux is supported on Tomcat, Jetty, Servlet 3.1+ containers, as well as on
 non-Servlet runtimes such as Netty and Undertow. All servers are adapted to a low-level,
@@ -209,7 +209,7 @@ For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API
 
 
 [[webflux-performance]]
-== Performance versus Scale
+=== Performance
 
 Performance has many characteristics and meanings. Reactive and non-blocking generally
 do not make applications run faster. They can, in some cases, (for example, if using the
@@ -226,7 +226,7 @@ dramatic.
 
 
 [[webflux-concurrency-model]]
-== Concurrency Model
+=== Concurrency Model
 
 Both Spring MVC and Spring WebFlux support annotated controllers, but there is a key
 difference in the concurrency model and the default assumptions for blocking and threads.
