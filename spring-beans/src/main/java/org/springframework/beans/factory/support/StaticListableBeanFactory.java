@@ -432,7 +432,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	@Override
 	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
-			throws NoSuchBeanDefinitionException{
+			throws NoSuchBeanDefinitionException {
 
 		Class<?> beanType = getType(beanName);
 		return (beanType != null ? AnnotationUtils.findAnnotation(beanType, annotationType) : null);
