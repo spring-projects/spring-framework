@@ -673,48 +673,45 @@ readers and writers for form data, multipart requests, and server-sent events.
 [[webflux-codecs-jackson]]
 ==== Jackson JSON
 
-The decoder relies on Jackson's non-blocking, byte-array parser to parse a stream of byte
-chunks into a `TokenBuffer` stream, which can then be turned into objects with Jackson's
-`ObjectMapper`. The JSON and https://github.com/FasterXML/smile-format-specification[Smile]
-(binary JSON) data formats are currently supported.
+JSON and binary JSON (https://github.com/FasterXML/smile-format-specification[Smile]) data
+formats are both supported.
 
-The encoder processes a `Publisher<?>`, as follows:
+The `Jackson2Decoder` uses Jackson's asynchronous, non-blocking parser to create a stream
+of ``TokenBuffer``'s and then each `TokenBuffer` is passed to Jackson's `ObjectMapper` to
+create a higher level object. When decoding to a multi-value publisher (e.g. `Flux`), the
+input stream can be a JSON array, or
+https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] if the content-type is
+"application/stream+json".
 
-* If the `Publisher` is a `Mono` (that is, a single value), the value is encoded when available.
-* If media type is `application/stream+json` for JSON or `application/stream+x-jackson-smile`
-  for Smile, each value produced by the `Publisher` is encoded individually (and followed
-  by a new line in JSON).
-* Otherwise, all items from the `Publisher` are gathered in with `Flux#collectToList()`,
-and the resulting collection is encoded as an array.
+The `Jackson2Encoder` works as follows:
 
-As a special case to the preceding rules, the `ServerSentEventHttpMessageWriter` feeds items
-emitted from its input `Publisher` individually into the `Jackson2JsonEncoder` as a
-`Mono<?>`.
+* For a single value publisher (e.g. `Mono`), simply serialize it.
+* For a multi-value publisher with "application/json", collect the values with
+`Flux#collectToList()` and then serialize the resulting collection.
+* For a multi-value publisher with a streaming media type such as
+`application/stream+json` or `application/stream+x-jackson-smile`, encode, write, and
+flush each value individually using a
+https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format.
+* For Server Sent Events, the `Jackson2Encoder` is invoked individually for each event
+by the `ServerSentEventHttpMessageWriter` the resulting output flushed.
 
-Note that both the Jackson JSON encoder and decoder explicitly back out of rendering
-elements of type `String`. Instead `String` instances are treated as low level content (that is,
-serialized JSON) and are rendered as-is by the `CharSequenceEncoder`. If you want a
-`Flux<String>` rendered as a JSON array, you have to use `Flux#collectToList()` and
-provide a `Mono<List<String>>` instead.
+By default `Jackson2Encoder` and `Jackson2Decoder` do not support serialization for
+elements of type `java.util.String`. Instead the default assumption is that a string
+or a sequence of strings represent serialized JSON content, to be rendered by the
+`CharSequenceEncoder`. If what you want is to render a JSON array from `Flux<String>`,
+use `Flux#collectToList()` and provide a `Mono<List<String>>` to be serialized.
 
 
 
 [[webflux-codecs-streaming]]
-==== HTTP Streaming
+==== Streaming
 [.small]#<<web.adoc#mvc-ann-async-http-streaming,Same as in Spring MVC>>#
 
-When a multi-value reactive type such as a `Flux` is used for response rendering, it may
-be collected to a `List` and rendered as a whole (for example, a JSON array), or it may be treated
-as an infinite stream with each item flushed immediately. The determination for which is
-which is made based on content negotiation and the selected media type, which may imply a
-streaming format (for example, `text/event-stream`, `application/stream+json`) or not
-(for example, `application/json`).
-
-When streaming to the HTTP response, regardless of the media type (for example, `text/event-stream` and
-`application/stream+json`), it is important to send data periodically, since the write would
-fail if the client has disconnected. The send could take the form of an empty
-(comment-only) SSE event or any other data that the other side would have to interpret as
-a heartbeat and ignore.
+When streaming to the HTTP response (for example, `text/event-stream`,
+`application/stream+json`), it is important to send data periodically, in order to
+reliably detect a disconnected client sooner rather than later. Such a send could be an
+comment-only, empty SSE event or any other "no-op" data that would effectively serve as
+a heartbeat.
 
 
 
