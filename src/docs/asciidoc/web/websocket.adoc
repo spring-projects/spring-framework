@@ -23,7 +23,7 @@ server-side applications that handle WebSocket messages.
 
 
 [[websocket-server-handler]]
-=== Using `WebSocketHandler`
+=== `WebSocketHandler`
 [.small]#<<web-reactive.adoc#webflux-websocket-server-handler,Same as in Spring WebFlux>>#
 
 Creating a WebSocket server is as simple as implementing `WebSocketHandler` or, more
@@ -789,7 +789,7 @@ SockJS endpoint prefix, thus letting Spring's `SockJsService` handle it.
 
 
 [[websocket-fallback-sockjs-client]]
-=== Using `SockJsClient`
+=== `SockJsClient`
 
 Spring provides a SockJS Java client to connect to remote SockJS endpoints without
 using a browser. This can be especially useful when there is a need for bidirectional
@@ -1265,7 +1265,7 @@ methods, as described in the following topics:
 
 
 [[websocket-stomp-message-mapping]]
-==== Using `@MessageMapping`
+==== `@MessageMapping`
 
 You can use `@MessageMapping` to annotate methods that route messages based on their
 destination. It is supported at the method level as well as at the type level. At the type
@@ -1349,7 +1349,7 @@ See <<websocket-stomp-handle-send>>.
 
 
 [[websocket-stomp-subscribe-mapping]]
-==== Using `@SubscribeMapping`
+==== `@SubscribeMapping`
 
 `@SubscribeMapping` is similar to `@MessageMapping` but narrows the mapping to
 subscription messages only. It supports the same
@@ -1403,7 +1403,7 @@ method that is invoked after messages, including subscriptions, have been handle
 
 
 [[websocket-stomp-exception-handler]]
-==== Using `@MessageExceptionHandler`
+==== `@MessageExceptionHandler`
 
 An application can use `@MessageExceptionHandler` methods to handle exceptions from
 `@MessageMapping` methods. You can declare exceptions in the annotation

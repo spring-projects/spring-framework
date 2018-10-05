@@ -6,7 +6,7 @@ This section describes options for client-side access to REST endpoints.
 
 
 [[webmvc-resttemplate]]
-== Using `RestTemplate`
+== `RestTemplate`
 
 `RestTemplate` is a synchronous client to perform HTTP requests. It is the original
 Spring REST client and exposes a simple, template-method API over underlying HTTP client
@@ -22,7 +22,7 @@ See <<integration.adoc#rest-client-access,REST Endpoints>> for details.
 
 
 [[webmvc-webclient]]
-== Using `WebClient`
+== `WebClient`
 
 `WebClient` is a non-blocking, reactive client to perform HTTP requests. It was
 introduced in 5.0 and offers a modern alternative to the `RestTemplate`, with efficient

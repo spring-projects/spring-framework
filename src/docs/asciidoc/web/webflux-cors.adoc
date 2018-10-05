@@ -73,7 +73,7 @@ To learn more from the source or to make advanced customizations, see:
 
 
 [[webflux-cors-controller]]
-== Using `@CrossOrigin`
+== `@CrossOrigin`
 [.small]#<<web.adoc#mvc-cors-controller,Same as in Spring MVC>>#
 
 The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]

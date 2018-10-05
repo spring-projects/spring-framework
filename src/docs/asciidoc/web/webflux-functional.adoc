@@ -85,7 +85,7 @@ and `Mono`. For more on that, see
 
 
 [[webflux-fn-request]]
-=== Using `ServerRequest`
+=== `ServerRequest`
 
 `ServerRequest` provides access to the HTTP method, URI, headers, and query parameters,
 while access to the body is provided through the `body` methods.
@@ -152,7 +152,7 @@ Flux<Part> parts = request.body(BodyExtractos.toParts());
 
 
 [[webflux-fn-response]]
-=== Using `ServerResponse`
+=== `ServerResponse`
 
 `ServerResponse` provides access to the HTTP response and, since it is immutable, you can use
 a `build` method to create it. You can use the builder to set the response status, to add response
@@ -246,7 +246,7 @@ found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not F
 
 
 [[webflux-fn-router-functions]]
-== Using `RouterFunction`
+== `RouterFunction`
 
 `RouterFunction` is used to route requests to a `HandlerFunction`. Typically, you do not
 write router functions yourself, but rather use
@@ -257,7 +257,7 @@ and that would translate to a 404 (Not Found) response.
 
 
 [[webflux-fn-predicates]]
-=== Using Predicates
+=== Predicates
 
 You can write your own `RequestPredicate`, but the `RequestPredicates` utility class
 offers commonly used implementations, based on the request path, HTTP method, content-type,
@@ -395,7 +395,7 @@ public class WebConfig implements WebFluxConfigurer {
 
 
 [[webflux-fn-handler-filter-function]]
-== Using `HandlerFilterFunction`
+== `HandlerFilterFunction`
 
 You can filter routes mapped by a router function by calling
 `RouterFunction.filter(HandlerFilterFunction)`, where `HandlerFilterFunction` is essentially a

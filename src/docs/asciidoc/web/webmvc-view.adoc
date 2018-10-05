@@ -1777,7 +1777,7 @@ them otherwise in the file names for Tiles definitions.
 
 
 [[mvc-view-tiles-url]]
-==== Using `UrlBasedViewResolver`
+==== `UrlBasedViewResolver`
 
 The `UrlBasedViewResolver` instantiates the given `viewClass` for each view it has to
 resolve. The following bean defines a `UrlBasedViewResolver`:
@@ -1795,7 +1795,7 @@ resolve. The following bean defines a `UrlBasedViewResolver`:
 
 
 [[mvc-view-tiles-resource]]
-==== Using `ResourceBundleViewResolver`
+==== `ResourceBundleViewResolver`
 
 The `ResourceBundleViewResolver` has to be provided with a property file that contains
 view names and view classes that the resolver can use. The following example shows a bean
@@ -1836,7 +1836,7 @@ Note that the `TilesView` class supports JSTL (the JSP Standard Tag Library).
 
 
 [[mvc-view-tiles-preparer]]
-==== Using `SimpleSpringPreparerFactory` and `SpringBeanPreparerFactory`
+==== `SimpleSpringPreparerFactory` and `SpringBeanPreparerFactory`
 
 As an advanced feature, Spring also supports two special Tiles `PreparerFactory`
 implementations. See the Tiles documentation for details on how to use

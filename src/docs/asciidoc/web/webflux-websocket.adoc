@@ -75,7 +75,7 @@ Then you can map it to a URL and add a `WebSocketHandlerAdapter`, as the followi
 
 
 [[webflux-websockethandler]]
-=== Using `WebSocketHandler`
+=== `WebSocketHandler`
 
 The `handle` method of `WebSocketHandler` takes `WebSocketSession` and returns `Mono<Void>`
 to indicate when application handling of the session is complete. The session is handled

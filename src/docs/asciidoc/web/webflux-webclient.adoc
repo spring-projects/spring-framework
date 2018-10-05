@@ -242,7 +242,7 @@ shows:
 
 
 [[webflux-client-retrieve]]
-== Using `retrieve()`
+== `retrieve()`
 
 The `retrieve()` method is the easiest way to get a response body and decode it.
 The following example shows how to do so:
@@ -295,7 +295,7 @@ as the following example shows:
 
 
 [[webflux-client-exchange]]
-== Using `exchange()`
+== `exchange()`
 
 The `exchange()` method provides more control than the `retrieve` method. The following example is equivalent
 to `retrieve()` but also provides access to the `ClientResponse`:

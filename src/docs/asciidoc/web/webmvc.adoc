@@ -284,7 +284,7 @@ provides many extra convenient options.
 
 
 [[mvc-container-config]]
-=== Servlet Configuration
+=== Servlet Config
 
 In a Servlet 3.0+ environment, you have the option of configuring the Servlet container
 programmatically as an alternative or in combination with a `web.xml` file. The following
@@ -2081,7 +2081,7 @@ to set a `UrlPathHelper` with `removeSemicolonContent=false` through
 
 
 [[mvc-ann-requestparam]]
-==== Using `@RequestParam`
+==== `@RequestParam`
 [.small]#<<web-reactive.adoc#webflux-ann-requestparam,Same as in Spring WebFlux>>#
 
 You can use the `@RequestParam` annotation to bind Servlet request parameters (that is, query
@@ -2133,7 +2133,7 @@ with `@RequestParam`.
 
 
 [[mvc-ann-requestheader]]
-==== Using `@RequestHeader`
+==== `@RequestHeader`
 [.small]#<<web-reactive.adoc#webflux-ann-requestheader,Same as in Spring WebFlux>>#
 
 You can use the `@RequestHeader` annotation to bind a request header to a method argument in a
@@ -2186,7 +2186,7 @@ example, a method parameter annotated with `@RequestHeader("Accept")` can be of 
 
 
 [[mvc-ann-cookievalue]]
-==== Using `@CookieValue`
+==== `@CookieValue`
 [.small]#<<web-reactive.adoc#webflux-ann-cookievalue,Same as in Spring WebFlux>>#
 
 You can use the `@CookieValue` annotation to bind the value of an HTTP cookie to a method argument
@@ -2222,7 +2222,7 @@ if the target method parameter type is not
 
 
 [[mvc-ann-modelattrib-method-args]]
-==== Using `@ModelAttribute`
+==== `@ModelAttribute`
 [.small]#<<web-reactive.adoc#webflux-ann-modelattrib-method-args,Same as in Spring WebFlux>>#
 
 You can use the `@ModelAttribute` annotation on a method argument to access an attribute from the
@@ -2350,7 +2350,7 @@ with `@ModelAttribute`.
 
 
 [[mvc-ann-sessionattributes]]
-==== Using `@SessionAttributes`
+==== `@SessionAttributes`
 [.small]#<<web-reactive.adoc#webflux-ann-sessionattributes,Same as in Spring WebFlux>>#
 
 `@SessionAttributes` is used to store model attributes in the HTTP Servlet session between
@@ -2407,7 +2407,7 @@ storage, as the following example shows:
 
 
 [[mvc-ann-sessionattribute]]
-==== Using `@SessionAttribute`
+==== `@SessionAttribute`
 [.small]#<<web-reactive.adoc#webflux-ann-sessionattribute,Same as in Spring WebFlux>>#
 
 If you need access to pre-existing session attributes that are managed globally
@@ -2438,7 +2438,7 @@ workflow, consider using `@SessionAttributes` as described in
 
 
 [[mvc-ann-requestattrib]]
-==== Using `@RequestAttribute`
+==== `@RequestAttribute`
 [.small]#<<web-reactive.adoc#webflux-ann-requestattrib,Same as in Spring WebFlux>>#
 
 Similar to `@SessionAttribute`, you can use the `@RequestAttribute` annotations to
@@ -2689,7 +2689,7 @@ public String handle(**@Valid** @RequestPart("meta-data") MetaData metadata,
 
 
 [[mvc-ann-requestbody]]
-==== Using `@RequestBody`
+==== `@RequestBody`
 [.small]#<<web-reactive.adoc#webflux-ann-requestbody,Same as in Spring WebFlux>>#
 
 You can use the `@RequestBody` annotation to have the request body read and deserialized into an
@@ -2751,7 +2751,7 @@ container object that exposes request headers and body. The following listing sh
 
 
 [[mvc-ann-responsebody]]
-==== Using `@ResponseBody`
+==== `@ResponseBody`
 [.small]#<<web-reactive.adoc#webflux-ann-responsebody,Same as in Spring WebFlux>>#
 
 You can use the `@ResponseBody` annotation on a method to have the return serialized to the
@@ -2971,7 +2971,7 @@ the model attribute name, as the following example shows:
 
 
 [[mvc-ann-initbinder]]
-=== Using `DataBinder`
+=== `DataBinder`
 [.small]#<<web-reactive.adoc#webflux-ann-initbinder,Same as in Spring WebFlux>>#
 
 `@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods that
@@ -3559,7 +3559,7 @@ controller methods and provide basic support for a single asynchronous return va
 
 
 [[mvc-ann-async-deferredresult]]
-=== Using `DeferredResult`
+=== `DeferredResult`
 [.small]#<<mvc-ann-async-vs-webflux,Compared to WebFlux>>#
 
 Once the asynchronous request processing feature is
@@ -3590,7 +3590,7 @@ example, in response to an external event (JMS message), a scheduled task, or ot
 
 
 [[mvc-ann-async-callable]]
-=== Using `Callable`
+=== `Callable`
 [.small]#<<mvc-ann-async-vs-webflux,Compared to WebFlux>>#
 
 A controller can wrap any supported return value with `java.util.concurrent.Callable`,
@@ -3989,7 +3989,7 @@ This section describes the HTTP caching-related options that are available in Sp
 
 
 [[mvc-caching-cachecontrol]]
-=== Using `CacheControl`
+=== `CacheControl`
 [.small]#<<web-reactive.adoc#webflux-caching-cachecontrol,Same as in Spring WebFlux>>#
 
 {api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
@@ -4182,7 +4182,7 @@ available on the classpath (for example, payload converters for JSON, XML, and o
 
 
 [[mvc-config-customize]]
-=== The MVC Configuration API
+=== MVC Config API
 [.small]#<<web-reactive.adoc#webflux-config-customize,Same as in Spring WebFlux>>#
 
 In Java configuration, you can implement the `WebMvcConfigurer` interface, as the
@@ -4952,7 +4952,7 @@ The following example shows how to achieve the same configuration in XML:
 
 
 [[mvc-config-advanced-java]]
-=== Advanced Java Configuration
+=== Advanced Java Config
 [.small]#<<web-reactive.adoc#webflux-config-advanced-java,Same as in Spring WebFlux>>#
 
 `@EnableWebMvc` imports `DelegatingWebMvcConfiguration`, which:
@@ -4984,7 +4984,7 @@ the classpath.
 
 
 [[mvc-config-advanced-xml]]
-=== Advanced XML Configuration
+=== Advanced XML Config
 
 The MVC namespace does not have an advanced mode. If you need to customize a property on
 a bean that you cannot change otherwise, you can use the `BeanPostProcessor` lifecycle
