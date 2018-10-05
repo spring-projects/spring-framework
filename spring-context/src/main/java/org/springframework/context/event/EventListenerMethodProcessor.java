@@ -32,6 +32,7 @@ import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -100,7 +101,7 @@ public class EventListenerMethodProcessor
 	public void afterSingletonsInstantiated() {
 		ConfigurableListableBeanFactory beanFactory = this.beanFactory;
 		Assert.state(this.beanFactory != null, "No ConfigurableListableBeanFactory set");
-		String[] beanNames = beanFactory.getBeanNamesForType(Object.class);
+		String[] beanNames = getBeanNames(beanFactory);
 		for (String beanName : beanNames) {
 			if (!ScopedProxyUtils.isScopedTarget(beanName)) {
 				Class<?> type = null;
@@ -139,6 +140,16 @@ public class EventListenerMethodProcessor
 				}
 			}
 		}
+	}
+
+	/**
+	 * Allows custom implementations to use a smaller subset of beans rather than checking all the beans in the registry.
+	 *
+	 * @param listableBeanFactory beanFactory
+	 * @return list of bean names
+	 */
+	protected String[] getBeanNames(ListableBeanFactory listableBeanFactory) {
+		return listableBeanFactory.getBeanNamesForType(Object.class);
 	}
 
 	private void processBean(final String beanName, final Class<?> targetType) {
