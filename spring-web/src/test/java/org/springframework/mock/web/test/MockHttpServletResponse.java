@@ -581,7 +581,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add(HttpHeaders.CONTENT_LANGUAGE, value.toString());
 			Locale language = headers.getContentLanguage();
-			this.locale = language != null ? language : Locale.getDefault();
+			setLocale(language != null ? language : Locale.getDefault());
 			return true;
 		}
 		else {
