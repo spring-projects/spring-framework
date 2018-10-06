@@ -674,9 +674,9 @@ readers and writers for form data, multipart requests, and server-sent events.
 ==== Jackson JSON
 
 JSON and binary JSON (https://github.com/FasterXML/smile-format-specification[Smile]) data
-formats are both supported.
+formats are both supported with the Jackson library.
 
-The `Jackson2Decoder` uses Jackson's asynchronous, non-blocking parser to create a stream
+`Jackson2Decoder` uses Jackson's asynchronous, non-blocking parser to create a stream
 of ``TokenBuffer``'s and then each `TokenBuffer` is passed to Jackson's `ObjectMapper` to
 create a higher level object. When decoding to a multi-value publisher (e.g. `Flux`), the
 input stream can be a JSON array, or
@@ -700,6 +700,45 @@ elements of type `java.util.String`. Instead the default assumption is that a st
 or a sequence of strings represent serialized JSON content, to be rendered by the
 `CharSequenceEncoder`. If what you want is to render a JSON array from `Flux<String>`,
 use `Flux#collectToList()` and provide a `Mono<List<String>>` to be serialized.
+
+
+
+[[webflux-codecs-forms]]
+==== Form Data
+
+`FormHttpMessageReader` and `FormHttpMessageWriter` support decoding and encoding
+"application/x-www-form-urlencoded" content.
+
+On the server side where form content often needs to be accessed from multiple places,
+`ServerWebExchange` provides a dedicated `getFormData()` method that parses the content
+through `FormHttpMessageReader` and then caches the result for repeated access.
+See <<webflux-form-data>> in the <<webflux-web-handler-api>> section.
+
+Once `getFormData()` is used, the original raw content can no longer be read from the
+request body. For this reason, applications are expected to go through `ServerWebExchange`
+consistently for access to the cached form data versus reading from the raw request body.
+
+
+
+[[webflux-codecs-multipart]]
+==== Multipart Data
+
+`MultipartHttpMessageReader` and `MultipartHttpMessageWriter` support decoding and
+encoding "multipart/form-data" content. In turn `MultipartHttpMessageReader` delegates to
+another `HttpMessageReader` for the actual parsing to a `Flux<Part>` and then simply
+collects the parts into a `MultiValueMap`. At present the
+https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is used for the
+actual parsing.
+
+On the server side where multipart form content may need to be accessed from multiple
+places, `ServerWebExchange` provides a dedicated `getMultipartData()` method that parses
+the content through `MultipartHttpMessageReader` and then caches the result for repeated access.
+See <<webflux-multipart>> in the <<webflux-web-handler-api>> section.
+
+Once `getMultipartData()` is used, the original raw content can no longer be read from the
+request body. For this reason applications have to consistently use `getMultipartData()`
+for repeated, map-like access to parts, or otherwise rely on the
+`SynchronossPartHttpMessageReader` for a one-time access to `Flux<Part>`.
 
 
 
