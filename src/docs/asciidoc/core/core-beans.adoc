@@ -26,6 +26,7 @@ interface provides an advanced configuration mechanism capable of managing any t
 object.
 {api-spring-framework}/context/ApplicationContext.html[`ApplicationContext`]
 is a sub-interface of `BeanFactory`. It adds:
+
 * Easier integration with Spring's AOP features
 * Message resource handling (for use in internationalization)
 * Event publication
