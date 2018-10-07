@@ -41,6 +41,9 @@ import org.springframework.beans.BeansException;
 public interface BeanFactoryAware extends Aware {
 
 	/**
+     * 将 BeanFactory 提供给 bean 实例回调
+     * 调用时机和 setBeanClassLoader 一样
+     *
 	 * Callback that supplies the owning factory to a bean instance.
 	 * <p>Invoked after the population of normal bean properties
 	 * but before an initialization callback such as

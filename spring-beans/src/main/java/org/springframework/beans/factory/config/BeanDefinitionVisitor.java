@@ -16,18 +16,14 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringValueResolver;
+
+import java.util.*;
 
 /**
  * Visitor class for traversing {@link BeanDefinition} objects, in particular
@@ -143,9 +139,12 @@ public class BeanDefinitionVisitor {
 
 	protected void visitPropertyValues(MutablePropertyValues pvs) {
 		PropertyValue[] pvArray = pvs.getPropertyValues();
+		// 遍历 PropertyValue 数组
 		for (PropertyValue pv : pvArray) {
+		    // 解析真
 			Object newVal = resolveValue(pv.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, pv.getValue())) {
+			    // 设置到 PropertyValue 中
 				pvs.add(pv.getName(), newVal);
 			}
 		}
@@ -174,11 +173,9 @@ public class BeanDefinitionVisitor {
 	protected Object resolveValue(@Nullable Object value) {
 		if (value instanceof BeanDefinition) {
 			visitBeanDefinition((BeanDefinition) value);
-		}
-		else if (value instanceof BeanDefinitionHolder) {
+		} else if (value instanceof BeanDefinitionHolder) {
 			visitBeanDefinition(((BeanDefinitionHolder) value).getBeanDefinition());
-		}
-		else if (value instanceof RuntimeBeanReference) {
+		} else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
 			String newBeanName = resolveStringValue(ref.getBeanName());
 			if (newBeanName == null) {
@@ -187,8 +184,7 @@ public class BeanDefinitionVisitor {
 			if (!newBeanName.equals(ref.getBeanName())) {
 				return new RuntimeBeanReference(newBeanName);
 			}
-		}
-		else if (value instanceof RuntimeBeanNameReference) {
+		} else if (value instanceof RuntimeBeanNameReference) {
 			RuntimeBeanNameReference ref = (RuntimeBeanNameReference) value;
 			String newBeanName = resolveStringValue(ref.getBeanName());
 			if (newBeanName == null) {
@@ -197,28 +193,22 @@ public class BeanDefinitionVisitor {
 			if (!newBeanName.equals(ref.getBeanName())) {
 				return new RuntimeBeanNameReference(newBeanName);
 			}
-		}
-		else if (value instanceof Object[]) {
+		} else if (value instanceof Object[]) {
 			visitArray((Object[]) value);
-		}
-		else if (value instanceof List) {
+		} else if (value instanceof List) {
 			visitList((List) value);
-		}
-		else if (value instanceof Set) {
+		} else if (value instanceof Set) {
 			visitSet((Set) value);
-		}
-		else if (value instanceof Map) {
+		} else if (value instanceof Map) {
 			visitMap((Map) value);
-		}
-		else if (value instanceof TypedStringValue) {
+		} else if (value instanceof TypedStringValue) {
 			TypedStringValue typedStringValue = (TypedStringValue) value;
 			String stringValue = typedStringValue.getValue();
 			if (stringValue != null) {
 				String visitedString = resolveStringValue(stringValue);
 				typedStringValue.setValue(visitedString);
 			}
-		}
-		else if (value instanceof String) {
+		} else if (value instanceof String) {
 			return resolveStringValue((String) value);
 		}
 		return value;
@@ -293,6 +283,7 @@ public class BeanDefinitionVisitor {
 			throw new IllegalStateException("No StringValueResolver specified - pass a resolver " +
 					"object into the constructor or override the 'resolveStringValue' method");
 		}
+		// 解析真值
 		String resolvedValue = this.valueResolver.resolveStringValue(strVal);
 		// Return original String if not modified.
 		return (strVal.equals(resolvedValue) ? strVal : resolvedValue);

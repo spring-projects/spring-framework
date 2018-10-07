@@ -56,7 +56,7 @@ public interface BeanPostProcessor {
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 */
 	@Nullable
-	default Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+	default Object postProcessBeforeInitialization(BeanFactoryPostProcessor) throws BeansException {
 		return bean;
 	}
 
