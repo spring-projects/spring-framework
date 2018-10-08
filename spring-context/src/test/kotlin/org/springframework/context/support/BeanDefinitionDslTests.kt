@@ -20,11 +20,11 @@ import org.junit.Assert.*
 import org.junit.Test
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.getBean
-import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.support.BeanDefinitionDsl.*
 import org.springframework.core.env.SimpleCommandLinePropertySource
 import org.springframework.core.env.get
 import org.springframework.mock.env.MockPropertySource
+import java.util.stream.Collectors
 
 @Suppress("UNUSED_EXPRESSION")
 class BeanDefinitionDslTests {
@@ -127,12 +127,12 @@ class BeanDefinitionDslTests {
 		}
 	}
 
-	@Test  // SPR-16269
-	fun `Provide access to the context for allowing calling advanced features like getBeansOfType`() {
+	@Test  // SPR-17352
+	fun `Retrieve multiple beans via a bean provider`() {
 		val beans = beans {
 			bean<Foo>()
 			bean<Foo>()
-			bean { BarBar(context.getBeansOfType<Foo>().values) }
+			bean { BarBar(provider<Foo>().stream().collect(Collectors.toList())) }
 		}
 
 		val context = GenericApplicationContext().apply {

@@ -16,8 +16,10 @@
 
 package org.springframework.context.support
 
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer
+import org.springframework.beans.factory.getBeanProvider
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.core.env.ConfigurableEnvironment
@@ -81,10 +83,10 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	internal val children = arrayListOf<BeanDefinitionDsl>()
 
 	/**
-	 * Access to the context for advanced use-cases.
-	 * @since 5.1
+	 * @see provider
 	 */
-	lateinit var context: GenericApplicationContext
+	@PublishedApi
+	internal lateinit var context: GenericApplicationContext
 
 	/**
 	 * Shortcut for `context.environment`
@@ -244,6 +246,15 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 		null -> context.getBean(T::class.java)
 		else -> context.getBean(name, T::class.java)
 	}
+
+
+	/**
+	 * Return an provider for the specified bean, allowing for lazy on-demand retrieval
+	 * of instances, including availability and uniqueness options.
+	 * @since 5.1.1
+	 * @see org.springframework.beans.factory.BeanFactory.getBeanProvider
+	 */
+	inline fun <reified T : Any> provider() : ObjectProvider<T> = context.getBeanProvider()
 
 	/**
 	 * Take in account bean definitions enclosed in the provided lambda only when the
