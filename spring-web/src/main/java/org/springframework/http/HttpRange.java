@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,9 @@ import org.springframework.util.StringUtils;
  */
 public abstract class HttpRange {
 
+	/** Maximum ranges per request. */
+	private static final int MAX_RANGES = 100;
+
 	private static final String BYTE_RANGE_PREFIX = "bytes=";
 
 
@@ -58,16 +61,23 @@ public abstract class HttpRange {
 		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
 		Assert.isTrue(resource.getClass() != InputStreamResource.class,
 				"Cannot convert an InputStreamResource to a ResourceRegion");
+		long contentLength = getLengthFor(resource);
+		Assert.isTrue(contentLength > 0, "Resource content length should be > 0");
+		long start = getRangeStart(contentLength);
+		long end = getRangeEnd(contentLength);
+		return new ResourceRegion(resource, start, end - start + 1);
+	}
+
+	private static long getLengthFor(Resource resource) {
+		long contentLength;
 		try {
-			long contentLength = resource.contentLength();
+			contentLength = resource.contentLength();
 			Assert.isTrue(contentLength > 0, "Resource content length should be > 0");
-			long start = getRangeStart(contentLength);
-			long end = getRangeEnd(contentLength);
-			return new ResourceRegion(resource, start, end - start + 1);
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException("Failed to convert Resource to ResourceRegion", ex);
+			throw new IllegalArgumentException("Failed to obtain Resource content length", ex);
 		}
+		return contentLength;
 	}
 
 	/**
@@ -121,7 +131,8 @@ public abstract class HttpRange {
 	 * <p>This method can be used to parse an {@code Range} header.
 	 * @param ranges the string to parse
 	 * @return the list of ranges
-	 * @throws IllegalArgumentException if the string cannot be parsed
+	 * @throws IllegalArgumentException if the string cannot be parsed, or if
+	 * the number of ranges is greater than 100.
 	 */
 	public static List<HttpRange> parseRanges(String ranges) {
 		if (!StringUtils.hasLength(ranges)) {
@@ -133,6 +144,7 @@ public abstract class HttpRange {
 		ranges = ranges.substring(BYTE_RANGE_PREFIX.length());
 
 		String[] tokens = StringUtils.tokenizeToStringArray(ranges, ",");
+		Assert.isTrue(tokens.length <= MAX_RANGES, "Too many ranges " + tokens.length);
 		List<HttpRange> result = new ArrayList<HttpRange>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseRange(token));
@@ -169,6 +181,8 @@ public abstract class HttpRange {
 	 * @param resource the resource to select the regions from
 	 * @return the list of regions for the given resource
 	 * @since 4.3
+	 * @throws IllegalArgumentException if the sum of all ranges exceeds the
+	 * resource length.
 	 */
 	public static List<ResourceRegion> toResourceRegions(List<HttpRange> ranges, Resource resource) {
 		if (CollectionUtils.isEmpty(ranges)) {
@@ -177,6 +191,15 @@ public abstract class HttpRange {
 		List<ResourceRegion> regions = new ArrayList<ResourceRegion>(ranges.size());
 		for (HttpRange range : ranges) {
 			regions.add(range.toResourceRegion(resource));
+		}
+		if (ranges.size() > 1) {
+			long length = getLengthFor(resource);
+			long total = 0;
+			for (ResourceRegion region : regions) {
+				total += region.getCount();
+			}
+			Assert.isTrue(total < length, "The sum of all ranges (" + total + ") " +
+					"should be less than the resource length (" + length + ")");
 		}
 		return regions;
 	}
