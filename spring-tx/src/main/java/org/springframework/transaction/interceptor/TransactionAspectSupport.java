@@ -60,13 +60,15 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @author St茅phane Nicoll
+ * @author Stéphane Nicoll
  * @author Sam Brannen
  * @since 1.1
  * @see #setTransactionManager
  * @see #setTransactionAttributes
  * @see #setTransactionAttributeSource
  */
+
+// 可以当做spring事务的入口invokeWithinTransaction
 public abstract class TransactionAspectSupport implements BeanFactoryAware, InitializingBean {
 
 	// NOTE: This class must not implement Serializable because it serves as base

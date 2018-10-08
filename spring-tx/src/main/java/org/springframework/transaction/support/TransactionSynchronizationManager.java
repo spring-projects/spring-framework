@@ -72,6 +72,10 @@ import org.springframework.util.Assert;
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+ *
+ *  事务管理容器
+ * 在spring事务管理过程中会用到一些线程安全对象，这些对象都交由TransactionSynchronizationManager管理，TransactionSynchronizationManager把这些对象都保存在ThreadLocal中。
+ *
  */
 public abstract class TransactionSynchronizationManager {
 
@@ -170,6 +174,9 @@ public abstract class TransactionSynchronizationManager {
 	 * @param value the value to bind (usually the active resource object)
 	 * @throws IllegalStateException if there is already a value bound to the thread
 	 * @see ResourceTransactionManager#getResourceFactory()
+	 *
+	 *  把ConneciontHolder以key=当前dataSource绑定在当前线程， 此外还可以在mybatis真正执行sql操作时从当前线程的ConneciontHolder中获取数据库连接对象
+	 *
 	 */
 	public static void bindResource(Object key, Object value) throws IllegalStateException {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
