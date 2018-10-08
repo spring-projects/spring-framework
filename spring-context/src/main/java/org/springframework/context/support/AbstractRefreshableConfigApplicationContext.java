@@ -36,9 +36,13 @@ import org.springframework.util.StringUtils;
  * @see #setConfigLocations
  * @see #getDefaultConfigLocations
  */
+@SuppressWarnings("JavadocReference")
 public abstract class AbstractRefreshableConfigApplicationContext extends AbstractRefreshableApplicationContext
 		implements BeanNameAware, InitializingBean {
 
+    /**
+     * 配置文件地址数组
+     */
 	@Nullable
 	private String[] configLocations;
 
@@ -76,12 +80,14 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	public void setConfigLocations(@Nullable String... locations) {
 		if (locations != null) {
 			Assert.noNullElements(locations, "Config locations must not be null");
+			// 创建数组
 			this.configLocations = new String[locations.length];
 			for (int i = 0; i < locations.length; i++) {
+			    // 解析给定路径
+                // 如果路径中包含特殊字符，如 ${var} ，那么在该方法中，会搜寻匹配的系统变量并替换
 				this.configLocations[i] = resolvePath(locations[i]).trim();
 			}
-		}
-		else {
+		} else {
 			this.configLocations = null;
 		}
 	}

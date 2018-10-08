@@ -44,6 +44,8 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
      *
      * 缓存 FactoryBean 创建的单例 Bean 对象的映射
      * beanName ===> Bean 对象
+     *
+     * @see #getCachedObjectForFactoryBean(String)
      */
 	private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>(16);
 

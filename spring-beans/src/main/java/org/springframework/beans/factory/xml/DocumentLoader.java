@@ -24,6 +24,8 @@ import org.xml.sax.InputSource;
 /**
  * Document 加载器接口
  *
+ * From 《Spring 源码深度解析》：定义从资源文件加载到转换为 Document 的功能。
+ *
  * Strategy interface for loading an XML {@link Document}.
  *
  * @author Rob Harrop

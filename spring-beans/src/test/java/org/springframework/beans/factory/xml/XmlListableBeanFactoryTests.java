@@ -16,14 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanFactory;
@@ -35,6 +29,11 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.LifecycleBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -70,7 +69,8 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		new XmlBeanDefinitionReader(this.factory).loadBeanDefinitions(new ClassPathResource("test.xml", getClass()));
 
 		this.factory.addBeanPostProcessor(new BeanPostProcessor() {
-			@Override
+
+		    @Override
 			public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 				if (bean instanceof TestBean) {
 					((TestBean) bean).setPostProcessed(true);
@@ -80,6 +80,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 				}
 				return bean;
 			}
+			
 			@Override
 			public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
 				return bean;

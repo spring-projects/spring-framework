@@ -19,6 +19,16 @@ package org.springframework.beans.factory;
 import org.springframework.lang.Nullable;
 
 /**
+ * From 《Spring 源码深度解析》P83 页
+ *
+ * 一般情况下，Spring 通过反射机制利用 bean 的 class 属性指定实现类来实例化 bean 。
+ * 某些情况下，实例化 bean 过程比较复杂，如果按照传统的方式，则需要在 <bean> 中提供大量的配置信息，
+ * 配置方式的灵活性是受限的，这时采用编码的方式可能会得到一个简单的方案。Spring 为此提供了一个 FactoryBean 的工厂类接口，
+ * 用户可以通过实现该接口定制实例化 bean 的逻辑。
+ *
+ * FactoryBean 接口对于 Spring 框架来说战友重要的地址，Spring 自身就提供了 70 多个 FactoryBean 的实现
+ * 它们隐藏了实例化一些复杂 bean 的细节，给上层应用带来了便利。
+ *
  * Interface to be implemented by objects used within a {@link BeanFactory} which
  * are themselves factories for individual objects. If a bean implements this
  * interface, it is used as a factory for an object to expose, not directly as a

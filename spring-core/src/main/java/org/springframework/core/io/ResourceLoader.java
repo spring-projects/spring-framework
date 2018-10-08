@@ -22,6 +22,8 @@ import org.springframework.util.ResourceUtils;
 /**
  * Spring 资源加载的统一抽象，具体的资源加载则由相应的实现类来完成，所以我们可以将 ResourceLoader 称作为统一资源定位器。
  *
+ * From 《Spring 源码深度解析》：定义资源加载器，主要应用于根据给定的资源文件地址，返回对应的 Resource 。
+ *
  * Strategy interface for loading resources (e.. class path or file system
  * resources). An {@link org.springframework.context.ApplicationContext}
  * is required to provide this functionality, plus extended
