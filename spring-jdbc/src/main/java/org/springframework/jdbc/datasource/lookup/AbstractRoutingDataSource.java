@@ -36,6 +36,13 @@ import org.springframework.util.Assert;
  * @see #setTargetDataSources
  * @see #setDefaultTargetDataSource
  * @see #determineCurrentLookupKey()
+ *
+ * AbstractDataSource实现了javax.sql.DataSource接口，在配置spring-datasource.xml时作为spring-jdbc.DataSourceTransactionManager的数据源
+ * 以及mybatis-spring.SqlSessionFactory的数据源。
+ * 使用多数据源时要继承此类，如：DynamicDataSource实现determineCurrentLookupKey
+ * 同时注入targetDataSources和defaultTargetDataSource。之后在service方法执行前通过AOP方式切换当前线程的数据源key(如AOP获取args后依据分库分表策略路由数据源key),
+ * determineTargetDataSource(..)方法就会通过该key从targetDataSources中寻找正确的数据源
+ *
  */
 public abstract class AbstractRoutingDataSource extends AbstractDataSource implements InitializingBean {
 

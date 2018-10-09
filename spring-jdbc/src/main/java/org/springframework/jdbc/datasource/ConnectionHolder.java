@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  * @see DataSourceTransactionManager
  * @see DataSourceUtils
  */
+//ConnectionHolder对象被封装在DataSourceTransactionObject对象中
 public class ConnectionHolder extends ResourceHolderSupport {
 
 	public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
@@ -45,6 +46,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	private ConnectionHandle connectionHandle;
 
+	//数据库连接对象
 	private Connection currentConnection;
 
 	private boolean transactionActive = false;

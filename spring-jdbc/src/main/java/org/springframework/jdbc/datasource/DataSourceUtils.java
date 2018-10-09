@@ -48,6 +48,9 @@ import org.springframework.util.Assert;
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
+//ORM框架、以及jdbcTemplate执行sql语句时都会从此工具类的doGetConnection(..)方法中获取当前线程中已设置的
+//事务ConnectionHolder对象
+//ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 public abstract class DataSourceUtils {
 
 	/**
