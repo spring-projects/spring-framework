@@ -37,11 +37,11 @@ import org.springframework.util.Assert;
  * @see #setDefaultTargetDataSource
  * @see #determineCurrentLookupKey()
  *
- * AbstractDataSourceÊµÏÖÁËjavax.sql.DataSource½Ó¿Ú£¬ÔÚÅäÖÃspring-datasource.xmlÊ±×÷Îªspring-jdbc.DataSourceTransactionManagerµÄÊı¾İÔ´
- * ÒÔ¼°mybatis-spring.SqlSessionFactoryµÄÊı¾İÔ´¡£
- * Ê¹ÓÃ¶àÊı¾İÔ´Ê±Òª¼Ì³Ğ´ËÀà£¬Èç£ºDynamicDataSourceÊµÏÖdetermineCurrentLookupKey
- * Í¬Ê±×¢ÈëtargetDataSourcesºÍdefaultTargetDataSource¡£Ö®ºóÔÚservice·½·¨Ö´ĞĞÇ°Í¨¹ıAOP·½Ê½ÇĞ»»µ±Ç°Ïß³ÌµÄÊı¾İÔ´key(ÈçAOP»ñÈ¡argsºóÒÀ¾İ·Ö¿â·Ö±í²ßÂÔÂ·ÓÉÊı¾İÔ´key),
- * determineTargetDataSource(..)·½·¨¾Í»áÍ¨¹ı¸Ãkey´ÓtargetDataSourcesÖĞÑ°ÕÒÕıÈ·µÄÊı¾İÔ´
+ * AbstractDataSourceå®ç°äº†javax.sql.DataSourceæ¥å£ï¼Œåœ¨é…ç½®spring-datasource.xmlæ—¶ä½œä¸ºspring-jdbc.DataSourceTransactionManagerçš„æ•°æ®æº
+ * ä»¥åŠmybatis-spring.SqlSessionFactoryçš„æ•°æ®æºã€‚
+ * ä½¿ç”¨å¤šæ•°æ®æºæ—¶è¦ç»§æ‰¿æ­¤ç±»ï¼Œå¦‚ï¼šDynamicDataSourceå®ç°determineCurrentLookupKey
+ * åŒæ—¶æ³¨å…¥targetDataSourceså’ŒdefaultTargetDataSourceã€‚ä¹‹ååœ¨serviceæ–¹æ³•æ‰§è¡Œå‰é€šè¿‡AOPæ–¹å¼åˆ‡æ¢å½“å‰çº¿ç¨‹çš„æ•°æ®æºkey(å¦‚AOPè·å–argsåä¾æ®åˆ†åº“åˆ†è¡¨ç­–ç•¥è·¯ç”±æ•°æ®æºkey),
+ * determineTargetDataSource(..)æ–¹æ³•å°±ä¼šé€šè¿‡è¯¥keyä»targetDataSourcesä¸­å¯»æ‰¾æ­£ç¡®çš„æ•°æ®æº
  *
  */
 public abstract class AbstractRoutingDataSource extends AbstractDataSource implements InitializingBean {

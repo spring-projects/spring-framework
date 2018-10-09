@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * @see DataSourceTransactionManager
  * @see DataSourceUtils
  */
-//ConnectionHolder¶ÔÏó±»·â×°ÔÚDataSourceTransactionObject¶ÔÏóÖĞ
+//ConnectionHolderå¯¹è±¡è¢«å°è£…åœ¨DataSourceTransactionObjectå¯¹è±¡ä¸­
 public class ConnectionHolder extends ResourceHolderSupport {
 
 	public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
@@ -46,7 +46,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	private ConnectionHandle connectionHandle;
 
-	//Êı¾İ¿âÁ¬½Ó¶ÔÏó
+	//æ•°æ®åº“è¿æ¥å¯¹è±¡
 	private Connection currentConnection;
 
 	private boolean transactionActive = false;

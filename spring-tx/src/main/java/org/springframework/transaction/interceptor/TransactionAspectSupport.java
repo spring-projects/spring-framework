@@ -60,7 +60,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @author Stéphane Nicoll
+ * @author St茅phane Nicoll
  * @author Sam Brannen
  * @since 1.1
  * @see #setTransactionManager
@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
  * @see #setTransactionAttributeSource
  */
 
-// 可以当做spring事务的入口invokeWithinTransaction
+// 鍙互褰撳仛spring浜嬪姟鐨勫叆鍙nvokeWithinTransaction
 public abstract class TransactionAspectSupport implements BeanFactoryAware, InitializingBean {
 
 	// NOTE: This class must not implement Serializable because it serves as base
@@ -246,12 +246,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (getTransactionManager() == null && this.beanFactory == null) {
 			throw new IllegalStateException(
 					"Set the 'transactionManager' property or make sure to run within a BeanFactory " +
-					"containing a PlatformTransactionManager bean!");
+							"containing a PlatformTransactionManager bean!");
 		}
 		if (getTransactionAttributeSource() == null) {
 			throw new IllegalStateException(
 					"Either 'transactionAttributeSource' or 'transactionAttributes' is required: " +
-					"If there are no transactional methods, then don't use a transaction aspect.");
+							"If there are no transactional methods, then don't use a transaction aspect.");
 		}
 	}
 
@@ -481,7 +481,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @return the prepared TransactionInfo object
 	 */
 	protected TransactionInfo prepareTransactionInfo(PlatformTransactionManager tm,
-			TransactionAttribute txAttr, String joinpointIdentification, TransactionStatus status) {
+													 TransactionAttribute txAttr, String joinpointIdentification, TransactionStatus status) {
 
 		TransactionInfo txInfo = new TransactionInfo(tm, txAttr, joinpointIdentification);
 		if (txAttr != null) {
@@ -603,7 +603,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		private TransactionInfo oldTransactionInfo;
 
 		public TransactionInfo(PlatformTransactionManager transactionManager,
-				TransactionAttribute transactionAttribute, String joinpointIdentification) {
+							   TransactionAttribute transactionAttribute, String joinpointIdentification) {
 
 			this.transactionManager = transactionManager;
 			this.transactionAttribute = transactionAttribute;
