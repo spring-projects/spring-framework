@@ -42,9 +42,9 @@ import org.springframework.util.Assert;
  * @author Philippe Marschall
  * @author Juergen Hoeller
  * @since 4.0
- * @see FileSystemResource
  * @see java.nio.file.Path
  * @see java.nio.file.Files
+ * @see FileSystemResource
  */
 public class PathResource extends AbstractResource implements WritableResource {
 
@@ -81,8 +81,8 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * <p>Note: Unlike {@link FileSystemResource}, when building relative resources
 	 * via {@link #createRelative}, the relative path will be built <i>underneath</i>
 	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
-	 * @see java.nio.file.Paths#get(URI)
 	 * @param uri a path URI
+	 * @see java.nio.file.Paths#get(URI)
 	 */
 	public PathResource(URI uri) {
 		Assert.notNull(uri, "URI must not be null");
@@ -99,7 +99,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 
 	/**
 	 * This implementation returns whether the underlying file exists.
-	 * @see org.springframework.core.io.PathResource#exists()
+	 * @see java.nio.file.Files#exists(Path, java.nio.file.LinkOption...)
 	 */
 	@Override
 	public boolean exists() {
