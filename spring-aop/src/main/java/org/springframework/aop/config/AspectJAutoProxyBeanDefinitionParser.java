@@ -32,6 +32,10 @@ import org.springframework.lang.Nullable;
  * enabling the automatic application of @AspectJ-style aspects found in
  * the {@link org.springframework.beans.factory.BeanFactory}.
  *
+ * 将 <aop:aspectj-autoproxy> 标签，解析成 BeanDefinition 的解析器
+ *
+ * 基于 Aspect 实现自动代理的 BeanDefinition 的解析器
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -41,14 +45,16 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 	@Override
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+        // AUTO_PROXY_CREATOR_BEAN_NAME 对应的 BeanDefinition 对象
 		AopNamespaceUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(parserContext, element);
+		// 解析 XML 中子标签的处理
 		extendBeanDefinition(element, parserContext);
 		return null;
 	}
 
 	private void extendBeanDefinition(Element element, ParserContext parserContext) {
-		BeanDefinition beanDef =
-				parserContext.getRegistry().getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		BeanDefinition beanDef = parserContext.getRegistry().getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		// 解析子标签
 		if (element.hasChildNodes()) {
 			addIncludePatterns(element, parserContext, beanDef);
 		}
@@ -57,6 +63,7 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 	private void addIncludePatterns(Element element, ParserContext parserContext, BeanDefinition beanDef) {
 		ManagedList<TypedStringValue> includePatterns = new ManagedList<>();
 		NodeList childNodes = element.getChildNodes();
+		// 解析 <aop:aspectj-autoproxy> 内嵌的 <aop:include /> 标签
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node node = childNodes.item(i);
 			if (node instanceof Element) {
@@ -66,6 +73,7 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 				includePatterns.add(valueHolder);
 			}
 		}
+		// 设置 includePatterns 属性
 		if (!includePatterns.isEmpty()) {
 			includePatterns.setSource(parserContext.extractSource(element));
 			beanDef.getPropertyValues().add("includePatterns", includePatterns);

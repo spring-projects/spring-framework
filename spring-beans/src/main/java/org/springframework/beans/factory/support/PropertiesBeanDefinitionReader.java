@@ -16,15 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessor;
@@ -39,7 +30,16 @@ import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+
 /**
+ * 基于 Properties 文件，解析对应的 BeanDefinition 们。
+ *
+ * 可参考 [《spring beans源码解读之 -- BeanDefinition 解析器》](https://www.bbsmax.com/A/KE5QLe8PJL/)
+ *
  * Bean definition reader for a simple properties format.
  *
  * <p>Provides bean definition registration methods for Map/Properties and
@@ -246,13 +246,13 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 */
 	public int loadBeanDefinitions(EncodedResource encodedResource, @Nullable String prefix)
 			throws BeanDefinitionStoreException {
-
 		if (logger.isTraceEnabled()) {
 			logger.trace("Loading properties bean definitions from " + encodedResource);
 		}
 
 		Properties props = new Properties();
 		try {
+		    // 从 Resource 中，读取数据到 Properties 中
 			try (InputStream is = encodedResource.getResource().getInputStream()) {
 				if (encodedResource.getEncoding() != null) {
 					getPropertiesPersister().load(props, new InputStreamReader(is, encodedResource.getEncoding()));
@@ -262,13 +262,14 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				}
 			}
 
+			// 从 Properties 中，解析 BeanDefinition 们
+            // 注册 BeanDefinition 们
 			int count = registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loaded " + count + " bean definitions from " + encodedResource);
 			}
 			return count;
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new BeanDefinitionStoreException("Could not parse properties from " + encodedResource.getResource(), ex);
 		}
 	}
@@ -352,11 +353,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 */
 	public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix, String resourceDescription)
 			throws BeansException {
-
+	    // 默认 prefix
 		if (prefix == null) {
 			prefix = "";
 		}
-		int beanCount = 0;
+		int beanCount = 0; // 计数
 
 		for (Object key : map.keySet()) {
 			if (!(key instanceof String)) {

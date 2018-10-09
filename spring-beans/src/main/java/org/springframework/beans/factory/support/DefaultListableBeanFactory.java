@@ -749,7 +749,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void freezeConfiguration() {
+	    // 标记冻结
 		this.configurationFrozen = true;
+		// 设置 frozenBeanDefinitionNames 不可变
 		this.frozenBeanDefinitionNames = StringUtils.toStringArray(this.beanDefinitionNames);
 	}
 
@@ -776,49 +778,57 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 		// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
+        // 获得所有 Bean 名字的集合
 		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
 
 		// Trigger initialization of all non-lazy singleton beans...
+        // 遍历 Bean 名字的集合，触发 Bean 加载
 		for (String beanName : beanNames) {
+		    // 获得 RootBeanDefinition 对象
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			// 单例 && 非延迟加载
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+			    // 如果是 FactoryBean
 				if (isFactoryBean(beanName)) {
+				    // 获得 FactoryBean 自身这个 Bean
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
 					if (bean instanceof FactoryBean) {
 						final FactoryBean<?> factory = (FactoryBean<?>) bean;
+						// 判断是否要提前初始化
 						boolean isEagerInit;
 						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
 							isEagerInit = AccessController.doPrivileged((PrivilegedAction<Boolean>)
 											((SmartFactoryBean<?>) factory)::isEagerInit,
 									getAccessControlContext());
-						}
-						else {
+						} else {
 							isEagerInit = (factory instanceof SmartFactoryBean &&
 									((SmartFactoryBean<?>) factory).isEagerInit());
 						}
+						// 如果要，加载 FactoryBean 要创建的 Bean 对象
 						if (isEagerInit) {
 							getBean(beanName);
 						}
 					}
-				}
-				else {
-					getBean(beanName);
+				} else {
+                    // 如果非 FactoryBean ，直接加载 Bean 对象
+                    getBean(beanName);
 				}
 			}
 		}
 
 		// Trigger post-initialization callback for all applicable beans...
+        // 遍历所有单例 Bean ，触发后置初始化方法，即 SmartInitializingSingleton 对象，所有非 lazy 单例 Bean 实例化完成后的回调方法。
+        // Spring 4.1 新增的特性
 		for (String beanName : beanNames) {
 			Object singletonInstance = getSingleton(beanName);
 			if (singletonInstance instanceof SmartInitializingSingleton) {
 				final SmartInitializingSingleton smartSingleton = (SmartInitializingSingleton) singletonInstance;
-				if (System.getSecurityManager() != null) {
+				if (System.getSecurityManager() != null) { // 安全模式
 					AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
 						smartSingleton.afterSingletonsInstantiated();
 						return null;
 					}, getAccessControlContext());
-				}
-				else {
+				} else {
 					smartSingleton.afterSingletonsInstantiated();
 				}
 			}

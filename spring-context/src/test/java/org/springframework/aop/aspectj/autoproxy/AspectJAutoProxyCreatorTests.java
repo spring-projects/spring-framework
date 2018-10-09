@@ -16,10 +16,6 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.JoinPoint;
@@ -29,7 +25,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.junit.Test;
-
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
@@ -58,6 +53,10 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StopWatch;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 
@@ -506,7 +505,7 @@ class MultiplyReturnValue {
 		return this.multiple;
 	}
 
-	@Around("execution(int *.getAge())")
+	@Around("execution(int *.getAge())") // 针对 #getAge() 方法，形成切面
 	public Object doubleReturnValue(ProceedingJoinPoint pjp) throws Throwable {
 		++this.invocations;
 		int result = (Integer) pjp.proceed();

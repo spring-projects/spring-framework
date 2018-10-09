@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -26,6 +23,9 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.lang.Nullable;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * Context that gets passed along a bean definition parsing process,
@@ -115,8 +115,8 @@ public final class ParserContext {
 		CompositeComponentDefinition containingComponent = getContainingComponent();
 		if (containingComponent != null) {
 			containingComponent.addNestedComponent(component);
-		}
-		else {
+		} else {
+		    // 通知
 			this.readerContext.fireComponentRegistered(component);
 		}
 	}
