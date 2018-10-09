@@ -711,13 +711,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the value of the {@linkplain #AUTHORIZATION Authorization} header to
 	 * Basic Authentication based on the given username and password.
-	 * <p>Note that Basic Authentication only supports characters in the
+	 * <p>Note that this method only supports characters in the
 	 * {@link StandardCharsets#ISO_8859_1 ISO-8859-1} character set.
 	 * @param username the username
 	 * @param password the password
 	 * @throws IllegalArgumentException if either {@code user} or
-	 * {@code password} contain characters that cannot be encoded to ISO-8859-1.
+	 * {@code password} contain characters that cannot be encoded to ISO-8859-1
 	 * @since 5.1
+	 * @see #setBasicAuth(String, String, Charset)
 	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
 	 */
 	public void setBasicAuth(String username, String password) {
@@ -730,9 +731,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @param username the username
 	 * @param password the password
 	 * @param charset the charset to use to convert the credentials into an octet
-	 * sequence. Defaults to {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1}
-	 * @throws IllegalArgumentException if either {@code user} or
-	 * {@code password} contain characters that cannot be encoded to ISO-8859-1.
+	 * sequence. Defaults to {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1}.
+	 * @throws IllegalArgumentException if {@code username} or {@code password}
+	 * contains characters that cannot be encoded to the given charset
 	 * @since 5.1
 	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
 	 */
@@ -746,8 +747,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		CharsetEncoder encoder = charset.newEncoder();
 		if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
 			throw new IllegalArgumentException(
-					"Username or password contains characters that cannot be encoded to " +
-			charset.displayName());
+					"Username or password contains characters that cannot be encoded to " + charset.displayName());
 		}
 
 		String credentialsString = username + ":" + password;

@@ -17,43 +17,59 @@
 package org.springframework.http.client.support;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 
 /**
- * {@link ClientHttpRequestInterceptor} to apply a BASIC authorization header.
+ * {@link ClientHttpRequestInterceptor} to apply a given HTTP Basic Authentication
+ * username/password pair, unless a custom Authorization header has been set before.
  *
- * @author Phillip Webb
- * @since 4.3.1
- * @deprecated as of 5.1.1, in favor of {@link BasicAuthenticationInterceptor}
- * which reuses {@link org.springframework.http.HttpHeaders#setBasicAuth},
- * sharing its default charset ISO-8859-1 instead of UTF-8 as used here
+ * @author Juergen Hoeller
+ * @since 5.1.1
+ * @see HttpHeaders#setBasicAuth
+ * @see HttpHeaders#AUTHORIZATION
  */
-@Deprecated
-public class BasicAuthorizationInterceptor implements ClientHttpRequestInterceptor {
+public class BasicAuthenticationInterceptor implements ClientHttpRequestInterceptor {
 
 	private final String username;
 
 	private final String password;
 
+	@Nullable
+	private final Charset charset;
+
 
 	/**
-	 * Create a new interceptor which adds a BASIC authorization header
-	 * for the given username and password.
+	 * Create a new interceptor which adds Basic Authentication for the
+	 * given username and password.
 	 * @param username the username to use
 	 * @param password the password to use
+	 * @see HttpHeaders#setBasicAuth(String, String)
 	 */
-	public BasicAuthorizationInterceptor(@Nullable String username, @Nullable String password) {
+	public BasicAuthenticationInterceptor(String username, String password) {
+		this(username, password, null);
+	}
+
+	/**
+	 * Create a new interceptor which adds Basic Authentication for the
+	 * given username and password, encoded using the specified charset.
+	 * @param username the username to use
+	 * @param password the password to use
+	 * @param charset the charset to use
+	 * @see HttpHeaders#setBasicAuth(String, String, Charset)
+	 */
+	public BasicAuthenticationInterceptor(String username, String password, @Nullable Charset charset) {
 		Assert.doesNotContain(username, ":", "Username must not contain a colon");
-		this.username = (username != null ? username : "");
-		this.password = (password != null ? password : "");
+		this.username = username;
+		this.password = password;
+		this.charset = charset;
 	}
 
 
@@ -61,9 +77,10 @@ public class BasicAuthorizationInterceptor implements ClientHttpRequestIntercept
 	public ClientHttpResponse intercept(
 			HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
 
-		String token = Base64Utils.encodeToString(
-				(this.username + ":" + this.password).getBytes(StandardCharsets.UTF_8));
-		request.getHeaders().add("Authorization", "Basic " + token);
+		HttpHeaders headers = request.getHeaders();
+		if (!headers.containsKey(HttpHeaders.AUTHORIZATION)) {
+			headers.setBasicAuth(this.username, this.password, this.charset);
+		}
 		return execution.execute(request, body);
 	}
 
