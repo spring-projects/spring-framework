@@ -496,7 +496,7 @@ final class SymbolTable {
           constantDynamic.getName(),
           constantDynamic.getDescriptor(),
           constantDynamic.getBootstrapMethod(),
-          constantDynamic.getBootstrapMethodArguments());
+          constantDynamic.getBootstrapMethodArgumentsUnsafe());
     } else {
       throw new IllegalArgumentException("value " + value);
     }

@@ -160,7 +160,9 @@ public class ClassReader {
    * @param classFileLength the length in bytes of the ClassFile to be read.
    */
   public ClassReader(
-      final byte[] classFileBuffer, final int classFileOffset, final int classFileLength) {
+      final byte[] classFileBuffer,
+      final int classFileOffset,
+      final int classFileLength) { // NOPMD(UnusedFormalParameter) used for backward compatibility.
     this(classFileBuffer, classFileOffset, /* checkClassVersion = */ true);
   }
 
@@ -500,9 +502,8 @@ public class ClassReader {
         moduleMainClass = readClass(currentAttributeOffset, charBuffer);
       } else if (Constants.MODULE_PACKAGES.equals(attributeName)) {
         modulePackagesOffset = currentAttributeOffset;
-      } else if (Constants.BOOTSTRAP_METHODS.equals(attributeName)) {
-        // This attribute is read in the constructor.
-      } else {
+      } else if (!Constants.BOOTSTRAP_METHODS.equals(attributeName)) {
+        // The BootstrapMethods attribute is read in the constructor.
         Attribute attribute =
             readAttribute(
                 attributePrototypes,
@@ -2358,12 +2359,12 @@ public class ClassReader {
 
     // Visit the local variable type annotations of the RuntimeVisibleTypeAnnotations attribute.
     if (visibleTypeAnnotationOffsets != null) {
-      for (int i = 0; i < visibleTypeAnnotationOffsets.length; ++i) {
-        int targetType = readByte(visibleTypeAnnotationOffsets[i]);
+      for (int typeAnnotationOffset : visibleTypeAnnotationOffsets) {
+        int targetType = readByte(typeAnnotationOffset);
         if (targetType == TypeReference.LOCAL_VARIABLE
             || targetType == TypeReference.RESOURCE_VARIABLE) {
           // Parse the target_type, target_info and target_path fields.
-          currentOffset = readTypeAnnotationTarget(context, visibleTypeAnnotationOffsets[i]);
+          currentOffset = readTypeAnnotationTarget(context, typeAnnotationOffset);
           // Parse the type_index field.
           String annotationDescriptor = readUTF8(currentOffset, charBuffer);
           currentOffset += 2;
@@ -2386,12 +2387,12 @@ public class ClassReader {
 
     // Visit the local variable type annotations of the RuntimeInvisibleTypeAnnotations attribute.
     if (invisibleTypeAnnotationOffsets != null) {
-      for (int i = 0; i < invisibleTypeAnnotationOffsets.length; ++i) {
-        int targetType = readByte(invisibleTypeAnnotationOffsets[i]);
+      for (int typeAnnotationOffset : invisibleTypeAnnotationOffsets) {
+        int targetType = readByte(typeAnnotationOffset);
         if (targetType == TypeReference.LOCAL_VARIABLE
             || targetType == TypeReference.RESOURCE_VARIABLE) {
           // Parse the target_type, target_info and target_path fields.
-          currentOffset = readTypeAnnotationTarget(context, invisibleTypeAnnotationOffsets[i]);
+          currentOffset = readTypeAnnotationTarget(context, typeAnnotationOffset);
           // Parse the type_index field.
           String annotationDescriptor = readUTF8(currentOffset, charBuffer);
           currentOffset += 2;
@@ -3283,9 +3284,9 @@ public class ClassReader {
       final char[] charBuffer,
       final int codeAttributeOffset,
       final Label[] labels) {
-    for (int i = 0; i < attributePrototypes.length; ++i) {
-      if (attributePrototypes[i].type.equals(type)) {
-        return attributePrototypes[i].read(
+    for (Attribute attributePrototype : attributePrototypes) {
+      if (attributePrototype.type.equals(type)) {
+        return attributePrototype.read(
             this, offset, length, charBuffer, codeAttributeOffset, labels);
       }
     }

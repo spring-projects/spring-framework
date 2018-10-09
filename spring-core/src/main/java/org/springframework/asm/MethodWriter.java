@@ -765,11 +765,10 @@ final class MethodWriter extends MethodVisitor {
         if (type == Opcodes.F_NEW) {
           currentBasicBlock.frame.setInputFrameFromApiFormat(
               symbolTable, numLocal, local, numStack, stack);
-        } else {
-          // In this case type is equal to F_INSERT by hypothesis, and currentBlock.frame contains
-          // the stack map frame at the current instruction, computed from the last F_NEW frame
-          // and the bytecode instructions in between (via calls to CurrentFrame#execute).
         }
+        // If type is not F_NEW then it is F_INSERT by hypothesis, and currentBlock.frame contains
+        // the stack map frame at the current instruction, computed from the last F_NEW frame and
+        // the bytecode instructions in between (via calls to CurrentFrame#execute).
         currentBasicBlock.frame.accept(this);
       }
     } else if (type == Opcodes.F_NEW) {
@@ -1951,6 +1950,7 @@ final class MethodWriter extends MethodVisitor {
         putAbstractTypes(3, 3 + numLocal);
         stackMapTableEntries.putShort(numStack);
         putAbstractTypes(3 + numLocal, 3 + numLocal + numStack);
+        break;
     }
   }
 
