@@ -111,7 +111,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	}
 
 	private List<RouterFunction<?>> routerFunctions() {
-		List<RouterFunction<?>> functions = this.getApplicationContext()
+		List<RouterFunction<?>> functions = obtainApplicationContext()
 				.getBeanProvider(RouterFunction.class)
 				.orderedStream()
 				.map(router -> (RouterFunction<?>)router)

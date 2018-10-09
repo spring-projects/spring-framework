@@ -199,8 +199,8 @@ public class JobDetailFactoryBean
 		if (this.applicationContextJobDataKey != null) {
 			if (this.applicationContext == null) {
 				throw new IllegalStateException(
-					"JobDetailBean needs to be set up in an ApplicationContext " +
-					"to be able to handle an 'applicationContextJobDataKey'");
+						"JobDetailBean needs to be set up in an ApplicationContext " +
+						"to be able to handle an 'applicationContextJobDataKey'");
 			}
 			getJobDataMap().put(this.applicationContextJobDataKey, this.applicationContext);
 		}
