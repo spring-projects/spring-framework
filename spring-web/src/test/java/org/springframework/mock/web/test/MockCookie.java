@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Extension of {@code Cookie} with extra directives, as defined in
+ * Extension of {@code Cookie} with extra attributes, as defined in
  * <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>.
  *
  * @author Vedran Pavic
@@ -70,45 +70,48 @@ public class MockCookie extends Cookie {
 
 	/**
 	 * Factory method that parses the value of a "Set-Cookie" header.
-	 * @param setCookieHeader the "Set-Cookie" value
+	 * @param setCookieHeader the "Set-Cookie" value; never {@code null} or empty
 	 * @return the created cookie
 	 */
 	public static MockCookie parse(String setCookieHeader) {
+		Assert.notNull(setCookieHeader, "Set-Cookie header must not be null");
 		String[] cookieParts = setCookieHeader.split("\\s*=\\s*", 2);
-		Assert.isTrue(cookieParts.length == 2, "Invalid Set-Cookie header value");
+		Assert.isTrue(cookieParts.length == 2, () -> "Invalid Set-Cookie header '" + setCookieHeader + "'");
 
 		String name = cookieParts[0];
-		String[] valueAndDirectives = cookieParts[1].split("\\s*;\\s*", 2);
-		String value = valueAndDirectives[0];
-		String[] directives = valueAndDirectives[1].split("\\s*;\\s*");
+		String[] valueAndAttributes = cookieParts[1].split("\\s*;\\s*", 2);
+		String value = valueAndAttributes[0];
+		String[] attributes =
+				(valueAndAttributes.length > 1 ? valueAndAttributes[1].split("\\s*;\\s*") : new String[0]);
 
 		MockCookie cookie = new MockCookie(name, value);
-		for (String directive : directives) {
-			if (directive.startsWith("Domain")) {
-				cookie.setDomain(extractDirectiveValue(directive));
+		for (String attribute : attributes) {
+			if (attribute.startsWith("Domain")) {
+				cookie.setDomain(extractAttributeValue(attribute, setCookieHeader));
 			}
-			else if (directive.startsWith("Max-Age")) {
-				cookie.setMaxAge(Integer.parseInt(extractDirectiveValue(directive)));
+			else if (attribute.startsWith("Max-Age")) {
+				cookie.setMaxAge(Integer.parseInt(extractAttributeValue(attribute, setCookieHeader)));
 			}
-			else if (directive.startsWith("Path")) {
-				cookie.setPath(extractDirectiveValue(directive));
+			else if (attribute.startsWith("Path")) {
+				cookie.setPath(extractAttributeValue(attribute, setCookieHeader));
 			}
-			else if (directive.startsWith("Secure")) {
+			else if (attribute.startsWith("Secure")) {
 				cookie.setSecure(true);
 			}
-			else if (directive.startsWith("HttpOnly")) {
+			else if (attribute.startsWith("HttpOnly")) {
 				cookie.setHttpOnly(true);
 			}
-			else if (directive.startsWith("SameSite")) {
-				cookie.setSameSite(extractDirectiveValue(directive));
+			else if (attribute.startsWith("SameSite")) {
+				cookie.setSameSite(extractAttributeValue(attribute, setCookieHeader));
 			}
 		}
 		return cookie;
 	}
 
-	private static String extractDirectiveValue(String directive) {
-		String[] nameAndValue = directive.split("=");
-		Assert.isTrue(nameAndValue.length == 2, () -> "No value in directive: '" + directive + "'");
+	private static String extractAttributeValue(String attribute, String header) {
+		String[] nameAndValue = attribute.split("=");
+		Assert.isTrue(nameAndValue.length == 2,
+				() -> "No value in attribute '" + nameAndValue[0] + "' for Set-Cookie header '" + header + "'");
 		return nameAndValue[1];
 	}
 
