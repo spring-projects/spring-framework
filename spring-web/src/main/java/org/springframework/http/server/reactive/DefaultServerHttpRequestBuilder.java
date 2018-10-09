@@ -72,8 +72,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		this.httpMethodValue = original.getMethodValue();
 		this.body = original.getBody();
 
-		this.httpHeaders = new HttpHeaders();
-		copyMultiValueMap(original.getHeaders(), this.httpHeaders);
+		this.httpHeaders = HttpHeaders.writableHttpHeaders(original.getHeaders());
 
 		this.cookies = new LinkedMultiValueMap<>(original.getCookies().size());
 		copyMultiValueMap(original.getCookies(), this.cookies);

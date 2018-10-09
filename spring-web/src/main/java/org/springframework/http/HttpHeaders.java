@@ -1617,4 +1617,17 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		}
 	}
 
+	/**
+	 * Return a {@code HttpHeaders} object that can read and written to.
+	 */
+	public static HttpHeaders writableHttpHeaders(HttpHeaders headers) {
+		Assert.notNull(headers, "HttpHeaders must not be null");
+		if (headers instanceof ReadOnlyHttpHeaders) {
+			return new HttpHeaders(headers.headers);
+		}
+		else {
+			return headers;
+		}
+	}
+
 }
