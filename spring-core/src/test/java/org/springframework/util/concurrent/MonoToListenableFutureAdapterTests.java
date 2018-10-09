@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.support;
+package org.springframework.util.concurrent;
 
 import java.time.Duration;
 import java.util.concurrent.Future;
@@ -21,8 +21,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-
-import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.junit.Assert.*;
 
