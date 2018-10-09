@@ -338,7 +338,9 @@ public class AnnotationMetadataTests {
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
 			assertThat(new HashSet<>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
-			assertThat(new HashSet<>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct")))));
+			assertThat(new HashSet<>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "")))));
+			assertEquals("", metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("additional"));
+			assertEquals(0, ((String[]) metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("additionalArray")).length);
 		}
 		{ // perform tests with classValuesAsString = true
 			AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(
@@ -425,6 +427,8 @@ public class AnnotationMetadataTests {
 		String myValue() default "";
 
 		String additional() default "direct";
+
+		String[] additionalArray() default "direct";
 	}
 
 	@Target(ElementType.TYPE)
@@ -470,7 +474,7 @@ public class AnnotationMetadataTests {
 			nestedAnno = @NestedAnno(value = "na", anEnum = SomeEnum.LABEL1, classArray = {String.class}),
 			nestedAnnoArray = {@NestedAnno, @NestedAnno(value = "na1", anEnum = SomeEnum.LABEL2, classArray = {Number.class})})
 	@SuppressWarnings({"serial", "unused"})
-	@DirectAnnotation("direct")
+	@DirectAnnotation(value = "direct", additional = "", additionalArray = {})
 	@MetaMetaAnnotation
 	@EnumSubclasses({SubclassEnum.FOO, SubclassEnum.BAR})
 	private static class AnnotatedComponent implements Serializable {
