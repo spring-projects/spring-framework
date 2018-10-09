@@ -71,13 +71,22 @@ final class TestDispatcherServlet extends DispatcherServlet {
 		super.service(request, response);
 
 		if (request.getAsyncContext() != null) {
-			MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
-			Assert.notNull(mockRequest, "Expected MockHttpServletRequest");
-			MockAsyncContext mockAsyncContext = ((MockAsyncContext) mockRequest.getAsyncContext());
-			Assert.notNull(mockAsyncContext, "MockAsyncContext not found. Did request wrapper not delegate startAsync?");
+			MockAsyncContext asyncContext;
+			if (request.getAsyncContext() instanceof MockAsyncContext) {
+				asyncContext = (MockAsyncContext) request.getAsyncContext();
+			}
+			else {
+				MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+				Assert.notNull(mockRequest, "Expected MockHttpServletRequest");
+				asyncContext = (MockAsyncContext) mockRequest.getAsyncContext();
+				Assert.notNull(asyncContext, () ->
+						"Outer request wrapper " + request.getClass().getName() + " has an AsyncContext," +
+								"but it is not a MockAsyncContext, while the nested " +
+								mockRequest.getClass().getName() + " does not have an AsyncContext at all.");
+			}
 
 			final CountDownLatch dispatchLatch = new CountDownLatch(1);
-			mockAsyncContext.addDispatchHandler(new Runnable() {
+			asyncContext.addDispatchHandler(new Runnable() {
 				@Override
 				public void run() {
 					dispatchLatch.countDown();
