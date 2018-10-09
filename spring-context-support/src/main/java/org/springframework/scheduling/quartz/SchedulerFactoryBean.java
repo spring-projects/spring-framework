@@ -619,6 +619,9 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				this.jobFactory = new AdaptableJobFactory();
 			}
 			if (this.jobFactory != null) {
+				if (this.applicationContext != null && this.jobFactory instanceof ApplicationContextAware) {
+					((ApplicationContextAware) this.jobFactory).setApplicationContext(this.applicationContext);
+				}
 				if (this.jobFactory instanceof SchedulerContextAware) {
 					((SchedulerContextAware) this.jobFactory).setSchedulerContext(scheduler.getContext());
 				}
