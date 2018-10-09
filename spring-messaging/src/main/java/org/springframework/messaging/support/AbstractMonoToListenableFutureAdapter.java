@@ -89,7 +89,8 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 			return false;
 		}
 		this.monoProcessor.cancel();
-		return true;
+		// isCancelled may still return false, if mono completed before the cancel
+		return this.monoProcessor.isCancelled();
 	}
 
 	@Override
