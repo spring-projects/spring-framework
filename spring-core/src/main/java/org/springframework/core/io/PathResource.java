@@ -48,10 +48,11 @@ import org.springframework.util.Assert;
  * @author Philippe Marschall
  * @author Juergen Hoeller
  * @since 4.0
- * @see FileSystemResource#FileSystemResource(Path)
  * @see java.nio.file.Path
  * @see java.nio.file.Files
+ * @deprecated as of 5.1.1, in favor of {@link FileSystemResource#FileSystemResource(Path)}
  */
+@Deprecated
 public class PathResource extends AbstractResource implements WritableResource {
 
 	private final Path path;
@@ -105,7 +106,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 
 	/**
 	 * This implementation returns whether the underlying file exists.
-	 * @see org.springframework.core.io.PathResource#exists()
+	 * @see java.nio.file.Files#exists(Path, java.nio.file.LinkOption...)
 	 */
 	@Override
 	public boolean exists() {
