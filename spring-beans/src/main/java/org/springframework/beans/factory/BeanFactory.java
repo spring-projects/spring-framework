@@ -225,12 +225,12 @@ public interface BeanFactory {
 	 * Note that collection types are not supported here, in contrast to reflective
 	 * injection points. For programmatically retrieving a list of beans matching a
 	 * specific type, specify the actual bean type as an argument here and subsequently
-	 * use {@link ObjectProvider#toList()} or its lazy streaming/iteration options.
+	 * use {@link ObjectProvider#orderedStream()} or its lazy streaming/iteration options.
 	 * @return a corresponding provider handle
 	 * @since 5.1
-	 * @see ObjectProvider#stream()
 	 * @see ObjectProvider#iterator()
-	 * @see ObjectProvider#toList()
+	 * @see ObjectProvider#stream()
+	 * @see ObjectProvider#orderedStream()
 	 */
 	<T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType);
 

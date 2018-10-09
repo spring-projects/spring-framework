@@ -382,13 +382,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			@Override
 			public Stream<T> stream() {
-				return Arrays.stream(getBeanNamesForType(requiredType))
+				return Arrays.stream(getBeanNamesForTypedStream(requiredType))
 						.map(name -> (T) getBean(name))
 						.filter(bean -> !(bean instanceof NullBean));
 			}
 			@Override
 			public Stream<T> orderedStream() {
-				String[] beanNames = getBeanNamesForType(requiredType);
+				String[] beanNames = getBeanNamesForTypedStream(requiredType);
 				Map<String, T> matchingBeans = new LinkedHashMap<>(beanNames.length);
 				for (String beanName : beanNames) {
 					Object beanInstance = getBean(beanName);
@@ -422,6 +422,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return null;
+	}
+
+	private String[] getBeanNamesForTypedStream(ResolvableType requiredType) {
+		return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
 	}
 
 
