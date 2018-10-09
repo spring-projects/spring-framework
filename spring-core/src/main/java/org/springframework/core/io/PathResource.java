@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 4.0
  * @see java.nio.file.Path
+ * @see java.nio.file.Files
+ * @see FileSystemResource
  */
 @UsesJava7
 public class PathResource extends AbstractResource implements WritableResource {
@@ -77,8 +79,8 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * <p>Note: Unlike {@link FileSystemResource}, when building relative resources
 	 * via {@link #createRelative}, the relative path will be built <i>underneath</i>
 	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
-	 * @see java.nio.file.Paths#get(URI)
 	 * @param uri a path URI
+	 * @see java.nio.file.Paths#get(URI)
 	 */
 	public PathResource(URI uri) {
 		Assert.notNull(uri, "URI must not be null");
@@ -95,7 +97,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 
 	/**
 	 * This implementation returns whether the underlying file exists.
-	 * @see org.springframework.core.io.PathResource#exists()
+	 * @see java.nio.file.Files#exists(Path, java.nio.file.LinkOption...)
 	 */
 	@Override
 	public boolean exists() {
@@ -186,7 +188,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	}
 
 	/**
-	 * This implementation returns the underlying File's length.
+	 * This implementation returns the underlying file's length.
 	 */
 	@Override
 	public long contentLength() throws IOException {

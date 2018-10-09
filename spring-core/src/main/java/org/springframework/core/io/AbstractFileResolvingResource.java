@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.core.io;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -112,14 +111,13 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 					return true;
 				}
 				if (httpCon != null) {
-					// no HTTP OK status, and no content-length header: give up
+					// No HTTP OK status, and no content-length header: give up
 					httpCon.disconnect();
 					return false;
 				}
 				else {
 					// Fall back to stream existence: can we open the stream?
-					InputStream is = getInputStream();
-					is.close();
+					getInputStream().close();
 					return true;
 				}
 			}
@@ -179,7 +177,6 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		customizeConnection(con);
 		return con.getLastModified();
 	}
-
 
 	/**
 	 * Customize the given {@link URLConnection}, obtained in the course of an
