@@ -778,7 +778,7 @@ class ConfigurationClassParser {
 				this.deferredImportSelectors = new ArrayList<>();
 			}
 		}
-		
+
 	}
 
 
