@@ -775,11 +775,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
-		if (uniqueCandidate != null) {
-			synchronized (mbd.constructorArgumentLock) {
-				mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
-			}
-		}
 		if (commonType == null) {
 			return null;
 		}
