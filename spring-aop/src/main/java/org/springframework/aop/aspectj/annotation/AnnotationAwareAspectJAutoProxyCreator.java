@@ -81,15 +81,18 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 		if (this.aspectJAdvisorFactory == null) {
 			this.aspectJAdvisorFactory = new ReflectiveAspectJAdvisorFactory(beanFactory);
 		}
-		this.aspectJAdvisorsBuilder =
-				new BeanFactoryAspectJAdvisorsBuilderAdapter(beanFactory, this.aspectJAdvisorFactory);
+		this.aspectJAdvisorsBuilder = new BeanFactoryAspectJAdvisorsBuilderAdapter(beanFactory, this.aspectJAdvisorFactory);
 	}
 
-	@Override
+	@Override // TODO 芋艿，需要写下
 	protected List<Advisor> findCandidateAdvisors() {
 		// Add all the Spring advisors found according to superclass rules.
+        // 当使用注解方式配置 AOP 的时候，并不是丢弃了对 XML 配置的支持，
+        // 在这里调用父类方法加载配置文件中的 AOP 声明
+        // TODO 芋艿，后面在调试
 		List<Advisor> advisors = super.findCandidateAdvisors();
 		// Build Advisors for all AspectJ aspects in the bean factory.
+        // 获取 Bean 的注解 @Aspect 增强的功能
 		if (this.aspectJAdvisorsBuilder != null) {
 			advisors.addAll(this.aspectJAdvisorsBuilder.buildAspectJAdvisors());
 		}
@@ -106,8 +109,8 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 		// proxied by that interface and fail at runtime as the advice method is not
 		// defined on the interface. We could potentially relax the restriction about
 		// not advising aspects in the future.
-		return (super.isInfrastructureClass(beanClass) ||
-				(this.aspectJAdvisorFactory != null && this.aspectJAdvisorFactory.isAspect(beanClass)));
+		return (super.isInfrastructureClass(beanClass) || // 判断指定类，是否代表 infrastructure 类，无需被代理
+				(this.aspectJAdvisorFactory != null && this.aspectJAdvisorFactory.isAspect(beanClass))); // 是否使用 @Aspect ，并且并未使用 ajc 增强过
 	}
 
 	/**

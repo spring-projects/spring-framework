@@ -16,13 +16,12 @@
 
 package org.springframework.aop.aspectj;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.AfterAdvice;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
 
 /**
  * Spring AOP advice wrapping an AspectJ after advice method.
@@ -36,7 +35,6 @@ public class AspectJAfterAdvice extends AbstractAspectJAdvice
 
 	public AspectJAfterAdvice(
 			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
-
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
@@ -45,8 +43,7 @@ public class AspectJAfterAdvice extends AbstractAspectJAdvice
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();
-		}
-		finally {
+		} finally {
 			invokeAdviceMethod(getJoinPointMatch(), null, null);
 		}
 	}

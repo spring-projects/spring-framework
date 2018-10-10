@@ -71,11 +71,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	@Nullable
 	protected Object[] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
-
+	    // 获得匹配的 Advisor 增强器
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
+		// 无匹配，返回 DO_NOT_PROXY
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
 		}
+		// 有匹配，返回 Advisor 数组
 		return advisors.toArray();
 	}
 
@@ -90,9 +92,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
+	    // 获取所有 Advisor 增强器
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		// 从所有 Advisor 增强器中，寻找匹配的
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
+		// TODO 芋艿 等需要在看
 		extendAdvisors(eligibleAdvisors);
+		// 排序匹配的 Advisor 增强器
 		if (!eligibleAdvisors.isEmpty()) {
 			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
 		}
@@ -119,12 +125,12 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 */
 	protected List<Advisor> findAdvisorsThatCanApply(
 			List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName) {
-
+	    // 设置当前 Proxy Bean 的名字
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
-		}
-		finally {
+		} finally {
+		    // 清空当前 Proxy Bean 的名字
 			ProxyCreationContext.setCurrentProxiedBeanName(null);
 		}
 	}

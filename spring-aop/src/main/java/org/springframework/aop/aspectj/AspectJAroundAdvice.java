@@ -16,17 +16,18 @@
 
 package org.springframework.aop.aspectj;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
-
 import org.springframework.aop.ProxyMethodInvocation;
 
+import java.io.Serializable;
+import java.lang.reflect.Method;
+
 /**
+ *
+ *
  * Spring AOP around advice (MethodInterceptor) that wraps
  * an AspectJ advice method. Exposes ProceedingJoinPoint.
  *
@@ -39,7 +40,6 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 
 	public AspectJAroundAdvice(
 			Method aspectJAroundAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
-
 		super(aspectJAroundAdviceMethod, pointcut, aif);
 	}
 
