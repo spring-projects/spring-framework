@@ -16,12 +16,7 @@
 
 package org.springframework.context.weaving;
 
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
-import java.security.ProtectionDomain;
-
 import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -30,6 +25,10 @@ import org.springframework.core.Ordered;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.lang.Nullable;
+
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
+import java.security.ProtectionDomain;
 
 /**
  * Post-processor that registers AspectJ's
@@ -77,7 +76,6 @@ public class AspectJWeavingEnabler
 		enableAspectJWeaving(this.loadTimeWeaver, this.beanClassLoader);
 	}
 
-
 	/**
 	 * Enable AspectJ weaving with the given {@link LoadTimeWeaver}.
 	 * @param weaverToUse the LoadTimeWeaver to apply to (or {@code null} for a default weaver)
@@ -85,15 +83,14 @@ public class AspectJWeavingEnabler
 	 */
 	public static void enableAspectJWeaving(
 			@Nullable LoadTimeWeaver weaverToUse, @Nullable ClassLoader beanClassLoader) {
-
 		if (weaverToUse == null) {
 			if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
 				weaverToUse = new InstrumentationLoadTimeWeaver(beanClassLoader);
-			}
-			else {
+			} else {
 				throw new IllegalStateException("No LoadTimeWeaver available");
 			}
 		}
+		// 使用 DefaultContextLoadTimeWeaver 类型的 bean 中的 loadTimeWeaver 属性，注册转换器
 		weaverToUse.addTransformer(
 				new AspectJClassBypassingClassFileTransformer(new ClassPreProcessorAgentAdapter()));
 	}
@@ -115,10 +112,11 @@ public class AspectJWeavingEnabler
 		@Override
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-
+		    // 忽略 "org.aspectj" 和 "org/aspectj" 大头的类
 			if (className.startsWith("org.aspectj") || className.startsWith("org/aspectj")) {
 				return classfileBuffer;
 			}
+			// 委托给 AspectJ 代理j继续处理
 			return this.delegate.transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
 		}
 	}

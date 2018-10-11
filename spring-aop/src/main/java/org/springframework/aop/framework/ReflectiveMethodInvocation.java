@@ -16,19 +16,18 @@
 
 package org.springframework.aop.framework;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.BridgeMethodResolver;
+import org.springframework.lang.Nullable;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.aop.ProxyMethodInvocation;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.core.BridgeMethodResolver;
-import org.springframework.lang.Nullable;
 
 /**
  * Spring's implementation of the AOP Alliance
@@ -61,15 +60,26 @@ import org.springframework.lang.Nullable;
  */
 public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Cloneable {
 
+    /**
+     * 代理对象
+     */
 	protected final Object proxy;
-
+    /**
+     * 被代理对象
+     */
 	@Nullable
 	protected final Object target;
-
+    /**
+     * 方法对象
+     */
 	protected final Method method;
-
+    /**
+     * 参数数组
+     */
 	protected Object[] arguments = new Object[0];
-
+    /**
+     * 目标类
+     */
 	@Nullable
 	private final Class<?> targetClass;
 
@@ -82,12 +92,16 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	/**
 	 * List of MethodInterceptor and InterceptorAndDynamicMethodMatcher
 	 * that need dynamic checks.
+     *
+     * 匹配的拦截器数组
 	 */
 	protected final List<?> interceptorsAndDynamicMethodMatchers;
 
 	/**
 	 * Index from 0 of the current interceptor we're invoking.
 	 * -1 until we invoke: then the current interceptor.
+     *
+     * 当前拦截器
 	 */
 	private int currentInterceptorIndex = -1;
 
@@ -154,40 +168,54 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.arguments = arguments;
 	}
 
-
+    /**
+     * 执行。
+     *
+     * 基于递归的方式
+     *
+     * @return
+     * @throws Throwable
+     */
 	@Override
 	@Nullable
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.
+        // 执行完所有拦截器后，执行切面方法
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
 
+		// 获得下一个拦截器
 		Object interceptorOrInterceptionAdvice =
 				this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
-		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
+		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) { // TODO 芋艿，这里没走到过
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.
-			InterceptorAndDynamicMethodMatcher dm =
+            InterceptorAndDynamicMethodMatcher dm =
 					(InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
 			Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());
-			if (dm.methodMatcher.matches(this.method, targetClass, this.arguments)) {
+            // 动态匹配
+			if (dm.methodMatcher.matches(this.method, targetClass, this.arguments)) { // 匹配，则执行拦截器
 				return dm.interceptor.invoke(this);
-			}
-			else {
+			} else { // 不匹配，跳到下一个，递归执行
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
 				return proceed();
 			}
-		}
-		else {
+		} else {
 			// It's an interceptor, so we just invoke it: The pointcut will have
 			// been evaluated statically before this object was constructed.
+            // 将 this 作为参数传递，以保证当前实例中调用链的执行
+            // MethodInterceptor 基于不同的切面类型，有不同的实现。
+            //      例如 @Before 对应 MethodBeforeAdviceInterceptor
+            //      例如 @After  对应 AfterReturningAdviceInterceptor
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
 	}
 
 	/**
+     * 基于反射的方式，调用切点方法
+     *
 	 * Invoke the joinpoint using reflection.
 	 * Subclasses can override this to use custom invocation.
 	 * @return the return value of the joinpoint

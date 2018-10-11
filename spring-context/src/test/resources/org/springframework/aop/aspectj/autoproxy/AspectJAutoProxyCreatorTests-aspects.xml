@@ -9,7 +9,7 @@
 	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"/>
 	-->
 
-	<aop:aspectj-autoproxy/>
+	<aop:aspectj-autoproxy proxy-target-class="true" />
 
 	<bean class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue">
 		<property name="multiple" value="2"/>

@@ -16,15 +16,14 @@
 
 package org.springframework.aop.interceptor;
 
-import java.io.Serializable;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.PriorityOrdered;
+
+import java.io.Serializable;
 
 /**
  * Interceptor that exposes the current {@link org.aopalliance.intercept.MethodInvocation}
@@ -87,12 +86,15 @@ public final class ExposeInvocationInterceptor implements MethodInterceptor, Pri
 
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
+	    // 获得老的 MethodInvocation 对象
 		MethodInvocation oldInvocation = invocation.get();
+		// 设置当前为 MethodInvocation 对象
 		invocation.set(mi);
 		try {
+		    // 执行
 			return mi.proceed();
-		}
-		finally {
+		} finally {
+		    // 设置回老的 MethodInvocation 对象
 			invocation.set(oldInvocation);
 		}
 	}

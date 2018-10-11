@@ -484,16 +484,22 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			}
 		}
 
+		// 创建增强器们，并添加到 ProxyFactory 对象中
 		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
 		proxyFactory.addAdvisors(advisors);
+		// 设置 targetSource 目标对象，到 ProxyFactory 对象中
 		proxyFactory.setTargetSource(targetSource);
+		// 定制 ProxyFactory 对象。目前实现为空。
 		customizeProxyFactory(proxyFactory);
-
+		// 用来控制代理工厂被配置之后，是否还允许修改通知。
+        // 缺省值为 false ，即在代理被配置之后，不允许修改代理的配置
 		proxyFactory.setFrozen(this.freezeProxy);
+		// TODO 芋艿，后续在看
 		if (advisorsPreFiltered()) {
 			proxyFactory.setPreFiltered(true);
 		}
 
+		// 创建代理
 		return proxyFactory.getProxy(getProxyClassLoader());
 	}
 
@@ -535,16 +541,18 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	protected Advisor[] buildAdvisors(@Nullable String beanName, @Nullable Object[] specificInterceptors) {
 		// Handle prototypes correctly...
+        // 解析所有注册的 interceptorNames
 		Advisor[] commonInterceptors = resolveInterceptorNames();
 
-		List<Object> allInterceptors = new ArrayList<>();
+		List<Object> allInterceptors = new ArrayList<>(); // 所有集合
 		if (specificInterceptors != null) {
+		    // 添加 specificInterceptors 到 allInterceptors 中
 			allInterceptors.addAll(Arrays.asList(specificInterceptors));
+			// 添加 commonInterceptors 到 allInterceptors 中
 			if (commonInterceptors.length > 0) {
 				if (this.applyCommonInterceptorsFirst) {
 					allInterceptors.addAll(0, Arrays.asList(commonInterceptors));
-				}
-				else {
+				} else {
 					allInterceptors.addAll(Arrays.asList(commonInterceptors));
 				}
 			}
@@ -556,6 +564,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 					" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 		}
 
+		// 遍历拦截器们，转化为对应的 Advisor 对象
 		Advisor[] advisors = new Advisor[allInterceptors.size()];
 		for (int i = 0; i < allInterceptors.size(); i++) {
 			advisors[i] = this.advisorAdapterRegistry.wrap(allInterceptors.get(i));
@@ -564,6 +573,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
+     * 解析所有注册的 interceptorNames
+     *
 	 * Resolves the specified interceptor names to Advisor objects.
 	 * @see #setInterceptorNames
 	 */

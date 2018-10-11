@@ -16,17 +16,17 @@
 
 package org.springframework.instrument.classloading;
 
+import org.springframework.instrument.InstrumentationSavingAgent;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.instrument.InstrumentationSavingAgent;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link LoadTimeWeaver} relying on VM {@link Instrumentation}.
@@ -62,7 +62,6 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
 	private final List<ClassFileTransformer> transformers = new ArrayList<>(4);
 
-
 	/**
 	 * Create a new InstrumentationLoadTimeWeaver for the default ClassLoader.
 	 */
@@ -83,6 +82,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
+		// 创建 FilteringClassFileTransformer 对象
 		FilteringClassFileTransformer actualTransformer =
 				new FilteringClassFileTransformer(transformer, this.classLoader);
 		synchronized (this.transformers) {
@@ -144,8 +144,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	private static Instrumentation getInstrumentation() {
 		if (AGENT_CLASS_PRESENT) {
 			return InstrumentationAccessor.getInstrumentation();
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
