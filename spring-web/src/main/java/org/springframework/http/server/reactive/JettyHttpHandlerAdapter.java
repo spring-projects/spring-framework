@@ -19,6 +19,7 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ import org.eclipse.jetty.server.Response;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for writing
@@ -94,6 +96,19 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected void applyHeaders() {
+			MediaType contentType = getHeaders().getContentType();
+			HttpServletResponse response = getNativeResponse();
+			if (response.getContentType() == null && contentType != null) {
+				response.setContentType(contentType.toString());
+			}
+			Charset charset = (contentType != null ? contentType.getCharset() : null);
+			if (response.getCharacterEncoding() == null && charset != null) {
+				response.setCharacterEncoding(charset.name());
+			}
+			long contentLength = getHeaders().getContentLength();
+			if (contentLength != -1) {
+				response.setContentLengthLong(contentLength);
+			}
 		}
 
 		@Override

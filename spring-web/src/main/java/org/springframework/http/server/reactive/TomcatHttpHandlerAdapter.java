@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -37,6 +38,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -159,6 +161,19 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected void applyHeaders() {
+			HttpServletResponse response = getNativeResponse();
+			MediaType contentType = getHeaders().getContentType();
+			if (response.getContentType() == null && contentType != null) {
+				response.setContentType(contentType.toString());
+			}
+			Charset charset = (contentType != null ? contentType.getCharset() : null);
+			if (response.getCharacterEncoding() == null && charset != null) {
+				response.setCharacterEncoding(charset.name());
+			}
+			long contentLength = getHeaders().getContentLength();
+			if (contentLength != -1) {
+				response.setContentLengthLong(contentLength);
+			}
 		}
 
 		@Override
