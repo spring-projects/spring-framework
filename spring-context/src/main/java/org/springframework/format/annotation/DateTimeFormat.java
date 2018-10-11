@@ -97,13 +97,13 @@ public @interface DateTimeFormat {
 		DATE,
 
 		/**
-		 * The most common ISO Time Format {@code HH:mm:ss.SSSZ},
+		 * The most common ISO Time Format {@code HH:mm:ss.SSSXXX},
 		 * e.g. "01:30:00.000-05:00".
 		 */
 		TIME,
 
 		/**
-		 * The most common ISO DateTime Format {@code yyyy-MM-dd'T'HH:mm:ss.SSSZ},
+		 * The most common ISO DateTime Format {@code yyyy-MM-dd'T'HH:mm:ss.SSSXXX},
 		 * e.g. "2000-10-31T01:30:00.000-05:00".
 		 * <p>This is the default if no annotation value is specified.
 		 */
