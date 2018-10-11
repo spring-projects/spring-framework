@@ -19,6 +19,8 @@ package org.springframework.web.context.request.async;
 import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +62,7 @@ public class DeferredResult<T> {
 	@Nullable
 	private final Long timeout;
 
-	private final Object timeoutResult;
+	private final Supplier<?> timeoutResultSupplier;
 
 	private Runnable timeoutCallback;
 
@@ -79,7 +81,7 @@ public class DeferredResult<T> {
 	 * Create a DeferredResult.
 	 */
 	public DeferredResult() {
-		this(null, RESULT_NONE);
+		this(null, () -> RESULT_NONE);
 	}
 
 	/**
@@ -90,7 +92,7 @@ public class DeferredResult<T> {
 	 * @param timeout timeout value in milliseconds
 	 */
 	public DeferredResult(Long timeout) {
-		this(timeout, RESULT_NONE);
+		this(timeout, () -> RESULT_NONE);
 	}
 
 	/**
@@ -99,11 +101,21 @@ public class DeferredResult<T> {
 	 * @param timeout timeout value in milliseconds (ignored if {@code null})
 	 * @param timeoutResult the result to use
 	 */
-	public DeferredResult(@Nullable Long timeout, Object timeoutResult) {
-		this.timeoutResult = timeoutResult;
+	public DeferredResult(@Nullable Long timeout, final Object timeoutResult) {
+		this.timeoutResultSupplier = () -> timeoutResult;
 		this.timeout = timeout;
 	}
 
+	/**
+	 * Create a DeferredResult with a timeout value and a default result supplier to use
+	 * in case of timeout.
+	 * @param timeout timeout value in milliseconds (ignored if {@code null})
+	 * @param timeoutResultSupplier the result supplier to use
+	 */
+	public DeferredResult(@Nullable Long timeout, Supplier<?> timeoutResultSupplier) {
+		this.timeoutResultSupplier = timeoutResultSupplier;
+		this.timeout = timeout;
+	}
 
 	/**
 	 * Return {@code true} if this DeferredResult is no longer usable either
@@ -281,10 +293,10 @@ public class DeferredResult<T> {
 					}
 				}
 				finally {
-					if (timeoutResult != RESULT_NONE) {
+					if (timeoutResultSupplier.get() != RESULT_NONE) {
 						continueProcessing = false;
 						try {
-							setResultInternal(timeoutResult);
+							setResultInternal(timeoutResultSupplier.get());
 						}
 						catch (Throwable ex) {
 							logger.debug("Failed to handle timeout result", ex);
