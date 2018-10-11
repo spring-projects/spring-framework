@@ -16,13 +16,9 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.time.Duration;
 import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import org.springframework.lang.Nullable;
 
 /**
  * {@code ExchangeResult} variant with the response body decoded as
@@ -35,20 +31,12 @@ import org.springframework.lang.Nullable;
  */
 public class FluxExchangeResult<T> extends ExchangeResult {
 
-	private static final IllegalStateException TIMEOUT_ERROR =
-			new IllegalStateException("Response timeout: for infinite streams " +
-					"use getResponseBody() first with explicit cancellation, e.g. via take(n).");
-
-
 	private final Flux<T> body;
 
-	private final Duration timeout;
 
-
-	FluxExchangeResult(ExchangeResult result, Flux<T> body, Duration timeout) {
+	FluxExchangeResult(ExchangeResult result, Flux<T> body) {
 		super(result);
 		this.body = body;
-		this.timeout = timeout;
 	}
 
 
@@ -79,22 +67,6 @@ public class FluxExchangeResult<T> extends ExchangeResult {
 	 */
 	public Flux<T> getResponseBody() {
 		return this.body;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p><strong>Note:</strong> this method should typically be called after
-	 * the response has been consumed in full via {@link #getResponseBody()}.
-	 * Calling it first will cause the response {@code Flux<T>} to be consumed
-	 * via {@code getResponseBody.ignoreElements()}.
-	 */
-	@Override
-	@Nullable
-	public byte[] getResponseBodyContent() {
-		return this.body.ignoreElements()
-				.timeout(this.timeout, Mono.error(TIMEOUT_ERROR))
-				.then(Mono.defer(() -> Mono.justOrEmpty(super.getResponseBodyContent())))
-				.block();
 	}
 
 	/**

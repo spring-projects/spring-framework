@@ -17,12 +17,14 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
@@ -112,9 +114,11 @@ class WiretapConnector implements ClientHttpConnector {
 		}
 
 
-		public ExchangeResult createExchangeResult(@Nullable  String uriTemplate) {
+		public ExchangeResult createExchangeResult(Duration timeout, @Nullable String uriTemplate) {
 			return new ExchangeResult(this.request, this.response,
-					this.request.getRecorder().getContent(), this.response.getRecorder().getContent(), uriTemplate);
+					Mono.defer(() -> this.request.getRecorder().getContent()),
+					Mono.defer(() -> this.response.getRecorder().getContent()),
+					timeout, uriTemplate);
 		}
 	}
 
@@ -126,21 +130,21 @@ class WiretapConnector implements ClientHttpConnector {
 
 		private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
-		public static final byte[] EMPTY_CONTENT = new byte[0];
-
 
 		@Nullable
-		private final Publisher<? extends DataBuffer> publisher;
+		private final Flux<? extends DataBuffer> publisher;
 
 		@Nullable
-		private final Publisher<? extends Publisher<? extends DataBuffer>> publisherNested;
+		private final Flux<? extends Publisher<? extends DataBuffer>> publisherNested;
 
 		private final DataBuffer buffer;
 
 		private final MonoProcessor<byte[]> content;
 
+		private volatile boolean subscriberRegistered;
 
-		private WiretapRecorder(@Nullable Publisher<? extends DataBuffer> publisher,
+
+		public WiretapRecorder(@Nullable Publisher<? extends DataBuffer> publisher,
 				@Nullable Publisher<? extends Publisher<? extends DataBuffer>> publisherNested) {
 
 			if (publisher != null && publisherNested != null) {
@@ -149,6 +153,7 @@ class WiretapConnector implements ClientHttpConnector {
 
 			this.publisher = publisher != null ?
 					Flux.from(publisher)
+							.doOnSubscribe(this::handleOnSubscribe)
 							.doOnNext(this::handleOnNext)
 							.doOnError(this::handleOnError)
 							.doOnCancel(this::handleOnComplete)
@@ -156,6 +161,7 @@ class WiretapConnector implements ClientHttpConnector {
 
 			this.publisherNested = publisherNested != null ?
 					Flux.from(publisherNested)
+							.doOnSubscribe(this::handleOnSubscribe)
 							.map(p -> Flux.from(p).doOnNext(this::handleOnNext).doOnError(this::handleOnError))
 							.doOnError(this::handleOnError)
 							.doOnCancel(this::handleOnComplete)
@@ -163,10 +169,6 @@ class WiretapConnector implements ClientHttpConnector {
 
 			this.buffer =  bufferFactory.allocateBuffer();
 			this.content = MonoProcessor.create();
-
-			if (this.publisher == null && this.publisherNested == null) {
-				this.content.onNext(EMPTY_CONTENT);
-			}
 		}
 
 
@@ -180,10 +182,35 @@ class WiretapConnector implements ClientHttpConnector {
 			return this.publisherNested;
 		}
 
-		public MonoProcessor<byte[]> getContent() {
-			return this.content;
+		public Mono<byte[]> getContent() {
+			// No publisher (e.g. request#setComplete)
+			if (this.publisher == null && this.publisherNested == null) {
+				return Mono.empty();
+			}
+			if (this.content.isTerminated()) {
+				return this.content;
+			}
+			if (this.subscriberRegistered) {
+				return Mono.error(new IllegalStateException(
+						"Subscriber registered but content is not yet fully consumed."));
+			}
+			else {
+				// No subscriber, e.g.:
+				// 	- mock server request body never consumed (error before read)
+				//  - FluxExchangeResult#getResponseBodyContent called
+				(this.publisher != null ? this.publisher : this.publisherNested)
+						.onErrorMap(ex -> new IllegalStateException(
+								"Content was not been consumed and " +
+										"an error was raised on attempt to produce it:", ex))
+						.subscribe();
+				return this.content;
+			}
 		}
 
+
+		private void handleOnSubscribe(Subscription subscription) {
+			this.subscriberRegistered = true;
+		}
 
 		private void handleOnNext(DataBuffer nextBuffer) {
 			this.buffer.write(nextBuffer);

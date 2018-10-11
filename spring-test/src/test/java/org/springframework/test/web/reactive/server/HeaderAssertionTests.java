@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
@@ -257,7 +258,7 @@ public class HeaderAssertionTests {
 		MonoProcessor<byte[]> emptyContent = MonoProcessor.create();
 		emptyContent.onComplete();
 
-		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, null);
+		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, Duration.ZERO, null);
 		return new HeaderAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 
