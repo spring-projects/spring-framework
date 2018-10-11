@@ -45,9 +45,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link HttpHandlerConnector}.
- *
  * @author Rossen Stoyanchev
- * @since 5.0
  */
 public class HttpHandlerConnectorTests {
 

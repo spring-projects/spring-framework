@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class WebTestClientConnectorTests {
+public class WiretapConnectorTests {
 
 	@Test
 	public void captureAndClaim() {
