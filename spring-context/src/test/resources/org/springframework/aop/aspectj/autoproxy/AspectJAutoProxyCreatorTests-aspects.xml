@@ -9,7 +9,7 @@
 	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"/>
 	-->
 
-	<aop:aspectj-autoproxy proxy-target-class="true" />
+	<aop:aspectj-autoproxy proxy-target-class="false" />
 
 	<bean class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue">
 		<property name="multiple" value="2"/>
@@ -31,9 +31,9 @@
 		<property name="name" value="adrian"/>
 	</bean>
 
-	<bean id="factoryBean" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="targetObject" ref="adrian"/>
-		<property name="targetMethod" value="toString"/>
-	</bean>
+	<!--<bean id="factoryBean" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">-->
+		<!--<property name="targetObject" ref="adrian"/>-->
+		<!--<property name="targetMethod" value="toString"/>-->
+	<!--</bean>-->
 
 </beans>

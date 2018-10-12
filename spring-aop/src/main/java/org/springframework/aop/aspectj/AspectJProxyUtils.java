@@ -16,11 +16,11 @@
 
 package org.springframework.aop.aspectj;
 
-import java.util.List;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+
+import java.util.List;
 
 /**
  * Utility methods for working with AspectJ proxies.
@@ -32,6 +32,8 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 public abstract class AspectJProxyUtils {
 
 	/**
+     * 如果需要（具体的条件，看代码），添加 ExposeInvocationInterceptor 到其中。
+     *
 	 * Add special advisors if necessary to work with a proxy chain that contains AspectJ advisors.
 	 * This will expose the current Spring AOP invocation (necessary for some AspectJ pointcut matching)
 	 * and make available the current AspectJ JoinPoint. The call will have no effect if there are no
@@ -42,14 +44,18 @@ public abstract class AspectJProxyUtils {
 	public static boolean makeAdvisorChainAspectJCapableIfNecessary(List<Advisor> advisors) {
 		// Don't add advisors to an empty list; may indicate that proxying is just not required
 		if (!advisors.isEmpty()) {
-			boolean foundAspectJAdvice = false;
+            // 判断是否有 AspectJ Advisor
+            boolean foundAspectJAdvice = false;
 			for (Advisor advisor : advisors) {
 				// Be careful not to get the Advice without a guard, as
 				// this might eagerly instantiate a non-singleton AspectJ aspect
 				if (isAspectJAdvice(advisor)) {
 					foundAspectJAdvice = true;
+					// TODO 芋艿，此处应有 break；
 				}
 			}
+			// 判断是否有 ExposeInvocationInterceptor 对象在其中。
+            // 如果没有，添加到首位。
 			if (foundAspectJAdvice && !advisors.contains(ExposeInvocationInterceptor.ADVISOR)) {
 				advisors.add(0, ExposeInvocationInterceptor.ADVISOR);
 				return true;

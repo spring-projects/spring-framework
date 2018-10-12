@@ -249,12 +249,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	    // 获得缓存 KEY
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
-		// TODO 芋艿 aop
+		// 判断，是否无需代理
 		if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
+		    // 已经标记为无需代理，忽略
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
-			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
+			if (isInfrastructureClass(beanClass) // 判断是否为 AOP Infrastructure 类。Infrastructure 英文翻译为，基础设施。
+                    || shouldSkip(beanClass, beanName)) { // 判断是否需要忽略
+			    // 标记为无需代理，并忽略
 				this.advisedBeans.put(cacheKey, Boolean.FALSE);
 				return null;
 			}
@@ -263,6 +266,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		// Create proxy here if we have a custom TargetSource.
 		// Suppresses unnecessary default instantiation of the target bean:
 		// The TargetSource will handle target instances in a custom fashion.
+        // TODO 芋艿，后续详细看看。暂时好像没用到这个特性，可看下 https://my.oschina.net/lixin91/blog/688188 博客。这个特性蛮有意思的。
+        // TODO TargetSource ，可以理解成，Target 的数据源，根据不同参数，返回相同或不同 Target 对象。有趣的紧。
 		TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 		if (targetSource != null) {
 			if (StringUtils.hasLength(beanName)) {
@@ -349,7 +354,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
 			return bean;
 		}
-		// TODO 芋艿，
+        // 判断，是否无需代理
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
 			this.advisedBeans.put(cacheKey, Boolean.FALSE);
 			return bean;
@@ -542,7 +547,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	protected Advisor[] buildAdvisors(@Nullable String beanName, @Nullable Object[] specificInterceptors) {
 		// Handle prototypes correctly...
         // 解析所有注册的 interceptorNames
-		Advisor[] commonInterceptors = resolveInterceptorNames();
+		Advisor[] commonInterceptors = resolveInterceptorNames(); // TODO 芋艿，这个情况，暂时没调试。
 
 		List<Object> allInterceptors = new ArrayList<>(); // 所有集合
 		if (specificInterceptors != null) {

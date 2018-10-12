@@ -16,12 +16,14 @@
 
 package org.springframework.aop.framework;
 
+import org.springframework.lang.Nullable;
+
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
-
 /**
+ * Advisor 调用链工厂接口，用于获取每个方法调用时的调用链
+ *
  * Factory interface for advisor chains.
  *
  * @author Rod Johnson
@@ -30,6 +32,8 @@ import org.springframework.lang.Nullable;
 public interface AdvisorChainFactory {
 
 	/**
+     * 获得指定方法拦截的拦截器链
+     *
 	 * Determine a list of {@link org.aopalliance.intercept.MethodInterceptor} objects
 	 * for the given advisor chain configuration.
 	 * @param config the AOP configuration in the form of an Advised object

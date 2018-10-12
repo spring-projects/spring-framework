@@ -288,7 +288,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return false;
 	}
 
-	@Override // TODO 芋艿，这个方法，后续有需要，在细看。
+	@Override // TODO 芋艿，这个方法，后续有需要，在细看。和 AspectJ 的机制，有一些关系
 	public boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions) {
 		obtainPointcutExpression();
 		// 进行匹配

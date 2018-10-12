@@ -122,14 +122,14 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		// If it's a per target aspect, emit the dummy instantiating aspect.
 		if (!advisors.isEmpty() // 非空
-                && lazySingletonAspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) { // 配置了增强延迟初始化
+                && lazySingletonAspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) { // 配置了增强延迟初始化 TODO 芋艿，后续详细看看
 		    // 如果寻找的增强器不为空，而且又配置了增强延迟初始化，那么需要在首个 advisors 的位置，加入 SyntheticInstantiationAdvisor 同步实例化增强器
 			Advisor instantiationAdvisor = new SyntheticInstantiationAdvisor(lazySingletonAspectInstanceFactory);
 			advisors.add(0, instantiationAdvisor);
 		}
 
 		// Find introduction fields.
-        // 遍历属性，若属性有增强注解 @DeclareParents ，则获取对应的增强 Advisor 对象
+        // 遍历属性，若属性有增强注解 @DeclareParents ，则获取对应的增强 Advisor 对象 // TODO 芋艿，理解，但是暂时没用到。等需要，在调试下。
 		for (Field field : aspectClass.getDeclaredFields()) { // 属性
 			Advisor advisor = getDeclareParentsAdvisor(field);
             // 获取到，添加到 advisors 中

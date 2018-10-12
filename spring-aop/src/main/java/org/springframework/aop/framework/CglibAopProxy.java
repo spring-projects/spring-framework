@@ -743,6 +743,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 
 	/**
+     * 基于 CGLIB 的方式，进一步优化调用的实现类
+     *
 	 * Implementation of AOP Alliance MethodInvocation used by this AOP proxy.
 	 */
 	private static class CglibMethodInvocation extends ReflectiveMethodInvocation {
@@ -772,7 +774,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		 */
 		@Override
 		protected Object invokeJoinpoint() throws Throwable {
-			if (this.publicMethod // 公共方法
+			if (this.publicMethod // 公共方法，优化调用方式
                     && getMethod().getDeclaringClass() != Object.class) { // 非 Object 类的方法
 				return this.methodProxy.invoke(this.target, this.arguments);
 			} else {

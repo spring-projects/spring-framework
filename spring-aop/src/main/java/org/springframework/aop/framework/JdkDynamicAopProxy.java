@@ -78,7 +78,13 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler /* 重要 
 	/** We use a static Log to avoid serialization issues. */
 	private static final Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
 
-	/** Config used to configure this proxy. */
+	/**
+     * Config used to configure this proxy.
+     *
+     * 从英文注释上，当前代理的配置。实际上，就是 {@link ProxyFactory} 对象。
+     *
+     * 目前在 {@link #JdkDynamicAopProxy(AdvisedSupport)} 构造方法中，进行设置。
+     */
 	private final AdvisedSupport advised;
 
 	/**

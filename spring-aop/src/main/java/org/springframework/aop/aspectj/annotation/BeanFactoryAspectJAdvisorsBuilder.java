@@ -123,24 +123,27 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						}
 						// 如果存在对应的 @Aspect 注解
 						if (this.advisorFactory.isAspect(beanType)) {
+						    // 添加到 aspectNames 中
 							aspectNames.add(beanName);
+							// 创建 AspectMetadata 对象
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
+							// 根据不同类型，不同处理
 							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) { // 单例
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName); // BeanFactory 开头
-								// 解析 @Aspect 注解中的增强方法 【重要】
+								// 解析有 AOP 注解中的增强方法 【重要】
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
 								// 记录到 advisorsCache 或 aspectFactoryCache 缓存中
 								if (this.beanFactory.isSingleton(beanName)) { // Bean 自身是单例
 									this.advisorsCache.put(beanName, classAdvisors);
-								} else { // Bean 是 BeanFactory
+								} else { // Bean 是 BeanFactory TODO 芋艿，这个情况，未调试过
 									this.aspectFactoryCache.put(beanName, factory);
 								}
                                 // 添加结果到 advisors 中
                                 advisors.addAll(classAdvisors);
 							} else {
 								// Per target or per this.
-								if (this.beanFactory.isSingleton(beanName)) { // 要求非单例，即 Prototype 类型
+								if (this.beanFactory.isSingleton(beanName)) { // 要求非单例，即 Prototype 类型 TODO 芋艿，这个情况，未调试过
 									throw new IllegalArgumentException("Bean with name '" + beanName +
 											"' is a singleton, but aspect instantiation model is not singleton");
 								}

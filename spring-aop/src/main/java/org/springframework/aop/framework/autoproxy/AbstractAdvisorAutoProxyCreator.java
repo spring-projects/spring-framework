@@ -66,7 +66,6 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		this.advisorRetrievalHelper = new BeanFactoryAdvisorRetrievalHelperAdapter(beanFactory);
 	}
 
-
 	@Override
 	@Nullable
 	protected Object[] getAdvicesAndAdvisorsForBean(
@@ -96,7 +95,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
 		// 从所有 Advisor 增强器中，寻找匹配的
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
-		// TODO 芋艿 等需要在看
+		// 拓展 Advisor 集合。目前实现为空，子类可覆盖实现自定义逻辑
 		extendAdvisors(eligibleAdvisors);
 		// 排序匹配的 Advisor 增强器
 		if (!eligibleAdvisors.isEmpty()) {
@@ -115,6 +114,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
+     * 获得 Bean 对象可使用的 Advisor 集合
+     *
 	 * Search the given candidate Advisors to find all Advisors that
 	 * can apply to the specified bean.
 	 * @param candidateAdvisors the candidate Advisors
@@ -160,6 +161,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
+     * 拓展 Advisor 集合。目前实现为空，子类可覆盖实现自定义逻辑
+     *
 	 * Extension hook that subclasses can override to register additional Advisors,
 	 * given the sorted Advisors obtained to date.
 	 * <p>The default implementation is empty.

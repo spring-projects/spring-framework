@@ -84,12 +84,15 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 		this.aspectJAdvisorsBuilder = new BeanFactoryAspectJAdvisorsBuilderAdapter(beanFactory, this.aspectJAdvisorFactory);
 	}
 
-	@Override // TODO 芋艿，需要写下
+    /**
+     * @return 获得所有增强方法的 Advisor 对象，包括 XML 配置、注解配置
+     */
+	@Override
 	protected List<Advisor> findCandidateAdvisors() {
 		// Add all the Spring advisors found according to superclass rules.
         // 当使用注解方式配置 AOP 的时候，并不是丢弃了对 XML 配置的支持，
         // 在这里调用父类方法加载配置文件中的 AOP 声明
-        // TODO 芋艿，后面在调试
+        // TODO 芋艿，后面在调试。反正我是不会调试的，哈哈哈哈哈哈哈。
 		List<Advisor> advisors = super.findCandidateAdvisors();
 		// Build Advisors for all AspectJ aspects in the bean factory.
         // 获取 Bean 的注解 @Aspect 增强的功能
@@ -114,6 +117,10 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 	}
 
 	/**
+     * 使用 {@link #includePatterns} 判断，是否 beanName 匹配
+     *
+     * 如果 {@link #includePatterns} 为空，默认匹配成功
+     *
 	 * Check whether the given aspect bean is eligible for auto-proxying.
 	 * <p>If no &lt;aop:include&gt; elements were used then "includePatterns" will be
 	 * {@code null} and all beans are included. If "includePatterns" is non-null,
@@ -122,8 +129,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 	protected boolean isEligibleAspectBean(String beanName) {
 		if (this.includePatterns == null) {
 			return true;
-		}
-		else {
+		} else {
 			for (Pattern pattern : this.includePatterns) {
 				if (pattern.matcher(beanName).matches()) {
 					return true;
@@ -148,6 +154,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 
 		@Override
 		protected boolean isEligibleBean(String beanName) {
+		    // 判断，是否是符合条件的 Bean
 			return AnnotationAwareAspectJAutoProxyCreator.this.isEligibleAspectBean(beanName);
 		}
 

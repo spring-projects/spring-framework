@@ -26,6 +26,13 @@ import org.springframework.core.PriorityOrdered;
 import java.io.Serializable;
 
 /**
+ * 暴露调用( Invocation )拦截器，通过 ThreadLocal 实现。
+ *
+ * @see #INSTANCE 变量
+ * @see #invoke(MethodInvocation) 方法
+ *
+ * 通过 ExposeInvocationInterceptor 拦截器，在调用 {@link #currentInvocation()} 方法，可以获得调用信息( Invocation )。
+ *
  * Interceptor that exposes the current {@link org.aopalliance.intercept.MethodInvocation}
  * as a thread-local object. We occasionally need to do this; for example, when a pointcut
  * (e.g. an AspectJ expression pointcut) needs to know the full invocation context.
@@ -42,23 +49,32 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public final class ExposeInvocationInterceptor implements MethodInterceptor, PriorityOrdered, Serializable {
 
-	/** Singleton instance of this class. */
+	/**
+     * Singleton instance of this class.
+     *
+     * Interceptor 单例对象
+     */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
 
 	/**
+     * Advisor 单例对象
+     *
 	 * Singleton advisor for this class. Use in preference to INSTANCE when using
 	 * Spring AOP, as it prevents the need to create a new Advisor to wrap the instance.
 	 */
 	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE) {
-		@Override
+
+	    @Override
 		public String toString() {
 			return ExposeInvocationInterceptor.class.getName() +".ADVISOR";
 		}
+
 	};
 
-	private static final ThreadLocal<MethodInvocation> invocation =
-			new NamedThreadLocal<>("Current AOP method invocation");
-
+    /**
+     * 线程变量，记录当前的方法调用
+     */
+	private static final ThreadLocal<MethodInvocation> invocation = new NamedThreadLocal<>("Current AOP method invocation");
 
 	/**
 	 * Return the AOP Alliance MethodInvocation object associated with the current invocation.

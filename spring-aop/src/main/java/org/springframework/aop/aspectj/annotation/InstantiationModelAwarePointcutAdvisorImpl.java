@@ -127,7 +127,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		this.declarationOrder = declarationOrder;
 		this.aspectName = aspectName;
 
-        // 根据切面元数据判断是否要延迟实例化，一般为否
+        // 根据切面元数据判断是否要延迟实例化，一般为否 TODO 芋艿，后续详细调试下。
 		if (aspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) {
 			// Static part of the pointcut is a lazy type.
 			Pointcut preInstantiationPointcut = Pointcuts.union(
