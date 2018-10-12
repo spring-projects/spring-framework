@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
@@ -74,8 +75,23 @@ public class MockHttpServletRequestTests {
 		byte[] bytes = "body".getBytes(Charset.defaultCharset());
 		request.setContent(bytes);
 		assertEquals(bytes.length, request.getContentLength());
-		assertNotNull(request.getInputStream());
 		assertEquals("body", StreamUtils.copyToString(request.getInputStream(), Charset.defaultCharset()));
+
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertEquals("body", StreamUtils.copyToString(request.getInputStream(), Charset.defaultCharset()));
+	}
+
+	@Test
+	public void setContentAndGetReader() throws IOException {
+		byte[] bytes = "body".getBytes(Charset.defaultCharset());
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertEquals("body", FileCopyUtils.copyToString(request.getReader()));
+
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertEquals("body", FileCopyUtils.copyToString(request.getReader()));
 	}
 
 	@Test
@@ -83,7 +99,6 @@ public class MockHttpServletRequestTests {
 		byte[] bytes = "request body".getBytes();
 		request.setContent(bytes);
 		assertEquals(bytes.length, request.getContentLength());
-		assertNotNull(request.getContentAsByteArray());
 		assertEquals(bytes, request.getContentAsByteArray());
 	}
 
@@ -101,14 +116,12 @@ public class MockHttpServletRequestTests {
 		request.setCharacterEncoding("UTF-16");
 		request.setContent(bytes);
 		assertEquals(bytes.length, request.getContentLength());
-		assertNotNull(request.getContentAsString());
 		assertEquals(palindrome, request.getContentAsString());
 	}
 
 	@Test
 	public void noContent() throws IOException {
 		assertEquals(-1, request.getContentLength());
-		assertNotNull(request.getInputStream());
 		assertEquals(-1, request.getInputStream().read());
 		assertNull(request.getContentAsByteArray());
 	}
@@ -213,7 +226,6 @@ public class MockHttpServletRequestTests {
 		String headerName = "Header1";
 		request.addHeader(headerName, "value1");
 		Enumeration<String> requestHeaders = request.getHeaderNames();
-		assertNotNull(requestHeaders);
 		assertEquals("HTTP header casing not being preserved", headerName, requestHeaders.nextElement());
 	}
 
@@ -545,8 +557,6 @@ public class MockHttpServletRequestTests {
 	}
 
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
-		assertNotNull(enum1);
-		assertNotNull(enum2);
 		int count = 0;
 		while (enum1.hasMoreElements()) {
 			assertTrue("enumerations must be equal in length", enum2.hasMoreElements());

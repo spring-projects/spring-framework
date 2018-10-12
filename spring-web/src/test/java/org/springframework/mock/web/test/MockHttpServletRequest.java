@@ -423,6 +423,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public void setContent(@Nullable byte[] content) {
 		this.content = content;
+		this.inputStream = null;
+		this.reader = null;
 	}
 
 	/**
