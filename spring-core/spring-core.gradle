@@ -12,7 +12,7 @@ dependencyManagement {
 // further transformed by the JarJar task to depend on org.springframework.asm; this
 // avoids including two different copies of asm unnecessarily.
 def cglibVersion = "3.2.8"
-def objenesisVersion = "2.6"
+def objenesisVersion = "3.0"
 
 configurations {
 	jarjar
@@ -26,7 +26,7 @@ task cglibRepackJar(type: Jar) { repackJar ->
 
 	doLast() {
 		project.ant {
-			taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+			taskdef name: "jarjar", classname: "org.pantsbuild.jarjar.JarJarTask",
 					classpath: configurations.jarjar.asPath
 			jarjar(destfile: repackJar.archivePath) {
 				configurations.cglib.each { originalJar ->
@@ -49,7 +49,7 @@ task objenesisRepackJar(type: Jar) { repackJar ->
 
 	doLast() {
 		project.ant {
-			taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+			taskdef name: "jarjar", classname: "org.pantsbuild.jarjar.JarJarTask",
 					classpath: configurations.jarjar.asPath
 			jarjar(destfile: repackJar.archivePath) {
 				configurations.objenesis.each { originalJar ->
@@ -65,7 +65,7 @@ task objenesisRepackJar(type: Jar) { repackJar ->
 dependencies {
 	cglib("cglib:cglib:${cglibVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
-	jarjar("com.googlecode.jarjar:jarjar:1.3")
+	jarjar("org.pantsbuild:jarjar:1.6.6")
 
 	compile(files(cglibRepackJar))
 	compile(files(objenesisRepackJar))
@@ -94,7 +94,7 @@ jar {
 	from(zipTree(cglibRepackJar.archivePath)) {
 		include "org/springframework/cglib/**"
 		exclude "org/springframework/cglib/core/AbstractClassGenerator*.class"
-		exclude "org/springframework/cglib/core/AsmApi.class"
+		exclude "org/springframework/cglib/core/AsmApi*.class"
 		exclude "org/springframework/cglib/core/KeyFactory.class"
 		exclude "org/springframework/cglib/core/KeyFactory\$*.class"
 		exclude "org/springframework/cglib/core/ReflectUtils*.class"
