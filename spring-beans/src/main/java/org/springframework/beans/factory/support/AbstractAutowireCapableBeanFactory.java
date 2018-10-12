@@ -775,6 +775,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
+		mbd.factoryMethodToIntrospect = uniqueCandidate;
 		if (commonType == null) {
 			return null;
 		}

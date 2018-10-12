@@ -75,6 +75,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	volatile ResolvableType factoryMethodReturnType;
 
+	/** Package-visible field for caching a unique factory method candidate for introspection. */
+	@Nullable
+	volatile Method factoryMethodToIntrospect;
+
 	/** Common lock for the four constructor fields below. */
 	final Object constructorArgumentLock = new Object();
 
@@ -370,10 +374,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	@Nullable
 	public Method getResolvedFactoryMethod() {
-		synchronized (this.constructorArgumentLock) {
-			Executable candidate = this.resolvedConstructorOrFactoryMethod;
-			return (candidate instanceof Method ? (Method) candidate : null);
-		}
+		return this.factoryMethodToIntrospect;
 	}
 
 	public void registerExternallyManagedConfigMember(Member configMember) {

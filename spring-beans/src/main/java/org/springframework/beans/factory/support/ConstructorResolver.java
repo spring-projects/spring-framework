@@ -337,9 +337,7 @@ class ConstructorResolver {
 				}
 			}
 		}
-		synchronized (mbd.constructorArgumentLock) {
-			mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
-		}
+		mbd.factoryMethodToIntrospect = uniqueCandidate;
 	}
 
 	/**
@@ -448,6 +446,7 @@ class ConstructorResolver {
 			if (candidateList.size() == 1 && explicitArgs == null && !mbd.hasConstructorArgumentValues()) {
 				Method uniqueCandidate = candidateList.get(0);
 				if (uniqueCandidate.getParameterCount() == 0) {
+					mbd.factoryMethodToIntrospect = uniqueCandidate;
 					synchronized (mbd.constructorArgumentLock) {
 						mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
 						mbd.constructorArgumentsResolved = true;
@@ -598,6 +597,7 @@ class ConstructorResolver {
 			}
 
 			if (explicitArgs == null && argsHolderToUse != null) {
+				mbd.factoryMethodToIntrospect = factoryMethodToUse;
 				argsHolderToUse.storeCache(mbd, factoryMethodToUse);
 			}
 		}
