@@ -231,7 +231,7 @@ public class ExchangeResult {
 		return body
 				.map(bytes -> {
 					if (contentType == null) {
-						return "Unknown content type (" + bytes.length + " bytes)";
+						return bytes.length + " bytes of content (unknown content-type).";
 					}
 					Charset charset = contentType.getCharset();
 					if (charset != null) {
@@ -240,7 +240,7 @@ public class ExchangeResult {
 					if (PRINTABLE_MEDIA_TYPES.stream().anyMatch(contentType::isCompatibleWith)) {
 						return new String(bytes, StandardCharsets.UTF_8);
 					}
-					return "Unknown charset (" + bytes.length + " bytes)";
+					return bytes.length + " bytes of content.";
 				})
 				.defaultIfEmpty("No content")
 				.onErrorResume(ex -> Mono.just("Failed to obtain content: " + ex.getMessage()))
