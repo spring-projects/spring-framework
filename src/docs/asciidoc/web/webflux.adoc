@@ -161,7 +161,7 @@ re-use knowledge while also selecting the right tool for the right job.
 
 * A simple way to evaluate an application is to check its dependencies. If you have blocking
 persistence APIs (JPA, JDBC) or networking APIs to use, Spring MVC is the best choice
-for common architectures at, least. It is technically feasible with both Reactor and
+for common architectures at least. It is technically feasible with both Reactor and
 RxJava to perform blocking calls on a separate thread but you would not be making the
 most of a non-blocking web stack.
 
