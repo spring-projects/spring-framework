@@ -40,7 +40,7 @@ dependencies {
 	optional("net.sourceforge.htmlunit:htmlunit:2.33") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:htmlunit-driver:2.32.1") {
+	optional("org.seleniumhq.selenium:htmlunit-driver:2.33.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.seleniumhq.selenium:selenium-java:3.14.0") {
