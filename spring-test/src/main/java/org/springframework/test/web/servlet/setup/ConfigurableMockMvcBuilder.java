@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
+ * @param <B> a self reference to the builder type
  */
 public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder<B>> extends MockMvcBuilder {
 
@@ -62,7 +63,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * </pre>
 	 * <p>Filters will be invoked in the order in which they are provided.
 	 * @param filter the filter to add
-	 * @param urlPatterns URL patterns to map to; if empty, "/*" is used by default
+	 * @param urlPatterns the URL patterns to map to; if empty, "/*" is used by default
 	 */
 	<T extends B> T addFilter(Filter filter, String... urlPatterns);
 

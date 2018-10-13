@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,8 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(this.servletRequest);
 
-		Method method = this.getClass().getDeclaredMethod("handle", UriComponentsBuilder.class, ServletUriComponentsBuilder.class, int.class);
+		Method method = this.getClass().getDeclaredMethod(
+				"handle", UriComponentsBuilder.class, ServletUriComponentsBuilder.class, int.class);
 		this.builderParam = new MethodParameter(method, 0);
 		this.servletBuilderParam = new MethodParameter(method, 1);
 		this.intParam = new MethodParameter(method, 2);

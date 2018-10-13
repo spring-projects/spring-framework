@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -48,7 +48,7 @@ public class DateFormatter implements Formatter<Date> {
 	private static final Map<ISO, String> ISO_PATTERNS;
 
 	static {
-		Map<ISO, String> formats = new HashMap<>(4);
+		Map<ISO, String> formats = new EnumMap<>(ISO.class);
 		formats.put(ISO.DATE, "yyyy-MM-dd");
 		formats.put(ISO.TIME, "HH:mm:ss.SSSXXX");
 		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -126,7 +126,7 @@ public class DateFormatter implements Formatter<Date> {
 	 * <li>'L' = Long</li>
 	 * <li>'F' = Full</li>
 	 * <li>'-' = Omitted</li>
-	 * <ul>
+	 * </ul>
 	 * This method mimics the styles supported by Joda-Time.
 	 * @param stylePattern two characters from the set {"S", "M", "L", "F", "-"}
 	 * @since 3.2

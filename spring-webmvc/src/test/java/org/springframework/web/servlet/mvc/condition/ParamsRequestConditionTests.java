@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,13 +97,35 @@ public class ParamsRequestConditionTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
-		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo", "bar");
+		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=a", "bar");
 
 		int result = condition1.compareTo(condition2, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 
 		result = condition2.compareTo(condition1, request);
 		assertTrue("Invalid comparison result: " + result, result > 0);
+	}
+
+	@Test // SPR-16674
+	public void compareToWithMoreSpecificMatchByValue() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+
+		ParamsRequestCondition condition1 = new ParamsRequestCondition("response_type=code");
+		ParamsRequestCondition condition2 = new ParamsRequestCondition("response_type");
+
+		int result = condition1.compareTo(condition2, request);
+		assertTrue("Invalid comparison result: " + result, result < 0);
+	}
+
+	@Test
+	public void compareToWithNegatedMatch() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+
+		ParamsRequestCondition condition1 = new ParamsRequestCondition("response_type!=code");
+		ParamsRequestCondition condition2 = new ParamsRequestCondition("response_type");
+
+		assertEquals("Negated match should not count as more specific",
+				0, condition1.compareTo(condition2, request));
 	}
 
 	@Test

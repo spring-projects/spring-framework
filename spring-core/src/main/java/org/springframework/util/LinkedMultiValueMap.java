@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import org.springframework.lang.Nullable;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
+ * @param <K> the key type
+ * @param <V> the value element type
  */
 public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializable, Cloneable {
 
@@ -76,6 +78,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	// MultiValueMap implementation
 
 	@Override
+	@Nullable
 	public V getFirst(K key) {
 		List<V> values = this.targetMap.get(key);
 		return (values != null ? values.get(0) : null);
@@ -116,7 +119,6 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	public Map<K, V> toSingleValueMap() {
 		LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<>(this.targetMap.size());
 		this.targetMap.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
-		
 		return singleValueMap;
 	}
 
@@ -190,20 +192,26 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	/**
 	 * Create a deep copy of this Map.
 	 * @return a copy of this Map, including a copy of each value-holding List entry
+	 * (consistently using an independent modifiable {@link LinkedList} for each entry)
+	 * along the lines of {@code MultiValueMap.addAll} semantics
 	 * @since 4.2
+	 * @see #addAll(MultiValueMap)
 	 * @see #clone()
 	 */
 	public LinkedMultiValueMap<K, V> deepCopy() {
 		LinkedMultiValueMap<K, V> copy = new LinkedMultiValueMap<>(this.targetMap.size());
-		this.targetMap.forEach((k, v) -> copy.put(k, new LinkedList<>(v)));
-		
+		this.targetMap.forEach((key, value) -> copy.put(key, new LinkedList<>(value)));
 		return copy;
 	}
 
 	/**
 	 * Create a regular copy of this Map.
 	 * @return a shallow copy of this Map, reusing this Map's value-holding List entries
+	 * (even if some entries are shared or unmodifiable) along the lines of standard
+	 * {@code Map.put} semantics
 	 * @since 4.2
+	 * @see #put(Object, List)
+	 * @see #putAll(Map)
 	 * @see LinkedMultiValueMap#LinkedMultiValueMap(Map)
 	 * @see #deepCopy()
 	 */

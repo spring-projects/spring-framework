@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,14 +48,14 @@ import org.springframework.util.Assert;
  */
 public abstract class ApplicationObjectSupport implements ApplicationContextAware {
 
-	/** Logger that is available to subclasses */
+	/** Logger that is available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** ApplicationContext this object runs in */
+	/** ApplicationContext this object runs in. */
 	@Nullable
 	private ApplicationContext applicationContext;
 
-	/** MessageSourceAccessor for easy message access */
+	/** MessageSourceAccessor for easy message access. */
 	@Nullable
 	private MessageSourceAccessor messageSourceAccessor;
 
@@ -111,7 +111,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	/**
 	 * Subclasses can override this for custom initialization behavior.
 	 * Gets called by {@code setApplicationContext} after setting the context instance.
-	 * <p>Note: Does </i>not</i> get called on reinitialization of the context
+	 * <p>Note: Does <i>not</i> get called on re-initialization of the context
 	 * but rather just on first initialization of this object's context reference.
 	 * <p>The default implementation calls the overloaded {@link #initApplicationContext()}
 	 * method without ApplicationContext reference.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,8 +73,8 @@ public class SqlUpdate extends SqlOperation {
 
 	/**
 	 * Constructs an update object with a given DataSource and SQL.
-	 * @param ds DataSource to use to obtain connections
-	 * @param sql SQL statement to execute
+	 * @param ds the DataSource to use to obtain connections
+	 * @param sql the SQL statement to execute
 	 */
 	public SqlUpdate(DataSource ds, String sql) {
 		setDataSource(ds);
@@ -84,9 +84,9 @@ public class SqlUpdate extends SqlOperation {
 	/**
 	 * Construct an update object with a given DataSource, SQL
 	 * and anonymous parameters.
-	 * @param ds DataSource to use to obtain connections
-	 * @param sql SQL statement to execute
-	 * @param types SQL types of the parameters, as defined in the
+	 * @param ds the DataSource to use to obtain connections
+	 * @param sql the SQL statement to execute
+	 * @param types the SQL types of the parameters, as defined in the
 	 * {@code java.sql.Types} class
 	 * @see java.sql.Types
 	 */
@@ -100,9 +100,9 @@ public class SqlUpdate extends SqlOperation {
 	 * Construct an update object with a given DataSource, SQL,
 	 * anonymous parameters and specifying the maximum number of rows
 	 * that may be affected.
-	 * @param ds DataSource to use to obtain connections
-	 * @param sql SQL statement to execute
-	 * @param types SQL types of the parameters, as defined in the
+	 * @param ds the DataSource to use to obtain connections
+	 * @param sql the SQL statement to execute
+	 * @param types the SQL types of the parameters, as defined in the
 	 * {@code java.sql.Types} class
 	 * @param maxRowsAffected the maximum number of rows that may
 	 * be affected by the update
@@ -174,7 +174,7 @@ public class SqlUpdate extends SqlOperation {
 	 * Method to execute the update given arguments and
 	 * retrieve the generated keys using a KeyHolder.
 	 * @param params array of parameter objects
-	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
+	 * @param generatedKeyHolder the KeyHolder that will hold the generated keys
 	 * @return the number of rows affected by the update
 	 */
 	public int update(Object[] params, KeyHolder generatedKeyHolder) throws DataAccessException {
@@ -242,7 +242,7 @@ public class SqlUpdate extends SqlOperation {
 	/**
 	 * Generic method to execute the update given named parameters.
 	 * All other update methods invoke this method.
-	 * @param paramMap Map of parameter name to parameter object,
+	 * @param paramMap a Map of parameter name to parameter object,
 	 * matching named parameters specified in the SQL statement
 	 * @return the number of rows affected by the update
 	 */
@@ -260,9 +260,9 @@ public class SqlUpdate extends SqlOperation {
 	/**
 	 * Method to execute the update given arguments and
 	 * retrieve the generated keys using a KeyHolder.
-	 * @param paramMap Map of parameter name to parameter object,
+	 * @param paramMap a Map of parameter name to parameter object,
 	 * matching named parameters specified in the SQL statement
-	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
+	 * @param generatedKeyHolder the KeyHolder that will hold the generated keys
 	 * @return the number of rows affected by the update
 	 */
 	public int updateByNamedParam(Map<String, ?> paramMap, KeyHolder generatedKeyHolder) throws DataAccessException {

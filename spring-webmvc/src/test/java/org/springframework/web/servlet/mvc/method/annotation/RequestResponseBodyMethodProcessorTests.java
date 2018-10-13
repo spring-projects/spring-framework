@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -269,8 +268,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		HttpMessageConverter target = new MappingJackson2HttpMessageConverter();
-		HttpMessageConverter proxy = ProxyFactory.getProxy(HttpMessageConverter.class, new SingletonTargetSource(target));
+		HttpMessageConverter<Object> target = new MappingJackson2HttpMessageConverter();
+		HttpMessageConverter<?> proxy = ProxyFactory.getProxy(HttpMessageConverter.class, new SingletonTargetSource(target));
 		converters.add(proxy);
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
@@ -378,12 +377,12 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		assertContentDisposition(processor, false, "/hello.json", "whitelisted extension");
 		assertContentDisposition(processor, false, "/hello.pdf", "registered extension");
-		assertContentDisposition(processor, true, "/hello.dataless", "uknown extension");
+		assertContentDisposition(processor, true, "/hello.dataless", "unknown extension");
 
 		// path parameters
 		assertContentDisposition(processor, false, "/hello.json;a=b", "path param shouldn't cause issue");
-		assertContentDisposition(processor, true, "/hello.json;a=b;setup.dataless", "uknown ext in path params");
-		assertContentDisposition(processor, true, "/hello.dataless;a=b;setup.json", "uknown ext in filename");
+		assertContentDisposition(processor, true, "/hello.json;a=b;setup.dataless", "unknown ext in path params");
+		assertContentDisposition(processor, true, "/hello.dataless;a=b;setup.json", "unknown ext in filename");
 		assertContentDisposition(processor, false, "/hello.json;a=b;setup.json", "whitelisted extensions");
 
 		// encoded dot
@@ -561,7 +560,10 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test  // SPR-12501
 	public void resolveArgumentWithJacksonJsonViewAndXmlMessageConverter() throws Exception {
-		String content = "<root><withView1>with</withView1><withView2>with</withView2><withoutView>without</withoutView></root>";
+		String content = "<root>" +
+				"<withView1>with</withView1>" +
+				"<withView2>with</withView2>" +
+				"<withoutView>without</withoutView></root>";
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_XML_VALUE);
 
@@ -587,7 +589,10 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test  // SPR-12501
 	public void resolveHttpEntityArgumentWithJacksonJsonViewAndXmlMessageConverter() throws Exception {
-		String content = "<root><withView1>with</withView1><withView2>with</withView2><withoutView>without</withoutView></root>";
+		String content = "<root>" +
+				"<withView1>with</withView1>" +
+				"<withView2>with</withView2>" +
+				"<withoutView>without</withoutView></root>";
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_XML_VALUE);
 
@@ -927,7 +932,21 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 
-	private static class JacksonController {
+	private static class BaseController<T> {
+
+		@RequestMapping
+		@ResponseBody
+		@SuppressWarnings("unchecked")
+		public List<T> handleTypeInfoList() {
+			List<T> list = new ArrayList<>();
+			list.add((T) new Foo("foo"));
+			list.add((T) new Bar("bar"));
+			return list;
+		}
+	}
+
+
+	private static class JacksonController extends BaseController<ParentClass> {
 
 		@RequestMapping
 		@ResponseBody
@@ -962,15 +981,6 @@ public class RequestResponseBodyMethodProcessorTests {
 		@ResponseBody
 		public JacksonViewBean handleHttpEntity(@JsonView(MyJacksonView1.class) HttpEntity<JacksonViewBean> entity) {
 			return entity.getBody();
-		}
-
-		@RequestMapping
-		@ResponseBody
-		public List<ParentClass> handleTypeInfoList() {
-			List<ParentClass> list = new ArrayList<>();
-			list.add(new Foo("foo"));
-			list.add(new Bar("bar"));
-			return list;
 		}
 
 		@RequestMapping

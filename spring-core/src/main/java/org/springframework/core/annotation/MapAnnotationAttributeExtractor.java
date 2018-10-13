@@ -60,11 +60,13 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(Method attributeMethod) {
 		return getRawAttributeValue(attributeMethod.getName());
 	}
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(String attributeName) {
 		return getSource().get(attributeName);
 	}

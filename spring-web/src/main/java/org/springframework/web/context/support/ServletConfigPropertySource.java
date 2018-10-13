@@ -20,6 +20,7 @@ import javax.servlet.ServletConfig;
 
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,6 +42,7 @@ public class ServletConfigPropertySource extends EnumerablePropertySource<Servle
 	}
 
 	@Override
+	@Nullable
 	public String getProperty(String name) {
 		return this.source.getInitParameter(name);
 	}

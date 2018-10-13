@@ -32,14 +32,17 @@ public class SimpMessageTypeMessageConditionTests {
 
 	@Test
 	public void combine() {
-		SimpMessageType actual = condition(SimpMessageType.MESSAGE).combine(condition(SimpMessageType.SUBSCRIBE)).getMessageType();
-		assertEquals(SimpMessageType.SUBSCRIBE, actual);
+		SimpMessageType messageType = SimpMessageType.MESSAGE;
+		SimpMessageType subscribeType = SimpMessageType.SUBSCRIBE;
 
-		actual = condition(SimpMessageType.MESSAGE).combine(condition(SimpMessageType.MESSAGE)).getMessageType();
-		assertEquals(SimpMessageType.MESSAGE, actual);
+		SimpMessageType actual = condition(messageType).combine(condition(subscribeType)).getMessageType();
+		assertEquals(subscribeType, actual);
 
-		actual = condition(SimpMessageType.SUBSCRIBE).combine(condition(SimpMessageType.SUBSCRIBE)).getMessageType();
-		assertEquals(SimpMessageType.SUBSCRIBE, actual);
+		actual = condition(messageType).combine(condition(messageType)).getMessageType();
+		assertEquals(messageType, actual);
+
+		actual = condition(subscribeType).combine(condition(subscribeType)).getMessageType();
+		assertEquals(subscribeType, actual);
 	}
 
 	@Test

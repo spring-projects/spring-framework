@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,18 @@
 
 package org.springframework.http.codec.json;
 
-import java.util.Arrays;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Decode a byte stream into Smile and convert to Object's with Jackson 2.9.
+ * Decode a byte stream into Smile and convert to Object's with Jackson 2.9,
+ * leveraging non-blocking parsing.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -37,11 +36,13 @@ import org.springframework.util.MimeType;
  */
 public class Jackson2SmileDecoder extends AbstractJackson2Decoder {
 
-	private static final MimeType SMILE_MIME_TYPE = new MediaType("application", "x-jackson-smile");
+	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {
+					new MimeType("application", "x-jackson-smile", StandardCharsets.UTF_8),
+					new MimeType("application", "*+x-jackson-smile", StandardCharsets.UTF_8)};
 
 
 	public Jackson2SmileDecoder() {
-		this(Jackson2ObjectMapperBuilder.smile().build(), SMILE_MIME_TYPE);
+		this(Jackson2ObjectMapperBuilder.smile().build(), DEFAULT_SMILE_MIME_TYPES);
 	}
 
 	public Jackson2SmileDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
@@ -49,8 +50,4 @@ public class Jackson2SmileDecoder extends AbstractJackson2Decoder {
 		Assert.isAssignable(SmileFactory.class, mapper.getFactory().getClass());
 	}
 
-	@Override
-	public List<MimeType> getDecodableMimeTypes() {
-		return Arrays.asList(SMILE_MIME_TYPE);
-	}
 }

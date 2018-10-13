@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.util.pattern.PathPattern;
-
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -304,7 +303,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 
 			/**
-			 * @param info RequestMappingInfo that matches the URL path
+			 * Create a new {@link PartialMatch} instance.
+			 * @param info the RequestMappingInfo that matches the URL path
 			 * @param exchange the current exchange
 			 */
 			public PartialMatch(RequestMappingInfo info, ServerWebExchange exchange) {
@@ -358,7 +358,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		private static Set<HttpMethod> initAllowedHttpMethods(Set<HttpMethod> declaredMethods) {
 			if (declaredMethods.isEmpty()) {
 				return EnumSet.allOf(HttpMethod.class).stream()
-						.filter(method -> !method.equals(HttpMethod.TRACE))
+						.filter(method -> method != HttpMethod.TRACE)
 						.collect(Collectors.toSet());
 			}
 			else {
@@ -366,6 +366,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				if (result.contains(HttpMethod.GET)) {
 					result.add(HttpMethod.HEAD);
 				}
+				result.add(HttpMethod.OPTIONS);
 				return result;
 			}
 		}

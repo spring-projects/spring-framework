@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	protected Method getCreateMethod(Object home) throws EjbAccessException {
 		try {
 			// Cache the EJB create() method that must be declared on the home interface.
-			return home.getClass().getMethod("create", (Class[]) null);
+			return home.getClass().getMethod("create");
 		}
 		catch (NoSuchMethodException ex) {
 			throw new EjbAccessException("EJB home [" + home + "] has no no-arg create() method");

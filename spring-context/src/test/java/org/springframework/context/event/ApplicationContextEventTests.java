@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,8 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	@Test
 	public void multicastSimpleEvent() {
+		multicastEvent(true, ApplicationListener.class,
+				new ContextRefreshedEvent(new StaticApplicationContext()), null);
 		multicastEvent(true, ApplicationListener.class,
 				new ContextClosedEvent(new StaticApplicationContext()), null);
 	}
@@ -469,6 +471,30 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		assertTrue(seenEvents.contains(event1));
 		assertTrue(seenEvents.contains(event2));
 
+		context.close();
+	}
+
+	@Test
+	public void lambdaAsListenerWithJava8StyleClassCastMessage() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		ApplicationListener<ApplicationEvent> listener =
+				event -> { throw new ClassCastException(event.getClass().getName()); };
+		context.addApplicationListener(listener);
+		context.refresh();
+
+		context.publishEvent(new MyEvent(context));
+		context.close();
+	}
+
+	@Test
+	public void lambdaAsListenerWithJava9StyleClassCastMessage() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		ApplicationListener<ApplicationEvent> listener =
+				event -> { throw new ClassCastException("spring.context/" + event.getClass().getName()); };
+		context.addApplicationListener(listener);
+		context.refresh();
+
+		context.publishEvent(new MyEvent(context));
 		context.close();
 	}
 

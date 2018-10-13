@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,9 @@ public class WebSocketTransportRegistration {
 
 	@Nullable
 	private Integer sendBufferSizeLimit;
+
+	@Nullable
+	private Integer timeToFirstMessage;
 
 	private final List<WebSocketHandlerDecoratorFactory> decoratorFactories = new ArrayList<>(2);
 
@@ -149,6 +152,30 @@ public class WebSocketTransportRegistration {
 	@Nullable
 	protected Integer getSendBufferSizeLimit() {
 		return this.sendBufferSizeLimit;
+	}
+
+	/**
+	 * Set the maximum time allowed in milliseconds after the WebSocket connection
+	 * is established and before the first sub-protocol message is received.
+	 * <p>This handler is for WebSocket connections that use a sub-protocol.
+	 * Therefore, we expect the client to send at least one sub-protocol message
+	 * in the beginning, or else we assume the connection isn't doing well, e.g.
+	 * proxy issue, slow network, and can be closed.
+	 * <p>By default this is set to {@code 60,000} (1 minute).
+	 * @param timeToFirstMessage the maximum time allowed in milliseconds
+	 * @since 5.1
+	 */
+	public WebSocketTransportRegistration setTimeToFirstMessage(int timeToFirstMessage) {
+		this.timeToFirstMessage = timeToFirstMessage;
+		return this;
+	}
+
+	/**
+	 * Protected accessor for internal use.
+	 */
+	@Nullable
+	protected Integer getTimeToFirstMessage() {
+		return this.timeToFirstMessage;
 	}
 
 	/**

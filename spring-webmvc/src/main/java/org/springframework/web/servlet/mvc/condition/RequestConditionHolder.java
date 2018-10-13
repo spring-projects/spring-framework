@@ -110,6 +110,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * holder, return the same holder instance.
 	 */
 	@Override
+	@Nullable
 	public RequestConditionHolder getMatchingCondition(HttpServletRequest request) {
 		if (this.condition == null) {
 			return this;

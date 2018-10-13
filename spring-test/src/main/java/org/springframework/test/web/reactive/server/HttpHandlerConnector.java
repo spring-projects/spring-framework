@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,9 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.HttpHeadResponseDecorator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
@@ -58,7 +60,6 @@ import org.springframework.util.MultiValueMap;
 public class HttpHandlerConnector implements ClientHttpConnector {
 
 	private static Log logger = LogFactory.getLog(HttpHandlerConnector.class);
-
 
 	private final HttpHandler handler;
 
@@ -84,15 +85,16 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 		mockClientRequest.setWriteHandler(requestBody -> {
 			log("Invoking HttpHandler for ", httpMethod, uri);
 			ServerHttpRequest mockServerRequest = adaptRequest(mockClientRequest, requestBody);
-			this.handler.handle(mockServerRequest, mockServerResponse).subscribe(aVoid -> {}, result::onError);
+			ServerHttpResponse responseToUse = prepareResponse(mockServerResponse, mockServerRequest);
+			this.handler.handle(mockServerRequest, responseToUse).subscribe(aVoid -> {}, result::onError);
 			return Mono.empty();
 		});
 
-		mockServerResponse.setWriteHandler(responseBody -> {
-			log("Creating client response for ", httpMethod, uri);
-			result.onNext(adaptResponse(mockServerResponse, responseBody));
-			return Mono.empty();
-		});
+		mockServerResponse.setWriteHandler(responseBody ->
+				Mono.fromRunnable(() -> {
+					log("Creating client response for ", httpMethod, uri);
+					result.onNext(adaptResponse(mockServerResponse, responseBody));
+				}));
 
 		log("Writing client request for ", httpMethod, uri);
 		requestCallback.apply(mockClientRequest).subscribe(aVoid -> {}, result::onError);
@@ -112,6 +114,10 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 		HttpHeaders headers = request.getHeaders();
 		MultiValueMap<String, HttpCookie> cookies = request.getCookies();
 		return MockServerHttpRequest.method(method, uri).headers(headers).cookies(cookies).body(body);
+	}
+
+	private ServerHttpResponse prepareResponse(ServerHttpResponse response, ServerHttpRequest request) {
+		return (request.getMethod() == HttpMethod.HEAD ? new HttpHeadResponseDecorator(response) : response);
 	}
 
 	private ClientHttpResponse adaptResponse(MockServerHttpResponse response, Flux<DataBuffer> body) {

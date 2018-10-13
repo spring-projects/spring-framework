@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,13 +225,14 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 		Assert.notNull(user, "User must not be null");
 		user = StringUtils.replace(user, "/", "%2F");
+		destination = destination.startsWith("/") ? destination : "/" + destination;
 		super.convertAndSend(this.destinationPrefix + user + destination, payload, headers, postProcessor);
 	}
 
 
 	/**
 	 * Creates a new map and puts the given headers under the key
-	 * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
+	 * {@link NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
 	 * effectively treats the input header map as headers to be sent out to the
 	 * destination.
 	 * <p>However if the given headers already contain the key
@@ -262,10 +263,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		initHeaders(headerAccessor);
-		for (Map.Entry<String, Object> headerEntry : headers.entrySet()) {
-			Object value = headerEntry.getValue();
-			headerAccessor.setNativeHeader(headerEntry.getKey(), (value != null ? value.toString() : null));
-		}
+		headers.forEach((key, value) -> headerAccessor.setNativeHeader(key, (value != null ? value.toString() : null)));
 		return headerAccessor.getMessageHeaders();
 	}
 

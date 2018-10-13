@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,14 @@ import org.springframework.util.ObjectUtils;
  */
 public class IdentityNamingStrategy implements ObjectNamingStrategy {
 
+	/**
+	 * The type key.
+	 */
 	public static final String TYPE_KEY = "type";
 
+	/**
+	 * The hash code key.
+	 */
 	public static final String HASH_CODE_KEY = "hashCode";
 
 

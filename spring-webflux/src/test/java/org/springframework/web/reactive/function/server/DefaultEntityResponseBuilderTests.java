@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -32,24 +32,22 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
-import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -57,21 +55,21 @@ import static org.junit.Assert.assertSame;
 public class DefaultEntityResponseBuilderTests {
 
 	@Test
-	public void fromObject() throws Exception {
+	public void fromObject() {
 		String body = "foo";
 		EntityResponse<String> response = EntityResponse.fromObject(body).build().block();
 		assertSame(body, response.entity());
 	}
 
 	@Test
-	public void fromPublisherClass() throws Exception {
+	public void fromPublisherClass() {
 		Flux<String> body = Flux.just("foo", "bar");
 		EntityResponse<Flux<String>> response = EntityResponse.fromPublisher(body, String.class).build().block();
 		assertSame(body, response.entity());
 	}
 
 	@Test
-	public void fromPublisher() throws Exception {
+	public void fromPublisher() {
 		Flux<String> body = Flux.just("foo", "bar");
 		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
 		EntityResponse<Flux<String>> response = EntityResponse.fromPublisher(body, typeReference).build().block();
@@ -79,7 +77,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void status() throws Exception {
+	public void status() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();
 		StepVerifier.create(result)
@@ -89,7 +87,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void allow() throws Exception {
+	public void allow() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).allow(HttpMethod.GET).build();
 		Set<HttpMethod> expected = EnumSet.of(HttpMethod.GET);
@@ -100,7 +98,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void contentLength() throws Exception {
+	public void contentLength() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).contentLength(42).build();
 		StepVerifier.create(result)
@@ -110,7 +108,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void contentType() throws Exception {
+	public void contentType() {
 		String body = "foo";
 		Mono<EntityResponse<String>>
 				result = EntityResponse.fromObject(body).contentType(MediaType.APPLICATION_JSON).build();
@@ -121,7 +119,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void etag() throws Exception {
+	public void etag() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).eTag("foo").build();
 		StepVerifier.create(result)
@@ -130,9 +128,8 @@ public class DefaultEntityResponseBuilderTests {
 				.verify();
 	}
 
-
 	@Test
-	public void lastModified() throws Exception {
+	public void lastModified() {
 		ZonedDateTime now = ZonedDateTime.now();
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).lastModified(now).build();
@@ -144,7 +141,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void cacheControlTag() throws Exception {
+	public void cacheControlTag() {
 		String body = "foo";
 		Mono<EntityResponse<String>>
 				result = EntityResponse.fromObject(body).cacheControl(CacheControl.noCache()).build();
@@ -155,7 +152,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void varyBy() throws Exception {
+	public void varyBy() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).varyBy("foo").build();
 		List<String> expected = Collections.singletonList("foo");
@@ -166,7 +163,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void headers() throws Exception {
+	public void headers() {
 		String body = "foo";
 		HttpHeaders headers = new HttpHeaders();
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).headers(headers).build();
@@ -177,31 +174,35 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void bodyInserter() throws Exception {
+	public void cookies() {
+		MultiValueMap<String, ResponseCookie> newCookies = new LinkedMultiValueMap<>();
+		newCookies.add("name", ResponseCookie.from("name", "value").build());
+		Mono<EntityResponse<String>> result =
+				EntityResponse.fromObject("foo").cookies(cookies -> cookies.addAll(newCookies)).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> newCookies.equals(response.cookies()))
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void bodyInserter() {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
-		BiFunction<ServerHttpResponse, BodyInserter.Context, Mono<Void>> writer =
-				(response, strategies) -> {
-					byte[] bodyBytes = body.getBytes(UTF_8);
-					ByteBuffer byteBuffer = ByteBuffer.wrap(bodyBytes);
-					DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-
-					return response.writeWith(Mono.just(buffer));
-				};
 
 		Mono<EntityResponse<Publisher<String>>> result = EntityResponse.fromPublisher(publisher, String.class).build();
 
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 
 		ServerResponse.Context context = new ServerResponse.Context() {
 			@Override
 			public List<HttpMessageWriter<?>> messageWriters() {
-				return Collections.<HttpMessageWriter<?>>singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+				return Collections.singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 			}
 
 			@Override
 			public List<ViewResolver> viewResolvers() {
-				return Collections.<ViewResolver>emptyList();
+				return Collections.emptyList();
 			}
 		};
 		StepVerifier.create(result)
@@ -216,6 +217,53 @@ public class DefaultEntityResponseBuilderTests {
 				.verify();
 
 		assertNotNull(exchange.getResponse().getBody());
+	}
+
+	@Test
+	public void notModifiedEtag() {
+		String etag = "\"foo\"";
+		EntityResponse<String> responseMono = EntityResponse.fromObject("bar")
+				.eTag(etag)
+				.build()
+				.block();
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com")
+				.header(HttpHeaders.IF_NONE_MATCH, etag)
+				.build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		responseMono.writeTo(exchange, DefaultServerResponseBuilderTests.EMPTY_CONTEXT);
+
+		MockServerHttpResponse response = exchange.getResponse();
+		assertEquals(HttpStatus.NOT_MODIFIED, response.getStatusCode());
+		StepVerifier.create(response.getBody())
+				.expectError(IllegalStateException.class)
+				.verify();
+	}
+
+	@Test
+	public void notModifiedLastModified() {
+		ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime oneMinuteBeforeNow = now.minus(1, ChronoUnit.MINUTES);
+
+		EntityResponse<String> responseMono = EntityResponse.fromObject("bar")
+				.lastModified(oneMinuteBeforeNow)
+				.build()
+				.block();
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com")
+				.header(HttpHeaders.IF_MODIFIED_SINCE,
+						DateTimeFormatter.RFC_1123_DATE_TIME.format(now))
+				.build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		responseMono.writeTo(exchange, DefaultServerResponseBuilderTests.EMPTY_CONTEXT);
+
+		MockServerHttpResponse response = exchange.getResponse();
+		assertEquals(HttpStatus.NOT_MODIFIED, response.getStatusCode());
+		StepVerifier.create(response.getBody())
+				.expectError(IllegalStateException.class)
+				.verify();
 	}
 
 }

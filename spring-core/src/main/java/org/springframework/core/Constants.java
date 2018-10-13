@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,10 @@ import org.springframework.util.ReflectionUtils;
  */
 public class Constants {
 
-	/** The name of the introspected class */
+	/** The name of the introspected class. */
 	private final String className;
 
-	/** Map from String field name to object value */
+	/** Map from String field name to object value. */
 	private final Map<String, Object> fieldCache = new HashMap<>();
 
 
@@ -105,9 +105,9 @@ public class Constants {
 	 * Return a constant value cast to a Number.
 	 * @param code the name of the field (never {@code null})
 	 * @return the Number value
-	 * @see #asObject
 	 * @throws ConstantException if the field name wasn't found
 	 * or if the type wasn't compatible with Number
+	 * @see #asObject
 	 */
 	public Number asNumber(String code) throws ConstantException {
 		Object obj = asObject(code);
@@ -122,8 +122,8 @@ public class Constants {
 	 * @param code the name of the field (never {@code null})
 	 * @return the String value
 	 * Works even if it's not a string (invokes {@code toString()}).
-	 * @see #asObject
 	 * @throws ConstantException if the field name wasn't found
+	 * @see #asObject
 	 */
 	public String asString(String code) throws ConstantException {
 		return asObject(code).toString();
@@ -215,11 +215,11 @@ public class Constants {
 	public Set<Object> getValues(@Nullable String namePrefix) {
 		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set<Object> values = new HashSet<>();
-		for (String code : this.fieldCache.keySet()) {
+		this.fieldCache.forEach((code, value) -> {
 			if (code.startsWith(prefixToUse)) {
-				values.add(this.fieldCache.get(code));
+				values.add(value);
 			}
-		}
+		});
 		return values;
 	}
 
@@ -247,11 +247,11 @@ public class Constants {
 	public Set<Object> getValuesForSuffix(@Nullable String nameSuffix) {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set<Object> values = new HashSet<>();
-		for (String code : this.fieldCache.keySet()) {
+		this.fieldCache.forEach((code, value) -> {
 			if (code.endsWith(suffixToUse)) {
-				values.add(this.fieldCache.get(code));
+				values.add(value);
 			}
-		}
+		});
 		return values;
 	}
 

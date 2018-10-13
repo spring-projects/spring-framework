@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 4.2
+ * @param <T> the result type returned by this Future's {@code get} method
  */
 public class CompletableToListenableFutureAdapter<T> implements ListenableFuture<T> {
 
@@ -50,14 +51,13 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 	 */
 	public CompletableToListenableFutureAdapter(CompletableFuture<T> completableFuture) {
 		this.completableFuture = completableFuture;
-		this.completableFuture.handle((result, ex) -> {
+		this.completableFuture.whenComplete((result, ex) -> {
 			if (ex != null) {
-				callbacks.failure(ex);
+				this.callbacks.failure(ex);
 			}
 			else {
-				callbacks.success(result);
+				this.callbacks.success(result);
 			}
-			return null;
 		});
 	}
 

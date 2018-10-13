@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,8 @@ import org.springframework.lang.Nullable;
  * servers[1]=foo.bar.com
  * </pre>
  *
+ * <p>Requires SnakeYAML 1.18 or higher, as of Spring Framework 5.0.6.
+ *
  * @author Dave Syer
  * @author Stephane Nicoll
  * @author Juergen Hoeller
@@ -108,6 +110,7 @@ public class YamlPropertiesFactoryBean extends YamlProcessor implements FactoryB
 	}
 
 	@Override
+	@Nullable
 	public Properties getObject() {
 		return (this.properties != null ? this.properties : createProperties());
 	}

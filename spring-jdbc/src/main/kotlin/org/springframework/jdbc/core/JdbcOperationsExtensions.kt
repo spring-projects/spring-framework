@@ -18,26 +18,28 @@ package org.springframework.jdbc.core
 
 import java.sql.ResultSet
 
-
 /**
- * Extension for [JdbcOperations.queryForObject] providing a `queryForObject<Foo>("...")` variant
+ * Extension for [JdbcOperations.queryForObject] providing a `queryForObject<Foo>("...")` variant.
  *
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String): T? = queryForObject(sql, T::class.java)
+inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String): T? =
+		queryForObject(sql, T::class.java)
 
 /**
- * Extensions for [JdbcOperations.queryForObject] providing a RowMapper-like function variant: `queryForObject("...", arg1, argN){ rs, i -> }`.
+ * Extensions for [JdbcOperations.queryForObject] providing a RowMapper-like function
+ * variant: `queryForObject("...", arg1, argN){ rs, i -> }`.
  *
  * @author Mario Arias
  * @since 5.0
  */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, vararg args: Any, function: (ResultSet, Int) -> T): T =
+fun <T : Any> JdbcOperations.queryForObject(sql: String, vararg args: Any, function: (ResultSet, Int) -> T): T? =
 		queryForObject(sql, RowMapper { resultSet, i -> function(resultSet, i) }, *args)
 
 /**
- * Extension for [JdbcOperations.queryForObject] providing a `queryForObject<Foo>("...", arrayOf(arg1, argN), intArray(type1, typeN))` variant
+ * Extension for [JdbcOperations.queryForObject] providing a
+ * `queryForObject<Foo>("...", arrayOf(arg1, argN), intArray(type1, typeN))` variant.
  *
  * @author Mario Arias
  * @since 5.0
@@ -46,14 +48,14 @@ inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Ar
 		queryForObject(sql, args, argTypes, T::class.java)
 
 /**
- * Extension for [JdbcOperations.queryForObject] providing a `queryForObject<Foo>("...", arrayOf(arg1, argN))` variant
+ * Extension for [JdbcOperations.queryForObject] providing a
+ * `queryForObject<Foo>("...", arrayOf(arg1, argN))` variant.
  *
  * @author Mario Arias
  * @since 5.0
  */
 inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>): T? =
 		queryForObject(sql, args, T::class.java)
-
 
 /**
  * Extension for [JdbcOperations.queryForList] providing a `queryForList<Foo>("...")` variant.
@@ -66,17 +68,20 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String): List<T> =
 		queryForList(sql, T::class.java)
 
 /**
- * Extension for [JdbcOperations.queryForList] providing a `queryForList<Foo>("...", arrayOf(arg1, argN), intArray(type1, typeN))` variant
+ * Extension for [JdbcOperations.queryForList] providing a
+ * `queryForList<Foo>("...", arrayOf(arg1, argN), intArray(type1, typeN))` variant.
  *
  * @author Mario Arias
  * @since 5.0
  */
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>, argTypes: IntArray): List<T> =
+inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>,
+		argTypes: IntArray): List<T> =
 		queryForList(sql, args, argTypes, T::class.java)
 
 /**
- * Extension for [JdbcOperations.queryForList] providing a `queryForList<Foo>("...", arrayOf(arg1, argN))` variant
+ * Extension for [JdbcOperations.queryForList] providing a
+ * `queryForList<Foo>("...", arrayOf(arg1, argN))` variant.
  *
  * @author Mario Arias
  * @since 5.0
@@ -84,18 +89,20 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Arra
 inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>): List<T> =
 		queryForList(sql, args, T::class.java)
 
-
 /**
- * Extension for [JdbcOperations.query] providing a ResultSetExtractor-like function variant: `query<Foo>("...", arg1, argN){ rs -> }`
+ * Extension for [JdbcOperations.query] providing a ResultSetExtractor-like function
+ * variant: `query<Foo>("...", arg1, argN){ rs -> }`.
  *
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T : Any> JdbcOperations.query(sql: String, vararg args: Any, crossinline function: (ResultSet) -> T): T? =
+inline fun <reified T : Any> JdbcOperations.query(sql: String, vararg args: Any,
+		crossinline function: (ResultSet) -> T): T? =
 		query(sql, ResultSetExtractor { function(it) }, *args)
 
 /**
- * Extension for [JdbcOperations.query] providing a RowCallbackHandler-like function variant: `query("...", arg1, argN){ rs -> }`
+ * Extension for [JdbcOperations.query] providing a RowCallbackHandler-like function
+ * variant: `query("...", arg1, argN){ rs -> }`.
  *
  * @author Mario Arias
  * @since 5.0
@@ -104,7 +111,8 @@ fun JdbcOperations.query(sql: String, vararg args: Any, function: (ResultSet) ->
 		query(sql, RowCallbackHandler { function(it) }, *args)
 
 /**
- * Extensions for [JdbcOperations.query] providing a RowMapper-like function variant: `query("...", arg1, argN){ rs, i -> }`.
+ * Extensions for [JdbcOperations.query] providing a RowMapper-like function variant:
+ * `query("...", arg1, argN){ rs, i -> }`.
  *
  * @author Mario Arias
  * @since 5.0

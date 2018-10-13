@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,10 @@
 
 package org.springframework.core;
 
-import java.io.Externalizable;
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -40,26 +34,16 @@ import org.springframework.util.ClassUtils;
  * @author Rossen Stoyanchev
  * @since 2.0
  */
-public abstract class Conventions {
+public final class Conventions {
 
 	/**
 	 * Suffix added to names when using arrays.
 	 */
 	private static final String PLURAL_SUFFIX = "List";
 
-	/**
-	 * Set of interfaces that are supposed to be ignored
-	 * when searching for the 'primary' interface of a proxy.
-	 */
-	private static final Set<Class<?>> IGNORED_INTERFACES;
 
-	static {
-		IGNORED_INTERFACES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-				Serializable.class, Externalizable.class, Cloneable.class, Comparable.class)));
+	private Conventions() {
 	}
-
-	private static final ReactiveAdapterRegistry reactiveAdapterRegistry =
-			new ReactiveAdapterRegistry();
 
 
 	/**
@@ -67,16 +51,13 @@ public abstract class Conventions {
 	 * based on its concrete type. The convention used is to return the
 	 * un-capitalized short name of the {@code Class}, according to JavaBeans
 	 * property naming rules.
-	 *
 	 * <p>For example:<br>
 	 * {@code com.myapp.Product} becomes {@code "product"}<br>
 	 * {@code com.myapp.MyProduct} becomes {@code "myProduct"}<br>
 	 * {@code com.myapp.UKProduct} becomes {@code "UKProduct"}<br>
-	 *
 	 * <p>For arrays the pluralized version of the array component type is used.
 	 * For {@code Collection}s an attempt is made to 'peek ahead' to determine
 	 * the component type and return its pluralized version.
-	 *
 	 * @param value the value to generate a variable name for
 	 * @return the generated variable name
 	 */
@@ -110,12 +91,10 @@ public abstract class Conventions {
 	/**
 	 * Determine the conventional variable name for the given parameter taking
 	 * the generic collection type, if any, into account.
-	 *
 	 * <p>As of 5.0 this method supports reactive types:<br>
 	 * {@code Mono<com.myapp.Product>} becomes {@code "productMono"}<br>
 	 * {@code Flux<com.myapp.MyProduct>} becomes {@code "myProductFlux"}<br>
 	 * {@code Observable<com.myapp.MyProduct>} becomes {@code "myProductObservable"}<br>
-	 *
 	 * @param parameter the method or constructor parameter
 	 * @return the generated variable name
 	 */
@@ -139,7 +118,7 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = parameter.getParameterType();
-
+			ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 			if (reactiveAdapterRegistry.hasAdapters()) {
 				ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
 				if (adapter != null && !adapter.getDescriptor().isNoValue()) {
@@ -228,11 +207,12 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = resolvedType;
+			ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 			if (reactiveAdapterRegistry.hasAdapters()) {
 				ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
 				if (adapter != null && !adapter.getDescriptor().isNoValue()) {
 					reactiveSuffix = ClassUtils.getShortName(valueClass);
-					valueClass = ResolvableType.forMethodReturnType(method).getGeneric().resolve(Object.class);
+					valueClass = ResolvableType.forMethodReturnType(method).getGeneric().toClass();
 				}
 			}
 		}
@@ -295,7 +275,7 @@ public abstract class Conventions {
 		if (Proxy.isProxyClass(valueClass)) {
 			Class<?>[] ifcs = valueClass.getInterfaces();
 			for (Class<?> ifc : ifcs) {
-				if (!IGNORED_INTERFACES.contains(ifc)) {
+				if (!ClassUtils.isJavaLanguageInterface(ifc)) {
 					return ifc;
 				}
 			}

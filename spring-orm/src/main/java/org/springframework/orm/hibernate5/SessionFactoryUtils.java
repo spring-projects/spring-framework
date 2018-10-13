@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public abstract class SessionFactoryUtils {
 	 * {@link PersistenceException} wrappers accordingly.
 	 * @param session the Hibernate Session to flush
 	 * @param synch whether this flush is triggered by transaction synchronization
-	 * @throws DataAccessException
+	 * @throws DataAccessException in case of flush failures
 	 * @since 4.3.2
 	 */
 	static void flush(Session session, boolean synch) throws DataAccessException {
@@ -216,7 +216,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Convert the given HibernateException to an appropriate exception
 	 * from the {@code org.springframework.dao} hierarchy.
-	 * @param ex HibernateException that occurred
+	 * @param ex the HibernateException that occurred
 	 * @return the corresponding DataAccessException instance
 	 * @see HibernateExceptionTranslator#convertHibernateAccessException
 	 * @see HibernateTransactionManager#convertHibernateAccessException

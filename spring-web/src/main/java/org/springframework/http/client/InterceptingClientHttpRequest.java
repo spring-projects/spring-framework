@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
 /**
- * Wrapper for a {@link ClientHttpRequest} that has support for {@link ClientHttpRequestInterceptor}s.
+ * Wrapper for a {@link ClientHttpRequest} that has support for {@link ClientHttpRequestInterceptor ClientHttpRequest} that has support for {@link ClientHttpRequestInterceptors}.
  *
  * @author Arjen Poutsma
  * @since 3.1
@@ -95,11 +95,15 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 				HttpMethod method = request.getMethod();
 				Assert.state(method != null, "No standard HTTP method");
 				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), method);
-				for (Map.Entry<String, List<String>> entry : request.getHeaders().entrySet()) {
-					delegate.getHeaders().addAll(entry.getKey(), entry.getValue());
-				}
+				request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));
 				if (body.length > 0) {
-					StreamUtils.copy(body, delegate.getBody());
+					if (delegate instanceof StreamingHttpOutputMessage) {
+						StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) delegate;
+						streamingOutputMessage.setBody(outputStream -> StreamUtils.copy(body, outputStream));
+					}
+					else {
+						StreamUtils.copy(body, delegate.getBody());
+					}
 				}
 				return delegate.execute();
 			}

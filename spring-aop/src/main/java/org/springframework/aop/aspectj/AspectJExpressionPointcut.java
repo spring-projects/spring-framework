@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.aop.aspectj;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -289,10 +290,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass, boolean beanHasIntroductions) {
+	public boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions) {
 		obtainPointcutExpression();
-		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-		ShadowMatch shadowMatch = getShadowMatch(targetMethod, method);
+		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
 		// Special handling for this, target, @this, @target, @annotation
 		// in Spring - we can optimize since we know we have exactly this class,
@@ -305,7 +305,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		else {
 			// the maybe case
-			if (beanHasIntroductions) {
+			if (hasIntroductions) {
 				return true;
 			}
 			// A match test returned maybe - if there are any subtype sensitive variables
@@ -313,13 +313,12 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			// we say this is not a match as in Spring there will never be a different
 			// runtime subtype.
 			RuntimeTestWalker walker = getRuntimeTestWalker(shadowMatch);
-			return (!walker.testsSubtypeSensitiveVars() ||
-					(targetClass != null && walker.testTargetInstanceOfResidue(targetClass)));
+			return (!walker.testsSubtypeSensitiveVars() || walker.testTargetInstanceOfResidue(targetClass));
 		}
 	}
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
 		return matches(method, targetClass, false);
 	}
 
@@ -329,10 +328,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
+	public boolean matches(Method method, Class<?> targetClass, Object... args) {
 		obtainPointcutExpression();
-		ShadowMatch shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
-		ShadowMatch originalShadowMatch = getShadowMatch(method, method);
+		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
 		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
 		// consistent with return of MethodInvocationProceedingJoinPoint
@@ -367,7 +365,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			 * <p>See SPR-2979 for the original bug.
 			 */
 			if (pmi != null && thisObject != null) {  // there is a current invocation
-				RuntimeTestWalker originalMethodResidueTest = getRuntimeTestWalker(originalShadowMatch);
+				RuntimeTestWalker originalMethodResidueTest = getRuntimeTestWalker(getShadowMatch(method, method));
 				if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
 					return false;
 				}
@@ -427,6 +425,28 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		invocation.setUserAttribute(resolveExpression(), jpm);
 	}
 
+	private ShadowMatch getTargetShadowMatch(Method method, Class<?> targetClass) {
+		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+		if (targetMethod.getDeclaringClass().isInterface()) {
+			// Try to build the most specific interface possible for inherited methods to be
+			// considered for sub-interface matches as well, in particular for proxy classes.
+			// Note: AspectJ is only going to take Method.getDeclaringClass() into account.
+			Set<Class<?>> ifcs = ClassUtils.getAllInterfacesForClassAsSet(targetClass);
+			if (ifcs.size() > 1) {
+				try {
+					Class<?> compositeInterface = ClassUtils.createCompositeInterface(
+							ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
+					targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
+				}
+				catch (IllegalArgumentException ex) {
+					// Implemented interfaces probably expose conflicting method signatures...
+					// Proceed with original target method.
+				}
+			}
+		}
+		return getShadowMatch(targetMethod, method);
+	}
+
 	private ShadowMatch getShadowMatch(Method targetMethod, Method originalMethod) {
 		// Avoid lock contention for known Methods through concurrent access...
 		ShadowMatch shadowMatch = this.shadowMatchCache.get(targetMethod);
@@ -434,9 +454,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			synchronized (this.shadowMatchCache) {
 				// Not found - now check again with full lock...
 				PointcutExpression fallbackExpression = null;
-				Method methodToMatch = targetMethod;
 				shadowMatch = this.shadowMatchCache.get(targetMethod);
 				if (shadowMatch == null) {
+					Method methodToMatch = targetMethod;
 					try {
 						try {
 							shadowMatch = obtainPointcutExpression().matchesMethodExecution(methodToMatch);
@@ -454,12 +474,16 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 								fallbackExpression = null;
 							}
 						}
-						if (shadowMatch == null && targetMethod != originalMethod) {
+						if (targetMethod != originalMethod && (shadowMatch == null ||
+								(shadowMatch.neverMatches() && Proxy.isProxyClass(targetMethod.getDeclaringClass())))) {
+							// Fall back to the plain original method in case of no resolvable match or a
+							// negative match on a proxy class (which doesn't carry any annotations on its
+							// redeclared methods).
 							methodToMatch = originalMethod;
 							try {
 								shadowMatch = obtainPointcutExpression().matchesMethodExecution(methodToMatch);
 							}
-							catch (ReflectionWorldException ex3) {
+							catch (ReflectionWorldException ex) {
 								// Could neither introspect the target class nor the proxy class ->
 								// let's try the original method's declaring class before we give up...
 								try {
@@ -468,7 +492,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 										shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
 									}
 								}
-								catch (ReflectionWorldException ex4) {
+								catch (ReflectionWorldException ex2) {
 									fallbackExpression = null;
 								}
 							}
@@ -540,6 +564,19 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			sb.append("<pointcut expression not set>");
 		}
 		return sb.toString();
+	}
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization, just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		// pointcutExpression will be initialized lazily by checkReadyToMatch()
+		this.shadowMatchCache = new ConcurrentHashMap<>(32);
 	}
 
 
@@ -635,20 +672,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			return BeanFactoryAnnotationUtils.isQualifierMatch(
 					this.expressionPattern::matches, advisedBeanName, beanFactory);
 		}
-	}
-
-
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-		// Rely on default serialization, just initialize state after deserialization.
-		ois.defaultReadObject();
-
-		// Initialize transient fields.
-		// pointcutExpression will be initialized lazily by checkReadyToMatch()
-		this.shadowMatchCache = new ConcurrentHashMap<>(32);
 	}
 
 

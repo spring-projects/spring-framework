@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@ import org.springframework.messaging.Message;
 
 /**
  * Convenient base class for {@link ReactorNettyCodec} implementations that need
- * to work with NIO {@link ByteBuffer}s.
+ * to work with NIO {@link ByteBuffer ByteBuffers}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <P> the message payload type
  */
 public abstract class AbstractNioBufferReactorNettyCodec<P> implements ReactorNettyCodec<P> {
 

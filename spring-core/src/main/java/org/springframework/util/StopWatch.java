@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,10 @@ public class StopWatch {
 
 	private final List<TaskInfo> taskList = new LinkedList<>();
 
-	/** Start time of the current task */
+	/** Start time of the current task. */
 	private long startTimeMillis;
 
-	/** Name of the current task */
+	/** Name of the current task. */
 	@Nullable
 	private String currentTaskName;
 
@@ -65,7 +65,7 @@ public class StopWatch {
 
 	private int taskCount;
 
-	/** Total running time */
+	/** Total running time. */
 	private long totalTimeMillis;
 
 
@@ -229,7 +229,7 @@ public class StopWatch {
 		if (!this.keepTaskList) {
 			throw new UnsupportedOperationException("Task info is not being kept!");
 		}
-		return this.taskList.toArray(new TaskInfo[this.taskList.size()]);
+		return this.taskList.toArray(new TaskInfo[0]);
 	}
 
 

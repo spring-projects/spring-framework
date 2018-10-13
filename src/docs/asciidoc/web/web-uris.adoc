@@ -1,0 +1,237 @@
+
+[[web-uricomponents]]
+= UriComponents
+[.small]#Spring MVC and Spring WebFlux#
+
+`UriComponentsBuilder` helps to build URI's from URI templates with variables, as the following example shows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	UriComponents uriComponents = UriComponentsBuilder
+			.fromUriString("http://example.com/hotels/{hotel}")  // <1>
+			.queryParam("q", "{q}")  // <2>
+			.encode() // <3>
+			.build(); // <4>
+
+	URI uri = uriComponents.expand("Westin", "123").toUri();  // <5>
+----
+<1> Static factory method with a URI template.
+<2> Add or replace URI components.
+<3> Request to have the URI template and URI variables encoded.
+<4> Build a `UriComponents`.
+<5> Expand variables and obtain the `URI`.
+====
+
+The preceding example can be consolidated into one chain and shortened with `buildAndExpand`,
+as the following example shows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	URI uri = UriComponentsBuilder
+			.fromUriString("http://example.com/hotels/{hotel}")
+			.queryParam("q", "{q}")
+			.encode()
+			.buildAndExpand("Westin", "123")
+			.toUri();
+----
+====
+
+You can shorten it further by going directly to a URI (which implies encoding),
+as the following example shows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	URI uri = UriComponentsBuilder
+			.fromUriString("http://example.com/hotels/{hotel}")
+			.queryParam("q", "{q}")
+			.build("Westin", "123");
+----
+====
+
+You shorter it further still with a full URI template, as the following example shows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	URI uri = UriComponentsBuilder
+			.fromUriString("http://example.com/hotels/{hotel}?q={q}")
+			.build("Westin", "123");
+----
+====
+
+
+
+[[web-uribuilder]]
+= UriBuilder
+[.small]#Spring MVC and Spring WebFlux#
+
+<<web-uricomponents,`UriComponentsBuilder`>> implements `UriBuilder`. You can create a `UriBuilder`, in turn,
+with a `UriBuilderFactory`. Together, `UriBuilderFactory` and `UriBuilder`
+provide a pluggable mechanism to build URIs from URI templates, based on shared
+configuration, such as a base URL, encoding preferences, and other details.
+
+You can configure `RestTemplate` and `WebClient` with a `UriBuilderFactory`
+to customize the preparation of URIs. `DefaultUriBuilderFactory` is a default
+implementation of `UriBuilderFactory` that uses `UriComponentsBuilder` internally and
+exposes shared configuration options.
+
+The following example shows how to configure a `RestTemplate`:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
+
+	String baseUrl = "http://example.org";
+	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
+	factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VARIABLES);
+
+	RestTemplate restTemplate = new RestTemplate();
+	restTemplate.setUriTemplateHandler(factory);
+----
+====
+
+The following example configures a `WebClient`:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
+
+	String baseUrl = "http://example.org";
+	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
+	factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VARIABLES);
+
+	WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
+----
+====
+
+In addition, you can also use `DefaultUriBuilderFactory` directly. It is similar to using
+`UriComponentsBuilder` but, instead of static factory methods, it is an actual instance
+that holds configuration and preferences, as the following example shows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	String baseUrl = "http://example.com";
+	DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(baseUrl);
+
+	URI uri = uriBuilderFactory.uriString("/hotels/{hotel}")
+			.queryParam("q", "{q}")
+			.build("Westin", "123");
+----
+====
+
+
+
+[[web-uri-encoding]]
+= URI Encoding
+[.small]#Spring MVC and Spring WebFlux#
+
+`UriComponentsBuilder` exposes encoding options at two levels:
+
+* {api-spring-framework}/web/util/UriComponentsBuilder.html#encode--[UriComponentsBuilder#encode()]:
+Pre-encodes the URI template first and then strictly encodes URI variables when expanded.
+* {api-spring-framework}/web/util/UriComponents.html#encode--[UriComponents#encode()]:
+Encodes URI components _after_ URI variables are expanded.
+
+Both options replace non-ASCII and illegal characters with escaped octets. However, the first option
+also replaces characters with reserved meaning that appear in URI variables.
+
+TIP: Consider ";", which is legal in a path but has reserved meaning. The first option replaces
+";" with "%3B" in URI variables but not in the URI template. By contrast, the second option never
+replaces ";", since it is a legal character in a path.
+
+For most cases, the first option is likely to give the expected result, because it treats URI
+variables as opaque data to be fully encoded, while option 2 is useful only if
+URI variables intentionally contain reserved characters.
+
+The following example uses the first option:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
+			.queryParam("q", "{q}")
+			.encode()
+			.buildAndExpand("New York", "foo+bar")
+			.toUri();
+
+	// Result is "/hotel%20list/New%20York?q=foo%2Bbar"
+----
+====
+
+You can shorten the preceding example by going directly to the URI (which implies encoding),
+as the following example shows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
+			.queryParam("q", "{q}")
+			.build("New York", "foo+bar")
+----
+====
+
+You can shorten it further still with a full URI template, as the following example shows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}?q={q}")
+			.build("New York", "foo+bar")
+----
+====
+
+The `WebClient` and the `RestTemplate` expand and encode URI templates internally through
+the `UriBuilderFactory` strategy. Both can be configured with a custom strategy.
+as the following example shows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	String baseUrl = "http://example.com";
+	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl)
+	factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VALUES);
+
+	// Customize the RestTemplate..
+	RestTemplate restTemplate = new RestTemplate();
+	restTemplate.setUriTemplateHandler(factory);
+
+	// Customize the WebClient..
+	WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
+----
+====
+
+The `DefaultUriBuilderFactory` implementation uses `UriComponentsBuilder` internally to
+expand and encode URI templates. As a factory, it provides a single place to configure
+the approach to encoding, based on one of the below encoding modes:
+
+* `TEMPLATE_AND_VALUES`: Uses `UriComponentsBuilder#encode()`, corresponding to
+the first option in the earlier list, to pre-encode the URI template and strictly encode URI variables when
+expanded.
+* `VALUES_ONLY`: Does not encode the URI template and, instead, applies strict encoding
+to URI variables through `UriUtils#encodeUriUriVariables` prior to expanding them into the
+template.
+* `URI_COMPONENTS`: Uses `UriComponents#encode()`, corresponding to the second option in the earlier list, to
+encode URI component value _after_ URI variables are expanded.
+* `NONE`: No encoding is applied.
+
+The `RestTemplate` is set to `EncodingMode.URI_COMPONENTS` for historic
+reasons and for backwards compatibility. The `WebClient` relies on the default value
+in `DefaultUriBuilderFactory`, which was changed from `EncodingMode.URI_COMPONENTS` in
+5.0.x to `EncodingMode.TEMPLATE_AND_VALUES` in 5.1.

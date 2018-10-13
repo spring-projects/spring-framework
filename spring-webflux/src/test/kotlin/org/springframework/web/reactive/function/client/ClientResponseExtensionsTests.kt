@@ -26,7 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.core.ParameterizedTypeReference
 
 /**
- * Mock object based tests for [ClientResponse] Kotlin extensions
+ * Mock object based tests for [ClientResponse] Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */

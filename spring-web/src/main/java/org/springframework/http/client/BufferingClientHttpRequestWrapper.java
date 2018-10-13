@@ -21,6 +21,7 @@ import java.net.URI;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -40,6 +41,7 @@ final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHtt
 
 
 	@Override
+	@Nullable
 	public HttpMethod getMethod() {
 		return this.request.getMethod();
 	}

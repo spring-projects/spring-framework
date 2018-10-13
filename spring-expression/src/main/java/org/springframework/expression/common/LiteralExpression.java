@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.lang.Nullable;
  */
 public class LiteralExpression implements Expression {
 
-	/** Fixed literal value of this expression */
+	/** Fixed literal value of this expression. */
 	private final String literalValue;
 
 
@@ -60,6 +60,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue();
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), expectedResultType);
@@ -71,6 +72,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(Object rootObject, @Nullable Class<T> desiredResultType) throws EvaluationException {
 		Object value = getValue(rootObject);
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), desiredResultType);
@@ -82,6 +84,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
@@ -95,6 +98,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(EvaluationContext context, Object rootObject, @Nullable Class<T> desiredResultType)
 			throws EvaluationException {
 

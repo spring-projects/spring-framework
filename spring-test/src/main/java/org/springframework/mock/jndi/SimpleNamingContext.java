@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,6 +209,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 	@Override
+	@Nullable
 	public Object addToEnvironment(String propName, Object propVal) {
 		return this.environment.put(propName, propVal);
 	}
@@ -296,7 +297,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	private static abstract class AbstractNamingEnumeration<T> implements NamingEnumeration<T> {
+	private abstract static class AbstractNamingEnumeration<T> implements NamingEnumeration<T> {
 
 		private Iterator<T> iterator;
 
@@ -356,7 +357,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	private static class NameClassPairEnumeration extends AbstractNamingEnumeration<NameClassPair> {
+	private static final class NameClassPairEnumeration extends AbstractNamingEnumeration<NameClassPair> {
 
 		private NameClassPairEnumeration(SimpleNamingContext context, String root) throws NamingException {
 			super(context, root);
@@ -369,7 +370,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	private static class BindingEnumeration extends AbstractNamingEnumeration<Binding> {
+	private static final class BindingEnumeration extends AbstractNamingEnumeration<Binding> {
 
 		private BindingEnumeration(SimpleNamingContext context, String root) throws NamingException {
 			super(context, root);

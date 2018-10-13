@@ -77,7 +77,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
 		this.port = SocketUtils.findAvailableTcpPort(61613);
 		this.responseChannel = new ExecutorSubscribableChannel();
@@ -100,19 +100,21 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	private void createAndStartRelay() throws InterruptedException {
-		this.relay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
-				this.responseChannel, new StubMessageChannel(), Arrays.asList("/queue/", "/topic/"));
+		StubMessageChannel channel = new StubMessageChannel();
+		List<String> prefixes = Arrays.asList("/queue/", "/topic/");
+		this.relay = new StompBrokerRelayMessageHandler(channel, this.responseChannel, channel, prefixes);
 		this.relay.setRelayPort(this.port);
 		this.relay.setApplicationEventPublisher(this.eventPublisher);
 		this.relay.setSystemHeartbeatReceiveInterval(0);
 		this.relay.setSystemHeartbeatSendInterval(0);
+		this.relay.setPreservePublishOrder(true);
 
 		this.relay.start();
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void stop() throws Exception {
 		try {
 			logger.debug("STOMP broker relay stats: " + this.relay.getStatsInfo());
 			this.relay.stop();
@@ -166,7 +168,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	@Test(expected = MessageDeliveryException.class)
 	public void messageDeliveryExceptionIfSystemSessionForwardFails() throws Exception {
-
 		logger.debug("Starting test messageDeliveryExceptionIfSystemSessionForwardFails()");
 
 		stopActiveMqBrokerAndAwait();
@@ -177,8 +178,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	@Test
-	public void brokerBecomingUnvailableTriggersErrorFrame() throws Exception {
-		logger.debug("Starting test brokerBecomingUnvailableTriggersErrorFrame()");
+	public void brokerBecomingUnavailableTriggersErrorFrame() throws Exception {
+		logger.debug("Starting test brokerBecomingUnavailableTriggersErrorFrame()");
 
 		String sess1 = "sess1";
 		MessageExchange connect = MessageExchangeBuilder.connect(sess1).build();
@@ -509,7 +510,9 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		@Override
 		protected boolean matchInternal(StompHeaderAccessor headers, Object payload) {
-			if (!this.subscriptionId.equals(headers.getSubscriptionId()) ||  !this.destination.equals(headers.getDestination())) {
+			if (!this.subscriptionId.equals(headers.getSubscriptionId()) ||
+					!this.destination.equals(headers.getDestination())) {
+
 				return false;
 			}
 			if (payload instanceof byte[] && this.payload instanceof byte[]) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
 /**
  * Undertow {@link WebSocketConnectionCallback} implementation that adapts and
  * delegates to a Spring {@link WebSocketHandler}.
- * 
+ *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -84,14 +84,14 @@ public class UndertowWebSocketHandlerAdapter extends AbstractReceiveListener {
 	private <T> WebSocketMessage toMessage(Type type, T message) {
 		if (Type.TEXT.equals(type)) {
 			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
-			return new WebSocketMessage(Type.TEXT, session.bufferFactory().wrap(bytes));
+			return new WebSocketMessage(Type.TEXT, this.session.bufferFactory().wrap(bytes));
 		}
 		else if (Type.BINARY.equals(type)) {
-			DataBuffer buffer = session.bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
+			DataBuffer buffer = this.session.bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
 			return new WebSocketMessage(Type.BINARY, buffer);
 		}
 		else if (Type.PONG.equals(type)) {
-			DataBuffer buffer = session.bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
+			DataBuffer buffer = this.session.bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
 			return new WebSocketMessage(Type.PONG, buffer);
 		}
 		else {

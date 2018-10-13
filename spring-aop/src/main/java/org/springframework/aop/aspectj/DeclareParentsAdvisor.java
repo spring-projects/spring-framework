@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
+import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.aop.support.DelegatePerTargetObjectIntroductionInterceptor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
@@ -34,11 +35,11 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
  */
 public class DeclareParentsAdvisor implements IntroductionAdvisor {
 
+	private final Advice advice;
+
 	private final Class<?> introducedInterface;
 
 	private final ClassFilter typePatternClassFilter;
-
-	private final Advice advice;
 
 
 	/**
@@ -48,8 +49,8 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	 * @param defaultImpl the default implementation class
 	 */
 	public DeclareParentsAdvisor(Class<?> interfaceType, String typePattern, Class<?> defaultImpl) {
-		this(interfaceType, typePattern, defaultImpl,
-			 new DelegatePerTargetObjectIntroductionInterceptor(defaultImpl, interfaceType));
+		this(interfaceType, typePattern,
+				new DelegatePerTargetObjectIntroductionInterceptor(defaultImpl, interfaceType));
 	}
 
 	/**
@@ -59,27 +60,24 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	 * @param delegateRef the delegate implementation object
 	 */
 	public DeclareParentsAdvisor(Class<?> interfaceType, String typePattern, Object delegateRef) {
-		this(interfaceType, typePattern, delegateRef.getClass(),
-			 new DelegatingIntroductionInterceptor(delegateRef));
+		this(interfaceType, typePattern, new DelegatingIntroductionInterceptor(delegateRef));
 	}
 
 	/**
 	 * Private constructor to share common code between impl-based delegate and reference-based delegate
-	 * (cannot use method such as init() to share common code, due the use of final fields)
+	 * (cannot use method such as init() to share common code, due the use of final fields).
 	 * @param interfaceType static field defining the introduction
 	 * @param typePattern type pattern the introduction is restricted to
-	 * @param implementationClass implementation class
-	 * @param advice delegation advice
+	 * @param interceptor the delegation advice as {@link IntroductionInterceptor}
 	 */
-	private DeclareParentsAdvisor(Class<?> interfaceType, String typePattern, Class<?> implementationClass, Advice advice) {
+	private DeclareParentsAdvisor(Class<?> interfaceType, String typePattern, IntroductionInterceptor interceptor) {
+		this.advice = interceptor;
 		this.introducedInterface = interfaceType;
-		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 
 		// Excludes methods implemented.
-		ClassFilter exclusion = clazz -> !(introducedInterface.isAssignableFrom(clazz));
-
+		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
+		ClassFilter exclusion = (clazz -> !this.introducedInterface.isAssignableFrom(clazz));
 		this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
-		this.advice = advice;
 	}
 
 

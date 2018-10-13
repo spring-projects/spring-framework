@@ -53,42 +53,49 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	//-------------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public String getXmlAsString(ResultSet rs, String columnName) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnName);
 		return (xmlObject != null ? xmlObject.getString() : null);
 	}
 
 	@Override
+	@Nullable
 	public String getXmlAsString(ResultSet rs, int columnIndex) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnIndex);
 		return (xmlObject != null ? xmlObject.getString() : null);
 	}
 
 	@Override
+	@Nullable
 	public InputStream getXmlAsBinaryStream(ResultSet rs, String columnName) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnName);
 		return (xmlObject != null ? xmlObject.getBinaryStream() : null);
 	}
 
 	@Override
+	@Nullable
 	public InputStream getXmlAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnIndex);
 		return (xmlObject != null ? xmlObject.getBinaryStream() : null);
 	}
 
 	@Override
+	@Nullable
 	public Reader getXmlAsCharacterStream(ResultSet rs, String columnName) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnName);
 		return (xmlObject != null ? xmlObject.getCharacterStream() : null);
 	}
 
 	@Override
+	@Nullable
 	public Reader getXmlAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnIndex);
 		return (xmlObject != null ? xmlObject.getCharacterStream() : null);
 	}
 
 	@Override
+	@Nullable
 	public Source getXmlAsSource(ResultSet rs, String columnName, @Nullable Class<? extends Source> sourceClass)
 			throws SQLException {
 
@@ -100,6 +107,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	}
 
 	@Override
+	@Nullable
 	public Source getXmlAsSource(ResultSet rs, int columnIndex, @Nullable Class<? extends Source> sourceClass)
 			throws SQLException {
 
@@ -169,7 +177,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	/**
 	 * Internal base class for {@link SqlXmlValue} implementations.
 	 */
-	private static abstract class AbstractJdbc4SqlXmlValue implements SqlXmlValue {
+	private abstract static class AbstractJdbc4SqlXmlValue implements SqlXmlValue {
 
 		@Nullable
 		private SQLXML xmlObject;

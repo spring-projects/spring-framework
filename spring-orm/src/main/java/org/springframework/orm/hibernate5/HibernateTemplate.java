@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
+import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -67,12 +68,14 @@ import org.springframework.util.ReflectionUtils;
  * always be configured as bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
- * <p><b>NOTE: Hibernate access code can also be coded in plain Hibernate style.
- * Hence, for newly started projects, consider adopting the standard Hibernate
- * style of coding data access objects instead, based on
- * {@link SessionFactory#getCurrentSession()}.
- * This HibernateTemplate primarily exists as a migration helper for Hibernate 3
- * based data access code, to benefit from bug fixes in Hibernate 5.x.</b>
+ * <p><b>NOTE: Hibernate access code can also be coded against the native Hibernate
+ * {@link Session}. Hence, for newly started projects, consider adopting the standard
+ * Hibernate style of coding against {@link SessionFactory#getCurrentSession()}.
+ * Alternatively, use {@link #execute(HibernateCallback)} with Java 8 lambda code blocks
+ * against the callback-provided {@code Session} which results in elegant code as well,
+ * decoupled from the Hibernate Session lifecycle. The remaining operations on this
+ * HibernateTemplate are deprecated in the meantime and primarily exist as a migration
+ * helper for older Hibernate 3.x/4.x data access code in existing applications.</b>
  *
  * @author Juergen Hoeller
  * @since 4.2
@@ -328,6 +331,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 
 	@Override
+	@Nullable
 	public <T> T execute(HibernateCallback<T> action) throws DataAccessException {
 		return doExecute(action, false);
 	}
@@ -453,11 +457,13 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	//-------------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public <T> T get(Class<T> entityClass, Serializable id) throws DataAccessException {
 		return get(entityClass, id, null);
 	}
 
 	@Override
+	@Nullable
 	public <T> T get(final Class<T> entityClass, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
@@ -472,11 +478,13 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
+	@Nullable
 	public Object get(String entityName, Serializable id) throws DataAccessException {
 		return get(entityName, id, null);
 	}
 
 	@Override
+	@Nullable
 	public Object get(final String entityName, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
@@ -817,131 +825,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 
 	//-------------------------------------------------------------------------
-	// Convenience finder methods for HQL strings
-	//-------------------------------------------------------------------------
-
-	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
-	public List<?> find(final String queryString, @Nullable final Object... values) throws DataAccessException {
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
-			prepareQuery(queryObject);
-			if (values != null) {
-				for (int i = 0; i < values.length; i++) {
-					queryObject.setParameter(i, values[i]);
-				}
-			}
-			return queryObject.list();
-		}));
-	}
-
-	@Override
-	public List<?> findByNamedParam(String queryString, String paramName, Object value)
-			throws DataAccessException {
-
-		return findByNamedParam(queryString, new String[] {paramName}, new Object[] {value});
-	}
-
-	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
-	public List<?> findByNamedParam(final String queryString, final String[] paramNames, final Object[] values)
-			throws DataAccessException {
-
-		if (paramNames.length != values.length) {
-			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
-		}
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
-			prepareQuery(queryObject);
-			for (int i = 0; i < values.length; i++) {
-				applyNamedParameterToQuery(queryObject, paramNames[i], values[i]);
-			}
-			return queryObject.list();
-		}));
-	}
-
-	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
-	public List<?> findByValueBean(final String queryString, final Object valueBean)
-			throws DataAccessException {
-
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
-			prepareQuery(queryObject);
-			queryObject.setProperties(valueBean);
-			return queryObject.list();
-		}));
-	}
-
-
-	//-------------------------------------------------------------------------
-	// Convenience finder methods for named queries
-	//-------------------------------------------------------------------------
-
-	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
-	public List<?> findByNamedQuery(final String queryName, @Nullable final Object... values) throws DataAccessException {
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
-			prepareQuery(queryObject);
-			if (values != null) {
-				for (int i = 0; i < values.length; i++) {
-					queryObject.setParameter(i, values[i]);
-				}
-			}
-			return queryObject.list();
-		}));
-	}
-
-	@Override
-	public List<?> findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
-			throws DataAccessException {
-
-		return findByNamedQueryAndNamedParam(queryName, new String[] {paramName}, new Object[] {value});
-	}
-
-	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
-	public List<?> findByNamedQueryAndNamedParam(
-			final String queryName, @Nullable final String[] paramNames, @Nullable final Object[] values)
-			throws DataAccessException {
-
-		if (values != null && (paramNames == null || paramNames.length != values.length)) {
-			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
-		}
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = (org.hibernate.Query)
-					nonNull(ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
-			prepareQuery(queryObject);
-			if (values != null) {
-				for (int i = 0; i < values.length; i++) {
-					applyNamedParameterToQuery(queryObject, paramNames[i], values[i]);
-				}
-			}
-			return queryObject.list();
-		}));
-	}
-
-	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
-	public List<?> findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
-			throws DataAccessException {
-
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
-			prepareQuery(queryObject);
-			queryObject.setProperties(valueBean);
-			return queryObject.list();
-		}));
-	}
-
-
-	//-------------------------------------------------------------------------
 	// Convenience finder methods for detached criteria
 	//-------------------------------------------------------------------------
 
@@ -1008,9 +891,143 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 
 	//-------------------------------------------------------------------------
+	// Convenience finder methods for HQL strings
+	//-------------------------------------------------------------------------
+
+	@Deprecated
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+	public List<?> find(final String queryString, @Nullable final Object... values) throws DataAccessException {
+		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+			org.hibernate.Query queryObject = queryObject(
+					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
+			prepareQuery(queryObject);
+			if (values != null) {
+				for (int i = 0; i < values.length; i++) {
+					queryObject.setParameter(i, values[i]);
+				}
+			}
+			return queryObject.list();
+		}));
+	}
+
+	@Deprecated
+	@Override
+	public List<?> findByNamedParam(String queryString, String paramName, Object value)
+			throws DataAccessException {
+
+		return findByNamedParam(queryString, new String[] {paramName}, new Object[] {value});
+	}
+
+	@Deprecated
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+	public List<?> findByNamedParam(final String queryString, final String[] paramNames, final Object[] values)
+			throws DataAccessException {
+
+		if (paramNames.length != values.length) {
+			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
+		}
+		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+			org.hibernate.Query queryObject = queryObject(
+					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
+			prepareQuery(queryObject);
+			for (int i = 0; i < values.length; i++) {
+				applyNamedParameterToQuery(queryObject, paramNames[i], values[i]);
+			}
+			return queryObject.list();
+		}));
+	}
+
+	@Deprecated
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+	public List<?> findByValueBean(final String queryString, final Object valueBean)
+			throws DataAccessException {
+
+		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+			org.hibernate.Query queryObject = queryObject(
+					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
+			prepareQuery(queryObject);
+			queryObject.setProperties(valueBean);
+			return queryObject.list();
+		}));
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Convenience finder methods for named queries
+	//-------------------------------------------------------------------------
+
+	@Deprecated
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+	public List<?> findByNamedQuery(final String queryName, @Nullable final Object... values) throws DataAccessException {
+		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+			org.hibernate.Query queryObject = queryObject(
+					ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
+			prepareQuery(queryObject);
+			if (values != null) {
+				for (int i = 0; i < values.length; i++) {
+					queryObject.setParameter(i, values[i]);
+				}
+			}
+			return queryObject.list();
+		}));
+	}
+
+	@Deprecated
+	@Override
+	public List<?> findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
+			throws DataAccessException {
+
+		return findByNamedQueryAndNamedParam(queryName, new String[] {paramName}, new Object[] {value});
+	}
+
+	@Deprecated
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+	public List<?> findByNamedQueryAndNamedParam(
+			final String queryName, @Nullable final String[] paramNames, @Nullable final Object[] values)
+			throws DataAccessException {
+
+		if (values != null && (paramNames == null || paramNames.length != values.length)) {
+			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
+		}
+		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+			org.hibernate.Query queryObject = (org.hibernate.Query)
+					nonNull(ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
+			prepareQuery(queryObject);
+			if (values != null) {
+				for (int i = 0; i < values.length; i++) {
+					applyNamedParameterToQuery(queryObject, paramNames[i], values[i]);
+				}
+			}
+			return queryObject.list();
+		}));
+	}
+
+	@Deprecated
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+	public List<?> findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
+			throws DataAccessException {
+
+		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+			org.hibernate.Query queryObject = queryObject(
+					ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
+			prepareQuery(queryObject);
+			queryObject.setProperties(valueBean);
+			return queryObject.list();
+		}));
+	}
+
+
+	//-------------------------------------------------------------------------
 	// Convenience query methods for iteration and bulk updates/deletes
 	//-------------------------------------------------------------------------
 
+	@Deprecated
 	@Override
 	@SuppressWarnings({"rawtypes", "deprecation"})
 	public Iterator<?> iterate(final String queryString, @Nullable final Object... values) throws DataAccessException {
@@ -1027,6 +1044,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}));
 	}
 
+	@Deprecated
 	@Override
 	public void closeIterator(Iterator<?> it) throws DataAccessException {
 		try {
@@ -1037,6 +1055,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 	}
 
+	@Deprecated
 	@Override
 	@SuppressWarnings({"rawtypes", "deprecation"})
 	public int bulkUpdate(final String queryString, @Nullable final Object... values) throws DataAccessException {
@@ -1079,6 +1098,34 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	/**
+	 * Prepare the given Criteria object, applying cache settings and/or
+	 * a transaction timeout.
+	 * @param criteria the Criteria object to prepare
+	 * @see #setCacheQueries
+	 * @see #setQueryCacheRegion
+	 */
+	protected void prepareCriteria(Criteria criteria) {
+		if (isCacheQueries()) {
+			criteria.setCacheable(true);
+			if (getQueryCacheRegion() != null) {
+				criteria.setCacheRegion(getQueryCacheRegion());
+			}
+		}
+		if (getFetchSize() > 0) {
+			criteria.setFetchSize(getFetchSize());
+		}
+		if (getMaxResults() > 0) {
+			criteria.setMaxResults(getMaxResults());
+		}
+
+		ResourceHolderSupport sessionHolder =
+				(ResourceHolderSupport) TransactionSynchronizationManager.getResource(obtainSessionFactory());
+		if (sessionHolder != null && sessionHolder.hasTimeout()) {
+			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
+		}
+	}
+
+	/**
 	 * Prepare the given Query object, applying cache settings and/or
 	 * a transaction timeout.
 	 * @param queryObject the Query object to prepare
@@ -1100,38 +1147,10 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			queryObject.setMaxResults(getMaxResults());
 		}
 
-		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(obtainSessionFactory());
+		ResourceHolderSupport sessionHolder =
+				(ResourceHolderSupport) TransactionSynchronizationManager.getResource(obtainSessionFactory());
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			queryObject.setTimeout(sessionHolder.getTimeToLiveInSeconds());
-		}
-	}
-
-	/**
-	 * Prepare the given Criteria object, applying cache settings and/or
-	 * a transaction timeout.
-	 * @param criteria the Criteria object to prepare
-	 * @see #setCacheQueries
-	 * @see #setQueryCacheRegion
-	 */
-	protected void prepareCriteria(Criteria criteria) {
-		if (isCacheQueries()) {
-			criteria.setCacheable(true);
-			if (getQueryCacheRegion() != null) {
-				criteria.setCacheRegion(getQueryCacheRegion());
-			}
-		}
-		if (getFetchSize() > 0) {
-			criteria.setFetchSize(getFetchSize());
-		}
-		if (getMaxResults() > 0) {
-			criteria.setMaxResults(getMaxResults());
-		}
-
-		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(obtainSessionFactory());
-		if (sessionHolder != null && sessionHolder.hasTimeout()) {
-			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
 	}
 
@@ -1142,6 +1161,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @param value the value of the parameter
 	 * @throws HibernateException if thrown by the Query object
 	 */
+	@Deprecated
 	@SuppressWarnings({"rawtypes", "deprecation"})
 	protected void applyNamedParameterToQuery(org.hibernate.Query queryObject, String paramName, Object value)
 			throws HibernateException {
@@ -1157,16 +1177,16 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 	}
 
-
-	private static <T> T nonNull(@Nullable T result) {
-		Assert.state(result != null, "No result");
-		return result;
-	}
-
+	@Deprecated
 	@SuppressWarnings({"rawtypes", "deprecation"})
 	private static org.hibernate.Query queryObject(@Nullable Object result) {
 		Assert.state(result != null, "No Hibernate Query");
 		return (org.hibernate.Query) result;
+	}
+
+	private static <T> T nonNull(@Nullable T result) {
+		Assert.state(result != null, "No result");
+		return result;
 	}
 
 
@@ -1208,11 +1228,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 				// If return value is a Query or Criteria, apply transaction timeout.
 				// Applies to createQuery, getNamedQuery, createCriteria.
-				if (retVal instanceof org.hibernate.Query) {
-					prepareQuery(((org.hibernate.Query) retVal));
-				}
 				if (retVal instanceof Criteria) {
 					prepareCriteria(((Criteria) retVal));
+				}
+				else if (retVal instanceof org.hibernate.Query) {
+					prepareQuery(((org.hibernate.Query) retVal));
 				}
 
 				return retVal;

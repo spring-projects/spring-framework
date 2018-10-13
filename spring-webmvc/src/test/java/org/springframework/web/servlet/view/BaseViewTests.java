@@ -293,7 +293,9 @@ public class BaseViewTests {
 	private static class ConcreteView extends AbstractView {
 		// Do-nothing concrete subclass
 		@Override
-		protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
+		protected void renderMergedOutputModel(Map<String, Object> model,
+				HttpServletRequest request, HttpServletResponse response)
+
 			throws ServletException, IOException {
 			throw new UnsupportedOperationException();
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 
 import org.junit.Ignore;
@@ -121,11 +123,24 @@ public class ResourceTests {
 
 	@Test
 	public void testFileSystemResource() throws IOException {
-		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
+		String file = getClass().getResource("Resource.class").getFile();
+		Resource resource = new FileSystemResource(file);
 		doTestResource(resource);
-		assertEquals(new FileSystemResource(getClass().getResource("Resource.class").getFile()), resource);
-		Resource resource2 = new FileSystemResource("core/io/Resource.class");
-		assertEquals(resource2, new FileSystemResource("core/../core/io/./Resource.class"));
+		assertEquals(new FileSystemResource(file), resource);
+	}
+
+	@Test
+	public void testFileSystemResourceWithFilePath() throws Exception {
+		Path filePath = Paths.get(getClass().getResource("Resource.class").toURI());
+		Resource resource = new FileSystemResource(filePath);
+		doTestResource(resource);
+		assertEquals(new FileSystemResource(filePath), resource);
+	}
+
+	@Test
+	public void testFileSystemResourceWithPlainPath() {
+		Resource resource = new FileSystemResource("core/io/Resource.class");
+		assertEquals(resource, new FileSystemResource("core/../core/io/./Resource.class"));
 	}
 
 	@Test
@@ -145,23 +160,52 @@ public class ResourceTests {
 	private void doTestResource(Resource resource) throws IOException {
 		assertEquals("Resource.class", resource.getFilename());
 		assertTrue(resource.getURL().getFile().endsWith("Resource.class"));
+		assertTrue(resource.exists());
+		assertTrue(resource.isReadable());
+		assertTrue(resource.contentLength() > 0);
+		assertTrue(resource.lastModified() > 0);
 
 		Resource relative1 = resource.createRelative("ClassPathResource.class");
 		assertEquals("ClassPathResource.class", relative1.getFilename());
 		assertTrue(relative1.getURL().getFile().endsWith("ClassPathResource.class"));
 		assertTrue(relative1.exists());
+		assertTrue(relative1.isReadable());
+		assertTrue(relative1.contentLength() > 0);
+		assertTrue(relative1.lastModified() > 0);
 
 		Resource relative2 = resource.createRelative("support/ResourcePatternResolver.class");
 		assertEquals("ResourcePatternResolver.class", relative2.getFilename());
 		assertTrue(relative2.getURL().getFile().endsWith("ResourcePatternResolver.class"));
 		assertTrue(relative2.exists());
+		assertTrue(relative2.isReadable());
+		assertTrue(relative2.contentLength() > 0);
+		assertTrue(relative2.lastModified() > 0);
 
-		/*
 		Resource relative3 = resource.createRelative("../SpringVersion.class");
 		assertEquals("SpringVersion.class", relative3.getFilename());
 		assertTrue(relative3.getURL().getFile().endsWith("SpringVersion.class"));
 		assertTrue(relative3.exists());
-		*/
+		assertTrue(relative3.isReadable());
+		assertTrue(relative3.contentLength() > 0);
+		assertTrue(relative3.lastModified() > 0);
+
+		Resource relative4 = resource.createRelative("X.class");
+		assertFalse(relative4.exists());
+		assertFalse(relative4.isReadable());
+		try {
+			relative4.contentLength();
+			fail("Should have thrown FileNotFoundException");
+		}
+		catch (FileNotFoundException ex) {
+			// expected
+		}
+		try {
+			relative4.lastModified();
+			fail("Should have thrown FileNotFoundException");
+		}
+		catch (FileNotFoundException ex) {
+			// expected
+		}
 	}
 
 	@Test
@@ -201,8 +245,8 @@ public class ResourceTests {
 				return name;
 			}
 			@Override
-			public InputStream getInputStream() {
-				return null;
+			public InputStream getInputStream() throws IOException {
+				throw new FileNotFoundException();
 			}
 		};
 
@@ -211,21 +255,21 @@ public class ResourceTests {
 			fail("FileNotFoundException should have been thrown");
 		}
 		catch (FileNotFoundException ex) {
-			assertTrue(ex.getMessage().indexOf(name) != -1);
+			assertTrue(ex.getMessage().contains(name));
 		}
 		try {
 			resource.getFile();
 			fail("FileNotFoundException should have been thrown");
 		}
 		catch (FileNotFoundException ex) {
-			assertTrue(ex.getMessage().indexOf(name) != -1);
+			assertTrue(ex.getMessage().contains(name));
 		}
 		try {
 			resource.createRelative("/testing");
 			fail("FileNotFoundException should have been thrown");
 		}
 		catch (FileNotFoundException ex) {
-			assertTrue(ex.getMessage().indexOf(name) != -1);
+			assertTrue(ex.getMessage().contains(name));
 		}
 
 		assertThat(resource.getFilename(), nullValue());
@@ -235,19 +279,19 @@ public class ResourceTests {
 	public void testContentLength() throws IOException {
 		AbstractResource resource = new AbstractResource() {
 			@Override
-			public InputStream getInputStream() throws IOException {
+			public InputStream getInputStream() {
 				return new ByteArrayInputStream(new byte[] { 'a', 'b', 'c' });
 			}
 			@Override
 			public String getDescription() {
-				return null;
+				return "";
 			}
 		};
 		assertThat(resource.contentLength(), is(3L));
 	}
 
 	@Test
-	public void testGetReadableByteChannel() throws IOException {
+	public void testReadableChannel() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
 		ReadableByteChannel channel = null;
 		try {
@@ -262,6 +306,26 @@ public class ResourceTests {
 				channel.close();
 			}
 		}
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void testInputStreamNotFoundOnFileSystemResource() throws IOException {
+		new FileSystemResource(getClass().getResource("Resource.class").getFile()).createRelative("X").getInputStream();
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void testReadableChannelNotFoundOnFileSystemResource() throws IOException {
+		new FileSystemResource(getClass().getResource("Resource.class").getFile()).createRelative("X").readableChannel();
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void testInputStreamNotFoundOnClassPathResource() throws IOException {
+		new ClassPathResource("Resource.class", getClass()).createRelative("X").getInputStream();
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void testReadableChannelNotFoundOnClassPathResource() throws IOException {
+		new ClassPathResource("Resource.class", getClass()).createRelative("X").readableChannel();
 	}
 
 }

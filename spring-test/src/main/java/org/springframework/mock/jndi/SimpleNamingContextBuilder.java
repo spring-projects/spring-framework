@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder {
 
-	/** An instance of this class bound to JNDI */
+	/** An instance of this class bound to JNDI. */
 	@Nullable
 	private static volatile SimpleNamingContextBuilder activated;
 
@@ -196,6 +196,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 * @see SimpleNamingContext
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public InitialContextFactory createInitialContextFactory(@Nullable Hashtable<?,?> environment) {
 		if (activated == null && environment != null) {
 			Object icf = environment.get(Context.INITIAL_CONTEXT_FACTORY);
@@ -225,13 +226,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 		}
 
 		// Default case...
-		return new InitialContextFactory() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public Context getInitialContext(Hashtable<?,?> environment) {
-				return new SimpleNamingContext("", boundObjects, (Hashtable<String, Object>) environment);
-			}
-		};
+		return environment1 -> new SimpleNamingContext("", this.boundObjects, (Hashtable<String, Object>) environment1);
 	}
 
 }

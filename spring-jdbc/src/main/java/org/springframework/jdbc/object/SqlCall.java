@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,8 +83,8 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Create a new SqlCall object with SQL, but without parameters.
 	 * Must add parameters or settle with none.
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
+	 * @param ds the DataSource to obtain connections from
+	 * @param sql the SQL to execute
 	 */
 	public SqlCall(DataSource ds, String sql) {
 		setDataSource(ds);
@@ -103,7 +103,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Return whether this call is for a function.
 	 */
 	public boolean isFunction() {
-		return function;
+		return this.function;
 	}
 
 	/**
@@ -117,7 +117,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Return whether the SQL can be used as is.
 	 */
 	public boolean isSqlReadyForUse() {
-		return sqlReadyForUse;
+		return this.sqlReadyForUse;
 	}
 
 

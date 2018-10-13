@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -149,7 +149,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 */
 	public void register(Class<?>... annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
-		this.annotatedClasses.addAll(Arrays.asList(annotatedClasses));
+		Collections.addAll(this.annotatedClasses, annotatedClasses);
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 */
 	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
-		this.basePackages.addAll(Arrays.asList(basePackages));
+		Collections.addAll(this.basePackages, basePackages);
 	}
 
 
@@ -209,19 +209,19 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 		}
 
 		if (!this.annotatedClasses.isEmpty()) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Registering annotated classes: [" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Registering annotated classes: [" +
 						StringUtils.collectionToCommaDelimitedString(this.annotatedClasses) + "]");
 			}
-			reader.register(this.annotatedClasses.toArray(new Class<?>[this.annotatedClasses.size()]));
+			reader.register(ClassUtils.toClassArray(this.annotatedClasses));
 		}
 
 		if (!this.basePackages.isEmpty()) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Scanning base packages: [" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Scanning base packages: [" +
 						StringUtils.collectionToCommaDelimitedString(this.basePackages) + "]");
 			}
-			scanner.scan(this.basePackages.toArray(new String[this.basePackages.size()]));
+			scanner.scan(StringUtils.toStringArray(this.basePackages));
 		}
 
 		String[] configLocations = getConfigLocations();
@@ -229,24 +229,19 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 			for (String configLocation : configLocations) {
 				try {
 					Class<?> clazz = ClassUtils.forName(configLocation, getClassLoader());
-					if (logger.isInfoEnabled()) {
-						logger.info("Successfully resolved class for [" + configLocation + "]");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Registering [" + configLocation + "]");
 					}
 					reader.register(clazz);
 				}
 				catch (ClassNotFoundException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Could not load class for config location [" + configLocation +
+					if (logger.isTraceEnabled()) {
+						logger.trace("Could not load class for config location [" + configLocation +
 								"] - trying package scan. " + ex);
 					}
 					int count = scanner.scan(configLocation);
-					if (logger.isInfoEnabled()) {
-						if (count == 0) {
-							logger.info("No annotated classes found for specified class/package [" + configLocation + "]");
-						}
-						else {
-							logger.info("Found " + count + " annotated classes in package [" + configLocation + "]");
-						}
+					if (count == 0 && logger.isDebugEnabled()) {
+						logger.debug("No annotated classes found for specified class/package [" + configLocation + "]");
 					}
 				}
 			}

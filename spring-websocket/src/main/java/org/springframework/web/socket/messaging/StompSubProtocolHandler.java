@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 */
 	public static final String CONNECTED_USER_HEADER = "user-name";
 
+	private static final String[] SUPPORTED_VERSIONS = {"1.2", "1.1", "1.0"};
+
 	private static final Log logger = LogFactory.getLog(StompSubProtocolHandler.class);
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
@@ -155,7 +157,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	/**
-	 * Configure a {@link StompEncoder} for encoding STOMP frames
+	 * Configure a {@link StompEncoder} for encoding STOMP frames.
 	 * @since 4.3.5
 	 */
 	public void setEncoder(StompEncoder encoder) {
@@ -163,7 +165,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	/**
-	 * Configure a {@link StompDecoder} for decoding STOMP frames
+	 * Configure a {@link StompDecoder} for decoding STOMP frames.
 	 * @since 4.3.5
 	 */
 	public void setDecoder(StompDecoder decoder) {
@@ -268,11 +270,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
 				}
 
-				boolean isConnect = StompCommand.CONNECT.equals(headerAccessor.getCommand());
+				StompCommand command = headerAccessor.getCommand();
+				boolean isConnect = StompCommand.CONNECT.equals(command);
 				if (isConnect) {
 					this.stats.incrementConnectCount();
 				}
-				else if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
+				else if (StompCommand.DISCONNECT.equals(command)) {
 					this.stats.incrementDisconnectCount();
 				}
 
@@ -292,10 +295,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 							if (isConnect) {
 								publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
 							}
-							else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
+							else if (StompCommand.SUBSCRIBE.equals(command)) {
 								publishEvent(this.eventPublisher, new SessionSubscribeEvent(this, message, user));
 							}
-							else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
+							else if (StompCommand.UNSUBSCRIBE.equals(command)) {
 								publishEvent(this.eventPublisher, new SessionUnsubscribeEvent(this, message, user));
 							}
 						}
@@ -523,15 +526,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 		if (connectHeaders != null) {
 			Set<String> acceptVersions = connectHeaders.getAcceptVersion();
-			if (acceptVersions.contains("1.2")) {
-				connectedHeaders.setVersion("1.2");
-			}
-			else if (acceptVersions.contains("1.1")) {
-				connectedHeaders.setVersion("1.1");
-			}
-			else if (!acceptVersions.isEmpty()) {
-				throw new IllegalArgumentException("Unsupported STOMP version '" + acceptVersions + "'");
-			}
+			connectedHeaders.setVersion(
+					Arrays.stream(SUPPORTED_VERSIONS)
+							.filter(acceptVersions::contains)
+							.findAny()
+							.orElseThrow(() -> new IllegalArgumentException(
+									"Unsupported STOMP version '" + acceptVersions + "'")));
 		}
 
 		long[] heartbeat = (long[]) connectAckHeaders.getHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER);
@@ -583,6 +583,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	@Override
+	@Nullable
 	public String resolveSessionId(Message<?> message) {
 		return SimpMessageHeaderAccessor.getSessionId(message.getHeaders());
 	}

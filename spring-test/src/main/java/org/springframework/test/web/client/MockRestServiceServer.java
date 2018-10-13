@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
@@ -63,7 +64,7 @@ import org.springframework.web.client.support.RestGatewaySupport;
  * @since 3.2
  */
 @SuppressWarnings("deprecation")
-public class MockRestServiceServer {
+public final class MockRestServiceServer {
 
 	private final RequestExpectationManager expectationManager;
 
@@ -92,7 +93,7 @@ public class MockRestServiceServer {
 	}
 
 	/**
-	 * An alternative to {@link #expect(RequestMatcher)} with an indication how
+	 * An alternative to {@link #expect(RequestMatcher)} that also indicates how
 	 * many times the request is expected to be executed.
 	 * <p>When request expectations have an expected count greater than one, only
 	 * the first execution is expected to match the order of declaration. Subsequent
@@ -202,6 +203,14 @@ public class MockRestServiceServer {
 		MockRestServiceServerBuilder ignoreExpectOrder(boolean ignoreExpectOrder);
 
 		/**
+		 * Use the {@link BufferingClientHttpRequestFactory} wrapper to buffer
+		 * the input and output streams, and for example, allow multiple reads
+		 * of the response body.
+		 * @since 5.0.5
+		 */
+		MockRestServiceServerBuilder bufferContent();
+
+		/**
 		 * Build the {@code MockRestServiceServer} and set up the underlying
 		 * {@code RestTemplate} or {@code AsyncRestTemplate} with a
 		 * {@link ClientHttpRequestFactory} that creates mock requests.
@@ -226,6 +235,9 @@ public class MockRestServiceServer {
 
 		private boolean ignoreExpectOrder;
 
+		private boolean bufferContent;
+
+
 		public DefaultBuilder(RestTemplate restTemplate) {
 			Assert.notNull(restTemplate, "RestTemplate must not be null");
 			this.restTemplate = restTemplate;
@@ -245,6 +257,12 @@ public class MockRestServiceServer {
 		}
 
 		@Override
+		public MockRestServiceServerBuilder bufferContent() {
+			this.bufferContent = true;
+			return this;
+		}
+
+		@Override
 		public MockRestServiceServer build() {
 			if (this.ignoreExpectOrder) {
 				return build(new UnorderedRequestExpectationManager());
@@ -259,7 +277,12 @@ public class MockRestServiceServer {
 			MockRestServiceServer server = new MockRestServiceServer(manager);
 			MockClientHttpRequestFactory factory = server.new MockClientHttpRequestFactory();
 			if (this.restTemplate != null) {
-				this.restTemplate.setRequestFactory(factory);
+				if (this.bufferContent) {
+					this.restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(factory));
+				}
+				else {
+					this.restTemplate.setRequestFactory(factory);
+				}
 			}
 			if (this.asyncRestTemplate != null) {
 				this.asyncRestTemplate.setAsyncRequestFactory(factory);

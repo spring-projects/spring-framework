@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,14 @@
 package org.springframework.web.reactive.result;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapter;
@@ -47,6 +49,8 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 
 	private static final MediaType MEDIA_TYPE_APPLICATION_ALL = new MediaType("application");
 
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final RequestedContentTypeResolver contentTypeResolver;
 
@@ -116,6 +120,14 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	protected MediaType selectMediaType(ServerWebExchange exchange,
 			Supplier<List<MediaType>> producibleTypesSupplier) {
 
+		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
+		if (contentType != null && contentType.isConcrete()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(exchange.getLogPrefix() + "Found 'Content-Type:" + contentType + "' in response");
+			}
+			return contentType;
+		}
+
 		List<MediaType> acceptableTypes = getAcceptableTypes(exchange);
 		List<MediaType> producibleTypes = getProducibleTypes(exchange, producibleTypesSupplier);
 
@@ -131,21 +143,34 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 		List<MediaType> result = new ArrayList<>(compatibleMediaTypes);
 		MediaType.sortBySpecificityAndQuality(result);
 
+		MediaType selected = null;
 		for (MediaType mediaType : result) {
 			if (mediaType.isConcrete()) {
-				return mediaType;
+				selected = mediaType;
+				break;
 			}
 			else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION_ALL)) {
-				return MediaType.APPLICATION_OCTET_STREAM;
+				selected = MediaType.APPLICATION_OCTET_STREAM;
+				break;
 			}
 		}
 
-		return null;
+		if (selected != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using '" + selected + "' given " +
+						acceptableTypes + " and supported " + producibleTypes);
+			}
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug(exchange.getLogPrefix() +
+					"No match for " + acceptableTypes + ", supported: " + producibleTypes);
+		}
+
+		return selected;
 	}
 
 	private List<MediaType> getAcceptableTypes(ServerWebExchange exchange) {
-		List<MediaType> mediaTypes = getContentTypeResolver().resolveMediaTypes(exchange);
-		return (mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes);
+		return getContentTypeResolver().resolveMediaTypes(exchange);
 	}
 
 	@SuppressWarnings("unchecked")

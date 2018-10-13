@@ -260,20 +260,26 @@ public class FreeMarkerMacroTests {
 	@Test
 	public void testForm16() throws Exception {
 		String output = getMacroOutput("FORM16");
-		assertTrue("Wrong output: " + output, output.startsWith("<input type=\"hidden\" name=\"_jedi\" value=\"on\"/>"));
-		assertTrue("Wrong output: " + output, output.contains("<input type=\"checkbox\" id=\"jedi\" name=\"jedi\" checked=\"checked\" />"));
+		assertTrue("Wrong output: " + output, output.startsWith(
+				"<input type=\"hidden\" name=\"_jedi\" value=\"on\"/>"));
+		assertTrue("Wrong output: " + output, output.contains(
+				"<input type=\"checkbox\" id=\"jedi\" name=\"jedi\" checked=\"checked\" />"));
 	}
 
 	@Test
 	public void testForm17() throws Exception {
-		assertEquals("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\"     >", getMacroOutput("FORM17"));
+		assertEquals(
+				"<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\"     >",
+				getMacroOutput("FORM17"));
 	}
 
 	@Test
 	public void testForm18() throws Exception {
 		String output = getMacroOutput("FORM18");
-		assertTrue("Wrong output: " + output, output.startsWith("<input type=\"hidden\" name=\"_spouses[0].jedi\" value=\"on\"/>"));
-		assertTrue("Wrong output: " + output, output.contains("<input type=\"checkbox\" id=\"spouses0.jedi\" name=\"spouses[0].jedi\" checked=\"checked\" />"));
+		assertTrue("Wrong output: " + output, output.startsWith(
+				"<input type=\"hidden\" name=\"_spouses[0].jedi\" value=\"on\"/>"));
+		assertTrue("Wrong output: " + output, output.contains(
+				"<input type=\"checkbox\" id=\"spouses0.jedi\" name=\"spouses[0].jedi\" checked=\"checked\" />"));
 	}
 
 

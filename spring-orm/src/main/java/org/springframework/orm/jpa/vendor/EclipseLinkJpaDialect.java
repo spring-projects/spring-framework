@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ import org.springframework.transaction.TransactionException;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Eclipse
- * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.4.
+ * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.7;
+ * backwards-compatible with EclipseLink 2.5 and 2.6 at runtime.
  *
  * <p>By default, this class acquires an early EclipseLink transaction with an early
  * JDBC Connection for non-read-only transactions. This allows for mixing JDBC and
@@ -72,6 +73,7 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 
 	@Override
+	@Nullable
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
@@ -128,10 +130,6 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 				this.connection = this.entityManager.unwrap(Connection.class);
 			}
 			return this.connection;
-		}
-
-		@Override
-		public void releaseConnection(Connection con) {
 		}
 	}
 

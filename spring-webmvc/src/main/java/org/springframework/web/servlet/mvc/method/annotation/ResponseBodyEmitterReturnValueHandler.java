@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.function.Consumer;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -61,9 +57,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	private static final Log logger = LogFactory.getLog(ResponseBodyEmitterReturnValueHandler.class);
-
-
 	private final List<HttpMessageConverter<?>> messageConverters;
 
 	private final ReactiveTypeHandler reactiveHandler;
@@ -83,17 +76,14 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 	/**
 	 * Complete constructor with pluggable "reactive" type support.
-	 *
 	 * @param messageConverters converters to write emitted objects with
 	 * @param reactiveRegistry for reactive return value type support
 	 * @param executor for blocking I/O writes of items emitted from reactive types
 	 * @param manager for detecting streaming media types
-	 *
 	 * @since 5.0
 	 */
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters,
-			ReactiveAdapterRegistry reactiveRegistry, TaskExecutor executor,
-			ContentNegotiationManager manager) {
+			ReactiveAdapterRegistry reactiveRegistry, TaskExecutor executor, ContentNegotiationManager manager) {
 
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.messageConverters = messageConverters;
@@ -103,16 +93,16 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-
 		Class<?> bodyType = ResponseEntity.class.isAssignableFrom(returnType.getParameterType()) ?
-				ResolvableType.forMethodParameter(returnType).getGeneric(0).resolve() :
+				ResolvableType.forMethodParameter(returnType).getGeneric().resolve() :
 				returnType.getParameterType();
 
-		return bodyType != null && (ResponseBodyEmitter.class.isAssignableFrom(bodyType) ||
-				this.reactiveHandler.isReactiveType(bodyType));
+		return (bodyType != null && (ResponseBodyEmitter.class.isAssignableFrom(bodyType) ||
+				this.reactiveHandler.isReactiveType(bodyType)));
 	}
 
 	@Override
+	@SuppressWarnings("resource")
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
@@ -140,22 +130,27 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		ServletRequest request = webRequest.getNativeRequest(ServletRequest.class);
 		Assert.state(request != null, "No ServletRequest");
-		ShallowEtagHeaderFilter.disableContentCaching(request);
 
 		ResponseBodyEmitter emitter;
-
 		if (returnValue instanceof ResponseBodyEmitter) {
 			emitter = (ResponseBodyEmitter) returnValue;
 		}
 		else {
 			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
+			if (emitter == null) {
+				// Not streaming: write headers without committing response..
+				outputMessage.getHeaders().forEach((headerName, headerValues) -> {
+					for (String headerValue : headerValues) {
+						response.addHeader(headerName, headerValue);
+					}
+				});
+				return;
+			}
 		}
-
-		if (emitter == null) {
-			return;
-		}
-
 		emitter.extendResponse(outputMessage);
+
+		// At this point we know we're streaming..
+		ShallowEtagHeaderFilter.disableContentCaching(request);
 
 		// Commit the response and wrap to ignore further header changes
 		outputMessage.getBody();
@@ -191,9 +186,6 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		@SuppressWarnings("unchecked")
 		private <T> void sendInternal(T data, @Nullable MediaType mediaType) throws IOException {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Writing [" + data + "]");
-			}
 			for (HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.messageConverters) {
 				if (converter.canWrite(data.getClass(), mediaType)) {
 					((HttpMessageConverter<T>) converter).write(data, mediaType, this.outputMessage);

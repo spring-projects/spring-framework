@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,17 +88,27 @@ public class DefaultRequestExpectation implements RequestExpectation {
 		}
 	}
 
+	/**
+	 * Note that as of 5.0.3, the creation of the response, which may block
+	 * intentionally, is separated from request count tracking, and this
+	 * method no longer increments the count transparently. Instead
+	 * {@link #incrementAndValidate()} must be invoked independently.
+	 */
 	@Override
 	public ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException {
 		ResponseCreator responseCreator = getResponseCreator();
 		Assert.state(responseCreator != null, "createResponse() called before ResponseCreator was set");
-		getRequestCount().incrementAndValidate();
 		return responseCreator.createResponse(request);
 	}
 
 	@Override
 	public boolean hasRemainingCount() {
 		return getRequestCount().hasRemainingCount();
+	}
+
+	@Override
+	public void incrementAndValidate() {
+		getRequestCount().incrementAndValidate();
 	}
 
 	@Override

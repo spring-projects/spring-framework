@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractMessageEndpointFactory implements MessageEndpointFactory, BeanNameAware {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
@@ -269,9 +269,10 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		 * endpoint throwing an exception.
 		 * @param ex the exception thrown from the concrete endpoint
 		 */
-		protected final void onEndpointException(Throwable ex) {
+		protected void onEndpointException(Throwable ex) {
 			Assert.state(this.transactionDelegate != null, "Not initialized");
 			this.transactionDelegate.setRollbackOnly();
+			logger.debug("Transaction marked as rollback-only after endpoint exception", ex);
 		}
 
 		/**
@@ -291,6 +292,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 				this.transactionDelegate.endTransaction();
 			}
 			catch (Throwable ex) {
+				logger.warn("Failed to complete transaction after endpoint delivery", ex);
 				throw new ApplicationServerInternalException("Failed to complete transaction", ex);
 			}
 		}
@@ -303,7 +305,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 					this.transactionDelegate.endTransaction();
 				}
 				catch (Throwable ex) {
-					logger.error("Could not complete unfinished transaction on endpoint release", ex);
+					logger.warn("Could not complete unfinished transaction on endpoint release", ex);
 				}
 			}
 		}
@@ -325,11 +327,10 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		private boolean rollbackOnly;
 
 		public TransactionDelegate(@Nullable XAResource xaResource) {
-			if (xaResource == null) {
-				if (transactionFactory != null && !transactionFactory.supportsResourceAdapterManagedTransactions()) {
-					throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " +
-							"transaction management. Check your ResourceAdapter's configuration.");
-				}
+			if (xaResource == null && transactionFactory != null &&
+					!transactionFactory.supportsResourceAdapterManagedTransactions()) {
+				throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " +
+						"transaction management. Check your ResourceAdapter's configuration.");
 			}
 			this.xaResource = xaResource;
 		}

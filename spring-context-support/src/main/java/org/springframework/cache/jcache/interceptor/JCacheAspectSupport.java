@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.cache.interceptor.AbstractCacheInvoker;
 import org.springframework.cache.interceptor.BasicOperation;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -52,19 +53,27 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private JCacheOperationSource cacheOperationSource;
+
+	@Nullable
+	private CacheResultInterceptor cacheResultInterceptor;
+
+	@Nullable
+	private CachePutInterceptor cachePutInterceptor;
+
+	@Nullable
+	private CacheRemoveEntryInterceptor cacheRemoveEntryInterceptor;
+
+	@Nullable
+	private CacheRemoveAllInterceptor cacheRemoveAllInterceptor;
 
 	private boolean initialized = false;
 
-	private CacheResultInterceptor cacheResultInterceptor;
 
-	private CachePutInterceptor cachePutInterceptor;
-
-	private CacheRemoveEntryInterceptor cacheRemoveEntryInterceptor;
-
-	private CacheRemoveAllInterceptor cacheRemoveAllInterceptor;
-
-
+	/**
+	 * Set the CacheOperationSource for this cache aspect.
+	 */
 	public void setCacheOperationSource(JCacheOperationSource cacheOperationSource) {
 		Assert.notNull(cacheOperationSource, "JCacheOperationSource must not be null");
 		this.cacheOperationSource = cacheOperationSource;
@@ -74,12 +83,13 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	 * Return the CacheOperationSource for this cache aspect.
 	 */
 	public JCacheOperationSource getCacheOperationSource() {
+		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSource' property is required: " +
+				"If there are no cacheable methods, then don't use a cache aspect.");
 		return this.cacheOperationSource;
 	}
 
 	public void afterPropertiesSet() {
-		Assert.state(getCacheOperationSource() != null, "The 'cacheOperationSource' property is required: " +
-				"If there are no cacheable methods, then don't use a cache aspect.");
+		getCacheOperationSource();
 
 		this.cacheResultInterceptor = new CacheResultInterceptor(getErrorHandler());
 		this.cachePutInterceptor = new CachePutInterceptor(getErrorHandler());
@@ -90,6 +100,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	}
 
 
+	@Nullable
 	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
 		// Check whether aspect is enabled to cope with cases where the AJ is pulled in automatically
 		if (this.initialized) {
@@ -114,23 +125,28 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	private Object execute(CacheOperationInvocationContext<?> context, CacheOperationInvoker invoker) {
 		CacheOperationInvoker adapter = new CacheOperationInvokerAdapter(invoker);
 		BasicOperation operation = context.getOperation();
 
 		if (operation instanceof CacheResultOperation) {
+			Assert.state(this.cacheResultInterceptor != null, "No CacheResultInterceptor");
 			return this.cacheResultInterceptor.invoke(
 					(CacheOperationInvocationContext<CacheResultOperation>) context, adapter);
 		}
 		else if (operation instanceof CachePutOperation) {
+			Assert.state(this.cachePutInterceptor != null, "No CachePutInterceptor");
 			return this.cachePutInterceptor.invoke(
 					(CacheOperationInvocationContext<CachePutOperation>) context, adapter);
 		}
 		else if (operation instanceof CacheRemoveOperation) {
+			Assert.state(this.cacheRemoveEntryInterceptor != null, "No CacheRemoveEntryInterceptor");
 			return this.cacheRemoveEntryInterceptor.invoke(
 					(CacheOperationInvocationContext<CacheRemoveOperation>) context, adapter);
 		}
 		else if (operation instanceof CacheRemoveAllOperation) {
+			Assert.state(this.cacheRemoveAllInterceptor != null, "No CacheRemoveAllInterceptor");
 			return this.cacheRemoveAllInterceptor.invoke(
 					(CacheOperationInvocationContext<CacheRemoveAllOperation>) context, adapter);
 		}

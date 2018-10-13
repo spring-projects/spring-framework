@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.IntervalTask;
+import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.config.TaskManagementConfigUtils;
 import org.springframework.tests.Assume;
@@ -64,6 +63,7 @@ public class EnableSchedulingTests {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfig.class);
+		assertEquals(2, ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size());
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
@@ -74,6 +74,7 @@ public class EnableSchedulingTests {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfigSubclass.class);
+		assertEquals(2, ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size());
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
@@ -84,6 +85,7 @@ public class EnableSchedulingTests {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		ctx = new AnnotationConfigApplicationContext(ExplicitSchedulerConfig.class);
+		assertEquals(1, ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size());
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
@@ -103,6 +105,7 @@ public class EnableSchedulingTests {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		ctx = new AnnotationConfigApplicationContext(ExplicitScheduledTaskRegistrarConfig.class);
+		assertEquals(1, ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size());
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
@@ -179,7 +182,12 @@ public class EnableSchedulingTests {
 
 	@Configuration
 	@EnableScheduling
-	static class FixedRateTaskConfig {
+	static class FixedRateTaskConfig implements SchedulingConfigurer {
+
+		@Override
+		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+			taskRegistrar.addFixedRateTask(() -> {}, 100);
+		}
 
 		@Bean
 		public AtomicInteger counter() {
@@ -447,19 +455,8 @@ public class EnableSchedulingTests {
 		public TaskScheduler scheduler() {
 			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 			scheduler.initialize();
-			scheduler.schedule(
-				new Runnable() {
-					@Override
-					public void run() {
-						counter().incrementAndGet();
-					}
-				},
-				new Trigger() {
-					@Override
-					public Date nextExecutionTime(TriggerContext triggerContext) {
-						return new Date(new Date().getTime()+10);
-					}
-				});
+			scheduler.schedule(() -> counter().incrementAndGet(),
+					triggerContext -> new Date(new Date().getTime()+10));
 			return scheduler;
 		}
 	}

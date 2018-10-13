@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.tests;
 import java.util.List;
 
 import org.mockito.Mockito;
+import org.mockito.internal.stubbing.InvocationContainerImpl;
 import org.mockito.internal.util.MockUtil;
 import org.mockito.invocation.Invocation;
 
@@ -40,8 +41,10 @@ public abstract class MockitoUtils {
 	 * @param argumentAdapters adapters that can be used to change argument values before they are compared
 	 */
 	public static <T> void verifySameInvocations(T expected, T actual, InvocationArgumentsAdapter... argumentAdapters) {
-		List<Invocation> expectedInvocations = MockUtil.getMockHandler(expected).getInvocationContainer().getInvocations();
-		List<Invocation> actualInvocations = MockUtil.getMockHandler(actual).getInvocationContainer().getInvocations();
+		List<Invocation> expectedInvocations =
+				((InvocationContainerImpl) MockUtil.getMockHandler(expected).getInvocationContainer()).getInvocations();
+		List<Invocation> actualInvocations =
+				((InvocationContainerImpl) MockUtil.getMockHandler(actual).getInvocationContainer()).getInvocations();
 		verifySameInvocations(expectedInvocations, actualInvocations, argumentAdapters);
 	}
 

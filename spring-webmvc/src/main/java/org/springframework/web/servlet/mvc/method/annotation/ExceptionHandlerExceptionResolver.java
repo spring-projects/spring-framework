@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,17 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -110,7 +111,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters = new ArrayList<>();
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(stringHttpMessageConverter);
-		this.messageConverters.add(new SourceHttpMessageConverter<>());
+		try {
+			this.messageConverters.add(new SourceHttpMessageConverter<>());
+		}
+		catch (Error err) {
+			// Ignore when no TransformerFactory implementation is available
+		}
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 
@@ -268,9 +274,6 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		if (getApplicationContext() == null) {
 			return;
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for exception mappings: " + getApplicationContext());
-		}
 
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		AnnotationAwareOrderComparator.sort(adviceBeans);
@@ -283,15 +286,21 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
 			if (resolver.hasExceptionMappings()) {
 				this.exceptionHandlerAdviceCache.put(adviceBean, resolver);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ExceptionHandler methods in " + adviceBean);
-				}
 			}
 			if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
 				this.responseBodyAdvice.add(adviceBean);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected ResponseBodyAdvice implementation in " + adviceBean);
-				}
+			}
+		}
+
+		if (logger.isDebugEnabled()) {
+			int handlerSize = this.exceptionHandlerAdviceCache.size();
+			int adviceSize = this.responseBodyAdvice.size();
+			if (handlerSize == 0 && adviceSize == 0) {
+				logger.debug("ControllerAdvice beans: none");
+			}
+			else {
+				logger.debug("ControllerAdvice beans: " +
+						handlerSize + " @ExceptionHandler, " + adviceSize + " ResponseBodyAdvice");
 			}
 		}
 	}
@@ -391,7 +400,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 		try {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking @ExceptionHandler method: " + exceptionHandlerMethod);
+				logger.debug("Using @ExceptionHandler " + exceptionHandlerMethod);
 			}
 			Throwable cause = exception.getCause();
 			if (cause != null) {
@@ -407,7 +416,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			// Any other than the original exception is unintended here,
 			// probably an accident (e.g. failed assertion or the like).
 			if (invocationEx != exception && logger.isWarnEnabled()) {
-				logger.warn("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
+				logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
 			}
 			// Continue with default processing of the original exception...
 			return null;
@@ -440,13 +449,18 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * Spring-managed beans were detected.
 	 * @param handlerMethod the method where the exception was raised (may be {@code null})
 	 * @param exception the raised exception
-	 * @return a method to handle the exception, or {@code null}
+	 * @return a method to handle the exception, or {@code null} if none
 	 */
 	@Nullable
-	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(@Nullable HandlerMethod handlerMethod, Exception exception) {
-		Class<?> handlerType = (handlerMethod != null ? handlerMethod.getBeanType() : null);
+	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(
+			@Nullable HandlerMethod handlerMethod, Exception exception) {
+
+		Class<?> handlerType = null;
 
 		if (handlerMethod != null) {
+			// Local exception handler methods on the controller class itself.
+			// To be invoked through the proxy, even in case of an interface-based proxy.
+			handlerType = handlerMethod.getBeanType();
 			ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(handlerType);
 			if (resolver == null) {
 				resolver = new ExceptionHandlerMethodResolver(handlerType);
@@ -456,14 +470,20 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			if (method != null) {
 				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
 			}
+			// For advice applicability check below (involving base packages, assignable types
+			// and annotation presence), use target class instead of interface-based proxy.
+			if (Proxy.isProxyClass(handlerType)) {
+				handlerType = AopUtils.getTargetClass(handlerMethod.getBean());
+			}
 		}
 
-		for (Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
-			if (entry.getKey().isApplicableToBeanType(handlerType)) {
+		for (Map.Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
+			ControllerAdviceBean advice = entry.getKey();
+			if (advice.isApplicableToBeanType(handlerType)) {
 				ExceptionHandlerMethodResolver resolver = entry.getValue();
 				Method method = resolver.resolveMethod(exception);
 				if (method != null) {
-					return new ServletInvocableHandlerMethod(entry.getKey().resolveBean(), method);
+					return new ServletInvocableHandlerMethod(advice.resolveBean(), method);
 				}
 			}
 		}

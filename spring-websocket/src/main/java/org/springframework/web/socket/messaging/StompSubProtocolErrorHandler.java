@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  */
 public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byte[]> {
 
-	private static byte[] EMPTY_PAYLOAD = new byte[0];
+	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 
 	@Override
@@ -57,6 +57,7 @@ public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byt
 	}
 
 	@Override
+	@Nullable
 	public Message<byte[]> handleErrorMessageToClient(Message<byte[]> errorMessage) {
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
 		Assert.notNull(accessor, "No StompHeaderAccessor");

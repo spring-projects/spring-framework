@@ -10,6 +10,8 @@
  * (<a href="http://www.mockobjects.com">MockObjects</a>).
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.mock.web;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

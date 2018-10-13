@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,14 +39,14 @@ import org.springframework.util.Assert;
  */
 public abstract class JdbcAccessor implements InitializingBean {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
 	private DataSource dataSource;
 
 	@Nullable
-	private SQLExceptionTranslator exceptionTranslator;
+	private volatile SQLExceptionTranslator exceptionTranslator;
 
 	private boolean lazyInit = true;
 
@@ -81,7 +81,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/**
 	 * Specify the database product name for the DataSource that this accessor uses.
 	 * This allows to initialize a SQLErrorCodeSQLExceptionTranslator without
-	 * obtaining a Connection from the DataSource to get the metadata.
+	 * obtaining a Connection from the DataSource to get the meta-data.
 	 * @param dbName the database product name that identifies the error codes entry
 	 * @see SQLErrorCodeSQLExceptionTranslator#setDatabaseProductName
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
@@ -109,17 +109,25 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * {@link SQLStateSQLExceptionTranslator} in case of no DataSource.
 	 * @see #getDataSource()
 	 */
-	public synchronized SQLExceptionTranslator getExceptionTranslator() {
-		if (this.exceptionTranslator == null) {
-			DataSource dataSource = getDataSource();
-			if (dataSource != null) {
-				this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
-			}
-			else {
-				this.exceptionTranslator = new SQLStateSQLExceptionTranslator();
-			}
+	public SQLExceptionTranslator getExceptionTranslator() {
+		SQLExceptionTranslator exceptionTranslator = this.exceptionTranslator;
+		if (exceptionTranslator != null) {
+			return exceptionTranslator;
 		}
-		return this.exceptionTranslator;
+		synchronized (this) {
+			exceptionTranslator = this.exceptionTranslator;
+			if (exceptionTranslator == null) {
+				DataSource dataSource = getDataSource();
+				if (dataSource != null) {
+					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
+				}
+				else {
+					exceptionTranslator = new SQLStateSQLExceptionTranslator();
+				}
+				this.exceptionTranslator = exceptionTranslator;
+			}
+			return exceptionTranslator;
+		}
 	}
 
 	/**

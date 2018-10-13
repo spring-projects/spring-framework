@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.BridgeMethodResolver;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.core.MethodClassKey;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -56,7 +56,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * Canonical value held in cache to indicate no caching attribute was
 	 * found for this method and we don't need to look again.
 	 */
-	private final static Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
+	private static final Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
 
 
 	/**
@@ -83,6 +83,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * is not cacheable
 	 */
 	@Override
+	@Nullable
 	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		if (method.getDeclaringClass() == Object.class) {
 			return null;
@@ -97,8 +98,8 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		else {
 			Collection<CacheOperation> cacheOps = computeCacheOperations(method, targetClass);
 			if (cacheOps != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheOps);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheOps);
 				}
 				this.attributeCache.put(cacheKey, cacheOps);
 			}
@@ -130,9 +131,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
-		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-		// If we are dealing with method with generic parameters, find the original method.
-		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
+		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
 		// First try is the method in the target class.
 		Collection<CacheOperation> opDef = findCacheOperations(specificMethod);
@@ -164,24 +163,22 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 
 
 	/**
-	 * Subclasses need to implement this to return the caching attribute
-	 * for the given method, if any.
-	 * @param method the method to retrieve the attribute for
-	 * @return all caching attribute associated with this method
-	 * (or {@code null} if none)
-	 */
-	@Nullable
-	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
-
-	/**
-	 * Subclasses need to implement this to return the caching attribute
-	 * for the given class, if any.
+	 * Subclasses need to implement this to return the caching attribute for the
+	 * given class, if any.
 	 * @param clazz the class to retrieve the attribute for
-	 * @return all caching attribute associated with this class
-	 * (or {@code null} if none)
+	 * @return all caching attribute associated with this class, or {@code null} if none
 	 */
 	@Nullable
 	protected abstract Collection<CacheOperation> findCacheOperations(Class<?> clazz);
+
+	/**
+	 * Subclasses need to implement this to return the caching attribute for the
+	 * given method, if any.
+	 * @param method the method to retrieve the attribute for
+	 * @return all caching attribute associated with this method, or {@code null} if none
+	 */
+	@Nullable
+	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
 
 	/**
 	 * Should only public methods be allowed to have caching semantics?

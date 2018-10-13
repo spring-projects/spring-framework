@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ public class CachePutOperation extends CacheOperation {
 
 
 	/**
+	 * Create a new {@link CachePutOperation} instance from the given builder.
 	 * @since 4.3
 	 */
 	public CachePutOperation(CachePutOperation.Builder b) {
@@ -48,6 +49,7 @@ public class CachePutOperation extends CacheOperation {
 
 
 	/**
+	 * A builder that can be used to create a {@link CachePutOperation}.
 	 * @since 4.3
 	 */
 	public static class Builder extends CacheOperation.Builder {

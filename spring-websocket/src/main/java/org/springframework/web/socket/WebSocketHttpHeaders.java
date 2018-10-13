@@ -206,6 +206,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * @return the first header value; or {@code null}
 	 */
 	@Override
+	@Nullable
 	public String getFirst(String headerName) {
 		return this.headers.getFirst(headerName);
 	}

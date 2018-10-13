@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -56,8 +58,11 @@ import org.springframework.messaging.handler.invocation.AbstractMethodMessageHan
 import org.springframework.messaging.handler.invocation.CompletableFutureReturnValueHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.messaging.handler.invocation.ListenableFutureReturnValueHandler;
+import org.springframework.messaging.handler.invocation.ReactiveReturnValueHandler;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageMappingInfo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -111,9 +116,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
-	private final Object lifecycleMonitor = new Object();
-
 	private volatile boolean running = false;
+
+	private final Object lifecycleMonitor = new Object();
 
 
 	/**
@@ -231,7 +236,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
-	 * Set the Validator instance used for validating @Payload arguments
+	 * Set the Validator instance used for validating {@code @Payload} arguments.
 	 * @see org.springframework.validation.annotation.Validated
 	 * @see PayloadArgumentResolver
 	 */
@@ -246,7 +251,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to pass on to
-	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler}s
+	 * {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}
 	 * that send messages from controller return values.
 	 * <p>By default, this property is not set.
 	 */
@@ -262,16 +267,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		return this.headerInitializer;
 	}
 
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
 
 	@Override
 	public final void start() {
@@ -299,9 +294,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
+		return this.running;
 	}
 
 
@@ -332,15 +325,16 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 
 		// Single-purpose return value types
+
 		handlers.add(new ListenableFutureReturnValueHandler());
 		handlers.add(new CompletableFutureReturnValueHandler());
+		handlers.add(new ReactiveReturnValueHandler());
 
 		// Annotation-based return value types
+
 		SendToMethodReturnValueHandler sendToHandler =
 				new SendToMethodReturnValueHandler(this.brokerTemplate, true);
-		if (this.headerInitializer != null) {
-			sendToHandler.setHeaderInitializer(this.headerInitializer);
-		}
+		sendToHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(sendToHandler);
 
 		SubscriptionMethodReturnValueHandler subscriptionHandler =
@@ -348,15 +342,27 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		subscriptionHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(subscriptionHandler);
 
-		// custom return value types
+		// Custom return value types
+
 		handlers.addAll(getCustomReturnValueHandlers());
 
-		// catch-all
+		// Catch-all
+
 		sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
 		sendToHandler.setHeaderInitializer(this.headerInitializer);
 		handlers.add(sendToHandler);
 
 		return handlers;
+	}
+
+	@Override
+	protected Log getReturnValueHandlerLogger() {
+		return SimpLogging.forLog(HandlerMethodReturnValueHandlerComposite.defaultLogger);
+	}
+
+	@Override
+	protected Log getHandlerMethodLogger() {
+		return SimpLogging.forLog(HandlerMethod.defaultLogger);
 	}
 
 
@@ -366,6 +372,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
+	@Nullable
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		MessageMapping messageAnn = AnnotatedElementUtils.findMergedAnnotation(method, MessageMapping.class);
 		if (messageAnn != null) {
@@ -438,6 +445,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
+	@Nullable
 	protected String getDestination(Message<?> message) {
 		return SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 	}
@@ -464,6 +472,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
+	@Nullable
 	protected SimpMessageMappingInfo getMatchingMapping(SimpMessageMappingInfo mapping, Message<?> message) {
 		return mapping.getMatchingCondition(message);
 

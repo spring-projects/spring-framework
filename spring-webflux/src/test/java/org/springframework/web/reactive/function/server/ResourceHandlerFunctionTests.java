@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class ResourceHandlerFunctionTests {
 
@@ -50,6 +51,7 @@ public class ResourceHandlerFunctionTests {
 
 	private ServerResponse.Context context;
 
+
 	@Before
 	public void createContext() {
 		HandlerStrategies strategies = HandlerStrategies.withDefaults();
@@ -58,19 +60,17 @@ public class ResourceHandlerFunctionTests {
 			public List<HttpMessageWriter<?>> messageWriters() {
 				return strategies.messageWriters();
 			}
-
 			@Override
 			public List<ViewResolver> viewResolvers() {
 				return strategies.viewResolvers();
 			}
 		};
-
 	}
 
 
 	@Test
 	public void get() throws IOException {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
@@ -80,6 +80,7 @@ public class ResourceHandlerFunctionTests {
 		Mono<Void> result = responseMono.flatMap(response -> {
 					assertEquals(HttpStatus.OK, response.statusCode());
 					assertTrue(response instanceof EntityResponse);
+					@SuppressWarnings("unchecked")
 					EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
 					assertEquals(this.resource, entityResponse.entity());
 					return response.writeTo(exchange, context);
@@ -105,7 +106,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void head() throws IOException {
-		MockServerWebExchange exchange = MockServerHttpRequest.head("http://localhost").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.head("http://localhost"));
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
@@ -115,6 +116,7 @@ public class ResourceHandlerFunctionTests {
 		Mono<Void> result = responseMono.flatMap(response -> {
 			assertEquals(HttpStatus.OK, response.statusCode());
 			assertTrue(response instanceof EntityResponse);
+			@SuppressWarnings("unchecked")
 			EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
 			assertEquals(this.resource.getFilename(), entityResponse.entity().getFilename());
 			return response.writeTo(exchange, context);
@@ -129,7 +131,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void options() {
-		MockServerWebExchange exchange = MockServerHttpRequest.options("http://localhost").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("http://localhost"));
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());

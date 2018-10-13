@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,9 @@ import org.springframework.util.IdGenerator;
  */
 public class MessageHeaders implements Map<String, Object>, Serializable {
 
+	/**
+	 * UUID for none.
+	 */
 	public static final UUID ID_VALUE_NONE = new UUID(0,0);
 
 	/**
@@ -81,12 +84,24 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 */
 	public static final String ID = "id";
 
+	/**
+	 * The key for the message timestamp.
+	 */
 	public static final String TIMESTAMP = "timestamp";
 
+	/**
+	 * The key for the message content type.
+	 */
 	public static final String CONTENT_TYPE = "contentType";
 
+	/**
+	 * The key for the message reply channel.
+	 */
 	public static final String REPLY_CHANNEL = "replyChannel";
 
+	/**
+	 * The key for the message error channel.
+	 */
 	public static final String ERROR_CHANNEL = "errorChannel";
 
 
@@ -149,7 +164,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param keysToIgnore the keys of the entries to ignore
 	 */
 	private MessageHeaders(MessageHeaders original, Set<String> keysToIgnore) {
-		this.headers = new HashMap<>(original.headers.size() - keysToIgnore.size());
+		this.headers = new HashMap<>(original.headers.size());
 		original.headers.forEach((key, value) -> {
 			if (!keysToIgnore.contains(key)) {
 				this.headers.put(key, value);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -38,7 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public final class HeadersRequestCondition extends AbstractRequestCondition<HeadersRequestCondition> {
 
-	private final static HeadersRequestCondition PRE_FLIGHT_MATCH = new HeadersRequestCondition();
+	private static final HeadersRequestCondition PRE_FLIGHT_MATCH = new HeadersRequestCondition();
 
 
 	private final Set<HeaderExpression> expressions;
@@ -107,11 +108,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 * or {@code null} otherwise.
 	 */
 	@Override
+	@Nullable
 	public HeadersRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return PRE_FLIGHT_MATCH;
 		}
-		for (HeaderExpression expression : expressions) {
+		for (HeaderExpression expression : this.expressions) {
 			if (!expression.match(exchange)) {
 				return null;
 			}
@@ -120,19 +122,27 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	}
 
 	/**
-	 * Returns:
-	 * <ul>
-	 * <li>0 if the two conditions have the same number of header expressions
-	 * <li>Less than 0 if "this" instance has more header expressions
-	 * <li>Greater than 0 if the "other" instance has more header expressions
-	 * </ul>
+	 * Compare to another condition based on header expressions. A condition
+	 * is considered to be a more specific match, if it has:
+	 * <ol>
+	 * <li>A greater number of expressions.
+	 * <li>A greater number of non-negated expressions with a concrete value.
+	 * </ol>
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(ServerWebExchange)} and each instance
 	 * contains the matching header expression only or is otherwise empty.
 	 */
 	@Override
 	public int compareTo(HeadersRequestCondition other, ServerWebExchange exchange) {
-		return other.expressions.size() - this.expressions.size();
+		int result = other.expressions.size() - this.expressions.size();
+		if (result != 0) {
+			return result;
+		}
+		return (int) (getValueMatchCount(other.expressions) - getValueMatchCount(this.expressions));
+	}
+
+	private long getValueMatchCount(Set<HeaderExpression> expressions) {
+		return expressions.stream().filter(e -> e.getValue() != null && !e.isNegated()).count();
 	}
 
 
@@ -157,12 +167,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 
 		@Override
 		protected boolean matchName(ServerWebExchange exchange) {
-			return exchange.getRequest().getHeaders().get(name) != null;
+			return (exchange.getRequest().getHeaders().get(this.name) != null);
 		}
 
 		@Override
 		protected boolean matchValue(ServerWebExchange exchange) {
-			return value.equals(exchange.getRequest().getHeaders().getFirst(name));
+			return (this.value != null && this.value.equals(exchange.getRequest().getHeaders().getFirst(this.name)));
 		}
 	}
 

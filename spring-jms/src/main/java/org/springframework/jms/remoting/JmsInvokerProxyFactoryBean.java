@@ -81,6 +81,7 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.serviceProxy;
 	}

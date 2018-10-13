@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,22 +54,22 @@ import org.springframework.util.ObjectUtils;
  */
 public class SingleConnectionDataSource extends DriverManagerDataSource implements SmartDataSource, DisposableBean {
 
-	/** Create a close-suppressing proxy? */
+	/** Create a close-suppressing proxy?. */
 	private boolean suppressClose;
 
-	/** Override auto-commit state? */
+	/** Override auto-commit state?. */
 	@Nullable
 	private Boolean autoCommit;
 
-	/** Wrapped Connection */
+	/** Wrapped Connection. */
 	@Nullable
 	private Connection target;
 
-	/** Proxy Connection */
+	/** Proxy Connection. */
 	@Nullable
 	private Connection connection;
 
-	/** Synchronization monitor for the shared Connection */
+	/** Synchronization monitor for the shared Connection. */
 	private final Object connectionMonitor = new Object();
 
 
@@ -223,8 +223,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 			closeConnection();
 			this.target = getConnectionFromDriver(getUsername(), getPassword());
 			prepareConnection(this.target);
-			if (logger.isInfoEnabled()) {
-				logger.info("Established shared JDBC Connection: " + this.target);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Established shared JDBC Connection: " + this.target);
 			}
 			this.connection = (isSuppressClose() ? getCloseSuppressingConnectionProxy(this.target) : this.target);
 		}
@@ -264,7 +264,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 				this.target.close();
 			}
 			catch (Throwable ex) {
-				logger.warn("Could not close shared JDBC Connection", ex);
+				logger.info("Could not close shared JDBC Connection", ex);
 			}
 		}
 	}

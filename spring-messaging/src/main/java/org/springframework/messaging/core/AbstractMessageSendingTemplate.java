@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
  * @since 4.0
+ * @param <D> the destination type
  */
 public abstract class AbstractMessageSendingTemplate<D> implements MessageSendingOperations<D> {
 
@@ -81,7 +82,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
-		Assert.notNull(messageConverter, "'messageConverter' must not be null");
+		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.converter = messageConverter;
 	}
 
@@ -122,12 +123,16 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	}
 
 	@Override
-	public void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers) throws MessagingException {
+	public void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers)
+			throws MessagingException {
+
 		convertAndSend(destination, payload, headers, null);
 	}
 
 	@Override
-	public void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor)
+			throws MessagingException {
+
 		convertAndSend(getRequiredDefaultDestination(), payload, postProcessor);
 	}
 

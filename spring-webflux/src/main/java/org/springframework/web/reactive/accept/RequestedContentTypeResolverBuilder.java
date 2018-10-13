@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,21 +87,19 @@ public class RequestedContentTypeResolverBuilder {
 	 * of resolvers configured through this builder.
 	 */
 	public RequestedContentTypeResolver build() {
-
-		List<RequestedContentTypeResolver> resolvers =
-				this.candidates.isEmpty() ?
-						Collections.singletonList(new HeaderContentTypeResolver()) :
-						this.candidates.stream().map(Supplier::get).collect(Collectors.toList());
+		List<RequestedContentTypeResolver> resolvers = (!this.candidates.isEmpty() ?
+				this.candidates.stream().map(Supplier::get).collect(Collectors.toList()) :
+				Collections.singletonList(new HeaderContentTypeResolver()));
 
 		return exchange -> {
 			for (RequestedContentTypeResolver resolver : resolvers) {
-				List<MediaType> type = resolver.resolveMediaTypes(exchange);
-				if (type.isEmpty() || (type.size() == 1 && type.contains(MediaType.ALL))) {
+				List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
+				if (mediaTypes.equals(RequestedContentTypeResolver.MEDIA_TYPE_ALL_LIST)) {
 					continue;
 				}
-				return type;
+				return mediaTypes;
 			}
-			return Collections.emptyList();
+			return RequestedContentTypeResolver.MEDIA_TYPE_ALL_LIST;
 		};
 	}
 

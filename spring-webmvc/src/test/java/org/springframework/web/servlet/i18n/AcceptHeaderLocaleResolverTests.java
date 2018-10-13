@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,28 +36,46 @@ import static org.junit.Assert.*;
  */
 public class AcceptHeaderLocaleResolverTests {
 
-	private AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
+	private final AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
 
 
 	@Test
-	public void resolve() throws Exception {
+	public void resolve() {
 		assertEquals(CANADA, this.resolver.resolveLocale(request(CANADA)));
 		assertEquals(US, this.resolver.resolveLocale(request(US, CANADA)));
 	}
 
 	@Test
-	public void resolvePreferredSupported() throws Exception {
+	public void resolvePreferredSupported() {
 		this.resolver.setSupportedLocales(Collections.singletonList(CANADA));
 		assertEquals(CANADA, this.resolver.resolveLocale(request(US, CANADA)));
 	}
 
 	@Test
-	public void resolvePreferredNotSupported() throws Exception {
+	public void resolvePreferredNotSupported() {
 		this.resolver.setSupportedLocales(Collections.singletonList(CANADA));
 		assertEquals(US, this.resolver.resolveLocale(request(US, UK)));
 	}
-	@Test
 
+	@Test
+	public void resolvePreferredAgainstLanguageOnly() {
+		this.resolver.setSupportedLocales(Collections.singletonList(ENGLISH));
+		assertEquals(ENGLISH, this.resolver.resolveLocale(request(GERMANY, US, UK)));
+	}
+
+	@Test
+	public void resolvePreferredAgainstCountryIfPossible() {
+		this.resolver.setSupportedLocales(Arrays.asList(ENGLISH, UK));
+		assertEquals(UK, this.resolver.resolveLocale(request(GERMANY, US, UK)));
+	}
+
+	@Test
+	public void resolvePreferredAgainstLanguageWithMultipleSupportedLocales() {
+		this.resolver.setSupportedLocales(Arrays.asList(GERMAN, US));
+		assertEquals(GERMAN, this.resolver.resolveLocale(request(GERMANY, US, UK)));
+	}
+
+	@Test
 	public void resolvePreferredNotSupportedWithDefault() {
 		this.resolver.setSupportedLocales(Arrays.asList(US, JAPAN));
 		this.resolver.setDefaultLocale(Locale.JAPAN);
@@ -69,7 +87,7 @@ public class AcceptHeaderLocaleResolverTests {
 	}
 
 	@Test
-	public void defaultLocale() throws Exception {
+	public void defaultLocale() {
 		this.resolver.setDefaultLocale(JAPANESE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		assertEquals(JAPANESE, this.resolver.resolveLocale(request));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  */
 
 package org.springframework.web.servlet.config.annotation;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
@@ -53,6 +57,9 @@ public class PathMatchConfigurer {
 	@Nullable
 	private PathMatcher pathMatcher;
 
+	@Nullable
+	private Map<String, Predicate<Class<?>>> pathPrefixes;
+
 
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
@@ -84,9 +91,7 @@ public class PathMatchConfigurer {
 	 * <p>By default this is set to "false".
 	 * @see WebMvcConfigurer#configureContentNegotiation
 	 */
-	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(
-			Boolean registeredSuffixPatternMatch) {
-
+	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
 		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
 		return this;
 	}
@@ -109,6 +114,25 @@ public class PathMatchConfigurer {
 	 */
 	public PathMatchConfigurer setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
+		return this;
+	}
+
+	/**
+	 * Configure a path prefix to apply to matching controller methods.
+	 * <p>Prefixes are used to enrich the mappings of every {@code @RequestMapping}
+	 * method whose controller type is matched by the corresponding
+	 * {@code Predicate}. The prefix for the first matching predicate is used.
+	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
+	 * HandlerTypePredicate} to group controllers.
+	 * @param prefix the prefix to apply
+	 * @param predicate a predicate for matching controller types
+	 * @since 5.1
+	 */
+	public PathMatchConfigurer addPathPrefix(String prefix, Predicate<Class<?>> predicate) {
+		if (this.pathPrefixes == null) {
+			this.pathPrefixes = new LinkedHashMap<>();
+		}
+		this.pathPrefixes.put(prefix, predicate);
 		return this;
 	}
 
@@ -138,4 +162,8 @@ public class PathMatchConfigurer {
 		return this.pathMatcher;
 	}
 
+	@Nullable
+	protected Map<String, Predicate<Class<?>>> getPathPrefixes() {
+		return this.pathPrefixes;
+	}
 }

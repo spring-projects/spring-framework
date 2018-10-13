@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.expression.spel;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
+import java.util.NoSuchElementException;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
@@ -47,6 +49,7 @@ import org.springframework.util.CollectionUtils;
  * nodes might need.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class ExpressionState {
@@ -58,20 +61,20 @@ public class ExpressionState {
 	private final SpelParserConfiguration configuration;
 
 	@Nullable
-	private Stack<TypedValue> contextObjects;
+	private Deque<TypedValue> contextObjects;
 
 	@Nullable
-	private Stack<VariableScope> variableScopes;
+	private Deque<VariableScope> variableScopes;
 
 	// When entering a new scope there is a new base object which should be used
 	// for '#this' references (or to act as a target for unqualified references).
-	// This stack captures those objects at each nested scope level.
+	// This ArrayDeque captures those objects at each nested scope level.
 	// For example:
 	// #list1.?[#list2.contains(#this)]
 	// On entering the selection we enter a new scope, and #this is now the
 	// element from list1
 	@Nullable
-	private Stack<TypedValue> scopeRootObjects;
+	private ArrayDeque<TypedValue> scopeRootObjects;
 
 
 	public ExpressionState(EvaluationContext context) {
@@ -102,21 +105,26 @@ public class ExpressionState {
 		if (CollectionUtils.isEmpty(this.contextObjects)) {
 			return this.rootObject;
 		}
-		return this.contextObjects.peek();
+		return this.contextObjects.element();
 	}
 
 	public void pushActiveContextObject(TypedValue obj) {
 		if (this.contextObjects == null) {
-			this.contextObjects = new Stack<>();
+			this.contextObjects = new ArrayDeque<>();
 		}
 		this.contextObjects.push(obj);
 	}
 
 	public void popActiveContextObject() {
 		if (this.contextObjects == null) {
-			this.contextObjects = new Stack<>();
+			this.contextObjects = new ArrayDeque<>();
 		}
-		this.contextObjects.pop();
+		try {
+			this.contextObjects.pop();
+		}
+		catch (NoSuchElementException ex) {
+			throw new IllegalStateException("Cannot pop active context object: stack is empty");
+		}
 	}
 
 	public TypedValue getRootContextObject() {
@@ -127,7 +135,7 @@ public class ExpressionState {
 		if (CollectionUtils.isEmpty(this.scopeRootObjects)) {
 			return this.rootObject;
 		}
-		return this.scopeRootObjects.peek();
+		return this.scopeRootObjects.element();
 	}
 
 	public void setVariable(String name, @Nullable Object value) {
@@ -148,8 +156,8 @@ public class ExpressionState {
 	}
 
 	public Object convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
-		Object result = this.relatedContext.getTypeConverter().convertValue(value,
-				TypeDescriptor.forObject(value), targetTypeDescriptor);
+		Object result = this.relatedContext.getTypeConverter().convertValue(
+				value, TypeDescriptor.forObject(value), targetTypeDescriptor);
 		if (result == null) {
 			throw new IllegalStateException("Null conversion result for value [" + value + "]");
 		}
@@ -163,7 +171,8 @@ public class ExpressionState {
 	@Nullable
 	public Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
 		Object val = value.getValue();
-		return this.relatedContext.getTypeConverter().convertValue(val, TypeDescriptor.forObject(val), targetTypeDescriptor);
+		return this.relatedContext.getTypeConverter().convertValue(
+				val, TypeDescriptor.forObject(val), targetTypeDescriptor);
 	}
 
 	/*
@@ -190,14 +199,12 @@ public class ExpressionState {
 	}
 
 	public void setLocalVariable(String name, Object value) {
-		initVariableScopes().peek().setVariable(name, value);
+		initVariableScopes().element().setVariable(name, value);
 	}
 
 	@Nullable
 	public Object lookupLocalVariable(String name) {
-		int scopeNumber = initVariableScopes().size() - 1;
-		for (int i = scopeNumber; i >= 0; i--) {
-			VariableScope scope = initVariableScopes().get(i);
+		for (VariableScope scope : initVariableScopes()) {
 			if (scope.definesVariable(name)) {
 				return scope.lookupVariable(name);
 			}
@@ -205,18 +212,18 @@ public class ExpressionState {
 		return null;
 	}
 
-	private Stack<VariableScope> initVariableScopes() {
+	private Deque<VariableScope> initVariableScopes() {
 		if (this.variableScopes == null) {
-			this.variableScopes = new Stack<>();
-			// top level empty variable scope
+			this.variableScopes = new ArrayDeque<>();
+			// top-level empty variable scope
 			this.variableScopes.add(new VariableScope());
 		}
 		return this.variableScopes;
 	}
 
-	private Stack<TypedValue> initScopeRootObjects() {
+	private Deque<TypedValue> initScopeRootObjects() {
 		if (this.scopeRootObjects == null) {
-			this.scopeRootObjects = new Stack<>();
+			this.scopeRootObjects = new ArrayDeque<>();
 		}
 		return this.scopeRootObjects;
 	}

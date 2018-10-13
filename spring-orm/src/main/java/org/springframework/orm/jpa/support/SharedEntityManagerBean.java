@@ -109,6 +109,7 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 
 
 	@Override
+	@Nullable
 	public EntityManager getObject() {
 		return this.shared;
 	}

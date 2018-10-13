@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.ParameterMode;
 import javax.persistence.Query;
+import javax.persistence.StoredProcedureQuery;
 import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
@@ -78,6 +81,7 @@ public abstract class SharedEntityManagerCreator {
 		transactionRequiringMethods.add("remove");
 		transactionRequiringMethods.add("refresh");
 
+		queryTerminatingMethods.add("execute");  // JPA 2.1 StoredProcedureQuery
 		queryTerminatingMethods.add("executeUpdate");
 		queryTerminatingMethods.add("getSingleResult");
 		queryTerminatingMethods.add("getResultList");
@@ -126,7 +130,7 @@ public abstract class SharedEntityManagerCreator {
 
 	/**
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
-	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
+	 * @param emf the EntityManagerFactory to obtain EntityManagers from as needed
 	 * @param properties the properties to be passed into the
 	 * {@code createEntityManager} call (may be {@code null})
 	 * @param entityManagerInterfaces the interfaces to be implemented by the
@@ -141,7 +145,7 @@ public abstract class SharedEntityManagerCreator {
 
 	/**
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
-	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
+	 * @param emf the EntityManagerFactory to obtain EntityManagers from as needed
 	 * @param properties the properties to be passed into the
 	 * {@code createEntityManager} call (may be {@code null})
 	 * @param synchronizedWithTransaction whether to automatically join ongoing
@@ -338,17 +342,23 @@ public abstract class SharedEntityManagerCreator {
 	/**
 	 * Invocation handler that handles deferred Query objects created by
 	 * non-transactional createQuery invocations on a shared EntityManager.
+	 * <p>Includes deferred output parameter access for JPA 2.1 StoredProcedureQuery,
+	 * retrieving the corresponding values for all registered parameters on query
+	 * termination and returning the locally cached values for subsequent access.
 	 */
 	private static class DeferredQueryInvocationHandler implements InvocationHandler {
 
 		private final Query target;
 
 		@Nullable
-		private EntityManager em;
+		private EntityManager entityManager;
 
-		public DeferredQueryInvocationHandler(Query target, EntityManager em) {
+		@Nullable
+		private Map<Object, Object> outputParameters;
+
+		public DeferredQueryInvocationHandler(Query target, EntityManager entityManager) {
 			this.target = target;
-			this.em = em;
+			this.entityManager = entityManager;
 		}
 
 		@Override
@@ -373,10 +383,30 @@ public abstract class SharedEntityManagerCreator {
 					return proxy;
 				}
 			}
+			else if (method.getName().equals("getOutputParameterValue")) {
+				if (this.entityManager == null) {
+					Object key = args[0];
+					if (this.outputParameters == null || !this.outputParameters.containsKey(key)) {
+						throw new IllegalArgumentException("OUT/INOUT parameter not available: " + key);
+					}
+					Object value = this.outputParameters.get(key);
+					if (value instanceof IllegalArgumentException) {
+						throw (IllegalArgumentException) value;
+					}
+					return value;
+				}
+			}
 
 			// Invoke method on actual Query object.
 			try {
 				Object retVal = method.invoke(this.target, args);
+				if (method.getName().equals("registerStoredProcedureParameter") && args.length == 3 &&
+						(args[2] == ParameterMode.OUT || args[2] == ParameterMode.INOUT)) {
+					if (this.outputParameters == null) {
+						this.outputParameters = new LinkedHashMap<>();
+					}
+					this.outputParameters.put(args[0], null);
+				}
 				return (retVal == this.target ? proxy : retVal);
 			}
 			catch (InvocationTargetException ex) {
@@ -386,8 +416,25 @@ public abstract class SharedEntityManagerCreator {
 				if (queryTerminatingMethods.contains(method.getName())) {
 					// Actual execution of the query: close the EntityManager right
 					// afterwards, since that was the only reason we kept it open.
-					EntityManagerFactoryUtils.closeEntityManager(this.em);
-					this.em = null;
+					if (this.outputParameters != null && this.target instanceof StoredProcedureQuery) {
+						StoredProcedureQuery storedProc = (StoredProcedureQuery) this.target;
+						for (Map.Entry<Object, Object> entry : this.outputParameters.entrySet()) {
+							try {
+								Object key = entry.getKey();
+								if (key instanceof Integer) {
+									entry.setValue(storedProc.getOutputParameterValue((Integer) key));
+								}
+								else {
+									entry.setValue(storedProc.getOutputParameterValue(key.toString()));
+								}
+							}
+							catch (IllegalArgumentException ex) {
+								entry.setValue(ex);
+							}
+						}
+					}
+					EntityManagerFactoryUtils.closeEntityManager(this.entityManager);
+					this.entityManager = null;
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,10 +63,6 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Mock private TransportHandler xhrSendHandler;
 
-	@Mock private SessionCreatingTransportHandler jsonpHandler;
-
-	@Mock private TransportHandler jsonpSendHandler;
-
 	@Mock private HandshakeTransportHandler wsTransportHandler;
 
 	@Mock private WebSocketHandler wsHandler;
@@ -80,7 +76,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Before
 	public void setup() {
-		super.setUp();
+		super.setup();
 		MockitoAnnotations.initMocks(this);
 
 		Map<String, Object> attributes = Collections.emptyMap();
@@ -89,26 +85,22 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		given(this.xhrHandler.getTransportType()).willReturn(TransportType.XHR);
 		given(this.xhrHandler.createSession(sessionId, this.wsHandler, attributes)).willReturn(this.session);
 		given(this.xhrSendHandler.getTransportType()).willReturn(TransportType.XHR_SEND);
-		given(this.jsonpHandler.getTransportType()).willReturn(TransportType.JSONP);
-		given(this.jsonpHandler.createSession(sessionId, this.wsHandler, attributes)).willReturn(this.session);
-		given(this.jsonpSendHandler.getTransportType()).willReturn(TransportType.JSONP_SEND);
 		given(this.wsTransportHandler.getTransportType()).willReturn(TransportType.WEBSOCKET);
 
 		this.service = new TransportHandlingSockJsService(this.taskScheduler, this.xhrHandler, this.xhrSendHandler);
 	}
+
 
 	@Test
 	public void defaultTransportHandlers() {
 		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class));
 		Map<TransportType, TransportHandler> handlers = service.getTransportHandlers();
 
-		assertEquals(8, handlers.size());
+		assertEquals(6, handlers.size());
 		assertNotNull(handlers.get(TransportType.WEBSOCKET));
 		assertNotNull(handlers.get(TransportType.XHR));
 		assertNotNull(handlers.get(TransportType.XHR_SEND));
 		assertNotNull(handlers.get(TransportType.XHR_STREAMING));
-		assertNotNull(handlers.get(TransportType.JSONP));
-		assertNotNull(handlers.get(TransportType.JSONP_SEND));
 		assertNotNull(handlers.get(TransportType.HTML_FILE));
 		assertNotNull(handlers.get(TransportType.EVENT_SOURCE));
 	}
@@ -120,7 +112,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class), xhrHandler);
 		Map<TransportType, TransportHandler> handlers = service.getTransportHandlers();
 
-		assertEquals(8, handlers.size());
+		assertEquals(6, handlers.size());
 		assertSame(xhrHandler, handlers.get(xhrHandler.getTransportType()));
 	}
 
@@ -269,29 +261,9 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	 public void handleTransportRequestJsonp() throws Exception {
-		TransportHandlingSockJsService jsonpService = new TransportHandlingSockJsService(this.taskScheduler, this.jsonpHandler, this.jsonpSendHandler);
-		String sockJsPath = sessionUrlPrefix+ "jsonp";
-		setRequest("GET", sockJsPrefix + sockJsPath);
-		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertEquals(404, this.servletResponse.getStatus());
-
-		resetRequestAndResponse();
-		jsonpService.setAllowedOrigins(Collections.singletonList("http://mydomain1.com"));
-		setRequest("GET", sockJsPrefix + sockJsPath);
-		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertEquals(404, this.servletResponse.getStatus());
-
-		resetRequestAndResponse();
-		jsonpService.setAllowedOrigins(Collections.singletonList("*"));
-		setRequest("GET", sockJsPrefix + sockJsPath);
-		jsonpService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertNotEquals(404, this.servletResponse.getStatus());
-	}
-
-	@Test
 	public void handleTransportRequestWebsocket() throws Exception {
-		TransportHandlingSockJsService wsService = new TransportHandlingSockJsService(this.taskScheduler, this.wsTransportHandler);
+		TransportHandlingSockJsService wsService = new TransportHandlingSockJsService(
+				this.taskScheduler, this.wsTransportHandler);
 		String sockJsPath = "/websocket";
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);

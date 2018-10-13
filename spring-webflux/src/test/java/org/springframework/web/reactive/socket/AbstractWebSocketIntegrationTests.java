@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.apache.tomcat.websocket.WsContainerProvider;
-import org.apache.tomcat.websocket.WsWebSocketContainer;
 import org.apache.tomcat.websocket.server.WsContextListener;
 import org.junit.After;
 import org.junit.Before;
@@ -43,13 +43,11 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
-import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
 import org.springframework.web.reactive.socket.client.UndertowWebSocketClient;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
@@ -59,11 +57,9 @@ import org.springframework.web.reactive.socket.server.support.HandshakeWebSocket
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
-import org.springframework.web.reactive.socket.server.upgrade.RxNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
-
-import static org.junit.Assume.*;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * Base class for WebSocket integration tests. Sub-classes must implement
@@ -94,47 +90,30 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Parameters(name = "client[{0}] - server [{1}]")
 	public static Object[][] arguments() throws IOException {
 
-		Flux<? extends WebSocketClient> clients = Flux.concat(
-				Flux.just(new TomcatWebSocketClient(new WsWebSocketContainer())).repeat(5),
-				Flux.just(new JettyWebSocketClient()).repeat(5),
-				Flux.just(new ReactorNettyWebSocketClient()).repeat(5),
-				Flux.just(new RxNettyWebSocketClient()).repeat(5),
-				Flux.just(new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))).repeat(5));
+		WebSocketClient[] clients = new WebSocketClient[] {
+				new TomcatWebSocketClient(),
+				new JettyWebSocketClient(),
+				new ReactorNettyWebSocketClient(),
+				new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))
+		};
 
-		Flux<? extends HttpServer> servers = Flux.just(
-				new TomcatHttpServer(TMP_DIR.getAbsolutePath(), WsContextListener.class),
-				new JettyHttpServer(),
-				new ReactorHttpServer(),
-				new RxNettyHttpServer(),
-				new UndertowHttpServer()).repeat(5);
+		Map<HttpServer, Class<?>> servers = new LinkedHashMap<>();
+		servers.put(new TomcatHttpServer(TMP_DIR.getAbsolutePath(), WsContextListener.class), TomcatConfig.class);
+		servers.put(new JettyHttpServer(), JettyConfig.class);
+		servers.put(new ReactorHttpServer(), ReactorNettyConfig.class);
+		servers.put(new UndertowHttpServer(), UndertowConfig.class);
 
-		Flux<? extends Class<?>> configs = Flux.just(
-				TomcatConfig.class,
-				JettyConfig.class,
-				ReactorNettyConfig.class,
-				RxNettyConfig.class,
-				UndertowConfig.class).repeat(5);
+		Flux<WebSocketClient> f1 = Flux.fromArray(clients).concatMap(c -> Flux.just(c).repeat(servers.size()));
+		Flux<HttpServer> f2 = Flux.fromIterable(servers.keySet()).repeat(clients.length);
+		Flux<Class<?>> f3 = Flux.fromIterable(servers.values()).repeat(clients.length);
 
-		return Flux.zip(clients, servers, configs)
-				.map(Tuple3::toArray)
-				.collectList()
-				.block()
-				.toArray(new Object[25][2]);
+		return Flux.zip(f1, f2, f3).map(Tuple3::toArray).collectList().block()
+				.toArray(new Object[clients.length * servers.size()][2]);
 	}
 
 
 	@Before
 	public void setup() throws Exception {
-		// TODO
-		// Caused by: java.io.IOException: Upgrade responses cannot have a transfer coding
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState.handleUpgrade(HttpUpgrade.java:490)
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState.access$1200(HttpUpgrade.java:165)
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:461)
-		// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:400)
-		// at org.xnio.ChannelListeners.invokeChannelListener(ChannelListeners.java:92)
-
-		assumeFalse(this.client instanceof UndertowWebSocketClient && this.server instanceof RxNettyHttpServer);
-
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();
@@ -148,7 +127,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 	@After
-	public void stop() throws Exception {
+	public void stop() {
 		if (this.client instanceof Lifecycle) {
 			((Lifecycle) this.client).stop();
 		}
@@ -161,7 +140,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		context.register(DispatcherConfig.class, this.serverConfigClass);
 		context.register(getWebConfigClass());
 		context.refresh();
-		return DispatcherHandler.toHttpHandler(context);
+		return WebHttpHandlerBuilder.applicationContext(context).build();
 	}
 
 	protected URI getUrl(String path) throws URISyntaxException {
@@ -203,16 +182,6 @@ public abstract class AbstractWebSocketIntegrationTests {
 		@Override
 		protected RequestUpgradeStrategy getUpgradeStrategy() {
 			return new ReactorNettyRequestUpgradeStrategy();
-		}
-	}
-
-
-	@Configuration
-	static class RxNettyConfig extends AbstractHandlerAdapterConfig {
-
-		@Override
-		protected RequestUpgradeStrategy getUpgradeStrategy() {
-			return new RxNettyRequestUpgradeStrategy();
 		}
 	}
 

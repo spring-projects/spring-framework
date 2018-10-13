@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,15 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class MediaTypeFactory {
+public final class MediaTypeFactory {
 
 	private static final String MIME_TYPES_FILE_NAME = "/org/springframework/http/mime.types";
 
 	private static final MultiValueMap<String, MediaType> fileExtensionToMediaTypes = parseMimeTypes();
+
+
+	private MediaTypeFactory() {
+	}
 
 
 	/**
@@ -60,9 +64,7 @@ public class MediaTypeFactory {
 	 * @return a multi-value map, mapping media types to file extensions.
 	 */
 	private static MultiValueMap<String, MediaType> parseMimeTypes() {
-		InputStream is = null;
-		try {
-			is = MediaTypeFactory.class.getResourceAsStream(MIME_TYPES_FILE_NAME);
+		try (InputStream is = MediaTypeFactory.class.getResourceAsStream(MIME_TYPES_FILE_NAME)) {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
 			MultiValueMap<String, MediaType> result = new LinkedMultiValueMap<>();
 			String line;
@@ -81,15 +83,6 @@ public class MediaTypeFactory {
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Could not load '" + MIME_TYPES_FILE_NAME + "'", ex);
-		}
-		finally {
-			if (is != null) {
-				try {
-					is.close();
-				}
-				catch (IOException ignore) {
-				}
-			}
 		}
 	}
 

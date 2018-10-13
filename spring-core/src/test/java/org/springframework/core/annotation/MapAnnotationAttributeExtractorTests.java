@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,13 +42,20 @@ import static org.springframework.core.annotation.AnnotationUtilsTests.*;
 @SuppressWarnings("serial")
 public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnnotationAttributeExtractorTestCase {
 
-	@Before
-	public void clearCachesBeforeTests() {
-		AnnotationUtilsTests.clearCaches();
+	@Override
+	protected AnnotationAttributeExtractor<?> createExtractorFor(Class<?> clazz, String expected, Class<? extends Annotation> annotationType) {
+		Map<String, Object> attributes = Collections.singletonMap(expected, expected);
+		return new MapAnnotationAttributeExtractor(attributes, annotationType, clazz);
 	}
 
+	@Before
+	public void clearCacheBeforeTests() {
+		AnnotationUtils.clearCache();
+	}
+
+
 	@Test
-	public void enrichAndValidateAttributesWithImplicitAliasesAndMinimalAttributes() {
+	public void enrichAndValidateAttributesWithImplicitAliasesAndMinimalAttributes() throws Exception {
 		Map<String, Object> attributes = new HashMap<>();
 		Map<String, Object> expectedAttributes = new HashMap<String, Object>() {{
 			put("groovyScript", "");
@@ -64,7 +72,7 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 	}
 
 	@Test
-	public void enrichAndValidateAttributesWithImplicitAliases() {
+	public void enrichAndValidateAttributesWithImplicitAliases() throws Exception {
 		Map<String, Object> attributes = new HashMap<String, Object>() {{
 			put("groovyScript", "groovy!");
 		}};
@@ -85,7 +93,6 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 
 	@Test
 	public void enrichAndValidateAttributesWithSingleElementThatOverridesAnArray() {
-		// @formatter:off
 		Map<String, Object> attributes = new HashMap<String, Object>() {{
 			// Intentionally storing 'value' as a single String instead of an array.
 			// put("value", asArray("/foo"));
@@ -99,7 +106,6 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 			put("name", "test");
 			put("method", new RequestMethod[0]);
 		}};
-		// @formatter:on
 
 		MapAnnotationAttributeExtractor extractor = new MapAnnotationAttributeExtractor(attributes, WebMapping.class, null);
 		Map<String, Object> enriched = extractor.getSource();
@@ -109,18 +115,17 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 	}
 
 	@SuppressWarnings("unchecked")
-	private void assertEnrichAndValidateAttributes(Map<String, Object> sourceAttributes, Map<String, Object> expected) {
+	private void assertEnrichAndValidateAttributes(Map<String, Object> sourceAttributes, Map<String, Object> expected) throws Exception {
 		Class<? extends Annotation> annotationType = ImplicitAliasesContextConfig.class;
 
-		// Since the ordering of attribute methods returned by the JVM is
-		// non-deterministic, we have to rig the attributeAliasesCache in AnnotationUtils
-		// so that the tests consistently fail in case enrichAndValidateAttributes() is
-		// buggy.
-		//
-		// Otherwise, these tests would intermittently pass even for an invalid
-		// implementation.
+		// Since the ordering of attribute methods returned by the JVM is non-deterministic,
+		// we have to rig the attributeAliasesCache in AnnotationUtils so that the tests
+		// consistently fail in case enrichAndValidateAttributes() is buggy.
+		// Otherwise, these tests would intermittently pass even for an invalid implementation.
+		Field cacheField = AnnotationUtils.class.getDeclaredField("attributeAliasesCache");
+		cacheField.setAccessible(true);
 		Map<Class<? extends Annotation>, MultiValueMap<String, String>> attributeAliasesCache =
-				(Map<Class<? extends Annotation>, MultiValueMap<String, String>>) AnnotationUtilsTests.getCache("attributeAliasesCache");
+				(Map<Class<? extends Annotation>, MultiValueMap<String, String>>) cacheField.get(null);
 
 		// Declare aliases in an order that will cause enrichAndValidateAttributes() to
 		// fail unless it considers all aliases in the set of implicit aliases.
@@ -139,12 +144,6 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 
 		assertEquals("attribute map size", expected.size(), enriched.size());
 		expected.forEach((attr, expectedValue) -> assertThat("for attribute '" + attr + "'", enriched.get(attr), is(expectedValue)));
-	}
-
-	@Override
-	protected AnnotationAttributeExtractor<?> createExtractorFor(Class<?> clazz, String expected, Class<? extends Annotation> annotationType) {
-		Map<String, Object> attributes = Collections.singletonMap(expected, expected);
-		return new MapAnnotationAttributeExtractor(attributes, annotationType, clazz);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.RequestPath;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -42,7 +43,7 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 
 
 	public ServerHttpRequestDecorator(ServerHttpRequest delegate) {
-		Assert.notNull(delegate, "ServerHttpRequest delegate is required.");
+		Assert.notNull(delegate, "Delegate is required");
 		this.delegate = delegate;
 	}
 
@@ -55,6 +56,12 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	// ServerHttpRequest delegation methods...
 
 	@Override
+	public String getId() {
+		return getDelegate().getId();
+	}
+
+	@Override
+	@Nullable
 	public HttpMethod getMethod() {
 		return getDelegate().getMethod();
 	}
@@ -92,6 +99,12 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return getDelegate().getRemoteAddress();
+	}
+
+	@Nullable
+	@Override
+	public SslInfo getSslInfo() {
+		return getDelegate().getSslInfo();
 	}
 
 	@Override

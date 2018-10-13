@@ -197,6 +197,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public Theme getTheme(String themeName) {
 		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);

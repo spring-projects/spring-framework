@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -74,10 +75,7 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 			boolean match = matchMediaType(exchange);
 			return (!this.isNegated == match);
 		}
-		catch (NotAcceptableStatusException ex) {
-			return false;
-		}
-		catch (UnsupportedMediaTypeStatusException ex) {
+		catch (NotAcceptableStatusException | UnsupportedMediaTypeStatusException ex) {
 			return false;
 		}
 	}
@@ -92,15 +90,15 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && getClass() == obj.getClass()) {
-			AbstractMediaTypeExpression other = (AbstractMediaTypeExpression) obj;
-			return (this.mediaType.equals(other.mediaType) && this.isNegated == other.isNegated);
+		if (other == null || getClass() != other.getClass()) {
+			return false;
 		}
-		return false;
+		AbstractMediaTypeExpression otherExpr = (AbstractMediaTypeExpression) other;
+		return (this.mediaType.equals(otherExpr.mediaType) && this.isNegated == otherExpr.isNegated);
 	}
 
 	@Override

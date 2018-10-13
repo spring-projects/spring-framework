@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,48 +80,58 @@ public class JsonPathResultMatchers {
 	/**
 	 * Evaluate the JSON path expression against the response content and
 	 * assert the resulting value with the given Hamcrest {@link Matcher}.
+	 * @see #value(Matcher, Class)
+	 * @see #value(Object)
 	 */
-	public <T> ResultMatcher value(final Matcher<T> matcher) {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.assertValue(content, matcher);
-		};
+	public <T> ResultMatcher value(Matcher<T> matcher) {
+		return result -> this.jsonPathHelper.assertValue(getContent(result), matcher);
+	}
+
+	/**
+	 * An overloaded variant of {@link #value(Matcher)} that also accepts a
+	 * target type for the resulting value that the matcher can work reliably
+	 * against.
+	 * <p>This can be useful for matching numbers reliably &mdash; for example,
+	 * to coerce an integer into a double.
+	 * @since 4.3.15
+	 * @see #value(Matcher)
+	 * @see #value(Object)
+	 */
+	public <T> ResultMatcher value(Matcher<T> matcher, Class<T> targetType) {
+		return result -> this.jsonPathHelper.assertValue(getContent(result), matcher, targetType);
 	}
 
 	/**
 	 * Evaluate the JSON path expression against the response content and
 	 * assert that the result is equal to the supplied value.
+	 * @see #value(Matcher)
+	 * @see #value(Matcher, Class)
 	 */
-	public ResultMatcher value(final Object expectedValue) {
-		return result -> jsonPathHelper.assertValue(getContent(result), expectedValue);
+	public ResultMatcher value(Object expectedValue) {
+		return result -> this.jsonPathHelper.assertValue(getContent(result), expectedValue);
 	}
 
 	/**
 	 * Evaluate the JSON path expression against the response content and
-	 * assert that a non-null value exists at the given path.
+	 * assert that a non-null value, possibly an empty array or map, exists at
+	 * the given path.
 	 * <p>If the JSON path expression is not {@linkplain JsonPath#isDefinite
 	 * definite}, this method asserts that the value at the given path is not
 	 * <em>empty</em>.
 	 */
 	public ResultMatcher exists() {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.exists(content);
-		};
+		return result -> this.jsonPathHelper.exists(getContent(result));
 	}
 
 	/**
 	 * Evaluate the JSON path expression against the response content and
-	 * assert that a value does not exist at the given path.
+	 * assert that a non-null value does not exist at the given path.
 	 * <p>If the JSON path expression is not {@linkplain JsonPath#isDefinite
 	 * definite}, this method asserts that the value at the given path is
 	 * <em>empty</em>.
 	 */
 	public ResultMatcher doesNotExist() {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.doesNotExist(content);
-		};
+		return result -> this.jsonPathHelper.doesNotExist(getContent(result));
 	}
 
 	/**
@@ -135,10 +145,7 @@ public class JsonPathResultMatchers {
 	 * @see #doesNotExist()
 	 */
 	public ResultMatcher isEmpty() {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.assertValueIsEmpty(content);
-		};
+		return result -> this.jsonPathHelper.assertValueIsEmpty(getContent(result));
 	}
 
 	/**
@@ -152,10 +159,36 @@ public class JsonPathResultMatchers {
 	 * @see #doesNotExist()
 	 */
 	public ResultMatcher isNotEmpty() {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.assertValueIsNotEmpty(content);
-		};
+		return result -> this.jsonPathHelper.assertValueIsNotEmpty(getContent(result));
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the response content
+	 * and assert that a value, possibly {@code null}, exists.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
+	 * that the list of values at the given path is not <em>empty</em>.
+	 * @since 5.0.3
+	 * @see #exists()
+	 * @see #isNotEmpty()
+	 */
+	public ResultMatcher hasJsonPath() {
+		return result -> this.jsonPathHelper.hasJsonPath(getContent(result));
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the supplied {@code content}
+	 * and assert that a value, including {@code null} values, does not exist
+	 * at the given path.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
+	 * that the list of values at the given path is <em>empty</em>.
+	 * @since 5.0.3
+	 * @see #doesNotExist()
+	 * @see #isEmpty()
+	 */
+	public ResultMatcher doesNotHaveJsonPath() {
+		return result -> this.jsonPathHelper.doesNotHaveJsonPath(getContent(result));
 	}
 
 	/**
@@ -164,10 +197,7 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isString() {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.assertValueIsString(content);
-		};
+		return result -> this.jsonPathHelper.assertValueIsString(getContent(result));
 	}
 
 	/**
@@ -176,10 +206,7 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isBoolean() {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.assertValueIsBoolean(content);
-		};
+		return result -> this.jsonPathHelper.assertValueIsBoolean(getContent(result));
 	}
 
 	/**
@@ -188,10 +215,7 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isNumber() {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.assertValueIsNumber(content);
-		};
+		return result -> this.jsonPathHelper.assertValueIsNumber(getContent(result));
 	}
 
 	/**
@@ -199,10 +223,7 @@ public class JsonPathResultMatchers {
 	 * assert that the result is an array.
 	 */
 	public ResultMatcher isArray() {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.assertValueIsArray(content);
-		};
+		return result -> this.jsonPathHelper.assertValueIsArray(getContent(result));
 	}
 
 	/**
@@ -211,10 +232,7 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isMap() {
-		return result -> {
-			String content = getContent(result);
-			jsonPathHelper.assertValueIsMap(content);
-		};
+		return result -> this.jsonPathHelper.assertValueIsMap(getContent(result));
 	}
 
 	private String getContent(MvcResult result) throws UnsupportedEncodingException {

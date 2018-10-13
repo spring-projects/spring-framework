@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * The Derby specific implementation of the {@link org.springframework.jdbc.core.metadata.TableMetaDataProvider}.
- * Overrides the Derby metadata info regarding retrieving generated keys. It seems to work OK so not sure why
- * they claim it's not supported.
+ * The Derby specific implementation of {@link TableMetaDataProvider}.
+ * Overrides the Derby meta-data info regarding retrieving generated keys.
  *
  * @author Thomas Risberg
  * @since 3.0
@@ -41,8 +40,8 @@ public class DerbyTableMetaDataProvider extends GenericTableMetaDataProvider {
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 		super.initializeWithMetaData(databaseMetaData);
 		if (!databaseMetaData.supportsGetGeneratedKeys()) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Overriding supportsGetGeneratedKeys from DatabaseMetaData to 'true'; it was reported as " +
+			if (logger.isInfoEnabled()) {
+				logger.info("Overriding supportsGetGeneratedKeys from DatabaseMetaData to 'true'; it was reported as " +
 						"'false' by " + databaseMetaData.getDriverName() + " " + databaseMetaData.getDriverVersion());
 			}
 			this.supportsGeneratedKeysOverride = true;
@@ -53,4 +52,5 @@ public class DerbyTableMetaDataProvider extends GenericTableMetaDataProvider {
 	public boolean isGetGeneratedKeysSupported() {
 		return (super.isGetGeneratedKeysSupported() || this.supportsGeneratedKeysOverride);
 	}
+
 }

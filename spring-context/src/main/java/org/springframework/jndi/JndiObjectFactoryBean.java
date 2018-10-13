@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,11 +244,11 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 		}
 		catch (NamingException ex) {
 			if (this.defaultObject != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("JNDI lookup failed - returning specified default object instead", ex);
+				if (logger.isTraceEnabled()) {
+					logger.trace("JNDI lookup failed - returning specified default object instead", ex);
 				}
-				else if (logger.isInfoEnabled()) {
-					logger.info("JNDI lookup failed - returning specified default object instead: " + ex);
+				else if (logger.isDebugEnabled()) {
+					logger.debug("JNDI lookup failed - returning specified default object instead: " + ex);
 				}
 				return this.defaultObject;
 			}
@@ -266,6 +266,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 	 * Return the singleton JNDI object.
 	 */
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.jndiObject;
 	}

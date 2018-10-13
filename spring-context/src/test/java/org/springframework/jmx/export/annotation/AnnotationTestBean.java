@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 	@ManagedMetric(description="The QueueSize metric", currencyTimeLimit = 20, persistPolicy="OnUpdate", persistPeriod=300,
 			category="utilization", metricType = MetricType.COUNTER, displayName="Queue Size", unit="messages")
 	public long getQueueSize() {
-		return 100l;
+		return 100L;
 	}
 
 	@ManagedMetric

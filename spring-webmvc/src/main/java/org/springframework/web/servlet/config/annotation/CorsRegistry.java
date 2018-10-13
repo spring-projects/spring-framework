@@ -24,10 +24,11 @@ import java.util.Map;
 import org.springframework.web.cors.CorsConfiguration;
 
 /**
- * {@code CorsRegistry} assists with the registration of {@link CorsConfiguration}
- * mapped to a path pattern.
+ * Assists with the registration of global, URL pattern based
+ * {@link CorsConfiguration} mappings.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 4.2
  * @see CorsRegistration
  */
@@ -38,14 +39,20 @@ public class CorsRegistry {
 
 	/**
 	 * Enable cross-origin request handling for the specified path pattern.
+	 *
 	 * <p>Exact path mapping URIs (such as {@code "/admin"}) are supported as
 	 * well as Ant-style path patterns (such as {@code "/admin/**"}).
 	 * <p>By default, all origins, all headers, credentials and {@code GET},
 	 * {@code HEAD}, and {@code POST} methods are allowed, and the max age
 	 * is set to 30 minutes.
-	 * @param pathPattern the path pattern to enable CORS handling for
-	 * @return CorsRegistration the corresponding registration object,
-	 * allowing for further fine-tuning
+	 *
+	 * <p>The following defaults are applied to the {@link CorsRegistration}:
+	 * <ul>
+	 *     <li>Allow all origins.</li>
+	 *     <li>Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.</li>
+	 *     <li>Allow all headers.</li>
+	 *     <li>Set max age to 1800 seconds (30 minutes).</li>
+	 * </ul>
 	 */
 	public CorsRegistration addMapping(String pathPattern) {
 		CorsRegistration registration = new CorsRegistration(pathPattern);

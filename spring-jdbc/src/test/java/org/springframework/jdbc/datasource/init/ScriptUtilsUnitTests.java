@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,10 +166,16 @@ public class ScriptUtilsUnitTests {
 	public void containsDelimiters() {
 		assertFalse(containsSqlScriptDelimiters("select 1\n select ';'", ";"));
 		assertTrue(containsSqlScriptDelimiters("select 1; select 2", ";"));
+
 		assertFalse(containsSqlScriptDelimiters("select 1; select '\\n\n';", "\n"));
 		assertTrue(containsSqlScriptDelimiters("select 1\n select 2", "\n"));
+		
 		assertFalse(containsSqlScriptDelimiters("select 1\n select 2", "\n\n"));
 		assertTrue(containsSqlScriptDelimiters("select 1\n\n select 2", "\n\n"));
+
+		// MySQL style escapes '\\'
+		assertFalse(containsSqlScriptDelimiters("insert into users(first_name, last_name)\nvalues('a\\\\', 'b;')", ";"));
+		assertTrue(containsSqlScriptDelimiters("insert into users(first_name, last_name)\nvalues('Charles', 'd\\'Artagnan'); select 1;", ";"));
 	}
 
 	private String readScript(String path) throws Exception {

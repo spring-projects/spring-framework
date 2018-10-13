@@ -59,8 +59,7 @@ public class LocaleContextResolverIntegrationTests extends AbstractRequestMappin
 				.uri("http://localhost:" + this.port + "/")
 				.exchange();
 
-		StepVerifier
-				.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(response -> {
 					assertEquals(HttpStatus.OK, response.statusCode());
 					assertEquals(Locale.GERMANY, response.headers().asHttpHeaders().getContentLanguage());

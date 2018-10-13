@@ -64,7 +64,7 @@ public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLException
 
 	@Override
 	@Nullable
-	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
+	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
 		if (ex instanceof SQLTransientException) {
 			if (ex instanceof SQLTransientConnectionException) {
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
@@ -90,7 +90,7 @@ public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLException
 				return new PermissionDeniedDataAccessException(buildMessage(task, sql, ex), ex);
 			}
 			else if (ex instanceof SQLSyntaxErrorException) {
-				return new BadSqlGrammarException(task, sql, ex);
+				return new BadSqlGrammarException(task, (sql != null ? sql : ""), ex);
 			}
 			else if (ex instanceof SQLFeatureNotSupportedException) {
 				return new InvalidDataAccessApiUsageException(buildMessage(task, sql, ex), ex);

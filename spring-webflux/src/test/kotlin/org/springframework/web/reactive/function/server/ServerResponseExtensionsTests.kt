@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,24 @@ class ServerResponseExtensionsTests {
 		val body = mock<Publisher<List<Foo>>>()
 		bodyBuilder.bodyToServerSentEvents(body)
 		verify(bodyBuilder, times(1)).contentType(TEXT_EVENT_STREAM)
+	}
+
+	@Test
+	fun `BodyBuilder#json`() {
+		bodyBuilder.json()
+		verify(bodyBuilder, times(1)).contentType(APPLICATION_JSON_UTF8)
+	}
+
+	@Test
+	fun `BodyBuilder#xml`() {
+		bodyBuilder.xml()
+		verify(bodyBuilder, times(1)).contentType(APPLICATION_XML)
+	}
+
+	@Test
+	fun `BodyBuilder#html`() {
+		bodyBuilder.html()
+		verify(bodyBuilder, times(1)).contentType(TEXT_HTML)
 	}
 
 	class Foo

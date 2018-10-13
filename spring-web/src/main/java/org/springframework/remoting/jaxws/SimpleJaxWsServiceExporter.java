@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,20 +30,18 @@ import javax.xml.ws.WebServiceProvider;
  *
  * <p>Note that this exporter will only work if the JAX-WS runtime actually
  * supports publishing with an address argument, i.e. if the JAX-WS runtime
- * ships an internal HTTP server. This is the case with the JAX-WS runtime
- * that's included in Sun's JDK 6 but not with the standalone JAX-WS 2.1 RI.
- *
- * <p>For explicit configuration of JAX-WS endpoints with Sun's JDK 6
- * HTTP server, consider using {@link SimpleHttpServerJaxWsServiceExporter}!
+ * ships an internal HTTP server.
  *
  * @author Juergen Hoeller
  * @since 2.5
  * @see javax.jws.WebService
  * @see javax.xml.ws.Endpoint#publish(String)
- * @see SimpleHttpServerJaxWsServiceExporter
  */
 public class SimpleJaxWsServiceExporter extends AbstractJaxWsServiceExporter {
 
+	/**
+	 * The default base address.
+	 */
 	public static final String DEFAULT_BASE_ADDRESS = "http://localhost:8080/";
 
 	private String baseAddress = DEFAULT_BASE_ADDRESS;

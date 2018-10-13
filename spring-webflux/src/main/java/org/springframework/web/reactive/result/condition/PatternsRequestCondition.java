@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,14 +56,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * Creates a new instance with the given {@code Stream} of URL patterns.
 	 */
 	public PatternsRequestCondition(List<PathPattern> patterns) {
-		this(toSortedSet(patterns));
+		this(new TreeSet<>(patterns));
 	}
 
-	private static SortedSet<PathPattern> toSortedSet(Collection<PathPattern> patterns) {
-		TreeSet<PathPattern> sorted = new TreeSet<>();
-		sorted.addAll(patterns);
-		return sorted;
-	}
 
 	private PatternsRequestCondition(SortedSet<PathPattern> patterns) {
 		this.patterns = patterns;
@@ -127,8 +122,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			return this;
 		}
 		SortedSet<PathPattern> matches = getMatchingPatterns(exchange);
-		return matches.isEmpty() ? null :
-				new PatternsRequestCondition(matches);
+		return (!matches.isEmpty() ? new PatternsRequestCondition(matches) : null);
 	}
 
 	/**
@@ -142,7 +136,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	private SortedSet<PathPattern> getMatchingPatterns(ServerWebExchange exchange) {
 		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
-		return patterns.stream()
+		return this.patterns.stream()
 				.filter(pattern -> pattern.matches(lookupPath))
 				.collect(Collectors.toCollection(TreeSet::new));
 	}

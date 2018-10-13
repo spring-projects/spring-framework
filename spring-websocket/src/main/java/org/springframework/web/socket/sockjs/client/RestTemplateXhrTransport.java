@@ -38,6 +38,7 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.UnknownHttpStatusCodeException;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -151,10 +152,10 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 	/**
 	 * A simple ResponseExtractor that reads the body into a String.
 	 */
-	private final static ResponseExtractor<ResponseEntity<String>> textResponseExtractor =
+	private static final ResponseExtractor<ResponseEntity<String>> textResponseExtractor =
 			response -> {
 				String body = StreamUtils.copyToString(response.getBody(), SockJsFrame.CHARSET);
-				return new ResponseEntity<>(body, response.getHeaders(), response.getStatusCode());
+				return ResponseEntity.status(response.getRawStatusCode()).headers(response.getHeaders()).body(body);
 			};
 
 
@@ -200,14 +201,22 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 
 		@Override
 		public Object extractData(ClientHttpResponse response) throws IOException {
-			if (!HttpStatus.OK.equals(response.getStatusCode())) {
-				throw new HttpServerErrorException(response.getStatusCode());
+			HttpStatus httpStatus = HttpStatus.resolve(response.getRawStatusCode());
+			if (httpStatus == null) {
+				throw new UnknownHttpStatusCodeException(
+						response.getRawStatusCode(), response.getStatusText(), response.getHeaders(), null, null);
 			}
+			if (httpStatus != HttpStatus.OK) {
+				throw new HttpServerErrorException(
+						httpStatus, response.getStatusText(), response.getHeaders(), null, null);
+			}
+
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR receive headers: " + response.getHeaders());
 			}
 			InputStream is = response.getBody();
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
+
 			while (true) {
 				if (this.sockJsSession.isDisconnected()) {
 					if (logger.isDebugEnabled()) {

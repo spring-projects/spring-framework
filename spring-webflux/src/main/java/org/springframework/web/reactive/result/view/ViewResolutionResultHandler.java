@@ -62,6 +62,7 @@ import org.springframework.web.server.ServerWebExchange;
  * <li>{@link View} -- View to render with
  * <li>{@link Model} -- attributes to add to the model
  * <li>{@link Map} -- attributes to add to the model
+ * <li>{@link Rendering} -- use case driven API for view resolution</li>
  * <li>{@link ModelAttribute @ModelAttribute} -- attribute for the model
  * <li>Non-simple value -- attribute for the model
  * </ul>
@@ -101,7 +102,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 	public ViewResolutionResultHandler(List<ViewResolver> viewResolvers,
 			RequestedContentTypeResolver contentTypeResolver) {
 
-		this(viewResolvers, contentTypeResolver, new ReactiveAdapterRegistry());
+		this(viewResolvers, contentTypeResolver, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 	/**
@@ -156,7 +157,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 			if (adapter.isNoValue()) {
 				return true;
 			}
-			type = result.getReturnType().getGeneric().resolve(Object.class);
+			type = result.getReturnType().getGeneric().toClass();
 		}
 
 		return (type != null &&
@@ -285,7 +286,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		return Optional.ofNullable(returnType.getMethodAnnotation(ModelAttribute.class))
 				.filter(ann -> StringUtils.hasText(ann.value()))
 				.map(ModelAttribute::value)
-				.orElse(Conventions.getVariableNameForParameter(returnType));
+				.orElseGet(() -> Conventions.getVariableNameForParameter(returnType));
 	}
 
 	private void updateBindingContext(BindingContext context, ServerWebExchange exchange) {

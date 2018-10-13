@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
 public abstract class AbstractAdaptableMessageListener
 		implements MessageListener, SessionAwareMessageListener<Message> {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
@@ -189,6 +189,7 @@ public abstract class AbstractAdaptableMessageListener
 	/**
 	 * Return the {@link QosSettings} to use when sending a response,
 	 * or {@code null} if the defaults should be used.
+	 * @since 5.0
 	 */
 	@Nullable
 	protected QosSettings getResponseQosSettings() {

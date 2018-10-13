@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -165,9 +165,9 @@ public abstract class ScriptUtils {
 	 * @param statements the list that will contain the individual statements
 	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 */
-	public static void splitSqlScript(@Nullable EncodedResource resource, String script, String separator, String commentPrefix,
-			String blockCommentStartDelimiter, String blockCommentEndDelimiter, List<String> statements)
-			throws ScriptException {
+	public static void splitSqlScript(@Nullable EncodedResource resource, String script,
+			String separator, String commentPrefix, String blockCommentStartDelimiter,
+			String blockCommentEndDelimiter, List<String> statements) throws ScriptException {
 
 		Assert.hasText(script, "'script' must not be null or empty");
 		Assert.notNull(separator, "'separator' must not be null");
@@ -179,6 +179,7 @@ public abstract class ScriptUtils {
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
 		boolean inEscape = false;
+
 		for (int i = 0; i < script.length(); i++) {
 			char c = script.charAt(i);
 			if (inEscape) {
@@ -210,7 +211,7 @@ public abstract class ScriptUtils {
 				}
 				else if (script.startsWith(commentPrefix, i)) {
 					// Skip over any content from the start of the comment to the EOL
-					int indexOfNextNewline = script.indexOf("\n", i);
+					int indexOfNextNewline = script.indexOf('\n', i);
 					if (indexOfNextNewline > i) {
 						i = indexOfNextNewline;
 						continue;
@@ -244,6 +245,7 @@ public abstract class ScriptUtils {
 			}
 			sb.append(c);
 		}
+
 		if (StringUtils.hasText(sb)) {
 			statements.add(sb.toString());
 		}
@@ -337,18 +339,31 @@ public abstract class ScriptUtils {
 	/**
 	 * Does the provided SQL script contain the specified delimiter?
 	 * @param script the SQL script
-	 * @param delim String delimiting each statement - typically a ';' character
+	 * @param delim the string delimiting each statement - typically a ';' character
 	 */
 	public static boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;
+		boolean inEscape = false;
+
 		for (int i = 0; i < script.length(); i++) {
-			if (script.charAt(i) == '\'') {
+			char c = script.charAt(i);
+			if (inEscape) {
+				inEscape = false;
+				continue;
+			}
+			// MySQL style escapes
+			if (c == '\\') {
+				inEscape = true;
+				continue;
+			}
+			if (c == '\'') {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral && script.startsWith(delim, i)) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -438,8 +453,8 @@ public abstract class ScriptUtils {
 			String blockCommentStartDelimiter, String blockCommentEndDelimiter) throws ScriptException {
 
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Executing SQL script from " + resource);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executing SQL script from " + resource);
 			}
 			long startTime = System.currentTimeMillis();
 
@@ -458,7 +473,7 @@ public abstract class ScriptUtils {
 				separator = FALLBACK_STATEMENT_SEPARATOR;
 			}
 
-			List<String> statements = new LinkedList<>();
+			List<String> statements = new ArrayList<>();
 			splitSqlScript(resource, script, separator, commentPrefix, blockCommentStartDelimiter,
 					blockCommentEndDelimiter, statements);
 
@@ -499,13 +514,13 @@ public abstract class ScriptUtils {
 					stmt.close();
 				}
 				catch (Throwable ex) {
-					logger.debug("Could not close JDBC Statement", ex);
+					logger.trace("Could not close JDBC Statement", ex);
 				}
 			}
 
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			if (logger.isInfoEnabled()) {
-				logger.info("Executed SQL script from " + resource + " in " + elapsedTime + " ms.");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executed SQL script from " + resource + " in " + elapsedTime + " ms.");
 			}
 		}
 		catch (Exception ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -66,39 +67,43 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	volatile ResolvableType targetType;
 
-	/** Package-visible field for caching the determined Class of a given bean definition */
+	/** Package-visible field for caching the determined Class of a given bean definition. */
 	@Nullable
 	volatile Class<?> resolvedTargetType;
 
-	/** Package-visible field for caching the return type of a generically typed factory method */
+	/** Package-visible field for caching the return type of a generically typed factory method. */
 	@Nullable
 	volatile ResolvableType factoryMethodReturnType;
 
-	/** Common lock for the four constructor fields below */
+	/** Package-visible field for caching a unique factory method candidate for introspection. */
+	@Nullable
+	volatile Method factoryMethodToIntrospect;
+
+	/** Common lock for the four constructor fields below. */
 	final Object constructorArgumentLock = new Object();
 
-	/** Package-visible field for caching the resolved constructor or factory method */
+	/** Package-visible field for caching the resolved constructor or factory method. */
 	@Nullable
 	Executable resolvedConstructorOrFactoryMethod;
 
-	/** Package-visible field that marks the constructor arguments as resolved */
+	/** Package-visible field that marks the constructor arguments as resolved. */
 	boolean constructorArgumentsResolved = false;
 
-	/** Package-visible field for caching fully resolved constructor arguments */
+	/** Package-visible field for caching fully resolved constructor arguments. */
 	@Nullable
 	Object[] resolvedConstructorArguments;
 
-	/** Package-visible field for caching partly prepared constructor arguments */
+	/** Package-visible field for caching partly prepared constructor arguments. */
 	@Nullable
 	Object[] preparedConstructorArguments;
 
-	/** Common lock for the two post-processing fields below */
+	/** Common lock for the two post-processing fields below. */
 	final Object postProcessingLock = new Object();
 
-	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied */
+	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied. */
 	boolean postProcessed = false;
 
-	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
+	/** Package-visible field that indicates a before-instantiation post-processor having kicked in. */
 	@Nullable
 	volatile Boolean beforeInstantiationResolved;
 
@@ -190,7 +195,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param cargs the constructor argument values to apply
 	 * @param pvs the property values to apply
 	 */
-	public RootBeanDefinition(@Nullable Class<?> beanClass, ConstructorArgumentValues cargs, @Nullable MutablePropertyValues pvs) {
+	public RootBeanDefinition(@Nullable Class<?> beanClass, @Nullable ConstructorArgumentValues cargs,
+			@Nullable MutablePropertyValues pvs) {
+
 		super(cargs, pvs);
 		setBeanClass(beanClass);
 	}
@@ -321,6 +328,31 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Return a {@link ResolvableType} for this bean definition,
+	 * either from runtime-cached type information or from configuration-time
+	 * {@link #setTargetType(ResolvableType)} or {@link #setBeanClass(Class)}.
+	 * @since 5.1
+	 * @see #getTargetType()
+	 * @see #getBeanClass()
+	 */
+	public ResolvableType getResolvableType() {
+		ResolvableType targetType = this.targetType;
+		return (targetType != null ? targetType : ResolvableType.forClass(getBeanClass()));
+	}
+
+	/**
+	 * Determine preferred constructors to use for default construction, if any.
+	 * Constructor arguments will be autowired if necessary.
+	 * @return one or more preferred constructors, or {@code null} if none
+	 * (in which case the regular no-arg default constructor will be called)
+	 * @since 5.1
+	 */
+	@Nullable
+	public Constructor<?>[] getPreferredConstructors() {
+		return null;
+	}
+
+	/**
 	 * Specify a factory method name that refers to a non-overloaded method.
 	 */
 	public void setUniqueFactoryMethodName(String name) {
@@ -342,10 +374,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	@Nullable
 	public Method getResolvedFactoryMethod() {
-		synchronized (this.constructorArgumentLock) {
-			Executable candidate = this.resolvedConstructorOrFactoryMethod;
-			return (candidate instanceof Method ? (Method) candidate : null);
-		}
+		return this.factoryMethodToIntrospect;
 	}
 
 	public void registerExternallyManagedConfigMember(Member configMember) {

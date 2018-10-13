@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +29,6 @@ import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
-import org.springframework.util.ReflectionUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;

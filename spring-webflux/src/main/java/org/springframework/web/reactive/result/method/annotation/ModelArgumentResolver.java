@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,19 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.Map;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.ui.Model;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Resolver for the {@link Model} controller method argument.
+ * Resolver for a controller method argument of type {@link Model} that can
+ * also be resolved as a {@link java.util.Map}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -41,15 +43,25 @@ public class ModelArgumentResolver extends HandlerMethodArgumentResolverSupport
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return checkParameterTypeNoReactiveWrapper(parameter, Model.class::isAssignableFrom);
+		return checkParameterTypeNoReactiveWrapper(parameter,
+				type -> Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type));
 	}
 
 	@Override
-	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public Object resolveArgumentValue(
+			MethodParameter parameter, BindingContext context, ServerWebExchange exchange) {
 
-		Assert.isAssignable(Model.class, methodParameter.getParameterType());
-		return context.getModel();
+		Class<?> type = parameter.getParameterType();
+		if (Model.class.isAssignableFrom(type)) {
+			return context.getModel();
+		}
+		else if (Map.class.isAssignableFrom(type)) {
+			return context.getModel().asMap();
+		}
+		else {
+			// Should never happen..
+			throw new IllegalStateException("Unexpected method parameter type: " + type);
+		}
 	}
 
 }

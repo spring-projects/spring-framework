@@ -237,7 +237,8 @@ public class PathMatchingUrlHandlerMappingTests {
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/show.html");
 		HandlerExecutionChain hec = getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-		assertEquals("Mapping not exposed", "show.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+		assertEquals("Mapping not exposed", "show.html",
+				req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 	}
 
 	private HandlerExecutionChain getHandler(MockHttpServletRequest req) throws Exception {

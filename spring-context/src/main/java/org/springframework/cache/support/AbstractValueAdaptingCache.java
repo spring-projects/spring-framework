@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,8 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	public <T> T get(Object key, @Nullable Class<T> type) {
 		Object value = fromStoreValue(lookup(key));
 		if (value != null && type != null && !type.isInstance(value)) {
-			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
+			throw new IllegalStateException(
+					"Cached value is not of required type [" + type.getName() + "]: " + value);
 		}
 		return (T) value;
 	}
@@ -73,8 +74,9 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	/**
 	 * Perform an actual lookup in the underlying store.
 	 * @param key the key whose associated value is to be returned
-	 * @return the raw store value for the key
+	 * @return the raw store value for the key, or {@code null} if none
 	 */
+	@Nullable
 	protected abstract Object lookup(Object key);
 
 
@@ -85,7 +87,7 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	 * @return the value to return to the user
 	 */
 	@Nullable
-	protected Object fromStoreValue(Object storeValue) {
+	protected Object fromStoreValue(@Nullable Object storeValue) {
 		if (this.allowNullValues && storeValue == NullValue.INSTANCE) {
 			return null;
 		}
@@ -104,8 +106,7 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 				return NullValue.INSTANCE;
 			}
 			throw new IllegalArgumentException(
-					String.format("Cache '%s' is configured to not allow null " +
-							"values but null was provided", getName()));
+					"Cache '" + getName() + "' is configured to not allow null values but null was provided");
 		}
 		return userValue;
 	}

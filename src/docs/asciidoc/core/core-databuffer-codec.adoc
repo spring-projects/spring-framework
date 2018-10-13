@@ -1,0 +1,174 @@
+[[databuffers]]
+= Data Buffers and Codecs
+
+The `DataBuffer` interface defines an abstraction over byte buffers.
+The main reason for introducing it (and not using the standard `java.nio.ByteBuffer` instead) is Netty.
+Netty does not use `ByteBuffer` but instead offers `ByteBuf` as an alternative.
+Spring's `DataBuffer` is a simple abstraction over `ByteBuf` that can also be used on non-Netty
+platforms (that is, Servlet 3.1+).
+
+
+
+== `DataBufferFactory`
+
+The `DataBufferFactory` offers functionality to allocate new data buffers as well as to wrap
+existing data.
+The `allocateBuffer` methods allocate a new data buffer with a default or given capacity.
+Though `DataBuffer` implementations grow and shrink on demand, it is more efficient to give the
+capacity upfront, if known.
+The `wrap` methods decorate an existing `ByteBuffer` or byte array.
+Wrapping does not involve allocation. It decorates the given data with a `DataBuffer`
+implementation.
+
+There are two implementation of `DataBufferFactory`: the `NettyDataBufferFactory`
+(for Netty platforms, such as Reactor Netty) and
+`DefaultDataBufferFactory` (for other platforms, such as
+Servlet 3.1+ servers).
+
+
+
+== The `DataBuffer` Interface
+
+The `DataBuffer` interface is similar to `ByteBuffer` but offers a number of advantages.
+Similar to Netty's `ByteBuf`, the `DataBuffer` abstraction offers independent read and write
+positions.
+This is different from the JDK's `ByteBuffer`, which exposes only one position for both reading and
+writing and a separate `flip()` operation to switch between the two  I/O operations.
+In general, the following invariant holds for the read position, write position, and the capacity:
+
+====
+[literal]
+[subs="verbatim,quotes"]
+--
+	0 <= read position <= write position <= capacity
+--
+====
+
+When reading bytes from the `DataBuffer`, the read position is automatically updated in accordance with
+the amount of data read from the buffer.
+Similarly, when writing bytes to the `DataBuffer`, the write position is updated with the amount of
+data written to the buffer.
+Also, when writing data, the capacity of a `DataBuffer` is automatically expanded, in the same fashion as `StringBuilder`,
+`ArrayList`, and similar types.
+
+Besides the reading and writing functionality mentioned above, the `DataBuffer` also has methods to
+view a (slice of a) buffer as a `ByteBuffer`, an `InputStream`, or an `OutputStream`.
+Additionally, it offers methods to determine the index of a given byte.
+
+As mentioned earlier, there are two implementation of `DataBufferFactory`: the `NettyDataBufferFactory`
+(for Netty platforms, such as Reactor Netty) and
+`DefaultDataBufferFactory` (for other platforms, such as
+Servlet 3.1+ servers).
+
+
+
+=== `PooledDataBuffer`
+
+The `PooledDataBuffer` is an extension to `DataBuffer` that adds methods for reference counting.
+The `retain` method increases the reference count by one.
+The `release` method decreases the count by one and releases the buffer's memory when the count
+reaches 0.
+Both of these methods are related to reference counting, a mechanism that we explain <<databuffer-reference-counting,later>>.
+
+Note that `DataBufferUtils` offers useful utility methods for releasing and retaining pooled data
+buffers.
+These methods take a plain `DataBuffer` as a parameter but only call `retain` or `release` if the
+passed data buffer is an instance of `PooledDataBuffer`.
+
+
+[[databuffer-reference-counting]]
+==== Reference Counting
+
+Reference counting is not a common technique in Java. It is much more common in other programming
+languages, such as Object C and C++.
+In and of itself, reference counting is not complex. It basically involves tracking the number of
+references that apply to an object.
+The reference count of a `PooledDataBuffer` starts at 1, is incremented by calling `retain`,
+and is decremented by calling `release`.
+As long as the buffer's reference count is larger than 0, the buffer is not released.
+When the number decreases to 0, the instance is released.
+In practice, this means that the reserved memory captured by the buffer is returned back to
+the memory pool, ready to be used for future allocations.
+
+In general, the last component to access a `DataBuffer` is responsible for releasing it.
+Within Spring, there are two sorts of components that release buffers: decoders and transports.
+Decoders are responsible for transforming a stream of buffers into other types (see <<codecs>>),
+and transports are responsible for sending buffers across a network boundary, typically as an HTTP message.
+This means that, if you allocate data buffers for the purpose of putting them into an outbound HTTP
+message (that is, a client-side request or server-side response), they do not have to be released.
+The other consequence of this rule is that if you allocate data buffers that do not end up in the
+body (for instance, because of a thrown exception), you have to release them yourself.
+The following snippet shows a typical `DataBuffer` usage scenario when dealing with methods that
+throw exceptions:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	DataBufferFactory factory = ...
+	DataBuffer buffer = factory.allocateBuffer(); <1>
+	boolean release = true; <2>
+	try {
+  		writeDataToBuffer(buffer); <3>
+  		putBufferInHttpBody(buffer);
+  		release = false; <4>
+	}
+	finally {
+  		if (release) {
+			DataBufferUtils.release(buffer); <5>
+		}
+	}
+
+	private void writeDataToBuffer(DataBuffer buffer) throws IOException { <3>
+		...
+	}
+----
+
+<1> A new buffer is allocated.
+<2> A boolean flag indicates whether the allocated buffer should be released.
+<3> This example method loads data into the buffer. Note that the method can throw an `IOException`.
+Therefore, a `finally` block to release the buffer is required.
+<4> If no exception occurred, we switch the `release` flag to `false` as the buffer is now
+released as part of sending the HTTP body across the wire.
+<5> If an exception did occur, the flag is still set to `true`, and the buffer is released
+here.
+====
+
+
+
+=== `DataBufferUtils`
+
+The `DataBufferUtils` class contains various utility methods that operate on data buffers.
+It contains methods for reading a `Flux` of `DataBuffer` objects from an `InputStream` or NIO
+`Channel` and methods for writing a data buffer `Flux` to an `OutputStream` or `Channel`.
+`DataBufferUtils` also exposes `retain` and `release` methods that operate on plain `DataBuffer`
+instances (so that casting to a `PooledDataBuffer` is not required).
+
+Additionally, `DataBufferUtils` exposes `compose`, which merges a stream of data buffers into one.
+For instance, this method can be used to convert the entire HTTP body into a single buffer (and
+from that, a `String` or `InputStream`).
+This is particularly useful when dealing with older, blocking APIs.
+Note, however, that this puts the entire body in memory, and therefore uses more memory than a pure
+streaming solution would.
+
+
+
+[[codecs]]
+== Codecs
+
+The `org.springframework.core.codec` package contains the two main abstractions for converting a
+stream of bytes into a stream of objects or vice-versa.
+The `Encoder` is a strategy interface that encodes a stream of objects into an output stream of
+data buffers.
+The `Decoder` does the reverse: It turns a stream of data buffers into a stream of objects.
+Note that a decoder instance needs to consider <<databuffer-reference-counting,reference counting>>.
+
+Spring comes with a wide array of default codecs (to convert from and to `String`,
+`ByteBuffer`, and byte arrays) and codecs that support marshalling libraries such as JAXB and
+Jackson (with https://github.com/FasterXML/jackson-core/issues/57[Jackson 2.9+ support for non-blocking parsing]).
+Within the context of Spring WebFlux, codecs are used to convert the request body into a
+`@RequestMapping` parameter or to convert the return type into the response body that is sent back
+to the client.
+The default codecs are configured in the `WebFluxConfigurationSupport` class. You can
+change them by overriding the `configureHttpMessageCodecs` when you inherit from that class.
+For more information about using codecs in WebFlux, see <<web-reactive#webflux-codecs>>.

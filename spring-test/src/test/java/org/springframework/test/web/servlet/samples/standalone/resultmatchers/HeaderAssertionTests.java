@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,6 +144,16 @@ public class HeaderAssertionTests {
 		}
 	}
 
+	@Test
+	public void exists() throws Exception {
+		this.mockMvc.perform(get("/persons/1")).andExpect(header().exists(LAST_MODIFIED));
+	}
+
+	@Test(expected = AssertionError.class)
+	public void existsFail() throws Exception {
+		this.mockMvc.perform(get("/persons/1")).andExpect(header().exists("X-Custom-Header"));
+	}
+
 	@Test  // SPR-10771
 	public void doesNotExist() throws Exception {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().doesNotExist("X-Custom-Header"));
@@ -198,7 +208,8 @@ public class HeaderAssertionTests {
 
 	private void assertMessageContains(AssertionError error, String expected) {
 		String message = error.getMessage();
-		assertTrue("Failure message should contain: " + expected, message.contains(expected));
+		assertTrue("Failure message should contain [" + expected + "], actual is [" + message + "]",
+				message.contains(expected));
 	}
 
 

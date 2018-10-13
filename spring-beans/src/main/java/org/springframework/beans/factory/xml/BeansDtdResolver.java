@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class BeansDtdResolver implements EntityResolver {
 					"] and system ID [" + systemId + "]");
 		}
 		if (systemId != null && systemId.endsWith(DTD_EXTENSION)) {
-			int lastPathSeparator = systemId.lastIndexOf("/");
+			int lastPathSeparator = systemId.lastIndexOf('/');
 			int dtdNameStart = systemId.indexOf(DTD_NAME, lastPathSeparator);
 			if (dtdNameStart != -1) {
 				String dtdFile = DTD_NAME + DTD_EXTENSION;
@@ -70,8 +70,8 @@ public class BeansDtdResolver implements EntityResolver {
 					InputSource source = new InputSource(resource.getInputStream());
 					source.setPublicId(publicId);
 					source.setSystemId(systemId);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found beans DTD [" + systemId + "] in classpath: " + dtdFile);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Found beans DTD [" + systemId + "] in classpath: " + dtdFile);
 					}
 					return source;
 				}
@@ -80,7 +80,6 @@ public class BeansDtdResolver implements EntityResolver {
 						logger.debug("Could not resolve beans DTD [" + systemId + "]: not found in classpath", ex);
 					}
 				}
-
 			}
 		}
 

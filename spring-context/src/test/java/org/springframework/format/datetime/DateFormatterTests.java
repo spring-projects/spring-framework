@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class DateFormatterTests {
 	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
 	@Rule
-	public ExpectedException thown = ExpectedException.none();
+	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -175,8 +175,8 @@ public class DateFormatterTests {
 	public void shouldThrowOnUnsupportedStylePattern() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setStylePattern("OO");
-		thown.expect(IllegalStateException.class);
-		thown.expectMessage("Unsupported style pattern 'OO'");
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("Unsupported style pattern 'OO'");
 		formatter.parse("2009", Locale.US);
 	}
 

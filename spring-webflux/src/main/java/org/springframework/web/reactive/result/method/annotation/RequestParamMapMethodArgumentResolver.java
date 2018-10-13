@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ import org.springframework.web.server.ServerWebExchange;
 public class RequestParamMapMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
 		implements SyncHandlerMethodArgumentResolver {
 
-
 	public RequestParamMapMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
 	}
@@ -59,17 +58,17 @@ public class RequestParamMapMethodArgumentResolver extends HandlerMethodArgument
 	}
 
 	private boolean allParams(RequestParam requestParam, Class<?> type) {
-		return Map.class.isAssignableFrom(type) && !StringUtils.hasText(requestParam.name());
+		return (Map.class.isAssignableFrom(type) && !StringUtils.hasText(requestParam.name()));
 	}
 
 
 	@Override
-	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public Object resolveArgumentValue(
+			MethodParameter methodParameter, BindingContext context, ServerWebExchange exchange) {
 
 		boolean isMultiValueMap = MultiValueMap.class.isAssignableFrom(methodParameter.getParameterType());
 		MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
-		return isMultiValueMap ? queryParams : queryParams.toSingleValueMap();
+		return (isMultiValueMap ? queryParams : queryParams.toSingleValueMap());
 	}
 
 }

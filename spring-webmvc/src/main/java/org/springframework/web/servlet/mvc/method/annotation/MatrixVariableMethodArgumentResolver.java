@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.MissingMatrixVariableException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -34,10 +36,12 @@ import org.springframework.web.method.annotation.AbstractNamedValueMethodArgumen
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Resolves method arguments annotated with {@link MatrixVariable @MatrixVariable}.
+ * Resolves arguments annotated with {@link MatrixVariable @MatrixVariable}.
  *
- * <p>If the method parameter is of type Map and no name is specified, then it will
- * by resolved by the {@link MatrixVariableMapMethodArgumentResolver} instead.
+ * <p>If the method parameter is of type {@link Map} it will by resolved by
+ * {@link MatrixVariableMapMethodArgumentResolver} instead unless the annotation
+ * specifies a name in which case it is considered to be a single attribute of
+ * type map (vs multiple attributes collected in a map).
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -71,6 +75,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 
 	@Override
 	@SuppressWarnings("unchecked")
+	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
 		Map<String, MultiValueMap<String, String>> pathParameters = (Map<String, MultiValueMap<String, String>>)
 				request.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
@@ -118,12 +123,11 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new ServletRequestBindingException("Missing matrix variable '" + name +
-				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
+		throw new MissingMatrixVariableException(name, parameter);
 	}
 
 
-	private static class MatrixVariableNamedValueInfo extends NamedValueInfo {
+	private static final class MatrixVariableNamedValueInfo extends NamedValueInfo {
 
 		private MatrixVariableNamedValueInfo(MatrixVariable annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

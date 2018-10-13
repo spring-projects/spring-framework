@@ -28,6 +28,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,7 +36,6 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
-import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -55,7 +55,7 @@ public class InitBinderBindingContextTests {
 
 	@Test
 	public void createBinder() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, null);
 
@@ -68,7 +68,7 @@ public class InitBinderBindingContextTests {
 		ConversionService conversionService = new DefaultFormattingConversionService();
 		bindingInitializer.setConversionService(conversionService);
 
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, null);
 
@@ -77,7 +77,7 @@ public class InitBinderBindingContextTests {
 
 	@Test
 	public void createBinderWithAttrName() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, "foo");
 
@@ -87,7 +87,7 @@ public class InitBinderBindingContextTests {
 
 	@Test
 	public void createBinderWithAttrNameNoMatch() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, "invalidName");
 
@@ -96,7 +96,7 @@ public class InitBinderBindingContextTests {
 
 	@Test
 	public void createBinderNullAttrName() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, null);
 
@@ -105,15 +105,16 @@ public class InitBinderBindingContextTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void returnValueNotExpected() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderReturnValue", WebDataBinder.class);
 		context.createDataBinder(exchange, null, "invalidName");
 	}
 
 	@Test
 	public void createBinderTypeConversion() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("/path?requestParam=22").toExchange();
-		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path?requestParam=22").build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.argumentResolvers.add(new RequestParamMethodArgumentResolver(null, adapterRegistry, false));
 
 		BindingContext context = createBindingContext("initBinderTypeConversion", WebDataBinder.class, int.class);

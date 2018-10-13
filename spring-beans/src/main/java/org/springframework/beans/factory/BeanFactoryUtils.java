@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
@@ -50,6 +52,13 @@ public abstract class BeanFactoryUtils {
 	 */
 	public static final String GENERATED_BEAN_NAME_SEPARATOR = "#";
 
+	/**
+	 * Cache from name with factory bean prefix to stripped name without dereference.
+	 * @since 5.1
+	 * @see BeanFactory#FACTORY_BEAN_PREFIX
+	 */
+	private static final Map<String, String> transformedBeanNameCache = new ConcurrentHashMap<>();
+
 
 	/**
 	 * Return whether the given name is a factory dereference
@@ -71,11 +80,16 @@ public abstract class BeanFactoryUtils {
 	 */
 	public static String transformedBeanName(String name) {
 		Assert.notNull(name, "'name' must not be null");
-		String beanName = name;
-		while (beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
-			beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());
+		if (!name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
+			return name;
 		}
-		return beanName;
+		return transformedBeanNameCache.computeIfAbsent(name, beanName -> {
+			do {
+				beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());
+			}
+			while (beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
+			return beanName;
+		});
 	}
 
 	/**
@@ -105,6 +119,8 @@ public abstract class BeanFactoryUtils {
 	}
 
 
+	// Retrieval of bean names
+
 	/**
 	 * Count all beans in any hierarchy in which this factory participates.
 	 * Includes counts of ancestor bean factories.
@@ -112,6 +128,7 @@ public abstract class BeanFactoryUtils {
 	 * with the same name) are only counted once.
 	 * @param lbf the bean factory
 	 * @return count of beans including those defined in ancestor factories
+	 * @see #beanNamesIncludingAncestors
 	 */
 	public static int countBeansIncludingAncestors(ListableBeanFactory lbf) {
 		return beanNamesIncludingAncestors(lbf).length;
@@ -139,6 +156,7 @@ public abstract class BeanFactoryUtils {
 	 * @param type the type that beans must match (as a {@code ResolvableType})
 	 * @return the array of matching bean names, or an empty array if none
 	 * @since 4.2
+	 * @see ListableBeanFactory#getBeanNamesForType(ResolvableType)
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, ResolvableType type) {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
@@ -148,14 +166,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				List<String> resultList = new ArrayList<>();
-				resultList.addAll(Arrays.asList(result));
-				for (String beanName : parentResult) {
-					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
-						resultList.add(beanName);
-					}
-				}
-				result = StringUtils.toStringArray(resultList);
+				result = mergeNamesWithParent(result, parentResult, hbf);
 			}
 		}
 		return result;
@@ -172,6 +183,7 @@ public abstract class BeanFactoryUtils {
 	 * @param lbf the bean factory
 	 * @param type the type that beans must match (as a {@code Class})
 	 * @return the array of matching bean names, or an empty array if none
+	 * @see ListableBeanFactory#getBeanNamesForType(Class)
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class<?> type) {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
@@ -181,14 +193,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				List<String> resultList = new ArrayList<>();
-				resultList.addAll(Arrays.asList(result));
-				for (String beanName : parentResult) {
-					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
-						resultList.add(beanName);
-					}
-				}
-				result = StringUtils.toStringArray(resultList);
+				result = mergeNamesWithParent(result, parentResult, hbf);
 			}
 		}
 		return result;
@@ -213,6 +218,7 @@ public abstract class BeanFactoryUtils {
 	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @param type the type that beans must match
 	 * @return the array of matching bean names, or an empty array if none
+	 * @see ListableBeanFactory#getBeanNamesForType(Class, boolean, boolean)
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(
 			ListableBeanFactory lbf, Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
@@ -224,18 +230,40 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				List<String> resultList = new ArrayList<>();
-				resultList.addAll(Arrays.asList(result));
-				for (String beanName : parentResult) {
-					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
-						resultList.add(beanName);
-					}
-				}
-				result = StringUtils.toStringArray(resultList);
+				result = mergeNamesWithParent(result, parentResult, hbf);
 			}
 		}
 		return result;
 	}
+
+	/**
+	 * Get all bean names whose {@code Class} has the supplied {@link Annotation}
+	 * type, including those defined in ancestor factories, without creating any bean
+	 * instances yet. Will return unique names in case of overridden bean definitions.
+	 * @param lbf the bean factory
+	 * @param annotationType the type of annotation to look for
+	 * @return the array of matching bean names, or an empty array if none
+	 * @since 5.0
+	 * @see ListableBeanFactory#getBeanNamesForAnnotation(Class)
+	 */
+	public static String[] beanNamesForAnnotationIncludingAncestors(
+			ListableBeanFactory lbf, Class<? extends Annotation> annotationType) {
+
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
+		String[] result = lbf.getBeanNamesForAnnotation(annotationType);
+		if (lbf instanceof HierarchicalBeanFactory) {
+			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
+			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+				String[] parentResult = beanNamesForAnnotationIncludingAncestors(
+						(ListableBeanFactory) hbf.getParentBeanFactory(), annotationType);
+				result = mergeNamesWithParent(result, parentResult, hbf);
+			}
+		}
+		return result;
+	}
+
+
+	// Retrieval of bean instances
 
 	/**
 	 * Return all beans of the given type or subtypes, also picking up beans defined in
@@ -253,6 +281,7 @@ public abstract class BeanFactoryUtils {
 	 * @param type type of bean to match
 	 * @return the Map of matching bean instances, or an empty Map if none
 	 * @throws BeansException if a bean could not be created
+	 * @see ListableBeanFactory#getBeansOfType(Class)
 	 */
 	public static <T> Map<String, T> beansOfTypeIncludingAncestors(ListableBeanFactory lbf, Class<T> type)
 			throws BeansException {
@@ -265,9 +294,9 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				parentResult.forEach((beanName, beanType) -> {
+				parentResult.forEach((beanName, beanInstance) -> {
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
-						result.put(beanName, beanType);
+						result.put(beanName, beanInstance);
 					}
 				});
 			}
@@ -300,6 +329,7 @@ public abstract class BeanFactoryUtils {
 	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @return the Map of matching bean instances, or an empty Map if none
 	 * @throws BeansException if a bean could not be created
+	 * @see ListableBeanFactory#getBeansOfType(Class, boolean, boolean)
 	 */
 	public static <T> Map<String, T> beansOfTypeIncludingAncestors(
 			ListableBeanFactory lbf, Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
@@ -313,16 +343,15 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				parentResult.forEach((beanName, beanType) -> {
+				parentResult.forEach((beanName, beanInstance) -> {
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
-						result.put(beanName, beanType);
+						result.put(beanName, beanInstance);
 					}
 				});
 			}
 		}
 		return result;
 	}
-
 
 	/**
 	 * Return a single bean of the given type or subtypes, also picking up beans
@@ -345,6 +374,7 @@ public abstract class BeanFactoryUtils {
 	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
 	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 * @throws BeansException if the bean could not be created
+	 * @see #beansOfTypeIncludingAncestors(ListableBeanFactory, Class)
 	 */
 	public static <T> T beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class<T> type)
 			throws BeansException {
@@ -381,6 +411,7 @@ public abstract class BeanFactoryUtils {
 	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
 	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 * @throws BeansException if the bean could not be created
+	 * @see #beansOfTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */
 	public static <T> T beanOfTypeIncludingAncestors(
 			ListableBeanFactory lbf, Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
@@ -405,6 +436,7 @@ public abstract class BeanFactoryUtils {
 	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
 	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 * @throws BeansException if the bean could not be created
+	 * @see ListableBeanFactory#getBeansOfType(Class)
 	 */
 	public static <T> T beanOfType(ListableBeanFactory lbf, Class<T> type) throws BeansException {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
@@ -435,6 +467,7 @@ public abstract class BeanFactoryUtils {
 	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
 	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 * @throws BeansException if the bean could not be created
+	 * @see ListableBeanFactory#getBeansOfType(Class, boolean, boolean)
 	 */
 	public static <T> T beanOfType(
 			ListableBeanFactory lbf, Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
@@ -443,6 +476,29 @@ public abstract class BeanFactoryUtils {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Map<String, T> beansOfType = lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit);
 		return uniqueBean(type, beansOfType);
+	}
+
+
+	/**
+	 * Merge the given bean names result with the given parent result.
+	 * @param result the local bean name result
+	 * @param parentResult the parent bean name result (possibly empty)
+	 * @param hbf the local bean factory
+	 * @return the merged result (possibly the local result as-is)
+	 * @since 4.3.15
+	 */
+	private static String[] mergeNamesWithParent(String[] result, String[] parentResult, HierarchicalBeanFactory hbf) {
+		if (parentResult.length == 0) {
+			return result;
+		}
+		List<String> merged = new ArrayList<>(result.length + parentResult.length);
+		merged.addAll(Arrays.asList(result));
+		for (String beanName : parentResult) {
+			if (!merged.contains(beanName) && !hbf.containsLocalBean(beanName)) {
+				merged.add(beanName);
+			}
+		}
+		return StringUtils.toStringArray(merged);
 	}
 
 	/**
@@ -454,11 +510,11 @@ public abstract class BeanFactoryUtils {
 	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 */
 	private static <T> T uniqueBean(Class<T> type, Map<String, T> matchingBeans) {
-		int nrFound = matchingBeans.size();
-		if (nrFound == 1) {
+		int count = matchingBeans.size();
+		if (count == 1) {
 			return matchingBeans.values().iterator().next();
 		}
-		else if (nrFound > 1) {
+		else if (count > 1) {
 			throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
 		}
 		else {

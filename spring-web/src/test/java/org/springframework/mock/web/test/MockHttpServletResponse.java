@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,28 +23,28 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
-
-import static java.time.format.DateTimeFormatter.*;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
@@ -54,13 +54,16 @@ import static java.time.format.DateTimeFormatter.*;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Brian Clozel
+ * @author Vedran Pavic
  * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
 
 	private static final String CHARSET_PREFIX = "charset=";
 
-	private static final ZoneId GMT = ZoneId.of("GMT");
+	private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
 	//---------------------------------------------------------------------
@@ -71,6 +74,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean writerAccessAllowed = true;
 
+	@Nullable
 	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 	private boolean charset = false;
@@ -79,10 +83,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private final ServletOutputStream outputStream = new ResponseServletOutputStream(this.content);
 
+	@Nullable
 	private PrintWriter writer;
 
 	private long contentLength = 0;
 
+	@Nullable
 	private String contentType;
 
 	private int bufferSize = 4096;
@@ -102,8 +108,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private int status = HttpServletResponse.SC_OK;
 
+	@Nullable
 	private String errorMessage;
 
+	@Nullable
 	private String forwardedUrl;
 
 	private final List<String> includedUrls = new ArrayList<>();
@@ -169,6 +177,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
+	@Nullable
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
@@ -191,12 +200,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public byte[] getContentAsByteArray() {
-		flushBuffer();
 		return this.content.toByteArray();
 	}
 
 	public String getContentAsString() throws UnsupportedEncodingException {
-		flushBuffer();
 		return (this.characterEncoding != null ?
 				this.content.toString(this.characterEncoding) : this.content.toString());
 	}
@@ -222,7 +229,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setContentType(String contentType) {
+	public void setContentType(@Nullable String contentType) {
 		this.contentType = contentType;
 		if (contentType != null) {
 			try {
@@ -245,6 +252,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
+	@Nullable
 	public String getContentType() {
 		return this.contentType;
 	}
@@ -292,7 +300,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.characterEncoding = null;
 		this.contentLength = 0;
 		this.contentType = null;
-		this.locale = null;
+		this.locale = Locale.getDefault();
 		this.cookies.clear();
 		this.headers.clear();
 		this.status = HttpServletResponse.SC_OK;
@@ -302,9 +310,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public void setLocale(Locale locale) {
 		this.locale = locale;
-		if (locale != null) {
-			doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag(), true);
-		}
+		doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, locale.toLanguageTag(), true);
 	}
 
 	@Override
@@ -348,13 +354,20 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		if (cookie.isHttpOnly()) {
 			buf.append("; HttpOnly");
 		}
+		if (cookie instanceof MockCookie) {
+			MockCookie mockCookie = (MockCookie) cookie;
+			if (StringUtils.hasText(mockCookie.getSameSite())) {
+				buf.append("; SameSite=").append(mockCookie.getSameSite());
+			}
+		}
 		return buf.toString();
 	}
 
 	public Cookie[] getCookies() {
-		return this.cookies.toArray(new Cookie[this.cookies.size()]);
+		return this.cookies.toArray(new Cookie[0]);
 	}
 
+	@Nullable
 	public Cookie getCookie(String name) {
 		Assert.notNull(name, "Cookie name must not be null");
 		for (Cookie cookie : this.cookies) {
@@ -390,6 +403,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @return the associated header value, or {@code null} if none
 	 */
 	@Override
+	@Nullable
 	public String getHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getStringValue() : null);
@@ -420,6 +434,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @param name the name of the header
 	 * @return the associated header value, or {@code null} if none
 	 */
+	@Nullable
 	public Object getHeaderValue(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getValue() : null);
@@ -498,6 +513,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		setCommitted(true);
 	}
 
+	@Nullable
 	public String getRedirectedUrl() {
 		return getHeader(HttpHeaders.LOCATION);
 	}
@@ -507,25 +523,33 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		setHeaderValue(name, formatDate(value));
 	}
 
-	public long getDateHeader(String name) {
-		try {
-			return ZonedDateTime.parse(getHeader(name), RFC_1123_DATE_TIME).toInstant().toEpochMilli();
-		}
-		catch (DateTimeParseException ex) {
-			throw new IllegalArgumentException(
-					"Value for header '" + name + "' is not a valid Date: " + getHeader(name));
-		}
-	}
-
 	@Override
 	public void addDateHeader(String name, long value) {
 		addHeaderValue(name, formatDate(value));
 	}
 
+	public long getDateHeader(String name) {
+		String headerValue = getHeader(name);
+		if (headerValue == null) {
+			return -1;
+		}
+		try {
+			return newDateFormat().parse(getHeader(name)).getTime();
+		}
+		catch (ParseException ex) {
+			throw new IllegalArgumentException(
+					"Value for header '" + name + "' is not a valid Date: " + headerValue);
+		}
+	}
+
 	private String formatDate(long date) {
-		Instant instant = Instant.ofEpochMilli(date);
-		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, GMT);
-		return RFC_1123_DATE_TIME.format(zonedDateTime);
+		return newDateFormat().format(new Date(date));
+	}
+
+	private DateFormat newDateFormat() {
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+		dateFormat.setTimeZone(GMT);
+		return dateFormat;
 	}
 
 	@Override
@@ -572,11 +596,16 @@ public class MockHttpServletResponse implements HttpServletResponse {
 					Integer.parseInt(value.toString()));
 			return true;
 		}
-		else if (HttpHeaders.ACCEPT_LANGUAGE.equalsIgnoreCase(name)) {
+		else if (HttpHeaders.CONTENT_LANGUAGE.equalsIgnoreCase(name)) {
 			HttpHeaders headers = new HttpHeaders();
-			headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
-			List<Locale> locales = headers.getAcceptLanguageAsLocales();
-			setLocale(locales.isEmpty() ? null : locales.get(0));
+			headers.add(HttpHeaders.CONTENT_LANGUAGE, value.toString());
+			Locale language = headers.getContentLanguage();
+			setLocale(language != null ? language : Locale.getDefault());
+			return true;
+		}
+		else if (HttpHeaders.SET_COOKIE.equalsIgnoreCase(name)) {
+			MockCookie cookie = MockCookie.parse(value.toString());
+			addCookie(cookie);
 			return true;
 		}
 		else {
@@ -620,6 +649,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.status;
 	}
 
+	@Nullable
 	public String getErrorMessage() {
 		return this.errorMessage;
 	}
@@ -629,21 +659,23 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	// Methods for MockRequestDispatcher
 	//---------------------------------------------------------------------
 
-	public void setForwardedUrl(String forwardedUrl) {
+	public void setForwardedUrl(@Nullable String forwardedUrl) {
 		this.forwardedUrl = forwardedUrl;
 	}
 
+	@Nullable
 	public String getForwardedUrl() {
 		return this.forwardedUrl;
 	}
 
-	public void setIncludedUrl(String includedUrl) {
+	public void setIncludedUrl(@Nullable String includedUrl) {
 		this.includedUrls.clear();
 		if (includedUrl != null) {
 			this.includedUrls.add(includedUrl);
 		}
 	}
 
+	@Nullable
 	public String getIncludedUrl() {
 		int count = this.includedUrls.size();
 		Assert.state(count <= 1,
@@ -697,7 +729,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 
 		@Override
-		public void write(char buf[], int off, int len) {
+		public void write(char[] buf, int off, int len) {
 			super.write(buf, off, len);
 			super.flush();
 			setCommittedIfBufferSizeExceeded();
@@ -720,6 +752,13 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		@Override
 		public void flush() {
 			super.flush();
+			setCommitted(true);
+		}
+
+		@Override
+		public void close() {
+			super.flush();
+			super.close();
 			setCommitted(true);
 		}
 	}

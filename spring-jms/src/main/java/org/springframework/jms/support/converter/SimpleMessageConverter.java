@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,11 +147,12 @@ public class SimpleMessageConverter implements MessageConverter {
 	protected MapMessage createMessageForMap(Map<?, ?> map, Session session) throws JMSException {
 		MapMessage message = session.createMapMessage();
 		for (Map.Entry<?, ?> entry : map.entrySet()) {
-			if (!(entry.getKey() instanceof String)) {
+			Object key = entry.getKey();
+			if (!(key instanceof String)) {
 				throw new MessageConversionException("Cannot convert non-String key of type [" +
-						ObjectUtils.nullSafeClassName(entry.getKey()) + "] to JMS MapMessage entry");
+						ObjectUtils.nullSafeClassName(key) + "] to JMS MapMessage entry");
 			}
-			message.setObject((String) entry.getKey(), entry.getValue());
+			message.setObject((String) key, entry.getValue());
 		}
 		return message;
 	}

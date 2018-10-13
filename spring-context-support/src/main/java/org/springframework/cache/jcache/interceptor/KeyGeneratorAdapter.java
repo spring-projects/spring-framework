@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,32 +25,36 @@ import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyInvocationContext;
 
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Spring's {@link KeyGenerator} implementation that either delegates to a
- * standard JSR-107 {@link javax.cache.annotation.CacheKeyGenerator}, or
- * wrap a standard {@link KeyGenerator} so that only relevant parameters
- * are handled.
+ * Spring's {@link KeyGenerator} implementation that either delegates to a standard JSR-107
+ * {@link javax.cache.annotation.CacheKeyGenerator}, or wrap a standard {@link KeyGenerator}
+ * so that only relevant parameters are handled.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  */
 class KeyGeneratorAdapter implements KeyGenerator {
 
 	private final JCacheOperationSource cacheOperationSource;
 
+	@Nullable
 	private KeyGenerator keyGenerator;
 
+	@Nullable
 	private CacheKeyGenerator cacheKeyGenerator;
+
 
 	/**
 	 * Create an instance with the given {@link KeyGenerator} so that {@link javax.cache.annotation.CacheKey}
 	 * and {@link javax.cache.annotation.CacheValue} are handled according to the spec.
 	 */
 	public KeyGeneratorAdapter(JCacheOperationSource cacheOperationSource, KeyGenerator target) {
-		Assert.notNull(cacheOperationSource, "cacheOperationSource must not be null.");
+		Assert.notNull(cacheOperationSource, "JCacheOperationSource must not be null");
 		Assert.notNull(target, "KeyGenerator must not be null");
 		this.cacheOperationSource = cacheOperationSource;
 		this.keyGenerator = target;
@@ -60,20 +64,24 @@ class KeyGeneratorAdapter implements KeyGenerator {
 	 * Create an instance used to wrap the specified {@link javax.cache.annotation.CacheKeyGenerator}.
 	 */
 	public KeyGeneratorAdapter(JCacheOperationSource cacheOperationSource, CacheKeyGenerator target) {
-		Assert.notNull(cacheOperationSource, "cacheOperationSource must not be null.");
-		Assert.notNull(target, "KeyGenerator must not be null");
+		Assert.notNull(cacheOperationSource, "JCacheOperationSource must not be null");
+		Assert.notNull(target, "CacheKeyGenerator must not be null");
 		this.cacheOperationSource = cacheOperationSource;
 		this.cacheKeyGenerator = target;
 	}
+
 
 	/**
 	 * Return the target key generator to use in the form of either a {@link KeyGenerator}
 	 * or a {@link CacheKeyGenerator}.
 	 */
 	public Object getTarget() {
-		return (this.keyGenerator != null ? this.keyGenerator : this.cacheKeyGenerator);
+		if (this.cacheKeyGenerator != null) {
+			return this.cacheKeyGenerator;
+		}
+		Assert.state(this.keyGenerator != null, "No key generator");
+		return this.keyGenerator;
 	}
-
 
 	@Override
 	public Object generate(Object target, Method method, Object... params) {
@@ -87,6 +95,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 			return this.cacheKeyGenerator.generateCacheKey(invocationContext);
 		}
 		else {
+			Assert.state(this.keyGenerator != null, "No key generator");
 			return doGenerate(this.keyGenerator, invocationContext);
 		}
 	}
@@ -104,15 +113,14 @@ class KeyGeneratorAdapter implements KeyGenerator {
 				parameters.add(value);
 			}
 		}
-		return keyGenerator.generate(context.getTarget(), context.getMethod(),
-				parameters.toArray(new Object[parameters.size()]));
-
+		return keyGenerator.generate(context.getTarget(), context.getMethod(), parameters.toArray());
 	}
 
 
 	@SuppressWarnings("unchecked")
-	private CacheKeyInvocationContext<?> createCacheKeyInvocationContext(Object target,
-			JCacheOperation<?> operation, Object[] params) {
+	private CacheKeyInvocationContext<?> createCacheKeyInvocationContext(
+			Object target, JCacheOperation<?> operation, Object[] params) {
+
 		AbstractJCacheKeyOperation<Annotation> keyCacheOperation = (AbstractJCacheKeyOperation<Annotation>) operation;
 		return new DefaultCacheKeyInvocationContext<>(keyCacheOperation, target, params);
 	}

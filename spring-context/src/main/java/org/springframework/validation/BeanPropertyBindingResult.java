@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link Errors} and {@link BindingResult}
@@ -108,7 +107,9 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * @see #getTarget()
 	 */
 	protected BeanWrapper createBeanWrapper() {
-		Assert.state(this.target != null, "Cannot access properties on null bean instance '" + getObjectName() + "'!");
+		if (this.target == null) {
+			throw new IllegalStateException("Cannot access properties on null bean instance '" + getObjectName() + "'");
+		}
 		return PropertyAccessorFactory.forBeanPropertyAccess(this.target);
 	}
 

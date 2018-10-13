@@ -1,0 +1,593 @@
+[[webflux-client]]
+= WebClient
+
+Spring WebFlux includes a reactive, non-blocking `WebClient` for HTTP requests. The client
+has a functional, fluent API with reactive types for declarative composition, see
+<<web-reactive.adoc#webflux-reactive-libraries>>. WebFlux client and server rely on the
+same non-blocking <<web-reactive.adoc#webflux-codecs,codecs>> to encode and decode request
+and response content.
+
+Internally `WebClient` delegates to an HTTP client library. By default, it uses
+https://github.com/reactor/reactor-netty[Reactor Netty], there is built-in support for
+the Jetty https://github.com/jetty-project/jetty-reactive-httpclient[reactive HtpClient],
+and others can be plugged in through a `ClientHttpConnector`.
+
+
+
+[[webflux-client-builder]]
+== Configuration
+
+The simplest way to create a `WebClient` is through one of the static factory methods:
+
+* `WebClient.create()`
+* `WebClient.create(String baseUrl)`
+
+The above methods use the Reactor Netty `HttpClient` with default settings and expect
+`io.projectreactor.netty:reactor-netty` to be on the classpath.
+
+You can also use `WebClient.builder()` with further options:
+
+* `uriBuilderFactory`: Customized `UriBuilderFactory` to use as a base URL.
+* `defaultHeader`: Headers for every request.
+* `defaultCookie`: Cookies for every request.
+* `defaultRequest`: `Consumer` to customize every request.
+* `filter`: Client filter for every request.
+* `exchangeStrategies`: HTTP message reader/writer customizations.
+* `clientConnector`: HTTP client library settings.
+
+The following example configures <<web-reactive.adoc#webflux-codecs,HTTP codecs>>:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	ExchangeStrategies strategies = ExchangeStrategies.builder()
+			.codecs(configurer -> {
+				// ...
+			})
+			.build();
+
+	WebClient client = WebClient.builder()
+			.exchangeStrategies(strategies)
+			.build();
+----
+====
+
+Once built, a `WebClient` instance is immutable. However, you can clone it and build a
+modified copy without affecting the original instance, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	WebClient client1 = WebClient.builder()
+			.filter(filterA).filter(filterB).build();
+
+	WebClient client2 = client1.mutate()
+			.filter(filterC).filter(filterD).build();
+
+	// client1 has filterA, filterB
+
+	// client2 has filterA, filterB, filterC, filterD
+----
+====
+
+
+
+[[webflux-client-builder-reactor]]
+=== Reactor Netty
+
+To customize Reactor Netty settings, simple provide a pre-configured `HttpClient`:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	HttpClient httpClient = HttpClient.create().secure(sslSpec -> ...);
+
+	WebClient webClient = WebClient.builder()
+			.clientConnector(new ReactorClientHttpConnector(httpClient))
+			.build();
+----
+====
+
+
+[[webflux-client-builder-reactor-resources]]
+==== Resources
+
+By default, `HttpClient` participates in the global Reactor Netty resources held in
+`reactor.netty.http.HttpResources`, including event loop threads and a connection pool.
+This is the recommended mode, since fixed, shared resources are preferred for event loop
+concurrency. In this mode global resources remain active until the process exits.
+
+If the server is timed with the process, there is typically no need for an explicit
+shutdown. However, if the server can start or stop in-process (for example, a Spring MVC
+application deployed as a WAR), you can declare a Spring-managed bean of type
+`ReactorResourceFactory` with `globalResources=true` (the default) to ensure that the Reactor
+Netty global resources are shut down when the Spring `ApplicationContext` is closed,
+as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	@Bean
+	public ReactorResourceFactory reactorResourceFactory() {
+		return new ReactorResourceFactory();
+	}
+----
+====
+
+You can also choose not to participate in the global Reactor Netty resources. However,
+in this mode, the burden is on you to ensure that all Reactor Netty client and server
+instances use shared resources, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	@Bean
+	public ReactorResourceFactory resourceFactory() {
+		ReactorResourceFactory factory = new ReactorResourceFactory();
+		factory.setGlobalResources(false); <1>
+		return factory;
+	}
+
+	@Bean
+	public WebClient webClient() {
+
+		Function<HttpClient, HttpClient> mapper = client -> {
+			// Further customizations...
+		};
+
+		ClientHttpConnector connector =
+				new ReactorClientHttpConnector(resourceFactory(), mapper); <2>
+
+		return WebClient.builder().clientConnector(connector).build(); <3>
+	}
+----
+<1> Create resources independent of global ones.
+<2> Use the `ReactorClientHttpConnector` constructor with resource factory.
+<3> Plug the connector into the `WebClient.Builder`.
+====
+
+
+[[webflux-client-builder-reactor-timeout]]
+==== Timeouts
+
+To configure a connection timeout:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+import io.netty.channel.ChannelOption;
+
+HttpClient httpClient = HttpClient.create()
+		.tcpConfiguration(client ->
+				client.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000));
+----
+====
+
+To configure a read and/or write timeout values:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
+
+HttpClient httpClient = HttpClient.create()
+		.tcpConfiguration(client ->
+				client.doOnConnected(conn -> conn
+						.addHandlerLast(new ReadTimeoutHandler(10))
+						.addHandlerLast(new WriteTimeoutHandler(10))));
+----
+====
+
+
+
+[[webflux-client-builder-jetty]]
+=== Jetty
+
+The following example shows how to customize Jetty `HttpClient` settings:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	HttpClient httpClient = new HttpClient();
+	httpClient.setCookieStore(...);
+	ClientHttpConnector connector = new JettyClientHttpConnector(httpClient);
+
+	WebClient webClient = WebClient.builder().clientConnector(connector).build();
+----
+====
+
+By default, `HttpClient` creates its own resources (`Executor`, `ByteBufferPool`, `Scheduler`),
+which remain active until the process exits or `stop()` is called.
+
+You can share resources between multiple instances of the Jetty client (and server) and
+ensure that the resources are shut down when the Spring `ApplicationContext` is closed by
+declaring a Spring-managed bean of type `JettyResourceFactory`, as the following example
+shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	@Bean
+	public JettyResourceFactory resourceFactory() {
+		return new JettyResourceFactory();
+	}
+
+	@Bean
+	public WebClient webClient() {
+
+		Consumer<HttpClient> customizer = client -> {
+			// Further customizations...
+		};
+
+		ClientHttpConnector connector =
+				new JettyClientHttpConnector(resourceFactory(), customizer); <1>
+
+		return WebClient.builder().clientConnector(connector).build(); <2>
+	}
+----
+<1> Use the `JettyClientHttpConnector` constructor with resource factory.
+<2> Plug the connector into the `WebClient.Builder`.
+====
+
+
+
+[[webflux-client-retrieve]]
+== `retrieve()`
+
+The `retrieve()` method is the easiest way to get a response body and decode it.
+The following example shows how to do so:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	WebClient client = WebClient.create("http://example.org");
+
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.bodyToMono(Person.class);
+----
+====
+
+You can also get a stream of objects decoded from the response, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Flux<Quote> result = client.get()
+			.uri("/quotes").accept(MediaType.TEXT_EVENT_STREAM)
+			.retrieve()
+			.bodyToFlux(Quote.class);
+----
+====
+
+By default, responses with 4xx or 5xx status codes result in an
+`WebClientResponseException` or one of its HTTP status specific sub-classes, such as
+`WebClientResponseException.BadRequest`, `WebClientResponseException.NotFound`, and others.
+You can also use the `onStatus` method to customize the resulting exception,
+as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.onStatus(HttpStatus::is4xxServerError, response -> ...)
+			.onStatus(HttpStatus::is5xxServerError, response -> ...)
+			.bodyToMono(Person.class);
+----
+====
+
+
+
+[[webflux-client-exchange]]
+== `exchange()`
+
+The `exchange()` method provides more control than the `retrieve` method. The following example is equivalent
+to `retrieve()` but also provides access to the `ClientResponse`:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.flatMap(response -> response.bodyToMono(Person.class));
+----
+====
+
+At this level, you can also create a full `ResponseEntity`:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Mono<ResponseEntity<Person>> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.flatMap(response -> response.toEntity(Person.class));
+----
+====
+
+Note that (unlike `retrieve()`), with `exchange()`, there are no automatic error signals for
+4xx and 5xx responses. You have to check the status code and decide how to proceed.
+
+CAUTION: When you use `exchange()`, you must always use any of the `body` or `toEntity` methods of
+`ClientResponse` to ensure resources are released and to avoid potential issues with HTTP
+connection pooling. You can use `bodyToMono(Void.class)` if no response content is
+expected. However, if the response does have content, the connection
+is closed and is not placed back in the pool.
+
+
+
+[[webflux-client-body]]
+== Request Body
+
+The request body can be encoded from an `Object`, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Mono<Person> personMono = ... ;
+
+	Mono<Void> result = client.post()
+			.uri("/persons/{id}", id)
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(personMono, Person.class)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+====
+
+You can also have a stream of objects be encoded, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Flux<Person> personFlux = ... ;
+
+	Mono<Void> result = client.post()
+			.uri("/persons/{id}", id)
+			.contentType(MediaType.APPLICATION_STREAM_JSON)
+			.body(personFlux, Person.class)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+====
+
+Alternatively, if you have the actual value, you can use the `syncBody` shortcut method,
+as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	Person person = ... ;
+
+	Mono<Void> result = client.post()
+			.uri("/persons/{id}", id)
+			.contentType(MediaType.APPLICATION_JSON)
+			.syncBody(person)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+====
+
+
+
+[[webflux-client-body-form]]
+=== Form Data
+
+To send form data, you can provide a `MultiValueMap<String, String>` as the body. Note that the
+content is automatically set to `application/x-www-form-urlencoded` by the
+`FormHttpMessageWriter`. The following example shows how to use `MultiValueMap<String, String>`:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	MultiValueMap<String, String> formData = ... ;
+
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.syncBody(formData)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+====
+
+You can also supply form data in-line by using `BodyInserters`, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	import static org.springframework.web.reactive.function.BodyInserters.*;
+
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.body(fromFormData("k1", "v1").with("k2", "v2"))
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+====
+
+
+
+[[webflux-client-body-multipart]]
+=== Multipart Data
+
+To send multipart data, you need to provide a `MultiValueMap<String, ?>` whose values are
+either `Object` instances that represent part content or `HttpEntity` instances that represent the content and
+headers for a part. `MultipartBodyBuilder` provides a convenient API to prepare a
+multipart request. The following example shows how to create a `MultiValueMap<String, ?>`:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	MultipartBodyBuilder builder = new MultipartBodyBuilder();
+	builder.part("fieldPart", "fieldValue");
+	builder.part("filePart", new FileSystemResource("...logo.png"));
+	builder.part("jsonPart", new Person("Jason"));
+
+	MultiValueMap<String, HttpEntity<?>> parts = builder.build();
+----
+
+In most cases, you do not have to specify the `Content-Type` for each part. The content
+type is determined automatically based on the `HttpMessageWriter` chosen to serialize it
+or, in the case of a `Resource`, based on the file extension. If necessary, you can
+explicitly provide the `MediaType` to use for each part through one of the overloaded
+builder `part` methods.
+
+Once a `MultiValueMap` is prepared, the easiest way to pass it to the the `WebClient` is
+through the `syncBody` method, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	MultipartBodyBuilder builder = ...;
+
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.syncBody(**builder.build()**)
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+====
+
+If the `MultiValueMap` contains at least one non-`String` value, which could also
+represent regular form data (that is, `application/x-www-form-urlencoded`), you need not
+set the `Content-Type` to `multipart/form-data`. This is always the case when using
+`MultipartBodyBuilder`, which ensures an `HttpEntity` wrapper.
+
+As an alternative to `MultipartBodyBuilder`, you can also provide multipart content,
+inline-style, through the built-in `BodyInserters`, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+	import static org.springframework.web.reactive.function.BodyInserters.*;
+
+	Mono<Void> result = client.post()
+			.uri("/path", id)
+			.body(fromMultipartData("fieldPart", "value").with("filePart", resource))
+			.retrieve()
+			.bodyToMono(Void.class);
+----
+====
+
+
+
+[[webflux-client-filter]]
+== Client Filters
+
+You can register a client filter (`ExchangeFilterFunction`) through the `WebClient.Builder`
+in order to intercept and modify requests, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+WebClient client = WebClient.builder()
+		.filter((request, next) -> {
+
+			ClientRequest filtered = ClientRequest.from(request)
+					.header("foo", "bar")
+					.build();
+
+			return next.exchange(filtered);
+		})
+		.build();
+----
+====
+
+This can be used for cross-cutting concerns, such as authentication. The following example uses
+a filter for basic authentication through a static factory method:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+
+// static import of ExchangeFilterFunctions.basicAuthentication
+
+WebClient client = WebClient.builder()
+		.filter(basicAuthentication("user", "password"))
+		.build();
+----
+====
+
+Filters apply globally to every request. To change a filter's behavior for a specific
+request, you can add request attributes to the `ClientRequest` that can then be accessed
+by all filters in the chain, as the following example shows:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+WebClient client = WebClient.builder()
+		.filter((request, next) -> {
+			Optional<Object> usr = request.attribute("myAttribute");
+			// ...
+		})
+		.build();
+
+client.get().uri("http://example.org/")
+		.attribute("myAttribute", "...")
+		.retrieve()
+		.bodyToMono(Void.class);
+
+	}
+----
+====
+
+You can also replicate an existing `WebClient`, insert new filters, or remove already
+registered filters. The following example, inserts a basic authentication filter at
+index 0:
+
+====
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+
+// static import of ExchangeFilterFunctions.basicAuthentication
+
+WebClient client = webClient.mutate()
+		.filters(filterList -> {
+			filterList.add(0, basicAuthentication("user", "password"));
+		})
+		.build();
+----
+====
+
+
+
+[[webflux-client-testing]]
+== Testing
+
+To test code that uses the `WebClient`, you can use a mock web server, such as the
+https://github.com/square/okhttp#mockwebserver[OkHttp MockWebServer]. To see an example
+of its use, check out
+https://github.com/spring-projects/spring-framework/blob/master/spring-webflux/src/test/java/org/springframework/web/reactive/function/client/WebClientIntegrationTests.java[`WebClientIntegrationTests`]
+in the Spring Framework test suite or the
+https://github.com/square/okhttp/tree/master/samples/static-server[`static-server`]
+sample in the OkHttp repository.

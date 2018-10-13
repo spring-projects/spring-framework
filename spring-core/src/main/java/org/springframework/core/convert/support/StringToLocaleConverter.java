@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,26 @@ package org.springframework.core.convert.support;
 import java.util.Locale;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
  * Converts from a String to a {@link java.util.Locale}.
  *
+ * <p>Accepts the classic {@link Locale} String format ({@link Locale#toString()})
+ * as well as BCP 47 language tags ({@link Locale#forLanguageTag} on Java 7+).
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
- * @see StringUtils#parseLocaleString
+ * @see StringUtils#parseLocale
  */
 final class StringToLocaleConverter implements Converter<String, Locale> {
 
 	@Override
+	@Nullable
 	public Locale convert(String source) {
-		return StringUtils.parseLocaleString(source);
+		return StringUtils.parseLocale(source);
 	}
 
 }

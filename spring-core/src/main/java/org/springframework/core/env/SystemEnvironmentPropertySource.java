@@ -88,6 +88,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 * any underscore/uppercase variant thereof exists in this property source.
 	 */
 	@Override
+	@Nullable
 	public Object getProperty(String name) {
 		String actualName = resolvePropertyName(name);
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {

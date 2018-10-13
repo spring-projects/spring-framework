@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,22 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.io.IOException;
-import java.security.Principal;
+import java.util.function.Supplier;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.server.reactive.AbstractServerHttpRequest;
+import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.http.server.reactive.ServletServerHttpRequest;
-import org.springframework.http.server.reactive.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -43,7 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * A {@link RequestUpgradeStrategy} for use with Jetty.
- * 
+ *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -53,6 +54,9 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	private static final ThreadLocal<WebSocketHandlerContainer> adapterHolder =
 			new NamedThreadLocal<>("JettyWebSocketHandlerAdapter");
 
+
+	@Nullable
+	private WebSocketPolicy webSocketPolicy;
 
 	@Nullable
 	private WebSocketServerFactory factory;
@@ -65,6 +69,24 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	private final Object lifecycleMonitor = new Object();
 
 
+	/**
+	 * Configure a {@link WebSocketPolicy} to use to initialize
+	 * {@link WebSocketServerFactory}.
+	 * @param webSocketPolicy the WebSocket settings
+	 */
+	public void setWebSocketPolicy(WebSocketPolicy webSocketPolicy) {
+		this.webSocketPolicy = webSocketPolicy;
+	}
+
+	/**
+	 * Return the configured {@link WebSocketPolicy}, if any.
+	 */
+	@Nullable
+	public WebSocketPolicy getWebSocketPolicy() {
+		return this.webSocketPolicy;
+	}
+
+
 	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
@@ -72,7 +94,9 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			if (!isRunning() && servletContext != null) {
 				this.running = true;
 				try {
-					this.factory = new WebSocketServerFactory(servletContext);
+					this.factory = (this.webSocketPolicy != null ?
+							new WebSocketServerFactory(servletContext, this.webSocketPolicy) :
+							new WebSocketServerFactory(servletContext));
 					this.factory.setCreator((request, response) -> {
 						WebSocketHandlerContainer container = adapterHolder.get();
 						String protocol = container.getProtocol();
@@ -114,19 +138,20 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
+			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
+
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(handler,
-				session -> {
-					HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
-					DataBufferFactory factory = response.bufferFactory();
-					return new JettyWebSocketSession(session, info, factory);
-				});
+		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
+		DataBufferFactory factory = response.bufferFactory();
+
+		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(
+				handler, session -> new JettyWebSocketSession(session, handshakeInfo, factory));
 
 		startLazily(servletRequest);
 
@@ -149,19 +174,13 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	}
 
 	private HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
-		Assert.isInstanceOf(ServletServerHttpRequest.class, request, "ServletServerHttpRequest required");
-		return ((ServletServerHttpRequest) request).getServletRequest();
+		Assert.isInstanceOf(AbstractServerHttpRequest.class, request);
+		return ((AbstractServerHttpRequest) request).getNativeRequest();
 	}
 
 	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
-		Assert.isInstanceOf(ServletServerHttpResponse.class, response, "ServletServerHttpResponse required");
-		return ((ServletServerHttpResponse) response).getServletResponse();
-	}
-
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, @Nullable String protocol) {
-		ServerHttpRequest request = exchange.getRequest();
-		Mono<Principal> principal = exchange.getPrincipal();
-		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
+		Assert.isInstanceOf(AbstractServerHttpResponse.class, response);
+		return ((AbstractServerHttpResponse) response).getNativeResponse();
 	}
 
 	private void startLazily(HttpServletRequest request) {

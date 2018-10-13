@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class MethodInvocationException extends PropertyAccessException {
 
 	/**
 	 * Create a new MethodInvocationException.
-	 * @param propertyChangeEvent PropertyChangeEvent that resulted in an exception
+	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in an exception
 	 * @param cause the Throwable raised by the invoked method
 	 */
 	public MethodInvocationException(PropertyChangeEvent propertyChangeEvent, Throwable cause) {

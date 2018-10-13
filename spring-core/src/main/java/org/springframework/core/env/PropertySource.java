@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Chris Beams
  * @since 3.1
+ * @param <T> the source type
  * @see PropertySources
  * @see PropertyResolver
  * @see PropertySourcesPropertyResolver
@@ -88,7 +89,7 @@ public abstract class PropertySource<T> {
 
 
 	/**
-	 * Return the name of this {@code PropertySource}
+	 * Return the name of this {@code PropertySource}.
 	 */
 	public String getName() {
 		return this.name;
@@ -131,9 +132,9 @@ public abstract class PropertySource<T> {
 	 * <p>No properties other than {@code name} are evaluated.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (this == obj || (obj instanceof PropertySource &&
-				ObjectUtils.nullSafeEquals(this.name, ((PropertySource<?>) obj).name)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof PropertySource &&
+				ObjectUtils.nullSafeEquals(this.name, ((PropertySource<?>) other).name)));
 	}
 
 	/**
@@ -210,6 +211,7 @@ public abstract class PropertySource<T> {
 		 * Always returns {@code null}.
 		 */
 		@Override
+		@Nullable
 		public String getProperty(String name) {
 			return null;
 		}
@@ -217,6 +219,9 @@ public abstract class PropertySource<T> {
 
 
 	/**
+	 * A {@code PropertySource} implementation intended for collection comparison
+	 * purposes.
+	 *
 	 * @see PropertySource#named(String)
 	 */
 	static class ComparisonPropertySource extends StubPropertySource {
@@ -239,6 +244,7 @@ public abstract class PropertySource<T> {
 		}
 
 		@Override
+		@Nullable
 		public String getProperty(String name) {
 			throw new UnsupportedOperationException(USAGE_ERROR);
 		}

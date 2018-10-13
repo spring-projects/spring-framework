@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,9 @@ import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 
 /**
- * Custom JSP tag to look up a message in the scope of this page. Messages are
- * resolved using the ApplicationContext and thus support internationalization.
+ * The {@code <message>} tag looks up a message in the scope of this page.
+ * Messages are resolved using the ApplicationContext and thus support
+ * internationalization.
  *
  * <p>Detects an HTML escaping setting, either on this tag instance, the page level,
  * or the {@code web.xml} level. Can also apply JavaScript escaping.
@@ -45,6 +46,91 @@ import org.springframework.web.util.TagUtils;
  *
  * <p>Message arguments can be specified via the {@link #setArguments(Object) arguments}
  * attribute or by using nested {@code <spring:argument>} tags.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr>
+ * <td>arguments</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Set optional message arguments for this tag, as a (comma-)delimited
+ * String (each String argument can contain JSP EL), an Object array (used as
+ * argument array), or a single Object (used as single argument).</td>
+ * </tr>
+ * <tr>
+ * <td>argumentSeparator</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The separator character to be used for splitting the arguments string
+ * value; defaults to a 'comma' (',').</td>
+ * </tr>
+ * <tr>
+ * <td>code</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The code (key) to use when looking up the message.
+ * If code is not provided, the text attribute will be used.</td>
+ * </tr>
+ * <tr>
+ * <td>htmlEscape</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Set HTML escaping for this tag, as boolean value.
+ * Overrides the default HTML escaping setting for the current page.</td>
+ * </tr>
+ * <tr>
+ * <td>javaScriptEscape</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Set JavaScript escaping for this tag, as boolean value.
+ * Default is false.</td>
+ * </tr>
+ * <tr>
+ * <td>message</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>A MessageSourceResolvable argument (direct or through JSP EL).
+ * Fits nicely when used in conjunction with Spring’s own validation error
+ * classes which all implement the MessageSourceResolvable interface.
+ * For example, this allows you to iterate over all of the errors in a form,
+ * passing each error (using a runtime expression) as the value of this
+ * 'message' attribute, thus effecting the easy display of such error
+ * messages.</td>
+ * </tr>
+ * <tr>
+ * <td>scope</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The scope to use when exporting the result to a variable. This attribute
+ * is only used when var is also set. Possible values are page, request, session
+ * and application.</td>
+ * </tr>
+ * <tr>
+ * <td>text</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Default text to output when a message for the given code could not be
+ * found. If both text and code are not set, the tag will output null.</td>
+ * </tr>
+ * <tr>
+ * <td>var</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The string to use when binding the result to the page, request, session
+ * or application scope. If not specified, the result gets outputted to the writer
+ * (i.e. typically directly to the JSP).</td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -61,7 +147,7 @@ import org.springframework.web.util.TagUtils;
 public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 
 	/**
-	 * Default separator for splitting an arguments String: a comma (",")
+	 * Default separator for splitting an arguments String: a comma (",").
 	 */
 	public static final String DEFAULT_ARGUMENT_SEPARATOR = ",";
 
@@ -192,7 +278,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 
 			// Expose as variable, if demanded, else write to the page.
 			if (this.var != null) {
-				pageContext.setAttribute(this.var, msg, TagUtils.getScope(this.scope));
+				this.pageContext.setAttribute(this.var, msg, TagUtils.getScope(this.scope));
 			}
 			else {
 				writeMessage(msg);
@@ -213,6 +299,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 		super.release();
 		this.arguments = null;
 	}
+
 
 	/**
 	 * Resolve the specified message into a concrete message String.
@@ -236,8 +323,9 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 
 			if (this.text != null) {
 				// We have a fallback text to consider.
-				return messageSource.getMessage(
+				String msg = messageSource.getMessage(
 						this.code, argumentsArray, this.text, getRequestContext().getLocale());
+				return (msg != null ? msg : "");
 			}
 			else {
 				// We have no fallback text to consider.
@@ -306,7 +394,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeMessage(String msg) throws IOException {
-		pageContext.getOut().write(String.valueOf(msg));
+		this.pageContext.getOut().write(String.valueOf(msg));
 	}
 
 	/**

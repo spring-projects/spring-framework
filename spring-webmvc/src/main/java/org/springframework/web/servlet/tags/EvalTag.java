@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,59 @@ import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 
 /**
- * JSP tag for evaluating expressions with the Spring Expression Language (SpEL).
- * Supports the standard JSP evaluation context consisting of implicit variables and scoped attributes.
+ * The {@code <eval>} tag evaluates a Spring expression (SpEL) and either prints
+ * the result or assigns it to a variable. Supports the standard JSP evaluation
+ * context consisting of implicit variables and scoped attributes.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr>
+ * <td>expression</td>
+ * <td>true</td>
+ * <td>true</td>
+ * <td>The expression to evaluate.</td>
+ * </tr>
+ * <tr>
+ * <td>htmlEscape</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Set HTML escaping for this tag, as a boolean value.
+ * Overrides the default HTML escaping setting for the current page.</td>
+ * </tr>
+ * <tr>
+ * <td>javaScriptEscape</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Set JavaScript escaping for this tag, as a boolean value.
+ * Default is false.</td>
+ * </tr>
+ * <tr>
+ * <td>scope</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The scope for the var. 'application', 'session', 'request' and 'page'
+ * scopes are supported. Defaults to page scope. This attribute has no effect
+ * unless the var attribute is also defined.</td>
+ * </tr>
+ * <tr>
+ * <td>var</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The name of the variable to export the evaluation result to.
+ * If not specified the evaluation result is converted to a String and written
+ * as output.</td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -168,6 +219,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		}
 
 		@Override
+		@Nullable
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
@@ -197,6 +249,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nullable
 		private Object resolveImplicitVariable(String name) throws AccessException {
 			if (this.variableResolver == null) {
 				return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,9 +67,9 @@ public class BooleanComparator implements Comparator<Boolean>, Serializable {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		return (this == obj ||
-				(obj instanceof BooleanComparator && (this.trueLow == ((BooleanComparator) obj).trueLow)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof BooleanComparator &&
+				this.trueLow == ((BooleanComparator) other).trueLow));
 	}
 
 	@Override

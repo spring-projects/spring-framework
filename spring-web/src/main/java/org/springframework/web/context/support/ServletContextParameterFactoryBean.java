@@ -66,6 +66,7 @@ public class ServletContextParameterFactoryBean implements FactoryBean<String>, 
 
 
 	@Override
+	@Nullable
 	public String getObject() {
 		return this.paramValue;
 	}

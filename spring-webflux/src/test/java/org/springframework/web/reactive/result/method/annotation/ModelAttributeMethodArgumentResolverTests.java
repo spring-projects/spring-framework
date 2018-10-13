@@ -32,6 +32,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -74,7 +75,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@Test
 	public void supports() throws Exception {
 		ModelAttributeMethodArgumentResolver resolver =
-				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
+				new ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance(), false);
 
 		MethodParameter param = this.testMethod.annotPresent(ModelAttribute.class).arg(Foo.class);
 		assertTrue(resolver.supportsParameter(param));
@@ -92,7 +93,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@Test
 	public void supportsWithDefaultResolution() throws Exception {
 		ModelAttributeMethodArgumentResolver resolver =
-				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), true);
+				new ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance(), true);
 
 		MethodParameter param = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
 		assertTrue(resolver.supportsParameter(param));
@@ -301,16 +302,17 @@ public class ModelAttributeMethodArgumentResolverTests {
 		assertTrue(map.get(bindingResultKey) instanceof BindingResult);
 	}
 
+	// TODO: SPR-15871, SPR-15542
+
 
 	private ModelAttributeMethodArgumentResolver createResolver() {
-		return new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
+		return new ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance(), false);
 	}
 
 	private ServerWebExchange postForm(String formData) throws URISyntaxException {
-		return MockServerHttpRequest.post("/")
+		return MockServerWebExchange.from(MockServerHttpRequest.post("/")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body(formData)
-				.toExchange();
+				.body(formData));
 	}
 
 
@@ -359,6 +361,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Bar {
 
 		private final String name;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,7 @@ public class StoredProcedureTests {
 		t.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
 
-		assertEquals(sp.execute(11), 5);
+		assertEquals(5, sp.execute(11));
 		assertEquals(1, t.calls);
 
 		verify(callableStatement).setObject(1, 11, Types.INTEGER);
@@ -216,7 +216,7 @@ public class StoredProcedureTests {
 		JdbcTemplate t = new JdbcTemplate();
 		t.setDataSource(dataSource);
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
-		assertEquals(sp.execute(1106), 4);
+		assertEquals(4, sp.execute(1106));
 		verify(callableStatement).setObject(1, 1106, Types.INTEGER);
 		verify(callableStatement).registerOutParameter(2, Types.INTEGER);
 	}
@@ -688,14 +688,10 @@ public class StoredProcedureTests {
 			setDataSource(ds);
 			setSql(SQL);
 			getJdbcTemplate().setExceptionTranslator(new SQLExceptionTranslator() {
-
 				@Override
-				@Nullable
-				public DataAccessException translate(String task, @Nullable String sql,
-						SQLException sqlex) {
-					return new CustomDataException(sql, sqlex);
+				public DataAccessException translate(String task, @Nullable String sql, SQLException ex) {
+					return new CustomDataException(sql, ex);
 				}
-
 			});
 			compile();
 		}

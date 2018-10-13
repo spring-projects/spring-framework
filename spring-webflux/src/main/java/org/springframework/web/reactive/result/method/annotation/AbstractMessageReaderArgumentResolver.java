@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -62,6 +62,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * failure results in an {@link ServerWebInputException}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public abstract class AbstractMessageReaderArgumentResolver extends HandlerMethodArgumentResolverSupport {
@@ -80,7 +81,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 * @param readers readers to convert from the request body
 	 */
 	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> readers) {
-		this(readers, new ReactiveAdapterRegistry());
+		this(readers, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 	/**
@@ -88,8 +89,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 * @param messageReaders readers to convert from the request body
 	 * @param adapterRegistry for adapting to other reactive types from Flux and Mono
 	 */
-	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders,
-			ReactiveAdapterRegistry adapterRegistry) {
+	protected AbstractMessageReaderArgumentResolver(
+			List<HttpMessageReader<?>> messageReaders, ReactiveAdapterRegistry adapterRegistry) {
 
 		super(adapterRegistry);
 		Assert.notEmpty(messageReaders, "At least one HttpMessageReader is required");
@@ -109,13 +110,41 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 
+	/**
+	 * Read the body from a method argument with {@link HttpMessageReader}.
+	 * @param bodyParameter the {@link MethodParameter} to read
+	 * @param isBodyRequired true if the body is required
+	 * @param bindingContext the binding context to use
+	 * @param exchange the current exchange
+	 * @return the body
+	 * @see #readBody(MethodParameter, MethodParameter, boolean, BindingContext, ServerWebExchange)
+	 */
 	protected Mono<Object> readBody(MethodParameter bodyParameter, boolean isBodyRequired,
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
-		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
+		return this.readBody(bodyParameter, null, isBodyRequired, bindingContext, exchange);
+	}
+
+	/**
+	 * Read the body from a method argument with {@link HttpMessageReader}.
+	 * @param bodyParam the {@link MethodParameter} to read
+	 * @param actualParam the actual {@link MethodParameter} to read; could be different
+	 * from {@code bodyParameter} when processing {@code HttpEntity} for example
+	 * @param isBodyRequired true if the body is required
+	 * @param bindingContext the binding context to use
+	 * @param exchange the current exchange
+	 * @return the body
+	 * @since 5.0.2
+	 */
+	protected Mono<Object> readBody(MethodParameter bodyParam, @Nullable MethodParameter actualParam,
+			boolean isBodyRequired, BindingContext bindingContext, ServerWebExchange exchange) {
+
+		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParam);
+		ResolvableType actualType = (actualParam != null ? ResolvableType.forMethodParameter(actualParam) : bodyType);
 		Class<?> resolvedType = bodyType.resolve();
 		ReactiveAdapter adapter = (resolvedType != null ? getAdapterRegistry().getAdapter(resolvedType) : null);
 		ResolvableType elementType = (adapter != null ? bodyType.getGeneric() : bodyType);
+		isBodyRequired = isBodyRequired || (adapter != null && !adapter.supportsEmpty());
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
@@ -123,40 +152,47 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		MediaType contentType = request.getHeaders().getContentType();
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 
+		if (logger.isDebugEnabled()) {
+			logger.debug(exchange.getLogPrefix() + (contentType != null ?
+					"Content-Type:" + contentType :
+					"No Content-Type, using " + MediaType.APPLICATION_OCTET_STREAM));
+		}
+
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
 			if (reader.canRead(elementType, mediaType)) {
-				Map<String, Object> readHints = Collections.emptyMap();
+				Map<String, Object> readHints = Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix());
 				if (adapter != null && adapter.isMultiValue()) {
-					Flux<?> flux = reader.read(bodyType, elementType, request, response, readHints);
-					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParameter, ex)));
-					if (isBodyRequired || !adapter.supportsEmpty()) {
-						flux = flux.switchIfEmpty(Flux.error(handleMissingBody(bodyParameter)));
+					if (logger.isDebugEnabled()) {
+						logger.debug(exchange.getLogPrefix() + "0..N [" + elementType + "]");
 					}
-					Object[] hints = extractValidationHints(bodyParameter);
+					Flux<?> flux = reader.read(actualType, elementType, request, response, readHints);
+					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParam, ex)));
+					if (isBodyRequired) {
+						flux = flux.switchIfEmpty(Flux.error(() -> handleMissingBody(bodyParam)));
+					}
+					Object[] hints = extractValidationHints(bodyParam);
 					if (hints != null) {
 						flux = flux.doOnNext(target ->
-								validate(target, hints, bodyParameter, bindingContext, exchange));
+								validate(target, hints, bodyParam, bindingContext, exchange));
 					}
 					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
 					// Single-value (with or without reactive type wrapper)
-					Mono<?> mono = reader.readMono(bodyType, elementType, request, response, readHints);
-					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParameter, ex)));
-					if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
-						mono = mono.switchIfEmpty(Mono.error(handleMissingBody(bodyParameter)));
+					if (logger.isDebugEnabled()) {
+						logger.debug(exchange.getLogPrefix() + "0..1 [" + elementType + "]");
 					}
-					Object[] hints = extractValidationHints(bodyParameter);
+					Mono<?> mono = reader.readMono(actualType, elementType, request, response, readHints);
+					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParam, ex)));
+					if (isBodyRequired) {
+						mono = mono.switchIfEmpty(Mono.error(() -> handleMissingBody(bodyParam)));
+					}
+					Object[] hints = extractValidationHints(bodyParam);
 					if (hints != null) {
 						mono = mono.doOnNext(target ->
-								validate(target, hints, bodyParameter, bindingContext, exchange));
+								validate(target, hints, bodyParam, bindingContext, exchange));
 					}
-					if (adapter != null) {
-						return Mono.just(adapter.fromPublisher(mono));
-					}
-					else {
-						return Mono.from(mono);
-					}
+					return (adapter != null ? Mono.just(adapter.fromPublisher(mono)) : Mono.from(mono));
 				}
 			}
 		}
@@ -167,15 +203,15 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		if (contentType == null && method != null && SUPPORTED_METHODS.contains(method)) {
 			Flux<DataBuffer> body = request.getBody().doOnNext(o -> {
 				// Body not empty, back to 415..
-				throw new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes);
+				throw new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes, elementType);
 			});
-			if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
-				body = body.switchIfEmpty(Mono.error(handleMissingBody(bodyParameter)));
+			if (isBodyRequired) {
+				body = body.switchIfEmpty(Mono.error(() -> handleMissingBody(bodyParam)));
 			}
 			return (adapter != null ? Mono.just(adapter.fromPublisher(body)) : Mono.from(body));
 		}
 
-		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
+		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes, elementType));
 	}
 
 	private Throwable handleReadError(MethodParameter parameter, Throwable ex) {

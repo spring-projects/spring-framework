@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String SEPARATOR = ".";
 
 	/**
-	 * Special key to distinguish {@code owner.(class)=com.myapp.MyClass}-
+	 * Special key to distinguish {@code owner.(class)=com.myapp.MyClass}.
 	 */
 	public static final String CLASS_KEY = "(class)";
 
@@ -247,10 +247,13 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public int loadBeanDefinitions(EncodedResource encodedResource, @Nullable String prefix)
 			throws BeanDefinitionStoreException {
 
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loading properties bean definitions from " + encodedResource);
+		}
+
 		Properties props = new Properties();
 		try {
-			InputStream is = encodedResource.getResource().getInputStream();
-			try {
+			try (InputStream is = encodedResource.getResource().getInputStream()) {
 				if (encodedResource.getEncoding() != null) {
 					getPropertiesPersister().load(props, new InputStreamReader(is, encodedResource.getEncoding()));
 				}
@@ -258,10 +261,12 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					getPropertiesPersister().load(props, is);
 				}
 			}
-			finally {
-				is.close();
+
+			int count = registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loaded " + count + " bean definitions from " + encodedResource);
 			}
-			return registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
+			return count;
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException("Could not parse properties from " + encodedResource.getResource(), ex);
@@ -303,10 +308,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 
 	/**
-	 * Register bean definitions contained in a Map,
-	 * using all property keys (i.e. not filtering by prefix).
-	 * @param map Map: name -> property (String or Object). Property values
-	 * will be strings if coming from a Properties file etc. Property names
+	 * Register bean definitions contained in a Map, using all property keys (i.e. not
+	 * filtering by prefix).
+	 * @param map a map of {@code name} to {@code property} (String or Object). Property
+	 * values will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
@@ -319,8 +324,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Register bean definitions contained in a Map.
 	 * Ignore ineligible properties.
-	 * @param map Map name -> property (String or Object). Property values
-	 * will be strings if coming from a Properties file etc. Property names
+	 * @param map a map of {@code name} to {@code property} (String or Object). Property
+	 * values will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
 	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
 	 * (can be empty or {@code null})
@@ -334,9 +339,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Register bean definitions contained in a Map.
 	 * Ignore ineligible properties.
-	 * @param map Map name -> property (String or Object). Property values
-	 * will be strings if coming from a Properties file etc. Property names
-	 * (keys) <b>must</b> be strings. Class keys must be Strings.
+	 * @param map a map of {@code name} to {@code property} (String or Object). Property
+	 * values will be strings if coming from a Properties file etc. Property names
+	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
 	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
 	 * (can be empty or {@code null})
 	 * @param resourceDescription description of the resource that the
@@ -372,8 +377,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				}
 				if (sepIdx != -1) {
 					String beanName = nameAndProperty.substring(0, sepIdx);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found bean name '" + beanName + "'");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Found bean name '" + beanName + "'");
 					}
 					if (!getRegistry().containsBeanDefinition(beanName)) {
 						// If we haven't already registered it...
@@ -396,9 +401,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Get all property values, given a prefix (which will be stripped)
-	 * and add the bean they define to the factory with the given name
+	 * and add the bean they define to the factory with the given name.
 	 * @param beanName name of the bean to define
-	 * @param map Map containing string pairs
+	 * @param map a Map containing string pairs
 	 * @param prefix prefix of each entry, which will be stripped
 	 * @param resourceDescription description of the resource that the
 	 * Map came from (for logging purposes)
@@ -472,8 +477,8 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			}
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering bean definition for bean name '" + beanName + "' with " + pvs);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Registering bean definition for bean name '" + beanName + "' with " + pvs);
 		}
 
 		// Just use default parent if we're not dealing with the parent itself,
@@ -505,7 +510,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Reads the value of the entry. Correctly interprets bean references for
 	 * values that are prefixed with an asterisk.
 	 */
-	private Object readValue(Map.Entry<? ,?> entry) {
+	private Object readValue(Map.Entry<?, ?> entry) {
 		Object val = entry.getValue();
 		if (val instanceof String) {
 			String strVal = (String) val;

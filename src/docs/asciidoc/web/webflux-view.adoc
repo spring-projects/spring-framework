@@ -1,0 +1,301 @@
+[[webflux-view]]
+= View Technologies
+[.small]#<<web.adoc#mvc-view,Same as in Spring MVC>>#
+
+The use of view technologies in Spring WebFlux is pluggable. Whether you decide to
+use Thymeleaf, FreeMarker, or some other view technology is primarily a matter of a configuration change.
+This chapter covers the view technologies integrated with Spring WebFlux. We assume you are
+already familiar with <<webflux-viewresolution>>.
+
+
+
+[[webflux-view-thymeleaf]]
+== Thymeleaf
+[.small]#<<web.adoc#mvc-view-thymeleaf,Same as in Spring MVC>>#
+
+Thymeleaf is a modern server-side Java template engine that emphasizes natural HTML
+templates that can be previewed in a browser by double-clicking, which is very
+helpful for independent work on UI templates (for example, by a designer) without the need for a
+running server. Thymeleaf offers an extensive set of features, and it is actively developed
+and maintained. For a more complete introduction, see the
+http://www.thymeleaf.org/[Thymeleaf] project home page.
+
+The Thymeleaf integration with Spring WebFlux is managed by the Thymeleaf project. The
+configuration involves a few bean declarations, such as
+`SpringResourceTemplateResolver`, `SpringWebFluxTemplateEngine`, and
+`ThymeleafReactiveViewResolver`. For more details, see
+http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] and the WebFlux integration
+http://forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announcement].
+
+
+
+[[webflux-view-freemarker]]
+== FreeMarker
+[.small]#<<web.adoc#mvc-view-freemarker,Same as in Spring MVC>>#
+
+http://www.freemarker.org[Apache FreeMarker] is a template engine for generating any
+kind of text output from HTML to email and others. The Spring Framework has a built-in
+integration for using Spring WebFlux with FreeMarker templates.
+
+
+
+[[webflux-view-freemarker-contextconfig]]
+=== View Configuration
+[.small]#<<web.adoc#mvc-view-freemarker-contextconfig,Same as in Spring MVC>>#
+
+The following example shows how to configure FreeMarker as a view technology:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freemarker();
+		}
+
+		// Configure FreeMarker...
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setTemplateLoaderPath("classpath:/templates");
+			return configurer;
+		}
+	}
+----
+====
+
+Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`,
+shown in the preceding example. Given the preceding configuration, if your controller returns the view name,
+`welcome`, the resolver looks for the
+`classpath:/templates/freemarker/welcome.ftl` template.
+
+
+
+[[webflux-views-freemarker]]
+=== FreeMarker Configuration
+[.small]#<<web.adoc#mvc-views-freemarker,Same as in Spring MVC>>#
+
+You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
+`Configuration` object (managed by Spring) by setting the appropriate bean properties on
+the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
+`java.util.Properties` object, and the `freemarkerVariables` property requires a
+`java.util.Map`. The following example shows how to use a `FreeMarkerConfigurer`:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		// ...
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			Map<String, Object> variables = new HashMap<>();
+			variables.put("xml_escape", new XmlEscape());
+
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setTemplateLoaderPath("classpath:/templates");
+			configurer.setFreemarkerVariables(variables);
+			return configurer;
+		}
+	}
+----
+====
+
+See the FreeMarker documentation for details of settings and variables as they apply to
+the `Configuration` object.
+
+
+
+[[webflux-view-script]]
+== Script Views
+[.small]#<<web.adoc#mvc-view-script,Same as in Spring MVC>>#
+
+The Spring Framework has a built-in integration for using Spring WebFlux with any
+templating library that can run on top of the
+https://www.jcp.org/en/jsr/detail?id=223[JSR-223] Java scripting engine.
+The following table shows the templating libraries that we have tested on different script engines:
+
+[%header]
+|===
+|Scripting Library |Scripting Engine
+|http://handlebarsjs.com/[Handlebars] |http://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://mustache.github.io/[Mustache] |http://openjdk.java.net/projects/nashorn/[Nashorn]
+|http://facebook.github.io/react/[React] |http://openjdk.java.net/projects/nashorn/[Nashorn]
+|http://www.embeddedjs.com/[EJS] |http://openjdk.java.net/projects/nashorn/[Nashorn]
+|http://www.stuartellis.eu/articles/erb/[ERB] |http://jruby.org[JRuby]
+|https://docs.python.org/2/library/string.html#template-strings[String templates] |http://www.jython.org/[Jython]
+|https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |http://kotlinlang.org/[Kotlin]
+|===
+
+TIP: The basic rule for integrating any other script engine is that it must implement the
+`ScriptEngine` and `Invocable` interfaces.
+
+
+
+[[webflux-view-script-dependencies]]
+=== Requirements
+[.small]#<<web.adoc#mvc-view-script-dependencies,Same as in Spring MVC>>#
+
+You need to have the script engine on your classpath, the details of which vary by script engine:
+
+* The http://openjdk.java.net/projects/nashorn/[Nashorn] JavaScript engine is provided with
+Java 8+. Using the latest update release available is highly recommended.
+* http://jruby.org[JRuby] should be added as a dependency for Ruby support.
+* http://www.jython.org[Jython] should be added as a dependency for Python support.
+* `org.jetbrains.kotlin:kotlin-script-util` dependency and a `META-INF/services/javax.script.ScriptEngineFactory`
+ file containing a `org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory`
+ line should be added for Kotlin script support. See
+ https://github.com/sdeleuze/kotlin-script-templating[this example] for more detail.
+
+You need to have the script templating library. One way to do that for Javascript is
+through http://www.webjars.org/[WebJars].
+
+
+
+[[webflux-view-script-integrate]]
+=== Script Templates
+[.small]#<<web.adoc#mvc-view-script-integrate,Same as in Spring MVC>>#
+
+You can declare a `ScriptTemplateConfigurer` bean to specify the script engine to use,
+the script files to load, what function to call to render templates, and so on.
+The following example uses Mustache templates and the Nashorn JavaScript engine:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.scriptTemplate();
+		}
+
+		@Bean
+		public ScriptTemplateConfigurer configurer() {
+			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
+			configurer.setEngineName("nashorn");
+			configurer.setScripts("mustache.js");
+			configurer.setRenderObject("Mustache");
+			configurer.setRenderFunction("render");
+			return configurer;
+		}
+	}
+----
+====
+
+The `render` function is called with the following parameters:
+
+* `String template`: The template content
+* `Map model`: The view model
+* `RenderingContext renderingContext`: The
+  {api-spring-framework}/web/servlet/view/script/RenderingContext.html[`RenderingContext`]
+  that gives access to the application context, the locale, the template loader, and the
+  URL (since 5.0)
+
+`Mustache.render()` is natively compatible with this signature, so you can call it directly.
+
+If your templating technology requires some customization, you can provide a script that
+implements a custom render function. For example, http://handlebarsjs.com[Handlerbars]
+needs to compile templates before using them and requires a
+http://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
+browser facilities not available in the server-side script engine.
+The following example shows how to set a custom render function:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.scriptTemplate();
+		}
+
+		@Bean
+		public ScriptTemplateConfigurer configurer() {
+			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
+			configurer.setEngineName("nashorn");
+			configurer.setScripts("polyfill.js", "handlebars.js", "render.js");
+			configurer.setRenderFunction("render");
+			configurer.setSharedEngine(false);
+			return configurer;
+		}
+	}
+----
+====
+
+NOTE: Setting the `sharedEngine` property to `false` is required when using non-thread-safe
+script engines with templating libraries not designed for concurrency, such as Handlebars or
+React running on Nashorn. In that case, Java 8u60 or greater is required, due
+to https://bugs.openjdk.java.net/browse/JDK-8076099[this bug].
+
+`polyfill.js` defines only the `window` object needed by Handlebars to run properly,
+as the following snippet shows:
+
+====
+[source,javascript,indent=0]
+[subs="verbatim,quotes"]
+----
+	var window = {};
+----
+====
+
+This basic `render.js` implementation compiles the template before using it. A production
+ready implementation should also store and reused cached templates or pre-compiled templates.
+This can be done on the script side, as well as any customization you need (managing
+template engine configuration for example).
+The following example shows how compile a template:
+
+====
+[source,javascript,indent=0]
+[subs="verbatim,quotes"]
+----
+	function render(template, model) {
+		var compiledTemplate = Handlebars.compile(template);
+		return compiledTemplate(model);
+	}
+----
+====
+
+Check out the Spring Framework unit tests,
+https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and
+https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/resources/org/springframework/web/reactive/result/view/script[resources],
+for more configuration examples.
+
+
+
+[[webflux-view-httpmessagewriter]]
+== JSON and XML
+[.small]#<<web.adoc#mvc-view-jackson,Same as in Spring MVC>>#
+
+For <<webflux-multiple-representations>> purposes, it is useful to be able to alternate
+between rendering a model with an HTML template or as other formats (such as JSON or XML),
+depending on the content type requested by the client. To support doing so, Spring WebFlux
+provides the `HttpMessageWriterView`, which you can use to plug in any of the available
+<<webflux-codecs>> from `spring-web`, such as `Jackson2JsonEncoder`,
+`Jackson2SmileEncoder`, or `Jaxb2XmlEncoder`.
+
+Unlike other view technologies, `HttpMessageWriterView` does not require a `ViewResolver`
+but is instead <<webflux-config-view-resolvers,configured>> as a default view. You can
+configure one or more such default views, wrapping different `HttpMessageWriter` instances or
+`Encoder` instances. The one that matches the requested content type is used at runtime.
+
+In most cases, a model contains multiple attributes. To determine which one
+to serialize, you can configure `HttpMessageWriterView` with the name of the model
+attribute to use for rendering. If the model contains only one attribute, that one is used.

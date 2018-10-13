@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 3.2
  */
-public abstract class SpringFactoriesLoader {
+public final class SpringFactoriesLoader {
 
 	/**
 	 * The location to look for factories.
@@ -74,6 +74,10 @@ public abstract class SpringFactoriesLoader {
 	private static final Map<ClassLoader, MultiValueMap<String, String>> cache = new ConcurrentReferenceHashMap<>();
 
 
+	private SpringFactoriesLoader() {
+	}
+
+
 	/**
 	 * Load and instantiate the factory implementations of the given type from
 	 * {@value #FACTORIES_RESOURCE_LOCATION}, using the given class loader.
@@ -82,9 +86,9 @@ public abstract class SpringFactoriesLoader {
 	 * to obtain all registered factory names.
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
-	 * @see #loadFactoryNames
 	 * @throws IllegalArgumentException if any factory implementation class cannot
 	 * be loaded or if an error occurs while instantiating any factory
+	 * @see #loadFactoryNames
 	 */
 	public static <T> List<T> loadFactories(Class<T> factoryClass, @Nullable ClassLoader classLoader) {
 		Assert.notNull(factoryClass, "'factoryClass' must not be null");
@@ -111,8 +115,8 @@ public abstract class SpringFactoriesLoader {
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading resources; can be
 	 * {@code null} to use the default
-	 * @see #loadFactories
 	 * @throws IllegalArgumentException if an error occurs while loading factory names
+	 * @see #loadFactories
 	 */
 	public static List<String> loadFactoryNames(Class<?> factoryClass, @Nullable ClassLoader classLoader) {
 		String factoryClassName = factoryClass.getName();
@@ -121,8 +125,10 @@ public abstract class SpringFactoriesLoader {
 
 	private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
 		MultiValueMap<String, String> result = cache.get(classLoader);
-		if (result != null)
+		if (result != null) {
 			return result;
+		}
+
 		try {
 			Enumeration<URL> urls = (classLoader != null ?
 					classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :

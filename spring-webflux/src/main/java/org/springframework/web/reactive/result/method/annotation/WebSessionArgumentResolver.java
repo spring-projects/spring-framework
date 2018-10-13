@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,9 @@ import org.springframework.web.server.WebSession;
  */
 public class WebSessionArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
+	// We need this resolver separate from ServerWebExchangeArgumentResolver which
+	// implements SyncHandlerMethodArgumentResolver.
+
 
 	public WebSessionArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
@@ -52,7 +55,7 @@ public class WebSessionArgumentResolver extends HandlerMethodArgumentResolverSup
 
 		Mono<WebSession> session = exchange.getSession();
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(parameter.getParameterType());
-		return adapter != null ? Mono.just(adapter.fromPublisher(session)) : Mono.from(session);
+		return (adapter != null ? Mono.just(adapter.fromPublisher(session)) : Mono.from(session));
 	}
 
 }

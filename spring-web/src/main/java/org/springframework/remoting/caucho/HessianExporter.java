@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,12 @@ import org.springframework.util.CommonsLogWriter;
  * @since 2.5.1
  * @see #invoke(java.io.InputStream, java.io.OutputStream)
  * @see HessianServiceExporter
- * @see SimpleHessianServiceExporter
  */
 public class HessianExporter extends RemoteExporter implements InitializingBean {
 
+	/**
+	 * The content type for hessian ({@code application/x-hessian}).
+	 */
 	public static final String CONTENT_TYPE_HESSIAN = "application/x-hessian";
 
 
@@ -158,15 +160,16 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 			OutputStream osToUse = outputStream;
 
 			if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
-				PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger));
-				@SuppressWarnings("resource")
-				HessianDebugInputStream dis = new HessianDebugInputStream(inputStream, debugWriter);
-				@SuppressWarnings("resource")
-				HessianDebugOutputStream dos = new HessianDebugOutputStream(outputStream, debugWriter);
-				dis.startTop2();
-				dos.startTop2();
-				isToUse = dis;
-				osToUse = dos;
+				try (PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger))){
+					@SuppressWarnings("resource")
+					HessianDebugInputStream dis = new HessianDebugInputStream(inputStream, debugWriter);
+					@SuppressWarnings("resource")
+					HessianDebugOutputStream dos = new HessianDebugOutputStream(outputStream, debugWriter);
+					dis.startTop2();
+					dos.startTop2();
+					isToUse = dis;
+					osToUse = dos;
+				}
 			}
 
 			if (!isToUse.markSupported()) {

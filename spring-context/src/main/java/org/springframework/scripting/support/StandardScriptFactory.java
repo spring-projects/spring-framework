@@ -139,6 +139,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 	 * Load and parse the script via JSR-223's ScriptEngine.
 	 */
 	@Override
+	@Nullable
 	public Object getScriptedObject(ScriptSource scriptSource, @Nullable Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
@@ -259,6 +260,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 

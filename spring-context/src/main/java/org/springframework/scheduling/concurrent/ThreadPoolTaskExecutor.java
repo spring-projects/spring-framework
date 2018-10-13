@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -35,6 +36,7 @@ import org.springframework.core.task.TaskRejectedException;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 
@@ -46,11 +48,15 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * providing several useful attributes: "corePoolSize", "maxPoolSize", "keepAliveSeconds"
  * (all supporting updates at runtime); "poolSize", "activeCount" (for introspection only).
  *
- * <p>For an alternative, you may set up a ThreadPoolExecutor instance directly using
- * constructor injection, or use a factory method definition that points to the
- * {@link java.util.concurrent.Executors} class. To expose such a raw Executor as a
- * Spring {@link org.springframework.core.task.TaskExecutor}, simply wrap it with a
- * {@link org.springframework.scheduling.concurrent.ConcurrentTaskExecutor} adapter.
+ * <p>The default configuration is a core pool size of 1, with unlimited max pool size
+ * and unlimited queue capacity. This is roughly equivalent to
+ * {@link java.util.concurrent.Executors#newSingleThreadExecutor()}, sharing a single
+ * thread for all tasks. Setting {@link #setQueueCapacity "queueCapacity"} to 0 mimics
+ * {@link java.util.concurrent.Executors#newCachedThreadPool()}, with immediate scaling
+ * of threads in the pool to a potentially very high number. Consider also setting a
+ * {@link #setMaxPoolSize "maxPoolSize"} at that point, as well as possibly a higher
+ * {@link #setCorePoolSize "corePoolSize"} (see also the
+ * {@link #setAllowCoreThreadTimeOut "allowCoreThreadTimeOut"} mode of scaling).
  *
  * <p><b>NOTE:</b> This class implements Spring's
  * {@link org.springframework.core.task.TaskExecutor} interface as well as the
@@ -59,13 +65,17 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * exception handling follows the TaskExecutor contract rather than the Executor contract,
  * in particular regarding the {@link org.springframework.core.task.TaskRejectedException}.
  *
- * <p><b>If you prefer native {@link java.util.concurrent.ExecutorService} exposure instead,
- * consider {@link ThreadPoolExecutorFactoryBean} as an alternative to this class.</b>
+ * <p>For an alternative, you may set up a ThreadPoolExecutor instance directly using
+ * constructor injection, or use a factory method definition that points to the
+ * {@link java.util.concurrent.Executors} class. To expose such a raw Executor as a
+ * Spring {@link org.springframework.core.task.TaskExecutor}, simply wrap it with a
+ * {@link org.springframework.scheduling.concurrent.ConcurrentTaskExecutor} adapter.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.core.task.TaskExecutor
  * @see java.util.concurrent.ThreadPoolExecutor
+ * @see ThreadPoolExecutorFactoryBean
  * @see ConcurrentTaskExecutor
  */
 @SuppressWarnings("serial")
@@ -89,6 +99,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	@Nullable
 	private ThreadPoolExecutor threadPoolExecutor;
+
+	// Runnable decorator to user-level FutureTask, if different
+	private final Map<Runnable, Object> decoratedTaskMap =
+			new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
 
 	/**
@@ -217,7 +231,11 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 					queue, threadFactory, rejectedExecutionHandler) {
 				@Override
 				public void execute(Runnable command) {
-					super.execute(taskDecorator.decorate(command));
+					Runnable decorated = taskDecorator.decorate(command);
+					if (decorated != command) {
+						decoratedTaskMap.put(decorated, command);
+					}
+					super.execute(decorated);
 				}
 			};
 		}
@@ -353,12 +371,14 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 	}
 
-	/**
-	 * This task executor prefers short-lived work units.
-	 */
 	@Override
-	public boolean prefersShortLivedTasks() {
-		return true;
+	protected void cancelRemainingTask(Runnable task) {
+		super.cancelRemainingTask(task);
+		// Cancel associated user-level Future handle as well
+		Object original = this.decoratedTaskMap.get(task);
+		if (original instanceof Future) {
+			((Future<?>) original).cancel(true);
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class AspectJProxyFactory extends ProxyCreatorSupport {
 
-	/** Cache for singleton aspect instances */
+	/** Cache for singleton aspect instances. */
 	private static final Map<Class<?>, Object> aspectCache = new ConcurrentHashMap<>();
 
 	private final AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
@@ -170,11 +170,10 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 			synchronized (aspectCache) {
 				// To be safe, check within full lock now...
 				instance = aspectCache.get(aspectClass);
-				if (instance != null) {
-					return instance;
+				if (instance == null) {
+					instance = new SimpleAspectInstanceFactory(aspectClass).getAspectInstance();
+					aspectCache.put(aspectClass, instance);
 				}
-				instance = new SimpleAspectInstanceFactory(aspectClass).getAspectInstance();
-				aspectCache.put(aspectClass, instance);
 			}
 		}
 		return instance;

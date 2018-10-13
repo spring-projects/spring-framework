@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,6 +226,40 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 				}
 			}
 			return ch;
+		}
+
+		@Override
+		public int read(byte[] b) throws IOException {
+			int count = this.is.read(b);
+			writeToCache(b, 0, count);
+			return count;
+		}
+
+		private void writeToCache(final byte[] b, final int off, int count) {
+			if (!this.overflow && count > 0) {
+				if (contentCacheLimit != null &&
+						count + cachedContent.size() > contentCacheLimit) {
+					this.overflow = true;
+					cachedContent.write(b, off, contentCacheLimit - cachedContent.size());
+					handleContentOverflow(contentCacheLimit);
+					return;
+				}
+				cachedContent.write(b, off, count);
+			}
+		}
+
+		@Override
+		public int read(final byte[] b, final int off, final int len) throws IOException {
+			int count = this.is.read(b, off, len);
+			writeToCache(b, off, count);
+			return count;
+		}
+
+		@Override
+		public int readLine(final byte[] b, final int off, final int len) throws IOException {
+			int count = this.is.readLine(b, off, len);
+			writeToCache(b, off, count);
+			return count;
 		}
 
 		@Override

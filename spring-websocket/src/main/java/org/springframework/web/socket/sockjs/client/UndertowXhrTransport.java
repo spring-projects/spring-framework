@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
@@ -54,6 +53,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.socket.CloseStatus;
@@ -115,7 +115,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 
 	/**
-	 * Return Undertow's native HTTP client
+	 * Return Undertow's native HTTP client.
 	 */
 	public UndertowClient getHttpClient() {
 		return this.httpClient;
@@ -170,11 +170,11 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 	private static void addHttpHeaders(ClientRequest request, HttpHeaders headers) {
 		HeaderMap headerMap = request.getRequestHeaders();
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			for (String value : entry.getValue()) {
-				headerMap.add(HttpString.tryFromString(entry.getKey()), value);
+		headers.forEach((key, values) -> {
+			for (String value : values) {
+				headerMap.add(HttpString.tryFromString(key), value);
 			}
-		}
+		});
 	}
 
 	private ClientCallback<ClientExchange> createReceiveCallback(final TransportRequest transportRequest,
@@ -276,7 +276,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			try {
 				ClientRequest request = new ClientRequest().setMethod(method).setPath(url.getPath());
 				request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.HOST), url.getHost());
-				if (body != null && !body.isEmpty()) {
+				if (StringUtils.hasLength(body)) {
 					HttpString headerName = HttpString.tryFromString(HttpHeaders.CONTENT_LENGTH);
 					request.getRequestHeaders().add(headerName, body.length());
 				}
@@ -300,6 +300,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
 		}
 		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
 			throw new SockJsTransportFailureException("Interrupted while processing request to " + url, ex);
 		}
 	}

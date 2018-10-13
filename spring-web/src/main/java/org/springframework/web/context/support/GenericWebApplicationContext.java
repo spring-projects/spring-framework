@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.web.context.ServletContextAware;
  * {@link org.springframework.web.context.ConfigurableWebApplicationContext},
  * but is not intended for declarative setup in {@code web.xml}. Instead,
  * it is designed for programmatic setup, for example for building nested contexts or
- * for use within Spring 3.1 {@link org.springframework.web.WebApplicationInitializer}s.
+ * for use within Spring 3.1 {@link org.springframework.web.WebApplicationInitializer org.springframework.web.WebApplicationInitializers}.
  *
  * <p><b>If you intend to implement a WebApplicationContext that reads bean definitions
  * from configuration files, consider deriving from AbstractRefreshableWebApplicationContext,
@@ -197,6 +197,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public Theme getTheme(String themeName) {
 		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);
@@ -213,6 +214,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public ServletConfig getServletConfig() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getServletConfig()");
@@ -224,6 +226,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public String getNamespace() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getNamespace()");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public abstract class AbstractAopProxyTests {
 		ProxyFactory pf1 = new ProxyFactory(target1);
 		pf1.addAdvice(new NopInterceptor());
 		pf1.addAdvice(new NopInterceptor());
-		ITestBean proxies[] = new ITestBean[howMany];
+		ITestBean[] proxies = new ITestBean[howMany];
 		for (int i = 0; i < howMany; i++) {
 			proxies[i] = (ITestBean) createAopProxy(pf1).getProxy();
 			assertEquals(age1, proxies[i].getAge());
@@ -212,7 +212,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 	@Test
-	public void testSerializationSerializableTargetAndAdvice() throws Throwable {
+	public void testSerializableTargetAndAdvice() throws Throwable {
 		SerializablePerson personTarget = new SerializablePerson();
 		personTarget.setName("jim");
 		personTarget.setAge(26);
@@ -435,7 +435,7 @@ public abstract class AbstractAopProxyTests {
 		TestBean raw = new OwnSpouse();
 
 		ProxyCreatorSupport pc = new ProxyCreatorSupport();
-		pc.setInterfaces(new Class<?>[] {ITestBean.class});
+		pc.setInterfaces(ITestBean.class);
 		pc.setTarget(raw);
 
 		ITestBean tb = (ITestBean) createProxy(pc);
@@ -457,7 +457,7 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvice(mi);
 
 		// We don't care about the object
-		mockTargetSource.setTarget(new Object());
+		mockTargetSource.setTarget(new TestBean());
 		pc.setTargetSource(mockTargetSource);
 		AopProxy aop = createAopProxy(pc);
 
@@ -1064,12 +1064,12 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvisor(dp);
 		pc.setTarget(tb);
 		ITestBean it = (ITestBean) createProxy(pc);
-		assertEquals(dp.count, 0);
+		assertEquals(0, dp.count);
 		it.getAge();
-		assertEquals(dp.count, 1);
+		assertEquals(1, dp.count);
 		it.setAge(11);
-		assertEquals(it.getAge(), 11);
-		assertEquals(dp.count, 2);
+		assertEquals(11, it.getAge());
+		assertEquals(2, dp.count);
 	}
 
 	@Test
@@ -1083,16 +1083,16 @@ public abstract class AbstractAopProxyTests {
 		this.mockTargetSource.setTarget(tb);
 		pc.setTargetSource(mockTargetSource);
 		ITestBean it = (ITestBean) createProxy(pc);
-		assertEquals(dp.count, 0);
+		assertEquals(0, dp.count);
 		it.getAge();
 		// Statically vetoed
 		assertEquals(0, dp.count);
 		it.setAge(11);
-		assertEquals(it.getAge(), 11);
-		assertEquals(dp.count, 1);
+		assertEquals(11, it.getAge());
+		assertEquals(1, dp.count);
 		// Applies statically but not dynamically
 		it.setName("joe");
-		assertEquals(dp.count, 1);
+		assertEquals(1, dp.count);
 	}
 
 	@Test
@@ -1356,7 +1356,7 @@ public abstract class AbstractAopProxyTests {
 				rmi.getUserAttributes().putAll(valuesToAdd);
 				return invocation.proceed();
 			}
-		};
+		}
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<>(), new HashMap<String, String>());
 		Map<String, String> firstValuesToAdd = new HashMap<>();

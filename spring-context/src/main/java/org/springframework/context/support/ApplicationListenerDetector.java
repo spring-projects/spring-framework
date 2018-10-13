@@ -46,9 +46,9 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	private static final Log logger = LogFactory.getLog(ApplicationListenerDetector.class);
 
-	private transient final AbstractApplicationContext applicationContext;
+	private final transient AbstractApplicationContext applicationContext;
 
-	private transient final Map<String, Boolean> singletonNames = new ConcurrentHashMap<>(256);
+	private final transient Map<String, Boolean> singletonNames = new ConcurrentHashMap<>(256);
 
 
 	public ApplicationListenerDetector(AbstractApplicationContext applicationContext) {
@@ -92,9 +92,14 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		if (bean instanceof ApplicationListener) {
-			ApplicationEventMulticaster multicaster = this.applicationContext.getApplicationEventMulticaster();
-			multicaster.removeApplicationListener((ApplicationListener<?>) bean);
-			multicaster.removeApplicationListenerBean(beanName);
+			try {
+				ApplicationEventMulticaster multicaster = this.applicationContext.getApplicationEventMulticaster();
+				multicaster.removeApplicationListener((ApplicationListener<?>) bean);
+				multicaster.removeApplicationListenerBean(beanName);
+			}
+			catch (IllegalStateException ex) {
+				// ApplicationEventMulticaster not initialized yet - no need to remove a listener
+			}
 		}
 	}
 

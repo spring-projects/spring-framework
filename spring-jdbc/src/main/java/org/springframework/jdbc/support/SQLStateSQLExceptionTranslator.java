@@ -88,7 +88,8 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 
 
 	@Override
-	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
+	@Nullable
+	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
 		// First, the getSQLState check...
 		String sqlState = getSqlState(ex);
 		if (sqlState != null && sqlState.length() >= 2) {
@@ -97,7 +98,7 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 				logger.debug("Extracted SQL state class '" + classCode + "' from value '" + sqlState + "'");
 			}
 			if (BAD_SQL_GRAMMAR_CODES.contains(classCode)) {
-				return new BadSqlGrammarException(task, sql, ex);
+				return new BadSqlGrammarException(task, (sql != null ? sql : ""), ex);
 			}
 			else if (DATA_INTEGRITY_VIOLATION_CODES.contains(classCode)) {
 				return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);

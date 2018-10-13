@@ -46,6 +46,8 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.lang.Nullable;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -57,9 +59,12 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -86,7 +91,8 @@ public class MessageReaderArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void missingContentType() throws Exception {
-		ServerWebExchange exchange = post("/path").body("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}").toExchange();
+		MockServerHttpRequest request = post("/path").body("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}");
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange);
@@ -99,7 +105,8 @@ public class MessageReaderArgumentResolverTests {
 
 	@Test @SuppressWarnings("unchecked") // SPR-9942
 	public void emptyBody() throws Exception {
-		ServerWebExchange exchange = post("/path").contentType(MediaType.APPLICATION_JSON).toExchange();
+		MockServerHttpRequest request = post("/path").contentType(MediaType.APPLICATION_JSON).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
 		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
@@ -292,7 +299,8 @@ public class MessageReaderArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
-		ServerWebExchange exchange = post("/path").contentType(MediaType.APPLICATION_JSON).body(body).toExchange();
+		MockServerHttpRequest request = post("/path").contentType(MediaType.APPLICATION_JSON).body(body);
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
@@ -313,7 +321,7 @@ public class MessageReaderArgumentResolverTests {
 				return false;
 			}
 			@Override
-			public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
+			public Mono<Object> resolveArgument(MethodParameter p, BindingContext bc, ServerWebExchange e) {
 				return null;
 			}
 		};

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +40,14 @@ import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
+import org.hibernate.cache.spi.RegionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.InfrastructureProxy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -66,16 +68,30 @@ import org.springframework.util.ClassUtils;
 /**
  * A Spring-provided extension of the standard Hibernate {@link Configuration} class,
  * adding {@link SpringSessionContext} as a default and providing convenient ways
- * to specify a DataSource and an application class loader.
+ * to specify a JDBC {@link DataSource} and an application class loader.
  *
- * <p>This is designed for programmatic use, e.g. in {@code @Bean} factory methods.
- * Consider using {@link LocalSessionFactoryBean} for XML bean definition files.
+ * <p>This is designed for programmatic use, e.g. in {@code @Bean} factory methods;
+ * consider using {@link LocalSessionFactoryBean} for XML bean definition files.
+ * Typically combined with {@link HibernateTransactionManager} for declarative
+ * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2, as of Spring 4.3.
+ * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2/5.3, as of Spring 5.1.
+ * Set up with Hibernate 5.2/5.3, this builder is also a convenient way to set up
+ * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
+ * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
+ *
+ * <p>This builder supports Hibernate 5.3 {@code BeanContainer} integration,
+ * {@link MetadataSources} from custom {@link BootstrapServiceRegistryBuilder}
+ * setup, as well as other advanced Hibernate configuration options beyond the
+ * standard JPA bootstrap contract.
  *
  * @author Juergen Hoeller
  * @since 4.2
+ * @see HibernateTransactionManager
  * @see LocalSessionFactoryBean
+ * @see #setBeanContainer
+ * @see #LocalSessionFactoryBuilder(DataSource, ResourceLoader, MetadataSources)
+ * @see BootstrapServiceRegistryBuilder
  */
 @SuppressWarnings("serial")
 public class LocalSessionFactoryBuilder extends Configuration {
@@ -89,7 +105,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			new AnnotationTypeFilter(Embeddable.class, false),
 			new AnnotationTypeFilter(MappedSuperclass.class, false)};
 
-	private final TypeFilter CONVERTER_TYPE_FILTER = new AnnotationTypeFilter(Converter.class, false);
+	private static final TypeFilter CONVERTER_TYPE_FILTER = new AnnotationTypeFilter(Converter.class, false);
 
 
 	private final ResourcePatternResolver resourcePatternResolver;
@@ -136,7 +152,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @param metadataSources the Hibernate MetadataSources service to use (e.g. reusing an existing one)
 	 * @since 4.3
 	 */
-	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
+	public LocalSessionFactoryBuilder(
+			@Nullable DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
+
 		super(metadataSources);
 
 		getProperties().put(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
@@ -223,6 +241,33 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			}
 		}
 
+		return this;
+	}
+
+	/**
+	 * Set a Hibernate {@link org.hibernate.resource.beans.container.spi.BeanContainer}
+	 * for the given Spring {@link ConfigurableListableBeanFactory}.
+	 * <p>Note: Bean container integration requires Hibernate 5.3 or higher.
+	 * It enables autowiring of Hibernate attribute converters and entity listeners.
+	 * @since 5.1
+	 * @see SpringBeanContainer
+	 * @see AvailableSettings#BEAN_CONTAINER
+	 */
+	public LocalSessionFactoryBuilder setBeanContainer(ConfigurableListableBeanFactory beanFactory) {
+		getProperties().put(AvailableSettings.BEAN_CONTAINER, new SpringBeanContainer(beanFactory));
+		return this;
+	}
+
+	/**
+	 * Set the Hibernate {@link RegionFactory} to use for the SessionFactory.
+	 * Allows for using a Spring-managed {@code RegionFactory} instance.
+	 * <p>Note: If this is set, the Hibernate settings should not define a
+	 * cache provider to avoid meaningless double configuration.
+	 * @since 5.1
+	 * @see AvailableSettings#CACHE_REGION_FACTORY
+	 */
+	public LocalSessionFactoryBuilder setCacheRegionFactory(RegionFactory cacheRegionFactory) {
+		getProperties().put(AvailableSettings.CACHE_REGION_FACTORY, cacheRegionFactory);
 		return this;
 	}
 
@@ -421,12 +466,17 @@ public class LocalSessionFactoryBuilder extends Configuration {
 				return this.sessionFactoryFuture.get();
 			}
 			catch (InterruptedException ex) {
-				throw new IllegalStateException("Interrupted during initialization of Hibernate SessionFactory: " +
-						ex.getMessage());
+				Thread.currentThread().interrupt();
+				throw new IllegalStateException("Interrupted during initialization of Hibernate SessionFactory", ex);
 			}
 			catch (ExecutionException ex) {
+				Throwable cause = ex.getCause();
+				if (cause instanceof HibernateException) {
+					// Rethrow a provider configuration exception (possibly with a nested cause) directly
+					throw (HibernateException) cause;
+				}
 				throw new IllegalStateException("Failed to asynchronously initialize Hibernate SessionFactory: " +
-						ex.getMessage(), ex.getCause());
+						ex.getMessage(), cause);
 			}
 		}
 	}

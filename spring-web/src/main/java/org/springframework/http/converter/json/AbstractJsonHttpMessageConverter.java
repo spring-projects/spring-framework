@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,9 @@ import org.springframework.lang.Nullable;
  */
 public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
+	/**
+	 * The default charset used by the converter.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	@Nullable
@@ -106,7 +109,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 			return readInternal(resolvedType, reader);
 		}
 		catch (Exception ex) {
-			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex, inputMessage);
 		}
 	}
 
@@ -124,7 +127,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 		catch (Exception ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
-		writer.close();
+		writer.flush();
 	}
 
 

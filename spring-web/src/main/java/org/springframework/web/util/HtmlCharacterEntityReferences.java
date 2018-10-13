@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ class HtmlCharacterEntityReferences {
 
 	private final String[] characterToEntityReferenceMap = new String[3000];
 
-	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(252);
+	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(512);
 
 
 	/**
@@ -89,7 +89,7 @@ class HtmlCharacterEntityReferences {
 			String key = (String) keys.nextElement();
 			int referredChar = Integer.parseInt(key);
 			Assert.isTrue((referredChar < 1000 || (referredChar >= 8000 && referredChar < 10000)),
-					"Invalid reference to special HTML entity: " + referredChar);
+					() -> "Invalid reference to special HTML entity: " + referredChar);
 			int index = (referredChar < 1000 ? referredChar : referredChar - 7000);
 			String reference = entityReferences.getProperty(key);
 			this.characterToEntityReferenceMap[index] = REFERENCE_START + reference + REFERENCE_END;
@@ -120,15 +120,15 @@ class HtmlCharacterEntityReferences {
 	}
 
 	/**
-	 * Return the reference mapped to the given character or {@code null}.
+	 * Return the reference mapped to the given character, or {@code null} if none found.
 	 */
 	@Nullable
 	public String convertToReference(char character) {
-	   return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
+		return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
 	/**
-	 * Return the reference mapped to the given character or {@code null}.
+	 * Return the reference mapped to the given character, or {@code null} if none found.
 	 * @since 4.1.2
 	 */
 	@Nullable

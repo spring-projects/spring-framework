@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,46 +16,43 @@
 
 package org.springframework.http.codec.multipart;
 
+import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.UnicastProcessor;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class MultipartHttpMessageWriterTests {
 
-	private final MultipartHttpMessageWriter writer = new MultipartHttpMessageWriter(Arrays.asList(
-			new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()),
-			new ResourceHttpMessageWriter(),
-			new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder())
-	));
+	private final MultipartHttpMessageWriter writer =
+			new MultipartHttpMessageWriter(ClientCodecConfigurer.create().getWriters());
 
 
 	@Test
@@ -70,53 +67,41 @@ public class MultipartHttpMessageWriterTests {
 		assertFalse(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(Map.class, String.class, Object.class),
 				MediaType.MULTIPART_FORM_DATA));
-		assertFalse(this.writer.canWrite(
+		assertTrue(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
 	}
 
 	@Test
 	public void writeMultipart() throws Exception {
-		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-		map.add("name 1", "value 1");
-		map.add("name 2", "value 2+1");
-		map.add("name 2", "value 2+2");
 
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		map.add("logo", logo);
-
-		// SPR-12108
 		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
 			@Override
 			public String getFilename() {
+				// SPR-12108
 				return "Hall\u00F6le.jpg";
 			}
 		};
-		map.add("utf8", utf8);
 
-		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		HttpEntity<Foo> entity = new HttpEntity<>(new Foo("bar"), entityHeaders);
-		map.add("json", entity);
+		Publisher<String> publisher = Flux.just("foo", "bar", "baz");
+
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		bodyBuilder.part("name 1", "value 1");
+		bodyBuilder.part("name 2", "value 2+1");
+		bodyBuilder.part("name 2", "value 2+2");
+		bodyBuilder.part("logo", logo);
+		bodyBuilder.part("utf8", utf8);
+		bodyBuilder.part("json", new Foo("bar"), MediaType.APPLICATION_JSON_UTF8);
+		bodyBuilder.asyncPart("publisher", publisher, String.class);
+		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Map<String, Object> hints = Collections.emptyMap();
-		this.writer.write(Mono.just(map), null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block(Duration.ofSeconds(5));
 
-		MediaType contentType = response.getHeaders().getContentType();
-		assertNotNull("No boundary found", contentType.getParameter("boundary"));
-
-		// see if Synchronoss NIO Multipart can read what we wrote
-		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader();
-		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
-
-		MockServerHttpRequest request = MockServerHttpRequest.post("/foo")
-				.contentType(MediaType.parseMediaType(contentType.toString()))
-				.body(response.getBody());
-
-		ResolvableType elementType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
-		MultiValueMap<String, Part> requestParts = reader.readMono(elementType, request, hints).block();
-		assertEquals(5, requestParts.size());
+		MultiValueMap<String, Part> requestParts = parse(response, hints);
+		assertEquals(6, requestParts.size());
 
 		Part part = requestParts.getFirst("name 1");
 		assertTrue(part instanceof FormFieldPart);
@@ -158,6 +143,113 @@ public class MultipartHttpMessageWriterTests {
 
 		assertEquals("{\"bar\":\"bar\"}", value);
 
+		part = requestParts.getFirst("publisher");
+		assertEquals("publisher", part.name());
+
+		value = StringDecoder.textPlainOnly(false).decodeToMono(part.content(),
+				ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN,
+				Collections.emptyMap()).block(Duration.ZERO);
+
+		assertEquals("foobarbaz", value);
+	}
+
+	@Test // SPR-16402
+	public void singleSubscriberWithResource() throws IOException {
+		UnicastProcessor<Resource> processor = UnicastProcessor.create();
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		Mono.just(logo).subscribe(processor);
+
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		bodyBuilder.asyncPart("logo", processor, Resource.class);
+
+		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Map<String, Object> hints = Collections.emptyMap();
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+
+		MultiValueMap<String, Part> requestParts = parse(response, hints);
+		assertEquals(1, requestParts.size());
+
+		Part part = requestParts.getFirst("logo");
+		assertEquals("logo", part.name());
+		assertTrue(part instanceof FilePart);
+		assertEquals("logo.jpg", ((FilePart) part).filename());
+		assertEquals(MediaType.IMAGE_JPEG, part.headers().getContentType());
+		assertEquals(logo.getFile().length(), part.headers().getContentLength());
+	}
+
+	@Test // SPR-16402
+	public void singleSubscriberWithStrings() {
+		UnicastProcessor<String> processor = UnicastProcessor.create();
+		Flux.just("foo", "bar", "baz").subscribe(processor);
+
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		bodyBuilder.asyncPart("name", processor, String.class);
+
+		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Map<String, Object> hints = Collections.emptyMap();
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+	}
+
+	@Test // SPR-16376
+	public void customContentDisposition() throws IOException {
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		Flux<DataBuffer> buffers = DataBufferUtils.read(logo, new DefaultDataBufferFactory(), 1024);
+		long contentLength = logo.contentLength();
+
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		bodyBuilder.part("resource", logo)
+				.headers(h -> h.setContentDispositionFormData("resource", "spring.jpg"));
+		bodyBuilder.asyncPart("buffers", buffers, DataBuffer.class)
+				.headers(h -> {
+					h.setContentDispositionFormData("buffers", "buffers.jpg");
+					h.setContentType(MediaType.IMAGE_JPEG);
+					h.setContentLength(contentLength);
+				});
+
+		MultiValueMap<String, HttpEntity<?>> multipartData = bodyBuilder.build();
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Map<String, Object> hints = Collections.emptyMap();
+		this.writer.write(Mono.just(multipartData), null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+
+		MultiValueMap<String, Part> requestParts = parse(response, hints);
+		assertEquals(2, requestParts.size());
+
+		Part part = requestParts.getFirst("resource");
+		assertTrue(part instanceof FilePart);
+		assertEquals("spring.jpg", ((FilePart) part).filename());
+		assertEquals(logo.getFile().length(), part.headers().getContentLength());
+
+		part = requestParts.getFirst("buffers");
+		assertTrue(part instanceof FilePart);
+		assertEquals("buffers.jpg", ((FilePart) part).filename());
+		assertEquals(logo.getFile().length(), part.headers().getContentLength());
+	}
+
+	private MultiValueMap<String, Part> parse(MockServerHttpResponse response, Map<String, Object> hints) {
+		MediaType contentType = response.getHeaders().getContentType();
+		assertNotNull("No boundary found", contentType.getParameter("boundary"));
+
+		// see if Synchronoss NIO Multipart can read what we wrote
+		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader();
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(MediaType.parseMediaType(contentType.toString()))
+				.body(response.getBody());
+
+		ResolvableType elementType = ResolvableType.forClassWithGenerics(
+				MultiValueMap.class, String.class, Part.class);
+
+		MultiValueMap<String, Part> result = reader.readMono(elementType, request, hints)
+				.block(Duration.ofSeconds(5));
+
+		assertNotNull(result);
+		return result;
 	}
 
 

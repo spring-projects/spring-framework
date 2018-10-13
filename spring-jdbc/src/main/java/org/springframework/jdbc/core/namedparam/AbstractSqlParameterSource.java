@@ -19,6 +19,7 @@ package org.springframework.jdbc.core.namedparam;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -74,6 +75,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * or {@code null} if not registered
 	 */
 	@Override
+	@Nullable
 	public String getTypeName(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		return this.typeNames.get(paramName);

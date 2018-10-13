@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 
 /**
  * A basic, no operation {@link CacheManager} implementation suitable
@@ -50,10 +51,11 @@ public class NoOpCacheManager implements CacheManager {
 	 * Additionally, the request cache will be remembered by the manager for consistency.
 	 */
 	@Override
+	@Nullable
 	public Cache getCache(String name) {
 		Cache cache = this.caches.get(name);
 		if (cache == null) {
-			this.caches.putIfAbsent(name, new NoOpCache(name));
+			this.caches.computeIfAbsent(name, key -> new NoOpCache(name));
 			synchronized (this.cacheNames) {
 				this.cacheNames.add(name);
 			}

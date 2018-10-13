@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,9 @@ public class MBeanRegistrationSupport {
 						registeredBean = this.server.registerMBean(mbean, objectName);
 					}
 					catch (InstanceNotFoundException ex2) {
-						logger.error("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						if (logger.isInfoEnabled()) {
+							logger.info("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						}
 						throw ex;
 					}
 				}
@@ -180,10 +182,10 @@ public class MBeanRegistrationSupport {
 			snapshot = new LinkedHashSet<>(this.registeredBeans);
 		}
 		if (!snapshot.isEmpty()) {
-			logger.info("Unregistering JMX-exposed beans");
-		}
-		for (ObjectName objectName : snapshot) {
-			doUnregister(objectName);
+			logger.debug("Unregistering JMX-exposed beans");
+			for (ObjectName objectName : snapshot) {
+				doUnregister(objectName);
+			}
 		}
 	}
 
@@ -204,15 +206,15 @@ public class MBeanRegistrationSupport {
 						actuallyUnregistered = true;
 					}
 					else {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Could not unregister MBean [" + objectName + "] as said MBean " +
+						if (logger.isInfoEnabled()) {
+							logger.info("Could not unregister MBean [" + objectName + "] as said MBean " +
 									"is not registered (perhaps already unregistered by an external process)");
 						}
 					}
 				}
 				catch (JMException ex) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Could not unregister MBean [" + objectName + "]", ex);
+					if (logger.isInfoEnabled()) {
+						logger.info("Could not unregister MBean [" + objectName + "]", ex);
 					}
 				}
 			}
@@ -228,7 +230,7 @@ public class MBeanRegistrationSupport {
 	 */
 	protected final ObjectName[] getRegisteredObjectNames() {
 		synchronized (this.registeredBeans) {
-			return this.registeredBeans.toArray(new ObjectName[this.registeredBeans.size()]);
+			return this.registeredBeans.toArray(new ObjectName[0]);
 		}
 	}
 

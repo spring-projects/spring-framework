@@ -216,11 +216,6 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 		// Regular case: find a handler method reflectively.
 		Object convertedMessage = extractMessage(message);
 		String methodName = getListenerMethodName(message, convertedMessage);
-		if (methodName == null) {
-			throw new javax.jms.IllegalStateException("No default listener method specified: " +
-					"Either specify a non-null value for the 'defaultListenerMethod' property or " +
-					"override the 'getListenerMethodName' method.");
-		}
 
 		// Invoke the handler method with appropriate arguments.
 		Object[] listenerArguments = buildListenerArguments(convertedMessage);
@@ -256,7 +251,6 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setDefaultListenerMethod
 	 */
-	@Nullable
 	protected String getListenerMethodName(Message originalMessage, Object extractedMessage) throws JMSException {
 		return getDefaultListenerMethod();
 	}

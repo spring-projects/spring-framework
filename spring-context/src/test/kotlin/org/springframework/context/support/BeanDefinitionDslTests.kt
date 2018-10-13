@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,24 @@ import org.springframework.beans.factory.getBean
 import org.springframework.context.support.BeanDefinitionDsl.*
 import org.springframework.core.env.SimpleCommandLinePropertySource
 import org.springframework.core.env.get
+import org.springframework.mock.env.MockPropertySource
+import java.util.stream.Collectors
 
 @Suppress("UNUSED_EXPRESSION")
 class BeanDefinitionDslTests {
 	
 	@Test
 	fun `Declare beans with the functional Kotlin DSL`() {
-		val beans = beans { 
+		val beans = beans {
 			bean<Foo>()
 			bean<Bar>("bar", scope = Scope.PROTOTYPE)
-			bean { Baz(ref()) }
 			bean { Baz(ref("bar")) }
 		}
 
-		val context = GenericApplicationContext()
-		beans.invoke(context)
-		context.refresh()
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
 		
 		assertNotNull(context.getBean<Foo>())
 		assertNotNull(context.getBean<Bar>("bar"))
@@ -49,20 +51,23 @@ class BeanDefinitionDslTests {
 	@Test
 	fun `Declare beans using profile condition with the functional Kotlin DSL`() {
 		val beans = beans {
-			bean<Foo>()
-			bean<Bar>("bar")
-			profile("baz") {
-				profile("pp") {
-					bean<Foo>()
+			profile("foo") {
+				bean<Foo>()
+				profile("bar") {
+					bean<Bar>("bar")
 				}
-				bean { Baz(ref()) }
+			}
+			profile("baz") {
 				bean { Baz(ref("bar")) }
 			}
 		}
 
-		val context = GenericApplicationContext()
-		beans.invoke(context)
-		context.refresh()
+		val context = GenericApplicationContext().apply {
+			environment.addActiveProfile("foo")
+			environment.addActiveProfile("bar")
+			beans.initialize(this)
+			refresh()
+		}
 
 		assertNotNull(context.getBean<Foo>())
 		assertNotNull(context.getBean<Bar>("bar"))
@@ -78,28 +83,78 @@ class BeanDefinitionDslTests {
 		val beans = beans {
 			bean<Foo>()
 			bean<Bar>("bar")
-			bean { FooFoo(env["name"]) }
+			environment( { env["name"].equals("foofoo") } ) {
+				bean { FooFoo(env["name"]!!) }
+			}
 			environment( { activeProfiles.contains("baz") } ) {
-				bean { Baz(ref()) }
 				bean { Baz(ref("bar")) }
 			}
 		}
 
-		val context = GenericApplicationContext().apply { 
+		val context = GenericApplicationContext().apply {
 			environment.propertySources.addFirst(SimpleCommandLinePropertySource("--name=foofoo"))
+			beans.initialize(this)
+			refresh()
 		}
-		beans.invoke(context)
-		context.refresh()
 
 		assertNotNull(context.getBean<Foo>())
 		assertNotNull(context.getBean<Bar>("bar"))
+		assertEquals("foofoo", context.getBean<FooFoo>().name)
 		try {
 			context.getBean<Baz>()
 			fail("Expect NoSuchBeanDefinitionException to be thrown")
 		}
 		catch(ex: NoSuchBeanDefinitionException) { null }
-		val foofoo = context.getBean<FooFoo>()
-		assertEquals("foofoo", foofoo.name)
+	}
+
+	@Test  // SPR-16412
+	fun `Declare beans depending on environment properties`() {
+		val beans = beans {
+			val n = env["number-of-beans"]!!.toInt()
+			for (i in 1..n) {
+				bean("string$i") { Foo() }
+			}
+		}
+
+		val context = GenericApplicationContext().apply {
+			environment.propertySources.addLast(MockPropertySource().withProperty("number-of-beans", 5))
+			beans.initialize(this)
+			refresh()
+		}
+
+		for (i in 1..5) {
+			assertNotNull(context.getBean("string$i"))
+		}
+	}
+
+	@Test  // SPR-17352
+	fun `Retrieve multiple beans via a bean provider`() {
+		val beans = beans {
+			bean<Foo>()
+			bean<Foo>()
+			bean { BarBar(provider<Foo>().stream().collect(Collectors.toList())) }
+		}
+
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
+
+		val barbar = context.getBean<BarBar>()
+		assertEquals(2, barbar.foos.size)
+	}
+
+	@Test  // SPR-17292
+	fun `Declare beans leveraging constructor injection`() {
+		val beans = beans {
+			bean<Bar>()
+			bean<Baz>()
+		}
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
+		context.getBean<Baz>()
 	}
 	
 }
@@ -108,3 +163,4 @@ class Foo
 class Bar
 class Baz(val bar: Bar)
 class FooFoo(val name: String)
+class BarBar(val foos: Collection<Foo>)

@@ -55,6 +55,7 @@ public class HessianProxyFactoryBean extends HessianClientInterceptor implements
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.serviceProxy;
 	}

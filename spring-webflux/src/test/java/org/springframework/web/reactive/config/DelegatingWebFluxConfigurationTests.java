@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -84,11 +82,9 @@ public class DelegatingWebFluxConfigurationTests {
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
-		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter();
 
-		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
-		ConversionService initializerConversionService = initializer.getConversionService();
-		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
+		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer)
+				this.delegatingConfig.requestMappingHandlerAdapter().getWebBindingInitializer();
 
 		verify(webFluxConfigurer).configureHttpMessageCodecs(codecsConfigurer.capture());
 		verify(webFluxConfigurer).getValidator();
@@ -96,8 +92,10 @@ public class DelegatingWebFluxConfigurationTests {
 		verify(webFluxConfigurer).addFormatters(formatterRegistry.capture());
 		verify(webFluxConfigurer).configureArgumentResolvers(any());
 
-		assertSame(formatterRegistry.getValue(), initializerConversionService);
-		assertEquals(12, codecsConfigurer.getValue().getReaders().size());
+		assertNotNull(initializer);
+		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
+		assertSame(formatterRegistry.getValue(), initializer.getConversionService());
+		assertEquals(13, codecsConfigurer.getValue().getReaders().size());
 	}
 
 	@Test

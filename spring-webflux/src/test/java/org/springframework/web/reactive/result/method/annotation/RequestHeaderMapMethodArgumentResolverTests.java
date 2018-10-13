@@ -29,11 +29,11 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -58,7 +58,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-		resolver = new RequestHeaderMapMethodArgumentResolver(new ReactiveAdapterRegistry());
+		resolver = new RequestHeaderMapMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
 		paramMap = new SynthesizingMethodParameter(method, 0);
@@ -92,7 +92,8 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value = "bar";
 		Map<String, String> expected = Collections.singletonMap(name, value);
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").header(name, value).toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").header(name, value).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		Mono<Object> mono = resolver.resolveArgument(paramMap, null, exchange);
 		Object result = mono.block();
@@ -106,7 +107,8 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").header(name, value1, value2).toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		MultiValueMap<String, String> expected = new LinkedMultiValueMap<>(1);
 		expected.add(name, value1);
@@ -124,7 +126,8 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").header(name, value1, value2).toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		HttpHeaders expected = new HttpHeaders();
 		expected.add(name, value1);

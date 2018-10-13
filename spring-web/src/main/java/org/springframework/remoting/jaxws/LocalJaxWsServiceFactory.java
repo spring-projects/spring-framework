@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,11 +73,10 @@ public class LocalJaxWsServiceFactory {
 
 	/**
 	 * Set the WSDL document URL as a {@link Resource}.
-	 * @throws IOException
 	 * @since 3.2
 	 */
 	public void setWsdlDocumentResource(Resource wsdlDocumentResource) throws IOException {
-		Assert.notNull(wsdlDocumentResource, "WSDL Resource must not be null.");
+		Assert.notNull(wsdlDocumentResource, "WSDL Resource must not be null");
 		this.wsdlDocumentUrl = wsdlDocumentResource.getURL();
 	}
 

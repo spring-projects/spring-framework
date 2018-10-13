@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -38,7 +37,7 @@ import org.springframework.util.PatternMatchUtils;
 @SuppressWarnings("serial")
 public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-	private List<String> mappedNames = new LinkedList<>();
+	private List<String> mappedNames = new ArrayList<>();
 
 
 	/**
@@ -55,11 +54,8 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	 * Matching will be the union of all these; if any match,
 	 * the pointcut matches.
 	 */
-	public void setMappedNames(@Nullable String... mappedNames) {
-		this.mappedNames = new LinkedList<>();
-		if (mappedNames != null) {
-			this.mappedNames.addAll(Arrays.asList(mappedNames));
-		}
+	public void setMappedNames(String... mappedNames) {
+		this.mappedNames = new ArrayList<>(Arrays.asList(mappedNames));
 	}
 
 	/**
@@ -78,7 +74,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
 		for (String mappedName : this.mappedNames) {
 			if (mappedName.equals(method.getName()) || isMatch(method.getName(), mappedName)) {
 				return true;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.util.StreamUtils;
@@ -30,23 +29,18 @@ import org.springframework.util.StreamUtils;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.*;
 
 /**
  * @author Brian Clozel
+ * @author Juergen Hoeller
  */
 public class SimpleClientHttpResponseTests {
 
-	private SimpleClientHttpResponse response;
+	private final HttpURLConnection connection = mock(HttpURLConnection.class);
 
-	private HttpURLConnection connection;
-
-
-	@Before
-	public void setup() throws Exception {
-		this.connection = mock(HttpURLConnection.class);
-		this.response = new SimpleClientHttpResponse(this.connection);
-	}
+	private final SimpleClientHttpResponse response = new SimpleClientHttpResponse(this.connection);
 
 
 	@Test  // SPR-14040
@@ -98,8 +92,34 @@ public class SimpleClientHttpResponseTests {
 		verify(this.connection, never()).disconnect();
 	}
 
+	@Test  // SPR-16773
+	public void shouldNotDrainWhenErrorStreamClosed() throws Exception {
+		InputStream is = mock(InputStream.class);
+		given(this.connection.getErrorStream()).willReturn(is);
+		doNothing().when(is).close();
+		given(is.read(any())).willThrow(new NullPointerException("from HttpURLConnection#ErrorStream"));
 
-	class TestByteArrayInputStream extends ByteArrayInputStream {
+		InputStream responseStream = this.response.getBody();
+		responseStream.close();
+		this.response.close();
+
+		verify(is).close();
+	}
+
+	@Test // SPR-17181
+	public void shouldDrainResponseEvenIfResponseNotRead() throws Exception {
+		TestByteArrayInputStream is = new TestByteArrayInputStream("SpringSpring".getBytes(StandardCharsets.UTF_8));
+		given(this.connection.getErrorStream()).willReturn(null);
+		given(this.connection.getInputStream()).willReturn(is);
+
+		this.response.close();
+		assertThat(is.available(), is(0));
+		assertTrue(is.isClosed());
+		verify(this.connection, never()).disconnect();
+	}
+
+
+	private static class TestByteArrayInputStream extends ByteArrayInputStream {
 
 		private boolean closed;
 

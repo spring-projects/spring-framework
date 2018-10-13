@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.HandlerMapping;
 
 import static org.junit.Assert.assertEquals;
@@ -47,7 +47,7 @@ public class RedirectViewTests {
 
 	@Before
 	public void setup() {
-		this.exchange = MockServerHttpRequest.get("/context/path").contextPath("/context").toExchange();
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/context/path").contextPath("/context"));
 	}
 
 
@@ -129,7 +129,7 @@ public class RedirectViewTests {
 	public void propagateQueryParams() throws Exception {
 		RedirectView view = new RedirectView("http://url.somewhere.com?foo=bar#bazz");
 		view.setPropagateQuery(true);
-		this.exchange = MockServerHttpRequest.get("http://url.somewhere.com?a=b&c=d").toExchange();
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://url.somewhere.com?a=b&c=d"));
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(HttpStatus.SEE_OTHER, this.exchange.getResponse().getStatusCode());
 		assertEquals(URI.create("http://url.somewhere.com?foo=bar&a=b&c=d#bazz"),

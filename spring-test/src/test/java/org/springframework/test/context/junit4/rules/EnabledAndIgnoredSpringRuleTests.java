@@ -35,7 +35,7 @@ import org.springframework.test.context.junit4.EnabledAndIgnoredSpringRunnerTest
 public class EnabledAndIgnoredSpringRuleTests extends EnabledAndIgnoredSpringRunnerTests {
 
 	@ClassRule
-	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+	public static final SpringClassRule springClassRule = new SpringClassRule();
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();

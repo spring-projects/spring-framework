@@ -1,6 +1,6 @@
 /**
  * Spring's repackaging of
- * <a href="http://asm.ow2.org">ASM</a>
+ * <a href="https://gitlab.ow2.org/asm/asm">ASM</a>
  * (for internal use only).
  *
  * <p>This repackaging technique avoids any potential conflicts with

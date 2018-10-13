@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,10 @@ import org.springframework.util.ObjectUtils;
  * {@link org.springframework.web.client.RestTemplate#exchange(RequestEntity, Class) exchange()}:
  * <pre class="code">
  * MyRequest body = ...
- * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(new URI(&quot;http://example.com/bar&quot;)).accept(MediaType.APPLICATION_JSON).body(body);
+ * RequestEntity&lt;MyRequest&gt; request = RequestEntity
+ *     .post(new URI(&quot;http://example.com/bar&quot;))
+ *     .accept(MediaType.APPLICATION_JSON)
+ *     .body(body);
  * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
  * </pre>
  *
@@ -57,6 +60,7 @@ import org.springframework.util.ObjectUtils;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @since 4.1
+ * @param <T> the body type
  * @see #getMethod()
  * @see #getUrl()
  */

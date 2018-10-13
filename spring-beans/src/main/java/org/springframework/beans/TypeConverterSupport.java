@@ -39,11 +39,13 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 
 
 	@Override
+	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType) throws TypeMismatchException {
 		return doConvert(value, requiredType, null, null);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable MethodParameter methodParam)
 			throws TypeMismatchException {
 
@@ -51,6 +53,7 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable Field field)
 			throws TypeMismatchException {
 

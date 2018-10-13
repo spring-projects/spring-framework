@@ -34,7 +34,10 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.0
  * @see commonj.timers.TimerManager
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler}
  */
+@Deprecated
 public abstract class TimerManagerAccessor extends JndiLocatorSupport
 		implements InitializingBean, DisposableBean, Lifecycle {
 

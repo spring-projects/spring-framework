@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,39 @@
 
 package org.springframework.http.codec.multipart;
 
-import java.io.IOException;
+import java.io.File;
+import java.time.Duration;
 import java.util.Map;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+import static java.util.Collections.*;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.http.MediaType.*;
 
 /**
+ * Unit tests for {@link SynchronossPartHttpMessageReader}.
+ *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class SynchronossPartHttpMessageReaderTests {
 
@@ -79,7 +80,7 @@ public class SynchronossPartHttpMessageReaderTests {
 	}
 
 	@Test
-	public void resolveParts() throws IOException {
+	public void resolveParts() {
 		ServerHttpRequest request = generateMultipartRequest();
 		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 		MultiValueMap<String, Part> parts = this.reader.readMono(elementType, request, emptyMap()).block();
@@ -90,7 +91,7 @@ public class SynchronossPartHttpMessageReaderTests {
 		assertTrue(part instanceof FilePart);
 		assertEquals("fooPart", part.name());
 		assertEquals("foo.txt", ((FilePart) part).filename());
-		DataBuffer buffer = part.content().reduce(DataBuffer::write).block();
+		DataBuffer buffer = DataBufferUtils.join(part.content()).block();
 		assertEquals(12, buffer.readableByteCount());
 		byte[] byteContent = new byte[12];
 		buffer.read(byteContent);
@@ -103,6 +104,24 @@ public class SynchronossPartHttpMessageReaderTests {
 		assertEquals("bar", ((FormFieldPart) part).value());
 	}
 
+	@Test // SPR-16545
+	public void transferTo() {
+		ServerHttpRequest request = generateMultipartRequest();
+		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
+		MultiValueMap<String, Part> parts = this.reader.readMono(elementType, request, emptyMap()).block();
+
+		assertNotNull(parts);
+		FilePart part = (FilePart) parts.getFirst("fooPart");
+		assertNotNull(part);
+
+		File dest = new File(System.getProperty("java.io.tmpdir") + "/" + part.filename());
+		part.transferTo(dest).block(Duration.ofSeconds(5));
+
+		assertTrue(dest.exists());
+		assertEquals(12, dest.length());
+		assertTrue(dest.delete());
+	}
+
 	@Test
 	public void bodyError() {
 		ServerHttpRequest request = generateErrorMultipartRequest();
@@ -111,29 +130,24 @@ public class SynchronossPartHttpMessageReaderTests {
 	}
 
 
-	private ServerHttpRequest generateMultipartRequest() throws IOException {
-		HttpHeaders fooHeaders = new HttpHeaders();
-		fooHeaders.setContentType(MediaType.TEXT_PLAIN);
-		ClassPathResource fooResource = new ClassPathResource("org/springframework/http/codec/multipart/foo.txt");
-		HttpEntity<ClassPathResource> fooPart = new HttpEntity<>(fooResource, fooHeaders);
-		HttpEntity<String> barPart = new HttpEntity<>("bar");
-		FormHttpMessageConverter converter = new FormHttpMessageConverter();
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-		parts.add("fooPart", fooPart);
-		parts.add("barPart", barPart);
-		converter.write(parts, MULTIPART_FORM_DATA, outputMessage);
-		byte[] content = outputMessage.getBodyAsBytes();
-		return MockServerHttpRequest
-				.post("/foo")
-				.header(CONTENT_TYPE, outputMessage.getHeaders().getContentType().toString())
-				.header(CONTENT_LENGTH, String.valueOf(content.length))
-				.body(new String(content));
+	private ServerHttpRequest generateMultipartRequest() {
+
+		MultipartBodyBuilder partsBuilder = new MultipartBodyBuilder();
+		partsBuilder.part("fooPart", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
+		partsBuilder.part("barPart", "bar");
+
+		MockClientHttpRequest outputMessage = new MockClientHttpRequest(HttpMethod.POST, "/");
+		new MultipartHttpMessageWriter()
+				.write(Mono.just(partsBuilder.build()), null, MediaType.MULTIPART_FORM_DATA, outputMessage, null)
+				.block(Duration.ofSeconds(5));
+
+		return MockServerHttpRequest.post("/")
+				.contentType(outputMessage.getHeaders().getContentType())
+				.body(outputMessage.getBody());
 	}
 
 	private ServerHttpRequest generateErrorMultipartRequest() {
-		return MockServerHttpRequest
-				.post("/foo")
+		return MockServerHttpRequest.post("/")
 				.header(CONTENT_TYPE, MULTIPART_FORM_DATA.toString())
 				.body(Flux.just(new DefaultDataBufferFactory().wrap("invalid content".getBytes())));
 	}

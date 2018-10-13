@@ -20,6 +20,9 @@ import java.lang.annotation.Annotation;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -34,6 +37,8 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 public abstract class HandlerMethodArgumentResolverSupport implements HandlerMethodArgumentResolver {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final ReactiveAdapterRegistry adapterRegistry;
 

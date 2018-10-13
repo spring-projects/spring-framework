@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,8 +173,9 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		}
 		catch (ClassCastException ex) {
 			String msg = ex.getMessage();
-			if (msg == null || msg.startsWith(event.getClass().getName())) {
+			if (msg == null || matchesClassCastMessage(msg, event.getClass())) {
 				// Possibly a lambda-defined listener which we could not resolve the generic event type for
+				// -> let's suppress the exception and just log a debug message.
 				Log logger = LogFactory.getLog(getClass());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Non-matching event type for listener: " + listener, ex);
@@ -184,6 +185,24 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 				throw ex;
 			}
 		}
+	}
+
+	private boolean matchesClassCastMessage(String classCastMessage, Class<?> eventClass) {
+		// On Java 8, the message starts with the class name: "java.lang.String cannot be cast..."
+		if (classCastMessage.startsWith(eventClass.getName())) {
+			return true;
+		}
+		// On Java 11, the message starts with "class ..." a.k.a. Class.toString()
+		if (classCastMessage.startsWith(eventClass.toString())) {
+			return true;
+		}
+		// On Java 9, the message used to contain the module name: "java.base/java.lang.String cannot be cast..."
+		int moduleSeparatorIndex = classCastMessage.indexOf('/');
+		if (moduleSeparatorIndex != -1 && classCastMessage.startsWith(eventClass.getName(), moduleSeparatorIndex + 1)) {
+			return true;
+		}
+		// Assuming an unrelated class cast failure...
+		return false;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.web.cors.CorsUtils;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
- * against a set of {@link RequestMethod}s.
+ * against a set of {@link RequestMethod RequestMethods}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -61,7 +61,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 
 
 	/**
-	 * Returns all {@link RequestMethod}s contained in this condition.
+	 * Returns all {@link RequestMethod RequestMethods} contained in this condition.
 	 */
 	public Set<RequestMethod> getMethods() {
 		return this.methods;
@@ -98,6 +98,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * request method is OPTIONS.
 	 */
 	@Override
+	@Nullable
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (CorsUtils.isPreFlightRequest(request)) {
 			return matchPreFlight(request);
@@ -129,6 +130,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		return matchRequestMethod(expectedMethod);
 	}
 
+	@Nullable
 	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
 		HttpMethod httpMethod = HttpMethod.resolve(httpMethodValue);
 		if (httpMethod != null) {

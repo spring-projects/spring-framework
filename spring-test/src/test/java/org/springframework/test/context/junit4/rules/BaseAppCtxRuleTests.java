@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
 public class BaseAppCtxRuleTests {
 
 	@ClassRule
-	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+	public static final SpringClassRule springClassRule = new SpringClassRule();
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.type;
 
 import java.lang.reflect.Method;
@@ -30,9 +31,9 @@ abstract class ClassloadingAssertions {
 
 	private static boolean isClassLoaded(String className) {
 		ClassLoader cl = ClassUtils.getDefaultClassLoader();
-		Method findLoadeClassMethod = ReflectionUtils.findMethod(cl.getClass(), "findLoadedClass", new Class[] { String.class });
-		ReflectionUtils.makeAccessible(findLoadeClassMethod);
-		Class<?> loadedClass = (Class<?>) ReflectionUtils.invokeMethod(findLoadeClassMethod, cl, new Object[] { className });
+		Method findLoadedClassMethod = ReflectionUtils.findMethod(cl.getClass(), "findLoadedClass", String.class);
+		ReflectionUtils.makeAccessible(findLoadedClassMethod);
+		Class<?> loadedClass = (Class<?>) ReflectionUtils.invokeMethod(findLoadedClassMethod, cl, className);
 		return loadedClass != null;
 	}
 

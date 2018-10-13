@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,10 @@ package org.springframework.http.server.reactive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,6 +30,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
@@ -39,12 +38,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 
 /**
  * Base class for {@link ServerHttpResponse} implementations.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 5.0
  */
@@ -58,20 +57,17 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 */
 	private enum State {NEW, COMMITTING, COMMITTED}
 
+	protected final Log logger = HttpLogging.forLogName(getClass());
 
-	private final Log logger = LogFactory.getLog(getClass());
 
 	private final DataBufferFactory dataBufferFactory;
 
 	@Nullable
-	private HttpStatus statusCode;
+	private Integer statusCode;
 
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
-
-	@Nullable
-	private Function<String, String> urlEncoder = url -> url;
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
@@ -79,9 +75,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
+		this(dataBufferFactory, new HttpHeaders());
+	}
+
+	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory, HttpHeaders headers) {
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
+		Assert.notNull(headers, "HttpHeaders must not be null");
 		this.dataBufferFactory = dataBufferFactory;
-		this.headers = new HttpHeaders();
+		this.headers = headers;
 		this.cookies = new LinkedMultiValueMap<>();
 	}
 
@@ -92,16 +93,12 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(@Nullable HttpStatus statusCode) {
+	public boolean setStatusCode(@Nullable HttpStatus status) {
 		if (this.state.get() == State.COMMITTED) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Can't set the status " + (statusCode != null ? statusCode.toString() : "null") +
-						" because the HTTP response has already been committed");
-			}
 			return false;
 		}
 		else {
-			this.statusCode = statusCode;
+			this.statusCode = (status != null ? status.value() : null);
 			return true;
 		}
 	}
@@ -109,6 +106,25 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	@Nullable
 	public HttpStatus getStatusCode() {
+		return (this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null);
+	}
+
+	/**
+	 * Set the HTTP status code of the response.
+	 * @param statusCode the HTTP status as an integer value
+	 * @since 5.0.1
+	 */
+	public void setStatusCodeValue(@Nullable Integer statusCode) {
+		this.statusCode = statusCode;
+	}
+
+	/**
+	 * Return the HTTP status code of the response.
+	 * @return the HTTP status as an integer value
+	 * @since 5.0.1
+	 */
+	@Nullable
+	public Integer getStatusCodeValue() {
 		return this.statusCode;
 	}
 
@@ -126,7 +142,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public void addCookie(ResponseCookie cookie) {
-		Assert.notNull(cookie, "'cookie' must not be null");
+		Assert.notNull(cookie, "ResponseCookie must not be null");
 
 		if (this.state.get() == State.COMMITTED) {
 			throw new IllegalStateException("Can't add the cookie " + cookie +
@@ -137,15 +153,13 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		}
 	}
 
-	@Override
-	public String encodeUrl(String url) {
-		return (this.urlEncoder != null ? this.urlEncoder.apply(url) : url);
-	}
+	/**
+	 * Return the underlying server response.
+	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
+	 * use such as WebSocket upgrades in the spring-webflux module.
+	 */
+	public abstract <T> T getNativeResponse();
 
-	@Override
-	public void registerUrlEncoder(Function<String, String> encoder) {
-		this.urlEncoder = (this.urlEncoder != null ? this.urlEncoder.andThen(encoder) : encoder);
-	}
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
@@ -171,7 +185,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Mono<Void> setComplete() {
-		return doCommit(null);
+		return !isCommitted() ? doCommit(null) : Mono.empty();
 	}
 
 	/**
@@ -190,19 +204,16 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 */
 	protected Mono<Void> doCommit(@Nullable Supplier<? extends Mono<Void>> writeAction) {
 		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Skipping doCommit (response already committed).");
-			}
 			return Mono.empty();
 		}
 
-		this.commitActions.add(() -> {
-			applyStatusCode();
-			applyHeaders();
-			applyCookies();
-			this.state.set(State.COMMITTED);
-			return Mono.empty();
-		});
+		this.commitActions.add(() ->
+				Mono.fromRunnable(() -> {
+					applyStatusCode();
+					applyHeaders();
+					applyCookies();
+					this.state.set(State.COMMITTED);
+				}));
 
 		if (writeAction != null) {
 			this.commitActions.add(writeAction);
@@ -211,7 +222,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		List<? extends Mono<Void>> actions = this.commitActions.stream()
 				.map(Supplier::get).collect(Collectors.toList());
 
-		return Flux.concat(actions).next();
+		return Flux.concat(actions).then();
 	}
 
 

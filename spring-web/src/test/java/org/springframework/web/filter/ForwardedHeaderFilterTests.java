@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ForwardedHeaderFilter}.
@@ -47,6 +48,7 @@ public class ForwardedHeaderFilterTests {
 	private static final String X_FORWARDED_HOST = "x-forwarded-host";
 	private static final String X_FORWARDED_PORT = "x-forwarded-port";
 	private static final String X_FORWARDED_PREFIX = "x-forwarded-prefix";
+	private static final String X_FORWARDED_SSL = "x-forwarded-ssl";
 
 
 	private final ForwardedHeaderFilter filter = new ForwardedHeaderFilter();
@@ -102,6 +104,17 @@ public class ForwardedHeaderFilterTests {
 		String actual = filterAndGetContextPath();
 		assertEquals("/prefix", actual);
 	}
+
+	private String filterAndGetContextPath() throws ServletException, IOException {
+		return filterAndGetWrappedRequest().getContextPath();
+	}
+
+	private HttpServletRequest filterAndGetWrappedRequest() throws ServletException, IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		this.filter.doFilterInternal(this.request, response, this.filterChain);
+		return (HttpServletRequest) this.filterChain.getRequest();
+	}
+
 
 	@Test
 	public void contextPathPreserveEncoding() throws Exception {
@@ -183,8 +196,8 @@ public class ForwardedHeaderFilterTests {
 	@Test
 	public void caseInsensitiveForwardedPrefix() throws Exception {
 		this.request = new MockHttpServletRequest() {
-			// Make it case-sensitive (SPR-14372)
-			@Override
+
+			@Override // SPR-14372: make it case-sensitive
 			public String getHeader(String header) {
 				Enumeration<String> names = getHeaderNames();
 				while (names.hasMoreElements()) {
@@ -204,15 +217,22 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
-	public void shouldFilter() throws Exception {
+	public void shouldFilter() {
 		testShouldFilter("Forwarded");
 		testShouldFilter(X_FORWARDED_HOST);
 		testShouldFilter(X_FORWARDED_PORT);
 		testShouldFilter(X_FORWARDED_PROTO);
+		testShouldFilter(X_FORWARDED_SSL);
+	}
+
+	private void testShouldFilter(String headerName) {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader(headerName, "1");
+		assertFalse(this.filter.shouldNotFilter(request));
 	}
 
 	@Test
-	public void shouldNotFilter() throws Exception {
+	public void shouldNotFilter() {
 		assertTrue(this.filter.shouldNotFilter(new MockHttpServletRequest()));
 	}
 
@@ -245,6 +265,7 @@ public class ForwardedHeaderFilterTests {
 		this.request.addHeader(X_FORWARDED_PROTO, "https");
 		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
 		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.addHeader(X_FORWARDED_SSL, "on");
 		this.request.addHeader("foo", "bar");
 
 		this.filter.setRemoveOnly(true);
@@ -258,6 +279,30 @@ public class ForwardedHeaderFilterTests {
 		assertFalse(actual.isSecure());
 
 		assertNull(actual.getHeader(X_FORWARDED_PROTO));
+		assertNull(actual.getHeader(X_FORWARDED_HOST));
+		assertNull(actual.getHeader(X_FORWARDED_PORT));
+		assertNull(actual.getHeader(X_FORWARDED_SSL));
+		assertEquals("bar", actual.getHeader("foo"));
+	}
+
+	@Test
+	public void forwardedRequestWithSsl() throws Exception {
+		this.request.setRequestURI("/mvc-showcase");
+		this.request.addHeader(X_FORWARDED_SSL, "on");
+		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.addHeader("foo", "bar");
+
+		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		HttpServletRequest actual = (HttpServletRequest) this.filterChain.getRequest();
+
+		assertEquals("https://84.198.58.199/mvc-showcase", actual.getRequestURL().toString());
+		assertEquals("https", actual.getScheme());
+		assertEquals("84.198.58.199", actual.getServerName());
+		assertEquals(443, actual.getServerPort());
+		assertTrue(actual.isSecure());
+
+		assertNull(actual.getHeader(X_FORWARDED_SSL));
 		assertNull(actual.getHeader(X_FORWARDED_HOST));
 		assertNull(actual.getHeader(X_FORWARDED_PORT));
 		assertEquals("bar", actual.getHeader("foo"));
@@ -280,9 +325,9 @@ public class ForwardedHeaderFilterTests {
 		HttpServletRequest actual = filterAndGetWrappedRequest();
 		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL().toString());
 	}
-	
+
 	@Test
-	public void requestURLNewStringBuffer() throws Exception { 
+	public void requestURLNewStringBuffer() throws Exception {
 		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
 		this.request.setRequestURI("/mvc-showcase");
 
@@ -299,6 +344,17 @@ public class ForwardedHeaderFilterTests {
 
 		String redirectedUrl = sendRedirect("/foo/bar");
 		assertEquals("https://example.com/foo/bar", redirectedUrl);
+	}
+
+	@Test // SPR-16506
+	public void sendRedirectWithAbsolutePathQueryParamAndFragment() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.setQueryString("oldqp=1");
+
+		String redirectedUrl = sendRedirect("/foo/bar?newqp=2#fragment");
+		assertEquals("https://example.com/foo/bar?newqp=2#fragment", redirectedUrl);
 	}
 
 	@Test
@@ -406,7 +462,6 @@ public class ForwardedHeaderFilterTests {
 		this.request.addHeader(X_FORWARDED_HOST, "example.com");
 		this.request.addHeader(X_FORWARDED_PORT, "443");
 		this.filter.setRelativeRedirects(true);
-
 		String location = sendRedirect("/a");
 
 		assertEquals("/a", location);
@@ -415,45 +470,26 @@ public class ForwardedHeaderFilterTests {
 	@Test
 	public void sendRedirectWhenRequestOnlyAndNoXForwardedThenUsesRelativeRedirects() throws Exception {
 		this.filter.setRelativeRedirects(true);
-
 		String location = sendRedirect("/a");
 
 		assertEquals("/a", location);
 	}
 
 	private String sendRedirect(final String location) throws ServletException, IOException {
-		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, new OncePerRequestFilter() {
+		Filter filter = new OncePerRequestFilter() {
 			@Override
-			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-					throws ServletException, IOException {
-				response.sendRedirect(location);
+			protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
+					FilterChain chain) throws IOException {
+
+				res.sendRedirect(location);
 			}
-		});
-		return response.getRedirectedUrl();
-	}
+		};
 
-	@SuppressWarnings("serial")
-	private MockHttpServletResponse doWithFiltersAndGetResponse(Filter... filters) throws ServletException, IOException {
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		FilterChain filterChain = new MockFilterChain(new HttpServlet() {}, filters);
+		FilterChain filterChain = new MockFilterChain(mock(HttpServlet.class), this.filter, filter);
 		filterChain.doFilter(request, response);
-		return response;
-	}
 
-	private String filterAndGetContextPath() throws ServletException, IOException {
-		return filterAndGetWrappedRequest().getContextPath();
-	}
-
-	private HttpServletRequest filterAndGetWrappedRequest() throws ServletException, IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		this.filter.doFilterInternal(this.request, response, this.filterChain);
-		return (HttpServletRequest) this.filterChain.getRequest();
-	}
-
-	private void testShouldFilter(String headerName) throws ServletException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader(headerName, "1");
-		assertFalse(this.filter.shouldNotFilter(request));
+		return response.getRedirectedUrl();
 	}
 
 }

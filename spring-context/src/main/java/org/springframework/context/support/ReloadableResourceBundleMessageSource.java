@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,8 @@ import org.springframework.util.StringUtils;
  * @see ResourceBundleMessageSource
  * @see java.util.ResourceBundle
  */
-public class ReloadableResourceBundleMessageSource extends AbstractResourceBasedMessageSource implements ResourceLoaderAware {
+public class ReloadableResourceBundleMessageSource extends AbstractResourceBasedMessageSource
+		implements ResourceLoaderAware {
 
 	private static final String PROPERTIES_SUFFIX = ".properties";
 
@@ -101,23 +102,20 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	/** Cache to hold filename lists per Locale */
-	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames =
-			new ConcurrentHashMap<>();
+	// Cache to hold filename lists per Locale
+	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames = new ConcurrentHashMap<>();
 
-	/** Cache to hold already loaded properties per filename */
-	private final ConcurrentMap<String, PropertiesHolder> cachedProperties =
-			new ConcurrentHashMap<>();
+	// Cache to hold already loaded properties per filename
+	private final ConcurrentMap<String, PropertiesHolder> cachedProperties = new ConcurrentHashMap<>();
 
-	/** Cache to hold merged loaded properties per locale */
-	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties =
-			new ConcurrentHashMap<>();
+	// Cache to hold already loaded properties per filename
+	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties = new ConcurrentHashMap<>();
 
 
 	/**
 	 * Set per-file charsets to use for parsing properties files.
 	 * <p>Only applies to classic properties files, not to XML files.
-	 * @param fileEncodings Properties with filenames as keys and charset
+	 * @param fileEncodings a Properties with filenames as keys and charset
 	 * names as values. Filenames have to match the basename syntax,
 	 * with optional locale-specific components: e.g. "WEB-INF/messages"
 	 * or "WEB-INF/messages_en".
@@ -201,6 +199,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * using a cached MessageFormat instance per message code.
 	 */
 	@Override
+	@Nullable
 	protected MessageFormat resolveCode(String code, Locale locale) {
 		if (getCacheMillis() < 0) {
 			PropertiesHolder propHolder = getMergedProperties(locale);
@@ -462,9 +461,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @throws IOException if properties loading failed
 	 */
 	protected Properties loadProperties(Resource resource, String filename) throws IOException {
-		InputStream is = resource.getInputStream();
 		Properties props = newProperties();
-		try {
+		try (InputStream is = resource.getInputStream()) {
 			String resourceFilename = resource.getFilename();
 			if (resourceFilename != null && resourceFilename.endsWith(XML_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
@@ -494,9 +492,6 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 				}
 			}
 			return props;
-		}
-		finally {
-			is.close();
 		}
 	}
 
@@ -559,7 +554,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 		private final ReentrantLock refreshLock = new ReentrantLock();
 
-		/** Cache to hold already generated MessageFormats per message code */
+		/** Cache to hold already generated MessageFormats per message code. */
 		private final ConcurrentMap<String, Map<Locale, MessageFormat>> cachedMessageFormats =
 				new ConcurrentHashMap<>();
 

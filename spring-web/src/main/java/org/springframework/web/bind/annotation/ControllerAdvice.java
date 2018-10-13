@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Specialization of {@link Component @Component} for classes that declare
  * {@link ExceptionHandler @ExceptionHandler}, {@link InitBinder @InitBinder}, or
@@ -39,10 +38,17 @@ import org.springframework.stereotype.Component;
  * AnnotationAwareOrderComparator}, i.e. based on
  * {@link org.springframework.core.annotation.Order @Order} and
  * {@link org.springframework.core.Ordered Ordered}, and applied in that order
- * at runtime. For handling exceptions the first {@code @ExceptionHandler} to
- * match the exception is used. For model attributes and {@code InitBinder}
- * initialization, {@code @ModelAttribute} and {@code @InitBinder} methods will
- * also follow {@code @ControllerAdvice} order.
+ * at runtime. For handling exceptions, an {@code @ExceptionHandler} will be
+ * picked on the first advice with a matching exception handler method. For
+ * model attributes and {@code InitBinder} initialization, {@code @ModelAttribute}
+ * and {@code @InitBinder} methods will also follow {@code @ControllerAdvice} order.
+ *
+ * <p>Note: For {@code @ExceptionHandler} methods, a root exception match will be
+ * preferred to just matching a cause of the current exception, among the handler
+ * methods of a particular advice bean. However, a cause match on a higher-priority
+ * advice will still be preferred to a any match (whether root or cause level)
+ * on a lower-priority advice bean. As a consequence, please declare your primary
+ * root exception mappings on a prioritized advice bean with a corresponding order!
  *
  * <p>By default the methods in an {@code @ControllerAdvice} apply globally to
  * all Controllers. Use selectors {@link #annotations()},
@@ -57,6 +63,8 @@ import org.springframework.stereotype.Component;
  * @author Brian Clozel
  * @author Sam Brannen
  * @since 3.2
+ * @see org.springframework.stereotype.Controller
+ * @see RestControllerAdvice
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class ConcurrencyThrottleInterceptorTests {
 	public void testSerializable() throws Exception {
 		DerivedTestBean tb = new DerivedTestBean();
 		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.setInterfaces(new Class[] {ITestBean.class});
+		proxyFactory.setInterfaces(ITestBean.class);
 		ConcurrencyThrottleInterceptor cti = new ConcurrencyThrottleInterceptor();
 		proxyFactory.addAdvice(cti);
 		proxyFactory.setTarget(tb);
@@ -75,7 +75,7 @@ public class ConcurrencyThrottleInterceptorTests {
 	private void testMultipleThreads(int concurrencyLimit) {
 		TestBean tb = new TestBean();
 		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.setInterfaces(new Class[] {ITestBean.class});
+		proxyFactory.setInterfaces(ITestBean.class);
 		ConcurrencyThrottleInterceptor cti = new ConcurrencyThrottleInterceptor();
 		cti.setConcurrencyLimit(concurrencyLimit);
 		proxyFactory.addAdvice(cti);
@@ -95,7 +95,7 @@ public class ConcurrencyThrottleInterceptorTests {
 				ex.printStackTrace();
 			}
 			threads[i] = new ConcurrencyThread(proxy,
-					i % 2 == 0 ? (Throwable) new OutOfMemoryError() : (Throwable) new IllegalStateException());
+					i % 2 == 0 ? new OutOfMemoryError() : new IllegalStateException());
 			threads[i].start();
 		}
 		for (int i = 0; i < NR_OF_THREADS; i++) {

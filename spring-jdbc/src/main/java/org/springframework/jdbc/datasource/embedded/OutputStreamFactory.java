@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,11 @@ import java.io.OutputStream;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class OutputStreamFactory {
+public final class OutputStreamFactory {
+
+	private OutputStreamFactory() {
+	}
+
 
 	/**
 	 * Returns an {@link java.io.OutputStream} that ignores all data given to it.

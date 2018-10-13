@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Handles method return values by delegating to a list of registered {@link HandlerMethodReturnValueHandler}s.
+ * Handles method return values by delegating to a list of registered {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}.
  * Previously resolved return types are cached for faster lookups.
  *
  * @author Rossen Stoyanchev
@@ -68,7 +68,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	}
 
 	/**
-	 * Iterate over registered {@link HandlerMethodReturnValueHandler}s and invoke the one that supports it.
+	 * Iterate over registered {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers} and invoke the one that supports it.
 	 * @throws IllegalStateException if no suitable {@link HandlerMethodReturnValueHandler} is found.
 	 */
 	@Override
@@ -98,10 +98,9 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	private boolean isAsyncReturnValue(@Nullable Object value, MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
-			if (handler instanceof AsyncHandlerMethodReturnValueHandler) {
-				if (((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(value, returnType)) {
-					return true;
-				}
+			if (handler instanceof AsyncHandlerMethodReturnValueHandler &&
+					((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(value, returnType)) {
+				return true;
 			}
 		}
 		return false;
@@ -116,15 +115,13 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	}
 
 	/**
-	 * Add the given {@link HandlerMethodReturnValueHandler}s.
+	 * Add the given {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}.
 	 */
 	public HandlerMethodReturnValueHandlerComposite addHandlers(
 			@Nullable List<? extends HandlerMethodReturnValueHandler> handlers) {
 
 		if (handlers != null) {
-			for (HandlerMethodReturnValueHandler handler : handlers) {
-				this.returnValueHandlers.add(handler);
-			}
+			this.returnValueHandlers.addAll(handlers);
 		}
 		return this;
 	}

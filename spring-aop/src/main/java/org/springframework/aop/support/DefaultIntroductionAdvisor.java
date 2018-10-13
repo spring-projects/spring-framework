@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 
 	private final Set<Class<?>> interfaces = new LinkedHashSet<>();
 
-	private int order = Integer.MAX_VALUE;
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
 	/**
@@ -105,7 +105,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 
 	@Override
 	public Class<?>[] getInterfaces() {
-		return this.interfaces.toArray(new Class<?>[this.interfaces.size()]);
+		return ClassUtils.toClassArray(this.interfaces);
 	}
 
 	@Override
@@ -113,12 +113,11 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		for (Class<?> ifc : this.interfaces) {
 			if (this.advice instanceof DynamicIntroductionAdvice &&
 					!((DynamicIntroductionAdvice) this.advice).implementsInterface(ifc)) {
-			 throw new IllegalArgumentException("DynamicIntroductionAdvice [" + this.advice + "] " +
-					 "does not implement interface [" + ifc.getName() + "] specified for introduction");
+			throw new IllegalArgumentException("DynamicIntroductionAdvice [" + this.advice + "] " +
+					"does not implement interface [" + ifc.getName() + "] specified for introduction");
 			}
 		}
 	}
-
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -128,7 +127,6 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	public int getOrder() {
 		return this.order;
 	}
-
 
 	@Override
 	public Advice getAdvice() {

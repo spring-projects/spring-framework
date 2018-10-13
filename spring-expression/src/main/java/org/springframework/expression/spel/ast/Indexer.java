@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -113,22 +114,20 @@ public class Indexer extends SpelNodeImpl {
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		TypedValue context = state.getActiveContextObject();
-		Object targetObject = context.getValue();
+		Object target = context.getValue();
 		TypeDescriptor targetDescriptor = context.getTypeDescriptor();
-		Assert.state(targetDescriptor != null, "No type descriptor");
-		TypedValue indexValue = null;
-		Object index = null;
+		TypedValue indexValue;
+		Object index;
 
-		// This first part of the if clause prevents a 'double dereference' of
-		// the property (SPR-5847)
-		if (targetObject instanceof Map && (this.children[0] instanceof PropertyOrFieldReference)) {
+		// This first part of the if clause prevents a 'double dereference' of the property (SPR-5847)
+		if (target instanceof Map && (this.children[0] instanceof PropertyOrFieldReference)) {
 			PropertyOrFieldReference reference = (PropertyOrFieldReference) this.children[0];
 			index = reference.getName();
 			indexValue = new TypedValue(index);
 		}
 		else {
-			// In case the map key is unqualified, we want it evaluated against
-			// the root object so temporarily push that on whilst evaluating the key
+			// In case the map key is unqualified, we want it evaluated against the root object
+			// so temporarily push that on whilst evaluating the key
 			try {
 				state.pushActiveContextObject(state.getRootContextObject());
 				indexValue = this.children[0].getValueInternal(state);
@@ -140,54 +139,58 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 
+		// Raise a proper exception in case of a null target
+		if (target == null) {
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+		}
+		// At this point, we need a TypeDescriptor for a non-null target object
+		Assert.state(targetDescriptor != null, "No type descriptor");
+
 		// Indexing into a Map
-		if (targetObject instanceof Map) {
+		if (target instanceof Map) {
 			Object key = index;
 			if (targetDescriptor.getMapKeyTypeDescriptor() != null) {
 				key = state.convertValue(key, targetDescriptor.getMapKeyTypeDescriptor());
 			}
 			this.indexedType = IndexedType.MAP;
-			return new MapIndexingValueRef(state.getTypeConverter(), (Map<?, ?>) targetObject, key, targetDescriptor);
+			return new MapIndexingValueRef(state.getTypeConverter(), (Map<?, ?>) target, key, targetDescriptor);
 		}
 
-		if (targetObject == null) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
-		}
-
-		// if the object is something that looks indexable by an integer,
+		// If the object is something that looks indexable by an integer,
 		// attempt to treat the index value as a number
-		if (targetObject.getClass().isArray() || targetObject instanceof Collection || targetObject instanceof String) {
+		if (target.getClass().isArray() || target instanceof Collection || target instanceof String) {
 			int idx = (Integer) state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
-			if (targetObject.getClass().isArray()) {
+			if (target.getClass().isArray()) {
 				this.indexedType = IndexedType.ARRAY;
-				return new ArrayIndexingValueRef(state.getTypeConverter(), targetObject, idx, targetDescriptor);
+				return new ArrayIndexingValueRef(state.getTypeConverter(), target, idx, targetDescriptor);
 			}
-			else if (targetObject instanceof Collection) {
-				if (targetObject instanceof List) {
+			else if (target instanceof Collection) {
+				if (target instanceof List) {
 					this.indexedType = IndexedType.LIST;
 				}
-				return new CollectionIndexingValueRef((Collection<?>) targetObject, idx, targetDescriptor,
+				return new CollectionIndexingValueRef((Collection<?>) target, idx, targetDescriptor,
 						state.getTypeConverter(), state.getConfiguration().isAutoGrowCollections(),
 						state.getConfiguration().getMaximumAutoGrowSize());
 			}
 			else {
 				this.indexedType = IndexedType.STRING;
-				return new StringIndexingLValue((String) targetObject, idx, targetDescriptor);
+				return new StringIndexingLValue((String) target, idx, targetDescriptor);
 			}
 		}
 
 		// Try and treat the index value as a property of the context object
-		// TODO could call the conversion service to convert the value to a String
+		// TODO: could call the conversion service to convert the value to a String
 		TypeDescriptor valueType = indexValue.getTypeDescriptor();
 		if (valueType != null && String.class == valueType.getType()) {
 			this.indexedType = IndexedType.OBJECT;
-			return new PropertyIndexingValueRef(targetObject, (String) index, state.getEvaluationContext(), targetDescriptor);
+			return new PropertyIndexingValueRef(
+					target, (String) index, state.getEvaluationContext(), targetDescriptor);
 		}
 
 		throw new SpelEvaluationException(
 				getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetDescriptor);
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		if (this.indexedType == IndexedType.ARRAY) {
@@ -200,16 +203,14 @@ public class Indexer extends SpelNodeImpl {
 			return (this.children[0] instanceof PropertyOrFieldReference || this.children[0].isCompilable());
 		}
 		else if (this.indexedType == IndexedType.OBJECT) {
-			// If the string name is changing the accessor is clearly going to change (so compilation is not possible)
-			if (this.cachedReadAccessor != null && 
-					(this.cachedReadAccessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor) &&
-					(getChild(0) instanceof StringLiteral)) {
-				return true;
-			}
+			// If the string name is changing the accessor is clearly going to change (so no compilation possible)
+			return (this.cachedReadAccessor != null &&
+					this.cachedReadAccessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor &&
+					getChild(0) instanceof StringLiteral);
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		String descriptor = cf.lastDescriptor();
@@ -248,7 +249,7 @@ public class Indexer extends SpelNodeImpl {
 				mv.visitTypeInsn(CHECKCAST, "[C");
 				insn = CALOAD;
 			}
-			else { 
+			else {
 				mv.visitTypeInsn(CHECKCAST, "["+ this.exitTypeDescriptor +
 						(CodeFlow.isPrimitiveArray(this.exitTypeDescriptor) ? "" : ";"));
 						//depthPlusOne(exitTypeDescriptor)+"Ljava/lang/Object;");
@@ -283,8 +284,9 @@ public class Indexer extends SpelNodeImpl {
 				this.children[0].generateCode(mv, cf);
 				cf.exitCompilationScope();
 			}
-			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
-		} 
+			mv.visitMethodInsn(
+					INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
+		}
 
 		else if (this.indexedType == IndexedType.OBJECT) {
 			ReflectivePropertyAccessor.OptimalPropertyAccessor accessor =
@@ -311,7 +313,7 @@ public class Indexer extends SpelNodeImpl {
 				mv.visitFieldInsn((isStatic ? GETSTATIC : GETFIELD), classDesc, member.getName(),
 						CodeFlow.toJvmDescriptor(((Field) member).getType()));
 			}
-		} 
+		}
 
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
@@ -333,30 +335,10 @@ public class Indexer extends SpelNodeImpl {
 	private void setArrayElement(TypeConverter converter, Object ctx, int idx, @Nullable Object newValue,
 			Class<?> arrayComponentType) throws EvaluationException {
 
-		if (arrayComponentType == Double.TYPE) {
-			double[] array = (double[]) ctx;
+		if (arrayComponentType == Boolean.TYPE) {
+			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Double.class);
-		}
-		else if (arrayComponentType == Float.TYPE) {
-			float[] array = (float[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Float.class);
-		}
-		else if (arrayComponentType == Long.TYPE) {
-			long[] array = (long[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Long.class);
-		}
-		else if (arrayComponentType == Integer.TYPE) {
-			int[] array = (int[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Integer.class);
-		}
-		else if (arrayComponentType == Short.TYPE) {
-			short[] array = (short[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Short.class);
+			array[idx] = convertValue(converter, newValue, Boolean.class);
 		}
 		else if (arrayComponentType == Byte.TYPE) {
 			byte[] array = (byte[]) ctx;
@@ -368,10 +350,30 @@ public class Indexer extends SpelNodeImpl {
 			checkAccess(array.length, idx);
 			array[idx] = convertValue(converter, newValue, Character.class);
 		}
-		else if (arrayComponentType == Boolean.TYPE) {
-			boolean[] array = (boolean[]) ctx;
+		else if (arrayComponentType == Double.TYPE) {
+			double[] array = (double[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Boolean.class);
+			array[idx] = convertValue(converter, newValue, Double.class);
+		}
+		else if (arrayComponentType == Float.TYPE) {
+			float[] array = (float[]) ctx;
+			checkAccess(array.length, idx);
+			array[idx] = convertValue(converter, newValue, Float.class);
+		}
+		else if (arrayComponentType == Integer.TYPE) {
+			int[] array = (int[]) ctx;
+			checkAccess(array.length, idx);
+			array[idx] = convertValue(converter, newValue, Integer.class);
+		}
+		else if (arrayComponentType == Long.TYPE) {
+			long[] array = (long[]) ctx;
+			checkAccess(array.length, idx);
+			array[idx] = convertValue(converter, newValue, Long.class);
+		}
+		else if (arrayComponentType == Short.TYPE) {
+			short[] array = (short[]) ctx;
+			checkAccess(array.length, idx);
+			array[idx] = convertValue(converter, newValue, Short.class);
 		}
 		else {
 			Object[] array = (Object[]) ctx;
@@ -382,34 +384,10 @@ public class Indexer extends SpelNodeImpl {
 
 	private Object accessArrayElement(Object ctx, int idx) throws SpelEvaluationException {
 		Class<?> arrayComponentType = ctx.getClass().getComponentType();
-		if (arrayComponentType == Double.TYPE) {
-			double[] array = (double[]) ctx;
+		if (arrayComponentType == Boolean.TYPE) {
+			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "D";
-			return array[idx];
-		}
-		else if (arrayComponentType == Float.TYPE) {
-			float[] array = (float[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "F";
-			return array[idx];
-		}
-		else if (arrayComponentType == Long.TYPE) {
-			long[] array = (long[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "J";
-			return array[idx];
-		}
-		else if (arrayComponentType == Integer.TYPE) {
-			int[] array = (int[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "I";
-			return array[idx];
-		}
-		else if (arrayComponentType == Short.TYPE) {
-			short[] array = (short[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "S";
+			this.exitTypeDescriptor = "Z";
 			return array[idx];
 		}
 		else if (arrayComponentType == Byte.TYPE) {
@@ -424,10 +402,34 @@ public class Indexer extends SpelNodeImpl {
 			this.exitTypeDescriptor = "C";
 			return array[idx];
 		}
-		else if (arrayComponentType == Boolean.TYPE) {
-			boolean[] array = (boolean[]) ctx;
+		else if (arrayComponentType == Double.TYPE) {
+			double[] array = (double[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "Z";
+			this.exitTypeDescriptor = "D";
+			return array[idx];
+		}
+		else if (arrayComponentType == Float.TYPE) {
+			float[] array = (float[]) ctx;
+			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "F";
+			return array[idx];
+		}
+		else if (arrayComponentType == Integer.TYPE) {
+			int[] array = (int[]) ctx;
+			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "I";
+			return array[idx];
+		}
+		else if (arrayComponentType == Long.TYPE) {
+			long[] array = (long[]) ctx;
+			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "J";
+			return array[idx];
+		}
+		else if (arrayComponentType == Short.TYPE) {
+			short[] array = (short[]) ctx;
+			checkAccess(array.length, idx);
+			this.exitTypeDescriptor = "S";
 			return array[idx];
 		}
 		else {
@@ -592,11 +594,11 @@ public class Indexer extends SpelNodeImpl {
 				}
 			}
 			catch (AccessException ex) {
-				throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
-						this.targetObjectTypeDescriptor.toString());
+				throw new SpelEvaluationException(getStartPosition(), ex,
+						SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, this.targetObjectTypeDescriptor.toString());
 			}
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
-					this.targetObjectTypeDescriptor.toString());
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, this.targetObjectTypeDescriptor.toString());
 		}
 
 		@Override
@@ -612,8 +614,8 @@ public class Indexer extends SpelNodeImpl {
 					accessor.write(this.evaluationContext, this.targetObject, this.name, newValue);
 					return;
 				}
-				List<PropertyAccessor> accessorsToTry =
-						AstUtils.getPropertyAccessorsToTry(contextObjectClass, this.evaluationContext.getPropertyAccessors());
+				List<PropertyAccessor> accessorsToTry = AstUtils.getPropertyAccessorsToTry(
+						contextObjectClass, this.evaluationContext.getPropertyAccessors());
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canWrite(this.evaluationContext, this.targetObject, this.name)) {
 						Indexer.this.cachedWriteName = this.name;
@@ -625,8 +627,8 @@ public class Indexer extends SpelNodeImpl {
 				}
 			}
 			catch (AccessException ex) {
-				throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,
-						this.name, ex.getMessage());
+				throw new SpelEvaluationException(getStartPosition(), ex,
+						SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE, this.name, ex.getMessage());
 			}
 		}
 
@@ -652,11 +654,12 @@ public class Indexer extends SpelNodeImpl {
 
 		private final int maximumSize;
 
-		public CollectionIndexingValueRef(Collection collection, int index, TypeDescriptor collectionEntryTypeDescriptor,
+		public CollectionIndexingValueRef(Collection collection, int index, TypeDescriptor collectionEntryDescriptor,
 				TypeConverter typeConverter, boolean growCollection, int maximumSize) {
+
 			this.collection = collection;
 			this.index = index;
-			this.collectionEntryDescriptor = collectionEntryTypeDescriptor;
+			this.collectionEntryDescriptor = collectionEntryDescriptor;
 			this.typeConverter = typeConverter;
 			this.growCollection = growCollection;
 			this.maximumSize = maximumSize;
@@ -707,13 +710,15 @@ public class Indexer extends SpelNodeImpl {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION);
 				}
 				if (this.collectionEntryDescriptor.getElementTypeDescriptor() == null) {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
+					throw new SpelEvaluationException(
+							getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
 				}
 				TypeDescriptor elementType = this.collectionEntryDescriptor.getElementTypeDescriptor();
 				try {
+					Constructor<?> ctor = ReflectionUtils.accessibleConstructor(elementType.getType());
 					int newElements = this.index - this.collection.size();
 					while (newElements >= 0) {
-						(this.collection).add(ReflectionUtils.accessibleConstructor(elementType.getType()).newInstance());
+						this.collection.add(ctor.newInstance());
 						newElements--;
 					}
 				}

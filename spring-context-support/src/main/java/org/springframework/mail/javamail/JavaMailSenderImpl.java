@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,10 @@ import org.springframework.util.Assert;
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
-	/** The default protocol: 'smtp' */
+	/** The default protocol: 'smtp'. */
 	public static final String DEFAULT_PROTOCOL = "smtp";
 
-	/** The default port: -1 */
+	/** The default port: -1. */
 	public static final int DEFAULT_PORT = -1;
 
 	private static final String HEADER_MESSAGE_ID = "Message-ID";
@@ -318,7 +318,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 			simpleMessage.copyTo(message);
 			mimeMessages.add(message.getMimeMessage());
 		}
-		doSend(mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
+		doSend(mimeMessages.toArray(new MimeMessage[0]), simpleMessages);
 	}
 
 
@@ -373,7 +373,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				preparator.prepare(mimeMessage);
 				mimeMessages.add(mimeMessage);
 			}
-			send(mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
+			send(mimeMessages.toArray(new MimeMessage[0]));
 		}
 		catch (MailException ex) {
 			throw ex;
@@ -404,7 +404,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	/**
 	 * Actually send the given array of MimeMessages via JavaMail.
-	 * @param mimeMessages MimeMessage objects to send
+	 * @param mimeMessages the MimeMessage objects to send
 	 * @param originalMessages corresponding original message objects
 	 * that the MimeMessages have been created from (with same array
 	 * length and indices as the "mimeMessages" array), if any

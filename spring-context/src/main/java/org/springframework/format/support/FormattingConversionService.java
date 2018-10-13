@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,6 +189,7 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		@Override
+		@Nullable
 		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			String text = (String) source;
 			if (!StringUtils.hasText(text)) {
@@ -247,6 +248,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		@SuppressWarnings("unchecked")
+		@Nullable
 		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			Annotation ann = sourceType.getAnnotation(this.annotationType);
 			if (ann == null) {
@@ -291,7 +293,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
-			return Collections.singleton(new ConvertiblePair(String.class, fieldType));
+			return Collections.singleton(new ConvertiblePair(String.class, this.fieldType));
 		}
 
 		@Override
@@ -301,6 +303,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		@SuppressWarnings("unchecked")
+		@Nullable
 		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			Annotation ann = targetType.getAnnotation(this.annotationType);
 			if (ann == null) {

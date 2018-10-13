@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,7 @@ public interface BindingResult extends Errors {
 	 * Extract the raw field value for the given field.
 	 * Typically used for comparison purposes.
 	 * @param field the field to check
-	 * @return the current value of the field in its raw form,
-	 * or {@code null} if not known
+	 * @return the current value of the field in its raw form, or {@code null} if not known
 	 */
 	@Nullable
 	Object getRawFieldValue(String field);
@@ -108,15 +107,6 @@ public interface BindingResult extends Errors {
 	PropertyEditorRegistry getPropertyEditorRegistry();
 
 	/**
-	 * Add a custom {@link ObjectError} or {@link FieldError} to the errors list.
-	 * <p>Intended to be used by cooperating strategies such as {@link BindingErrorProcessor}.
-	 * @see ObjectError
-	 * @see FieldError
-	 * @see BindingErrorProcessor
-	 */
-	void addError(ObjectError error);
-
-	/**
 	 * Resolve the given error code into message codes.
 	 * <p>Calls the configured {@link MessageCodesResolver} with appropriate parameters.
 	 * @param errorCode the error code to resolve into message codes
@@ -134,12 +124,36 @@ public interface BindingResult extends Errors {
 	String[] resolveMessageCodes(String errorCode, String field);
 
 	/**
+	 * Add a custom {@link ObjectError} or {@link FieldError} to the errors list.
+	 * <p>Intended to be used by cooperating strategies such as {@link BindingErrorProcessor}.
+	 * @see ObjectError
+	 * @see FieldError
+	 * @see BindingErrorProcessor
+	 */
+	void addError(ObjectError error);
+
+	/**
+	 * Record the given value for the specified field.
+	 * <p>To be used when a target object cannot be constructed, making
+	 * the original field values available through {@link #getFieldValue}.
+	 * In case of a registered error, the rejected value will be exposed
+	 * for each affected field.
+	 * @param field the field to record the value for
+	 * @param type the type of the field
+	 * @param value the original value
+	 * @since 5.0.4
+	 */
+	default void recordFieldValue(String field, Class<?> type, @Nullable Object value) {
+	}
+
+	/**
 	 * Mark the specified disallowed field as suppressed.
 	 * <p>The data binder invokes this for each field value that was
 	 * detected to target a disallowed field.
 	 * @see DataBinder#setAllowedFields
 	 */
-	void recordSuppressedField(String field);
+	default void recordSuppressedField(String field) {
+	}
 
 	/**
 	 * Return the list of fields that were suppressed during the bind process.
@@ -147,6 +161,8 @@ public interface BindingResult extends Errors {
 	 * disallowed fields.
 	 * @see DataBinder#setAllowedFields
 	 */
-	String[] getSuppressedFields();
+	default String[] getSuppressedFields() {
+		return new String[0];
+	}
 
 }

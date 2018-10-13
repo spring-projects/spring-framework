@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 
 /**
- * Defines the strategies for invoking {@link ExchangeFunction}s. An instance of
- * this class is immutable; instances are typically created through the mutable {@link Builder}:
- * either through {@link #builder()} to set up default strategies, or {@link #empty()} to start
- * from scratch.
+ * Provides strategies for use in an {@link ExchangeFunction}.
+ *
+ * <p>To create an instance, see the static methods {@link #withDefaults()},
+ * {@link #builder()}, and {@link #empty()}.
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
@@ -35,16 +35,14 @@ import org.springframework.http.codec.HttpMessageWriter;
  */
 public interface ExchangeStrategies {
 
-	// Instance methods
-
 	/**
-	 * Return the {@link HttpMessageReader}s to be used for request body conversion.
+	 * Return {@link HttpMessageReader HttpMessageReaders} to read and decode the response body with.
 	 * @return the stream of message readers
 	 */
 	List<HttpMessageReader<?>> messageReaders();
 
 	/**
-	 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
+	 * Return {@link HttpMessageWriter HttpMessageWriters} to write and encode the request body with.
 	 * @return the stream of message writers
 	 */
 	List<HttpMessageWriter<?>> messageWriters();
@@ -53,18 +51,17 @@ public interface ExchangeStrategies {
 	// Static methods
 
 	/**
-	 * Return a new {@code ExchangeStrategies} with default initialization.
-	 * @return the new {@code ExchangeStrategies}
+	 * Return a new {@code ExchangeStrategies} with default configuration
+	 * provided by {@link ClientCodecConfigurer}.
 	 */
 	static ExchangeStrategies withDefaults() {
-		return builder().build();
+		return DefaultExchangeStrategiesBuilder.DEFAULT_EXCHANGE_STRATEGIES;
 	}
 
-	// Builder methods
-
 	/**
-	 * Return a mutable builder for a {@code ExchangeStrategies} with default initialization.
-	 * @return the builder
+	 * Return a builder pre-configured with default configuration to start.
+	 * This is the same as {@link #withDefaults()} but returns a mutable builder
+	 * for further customizations.
 	 */
 	static Builder builder() {
 		DefaultExchangeStrategiesBuilder builder = new DefaultExchangeStrategiesBuilder();
@@ -73,8 +70,7 @@ public interface ExchangeStrategies {
 	}
 
 	/**
-	 * Return a mutable, empty builder for a {@code ExchangeStrategies}.
-	 * @return the builder
+	 * Return a builder with empty configuration to start.
 	 */
 	static Builder empty() {
 		return new DefaultExchangeStrategiesBuilder();
@@ -82,7 +78,7 @@ public interface ExchangeStrategies {
 
 
 	/**
-	 * A mutable builder for a {@link ExchangeStrategies}.
+	 * A mutable builder for an {@link ExchangeStrategies}.
 	 */
 	interface Builder {
 

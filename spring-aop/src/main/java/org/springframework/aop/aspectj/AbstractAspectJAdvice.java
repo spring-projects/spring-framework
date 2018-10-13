@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,16 +117,16 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	/**
 	 * This will be non-null if the creator of this advice object knows the argument names
-	 * and sets them explicitly
+	 * and sets them explicitly.
 	 */
 	@Nullable
 	private String[] argumentNames;
 
-	/** Non-null if after throwing advice binds the thrown value */
+	/** Non-null if after throwing advice binds the thrown value. */
 	@Nullable
 	private String throwingName;
 
-	/** Non-null if after returning advice binds the return value */
+	/** Non-null if after returning advice binds the return value. */
 	@Nullable
 	private String returningName;
 
@@ -136,13 +136,13 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	/**
 	 * Index for thisJoinPoint argument (currently only
-	 * supported at index 0 if present at all)
+	 * supported at index 0 if present at all).
 	 */
 	private int joinPointArgumentIndex = -1;
 
 	/**
 	 * Index for thisJoinPointStaticPart argument (currently only
-	 * supported at index 0 if present at all)
+	 * supported at index 0 if present at all).
 	 */
 	private int joinPointStaticPartArgumentIndex = -1;
 
@@ -224,6 +224,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 
+	/**
+	 * Set the name of the aspect (bean) in which the advice was declared.
+	 */
 	public void setAspectName(String name) {
 		this.aspectName = name;
 	}
@@ -234,7 +237,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	/**
-	 * Sets the <b>declaration order</b> of this advice within the aspect
+	 * Set the declaration order of this advice within the aspect.
 	 */
 	public void setDeclarationOrder(int order) {
 		this.declarationOrder = order;
@@ -374,7 +377,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * to which argument name. There are multiple strategies for determining
 	 * this binding, which are arranged in a ChainOfResponsibility.
 	 */
-	public synchronized final void calculateArgumentBindings() {
+	public final synchronized void calculateArgumentBindings() {
 		// The simple case... nothing to bind.
 		if (this.argumentsIntrospected || this.parameterTypes.length == 0) {
 			return;
@@ -382,10 +385,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 		int numUnboundArgs = this.parameterTypes.length;
 		Class<?>[] parameterTypes = this.aspectJAdviceMethod.getParameterTypes();
-		if (maybeBindJoinPoint(parameterTypes[0]) || maybeBindProceedingJoinPoint(parameterTypes[0])) {
-			numUnboundArgs--;
-		}
-		else if (maybeBindJoinPointStaticPart(parameterTypes[0])) {
+		if (maybeBindJoinPoint(parameterTypes[0]) || maybeBindProceedingJoinPoint(parameterTypes[0]) ||
+				maybeBindJoinPointStaticPart(parameterTypes[0])) {
 			numUnboundArgs--;
 		}
 
@@ -550,7 +551,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	/**
 	 * Take the arguments at the method execution join point and output a set of arguments
-	 * to the advice method
+	 * to the advice method.
 	 * @param jp the current JoinPoint
 	 * @param jpMatch the join point match that matched this execution join point
 	 * @param returnValue the return value from the method execution (may be null)
@@ -714,7 +715,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 
 		@Override
-		public boolean matches(Method method, @Nullable Class<?> targetClass) {
+		public boolean matches(Method method, Class<?> targetClass) {
 			return !this.adviceMethod.equals(method);
 		}
 

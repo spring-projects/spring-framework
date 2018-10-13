@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
  * {@code @EnableWebSocketMessageBroker} for Java config and
  * {@code <websocket:message-broker>} for XML.
  *
- * <p>By default aggregated information is logged every 15 minutes at INFO level.
+ * <p>By default aggregated information is logged every 30 minutes at INFO level.
  * The frequency of logging can be changed via {@link #setLoggingPeriod(long)}.
  *
  * <p>This class is declared as a Spring bean by the above configuration with the
@@ -75,7 +75,7 @@ public class WebSocketMessageBrokerStats {
 	@Nullable
 	private ScheduledFuture<?> loggingTask;
 
-	private long loggingPeriod = 30 * 60 * 1000;
+	private long loggingPeriod = TimeUnit.MINUTES.toMillis(30);
 
 
 	public void setSubProtocolWebSocketHandler(SubProtocolWebSocketHandler webSocketHandler) {
@@ -114,7 +114,7 @@ public class WebSocketMessageBrokerStats {
 
 	public void setSockJsTaskScheduler(ThreadPoolTaskScheduler sockJsTaskScheduler) {
 		this.sockJsTaskScheduler = sockJsTaskScheduler.getScheduledThreadPoolExecutor();
-		this.loggingTask = initLoggingTask(60 * 1000);
+		this.loggingTask = initLoggingTask(TimeUnit.MINUTES.toMillis(1));
 	}
 
 	@Nullable

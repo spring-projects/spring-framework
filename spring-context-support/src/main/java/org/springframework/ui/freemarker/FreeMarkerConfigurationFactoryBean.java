@@ -65,6 +65,7 @@ public class FreeMarkerConfigurationFactoryBean extends FreeMarkerConfigurationF
 
 
 	@Override
+	@Nullable
 	public Configuration getObject() {
 		return this.configuration;
 	}

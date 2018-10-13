@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.springframework.web.server;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -91,6 +93,11 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	}
 
 	@Override
+	public ApplicationContext getApplicationContext() {
+		return getDelegate().getApplicationContext();
+	}
+
+	@Override
 	public Mono<MultiValueMap<String, String>> getFormData() {
 		return getDelegate().getFormData();
 	}
@@ -120,6 +127,20 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 		return getDelegate().checkNotModified(etag, lastModified);
 	}
 
+	@Override
+	public String transformUrl(String url) {
+		return getDelegate().transformUrl(url);
+	}
+
+	@Override
+	public void addUrlTransformer(Function<String, String> transformer) {
+		getDelegate().addUrlTransformer(transformer);
+	}
+
+	@Override
+	public String getLogPrefix() {
+		return getDelegate().getLogPrefix();
+	}
 
 	@Override
 	public String toString() {

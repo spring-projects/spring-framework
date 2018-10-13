@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.core.MethodParameter;
  *
  * @author Rossen Stoyanchev
  * @since 4.2
+ * @see MissingMatrixVariableException
  */
 @SuppressWarnings("serial")
 public class MissingPathVariableException extends ServletRequestBindingException {
@@ -51,7 +52,7 @@ public class MissingPathVariableException extends ServletRequestBindingException
 	@Override
 	public String getMessage() {
 		return "Missing URI template variable '" + this.variableName +
-				"' for method parameter of type " + this.parameter.getParameterType().getSimpleName();
+				"' for method parameter of type " + this.parameter.getNestedParameterType().getSimpleName();
 	}
 
 	/**

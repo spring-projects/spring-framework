@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,13 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 
 
 	/**
-	 * Create an instance from a collection of {@link UriComponentsContributor}s or
-	 * {@link HandlerMethodArgumentResolver}s. Since both of these tend to be implemented
+	 * Create an instance from a collection of {@link UriComponentsContributor UriComponentsContributors} or
+	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}. Since both of these tend to be implemented
 	 * by the same class, the most convenient option is to obtain the configured
 	 * {@code HandlerMethodArgumentResolvers} in {@code RequestMappingHandlerAdapter}
 	 * and provide that to this constructor.
 	 * @param contributors a collection of {@link UriComponentsContributor}
-	 * or {@link HandlerMethodArgumentResolver}s.
+	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 */
 	public CompositeUriComponentsContributor(UriComponentsContributor... contributors) {
 		Collections.addAll(this.contributors, contributors);
@@ -58,21 +58,21 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	}
 
 	/**
-	 * Create an instance from a collection of {@link UriComponentsContributor}s or
-	 * {@link HandlerMethodArgumentResolver}s. Since both of these tend to be implemented
+	 * Create an instance from a collection of {@link UriComponentsContributor UriComponentsContributors} or
+	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}. Since both of these tend to be implemented
 	 * by the same class, the most convenient option is to obtain the configured
 	 * {@code HandlerMethodArgumentResolvers} in {@code RequestMappingHandlerAdapter}
 	 * and provide that to this constructor.
 	 * @param contributors a collection of {@link UriComponentsContributor}
-	 * or {@link HandlerMethodArgumentResolver}s.
+	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 */
 	public CompositeUriComponentsContributor(Collection<?> contributors) {
 		this(contributors, null);
 	}
 
 	/**
-	 * Create an instance from a collection of {@link UriComponentsContributor}s or
-	 * {@link HandlerMethodArgumentResolver}s. Since both of these tend to be implemented
+	 * Create an instance from a collection of {@link UriComponentsContributor UriComponentsContributors} or
+	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}. Since both of these tend to be implemented
 	 * by the same class, the most convenient option is to obtain the configured
 	 * {@code HandlerMethodArgumentResolvers} in the {@code RequestMappingHandlerAdapter}
 	 * and provide that to this constructor.
@@ -80,7 +80,7 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * {@link org.springframework.format.support.DefaultFormattingConversionService}
 	 * will be used by default.
 	 * @param contributors a collection of {@link UriComponentsContributor}
-	 * or {@link HandlerMethodArgumentResolver}s.
+	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 * @param cs a ConversionService to use when method argument values
 	 * need to be formatted as Strings before being added to the URI
 	 */
@@ -98,15 +98,14 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		for (Object c : this.contributors) {
-			if (c instanceof UriComponentsContributor) {
-				UriComponentsContributor contributor = (UriComponentsContributor) c;
-				if (contributor.supportsParameter(parameter)) {
+		for (Object contributor : this.contributors) {
+			if (contributor instanceof UriComponentsContributor) {
+				if (((UriComponentsContributor) contributor).supportsParameter(parameter)) {
 					return true;
 				}
 			}
-			else if (c instanceof HandlerMethodArgumentResolver) {
-				if (((HandlerMethodArgumentResolver) c).supportsParameter(parameter)) {
+			else if (contributor instanceof HandlerMethodArgumentResolver) {
+				if (((HandlerMethodArgumentResolver) contributor).supportsParameter(parameter)) {
 					return false;
 				}
 			}

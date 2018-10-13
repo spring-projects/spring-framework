@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import static java.util.Collections.singletonList;
@@ -47,7 +48,7 @@ public class WebJarsResourceResolverTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(1);
 
-	
+
 	private List<Resource> locations;
 
 	private WebJarsResourceResolver resolver;
@@ -63,7 +64,7 @@ public class WebJarsResourceResolverTests {
 		this.locations = singletonList(new ClassPathResource("/META-INF/resources/webjars"));
 		this.resolver = new WebJarsResourceResolver();
 		this.chain = mock(ResourceResolverChain.class);
-		this.exchange = MockServerHttpRequest.get("").toExchange();
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 	}
 
 

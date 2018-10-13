@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
@@ -86,7 +84,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 			}
 		}
 		catch (Exception ex) {
-			throw new SockJsException("Failed to start " + this, ex);
+			throw new SockJsException("Failed to start JettyXhrTransport", ex);
 		}
 	}
 
@@ -98,7 +96,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 			}
 		}
 		catch (Exception ex) {
-			throw new SockJsException("Failed to stop " + this, ex);
+			throw new SockJsException("Failed to stop JettyXhrTransport", ex);
 		}
 	}
 
@@ -137,7 +135,9 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		return executeRequest(url, HttpMethod.POST, headers, message.getPayload());
 	}
 
-	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method, HttpHeaders headers, @Nullable String body) {
+	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method,
+			HttpHeaders headers, @Nullable String body) {
+
 		Request httpRequest = this.httpClient.newRequest(url).method(method);
 		addHttpHeaders(httpRequest, headers);
 		if (body != null) {
@@ -159,11 +159,11 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 
 	private static void addHttpHeaders(Request request, HttpHeaders headers) {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			for (String value : entry.getValue()) {
-				request.header(entry.getKey(), value);
+		headers.forEach((key, values) -> {
+			for (String value : values) {
+				request.header(key, value);
 			}
-		}
+		});
 	}
 
 	private static HttpHeaders toHttpHeaders(HttpFields httpFields) {
@@ -271,7 +271,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 		@Override
 		public void onFailure(Response response, Throwable failure) {
-			if (connectFuture.setException(failure)) {
+			if (this.connectFuture.setException(failure)) {
 				return;
 			}
 			if (this.sockJsSession.isDisconnected()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.cache.CacheManager;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -29,13 +30,17 @@ import org.springframework.util.ObjectUtils;
  * has an attribute for a given method.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 3.1
  */
 @SuppressWarnings("serial")
 abstract class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
+		if (CacheManager.class.isAssignableFrom(targetClass)) {
+			return false;
+		}
 		CacheOperationSource cas = getCacheOperationSource();
 		return (cas != null && !CollectionUtils.isEmpty(cas.getCacheOperations(method, targetClass)));
 	}

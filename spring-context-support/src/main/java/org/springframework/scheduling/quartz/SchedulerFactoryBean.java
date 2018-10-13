@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
 import org.quartz.Scheduler;
@@ -89,30 +90,31 @@ import org.springframework.util.CollectionUtils;
 public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBean<Scheduler>,
 		BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean, SmartLifecycle {
 
+	/**
+	 * The thread count property.
+	 */
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
+	/**
+	 * The default thread count.
+	 */
 	public static final int DEFAULT_THREAD_COUNT = 10;
 
 
-	private static final ThreadLocal<ResourceLoader> configTimeResourceLoaderHolder =
-			new ThreadLocal<>();
+	private static final ThreadLocal<ResourceLoader> configTimeResourceLoaderHolder = new ThreadLocal<>();
 
-	private static final ThreadLocal<Executor> configTimeTaskExecutorHolder =
-			new ThreadLocal<>();
+	private static final ThreadLocal<Executor> configTimeTaskExecutorHolder = new ThreadLocal<>();
 
-	private static final ThreadLocal<DataSource> configTimeDataSourceHolder =
-			new ThreadLocal<>();
+	private static final ThreadLocal<DataSource> configTimeDataSourceHolder = new ThreadLocal<>();
 
-	private static final ThreadLocal<DataSource> configTimeNonTransactionalDataSourceHolder =
-			new ThreadLocal<>();
+	private static final ThreadLocal<DataSource> configTimeNonTransactionalDataSourceHolder = new ThreadLocal<>();
 
 
 	/**
-	 * Return the ResourceLoader for the currently configured Quartz Scheduler,
-	 * to be used by ResourceLoaderClassLoadHelper.
-	 * <p>This instance will be set before initialization of the corresponding
-	 * Scheduler, and reset immediately afterwards. It is thus only available
-	 * during configuration.
+	 * Return the {@link ResourceLoader} for the currently configured Quartz Scheduler,
+	 * to be used by {@link ResourceLoaderClassLoadHelper}.
+	 * <p>This instance will be set before initialization of the corresponding Scheduler,
+	 * and reset immediately afterwards. It is thus only available during configuration.
 	 * @see #setApplicationContext
 	 * @see ResourceLoaderClassLoadHelper
 	 */
@@ -122,11 +124,11 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	/**
-	 * Return the TaskExecutor for the currently configured Quartz Scheduler,
-	 * to be used by LocalTaskExecutorThreadPool.
-	 * <p>This instance will be set before initialization of the corresponding
-	 * Scheduler, and reset immediately afterwards. It is thus only available
-	 * during configuration.
+	 * Return the {@link Executor} for the currently configured Quartz Scheduler,
+	 * to be used by {@link LocalTaskExecutorThreadPool}.
+	 * <p>This instance will be set before initialization of the corresponding Scheduler,
+	 * and reset immediately afterwards. It is thus only available during configuration.
+	 * @since 2.0
 	 * @see #setTaskExecutor
 	 * @see LocalTaskExecutorThreadPool
 	 */
@@ -136,11 +138,11 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	/**
-	 * Return the DataSource for the currently configured Quartz Scheduler,
-	 * to be used by LocalDataSourceJobStore.
-	 * <p>This instance will be set before initialization of the corresponding
-	 * Scheduler, and reset immediately afterwards. It is thus only available
-	 * during configuration.
+	 * Return the {@link DataSource} for the currently configured Quartz Scheduler,
+	 * to be used by {@link LocalDataSourceJobStore}.
+	 * <p>This instance will be set before initialization of the corresponding Scheduler,
+	 * and reset immediately afterwards. It is thus only available during configuration.
+	 * @since 1.1
 	 * @see #setDataSource
 	 * @see LocalDataSourceJobStore
 	 */
@@ -150,11 +152,11 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	/**
-	 * Return the non-transactional DataSource for the currently configured
-	 * Quartz Scheduler, to be used by LocalDataSourceJobStore.
-	 * <p>This instance will be set before initialization of the corresponding
-	 * Scheduler, and reset immediately afterwards. It is thus only available
-	 * during configuration.
+	 * Return the non-transactional {@link DataSource} for the currently configured
+	 * Quartz Scheduler, to be used by {@link LocalDataSourceJobStore}.
+	 * <p>This instance will be set before initialization of the corresponding Scheduler,
+	 * and reset immediately afterwards. It is thus only available during configuration.
+	 * @since 1.1
 	 * @see #setNonTransactionalDataSource
 	 * @see LocalDataSourceJobStore
 	 */
@@ -163,6 +165,9 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		return configTimeNonTransactionalDataSourceHolder.get();
 	}
 
+
+	@Nullable
+	private SchedulerFactory schedulerFactory;
 
 	private Class<? extends SchedulerFactory> schedulerFactoryClass = StdSchedulerFactory.class;
 
@@ -175,7 +180,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	@Nullable
 	private Properties quartzProperties;
 
-
 	@Nullable
 	private Executor taskExecutor;
 
@@ -185,12 +189,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	@Nullable
 	private DataSource nonTransactionalDataSource;
 
-
 	@Nullable
-    private Map<String, ?> schedulerContextMap;
-
-	@Nullable
-	private ApplicationContext applicationContext;
+	private Map<String, ?> schedulerContextMap;
 
 	@Nullable
 	private String applicationContextSchedulerContextKey;
@@ -200,40 +200,68 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	private boolean jobFactorySet = false;
 
-
 	private boolean autoStartup = true;
 
 	private int startupDelay = 0;
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
 
 	private boolean exposeSchedulerInRepository = false;
 
 	private boolean waitForJobsToCompleteOnShutdown = false;
 
+	@Nullable
+	private String beanName;
+
+	@Nullable
+	private ApplicationContext applicationContext;
 
 	@Nullable
 	private Scheduler scheduler;
 
 
 	/**
-	 * Set the Quartz SchedulerFactory implementation to use.
-	 * <p>Default is {@link StdSchedulerFactory}, reading in the standard
-	 * {@code quartz.properties} from {@code quartz.jar}.
-	 * To use custom Quartz properties, specify the "configLocation"
-	 * or "quartzProperties" bean property on this FactoryBean.
+	 * Set an external Quartz {@link SchedulerFactory} instance to use.
+	 * <p>Default is an internal {@link StdSchedulerFactory} instance. If this method is
+	 * called, it overrides any class specified through {@link #setSchedulerFactoryClass}
+	 * as well as any settings specified through {@link #setConfigLocation},
+	 * {@link #setQuartzProperties}, {@link #setTaskExecutor} or {@link #setDataSource}.
+	 * <p><b>NOTE:</b> With an externally provided {@code SchedulerFactory} instance,
+	 * local settings such as {@link #setConfigLocation} or {@link #setQuartzProperties}
+	 * will be ignored here in {@code SchedulerFactoryBean}, expecting the external
+	 * {@code SchedulerFactory} instance to get initialized on its own.
+	 * @since 4.3.15
+	 * @see #setSchedulerFactoryClass
+	 */
+	public void setSchedulerFactory(SchedulerFactory schedulerFactory) {
+		this.schedulerFactory = schedulerFactory;
+	}
+
+	/**
+	 * Set the Quartz {@link SchedulerFactory} implementation to use.
+	 * <p>Default is the {@link StdSchedulerFactory} class, reading in the standard
+	 * {@code quartz.properties} from {@code quartz.jar}. For applying custom Quartz
+	 * properties, specify {@link #setConfigLocation "configLocation"} and/or
+	 * {@link #setQuartzProperties "quartzProperties"} etc on this local
+	 * {@code SchedulerFactoryBean} instance.
 	 * @see org.quartz.impl.StdSchedulerFactory
 	 * @see #setConfigLocation
 	 * @see #setQuartzProperties
+	 * @see #setTaskExecutor
+	 * @see #setDataSource
 	 */
 	public void setSchedulerFactoryClass(Class<? extends SchedulerFactory> schedulerFactoryClass) {
 		this.schedulerFactoryClass = schedulerFactoryClass;
 	}
 
 	/**
-	 * Set the name of the Scheduler to create via the SchedulerFactory.
-	 * <p>If not specified, the bean name will be used as default scheduler name.
+	 * Set the name of the Scheduler to create via the SchedulerFactory, as an
+	 * alternative to the {@code org.quartz.scheduler.instanceName} property.
+	 * <p>If not specified, the name will be taken from Quartz properties
+	 * ({@code org.quartz.scheduler.instanceName}), or from the declared
+	 * {@code SchedulerFactoryBean} bean name as a fallback.
 	 * @see #setBeanName
+	 * @see StdSchedulerFactory#PROP_SCHED_INSTANCE_NAME
 	 * @see org.quartz.SchedulerFactory#getScheduler()
 	 * @see org.quartz.SchedulerFactory#getScheduler(String)
 	 */
@@ -262,26 +290,26 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		this.quartzProperties = quartzProperties;
 	}
 
-
 	/**
-	 * Set the Spring TaskExecutor to use as Quartz backend.
+	 * Set a Spring-managed {@link Executor} to use as Quartz backend.
 	 * Exposed as thread pool through the Quartz SPI.
-	 * <p>Can be used to assign a JDK 1.5 ThreadPoolExecutor or a CommonJ
+	 * <p>Can be used to assign a local JDK ThreadPoolExecutor or a CommonJ
 	 * WorkManager as Quartz backend, to avoid Quartz's manual thread creation.
 	 * <p>By default, a Quartz SimpleThreadPool will be used, configured through
 	 * the corresponding Quartz properties.
+	 * @since 2.0
 	 * @see #setQuartzProperties
 	 * @see LocalTaskExecutorThreadPool
 	 * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
+	 * @see org.springframework.scheduling.concurrent.DefaultManagedTaskExecutor
 	 */
 	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
-	 * Set the default DataSource to be used by the Scheduler. If set,
-	 * this will override corresponding settings in Quartz properties.
+	 * Set the default {@link DataSource} to be used by the Scheduler.
+	 * If set, this will override corresponding settings in Quartz properties.
 	 * <p>Note: If this is set, the Quartz settings should not define
 	 * a job store "dataSource" to avoid meaningless double configuration.
 	 * <p>A Spring-specific subclass of Quartz' JobStoreCMT will be used.
@@ -294,6 +322,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * argument is sufficient. In case of an XA DataSource and global JTA transactions,
 	 * SchedulerFactoryBean's "nonTransactionalDataSource" property should be set,
 	 * passing in a non-XA DataSource that will not participate in global transactions.
+	 * @since 1.1
 	 * @see #setNonTransactionalDataSource
 	 * @see #setQuartzProperties
 	 * @see #setTransactionManager
@@ -304,12 +333,13 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	/**
-	 * Set the DataSource to be used by the Scheduler <i>for non-transactional access</i>.
+	 * Set the {@link DataSource} to be used <i>for non-transactional access</i>.
 	 * <p>This is only necessary if the default DataSource is an XA DataSource that will
 	 * always participate in transactions: A non-XA version of that DataSource should
 	 * be specified as "nonTransactionalDataSource" in such a scenario.
 	 * <p>This is not relevant with a local DataSource instance and Spring transactions.
 	 * Specifying a single default DataSource as "dataSource" is sufficient there.
+	 * @since 1.1
 	 * @see #setDataSource
 	 * @see LocalDataSourceJobStore
 	 */
@@ -317,14 +347,13 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		this.nonTransactionalDataSource = nonTransactionalDataSource;
 	}
 
-
 	/**
 	 * Register objects in the Scheduler context via a given Map.
 	 * These objects will be available to any Job that runs in this Scheduler.
 	 * <p>Note: When using persistent Jobs whose JobDetail will be kept in the
 	 * database, do not put Spring-managed beans or an ApplicationContext
 	 * reference into the JobDataMap but rather into the SchedulerContext.
-	 * @param schedulerContextAsMap Map with String keys and any objects as
+	 * @param schedulerContextAsMap a Map with String keys and any objects as
 	 * values (for example Spring-managed beans)
 	 * @see JobDetailFactoryBean#setJobDataAsMap
 	 */
@@ -333,7 +362,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	/**
-	 * Set the key of an ApplicationContext reference to expose in the
+	 * Set the key of an {@link ApplicationContext} reference to expose in the
 	 * SchedulerContext, for example "applicationContext". Default is none.
 	 * Only applicable when running in a Spring ApplicationContext.
 	 * <p>Note: When using persistent Jobs whose JobDetail will be kept in the
@@ -353,7 +382,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	/**
-	 * Set the Quartz JobFactory to use for this Scheduler.
+	 * Set the Quartz {@link JobFactory} to use for this Scheduler.
 	 * <p>Default is Spring's {@link AdaptableJobFactory}, which supports
 	 * {@link java.lang.Runnable} objects as well as standard Quartz
 	 * {@link org.quartz.Job} instances. Note that this default only applies
@@ -362,6 +391,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * <p>Specify an instance of Spring's {@link SpringBeanJobFactory} here
 	 * (typically as an inner bean definition) to automatically populate a job's
 	 * bean properties from the specified job data map and scheduler context.
+	 * @since 2.0
 	 * @see AdaptableJobFactory
 	 * @see SpringBeanJobFactory
 	 */
@@ -369,7 +399,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		this.jobFactory = jobFactory;
 		this.jobFactorySet = true;
 	}
-
 
 	/**
 	 * Set whether to automatically start the scheduler after initialization.
@@ -390,11 +419,12 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	/**
-	 * Specify the phase in which this scheduler should be started and
-	 * stopped. The startup order proceeds from lowest to highest, and
-	 * the shutdown order is the reverse of that. By default this value
-	 * is Integer.MAX_VALUE meaning that this scheduler starts as late
-	 * as possible and stops as soon as possible.
+	 * Specify the phase in which this scheduler should be started and stopped.
+	 * The startup order proceeds from lowest to highest, and the shutdown order
+	 * is the reverse of that. By default this value is {@code Integer.MAX_VALUE}
+	 * meaning that this scheduler starts as late as possible and stops as soon
+	 * as possible.
+	 * @since 3.0
 	 */
 	public void setPhase(int phase) {
 		this.phase = phase;
@@ -442,12 +472,9 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		this.waitForJobsToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
 	}
 
-
 	@Override
 	public void setBeanName(String name) {
-		if (this.schedulerName == null) {
-			this.schedulerName = name;
-		}
+		this.beanName = name;
 	}
 
 	@Override
@@ -470,10 +497,100 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 			this.resourceLoader = this.applicationContext;
 		}
 
-		// Create SchedulerFactory instance...
-		SchedulerFactory schedulerFactory = BeanUtils.instantiateClass(this.schedulerFactoryClass);
-		initSchedulerFactory(schedulerFactory);
+		// Initialize the Scheduler instance...
+		this.scheduler = prepareScheduler(prepareSchedulerFactory());
+		try {
+			registerListeners();
+			registerJobsAndTriggers();
+		}
+		catch (Exception ex) {
+			try {
+				this.scheduler.shutdown(true);
+			}
+			catch (Exception ex2) {
+				logger.debug("Scheduler shutdown exception after registration failure", ex2);
+			}
+			throw ex;
+		}
+	}
 
+
+	/**
+	 * Create a SchedulerFactory if necessary and apply locally defined Quartz properties to it.
+	 * @return the initialized SchedulerFactory
+	 */
+	private SchedulerFactory prepareSchedulerFactory() throws SchedulerException, IOException {
+		SchedulerFactory schedulerFactory = this.schedulerFactory;
+		if (schedulerFactory == null) {
+			// Create local SchedulerFactory instance (typically a StdSchedulerFactory)
+			schedulerFactory = BeanUtils.instantiateClass(this.schedulerFactoryClass);
+			if (schedulerFactory instanceof StdSchedulerFactory) {
+				initSchedulerFactory((StdSchedulerFactory) schedulerFactory);
+			}
+			else if (this.configLocation != null || this.quartzProperties != null ||
+					this.taskExecutor != null || this.dataSource != null) {
+				throw new IllegalArgumentException(
+						"StdSchedulerFactory required for applying Quartz properties: " + schedulerFactory);
+			}
+			// Otherwise, no local settings to be applied via StdSchedulerFactory.initialize(Properties)
+		}
+		// Otherwise, assume that externally provided factory has been initialized with appropriate settings
+		return schedulerFactory;
+	}
+
+	/**
+	 * Initialize the given SchedulerFactory, applying locally defined Quartz properties to it.
+	 * @param schedulerFactory the SchedulerFactory to initialize
+	 */
+	private void initSchedulerFactory(StdSchedulerFactory schedulerFactory) throws SchedulerException, IOException {
+		Properties mergedProps = new Properties();
+		if (this.resourceLoader != null) {
+			mergedProps.setProperty(StdSchedulerFactory.PROP_SCHED_CLASS_LOAD_HELPER_CLASS,
+					ResourceLoaderClassLoadHelper.class.getName());
+		}
+
+		if (this.taskExecutor != null) {
+			mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS,
+					LocalTaskExecutorThreadPool.class.getName());
+		}
+		else {
+			// Set necessary default properties here, as Quartz will not apply
+			// its default configuration when explicitly given properties.
+			mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getName());
+			mergedProps.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
+		}
+
+		if (this.configLocation != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loading Quartz config from [" + this.configLocation + "]");
+			}
+			PropertiesLoaderUtils.fillProperties(mergedProps, this.configLocation);
+		}
+
+		CollectionUtils.mergePropertiesIntoMap(this.quartzProperties, mergedProps);
+		if (this.dataSource != null) {
+			mergedProps.setProperty(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
+		}
+
+		// Determine scheduler name across local settings and Quartz properties...
+		if (this.schedulerName != null) {
+			mergedProps.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
+		}
+		else {
+			String nameProp = mergedProps.getProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME);
+			if (nameProp != null) {
+				this.schedulerName = nameProp;
+			}
+			else if (this.beanName != null) {
+				mergedProps.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.beanName);
+				this.schedulerName = this.beanName;
+			}
+		}
+
+		schedulerFactory.initialize(mergedProps);
+	}
+
+	private Scheduler prepareScheduler(SchedulerFactory schedulerFactory) throws SchedulerException {
 		if (this.resourceLoader != null) {
 			// Make given ResourceLoader available for SchedulerFactory configuration.
 			configTimeResourceLoaderHolder.set(this.resourceLoader);
@@ -493,20 +610,24 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 		// Get Scheduler instance from SchedulerFactory.
 		try {
-			this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
-			populateSchedulerContext();
+			Scheduler scheduler = createScheduler(schedulerFactory, this.schedulerName);
+			populateSchedulerContext(scheduler);
 
-			if (!this.jobFactorySet && !(this.scheduler instanceof RemoteScheduler)) {
+			if (!this.jobFactorySet && !(scheduler instanceof RemoteScheduler)) {
 				// Use AdaptableJobFactory as default for a local Scheduler, unless when
 				// explicitly given a null value through the "jobFactory" bean property.
 				this.jobFactory = new AdaptableJobFactory();
 			}
 			if (this.jobFactory != null) {
-				if (this.jobFactory instanceof SchedulerContextAware) {
-					((SchedulerContextAware) this.jobFactory).setSchedulerContext(this.scheduler.getContext());
+				if (this.applicationContext != null && this.jobFactory instanceof ApplicationContextAware) {
+					((ApplicationContextAware) this.jobFactory).setApplicationContext(this.applicationContext);
 				}
-				this.scheduler.setJobFactory(this.jobFactory);
+				if (this.jobFactory instanceof SchedulerContextAware) {
+					((SchedulerContextAware) this.jobFactory).setSchedulerContext(scheduler.getContext());
+				}
+				scheduler.setJobFactory(this.jobFactory);
 			}
+			return scheduler;
 		}
 
 		finally {
@@ -523,64 +644,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				configTimeNonTransactionalDataSourceHolder.remove();
 			}
 		}
-
-		registerListeners();
-		registerJobsAndTriggers();
-	}
-
-
-	/**
-	 * Load and/or apply Quartz properties to the given SchedulerFactory.
-	 * @param schedulerFactory the SchedulerFactory to initialize
-	 */
-	private void initSchedulerFactory(SchedulerFactory schedulerFactory) throws SchedulerException, IOException {
-		if (!(schedulerFactory instanceof StdSchedulerFactory)) {
-			if (this.configLocation != null || this.quartzProperties != null ||
-					this.taskExecutor != null || this.dataSource != null) {
-				throw new IllegalArgumentException(
-						"StdSchedulerFactory required for applying Quartz properties: " + schedulerFactory);
-			}
-			// Otherwise assume that no initialization is necessary...
-			return;
-		}
-
-		Properties mergedProps = new Properties();
-
-		if (this.resourceLoader != null) {
-			mergedProps.setProperty(StdSchedulerFactory.PROP_SCHED_CLASS_LOAD_HELPER_CLASS,
-					ResourceLoaderClassLoadHelper.class.getName());
-		}
-
-		if (this.taskExecutor != null) {
-			mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS,
-					LocalTaskExecutorThreadPool.class.getName());
-		}
-		else {
-			// Set necessary default properties here, as Quartz will not apply
-			// its default configuration when explicitly given properties.
-			mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getName());
-			mergedProps.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
-		}
-
-		if (this.configLocation != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Loading Quartz config from [" + this.configLocation + "]");
-			}
-			PropertiesLoaderUtils.fillProperties(mergedProps, this.configLocation);
-		}
-
-		CollectionUtils.mergePropertiesIntoMap(this.quartzProperties, mergedProps);
-
-		if (this.dataSource != null) {
-			mergedProps.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
-		}
-
-		// Make sure to set the scheduler name as configured in the Spring configuration.
-		if (this.schedulerName != null) {
-			mergedProps.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
-		}
-
-		((StdSchedulerFactory) schedulerFactory).initialize(mergedProps);
 	}
 
 	/**
@@ -634,10 +697,10 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * Expose the specified context attributes and/or the current
 	 * ApplicationContext in the Quartz SchedulerContext.
 	 */
-	private void populateSchedulerContext() throws SchedulerException {
+	private void populateSchedulerContext(Scheduler scheduler) throws SchedulerException {
 		// Put specified objects into Scheduler context.
 		if (this.schedulerContextMap != null) {
-			getScheduler().getContext().putAll(this.schedulerContextMap);
+			scheduler.getContext().putAll(this.schedulerContextMap);
 		}
 
 		// Register ApplicationContext in Scheduler context.
@@ -647,7 +710,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 					"SchedulerFactoryBean needs to be set up in an ApplicationContext " +
 					"to be able to handle an 'applicationContextSchedulerContextKey'");
 			}
-			getScheduler().getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
+			scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
 		}
 	}
 
@@ -674,9 +737,10 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				@Override
 				public void run() {
 					try {
-						Thread.sleep(startupDelay * 1000);
+						TimeUnit.SECONDS.sleep(startupDelay);
 					}
 					catch (InterruptedException ex) {
+						Thread.currentThread().interrupt();
 						// simply proceed
 					}
 					if (logger.isInfoEnabled()) {
@@ -708,13 +772,14 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	@Override
+	@Nullable
 	public Scheduler getObject() {
 		return this.scheduler;
 	}
 
 	@Override
 	public Class<? extends Scheduler> getObjectType() {
-		return (this.scheduler != null) ? this.scheduler.getClass() : Scheduler.class;
+		return (this.scheduler != null ? this.scheduler.getClass() : Scheduler.class);
 	}
 
 	@Override
@@ -749,12 +814,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				throw new SchedulingException("Could not stop Quartz Scheduler", ex);
 			}
 		}
-	}
-
-	@Override
-	public void stop(Runnable callback) throws SchedulingException {
-		stop();
-		callback.run();
 	}
 
 	@Override

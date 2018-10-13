@@ -32,7 +32,7 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 
@@ -47,7 +47,8 @@ public class FreeMarkerViewTests {
 	private static final String TEMPLATE_PATH = "classpath*:org/springframework/web/reactive/view/freemarker/";
 
 
-	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
+	private final MockServerWebExchange exchange =
+			MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 
 	private GenericApplicationContext context;
 

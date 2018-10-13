@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,12 +109,6 @@ public class BeanDefinitionParserDelegate {
 	public static final String AUTOWIRE_CONSTRUCTOR_VALUE = "constructor";
 
 	public static final String AUTOWIRE_AUTODETECT_VALUE = "autodetect";
-
-	public static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
-
-	public static final String DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE = "simple";
-
-	public static final String DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE = "objects";
 
 	public static final String NAME_ATTRIBUTE = "name";
 
@@ -318,7 +312,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Populate the given DocumentDefaultsDefinition instance with the default lazy-init,
 	 * autowire, dependency check settings, init-method, destroy-method and merge settings.
-	 * Support nested 'beans' element use cases by falling back to <literal>parentDefaults</literal>
+	 * Support nested 'beans' element use cases by falling back to {@code parentDefaults}
 	 * in case the defaults are not explicitly set locally.
 	 * @param defaults the defaults to populate
 	 * @param parentDefaults the parent BeanDefinitionParserDelegate (if any) defaults to fall back to
@@ -430,8 +424,8 @@ public class BeanDefinitionParserDelegate {
 		String beanName = id;
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
 			beanName = aliases.remove(0);
-			if (logger.isDebugEnabled()) {
-				logger.debug("No XML 'id' specified - using '" + beanName +
+			if (logger.isTraceEnabled()) {
+				logger.trace("No XML 'id' specified - using '" + beanName +
 						"' as bean name and " + aliases + " as aliases");
 			}
 		}
@@ -460,8 +454,8 @@ public class BeanDefinitionParserDelegate {
 							aliases.add(beanClassName);
 						}
 					}
-					if (logger.isDebugEnabled()) {
-						logger.debug("Neither XML 'id' nor 'name' specified - " +
+					if (logger.isTraceEnabled()) {
+						logger.trace("Neither XML 'id' nor 'name' specified - " +
 								"using generated bean name [" + beanName + "]");
 					}
 				}
@@ -609,9 +603,7 @@ public class BeanDefinitionParserDelegate {
 
 		if (ele.hasAttribute(INIT_METHOD_ATTRIBUTE)) {
 			String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
-			if (!"".equals(initMethodName)) {
-				bd.setInitMethodName(initMethodName);
-			}
+			bd.setInitMethodName(initMethodName);
 		}
 		else if (this.defaults.getInitMethod() != null) {
 			bd.setInitMethodName(this.defaults.getInitMethod());
@@ -908,9 +900,9 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable String propertyName) {
-		String elementName = (propertyName != null) ?
-						"<property> element for property '" + propertyName + "'" :
-						"<constructor-arg> element";
+		String elementName = (propertyName != null ?
+				"<property> element for property '" + propertyName + "'" :
+				"<constructor-arg> element");
 
 		// Should only have one child element: ref, value, list, etc.
 		NodeList nl = ele.getChildNodes();
@@ -1210,7 +1202,7 @@ public class BeanDefinitionParserDelegate {
 			boolean hasKeyAttribute = entryEle.hasAttribute(KEY_ATTRIBUTE);
 			boolean hasKeyRefAttribute = entryEle.hasAttribute(KEY_REF_ATTRIBUTE);
 			if ((hasKeyAttribute && hasKeyRefAttribute) ||
-					((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
+					(hasKeyAttribute || hasKeyRefAttribute) && keyEle != null) {
 				error("<entry> element is only allowed to contain either " +
 						"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
@@ -1239,7 +1231,7 @@ public class BeanDefinitionParserDelegate {
 			boolean hasValueRefAttribute = entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
 			boolean hasValueTypeAttribute = entryEle.hasAttribute(VALUE_TYPE_ATTRIBUTE);
 			if ((hasValueAttribute && hasValueRefAttribute) ||
-					((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
+					(hasValueAttribute || hasValueRefAttribute) && valueEle != null) {
 				error("<entry> element is only allowed to contain either " +
 						"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
@@ -1437,8 +1429,8 @@ public class BeanDefinitionParserDelegate {
 		}
 		String id = ele.getNodeName() + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR +
 				ObjectUtils.getIdentityHexString(innerDefinition);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Using generated bean name [" + id +
+		if (logger.isTraceEnabled()) {
+			logger.trace("Using generated bean name [" + id +
 					"] for nested custom element '" + ele.getNodeName() + "'");
 		}
 		return new BeanDefinitionHolder(innerDefinition, id);

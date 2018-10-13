@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +40,10 @@ import org.springframework.web.context.request.NativeWebRequest;
  * {@code MediaTypeFileExtensionResolver} instances.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  */
 public class ContentNegotiationManager implements ContentNegotiationStrategy, MediaTypeFileExtensionResolver {
-
-	private static final List<MediaType> MEDIA_TYPE_ALL = Collections.singletonList(MediaType.ALL);
-
 
 	private final List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
@@ -66,6 +64,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * A collection-based alternative to
 	 * {@link #ContentNegotiationManager(ContentNegotiationStrategy...)}.
 	 * @param strategies the strategies to use
+	 * @since 3.2.2
 	 */
 	public ContentNegotiationManager(Collection<ContentNegotiationStrategy> strategies) {
 		Assert.notEmpty(strategies, "At least one ContentNegotiationStrategy is expected");
@@ -96,7 +95,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	/**
 	 * Find a {@code ContentNegotiationStrategy} of the given type.
 	 * @param strategyType the strategy type
-	 * @return the first matching strategy or {@code null}.
+	 * @return the first matching strategy, or {@code null} if none
 	 * @since 4.3
 	 */
 	@SuppressWarnings("unchecked")
@@ -116,19 +115,19 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * @param resolvers the resolvers to add
 	 */
 	public void addFileExtensionResolvers(MediaTypeFileExtensionResolver... resolvers) {
-		this.resolvers.addAll(Arrays.asList(resolvers));
+		Collections.addAll(this.resolvers, resolvers);
 	}
 
 	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
 		for (ContentNegotiationStrategy strategy : this.strategies) {
 			List<MediaType> mediaTypes = strategy.resolveMediaTypes(request);
-			if (mediaTypes.isEmpty() || mediaTypes.equals(MEDIA_TYPE_ALL)) {
+			if (mediaTypes.equals(MEDIA_TYPE_ALL_LIST)) {
 				continue;
 			}
 			return mediaTypes;
 		}
-		return Collections.emptyList();
+		return MEDIA_TYPE_ALL_LIST;
 	}
 
 	@Override

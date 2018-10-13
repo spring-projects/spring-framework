@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,29 @@
 package org.springframework.beans.factory;
 
 /**
- * Interface to be implemented by beans that want to release resources
- * on destruction. A BeanFactory is supposed to invoke the destroy
- * method if it disposes a cached singleton. An application context
- * is supposed to dispose all of its singletons on close.
+ * Interface to be implemented by beans that want to release resources on destruction.
+ * A {@link BeanFactory} will invoke the destroy method on individual destruction of a
+ * scoped bean. An {@link org.springframework.context.ApplicationContext} is supposed
+ * to dispose all of its singletons on shutdown, driven by the application lifecycle.
  *
- * <p>An alternative to implementing DisposableBean is specifying a custom
- * destroy-method, for example in an XML bean definition.
- * For a list of all bean lifecycle methods, see the
- * {@link BeanFactory BeanFactory javadocs}.
+ * <p>A Spring-managed bean may also implement Java's {@link AutoCloseable} interface
+ * for the same purpose. An alternative to implementing an interface is specifying a
+ * custom destroy method, for example in an XML bean definition. For a list of all
+ * bean lifecycle methods, see the {@link BeanFactory BeanFactory javadocs}.
  *
  * @author Juergen Hoeller
  * @since 12.08.2003
- * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName
- * @see org.springframework.context.ConfigurableApplicationContext#close
+ * @see InitializingBean
+ * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName()
+ * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroySingletons()
+ * @see org.springframework.context.ConfigurableApplicationContext#close()
  */
 public interface DisposableBean {
 
 	/**
-	 * Invoked by a BeanFactory on destruction of a singleton.
-	 * @throws Exception in case of shutdown errors.
-	 * Exceptions will get logged but not rethrown to allow
-	 * other beans to release their resources too.
+	 * Invoked by the containing {@code BeanFactory} on destruction of a bean.
+	 * @throws Exception in case of shutdown errors. Exceptions will get logged
+	 * but not rethrown to allow other beans to release their resources as well.
 	 */
 	void destroy() throws Exception;
 

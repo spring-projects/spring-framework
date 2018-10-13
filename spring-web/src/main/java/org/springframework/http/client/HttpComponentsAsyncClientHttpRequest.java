@@ -160,7 +160,9 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 		}
 
 		@Override
-		public void addCallback(SuccessCallback<? super ClientHttpResponse> successCallback, FailureCallback failureCallback) {
+		public void addCallback(SuccessCallback<? super ClientHttpResponse> successCallback,
+				FailureCallback failureCallback) {
+
 			this.callback.addSuccessCallback(successCallback);
 			this.callback.addFailureCallback(failureCallback);
 		}

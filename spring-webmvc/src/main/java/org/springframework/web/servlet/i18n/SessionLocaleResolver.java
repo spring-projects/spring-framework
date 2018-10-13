@@ -127,6 +127,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 				return locale;
 			}
 			@Override
+			@Nullable
 			public TimeZone getTimeZone() {
 				TimeZone timeZone = (TimeZone) WebUtils.getSessionAttribute(request, timeZoneAttributeName);
 				if (timeZone == null) {

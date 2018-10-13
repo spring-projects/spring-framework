@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ public class AspectAndAdvicePrecedenceTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		highPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("highPrecedenceAspect");
 		lowPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("lowPrecedenceAspect");
 		highPrecedenceSpringAdvice = (SimpleSpringBeforeAdvice) ctx.getBean("highPrecedenceSpringAdvice");
@@ -59,7 +59,6 @@ public class AspectAndAdvicePrecedenceTests {
 		testBean = (ITestBean) ctx.getBean("testBean");
 	}
 
-	// ========== end of test case set up, start of tests proper ===================
 
 	@Test
 	public void testAdviceOrder() {
@@ -77,24 +76,24 @@ public class AspectAndAdvicePrecedenceTests {
 		private static final String[] EXPECTED = {
 			// this order confirmed by running the same aspects (minus the Spring AOP advisors)
 			// through AspectJ...
-			"beforeAdviceOne(highPrecedenceAspect)",  	       // 1
-			"beforeAdviceTwo(highPrecedenceAspect)",           // 2
-			"aroundAdviceOne(highPrecedenceAspect)",           // 3, before proceed
-			  "aroundAdviceTwo(highPrecedenceAspect)",         // 4, before proceed
-			    "beforeAdviceOne(highPrecedenceSpringAdvice)", // 5
-			    "beforeAdviceOne(lowPrecedenceSpringAdvice)",  // 6
-			    "beforeAdviceOne(lowPrecedenceAspect)",        // 7
-			    "beforeAdviceTwo(lowPrecedenceAspect)",        // 8
-			    "aroundAdviceOne(lowPrecedenceAspect)",        // 9, before proceed
-			      "aroundAdviceTwo(lowPrecedenceAspect)",      // 10, before proceed
-			      "aroundAdviceTwo(lowPrecedenceAspect)",      // 11, after proceed
-			    "aroundAdviceOne(lowPrecedenceAspect)",        // 12, after proceed
-			    "afterAdviceOne(lowPrecedenceAspect)",         // 13
-			    "afterAdviceTwo(lowPrecedenceAspect)",         // 14
-			  "aroundAdviceTwo(highPrecedenceAspect)",         // 15, after proceed
-			"aroundAdviceOne(highPrecedenceAspect)",           // 16, after proceed
-			"afterAdviceOne(highPrecedenceAspect)",            // 17
-			"afterAdviceTwo(highPrecedenceAspect)"             // 18
+			"beforeAdviceOne(highPrecedenceAspect)",				// 1
+			"beforeAdviceTwo(highPrecedenceAspect)",				// 2
+			"aroundAdviceOne(highPrecedenceAspect)",				// 3,  before proceed
+				"aroundAdviceTwo(highPrecedenceAspect)",			// 4,  before proceed
+					"beforeAdviceOne(highPrecedenceSpringAdvice)",	// 5
+					"beforeAdviceOne(lowPrecedenceSpringAdvice)",	// 6
+					"beforeAdviceOne(lowPrecedenceAspect)",			// 7
+					"beforeAdviceTwo(lowPrecedenceAspect)",			// 8
+					"aroundAdviceOne(lowPrecedenceAspect)",			// 9,  before proceed
+				"aroundAdviceTwo(lowPrecedenceAspect)",				// 10, before proceed
+				"aroundAdviceTwo(lowPrecedenceAspect)",				// 11, after proceed
+					"aroundAdviceOne(lowPrecedenceAspect)",			// 12, after proceed
+					"afterAdviceOne(lowPrecedenceAspect)",			// 13
+					"afterAdviceTwo(lowPrecedenceAspect)",			// 14
+				"aroundAdviceTwo(highPrecedenceAspect)",			// 15, after proceed
+			"aroundAdviceOne(highPrecedenceAspect)",				// 16, after proceed
+			"afterAdviceOne(highPrecedenceAspect)",					// 17
+			"afterAdviceTwo(highPrecedenceAspect)"					// 18
 		};
 
 		private int adviceInvocationNumber = 0;

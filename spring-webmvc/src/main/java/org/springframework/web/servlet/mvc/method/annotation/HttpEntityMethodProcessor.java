@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -65,6 +67,8 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @since 3.1
  */
 public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodProcessor {
+
+	private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	/**
 	 * Basic constructor with converters only. Suitable for resolving
@@ -122,6 +126,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
@@ -180,15 +185,15 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		HttpHeaders outputHeaders = outputMessage.getHeaders();
 		HttpHeaders entityHeaders = responseEntity.getHeaders();
-		if (outputHeaders.containsKey(HttpHeaders.VARY) && entityHeaders.containsKey(HttpHeaders.VARY)) {
-			List<String> values = getVaryRequestHeadersToAdd(outputHeaders, entityHeaders);
-			if (!values.isEmpty()) {
-				outputHeaders.setVary(values);
-			}
-		}
 		if (!entityHeaders.isEmpty()) {
 			entityHeaders.forEach((key, value) -> {
-				if (!outputHeaders.containsKey(key)) {
+				if (HttpHeaders.VARY.equals(key) && outputHeaders.containsKey(HttpHeaders.VARY)) {
+					List<String> values = getVaryRequestHeadersToAdd(outputHeaders, entityHeaders);
+					if (!values.isEmpty()) {
+						outputHeaders.setVary(values);
+					}
+				}
+				else {
 					outputHeaders.put(key, value);
 				}
 			});
@@ -198,7 +203,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			int returnStatus = ((ResponseEntity<?>) responseEntity).getStatusCodeValue();
 			outputMessage.getServletResponse().setStatus(returnStatus);
 			if (returnStatus == 200) {
-				if (isResourceNotModified(inputMessage, outputMessage)) {
+				if (SAFE_METHODS.contains(inputMessage.getMethod())
+						&& isResourceNotModified(inputMessage, outputMessage)) {
 					// Ensure headers are flushed, no body should be written.
 					outputMessage.flush();
 					// Skip call to converters, as they may update the body.
@@ -242,13 +248,13 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		return entityHeadersVary;
 	}
 
-	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
+	private boolean isResourceNotModified(ServletServerHttpRequest request, ServletServerHttpResponse response) {
 		ServletWebRequest servletWebRequest =
-				new ServletWebRequest(inputMessage.getServletRequest(), outputMessage.getServletResponse());
-		HttpHeaders responseHeaders = outputMessage.getHeaders();
+				new ServletWebRequest(request.getServletRequest(), response.getServletResponse());
+		HttpHeaders responseHeaders = response.getHeaders();
 		String etag = responseHeaders.getETag();
 		long lastModifiedTimestamp = responseHeaders.getLastModified();
-		if (inputMessage.getMethod() == HttpMethod.GET || inputMessage.getMethod() == HttpMethod.HEAD) {
+		if (request.getMethod() == HttpMethod.GET || request.getMethod() == HttpMethod.HEAD) {
 			responseHeaders.remove(HttpHeaders.ETAG);
 			responseHeaders.remove(HttpHeaders.LAST_MODIFIED);
 		}
@@ -282,7 +288,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		else {
 			Type type = getHttpEntityType(returnType);
 			type = (type != null ? type : Object.class);
-			return ResolvableType.forMethodParameter(returnType, type).resolve(Object.class);
+			return ResolvableType.forMethodParameter(returnType, type).toClass();
 		}
 	}
 

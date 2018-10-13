@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.simp.user;
 
-import org.springframework.lang.Nullable;
-
 /**
  * Represents a subscription within a user session.
  *

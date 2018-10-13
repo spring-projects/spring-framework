@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
@@ -40,11 +42,15 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @author Mark Fisher
  * @author Sam Brannen
+ * @author Vedran Pavic
  * @since 1.0.2
  */
 @SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
 
+	/**
+	 * The session cookie name.
+	 */
 	public static final String SESSION_COOKIE_NAME = "JSESSION";
 
 
@@ -79,7 +85,7 @@ public class MockHttpSession implements HttpSession {
 	 * Create a new MockHttpSession.
 	 * @param servletContext the ServletContext that the session runs in
 	 */
-	public MockHttpSession(ServletContext servletContext) {
+	public MockHttpSession(@Nullable ServletContext servletContext) {
 		this(servletContext, null);
 	}
 
@@ -88,7 +94,7 @@ public class MockHttpSession implements HttpSession {
 	 * @param servletContext the ServletContext that the session runs in
 	 * @param id a unique identifier for this session
 	 */
-	public MockHttpSession(ServletContext servletContext, String id) {
+	public MockHttpSession(@Nullable ServletContext servletContext, @Nullable String id) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.id = (id != null ? id : Integer.toString(nextId++));
 	}
@@ -167,17 +173,22 @@ public class MockHttpSession implements HttpSession {
 	@Override
 	public String[] getValueNames() {
 		assertIsValid();
-		return this.attributes.keySet().toArray(new String[this.attributes.size()]);
+		return StringUtils.toStringArray(this.attributes.keySet());
 	}
 
 	@Override
-	public void setAttribute(String name, Object value) {
+	public void setAttribute(String name, @Nullable Object value) {
 		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
-			this.attributes.put(name, value);
-			if (value instanceof HttpSessionBindingListener) {
-				((HttpSessionBindingListener) value).valueBound(new HttpSessionBindingEvent(this, name, value));
+			Object oldValue = this.attributes.put(name, value);
+			if (value != oldValue) {
+				if (oldValue instanceof HttpSessionBindingListener) {
+					((HttpSessionBindingListener) oldValue).valueUnbound(new HttpSessionBindingEvent(this, name, oldValue));
+				}
+				if (value instanceof HttpSessionBindingListener) {
+					((HttpSessionBindingListener) value).valueBound(new HttpSessionBindingEvent(this, name, value));
+				}
 			}
 		}
 		else {

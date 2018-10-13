@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class CompositeStringExpression implements Expression {
 
 	private final String expressionString;
 
-	/** The array of expressions that make up the composite expression */
+	/** The array of expressions that make up the composite expression. */
 	private final Expression[] expressions;
 
 
@@ -76,6 +76,7 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue();
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), expectedResultType);
@@ -94,6 +95,7 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(Object rootObject, @Nullable Class<T> desiredResultType) throws EvaluationException {
 		Object value = getValue(rootObject);
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), desiredResultType);
@@ -112,6 +114,7 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
@@ -132,6 +135,7 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(EvaluationContext context, Object rootObject, @Nullable Class<T> desiredResultType)
 			throws EvaluationException {
 

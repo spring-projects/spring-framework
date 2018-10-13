@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> implements JmsHeaderMapper {
 
-	private static Set<Class<?>> SUPPORTED_PROPERTY_TYPES = new HashSet<>(Arrays.asList(new Class<?>[] {
-			Boolean.class, Byte.class, Double.class, Float.class, Integer.class, Long.class, Short.class, String.class}));
+	private static final Set<Class<?>> SUPPORTED_PROPERTY_TYPES = new HashSet<>(Arrays.asList(
+			Boolean.class, Byte.class, Double.class, Float.class, Integer.class, Long.class, Short.class, String.class));
 
 
 	@Override
@@ -71,7 +71,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 					jmsMessage.setJMSCorrelationID((String) jmsCorrelationId);
 				}
 				catch (Exception ex) {
-					logger.info("Failed to set JMSCorrelationID - skipping", ex);
+					logger.debug("Failed to set JMSCorrelationID - skipping", ex);
 				}
 			}
 			Destination jmsReplyTo = getHeaderIfAvailable(headers, JmsHeaders.REPLY_TO, Destination.class);
@@ -80,7 +80,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 					jmsMessage.setJMSReplyTo(jmsReplyTo);
 				}
 				catch (Exception ex) {
-					logger.info("Failed to set JMSReplyTo - skipping", ex);
+					logger.debug("Failed to set JMSReplyTo - skipping", ex);
 				}
 			}
 			String jmsType = getHeaderIfAvailable(headers, JmsHeaders.TYPE, String.class);
@@ -89,7 +89,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 					jmsMessage.setJMSType(jmsType);
 				}
 				catch (Exception ex) {
-					logger.info("Failed to set JMSType - skipping", ex);
+					logger.debug("Failed to set JMSType - skipping", ex);
 				}
 			}
 			Set<String> headerNames = headers.keySet();
@@ -108,8 +108,8 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 											"' since it cannot be set by client");
 								}
 							}
-							else if (logger.isWarnEnabled()) {
-								logger.warn("Failed to map message header '" + headerName + "' to JMS property", ex);
+							else if (logger.isDebugEnabled()) {
+								logger.debug("Failed to map message header '" + headerName + "' to JMS property", ex);
 							}
 						}
 					}
@@ -117,8 +117,8 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 			}
 		}
 		catch (Exception ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Error occurred while mapping from MessageHeaders to JMS properties", ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Error occurred while mapping from MessageHeaders to JMS properties", ex);
 			}
 		}
 	}
@@ -134,7 +134,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 				}
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSCorrelationID property - skipping", ex);
+				logger.debug("Failed to read JMSCorrelationID property - skipping", ex);
 			}
 			try {
 				Destination destination = jmsMessage.getJMSDestination();
@@ -143,21 +143,21 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 				}
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSDestination property - skipping", ex);
+				logger.debug("Failed to read JMSDestination property - skipping", ex);
 			}
 			try {
 				int deliveryMode = jmsMessage.getJMSDeliveryMode();
 				headers.put(JmsHeaders.DELIVERY_MODE, deliveryMode);
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSDeliveryMode property - skipping", ex);
+				logger.debug("Failed to read JMSDeliveryMode property - skipping", ex);
 			}
 			try {
 				long expiration = jmsMessage.getJMSExpiration();
 				headers.put(JmsHeaders.EXPIRATION, expiration);
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSExpiration property - skipping", ex);
+				logger.debug("Failed to read JMSExpiration property - skipping", ex);
 			}
 			try {
 				String messageId = jmsMessage.getJMSMessageID();
@@ -166,13 +166,13 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 				}
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSMessageID property - skipping", ex);
+				logger.debug("Failed to read JMSMessageID property - skipping", ex);
 			}
 			try {
 				headers.put(JmsHeaders.PRIORITY, jmsMessage.getJMSPriority());
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSPriority property - skipping", ex);
+				logger.debug("Failed to read JMSPriority property - skipping", ex);
 			}
 			try {
 				Destination replyTo = jmsMessage.getJMSReplyTo();
@@ -181,13 +181,13 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 				}
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSReplyTo property - skipping", ex);
+				logger.debug("Failed to read JMSReplyTo property - skipping", ex);
 			}
 			try {
 				headers.put(JmsHeaders.REDELIVERED, jmsMessage.getJMSRedelivered());
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSRedelivered property - skipping", ex);
+				logger.debug("Failed to read JMSRedelivered property - skipping", ex);
 			}
 			try {
 				String type = jmsMessage.getJMSType();
@@ -196,15 +196,14 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 				}
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSType property - skipping", ex);
+				logger.debug("Failed to read JMSType property - skipping", ex);
 			}
 			try {
 				headers.put(JmsHeaders.TIMESTAMP, jmsMessage.getJMSTimestamp());
 			}
 			catch (Exception ex) {
-				logger.info("Failed to read JMSTimestamp property - skipping", ex);
+				logger.debug("Failed to read JMSTimestamp property - skipping", ex);
 			}
-
 
 			Enumeration<?> jmsPropertyNames = jmsMessage.getPropertyNames();
 			if (jmsPropertyNames != null) {
@@ -215,8 +214,8 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 						headers.put(headerName, jmsMessage.getObjectProperty(propertyName));
 					}
 					catch (Exception ex) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Error occurred while mapping JMS property '" + propertyName +
+						if (logger.isDebugEnabled()) {
+							logger.debug("Error occurred while mapping JMS property '" + propertyName +
 									"' to Message header", ex);
 						}
 					}
@@ -224,8 +223,8 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 			}
 		}
 		catch (JMSException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Error occurred while mapping from JMS properties to MessageHeaders", ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Error occurred while mapping from JMS properties to MessageHeaders", ex);
 			}
 		}
 		return new MessageHeaders(headers);
@@ -233,8 +232,10 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 
 	/**
 	 * Add the outbound prefix if necessary.
-	 * <p>Convert {@link MessageHeaders#CONTENT_TYPE} to content_type for JMS compliance.
+	 * <p>Convert {@link MessageHeaders#CONTENT_TYPE} to {@code content_type} for JMS compliance.
+	 * @see #CONTENT_TYPE_PROPERTY
 	 */
+	@Override
 	protected String fromHeaderName(String headerName) {
 		if (MessageHeaders.CONTENT_TYPE.equals(headerName)) {
 			return CONTENT_TYPE_PROPERTY;
@@ -244,8 +245,10 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 
 	/**
 	 * Add the inbound prefix if necessary.
-	 * <p>Convert content_type to {@link MessageHeaders#CONTENT_TYPE}.
+	 * <p>Convert the JMS-compliant {@code content_type} to {@link MessageHeaders#CONTENT_TYPE}.
+	 * @see #CONTENT_TYPE_PROPERTY
 	 */
+	@Override
 	protected String toHeaderName(String propertyName) {
 		if (CONTENT_TYPE_PROPERTY.equals(propertyName)) {
 			return MessageHeaders.CONTENT_TYPE;

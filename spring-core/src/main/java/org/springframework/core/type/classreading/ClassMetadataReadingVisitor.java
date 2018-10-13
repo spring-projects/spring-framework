@@ -29,6 +29,7 @@ import org.springframework.asm.SpringAsmInfo;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * ASM class visitor which looks only for the class name and implemented types,
@@ -64,7 +65,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	private String[] interfaces = new String[0];
 
-	private Set<String> memberClassNames = new LinkedHashSet<>();
+	private Set<String> memberClassNames = new LinkedHashSet<>(4);
 
 
 	public ClassMetadataReadingVisitor() {
@@ -208,7 +209,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	@Override
 	public String[] getMemberClassNames() {
-		return this.memberClassNames.toArray(new String[this.memberClassNames.size()]);
+		return StringUtils.toStringArray(this.memberClassNames);
 	}
 
 

@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import javax.servlet.ServletException;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -48,6 +49,7 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueMe
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request){
 		return request.getAttribute(name, RequestAttributes.SCOPE_REQUEST);
 	}

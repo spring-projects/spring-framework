@@ -165,7 +165,7 @@ public class AbstractMockWebServerTestCase {
 	}
 
 	private MockResponse formRequest(RecordedRequest request) {
-		assertEquals("application/x-www-form-urlencoded", request.getHeader("Content-Type"));
+		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", request.getHeader("Content-Type"));
 		String body = request.getBody().readUtf8();
 		assertThat(body, Matchers.containsString("name+1=value+1"));
 		assertThat(body, Matchers.containsString("name+2=value+2%2B1"));
@@ -240,6 +240,9 @@ public class AbstractMockWebServerTestCase {
 				}
 				else if (request.getPath().equals("/status/notfound")) {
 					return new MockResponse().setResponseCode(404);
+				}
+				else if (request.getPath().equals("/status/badrequest")) {
+					return new MockResponse().setResponseCode(400);
 				}
 				else if (request.getPath().equals("/status/server")) {
 					return new MockResponse().setResponseCode(500);

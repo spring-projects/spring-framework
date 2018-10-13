@@ -111,11 +111,13 @@ public class JspAwareRequestContext extends RequestContext {
 	 */
 	private static class JstlPageLocaleResolver {
 
+		@Nullable
 		public static Locale getJstlLocale(PageContext pageContext) {
 			Object localeObject = Config.find(pageContext, Config.FMT_LOCALE);
 			return (localeObject instanceof Locale ? (Locale) localeObject : null);
 		}
 
+		@Nullable
 		public static TimeZone getJstlTimeZone(PageContext pageContext) {
 			Object timeZoneObject = Config.find(pageContext, Config.FMT_TIME_ZONE);
 			return (timeZoneObject instanceof TimeZone ? (TimeZone) timeZoneObject : null);

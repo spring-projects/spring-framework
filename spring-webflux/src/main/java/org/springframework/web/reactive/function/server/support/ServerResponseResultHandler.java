@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code HandlerResultHandler} implementation that supports {@link ServerResponse}s.
+ * {@code HandlerResultHandler} implementation that supports {@link ServerResponse ServerResponses}.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -45,7 +45,7 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 
 	private List<ViewResolver> viewResolvers = Collections.emptyList();
 
-	private int order = LOWEST_PRECEDENCE;
+	private int order = 0;
 
 
 	/**
@@ -53,7 +53,6 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 	 * <p>By default this is set to {@link ServerCodecConfigurer}'s default writers.
 	 */
 	public void setMessageWriters(List<HttpMessageWriter<?>> configurer) {
-		Assert.notNull(messageWriters, "'messageWriters' must not be null");
 		this.messageWriters = configurer;
 	}
 
@@ -63,9 +62,8 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 
 	/**
 	 * Set the order for this result handler relative to others.
-	 * <p>By default set to {@link Ordered#LOWEST_PRECEDENCE}, however see
-	 * Javadoc of sub-classes which may change this default.
-	 * @param order the order
+	 * <p>By default set to 0. It is generally safe to place it early in the
+	 * order as it looks for a concrete return type.
 	 */
 	public void setOrder(int order) {
 		this.order = order;
@@ -104,4 +102,5 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 			}
 		});
 	}
+
 }

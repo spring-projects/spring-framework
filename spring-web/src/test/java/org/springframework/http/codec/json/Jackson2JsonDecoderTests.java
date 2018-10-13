@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,19 @@
 
 package org.springframework.http.codec.json;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,14 +39,21 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.codec.Pojo;
+import org.springframework.util.MimeType;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 import static org.springframework.http.codec.json.Jackson2JsonDecoder.JSON_VIEW_HINT;
 import static org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
@@ -57,10 +72,28 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
 
 		assertTrue(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON));
+		assertTrue(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON_UTF8));
+		assertTrue(decoder.canDecode(forClass(Pojo.class), APPLICATION_STREAM_JSON));
 		assertTrue(decoder.canDecode(forClass(Pojo.class), null));
 
 		assertFalse(decoder.canDecode(forClass(String.class), null));
 		assertFalse(decoder.canDecode(forClass(Pojo.class), APPLICATION_XML));
+	}
+
+	@Test // SPR-15866
+	public void canDecodeWithProvidedMimeType() {
+		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
+		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), textJavascript);
+
+		assertEquals(Collections.singletonList(textJavascript), decoder.getDecodableMimeTypes());
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void decodableMimeTypesIsImmutable() {
+		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
+		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), textJavascript);
+
+		decoder.getMimeTypes().add(new MimeType("text", "ecmascript"));
 	}
 
 	@Test
@@ -101,12 +134,27 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
-	public void decodeToFlux() throws Exception {
+	public void decodeArrayToFlux() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
 
 		ResolvableType elementType = forClass(Pojo.class);
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
+				emptyMap());
+
+		StepVerifier.create(flux)
+				.expectNext(new Pojo("f1", "b1"))
+				.expectNext(new Pojo("f2", "b2"))
+				.verifyComplete();
+	}
+
+	@Test
+	public void decodeStreamToFlux() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"bar\":\"b1\",\"foo\":\"f1\"}"),
+				stringBuffer("{\"bar\":\"b2\",\"foo\":\"f2\"}"));
+
+		ResolvableType elementType = forClass(Pojo.class);
+		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, APPLICATION_STREAM_JSON,
 				emptyMap());
 
 		StepVerifier.create(flux)
@@ -189,6 +237,19 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		StepVerifier.create(flux).verifyError(CodecException.class);
 	}
 
+	@Test  // SPR-15975
+	public void  customDeserializer() {
+		DataBuffer buffer = new DefaultDataBufferFactory().wrap("{\"test\": 1}".getBytes());
+
+		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper());
+		Flux<TestObject> decoded = decoder.decode(Mono.just(buffer),
+				ResolvableType.forClass(TestObject.class), null, null).cast(TestObject.class);
+
+		StepVerifier.create(decoded)
+				.assertNext(v -> assertEquals(1, v.getTest()))
+				.verifyComplete();
+	}
+
 
 	private static class BeanWithNoDefaultConstructor {
 
@@ -209,6 +270,35 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 			return property2;
 		}
 
+	}
+
+	@JsonDeserialize(using = Deserializer.class)
+	public static class TestObject {
+		private int test;
+		public int getTest() {
+			return test;
+		}
+		public void setTest(int test) {
+			this.test = test;
+		}
+	}
+
+	public static class Deserializer extends StdDeserializer<TestObject> {
+
+		private static final long serialVersionUID = 1L;
+
+		protected Deserializer() {
+			super(TestObject.class);
+		}
+
+		@Override
+		public TestObject deserialize(JsonParser p,
+				DeserializationContext ctxt) throws IOException, JsonProcessingException {
+			JsonNode node = p.readValueAsTree();
+			TestObject result = new TestObject();
+			result.setTest(node.get("test").asInt());
+			return result;
+		}
 	}
 
 }

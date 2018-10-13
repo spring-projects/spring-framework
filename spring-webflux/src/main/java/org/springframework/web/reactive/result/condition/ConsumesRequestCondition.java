@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.condition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,7 +43,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  */
 public final class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
 
-	private final static ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
+	private static final ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
 
 
 	private final List<ConsumeMediaTypeExpression> expressions;
@@ -146,7 +145,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 */
 	@Override
 	public ConsumesRequestCondition combine(ConsumesRequestCondition other) {
-		return !other.expressions.isEmpty() ? other : this;
+		return (!other.expressions.isEmpty() ? other : this);
 	}
 
 	/**
@@ -167,14 +166,9 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 		if (isEmpty()) {
 			return this;
 		}
-		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>(expressions);
-		for (Iterator<ConsumeMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
-			ConsumeMediaTypeExpression expression = iterator.next();
-			if (!expression.match(exchange)) {
-				iterator.remove();
-			}
-		}
-		return (result.isEmpty()) ? null : new ConsumesRequestCondition(result);
+		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
+		result.removeIf(expression -> !expression.match(exchange));
+		return (!result.isEmpty() ? new ConsumesRequestCondition(result) : null);
 	}
 
 	/**

@@ -88,7 +88,9 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * A constructor for creating new message headers.
 	 * This constructor is protected. See factory methods in this and sub-classes.
 	 */
-	protected SimpMessageHeaderAccessor(SimpMessageType messageType, @Nullable Map<String, List<String>> externalSourceHeaders) {
+	protected SimpMessageHeaderAccessor(SimpMessageType messageType,
+			@Nullable Map<String, List<String>> externalSourceHeaders) {
+
 		super(externalSourceHeaders);
 		Assert.notNull(messageType, "MessageType must not be null");
 		setHeader(MESSAGE_TYPE_HEADER, messageType);
@@ -213,15 +215,18 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		StringBuilder sb = new StringBuilder();
 		SimpMessageType messageType = getMessageType();
 		sb.append(messageType != null ? messageType.name() : SimpMessageType.OTHER);
-		if (getDestination() != null) {
-			sb.append(" destination=").append(getDestination());
+		String destination = getDestination();
+		if (destination != null) {
+			sb.append(" destination=").append(destination);
 		}
-		if (getSubscriptionId() != null) {
-			sb.append(" subscriptionId=").append(getSubscriptionId());
+		String subscriptionId = getSubscriptionId();
+		if (subscriptionId != null) {
+			sb.append(" subscriptionId=").append(subscriptionId);
 		}
 		sb.append(" session=").append(getSessionId());
-		if (getUser() != null) {
-			sb.append(" user=").append(getUser().getName());
+		Principal user = getUser();
+		if (user != null) {
+			sb.append(" user=").append(user.getName());
 		}
 		return sb;
 	}

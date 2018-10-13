@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,11 +155,9 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(servletRequest);
 
 		Object arg = readWithMessageConverters(inputMessage, parameter, paramType);
-		if (arg == null) {
-			if (checkRequired(parameter)) {
-				throw new HttpMessageNotReadableException("Required request body is missing: " +
-						parameter.getExecutable().toGenericString());
-			}
+		if (arg == null && checkRequired(parameter)) {
+			throw new HttpMessageNotReadableException("Required request body is missing: " +
+					parameter.getExecutable().toGenericString(), inputMessage);
 		}
 		return arg;
 	}

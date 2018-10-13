@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -71,14 +70,13 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 
 	/**
-	 * Constructs a new instance of the {@code StaxEventXmlReader} that reads from the given
-	 * {@code XMLEventReader}. The supplied event reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
-	 * {@code XMLStreamConstants.START_ELEMENT} state.
+	 * Constructs a new instance of the {@code StaxEventXmlReader} that reads from
+	 * the given {@code XMLEventReader}. The supplied event reader must be in
+	 * {@code XMLStreamConstants.START_DOCUMENT} or {@code XMLStreamConstants.START_ELEMENT} state.
 	 * @param reader the {@code XMLEventReader} to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	StaxEventXMLReader(XMLEventReader reader) {
-		Assert.notNull(reader, "XMLEventReader must not be null");
 		try {
 			XMLEvent event = reader.peek();
 			if (event != null && !(event.isStartDocument() || event.isStartElement())) {

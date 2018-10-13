@@ -24,9 +24,11 @@ import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.awaitility.Awaitility;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -365,19 +367,26 @@ public class AsyncExecutionTests {
 
 	@Test
 	public void asyncMethodListener() throws Exception {
+		// Arrange
 		originalThreadName = Thread.currentThread().getName();
 		listenerCalled = 0;
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodListener.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		// Act
 		context.refresh();
-		Thread.sleep(1000);
-		assertEquals(1, listenerCalled);
+		// Assert
+		Awaitility.await()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> listenerCalled == 1);
+		context.close();
 	}
 
 	@Test
 	public void asyncClassListener() throws Exception {
+		// Arrange
 		originalThreadName = Thread.currentThread().getName();
 		listenerCalled = 0;
 		listenerConstructed = 0;
@@ -385,15 +394,20 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassListener.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		// Act
 		context.refresh();
 		context.close();
-		Thread.sleep(1000);
-		assertEquals(2, listenerCalled);
+		// Assert
+		Awaitility.await()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> listenerCalled == 2);
 		assertEquals(1, listenerConstructed);
 	}
 
 	@Test
 	public void asyncPrototypeClassListener() throws Exception {
+		// Arrange
 		originalThreadName = Thread.currentThread().getName();
 		listenerCalled = 0;
 		listenerConstructed = 0;
@@ -403,10 +417,14 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", listenerDef);
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		// Act
 		context.refresh();
 		context.close();
-		Thread.sleep(1000);
-		assertEquals(2, listenerCalled);
+		// Assert
+		Awaitility.await()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> listenerCalled == 2);
 		assertEquals(2, listenerConstructed);
 	}
 

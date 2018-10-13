@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 	 * {@code after} function
 	 */
 	default HandlerFilterFunction<T, R> andThen(HandlerFilterFunction<T, T> after) {
-		Assert.notNull(after, "'after' must not be null");
+		Assert.notNull(after, "HandlerFilterFunction must not be null");
 		return (request, next) -> {
 			HandlerFunction<T> nextHandler = handlerRequest -> after.filter(handlerRequest, next);
 			return filter(request, nextHandler);
@@ -68,35 +68,34 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 	 * @return the filtered handler function
 	 */
 	default HandlerFunction<R> apply(HandlerFunction<T> handler) {
-		Assert.notNull(handler, "'handler' must not be null");
+		Assert.notNull(handler, "HandlerFunction must not be null");
 		return request -> this.filter(request, handler);
 	}
 
 	/**
-	 * Adapt the given request processor function to a filter function that only operates on the
-	 * {@code ClientRequest}.
+	 * Adapt the given request processor function to a filter function that only operates
+	 * on the {@code ServerRequest}.
 	 * @param requestProcessor the request processor
 	 * @return the filter adaptation of the request processor
 	 */
 	static HandlerFilterFunction<?, ?> ofRequestProcessor(
 			Function<ServerRequest, Mono<ServerRequest>> requestProcessor) {
 
-		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
+		Assert.notNull(requestProcessor, "Function must not be null");
 		return (request, next) -> requestProcessor.apply(request).flatMap(next::handle);
 	}
 
 	/**
-	 * Adapt the given response processor function to a filter function that only operates on the
-	 * {@code ClientResponse}.
+	 * Adapt the given response processor function to a filter function that only operates
+	 * on the {@code ServerResponse}.
 	 * @param responseProcessor the response processor
 	 * @return the filter adaptation of the request processor
 	 */
 	static <T extends ServerResponse, R extends ServerResponse> HandlerFilterFunction<T, R> ofResponseProcessor(
 			Function<T, Mono<R>> responseProcessor) {
 
-		Assert.notNull(responseProcessor, "'responseProcessor' must not be null");
+		Assert.notNull(responseProcessor, "Function must not be null");
 		return (request, next) -> next.handle(request).flatMap(responseProcessor);
 	}
-
 
 }

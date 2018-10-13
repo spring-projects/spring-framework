@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,12 @@ import org.springframework.util.ObjectUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-class PropertyDescriptorUtils {
+abstract class PropertyDescriptorUtils {
 
 	/**
 	 * See {@link java.beans.FeatureDescriptor}.
 	 */
-	public static void copyNonMethodProperties(PropertyDescriptor source, PropertyDescriptor target)
-			throws IntrospectionException {
-
+	public static void copyNonMethodProperties(PropertyDescriptor source, PropertyDescriptor target) {
 		target.setExpert(source.isExpert());
 		target.setHidden(source.isHidden());
 		target.setPreferred(source.isPreferred());
@@ -79,7 +77,7 @@ class PropertyDescriptorUtils {
 		}
 
 		if (writeMethod != null) {
-			Class<?> params[] = writeMethod.getParameterTypes();
+			Class<?>[] params = writeMethod.getParameterTypes();
 			if (params.length != 1) {
 				throw new IntrospectionException("Bad write method arg count: " + writeMethod);
 			}
@@ -114,7 +112,7 @@ class PropertyDescriptorUtils {
 		Class<?> indexedPropertyType = null;
 
 		if (indexedReadMethod != null) {
-			Class<?> params[] = indexedReadMethod.getParameterTypes();
+			Class<?>[] params = indexedReadMethod.getParameterTypes();
 			if (params.length != 1) {
 				throw new IntrospectionException("Bad indexed read method arg count: " + indexedReadMethod);
 			}
@@ -128,7 +126,7 @@ class PropertyDescriptorUtils {
 		}
 
 		if (indexedWriteMethod != null) {
-			Class<?> params[] = indexedWriteMethod.getParameterTypes();
+			Class<?>[] params = indexedWriteMethod.getParameterTypes();
 			if (params.length != 2) {
 				throw new IntrospectionException("Bad indexed write method arg count: " + indexedWriteMethod);
 			}

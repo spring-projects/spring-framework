@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,8 +175,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		else {
 			result.add("");
 		}
-		return new PatternsRequestCondition(result, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
-				this.useTrailingSlashMatch, this.fileExtensions);
+		return new PatternsRequestCondition(result, this.pathHelper, this.pathMatcher,
+				this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions);
 	}
 
 	/**
@@ -196,18 +196,16 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * or {@code null} if no patterns match.
 	 */
 	@Override
+	@Nullable
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
-
 		if (this.patterns.isEmpty()) {
 			return this;
 		}
-
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
 		List<String> matches = getMatchingPatterns(lookupPath);
-
-		return matches.isEmpty() ? null :
-			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
-					this.useTrailingSlashMatch, this.fileExtensions);
+		return (!matches.isEmpty() ?
+				new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher,
+						this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions) : null);
 	}
 
 	/**
@@ -227,10 +225,13 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 				matches.add(match);
 			}
 		}
-		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
+		if (matches.size() > 1) {
+			matches.sort(this.pathMatcher.getPatternComparator(lookupPath));
+		}
 		return matches;
 	}
 
+	@Nullable
 	private String getMatchingPattern(String pattern, String lookupPath) {
 		if (pattern.equals(lookupPath)) {
 			return pattern;

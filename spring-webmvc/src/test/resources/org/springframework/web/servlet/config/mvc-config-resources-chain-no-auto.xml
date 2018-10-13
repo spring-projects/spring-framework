@@ -15,7 +15,7 @@
 						<bean class="org.springframework.web.servlet.resource.ContentVersionStrategy" />
 					</mvc:version-strategy>
 				</mvc:version-resolver>
-				<ref bean="gzipResourceResolver"/>
+				<ref bean="encodedResourceResolver"/>
 				<bean class="org.springframework.web.servlet.resource.PathResourceResolver"/>
 			</mvc:resolvers>
 			<mvc:transformers>
@@ -27,7 +27,7 @@
 		</mvc:resource-chain>
 	</mvc:resources>
 
-	<bean id="gzipResourceResolver" class="org.springframework.web.servlet.resource.GzipResourceResolver" />
+	<bean id="encodedResourceResolver" class="org.springframework.web.servlet.resource.EncodedResourceResolver" />
 	<bean id="resourceCache" class="org.springframework.cache.concurrent.ConcurrentMapCache">
 		<constructor-arg name="name" value="resourceCache"/>
 	</bean>

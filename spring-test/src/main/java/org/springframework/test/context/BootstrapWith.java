@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,10 @@ import java.lang.annotation.Target;
  * how to bootstrap the <em>Spring TestContext Framework</em>.
  *
  * <p>This annotation may also be used as a <em>meta-annotation</em> to create
- * custom <em>composed annotations</em>.
+ * custom <em>composed annotations</em>. As of Spring Framework 5.1, a locally
+ * declared {@code @BootstrapWith} annotation (i.e., one that is <em>directly
+ * present</em> on the current test class) will override any meta-present
+ * declarations of {@code @BootstrapWith}.
  *
  * @author Sam Brannen
  * @since 4.1

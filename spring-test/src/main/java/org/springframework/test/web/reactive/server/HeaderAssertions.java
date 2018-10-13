@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,24 @@
 package org.springframework.test.web.reactive.server;
 
 import java.util.Arrays;
-import java.util.regex.Pattern;
+import java.util.function.Consumer;
+
+import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
-
-import static org.springframework.test.util.AssertionErrors.*;
+import org.springframework.test.util.AssertionErrors;
 
 /**
  * Assertions on headers of the response.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.0
  * @see WebTestClient.ResponseSpec#expectHeader()
  */
@@ -55,19 +59,69 @@ public class HeaderAssertions {
 	}
 
 	/**
-	 * Expect a header with the given name whose first value matches the
-	 * provided regex pattern.
+	 * Match the primary value of the response header with a regex.
 	 * @param name the header name
-	 * @param pattern String pattern to pass to {@link Pattern#compile(String)}
+	 * @param pattern the regex pattern
 	 */
 	public WebTestClient.ResponseSpec valueMatches(String name, String pattern) {
+		String value = getRequiredValue(name);
+		String message = getMessage(name) + "=[" + value + "] does not match [" + pattern + "]";
+		this.exchangeResult.assertWithDiagnostics(() -> AssertionErrors.assertTrue(message, value.matches(pattern)));
+		return this.responseSpec;
+	}
+
+	/**
+	 * Assert the primary value of the response header with a {@link Matcher}.
+	 * @param name the header name
+	 * @param matcher the matcher to sue
+	 * @since 5.1
+	 */
+	public WebTestClient.ResponseSpec value(String name, Matcher<? super String> matcher) {
+		String value = getRequiredValue(name);
+		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat(value, matcher));
+		return this.responseSpec;
+	}
+
+	/**
+	 * Assert the primary value of the response header with a {@link Matcher}.
+	 * @param name the header name
+	 * @param consumer the matcher to sue
+	 * @since 5.1
+	 */
+	public WebTestClient.ResponseSpec value(String name, Consumer<String> consumer) {
+		String value = getRequiredValue(name);
+		this.exchangeResult.assertWithDiagnostics(() -> consumer.accept(value));
+		return this.responseSpec;
+	}
+
+	private String getRequiredValue(String name) {
 		String value = getHeaders().getFirst(name);
 		if (value == null) {
-			fail(getMessage(name) + " not found");
+			AssertionErrors.fail(getMessage(name) + " not found");
 		}
-		boolean match = Pattern.compile(pattern).matcher(value).matches();
-		String message = getMessage(name) + "=\'" + value + "\' does not match \'" + pattern + "\'";
-		this.exchangeResult.assertWithDiagnostics(() -> assertTrue(message, match));
+		return value;
+	}
+
+	/**
+	 * Expect that the header with the given name is present.
+	 * @since 5.0.3
+	 */
+	public WebTestClient.ResponseSpec exists(String name) {
+		if (!getHeaders().containsKey(name)) {
+			String message = getMessage(name) + " does not exist";
+			this.exchangeResult.assertWithDiagnostics(() -> AssertionErrors.fail(message));
+		}
+		return this.responseSpec;
+	}
+
+	/**
+	 * Expect that the header with the given name is not present.
+	 */
+	public WebTestClient.ResponseSpec doesNotExist(String name) {
+		if (getHeaders().containsKey(name)) {
+			String message = getMessage(name) + " exists with value=[" + getHeaders().getFirst(name) + "]";
+			this.exchangeResult.assertWithDiagnostics(() -> AssertionErrors.fail(message));
+		}
 		return this.responseSpec;
 	}
 
@@ -100,32 +154,58 @@ public class HeaderAssertions {
 	}
 
 	/**
+	 * Expect a "Content-Type" header with the given value.
+	 */
+	public WebTestClient.ResponseSpec contentType(String mediaType) {
+		return contentType(MediaType.parseMediaType(mediaType));
+	}
+
+	/**
+	 * Expect a "Content-Type" header compatible with the given value.
+	 */
+	public WebTestClient.ResponseSpec contentTypeCompatibleWith(MediaType mediaType) {
+		MediaType actual = getHeaders().getContentType();
+		String message = getMessage("Content-Type") + "=[" + actual + "] is not compatible with [" + mediaType + "]";
+		this.exchangeResult.assertWithDiagnostics(() ->
+				AssertionErrors.assertTrue(message, (actual != null && actual.isCompatibleWith(mediaType))));
+		return this.responseSpec;
+	}
+
+	/**
+	 * Expect a "Content-Type" header compatible with the given value.
+	 */
+	public WebTestClient.ResponseSpec contentTypeCompatibleWith(String mediaType) {
+		return contentTypeCompatibleWith(MediaType.parseMediaType(mediaType));
+	}
+
+	/**
 	 * Expect an "Expires" header with the given value.
 	 */
-	public WebTestClient.ResponseSpec expires(int expires) {
+	public WebTestClient.ResponseSpec expires(long expires) {
 		return assertHeader("Expires", expires, getHeaders().getExpires());
 	}
 
 	/**
 	 * Expect a "Last-Modified" header with the given value.
 	 */
-	public WebTestClient.ResponseSpec lastModified(int lastModified) {
+	public WebTestClient.ResponseSpec lastModified(long lastModified) {
 		return assertHeader("Last-Modified", lastModified, getHeaders().getLastModified());
 	}
 
-
-	// Private methods
 
 	private HttpHeaders getHeaders() {
 		return this.exchangeResult.getResponseHeaders();
 	}
 
 	private String getMessage(String headerName) {
-		return "Response header [" + headerName + "]";
+		return "Response header '" + headerName + "'";
 	}
 
 	private WebTestClient.ResponseSpec assertHeader(String name, @Nullable Object expected, @Nullable Object actual) {
-		this.exchangeResult.assertWithDiagnostics(() -> assertEquals(getMessage(name), expected, actual));
+		this.exchangeResult.assertWithDiagnostics(() -> {
+			String message = getMessage(name);
+			AssertionErrors.assertEquals(message, expected, actual);
+		});
 		return this.responseSpec;
 	}
 

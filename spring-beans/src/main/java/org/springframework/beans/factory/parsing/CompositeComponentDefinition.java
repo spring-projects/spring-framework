@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.parsing;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
@@ -38,7 +38,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 	@Nullable
 	private final Object source;
 
-	private final List<ComponentDefinition> nestedComponents = new LinkedList<>();
+	private final List<ComponentDefinition> nestedComponents = new ArrayList<>();
 
 
 	/**
@@ -79,7 +79,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 	 * @return the array of nested components, or an empty array if none
 	 */
 	public ComponentDefinition[] getNestedComponents() {
-		return this.nestedComponents.toArray(new ComponentDefinition[this.nestedComponents.size()]);
+		return this.nestedComponents.toArray(new ComponentDefinition[0]);
 	}
 
 }

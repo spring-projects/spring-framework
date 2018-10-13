@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import javax.servlet.ServletContext;
 
@@ -86,6 +85,7 @@ import org.springframework.web.context.ServletContextAware;
  * {@link #setStrategies(List)}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.2
  */
 public class ContentNegotiationManagerFactoryBean
@@ -159,11 +159,11 @@ public class ContentNegotiationManagerFactoryBean
 	 */
 	public void setMediaTypes(Properties mediaTypes) {
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			for (Entry<Object, Object> entry : mediaTypes.entrySet()) {
-				String extension = ((String)entry.getKey()).toLowerCase(Locale.ENGLISH);
-				MediaType mediaType = MediaType.valueOf((String) entry.getValue());
+			mediaTypes.forEach((key, value) -> {
+				String extension = ((String) key).toLowerCase(Locale.ENGLISH);
+				MediaType mediaType = MediaType.valueOf((String) value);
 				this.mediaTypes.put(extension, mediaType);
-			}
+			});
 		}
 	}
 
@@ -198,6 +198,8 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
+	 * Indicate whether to use the Java Activation Framework as a fallback option
+	 * to map from file extensions to media types.
 	 * @deprecated as of 5.0, in favor of {@link #setUseRegisteredExtensionsOnly(boolean)}, which
 	 * has reverse behavior.
 	 */
@@ -261,8 +263,8 @@ public class ContentNegotiationManagerFactoryBean
 	/**
 	 * Set the default content types to use when no content type is requested.
 	 * <p>By default this is not set.
-	 * @see #setDefaultContentTypeStrategy
 	 * @since 5.0
+	 * @see #setDefaultContentTypeStrategy
 	 */
 	public void setDefaultContentTypes(List<MediaType> contentTypes) {
 		this.defaultNegotiationStrategy = new FixedContentNegotiationStrategy(contentTypes);
@@ -272,8 +274,8 @@ public class ContentNegotiationManagerFactoryBean
 	 * Set a custom {@link ContentNegotiationStrategy} to use to determine
 	 * the content type to use when no content type is requested.
 	 * <p>By default this is not set.
-	 * @see #setDefaultContentType
 	 * @since 4.1.2
+	 * @see #setDefaultContentType
 	 */
 	public void setDefaultContentTypeStrategy(ContentNegotiationStrategy strategy) {
 		this.defaultNegotiationStrategy = strategy;
@@ -293,6 +295,10 @@ public class ContentNegotiationManagerFactoryBean
 		build();
 	}
 
+	/**
+	 * Actually build the {@link ContentNegotiationManager}.
+	 * @since 5.0
+	 */
 	public ContentNegotiationManager build() {
 		List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
@@ -303,8 +309,7 @@ public class ContentNegotiationManagerFactoryBean
 			if (this.favorPathExtension) {
 				PathExtensionContentNegotiationStrategy strategy;
 				if (this.servletContext != null && !useRegisteredExtensionsOnly()) {
-					strategy = new ServletPathExtensionContentNegotiationStrategy(
-							this.servletContext, this.mediaTypes);
+					strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, this.mediaTypes);
 				}
 				else {
 					strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
@@ -317,14 +322,13 @@ public class ContentNegotiationManagerFactoryBean
 			}
 
 			if (this.favorParameter) {
-				ParameterContentNegotiationStrategy strategy =
-						new ParameterContentNegotiationStrategy(this.mediaTypes);
+				ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
 				strategy.setParameterName(this.parameterName);
 				if (this.useRegisteredExtensionsOnly != null) {
 					strategy.setUseRegisteredExtensionsOnly(this.useRegisteredExtensionsOnly);
 				}
 				else {
-					strategy.setUseRegisteredExtensionsOnly(true); // backwards compatibility
+					strategy.setUseRegisteredExtensionsOnly(true);  // backwards compatibility
 				}
 				strategies.add(strategy);
 			}
@@ -344,6 +348,7 @@ public class ContentNegotiationManagerFactoryBean
 
 
 	@Override
+	@Nullable
 	public ContentNegotiationManager getObject() {
 		return this.contentNegotiationManager;
 	}

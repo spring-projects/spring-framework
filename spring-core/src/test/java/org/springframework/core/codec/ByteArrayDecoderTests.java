@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
@@ -28,9 +29,7 @@ import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -38,6 +37,7 @@ import static org.junit.Assert.assertTrue;
 public class ByteArrayDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final ByteArrayDecoder decoder = new ByteArrayDecoder();
+
 
 	@Test
 	public void canDecode() {
@@ -61,6 +61,36 @@ public class ByteArrayDecoderTests extends AbstractDataBufferAllocatingTestCase 
 		StepVerifier.create(output)
 				.consumeNextWith(bytes -> assertArrayEquals("foo".getBytes(), bytes))
 				.consumeNextWith(bytes -> assertArrayEquals("bar".getBytes(), bytes))
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void decodeError() {
+		DataBuffer fooBuffer = stringBuffer("foo");
+		Flux<DataBuffer> source =
+				Flux.just(fooBuffer).concatWith(Flux.error(new RuntimeException()));
+		Flux<byte[]> output = this.decoder.decode(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, byte[].class),
+				null, Collections.emptyMap());
+
+		StepVerifier.create(output)
+				.consumeNextWith(bytes -> assertArrayEquals("foo".getBytes(), bytes))
+				.expectError()
+				.verify();
+	}
+
+	@Test
+	public void decodeToMono() {
+		DataBuffer fooBuffer = stringBuffer("foo");
+		DataBuffer barBuffer = stringBuffer("bar");
+		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
+		Mono<byte[]> output = this.decoder.decodeToMono(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, byte[].class),
+				null, Collections.emptyMap());
+
+		StepVerifier.create(output)
+				.consumeNextWith(bytes -> assertArrayEquals("foobar".getBytes(), bytes))
 				.expectComplete()
 				.verify();
 	}

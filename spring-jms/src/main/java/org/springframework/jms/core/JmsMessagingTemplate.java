@@ -52,6 +52,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	private MessageConverter jmsMessageConverter = new MessagingMessageConverter();
 
+	private boolean converterSet;
+
 	@Nullable
 	private String defaultDestinationName;
 
@@ -131,6 +133,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	public void setJmsMessageConverter(MessageConverter jmsMessageConverter) {
 		Assert.notNull(jmsMessageConverter, "MessageConverter must not be null");
 		this.jmsMessageConverter = jmsMessageConverter;
+		this.converterSet = true;
 	}
 
 	/**
@@ -162,6 +165,10 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	@Override
 	public void afterPropertiesSet() {
 		Assert.notNull(this.jmsTemplate, "Property 'connectionFactory' or 'jmsTemplate' is required");
+		if (!this.converterSet && this.jmsTemplate.getMessageConverter() != null) {
+			((MessagingMessageConverter) this.jmsMessageConverter)
+					.setPayloadConverter(this.jmsTemplate.getMessageConverter());
+		}
 	}
 
 	private JmsTemplate obtainJmsTemplate() {
@@ -230,6 +237,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	public Message<?> receive() {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
@@ -241,6 +249,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	public <T> T receiveAndConvert(Class<T> targetClass) {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
@@ -252,11 +261,13 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	public Message<?> receive(String destinationName) throws MessagingException {
 		return doReceive(destinationName);
 	}
 
 	@Override
+	@Nullable
 	public <T> T receiveAndConvert(String destinationName, Class<T> targetClass) throws MessagingException {
 		Message<?> message = doReceive(destinationName);
 		if (message != null) {
@@ -268,6 +279,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	public Message<?> sendAndReceive(Message<?> requestMessage) {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
@@ -279,11 +291,13 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	public Message<?> sendAndReceive(String destinationName, Message<?> requestMessage) throws MessagingException {
 		return doSendAndReceive(destinationName, requestMessage);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass)
 			throws MessagingException {
 
@@ -291,11 +305,13 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(Object request, Class<T> targetClass) {
 		return convertSendAndReceive(request, targetClass, null);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(String destinationName, Object request,
 			@Nullable Map<String, Object> headers, Class<T> targetClass) throws MessagingException {
 
@@ -303,6 +319,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
@@ -314,6 +331,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
 			@Nullable MessagePostProcessor requestPostProcessor) throws MessagingException {
 
@@ -322,6 +340,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(String destinationName, Object request, @Nullable Map<String, Object> headers,
 			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 
@@ -350,6 +369,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	protected Message<?> doReceive(Destination destination) {
 		try {
 			javax.jms.Message jmsMessage = obtainJmsTemplate().receive(destination);
@@ -372,6 +392,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
+	@Nullable
 	protected Message<?> doSendAndReceive(Destination destination, Message<?> requestMessage) {
 		try {
 			javax.jms.Message jmsMessage = obtainJmsTemplate().sendAndReceive(

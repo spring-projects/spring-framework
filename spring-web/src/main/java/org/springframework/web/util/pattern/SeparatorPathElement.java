@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,6 @@ class SeparatorPathElement extends PathElement {
 			}
 			else {
 				pathIndex++;
-				if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
-					return true;  // no more data but matches up to this point
-				}
 				return (this.next != null && this.next.matches(pathIndex, matchingContext));
 			}
 		}
@@ -68,7 +65,7 @@ class SeparatorPathElement extends PathElement {
 	public String toString() {
 		return "Separator(" + this.separator + ")";
 	}
-	
+
 	public char[] getChars() {
 		return new char[] {this.separator};
 	}

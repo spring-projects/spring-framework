@@ -47,6 +47,7 @@ public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory
 	}
 
 	@Override
+	@Nullable
 	public DateTimeFormatter getObject() {
 		return this.dateTimeFormatter;
 	}

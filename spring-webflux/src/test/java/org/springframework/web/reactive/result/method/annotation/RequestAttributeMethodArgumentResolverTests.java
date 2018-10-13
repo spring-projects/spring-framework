@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,24 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Optional;
 
+import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebInputException;
 
@@ -45,7 +43,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestAttribute;
 
 /**
  * Unit tests for {@link RequestAttributeMethodArgumentResolver}.
@@ -56,39 +54,39 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 	private RequestAttributeMethodArgumentResolver resolver;
 
-	private final MockServerWebExchange exchange= MockServerHttpRequest.get("/").toExchange();
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
-	private Method handleMethod;
+	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass())
+			.named("handleWithRequestAttribute").build();
 
 
 	@Before
+	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
-		this.resolver = new RequestAttributeMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
-		this.handleMethod = ReflectionUtils.findMethod(getClass(), "handleWithRequestAttribute", (Class<?>[]) null);
+		ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
+		this.resolver = new RequestAttributeMethodArgumentResolver(context.getBeanFactory(), registry);
 	}
 
 
 	@Test
 	public void supportsParameter() throws Exception {
-		assertTrue(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0)));
-		assertFalse(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 4)));
-		try {
-			this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 5));
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"RequestAttributeMethodArgumentResolver doesn't support reactive type wrapper"));
-		}
+
+		assertTrue(this.resolver.supportsParameter(
+				this.testMethod.annot(requestAttribute().noName()).arg(Foo.class)));
+
+		// SPR-16158
+		assertTrue(this.resolver.supportsParameter(
+				this.testMethod.annotPresent(RequestAttribute.class).arg(Mono.class, Foo.class)));
+
+		assertFalse(this.resolver.supportsParameter(
+				this.testMethod.annotNotPresent(RequestAttribute.class).arg()));
 	}
 
 	@Test
 	public void resolve() throws Exception {
-		MethodParameter param = initMethodParameter(0);
+		MethodParameter param = this.testMethod.annot(requestAttribute().noName()).arg(Foo.class);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		StepVerifier.create(mono)
 				.expectNextCount(0)
@@ -103,7 +101,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void resolveWithName() throws Exception {
-		MethodParameter param = initMethodParameter(1);
+		MethodParameter param = this.testMethod.annot(requestAttribute().name("specialFoo")).arg();
 		Foo foo = new Foo();
 		this.exchange.getAttributes().put("specialFoo", foo);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
@@ -112,7 +110,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void resolveNotRequired() throws Exception {
-		MethodParameter param = initMethodParameter(2);
+		MethodParameter param = this.testMethod.annot(requestAttribute().name("foo").notRequired()).arg();
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertNull(mono.block());
 
@@ -124,7 +122,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void resolveOptional() throws Exception {
-		MethodParameter param = initMethodParameter(3);
+		MethodParameter param = this.testMethod.annot(requestAttribute().name("foo")).arg(Optional.class, Foo.class);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 
 		assertNotNull(mono.block());
@@ -146,12 +144,30 @@ public class RequestAttributeMethodArgumentResolverTests {
 		assertSame(foo, optional.get());
 	}
 
+	@Test // SPR-16158
+	public void resolveMonoParameter() throws Exception {
+		MethodParameter param = this.testMethod.annot(requestAttribute().noName()).arg(Mono.class, Foo.class);
 
-	private MethodParameter initMethodParameter(int parameterIndex) {
-		MethodParameter param = new SynthesizingMethodParameter(this.handleMethod, parameterIndex);
-		param.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
-		GenericTypeResolver.resolveParameterType(param, this.resolver.getClass());
-		return param;
+		// Mono attribute
+		Foo foo = new Foo();
+		Mono<Foo> fooMono = Mono.just(foo);
+		this.exchange.getAttributes().put("fooMono", fooMono);
+		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
+		assertSame(fooMono, mono.block(Duration.ZERO));
+
+		// RxJava Single attribute
+		Single<Foo> singleMono = Single.just(foo);
+		this.exchange.getAttributes().clear();
+		this.exchange.getAttributes().put("fooMono", singleMono);
+		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
+		Object value = mono.block(Duration.ZERO);
+		assertTrue(value instanceof Mono);
+		assertSame(foo, ((Mono<?>) value).block(Duration.ZERO));
+
+		// No attribute --> Mono.empty
+		this.exchange.getAttributes().clear();
+		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
+		assertSame(Mono.empty(), mono.block(Duration.ZERO));
 	}
 
 
@@ -161,8 +177,8 @@ public class RequestAttributeMethodArgumentResolverTests {
 			@RequestAttribute("specialFoo") Foo namedFoo,
 			@RequestAttribute(name="foo", required = false) Foo notRequiredFoo,
 			@RequestAttribute(name="foo") Optional<Foo> optionalFoo,
-			String notSupported,
-			@RequestAttribute Mono<Foo> alsoNotSupported) {
+			@RequestAttribute Mono<Foo> fooMono,
+			String notSupported) {
 	}
 
 

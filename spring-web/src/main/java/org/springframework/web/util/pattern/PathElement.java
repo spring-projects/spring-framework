@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ abstract class PathElement {
 
 	protected static final int CAPTURE_VARIABLE_WEIGHT = 1;
 
-	protected final static MultiValueMap<String,String> NO_PARAMETERS = new LinkedMultiValueMap<>();
+	protected static final MultiValueMap<String,String> NO_PARAMETERS = new LinkedMultiValueMap<>();
 
 	// Position in the pattern where this path element starts
 	protected final int pos;
@@ -71,7 +71,8 @@ abstract class PathElement {
 	public abstract boolean matches(int candidatePos, MatchingContext matchingContext);
 
 	/**
-	 * @return the length of the path element where captures are considered to be one character long.
+	 * Return the length of the path element where captures are considered to be one character long.
+	 * @return the normalized length
 	 */
 	public abstract int getNormalizedLength();
 
@@ -99,7 +100,8 @@ abstract class PathElement {
 	}
 
 	/**
-	 * @return true if the there are no more PathElements in the pattern
+	 * Return if the there are no more PathElements in the pattern.
+	 * @return {@code true} if the there are no more elements
 	 */
 	protected final boolean isNoMorePattern() {
 		return this.next == null;

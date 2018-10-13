@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.lang.Nullable;
  */
 public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanRegistry {
 
-	/** Cache of singleton objects created by FactoryBeans: FactoryBean name --> object */
+	/** Cache of singleton objects created by FactoryBeans: FactoryBean name to object. */
 	private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>(16);
 
 
@@ -57,8 +57,8 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
 		try {
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged((PrivilegedAction<Class<?>>) () ->
-						factoryBean.getObjectType(), getAccessControlContext());
+				return AccessController.doPrivileged((PrivilegedAction<Class<?>>)
+						factoryBean::getObjectType, getAccessControlContext());
 			}
 			else {
 				return factoryBean.getObjectType();
@@ -66,7 +66,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 		}
 		catch (Throwable ex) {
 			// Thrown from the FactoryBean's getObjectType implementation.
-			logger.warn("FactoryBean threw exception from getObjectType, despite the contract saying " +
+			logger.info("FactoryBean threw exception from getObjectType, despite the contract saying " +
 					"that it should return null if the type of its object cannot be determined yet", ex);
 			return null;
 		}
@@ -81,8 +81,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 */
 	@Nullable
 	protected Object getCachedObjectForFactoryBean(String beanName) {
-		Object object = this.factoryBeanObjectCache.get(beanName);
-		return (object != NULL_OBJECT ? object : null);
+		return this.factoryBeanObjectCache.get(beanName);
 	}
 
 	/**
@@ -94,7 +93,6 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	@Nullable
 	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
 		if (factory.isSingleton() && containsSingleton(beanName)) {
 			synchronized (getSingletonMutex()) {
@@ -108,7 +106,12 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 						object = alreadyThere;
 					}
 					else {
-						if (object != null && shouldPostProcess) {
+						if (shouldPostProcess) {
+							if (isSingletonCurrentlyInCreation(beanName)) {
+								// Temporarily return non-post-processed object, not storing it yet..
+								return object;
+							}
+							beforeSingletonCreation(beanName);
 							try {
 								object = postProcessObjectFromFactoryBean(object, beanName);
 							}
@@ -116,16 +119,21 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 								throw new BeanCreationException(beanName,
 										"Post-processing of FactoryBean's singleton object failed", ex);
 							}
+							finally {
+								afterSingletonCreation(beanName);
+							}
 						}
-						this.factoryBeanObjectCache.put(beanName, (object != null ? object : NULL_OBJECT));
+						if (containsSingleton(beanName)) {
+							this.factoryBeanObjectCache.put(beanName, object);
+						}
 					}
 				}
-				return (object != NULL_OBJECT ? object : null);
+				return object;
 			}
 		}
 		else {
 			Object object = doGetObjectFromFactoryBean(factory, beanName);
-			if (object != null && shouldPostProcess) {
+			if (shouldPostProcess) {
 				try {
 					object = postProcessObjectFromFactoryBean(object, beanName);
 				}
@@ -145,7 +153,6 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	@Nullable
 	private Object doGetObjectFromFactoryBean(final FactoryBean<?> factory, final String beanName)
 			throws BeanCreationException {
 
@@ -154,8 +161,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			if (System.getSecurityManager() != null) {
 				AccessControlContext acc = getAccessControlContext();
 				try {
-					object = AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-							factory.getObject(), acc);
+					object = AccessController.doPrivileged((PrivilegedExceptionAction<Object>) factory::getObject, acc);
 				}
 				catch (PrivilegedActionException pae) {
 					throw pae.getException();
@@ -174,9 +180,12 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 
 		// Do not accept a null value for a FactoryBean that's not fully
 		// initialized yet: Many FactoryBeans just return null then.
-		if (object == null && isSingletonCurrentlyInCreation(beanName)) {
-			throw new BeanCurrentlyInCreationException(
-					beanName, "FactoryBean which is currently in creation returned null from getObject");
+		if (object == null) {
+			if (isSingletonCurrentlyInCreation(beanName)) {
+				throw new BeanCurrentlyInCreationException(
+						beanName, "FactoryBean which is currently in creation returned null from getObject");
+			}
+			object = new NullBean();
 		}
 		return object;
 	}
@@ -191,7 +200,6 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the object to expose
 	 * @throws org.springframework.beans.BeansException if any post-processing failed
 	 */
-	@Nullable
 	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) throws BeansException {
 		return object;
 	}
@@ -216,17 +224,21 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 */
 	@Override
 	protected void removeSingleton(String beanName) {
-		super.removeSingleton(beanName);
-		this.factoryBeanObjectCache.remove(beanName);
+		synchronized (getSingletonMutex()) {
+			super.removeSingleton(beanName);
+			this.factoryBeanObjectCache.remove(beanName);
+		}
 	}
 
 	/**
 	 * Overridden to clear the FactoryBean object cache as well.
 	 */
 	@Override
-	public void destroySingletons() {
-		super.destroySingletons();
-		this.factoryBeanObjectCache.clear();
+	protected void clearSingletonCache() {
+		synchronized (getSingletonMutex()) {
+			super.clearSingletonCache();
+			this.factoryBeanObjectCache.clear();
+		}
 	}
 
 	/**

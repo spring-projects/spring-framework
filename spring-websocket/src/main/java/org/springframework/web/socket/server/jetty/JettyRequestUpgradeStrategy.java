@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,6 @@ import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.core.NamedThreadLocal;
@@ -118,17 +115,14 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 			this.running = true;
 			try {
 				if (this.factory == null) {
-					this.factory = new WebSocketServerFactory(servletContext, this.policy);
+					this.factory = new WebSocketServerFactory(this.servletContext, this.policy);
 				}
-				this.factory.setCreator(new WebSocketCreator() {
-					@Override
-					public Object createWebSocket(ServletUpgradeRequest request, ServletUpgradeResponse response) {
-						WebSocketHandlerContainer container = containerHolder.get();
-						Assert.state(container != null, "Expected WebSocketHandlerContainer");
-						response.setAcceptedSubProtocol(container.getSelectedProtocol());
-						response.setExtensions(container.getExtensionConfigs());
-						return container.getHandler();
-					}
+				this.factory.setCreator((request, response) -> {
+					WebSocketHandlerContainer container = containerHolder.get();
+					Assert.state(container != null, "Expected WebSocketHandlerContainer");
+					response.setAcceptedSubProtocol(container.getSelectedProtocol());
+					response.setExtensions(container.getExtensionConfigs());
+					return container.getHandler();
 				});
 				this.factory.start();
 			}

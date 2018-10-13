@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,7 +63,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-import static org.springframework.context.annotation.AnnotationConfigUtils.*;
+import static org.springframework.context.annotation.AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR;
 
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
@@ -74,10 +73,10 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  * {@code <context:component-scan/>}. Otherwise, may be declared manually as
  * with any other BeanFactoryPostProcessor.
  *
- * <p>This post processor is {@link Ordered#HIGHEST_PRECEDENCE} as it is important
- * that any {@link Bean} methods declared in Configuration classes have their
- * respective bean definitions registered before any other BeanFactoryPostProcessor
- * executes.
+ * <p>This post processor is priority-ordered as it is important that any
+ * {@link Bean} methods declared in {@code @Configuration} classes have
+ * their corresponding bean definitions registered before any other
+ * {@link BeanFactoryPostProcessor} executes.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -285,7 +284,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		configCandidates.sort((bd1, bd2) -> {
 			int i1 = ConfigurationClassUtils.getOrder(bd1.getBeanDefinition());
 			int i2 = ConfigurationClassUtils.getOrder(bd2.getBeanDefinition());
-			return (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
+			return Integer.compare(i1, i2);
 		});
 
 		// Detect any custom bean name generation strategy supplied through the enclosing application context
@@ -351,10 +350,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		while (!candidates.isEmpty());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
-		if (sbr != null) {
-			if (!sbr.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
-				sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
-			}
+		if (sbr != null && !sbr.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
+			sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
 		}
 
 		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
@@ -379,8 +376,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
 							beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
 				}
-				else if (logger.isWarnEnabled() && beanFactory.containsSingleton(beanName)) {
-					logger.warn("Cannot enhance @Configuration bean definition '" + beanName +
+				else if (logger.isInfoEnabled() && beanFactory.containsSingleton(beanName)) {
+					logger.info("Cannot enhance @Configuration bean definition '" + beanName +
 							"' since its singleton instance has been created too early. The typical cause " +
 							"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
 							"return type: Consider declaring such methods as 'static'.");
@@ -404,8 +401,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				if (configClass != null) {
 					Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
 					if (configClass != enhancedClass) {
-						if (logger.isDebugEnabled()) {
-							logger.debug(String.format("Replacing bean definition '%s' existing class '%s' with " +
+						if (logger.isTraceEnabled()) {
+							logger.trace(String.format("Replacing bean definition '%s' existing class '%s' with " +
 									"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
 						}
 						beanDef.setBeanClass(enhancedClass);
@@ -428,11 +425,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		@Override
-		public PropertyValues postProcessPropertyValues(
-				PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
+		public PropertyValues postProcessProperties(@Nullable PropertyValues pvs, Object bean, String beanName) {
 			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
-			// postProcessPropertyValues method attempts to autowire other configuration beans.
+			// postProcessProperties method attempts to autowire other configuration beans.
 			if (bean instanceof EnhancedConfiguration) {
 				((EnhancedConfiguration) bean).setBeanFactory(this.beanFactory);
 			}

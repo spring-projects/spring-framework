@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,12 +52,12 @@ public class DateFormattingTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
-		setUp(registrar);
+		setup(registrar);
 	}
 
-	private void setUp(DateFormatterRegistrar registrar) {
+	private void setup(DateFormatterRegistrar registrar) {
 		DefaultConversionService.addDefaultConverters(conversionService);
 		registrar.registerFormatters(conversionService);
 
@@ -193,7 +193,7 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void dateToStringWithoutGlobalFormat() throws Exception {
+	public void dateToStringWithoutGlobalFormat() {
 		Date date = new Date();
 		Object actual = this.conversionService.convert(date, TypeDescriptor.valueOf(Date.class), TypeDescriptor.valueOf(String.class));
 		String expected = date.toString();
@@ -201,33 +201,31 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void dateToStringWithGlobalFormat() throws Exception {
+	public void dateToStringWithGlobalFormat() {
 		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
 		registrar.setFormatter(new DateFormatter());
-		setUp(registrar);
+		setup(registrar);
 		Date date = new Date();
 		Object actual = this.conversionService.convert(date, TypeDescriptor.valueOf(Date.class), TypeDescriptor.valueOf(String.class));
 		String expected = new DateFormatter().print(date, Locale.US);
 		assertEquals(expected, actual);
 	}
 
-	@Test
+	@Test  // SPR-10105
 	@SuppressWarnings("deprecation")
-	public void stringToDateWithoutGlobalFormat() throws Exception {
-		// SPR-10105
+	public void stringToDateWithoutGlobalFormat() {
 		String string = "Sat, 12 Aug 1995 13:30:00 GM";
 		Date date = this.conversionService.convert(string, Date.class);
 		assertThat(date, equalTo(new Date(string)));
 	}
 
-	@Test
-	public void stringToDateWithGlobalFormat() throws Exception {
-		// SPR-10105
+	@Test  // SPR-10105
+	public void stringToDateWithGlobalFormat() {
 		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
 		DateFormatter dateFormatter = new DateFormatter();
 		dateFormatter.setIso(ISO.DATE_TIME);
 		registrar.setFormatter(dateFormatter);
-		setUp(registrar);
+		setup(registrar);
 		// This is a format that cannot be parsed by new Date(String)
 		String string = "2009-06-01T14:23:05.003+00:00";
 		Date date = this.conversionService.convert(string, Date.class);

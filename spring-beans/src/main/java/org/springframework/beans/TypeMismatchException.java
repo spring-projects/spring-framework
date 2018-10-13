@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.beans.PropertyChangeEvent;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -37,6 +38,9 @@ public class TypeMismatchException extends PropertyAccessException {
 
 
 	@Nullable
+	private String propertyName;
+
+	@Nullable
 	private transient Object value;
 
 	@Nullable
@@ -44,7 +48,7 @@ public class TypeMismatchException extends PropertyAccessException {
 
 
 	/**
-	 * Create a new TypeMismatchException.
+	 * Create a new {@code TypeMismatchException}.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
 	 * @param requiredType the required target type
 	 */
@@ -53,7 +57,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	}
 
 	/**
-	 * Create a new TypeMismatchException.
+	 * Create a new {@code TypeMismatchException}.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
@@ -65,28 +69,31 @@ public class TypeMismatchException extends PropertyAccessException {
 				"Failed to convert property value of type '" +
 				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "'" +
 				(requiredType != null ?
-				 " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : "") +
+				" to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : "") +
 				(propertyChangeEvent.getPropertyName() != null ?
-				 " for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
+				" for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
 				cause);
+		this.propertyName = propertyChangeEvent.getPropertyName();
 		this.value = propertyChangeEvent.getNewValue();
 		this.requiredType = requiredType;
 	}
 
 	/**
-	 * Create a new TypeMismatchException without PropertyChangeEvent.
+	 * Create a new {@code TypeMismatchException} without a {@code PropertyChangeEvent}.
 	 * @param value the offending value that couldn't be converted (may be {@code null})
 	 * @param requiredType the required target type (or {@code null} if not known)
+	 * @see #initPropertyName
 	 */
 	public TypeMismatchException(@Nullable Object value, @Nullable Class<?> requiredType) {
 		this(value, requiredType, null);
 	}
 
 	/**
-	 * Create a new TypeMismatchException without PropertyChangeEvent.
+	 * Create a new {@code TypeMismatchException} without a {@code PropertyChangeEvent}.
 	 * @param value the offending value that couldn't be converted (may be {@code null})
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
+	 * @see #initPropertyName
 	 */
 	public TypeMismatchException(@Nullable Object value, @Nullable Class<?> requiredType, @Nullable Throwable cause) {
 		super("Failed to convert value of type '" + ClassUtils.getDescriptiveType(value) + "'" +
@@ -96,6 +103,28 @@ public class TypeMismatchException extends PropertyAccessException {
 		this.requiredType = requiredType;
 	}
 
+
+	/**
+	 * Initialize this exception's property name for exposure through {@link #getPropertyName()},
+	 * as an alternative to having it initialized via a {@link PropertyChangeEvent}.
+	 * @param propertyName the property name to expose
+	 * @since 5.0.4
+	 * @see #TypeMismatchException(Object, Class)
+	 * @see #TypeMismatchException(Object, Class, Throwable)
+	 */
+	public void initPropertyName(String propertyName) {
+		Assert.state(this.propertyName == null, "Property name already initialized");
+		this.propertyName = propertyName;
+	}
+
+	/**
+	 * Return the name of the affected property, if available.
+	 */
+	@Override
+	@Nullable
+	public String getPropertyName() {
+		return this.propertyName;
+	}
 
 	/**
 	 * Return the offending value (may be {@code null}).

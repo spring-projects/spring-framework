@@ -14,6 +14,8 @@
  * by Rod Johnson (Wrox, 2002).
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.dao;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

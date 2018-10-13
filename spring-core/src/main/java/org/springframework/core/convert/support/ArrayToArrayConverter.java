@@ -60,6 +60,7 @@ final class ArrayToArrayConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
+	@Nullable
 	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (this.conversionService instanceof GenericConversionService) {
 			TypeDescriptor targetElement = targetType.getElementTypeDescriptor();

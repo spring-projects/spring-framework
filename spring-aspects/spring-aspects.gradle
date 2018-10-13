@@ -1,0 +1,102 @@
+description = "Spring Aspects"
+
+// Redefine the compileJava and compileTestJava tasks in order to compile sources with ajc instead of javac
+
+configurations {
+	rt
+	ajc
+	aspects
+	ajInpath
+}
+
+compileJava {
+	actions = []
+	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
+
+	def outputDir = project.sourceSets.main.java.outputDir
+	inputs.files(project.sourceSets.main.allSource + project.sourceSets.main.compileClasspath)
+	outputs.dir outputDir
+
+	sourceCompatibility = 1.8  // fixed even when general compatibility level set to e.g. 10
+	targetCompatibility = 1.8
+
+	doLast{
+		// Assemble runtime classpath from folders and JARs that actually exist
+		def runtimeClasspath = project.files(sourceSets.main.runtimeClasspath.files.findAll({ it.exists() }))
+
+		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
+				classpath: configurations.ajc.asPath)
+
+		ant.iajc(source: sourceCompatibility, target: targetCompatibility,
+				maxmem: "1024m", fork: "true", Xlint: "ignore",
+				destDir: outputDir.absolutePath,
+				aspectPath: configurations.aspects.asPath,
+				inpath: configurations.ajInpath.asPath,
+				sourceRootCopyFilter: "**/*.java,**/*.aj",
+				classpath: (runtimeClasspath + configurations.rt).asPath) {
+			sourceroots {
+				sourceSets.main.java.srcDirs.each {
+					pathelement(location:it.absolutePath)
+				}
+			}
+		}
+	}
+}
+
+compileTestJava {
+	actions = []
+	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileTestJava")
+	dependsOn jar
+
+	def outputDir = project.sourceSets.test.java.outputDir
+	inputs.files(project.sourceSets.test.allSource + project.sourceSets.test.compileClasspath)
+	outputs.dir outputDir
+
+	sourceCompatibility = 1.8  // fixed even when general compatibility level set to e.g. 10
+	targetCompatibility = 1.8
+
+	doLast{
+		// Assemble runtime classpath from folders and JARs that actually exist
+		def runtimeClasspath = project.files(sourceSets.test.runtimeClasspath.files.findAll({ it.exists() }))
+
+		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
+				classpath: configurations.ajc.asPath)
+
+		ant.iajc(source: sourceCompatibility, target: targetCompatibility,
+				maxmem: "1024m", fork: "true", Xlint: "ignore",
+				destDir: outputDir.absolutePath,
+				aspectPath: jar.archivePath,
+				inpath: configurations.ajInpath.asPath,
+				classpath: (runtimeClasspath + project.files(jar.archivePath) + configurations.rt).asPath) {
+			sourceroots {
+				sourceSets.test.java.srcDirs.each {
+					pathelement(location:it.absolutePath)
+				}
+			}
+		}
+	}
+}
+
+
+dependencies {
+	aspects(project(":spring-orm"))
+	ajc("org.aspectj:aspectjtools:${aspectjVersion}")
+	rt("org.aspectj:aspectjrt:${aspectjVersion}")
+	compile("org.aspectj:aspectjweaver:${aspectjVersion}")
+	optional(project(":spring-aop"))  // for @Async support
+	optional(project(":spring-beans"))  // for @Configurable support
+	optional(project(":spring-context"))  // for @Enable* support
+	optional(project(":spring-context-support"))  // for JavaMail and JSR-107 support
+	optional(project(":spring-orm"))  // for JPA exception translation support
+	optional(project(":spring-tx"))  // for JPA, @Transactional support
+	optional("javax.cache:cache-api:1.1.0") // for JCache aspect
+	optional("javax.transaction:javax.transaction-api:1.3")  // for @javax.transaction.Transactional support
+	testCompile(project(":spring-core"))  // for CodeStyleAspect
+	testCompile(project(":spring-test"))
+	testCompile("javax.mail:javax.mail-api:1.6.2")
+}
+
+eclipse.project {
+	natures += "org.eclipse.ajdt.ui.ajnature"
+	buildCommands = [new org.gradle.plugins.ide.eclipse.model.BuildCommand("org.eclipse.ajdt.core.ajbuilder")]
+}

@@ -58,6 +58,7 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T getNativeSession(@Nullable Class<T> requiredType) {
 		return (requiredType == null || requiredType.isInstance(this.webSocketSession) ? (T) this.webSocketSession : null);
 	}

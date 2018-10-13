@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * PagedListHolder is a simple state holder for handling lists of objects,
  * separating them into pages. Page numbering starts with 0.
  *
- * <p>This is mainly targetted at usage in web UIs. Typically, an instance will be
+ * <p>This is mainly targeted at usage in web UIs. Typically, an instance will be
  * instantiated with a list of beans, put into the session, and exported as model.
  * The properties can all be set/get programmatically, but the most common way will
  * be data binding, i.e. populating the bean from request parameters. The getters
@@ -46,14 +46,21 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 19.05.2003
+ * @param <E> the element type
  * @see #getPageList()
  * @see org.springframework.beans.support.MutableSortDefinition
  */
 @SuppressWarnings("serial")
 public class PagedListHolder<E> implements Serializable {
 
+	/**
+	 * The default page size.
+	 */
 	public static final int DEFAULT_PAGE_SIZE = 10;
 
+	/**
+	 * The default maximum number of page links.
+	 */
 	public static final int DEFAULT_MAX_LINKED_PAGES = 10;
 
 

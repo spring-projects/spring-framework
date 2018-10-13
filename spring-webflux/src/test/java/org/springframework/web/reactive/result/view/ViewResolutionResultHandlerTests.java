@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.view;
 
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Arrays;
@@ -45,7 +44,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -56,12 +55,12 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static java.nio.charset.StandardCharsets.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
+import static org.springframework.web.method.ResolvableMethod.*;
 
 /**
  * ViewResolutionResultHandler relying on a canned {@link TestViewResolver}
@@ -75,8 +74,7 @@ public class ViewResolutionResultHandlerTests {
 
 
 	@Test
-	public void supports() throws Exception {
-
+	public void supports() {
 		testSupports(on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class));
 		testSupports(on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class));
 		testSupports(on(Handler.class).resolveReturnType(Mono.class, String.class));
@@ -120,7 +118,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void viewResolverOrder() throws Exception {
+	public void viewResolverOrder() {
 		TestViewResolver resolver1 = new TestViewResolver("account");
 		TestViewResolver resolver2 = new TestViewResolver("profile");
 		resolver1.setOrder(2);
@@ -131,8 +129,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void handleReturnValueTypes() throws Exception {
-
+	public void handleReturnValueTypes() {
 		Object returnValue;
 		MethodParameter returnType;
 		ViewResolver resolver = new TestViewResolver("account");
@@ -158,7 +155,7 @@ public class ViewResolutionResultHandlerTests {
 		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 
 		returnType = on(Handler.class).resolveReturnType(Model.class);
-		returnValue = new ConcurrentModel().addAttribute("name", "Joe");
+		returnValue = new ConcurrentModel().addAttribute("name", "Joe").addAttribute("ignore", null);
 		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
 		// Work around  caching issue...
@@ -196,7 +193,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void handleWithMultipleResolvers() throws Exception {
+	public void handleWithMultipleResolvers() {
 		testHandle("/account",
 				on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class),
 				"profile", "profile: {id=123}",
@@ -204,38 +201,38 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void defaultViewName() throws Exception {
+	public void defaultViewName() {
 		testDefaultViewName(null, on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class));
 		testDefaultViewName(Mono.empty(), on(Handler.class).resolveReturnType(Mono.class, String.class));
 		testDefaultViewName(Mono.empty(), on(Handler.class).resolveReturnType(Mono.class, Void.class));
 		testDefaultViewName(Completable.complete(), on(Handler.class).resolveReturnType(Completable.class));
 	}
 
-	private void testDefaultViewName(Object returnValue, MethodParameter returnType) throws URISyntaxException {
+	private void testDefaultViewName(Object returnValue, MethodParameter returnType) {
 		this.bindingContext.getModel().addAttribute("id", "123");
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
 		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
 
-		MockServerWebExchange exchange = get("/account").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/account"));
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
-		exchange = get("/account/").toExchange();
+		exchange = MockServerWebExchange.from(get("/account/"));
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
-		exchange = get("/account.123").toExchange();
+		exchange = MockServerWebExchange.from(get("/account.123"));
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 	}
 
 	@Test
-	public void unresolvedViewName() throws Exception {
+	public void unresolvedViewName() {
 		String returnValue = "account";
 		MethodParameter returnType = on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class);
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
 
-		MockServerWebExchange exchange = get("/path").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
 		Mono<Void> mono = resultHandler().handleResult(exchange, result);
 
 		StepVerifier.create(mono)
@@ -245,12 +242,12 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void contentNegotiation() throws Exception {
+	public void contentNegotiation() {
 		TestBean value = new TestBean("Joe");
 		MethodParameter returnType = on(Handler.class).resolveReturnType(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
-		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/account").accept(APPLICATION_JSON));
 
 		TestView defaultView = new TestView("jsonView", APPLICATION_JSON);
 
@@ -267,12 +264,12 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void contentNegotiationWith406() throws Exception {
+	public void contentNegotiationWith406() {
 		TestBean value = new TestBean("Joe");
 		MethodParameter returnType = on(Handler.class).resolveReturnType(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
-		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/account").accept(APPLICATION_JSON));
 
 		ViewResolutionResultHandler resultHandler = resultHandler(new TestViewResolver("account"));
 		Mono<Void> mono = resultHandler.handleResult(exchange, handlerResult);
@@ -282,9 +279,8 @@ public class ViewResolutionResultHandlerTests {
 				.verify();
 	}
 
-	@Test // SPR-15291
-	public void contentNegotiationWithRedirect() throws Exception {
-
+	@Test  // SPR-15291
+	public void contentNegotiationWithRedirect() {
 		HandlerResult handlerResult = new HandlerResult(new Object(), "redirect:/",
 				on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class),
 				this.bindingContext);
@@ -293,7 +289,7 @@ public class ViewResolutionResultHandlerTests {
 		viewResolver.setApplicationContext(new StaticApplicationContext());
 		ViewResolutionResultHandler resultHandler = resultHandler(viewResolver);
 
-		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/account").accept(APPLICATION_JSON));
 		resultHandler.handleResult(exchange, handlerResult).block(Duration.ZERO);
 
 		MockServerHttpResponse response = exchange.getResponse();
@@ -315,13 +311,13 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	private ServerWebExchange testHandle(String path, MethodParameter returnType, Object returnValue,
-			String responseBody, ViewResolver... resolvers) throws URISyntaxException {
+			String responseBody, ViewResolver... resolvers) {
 
 		Model model = this.bindingContext.getModel();
 		model.asMap().clear();
 		model.addAttribute("id", "123");
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
-		MockServerWebExchange exchange = get(path).toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(get(path));
 		resultHandler(resolvers).handleResult(exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody(exchange, responseBody);
 		return exchange;

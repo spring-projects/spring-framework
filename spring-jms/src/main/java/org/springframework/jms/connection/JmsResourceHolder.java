@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * JMS resource holder, wrapping a JMS Connection and a JMS Session.
- * JmsTransactionManager binds instances of this class to the thread,
- * for a given JMS ConnectionFactory.
+ * Resource holder wrapping a JMS {@link Connection} and a JMS {@link Session}.
+ * {@link JmsTransactionManager} binds instances of this class to the thread,
+ * for a given JMS {@link ConnectionFactory}.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
@@ -139,11 +139,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		if (!this.sessions.contains(session)) {
 			this.sessions.add(session);
 			if (connection != null) {
-				List<Session> sessions = this.sessionsPerConnection.get(connection);
-				if (sessions == null) {
-					sessions = new LinkedList<>();
-					this.sessionsPerConnection.put(connection, sessions);
-				}
+				List<Session> sessions = this.sessionsPerConnection.computeIfAbsent(connection, k -> new LinkedList<>());
 				sessions.add(session);
 			}
 		}

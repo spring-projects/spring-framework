@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class HandlerExecutionChain {
 	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
 		if (this.interceptors == null && this.interceptorList != null) {
-			this.interceptors = this.interceptorList.toArray(new HandlerInterceptor[this.interceptorList.size()]);
+			this.interceptors = this.interceptorList.toArray(new HandlerInterceptor[0]);
 		}
 		return this.interceptors;
 	}
@@ -202,21 +202,23 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Delegates to the handler's {@code toString()}.
+	 * Delegates to the handler and interceptors' {@code toString()}.
 	 */
 	@Override
 	public String toString() {
 		Object handler = getHandler();
 		StringBuilder sb = new StringBuilder();
-		sb.append("HandlerExecutionChain with handler [").append(handler).append("]");
-		HandlerInterceptor[] interceptors = getInterceptors();
-		if (!ObjectUtils.isEmpty(interceptors)) {
-			sb.append(" and ").append(interceptors.length).append(" interceptor");
-			if (interceptors.length > 1) {
-				sb.append("s");
-			}
+		sb.append("HandlerExecutionChain with [").append(handler).append("] and ");
+		if (this.interceptorList != null) {
+			sb.append(this.interceptorList.size());
 		}
-		return sb.toString();
+		else if (this.interceptors != null) {
+			sb.append(this.interceptors.length);
+		}
+		else {
+			sb.append(0);
+		}
+		return sb.append(" interceptors").toString();
 	}
 
 }

@@ -22,8 +22,7 @@ import org.springframework.web.context.request.WebRequest;
 
 /**
  * Default implementation of the {@link SessionAttributeStore} interface,
- * storing the attributes in the WebRequest session (i.e. HttpSession
- * or PortletSession).
+ * storing the attributes in the WebRequest session (i.e. HttpSession).
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -57,6 +56,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 	}
 
 	@Override
+	@Nullable
 	public Object retrieveAttribute(WebRequest request, String attributeName) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,21 +101,24 @@ public class DefaultPersistenceUnitManager
 	 * Default location of the {@code persistence.xml} file:
 	 * "classpath*:META-INF/persistence.xml".
 	 */
-	public final static String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/" + PERSISTENCE_XML_FILENAME;
+	public static final String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/" + PERSISTENCE_XML_FILENAME;
 
 	/**
 	 * Default location for the persistence unit root URL:
 	 * "classpath:", indicating the root of the classpath.
 	 */
-	public final static String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION = "classpath:";
+	public static final String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION = "classpath:";
 
-	public final static String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME = "default";
+	/**
+	 * Default persistence unit name.
+	 */
+	public static final String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME = "default";
 
 
 	private static final Set<AnnotationTypeFilter> entityTypeFilters;
 
 	static {
-		entityTypeFilters = new LinkedHashSet<>(4);
+		entityTypeFilters = new LinkedHashSet<>(8);
 		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
@@ -223,7 +226,7 @@ public class DefaultPersistenceUnitManager
 	 * may live next to regularly defined units originating from {@code persistence.xml}.
 	 * Its name is determined by {@link #setDefaultPersistenceUnitName}: by default,
 	 * it's simply "default".
-	 * <p><p>Note: There may be limitations in comparison to regular JPA scanning.</b>
+	 * <p><b>Note: There may be limitations in comparison to regular JPA scanning.</b>
 	 * In particular, JPA providers may pick up annotated packages for provider-specific
 	 * annotations only when driven by {@code persistence.xml}. As of 4.1, Spring's
 	 * scan can detect annotated packages as well if supported by the given
@@ -510,8 +513,8 @@ public class DefaultPersistenceUnitManager
 
 		if (buildDefaultUnit) {
 			if (foundDefaultUnit) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Found explicit default unit with name '" + defaultName + "' in persistence.xml - " +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found explicit default unit with name '" + defaultName + "' in persistence.xml - " +
 							"overriding local default unit settings ('packagesToScan'/'mappingResources')");
 				}
 			}

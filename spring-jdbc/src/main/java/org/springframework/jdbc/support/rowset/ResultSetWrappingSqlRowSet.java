@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * The default implementation of Spring's {@link SqlRowSet} interface, wrapping a
- * {@link java.sql.ResultSet}, catching any {@link SQLException}s and translating
- * them to a corresponding Spring {@link InvalidResultSetAccessException}.
+ * {@link java.sql.ResultSet}, catching any {@link SQLException SQLExceptions} and
+ * translating them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
  * <p>The passed-in ResultSet should already be disconnected if the SqlRowSet is supposed
  * to be usable in a disconnected fashion. This means that you will usually pass in a
@@ -63,7 +63,7 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  */
 public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 
-	/** use serialVersionUID from Spring 1.2 for interoperability */
+	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = -4688694393146734764L;
 
 

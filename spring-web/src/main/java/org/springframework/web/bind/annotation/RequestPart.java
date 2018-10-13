@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.web.multipart.MultipartResolver;
  * method argument types. The main difference is that when the method argument is not a
  * String, @{@link RequestParam} relies on type conversion via a registered
  * {@link Converter} or {@link PropertyEditor} while @{@link RequestPart} relies
- * on {@link HttpMessageConverter}s taking into consideration the 'Content-Type' header
+ * on {@link HttpMessageConverter HttpMessageConverters} taking into consideration the 'Content-Type' header
  * of the request part. @{@link RequestParam} is likely to be used with name-value form
  * fields while @{@link RequestPart} is likely to be used with parts containing more
  * complex content (e.g. JSON, XML).

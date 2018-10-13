@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,11 +139,11 @@ public abstract class ObjectUtils {
 		if (obj instanceof Optional) {
 			return !((Optional) obj).isPresent();
 		}
-		if (obj.getClass().isArray()) {
-			return Array.getLength(obj) == 0;
-		}
 		if (obj instanceof CharSequence) {
 			return ((CharSequence) obj).length() == 0;
+		}
+		if (obj.getClass().isArray()) {
+			return Array.getLength(obj) == 0;
 		}
 		if (obj instanceof Collection) {
 			return ((Collection) obj).isEmpty();
@@ -251,7 +251,7 @@ public abstract class ObjectUtils {
 	 * @param obj the object to append
 	 * @return the new array (of the same component type; never {@code null})
 	 */
-	public static <A, O extends A>  A[] addObjectToArray(@Nullable A[] array, @Nullable O obj) {
+	public static <A, O extends A> A[] addObjectToArray(@Nullable A[] array, @Nullable O obj) {
 		Class<?> compType = Object.class;
 		if (array != null) {
 			compType = array.getClass().getComponentType();

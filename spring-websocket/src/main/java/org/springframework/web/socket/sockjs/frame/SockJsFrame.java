@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents a SockJS frame. Provides factory methods to create SockJS frames.
@@ -30,6 +31,9 @@ import org.springframework.util.Assert;
  */
 public class SockJsFrame {
 
+	/**
+	 * The charset used by SockJS.
+	 */
 	public static final Charset CHARSET = StandardCharsets.UTF_8;
 
 	private static final SockJsFrame OPEN_FRAME = new SockJsFrame("o");
@@ -139,7 +143,9 @@ public class SockJsFrame {
 		if (result.length() > 80) {
 			result = result.substring(0, 80) + "...(truncated)";
 		}
-		return "SockJsFrame content='" + result.replace("\n", "\\n").replace("\r", "\\r") + "'";
+		result = StringUtils.replace(result, "\n", "\\n");
+		result = StringUtils.replace(result, "\r", "\\r");
+		return "SockJsFrame content='" + result + "'";
 	}
 
 

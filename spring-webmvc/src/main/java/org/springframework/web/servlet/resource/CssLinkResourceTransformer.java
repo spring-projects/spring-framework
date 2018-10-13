@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.servlet.http.HttpServletRequest;
@@ -64,6 +62,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain)
 			throws IOException {
@@ -72,12 +71,9 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		String filename = resource.getFilename();
 		if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
+				resource instanceof EncodedResourceResolver.EncodedResource ||
 				resource instanceof GzipResourceResolver.GzippedResource) {
 			return resource;
-		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Transforming resource: " + resource);
 		}
 
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
@@ -89,9 +85,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		if (links.isEmpty()) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No links found.");
-			}
 			return resource;
 		}
 
@@ -105,14 +98,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 				String absolutePath = toAbsolutePath(link, request);
 				newLink = resolveUrlPath(absolutePath, request, resource, transformerChain);
 			}
-			if (logger.isTraceEnabled()) {
-				if (newLink != null && !newLink.equals(link)) {
-					logger.trace("Link modified: " + newLink + " (original: " + link + ")");
-				}
-				else {
-					logger.trace("Link not modified: " + link);
-				}
-			}
 			writer.write(newLink != null ? newLink : link);
 			index = linkContentChunkInfo.getEnd();
 		}
@@ -122,8 +107,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 	private boolean hasScheme(String link) {
-		int schemeIndex = link.indexOf(":");
-		return (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/")) || link.indexOf("//") == 0;
+		int schemeIndex = link.indexOf(':');
+		return ((schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/")) || link.indexOf("//") == 0);
 	}
 
 
@@ -138,7 +123,10 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
-	protected static abstract class AbstractLinkParser implements LinkParser {
+	/**
+	 * Abstract base class for {@link LinkParser} implementations.
+	 */
+	protected abstract static class AbstractLinkParser implements LinkParser {
 
 		/** Return the keyword to use to search for links, e.g. "@import", "url(" */
 		protected abstract String getKeyword();
@@ -179,9 +167,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		 * Invoked after a keyword match, after whitespaces removed, and when
 		 * the next char is neither a single nor double quote.
 		 */
-		protected abstract int extractLink(int index, String content,
-				SortedSet<ContentChunkInfo> linksToAdd);
-
+		protected abstract int extractLink(int index, String content, SortedSet<ContentChunkInfo> linksToAdd);
 	}
 
 
@@ -197,8 +183,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			if (content.substring(index, index + 4).equals("url(")) {
 				// Ignore, UrlLinkParser will take care
 			}
-			else if (logger.isErrorEnabled()) {
-				logger.error("Unexpected syntax for @import link at index " + index);
+			else if (logger.isTraceEnabled()) {
+				logger.trace("Unexpected syntax for @import link at index " + index);
 			}
 			return index;
 		}
@@ -241,19 +227,19 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		@Override
 		public int compareTo(ContentChunkInfo other) {
-			return (this.start < other.start ? -1 : (this.start == other.start ? 0 : 1));
+			return Integer.compare(this.start, other.start);
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
+		public boolean equals(Object other) {
+			if (this == other) {
 				return true;
 			}
-			if (obj instanceof ContentChunkInfo) {
-				ContentChunkInfo other = (ContentChunkInfo) obj;
-				return (this.start == other.start && this.end == other.end);
+			if (!(other instanceof ContentChunkInfo)) {
+				return false;
 			}
-			return false;
+			ContentChunkInfo otherCci = (ContentChunkInfo) other;
+			return (this.start == otherCci.start && this.end == otherCci.end);
 		}
 
 		@Override

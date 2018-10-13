@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jdbc.support;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -41,8 +42,14 @@ import org.springframework.lang.Nullable;
  */
 public class DatabaseStartupValidator implements InitializingBean {
 
+	/**
+	 * The default interval.
+	 */
 	public static final int DEFAULT_INTERVAL = 1;
 
+	/**
+	 * The default timeout.
+	 */
 	public static final int DEFAULT_TIMEOUT = 60;
 
 
@@ -75,7 +82,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 
 	/**
 	 * Set the interval between validation runs (in seconds).
-	 * Default is 1.
+	 * Default is {@value #DEFAULT_INTERVAL}.
 	 */
 	public void setInterval(int interval) {
 		this.interval = interval;
@@ -83,7 +90,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 
 	/**
 	 * Set the timeout (in seconds) after which a fatal exception
-	 * will be thrown. Default is 60.
+	 * will be thrown. Default is {@value #DEFAULT_TIMEOUT}.
 	 */
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
@@ -98,16 +105,16 @@ public class DatabaseStartupValidator implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() {
 		if (this.dataSource == null) {
-			throw new IllegalArgumentException("dataSource is required");
+			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
 		if (this.validationQuery == null) {
-			throw new IllegalArgumentException("validationQuery is required");
+			throw new IllegalArgumentException("Property 'validationQuery' is required");
 		}
 
 		try {
 			boolean validated = false;
 			long beginTime = System.currentTimeMillis();
-			long deadLine = beginTime + this.timeout * 1000;
+			long deadLine = beginTime + TimeUnit.SECONDS.toMillis(this.timeout);
 			SQLException latestEx = null;
 
 			while (!validated && System.currentTimeMillis() < deadLine) {
@@ -125,11 +132,15 @@ public class DatabaseStartupValidator implements InitializingBean {
 				}
 				catch (SQLException ex) {
 					latestEx = ex;
-					logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
-					float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;
-					if (rest > this.interval) {
-						logger.warn("Database has not started up yet - retrying in " + this.interval +
-								" seconds (timeout in " + rest + " seconds)");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
+					}
+					if (logger.isInfoEnabled()) {
+						float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;
+						if (rest > this.interval) {
+							logger.info("Database has not started up yet - retrying in " + this.interval +
+									" seconds (timeout in " + rest + " seconds)");
+						}
 					}
 				}
 				finally {
@@ -138,7 +149,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 				}
 
 				if (!validated) {
-					Thread.sleep(this.interval * 1000);
+					TimeUnit.SECONDS.sleep(this.interval);
 				}
 			}
 
@@ -147,8 +158,8 @@ public class DatabaseStartupValidator implements InitializingBean {
 						"Database has not started up within " + this.timeout + " seconds", latestEx);
 			}
 
-			float duration = (System.currentTimeMillis() - beginTime) / 1000;
 			if (logger.isInfoEnabled()) {
+				float duration = ((float) (System.currentTimeMillis() - beginTime)) / 1000;
 				logger.info("Database startup detected after " + duration + " seconds");
 			}
 		}

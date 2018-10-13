@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.test.context.junit;
 
 import org.junit.platform.runner.JUnitPlatform;
-import org.junit.platform.suite.api.IncludeClassNamePatterns;
+import org.junit.platform.suite.api.ExcludeTags;
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectPackages;
 import org.junit.platform.suite.api.UseTechnicalNames;
@@ -48,7 +48,7 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitPlatform.class)
 @IncludeEngines("junit-jupiter")
 @SelectPackages("org.springframework.test.context.junit.jupiter")
-@IncludeClassNamePatterns("^.*TestCase$")
+@ExcludeTags("failing-test-case")
 @UseTechnicalNames
 public class SpringJUnitJupiterTestSuite {
 }

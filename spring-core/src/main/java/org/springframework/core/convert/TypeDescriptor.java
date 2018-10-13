@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,14 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
 
-	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
+	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
-	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(18);
+	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(32);
 
 	private static final Class<?>[] CACHED_COMMON_TYPES = {
 			boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class,
-			double.class, Double.class, int.class, Integer.class, long.class, Long.class,
-			float.class, Float.class, short.class, Short.class, String.class, Object.class};
+			double.class, Double.class, float.class, Float.class, int.class, Integer.class,
+			long.class, Long.class, short.class, Short.class, String.class, Object.class};
 
 	static {
 		for (Class<?> preCachedClass : CACHED_COMMON_TYPES) {
@@ -120,7 +120,7 @@ public class TypeDescriptor implements Serializable {
 	 */
 	protected TypeDescriptor(ResolvableType resolvableType, @Nullable Class<?> type, @Nullable Annotation[] annotations) {
 		this.resolvableType = resolvableType;
-		this.type = (type != null ? type : resolvableType.resolve(Object.class));
+		this.type = (type != null ? type : resolvableType.toClass());
 		this.annotatedElement = new AnnotatedElementAdapter(annotations);
 	}
 
@@ -251,7 +251,6 @@ public class TypeDescriptor implements Serializable {
 	 * @param annotationType the annotation type
 	 * @return the annotation, or {@code null} if no such annotation exists on this type descriptor
 	 */
-	@SuppressWarnings("unchecked")
 	@Nullable
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
 		if (this.annotatedElement.isEmpty()) {

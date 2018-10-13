@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.lang.Nullable;
  */
 public class MethodOverrides {
 
-	private final Set<MethodOverride> overrides = Collections.synchronizedSet(new LinkedHashSet<>(0));
+	private final Set<MethodOverride> overrides = Collections.synchronizedSet(new LinkedHashSet<>(2));
 
 	private volatile boolean modified = false;
 
@@ -76,7 +76,7 @@ public class MethodOverrides {
 
 	/**
 	 * Return all method overrides contained by this object.
-	 * @return Set of MethodOverride objects
+	 * @return a Set of MethodOverride objects
 	 * @see MethodOverride
 	 */
 	public Set<MethodOverride> getOverrides() {

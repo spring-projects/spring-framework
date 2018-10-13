@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import java.util.UUID;
 import org.springframework.lang.Nullable;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.JdkIdGenerator;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Container for the base URL of a SockJS endpoint with additional helper methods
- * to derive related SockJS URLs as the {@link #getInfoUrl() info} URL and
- * {@link #getTransportUrl(TransportType) transport} URLs.
+ * to derive related SockJS URLs: specifically, the {@link #getInfoUrl() info}
+ * and {@link #getTransportUrl(TransportType) transport} URLs.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
@@ -68,7 +69,7 @@ public class SockJsUrlInfo {
 
 	public String getSessionId() {
 		if (this.sessionId == null) {
-			this.sessionId = getUuid().toString().replace("-","");
+			this.sessionId = StringUtils.delete(getUuid().toString(), "-");
 		}
 		return this.sessionId;
 	}

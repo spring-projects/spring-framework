@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.springframework.core.annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.OrderComparator;
+import org.springframework.lang.Nullable;
 
 /**
  * {@code AnnotationAwareOrderComparator} is an extension of
@@ -58,6 +58,8 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * elements, in addition to the {@link org.springframework.core.Ordered}
 	 * check in the superclass.
 	 */
+	@Override
+	@Nullable
 	protected Integer findOrder(Object obj) {
 		// Check for regular Ordered interface
 		Integer order = super.findOrder(obj);
@@ -97,13 +99,15 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * annotation: typically, selecting one object over another in case of
 	 * multiple matches but only one object to be returned.
 	 */
+	@Override
+	@Nullable
 	public Integer getPriority(Object obj) {
 		if (obj instanceof Class) {
 			return OrderUtils.getPriority((Class<?>) obj);
 		}
 		Integer priority = OrderUtils.getPriority(obj.getClass());
 		if (priority == null && obj instanceof DecoratingProxy) {
-			priority = OrderUtils.getOrder(((DecoratingProxy) obj).getDecoratedClass());
+			priority = OrderUtils.getPriority(((DecoratingProxy) obj).getDecoratedClass());
 		}
 		return priority;
 	}
@@ -114,11 +118,11 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * <p>Optimized to skip sorting for lists with size 0 or 1,
 	 * in order to avoid unnecessary array extraction.
 	 * @param list the List to sort
-	 * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
+	 * @see java.util.List#sort(java.util.Comparator)
 	 */
 	public static void sort(List<?> list) {
 		if (list.size() > 1) {
-			Collections.sort(list, INSTANCE);
+			list.sort(INSTANCE);
 		}
 	}
 

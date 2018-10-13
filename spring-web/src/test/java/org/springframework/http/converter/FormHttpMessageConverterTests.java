@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -87,7 +88,8 @@ public class FormHttpMessageConverterTests {
 	public void readForm() throws Exception {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
-		inputMessage.getHeaders().setContentType(new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
+		inputMessage.getHeaders().setContentType(
+				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
 		MultiValueMap<String, String> result = this.converter.read(null, inputMessage);
 
 		assertEquals("Invalid result", 3, result.size());
@@ -111,8 +113,8 @@ public class FormHttpMessageConverterTests {
 
 		assertEquals("Invalid result", "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
 				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
-		assertEquals("Invalid content-type", new MediaType("application", "x-www-form-urlencoded"),
-				outputMessage.getHeaders().getContentType());
+		assertEquals("Invalid content-type", "application/x-www-form-urlencoded;charset=UTF-8",
+				outputMessage.getHeaders().getContentType().toString());
 		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
 				outputMessage.getHeaders().getContentLength());
 	}
@@ -147,7 +149,8 @@ public class FormHttpMessageConverterTests {
 		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		assertNotNull("No boundary found", contentType.getParameter("boundary"));
+		// SPR-17030
+		assertThat(contentType.getParameters().keySet(), Matchers.contains("charset", "boundary"));
 
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();

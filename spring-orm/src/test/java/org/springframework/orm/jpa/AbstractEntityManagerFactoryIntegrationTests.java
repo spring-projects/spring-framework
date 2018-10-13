@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -48,12 +47,8 @@ import static org.junit.Assert.*;
 public abstract class AbstractEntityManagerFactoryIntegrationTests {
 
 	protected static final String[] ECLIPSELINK_CONFIG_LOCATIONS = new String[] {
-			"/org/springframework/orm/jpa/eclipselink/eclipselink-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
-			"/org/springframework/orm/jpa/inject.xml"};
-
-	protected static final String[] HIBERNATE_CONFIG_LOCATIONS = new String[] {
-			"/org/springframework/orm/jpa/hibernate/hibernate-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
-			"/org/springframework/orm/jpa/inject.xml"};
+			"/org/springframework/orm/jpa/eclipselink/eclipselink-manager.xml",
+			"/org/springframework/orm/jpa/memdb.xml", "/org/springframework/orm/jpa/inject.xml"};
 
 
 	private static ConfigurableApplicationContext applicationContext;
@@ -64,7 +59,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 
 	protected PlatformTransactionManager transactionManager;
 
-	protected TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
+	protected DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 	protected TransactionStatus transactionStatus;
 
@@ -93,7 +88,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		if (applicationContext == null) {
 			applicationContext = new ClassPathXmlApplicationContext(getConfigLocations());
 		}
@@ -109,7 +104,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void cleanup() {
 		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
 			endTransaction();
 		}

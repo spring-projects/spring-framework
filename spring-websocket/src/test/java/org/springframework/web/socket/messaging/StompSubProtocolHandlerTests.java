@@ -46,7 +46,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
@@ -59,21 +59,10 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link StompSubProtocolHandler} tests.
@@ -137,7 +126,7 @@ public class StompSubProtocolHandlerTests {
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
 		accessor.setHeartbeat(10000, 10000);
-		accessor.setAcceptVersion("1.0,1.1");
+		accessor.setAcceptVersion("1.0,1.1,1.2");
 		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 
 		SimpMessageHeaderAccessor ackAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
@@ -148,7 +137,7 @@ public class StompSubProtocolHandlerTests {
 
 		assertEquals(1, this.session.getSentMessages().size());
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
-		assertEquals("CONNECTED\n" + "version:1.1\n" + "heart-beat:15000,15000\n" +
+		assertEquals("CONNECTED\n" + "version:1.2\n" + "heart-beat:15000,15000\n" +
 				"user-name:joe\n" + "\n" + "\u0000", actual.getPayload());
 	}
 
@@ -157,7 +146,7 @@ public class StompSubProtocolHandlerTests {
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
 		accessor.setHeartbeat(10000, 10000);
-		accessor.setAcceptVersion("1.0,1.1");
+		accessor.setAcceptVersion("1.0");
 		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 
 		SimpMessageHeaderAccessor ackAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
@@ -167,7 +156,7 @@ public class StompSubProtocolHandlerTests {
 
 		assertEquals(1, this.session.getSentMessages().size());
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
-		assertEquals("CONNECTED\n" + "version:1.1\n" + "heart-beat:0,0\n" +
+		assertEquals("CONNECTED\n" + "version:1.0\n" + "heart-beat:0,0\n" +
 				"user-name:joe\n" + "\n" + "\u0000", actual.getPayload());
 	}
 
@@ -330,7 +319,7 @@ public class StompSubProtocolHandlerTests {
 	public void handleMessageFromClientWithImmutableMessageInterceptor() {
 		AtomicReference<Boolean> mutable = new AtomicReference<>();
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
-		channel.addInterceptor(new ChannelInterceptorAdapter() {
+		channel.addInterceptor(new ChannelInterceptor() {
 			@Override
 			public Message<?> preSend(Message<?> message, MessageChannel channel) {
 				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());
@@ -352,7 +341,7 @@ public class StompSubProtocolHandlerTests {
 	public void handleMessageFromClientWithoutImmutableMessageInterceptor() {
 		AtomicReference<Boolean> mutable = new AtomicReference<>();
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
-		channel.addInterceptor(new ChannelInterceptorAdapter() {
+		channel.addInterceptor(new ChannelInterceptor() {
 			@Override
 			public Message<?> preSend(Message<?> message, MessageChannel channel) {
 				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());
@@ -557,7 +546,7 @@ public class StompSubProtocolHandlerTests {
 		}
 	}
 
-	private static class AuthenticationInterceptor extends ChannelInterceptorAdapter {
+	private static class AuthenticationInterceptor implements ChannelInterceptor {
 
 		private final String name;
 

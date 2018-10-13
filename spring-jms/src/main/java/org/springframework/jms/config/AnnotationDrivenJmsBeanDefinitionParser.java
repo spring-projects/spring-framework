@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
 class AnnotationDrivenJmsBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 

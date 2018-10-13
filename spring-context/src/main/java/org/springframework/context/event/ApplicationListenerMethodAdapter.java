@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.context.event;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +28,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.PayloadApplicationEvent;
@@ -35,10 +37,8 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.Order;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -66,9 +66,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private final Method method;
 
-	private final Class<?> targetClass;
+	private final Method targetMethod;
 
-	private final Method bridgedMethod;
+	private final AnnotatedElementKey methodKey;
 
 	private final List<ResolvableType> declaredEventTypes;
 
@@ -76,8 +76,6 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	private final String condition;
 
 	private final int order;
-
-	private final AnnotatedElementKey methodKey;
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -88,18 +86,15 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	public ApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
 		this.beanName = beanName;
-		this.method = method;
-		this.targetClass = targetClass;
-		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		this.method = BridgeMethodResolver.findBridgedMethod(method);
+		this.targetMethod = (!Proxy.isProxyClass(targetClass) ?
+				AopUtils.getMostSpecificMethod(method, targetClass) : this.method);
+		this.methodKey = new AnnotatedElementKey(this.targetMethod, targetClass);
 
-		Method targetMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(targetMethod, EventListener.class);
-
+		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(this.targetMethod, EventListener.class);
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
 		this.order = resolveOrder(method);
-
-		this.methodKey = new AnnotatedElementKey(method, targetClass);
 	}
 
 
@@ -109,20 +104,23 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			throw new IllegalStateException(
 					"Maximum one parameter is allowed for event listener method: " + method);
 		}
-		if (ann != null && ann.classes().length > 0) {
-			List<ResolvableType> types = new ArrayList<>(ann.classes().length);
-			for (Class<?> eventType : ann.classes()) {
-				types.add(ResolvableType.forClass(eventType));
+
+		if (ann != null) {
+			Class<?>[] classes = ann.classes();
+			if (classes.length > 0) {
+				List<ResolvableType> types = new ArrayList<>(classes.length);
+				for (Class<?> eventType : classes) {
+					types.add(ResolvableType.forClass(eventType));
+				}
+				return types;
 			}
-			return types;
 		}
-		else {
-			if (count == 0) {
-				throw new IllegalStateException(
-						"Event parameter is mandatory for event listener method: " + method);
-			}
-			return Collections.singletonList(ResolvableType.forMethodParameter(method, 0));
+
+		if (count == 0) {
+			throw new IllegalStateException(
+					"Event parameter is mandatory for event listener method: " + method);
 		}
+		return Collections.singletonList(ResolvableType.forMethodParameter(method, 0));
 	}
 
 	private int resolveOrder(Method method) {
@@ -245,10 +243,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 		String condition = getCondition();
 		if (StringUtils.hasText(condition)) {
-			Assert.notNull(this.evaluator, "EventExpressionEvaluator must no be null");
-			EvaluationContext evaluationContext = this.evaluator.createEvaluationContext(
-					event, this.targetClass, this.method, args, this.applicationContext);
-			return this.evaluator.condition(condition, this.methodKey, evaluationContext);
+			Assert.notNull(this.evaluator, "EventExpressionEvaluator must not be null");
+			return this.evaluator.condition(
+					condition, event, this.targetMethod, this.methodKey, args, this.applicationContext);
 		}
 		return true;
 	}
@@ -259,12 +256,12 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	@Nullable
 	protected Object doInvoke(Object... args) {
 		Object bean = getTargetBean();
-		ReflectionUtils.makeAccessible(this.bridgedMethod);
+		ReflectionUtils.makeAccessible(this.method);
 		try {
-			return this.bridgedMethod.invoke(bean, args);
+			return this.method.invoke(bean, args);
 		}
 		catch (IllegalArgumentException ex) {
-			assertTargetBean(this.bridgedMethod, bean, args);
+			assertTargetBean(this.method, bean, args);
 			throw new IllegalStateException(getInvocationErrorMessage(bean, ex.getMessage(), args), ex);
 		}
 		catch (IllegalAccessException ex) {
@@ -311,7 +308,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		StringBuilder sb = new StringBuilder(message).append("\n");
 		sb.append("HandlerMethod details: \n");
 		sb.append("Bean [").append(bean.getClass().getName()).append("]\n");
-		sb.append("Method [").append(this.bridgedMethod.toGenericString()).append("]\n");
+		sb.append("Method [").append(this.method.toGenericString()).append("]\n");
 		return sb.toString();
 	}
 
@@ -362,12 +359,11 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 		for (ResolvableType declaredEventType : this.declaredEventTypes) {
 			Class<?> eventClass = declaredEventType.getRawClass();
-			if ((eventClass == null || !ApplicationEvent.class.isAssignableFrom(eventClass)) && payloadType != null) {
-				if (declaredEventType.isAssignableFrom(payloadType)) {
-					return declaredEventType;
-				}
+			if ((eventClass == null || !ApplicationEvent.class.isAssignableFrom(eventClass)) &&
+					payloadType != null && declaredEventType.isAssignableFrom(payloadType)) {
+				return declaredEventType;
 			}
-			if (declaredEventType.getRawClass().isInstance(event)) {
+			if (eventClass != null && eventClass.isInstance(event)) {
 				return declaredEventType;
 			}
 		}

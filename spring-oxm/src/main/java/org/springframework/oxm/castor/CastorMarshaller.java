@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,8 +74,8 @@ import org.springframework.util.xml.StaxUtils;
  * can only be used to unmarshal XML that represents that specific class. If you want to unmarshal
  * multiple classes, you have to provide a mapping file using {@code setMappingLocations}.
  *
- * <p>Due to limitations of Castor's API, it is required to set the encoding used for
- * writing to output streams. It defaults to {@code UTF-8}.
+ * <p>Due to limitations of Castor's API, it is required to set the encoding used for writing
+ * to output streams. It defaults to {@code UTF-8}.
  *
  * @author Arjen Poutsma
  * @author Jakub Narloch
@@ -86,7 +86,9 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setTargetPackages(String[])
  * @see #setMappingLocation(Resource)
  * @see #setMappingLocations(Resource[])
+ * @deprecated as of Spring Framework 4.3.13, due to the lack of activity on the Castor project
  */
+@Deprecated
 public class CastorMarshaller extends AbstractMarshaller implements InitializingBean, BeanClassLoaderAware {
 
 	/**
@@ -548,7 +550,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	@Override
 	protected void marshalOutputStream(Object graph, OutputStream outputStream) throws XmlMappingException, IOException {
-		marshalWriter(graph, new OutputStreamWriter(outputStream, encoding));
+		marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
 	}
 
 	@Override
@@ -706,7 +708,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * {@code org.springframework.oxm} hierarchy.
 	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
 	 * unmarshalling, since Castor itself does not make this distinction in its exception hierarchy.
-	 * @param ex Castor {@code XMLException} that occurred
+	 * @param ex the Castor {@code XMLException} that occurred
 	 * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
 	 * or unmarshalling ({@code false})
 	 * @return the corresponding {@code XmlMappingException}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.scheduling.annotation.EnableAsync
  * @see org.springframework.scheduling.annotation.SchedulingConfigurer
  */
-public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean {
+public class ScheduledTaskRegistrar implements ScheduledTaskHolder, InitializingBean, DisposableBean {
 
 	@Nullable
 	private TaskScheduler taskScheduler;
@@ -254,7 +254,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Add a Runnable task to be triggered per the given cron expression
+	 * Add a Runnable task to be triggered per the given cron expression.
 	 */
 	public void addCronTask(Runnable task, String expression) {
 		addCronTask(new CronTask(task, expression));
@@ -333,9 +333,10 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Schedule all registered tasks against the underlying {@linkplain
-	 * #setTaskScheduler(TaskScheduler) task scheduler}.
+	 * Schedule all registered tasks against the underlying
+	 * {@linkplain #setTaskScheduler(TaskScheduler) task scheduler}.
 	 */
+	@SuppressWarnings("deprecation")
 	protected void scheduleTasks() {
 		if (this.taskScheduler == null) {
 			this.localExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -381,7 +382,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
 		if (scheduledTask == null) {
-			scheduledTask = new ScheduledTask();
+			scheduledTask = new ScheduledTask(task);
 			newTask = true;
 		}
 		if (this.taskScheduler != null) {
@@ -406,7 +407,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
 		if (scheduledTask == null) {
-			scheduledTask = new ScheduledTask();
+			scheduledTask = new ScheduledTask(task);
 			newTask = true;
 		}
 		if (this.taskScheduler != null) {
@@ -425,13 +426,29 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * @return a handle to the scheduled task, allowing to cancel it
 	 * (or {@code null} if processing a previously registered task)
 	 * @since 4.3
+	 * @deprecated as of 5.0.2, in favor of {@link #scheduleFixedRateTask(FixedRateTask)}
 	 */
+	@Deprecated
 	@Nullable
 	public ScheduledTask scheduleFixedRateTask(IntervalTask task) {
+		FixedRateTask taskToUse = (task instanceof FixedRateTask ? (FixedRateTask) task :
+				new FixedRateTask(task.getRunnable(), task.getInterval(), task.getInitialDelay()));
+		return scheduleFixedRateTask(taskToUse);
+	}
+
+	/**
+	 * Schedule the specified fixed-rate task, either right away if possible
+	 * or on initialization of the scheduler.
+	 * @return a handle to the scheduled task, allowing to cancel it
+	 * (or {@code null} if processing a previously registered task)
+	 * @since 5.0.2
+	 */
+	@Nullable
+	public ScheduledTask scheduleFixedRateTask(FixedRateTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
 		if (scheduledTask == null) {
-			scheduledTask = new ScheduledTask();
+			scheduledTask = new ScheduledTask(task);
 			newTask = true;
 		}
 		if (this.taskScheduler != null) {
@@ -458,13 +475,29 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * @return a handle to the scheduled task, allowing to cancel it
 	 * (or {@code null} if processing a previously registered task)
 	 * @since 4.3
+	 * @deprecated as of 5.0.2, in favor of {@link #scheduleFixedDelayTask(FixedDelayTask)}
 	 */
+	@Deprecated
 	@Nullable
 	public ScheduledTask scheduleFixedDelayTask(IntervalTask task) {
+		FixedDelayTask taskToUse = (task instanceof FixedDelayTask ? (FixedDelayTask) task :
+				new FixedDelayTask(task.getRunnable(), task.getInterval(), task.getInitialDelay()));
+		return scheduleFixedDelayTask(taskToUse);
+	}
+
+	/**
+	 * Schedule the specified fixed-delay task, either right away if possible
+	 * or on initialization of the scheduler.
+	 * @return a handle to the scheduled task, allowing to cancel it
+	 * (or {@code null} if processing a previously registered task)
+	 * @since 5.0.2
+	 */
+	@Nullable
+	public ScheduledTask scheduleFixedDelayTask(FixedDelayTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
 		if (scheduledTask == null) {
-			scheduledTask = new ScheduledTask();
+			scheduledTask = new ScheduledTask(task);
 			newTask = true;
 		}
 		if (this.taskScheduler != null) {
@@ -485,6 +518,19 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 		return (newTask ? scheduledTask : null);
 	}
 
+
+	/**
+	 * Return all locally registered tasks that have been scheduled by this registrar.
+	 * @since 5.0.2
+	 * @see #addTriggerTask
+	 * @see #addCronTask
+	 * @see #addFixedRateTask
+	 * @see #addFixedDelayTask
+	 */
+	@Override
+	public Set<ScheduledTask> getScheduledTasks() {
+		return Collections.unmodifiableSet(this.scheduledTasks);
+	}
 
 	@Override
 	public void destroy() {

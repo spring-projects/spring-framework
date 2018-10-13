@@ -20,7 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.Is.is;
 
 /**
  * Unit tests for {@link JsonPathExpectationsHelper}.
@@ -215,6 +215,54 @@ public class JsonPathExpectationsHelperTests {
 		exception.expect(AssertionError.class);
 		exception.expectMessage("Expected a non-empty value at JSON path \"" + expression + "\" but found: {}");
 		new JsonPathExpectationsHelper(expression).assertValueIsNotEmpty(CONTENT);
+	}
+
+	@Test
+	public void hasJsonPath() {
+		new JsonPathExpectationsHelper("$.abc").hasJsonPath("{\"abc\": \"123\"}");
+	}
+
+	@Test
+	public void hasJsonPathWithNull() {
+		new JsonPathExpectationsHelper("$.abc").hasJsonPath("{\"abc\": null}");
+	}
+
+	@Test
+	public void hasJsonPathForIndefinatePathWithResults() {
+		new JsonPathExpectationsHelper("$.familyMembers[?(@.name == 'Bart')]").hasJsonPath(SIMPSONS);
+	}
+
+	@Test
+	public void hasJsonPathForIndefinatePathWithEmptyResults() {
+		String expression = "$.familyMembers[?(@.name == 'Dilbert')]";
+		exception.expect(AssertionError.class);
+		exception.expectMessage("No values for JSON path \"" + expression + "\"");
+		new JsonPathExpectationsHelper(expression).hasJsonPath(SIMPSONS);
+	}
+
+	@Test // SPR-16339
+	public void doesNotHaveJsonPath() {
+		new JsonPathExpectationsHelper("$.abc").doesNotHaveJsonPath("{}");
+	}
+
+	@Test // SPR-16339
+	public void doesNotHaveJsonPathWithNull() {
+		exception.expect(AssertionError.class);
+		new JsonPathExpectationsHelper("$.abc").doesNotHaveJsonPath("{\"abc\": null}");
+	}
+
+	@Test
+	public void doesNotHaveJsonPathForIndefinatePathWithEmptyResults() {
+		new JsonPathExpectationsHelper("$.familyMembers[?(@.name == 'Dilbert')]").doesNotHaveJsonPath(SIMPSONS);
+	}
+
+	@Test
+	public void doesNotHaveEmptyPathForIndefinatePathWithResults() {
+		String expression = "$.familyMembers[?(@.name == 'Bart')]";
+		exception.expect(AssertionError.class);
+		exception.expectMessage("Expected no values at JSON path \"" + expression + "\" " +
+				"but found: [{\"name\":\"Bart\"}]");
+		new JsonPathExpectationsHelper(expression).doesNotHaveJsonPath(SIMPSONS);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -486,7 +486,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	@Override
 	public boolean isReplyPubSubDomain() {
 		if (this.replyPubSubDomain != null) {
-			return replyPubSubDomain;
+			return this.replyPubSubDomain;
 		}
 		else {
 			return isPubSubDomain();
@@ -673,17 +673,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		try {
 			invokeListener(session, message);
 		}
-		catch (JMSException ex) {
+		catch (JMSException | RuntimeException | Error ex) {
 			rollbackOnExceptionIfNecessary(session, ex);
 			throw ex;
-		}
-		catch (RuntimeException ex) {
-			rollbackOnExceptionIfNecessary(session, ex);
-			throw ex;
-		}
-		catch (Error err) {
-			rollbackOnExceptionIfNecessary(session, err);
-			throw err;
 		}
 		commitIfNecessary(session, message);
 	}

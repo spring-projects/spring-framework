@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +52,11 @@ public class NamedParameterUtilsTests {
 		assertEquals(2, psql2.getTotalParameterCount());
 		assertEquals(1, psql2.getNamedParameterCount());
 
-		String sql3 = "xxx &a+:b" + '\t' + ":c%10 yyyy ? zzzzz";
+		String sql3 = "xxx &ä+:ö" + '\t' + ":ü%10 yyyy ? zzzzz";
 		ParsedSql psql3 = NamedParameterUtils.parseSqlStatement(sql3);
-		assertEquals("a", psql3.getParameterNames().get(0));
-		assertEquals("b", psql3.getParameterNames().get(1));
-		assertEquals("c", psql3.getParameterNames().get(2));
+		assertEquals("ä", psql3.getParameterNames().get(0));
+		assertEquals("ö", psql3.getParameterNames().get(1));
+		assertEquals("ü", psql3.getParameterNames().get(2));
 	}
 
 	@Test
@@ -251,6 +251,18 @@ public class NamedParameterUtilsTests {
 		assertEquals(0, parsedSql2.getParameterNames().size());
 		String finalSql2 = NamedParameterUtils.substituteNamedParameters(parsedSql2, null);
 		assertEquals(expectedSql2, finalSql2);
+	}
+
+	@Test
+	public void parseSqlStatementWithSingleLetterInBrackets() {
+		String expectedSql = "select foo from bar where baz = b?z";
+		String sql = "select foo from bar where baz = b:{p}z";
+
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(1, parsedSql.getParameterNames().size());
+		assertEquals("p", parsedSql.getParameterNames().get(0));
+		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
+		assertEquals(expectedSql, finalSql);
 	}
 
 	@Test  // SPR-2544

@@ -56,6 +56,7 @@ public class JaxWsPortProxyFactoryBean extends JaxWsPortClientInterceptor implem
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.serviceProxy;
 	}

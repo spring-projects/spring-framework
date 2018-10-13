@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -767,7 +767,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
 		}
-        return doUnmarshal(streamReader, null);
+		return doUnmarshal(streamReader, null);
 	}
 
 	@Override
@@ -783,7 +783,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	@Override
 	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
-        return doUnmarshal(new StaxReader(new QNameMap(), streamReader, this.nameCoder), null);
+		return doUnmarshal(new StaxReader(new QNameMap(), streamReader, this.nameCoder), null);
 	}
 
 	@Override
@@ -800,12 +800,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	}
 
 	public Object unmarshalInputStream(InputStream inputStream, @Nullable DataHolder dataHolder) throws XmlMappingException, IOException {
-        if (this.streamDriver != null) {
-            return doUnmarshal(this.streamDriver.createReader(inputStream), dataHolder);
-        }
-        else {
-		    return unmarshalReader(new InputStreamReader(inputStream, this.encoding), dataHolder);
-        }
+		if (this.streamDriver != null) {
+			return doUnmarshal(this.streamDriver.createReader(inputStream), dataHolder);
+		}
+		else {
+			return unmarshalReader(new InputStreamReader(inputStream, this.encoding), dataHolder);
+		}
 	}
 
 	@Override
@@ -817,30 +817,30 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		return doUnmarshal(getDefaultDriver().createReader(reader), dataHolder);
 	}
 
-    /**
-     * Unmarshals the given graph to the given XStream HierarchicalStreamWriter.
-     * Converts exceptions using {@link #convertXStreamException}.
-     */
-    private Object doUnmarshal(HierarchicalStreamReader streamReader, @Nullable DataHolder dataHolder) {
-        try {
-            return getXStream().unmarshal(streamReader, null, dataHolder);
-        }
-        catch (Exception ex) {
-            throw convertXStreamException(ex, false);
-        }
-    }
+	/**
+	 * Unmarshals the given graph to the given XStream HierarchicalStreamWriter.
+	 * Converts exceptions using {@link #convertXStreamException}.
+	 */
+	private Object doUnmarshal(HierarchicalStreamReader streamReader, @Nullable DataHolder dataHolder) {
+		try {
+			return getXStream().unmarshal(streamReader, null, dataHolder);
+		}
+		catch (Exception ex) {
+			throw convertXStreamException(ex, false);
+		}
+	}
 
 
-    /**
-     * Convert the given XStream exception to an appropriate exception from the
-     * {@code org.springframework.oxm} hierarchy.
-     * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
-     * unmarshalling, since XStream itself does not make this distinction in its exception hierarchy.
-     * @param ex XStream exception that occurred
-     * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
-     * or unmarshalling ({@code false})
-     * @return the corresponding {@code XmlMappingException}
-     */
+	/**
+	 * Convert the given XStream exception to an appropriate exception from the
+	 * {@code org.springframework.oxm} hierarchy.
+	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
+	 * unmarshalling, since XStream itself does not make this distinction in its exception hierarchy.
+	 * @param ex the XStream exception that occurred
+	 * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
+	 * or unmarshalling ({@code false})
+	 * @return the corresponding {@code XmlMappingException}
+	 */
 	protected XmlMappingException convertXStreamException(Exception ex, boolean marshalling) {
 		if (ex instanceof StreamException || ex instanceof CannotResolveClassException ||
 				ex instanceof ConversionException) {

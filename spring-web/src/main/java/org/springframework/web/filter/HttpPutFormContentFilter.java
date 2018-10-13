@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link javax.servlet.Filter} that makes form encoded data available through
@@ -57,7 +58,10 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
+ * @deprecated as of 5.1 in favor of {@link FormContentFilter} which is the same
+ * but also handles DELETE.
  */
+@Deprecated
 public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 	private FormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
@@ -65,7 +69,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 	/**
 	 * Set the converter to use for parsing form content.
-	 * <p>By default this is an instnace of {@link AllEncompassingFormHttpMessageConverter}.
+	 * <p>By default this is an instance of {@link AllEncompassingFormHttpMessageConverter}.
 	 */
 	public void setFormConverter(FormHttpMessageConverter converter) {
 		Assert.notNull(converter, "FormHttpMessageConverter is required.");
@@ -170,13 +174,13 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 				return parameterValues;
 			}
 			if (parameterValues == null || getQueryString() == null) {
-				return formParam.toArray(new String[formParam.size()]);
+				return StringUtils.toStringArray(formParam);
 			}
 			else {
 				List<String> result = new ArrayList<>(parameterValues.length + formParam.size());
 				result.addAll(Arrays.asList(parameterValues));
 				result.addAll(formParam);
-				return result.toArray(new String[result.size()]);
+				return StringUtils.toStringArray(result);
 			}
 		}
 	}

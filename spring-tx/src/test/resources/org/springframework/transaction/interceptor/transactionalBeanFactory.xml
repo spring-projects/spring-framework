@@ -23,7 +23,7 @@
 		<property name="transactionAttributeSource">
 			<value>
 				org.springframework.tests.sample.beans.ITestBean.s*=PROPAGATION_MANDATORY
-				org.springframework.tests.sample.beans.ITestBean.setAg*=PROPAGATION_REQUIRED
+				org.springframework.tests.sample.beans.AgeHolder.setAg*=PROPAGATION_REQUIRED
 				org.springframework.tests.sample.beans.ITestBean.set*= PROPAGATION_SUPPORTS , readOnly
 			</value>
 		</property>

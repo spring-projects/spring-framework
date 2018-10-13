@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 package org.springframework.http.converter.protobuf;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
+import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
+import com.google.protobuf.util.JsonFormat;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,10 +39,15 @@ import static org.mockito.Mockito.*;
  *
  * @author Alex Antonov
  * @author Juergen Hoeller
+ * @author Andreas Ahlenstorf
+ * @author Sebastien Deleuze
  */
+@SuppressWarnings("deprecation")
 public class ProtobufHttpMessageConverterTests {
 
 	private ProtobufHttpMessageConverter converter;
+
+	private ExtensionRegistry extensionRegistry;
 
 	private ExtensionRegistryInitializer registryInitializer;
 
@@ -49,6 +57,7 @@ public class ProtobufHttpMessageConverterTests {
 	@Before
 	public void setup() {
 		this.registryInitializer = mock(ExtensionRegistryInitializer.class);
+		this.extensionRegistry = mock(ExtensionRegistry.class);
 		this.converter = new ProtobufHttpMessageConverter(this.registryInitializer);
 		this.testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 	}
@@ -56,12 +65,19 @@ public class ProtobufHttpMessageConverterTests {
 
 	@Test
 	public void extensionRegistryInitialized() {
-	    verify(this.registryInitializer, times(1)).initializeExtensionRegistry(any());
+		verify(this.registryInitializer, times(1)).initializeExtensionRegistry(any());
+	}
+
+	@Test
+	public void extensionRegistryInitializerNull() {
+		ProtobufHttpMessageConverter converter = new ProtobufHttpMessageConverter((ExtensionRegistryInitializer)null);
+		assertNotNull(converter.extensionRegistry);
 	}
 
 	@Test
 	public void extensionRegistryNull() {
-		new ProtobufHttpMessageConverter(null);
+		ProtobufHttpMessageConverter converter = new ProtobufHttpMessageConverter((ExtensionRegistry)null);
+		assertNotNull(converter.extensionRegistry);
 	}
 
 	@Test
@@ -104,7 +120,7 @@ public class ProtobufHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws IOException {
+	public void writeProtobuf() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MediaType contentType = ProtobufHttpMessageConverter.PROTOBUF;
 		this.converter.write(this.testMsg, contentType, outputMessage);
@@ -119,6 +135,54 @@ public class ProtobufHttpMessageConverterTests {
 		String schemaHeader =
 				outputMessage.getHeaders().getFirst(ProtobufHttpMessageConverter.X_PROTOBUF_SCHEMA_HEADER);
 		assertEquals("sample.proto", schemaHeader);
+	}
+
+	@Test
+	public void writeJsonWithGoogleProtobuf() throws IOException {
+		this.converter = new ProtobufHttpMessageConverter(
+				new ProtobufHttpMessageConverter.ProtobufJavaUtilSupport(null, null),
+				this.extensionRegistry);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		MediaType contentType = MediaType.APPLICATION_JSON_UTF8;
+		this.converter.write(this.testMsg, contentType, outputMessage);
+
+		assertEquals(contentType, outputMessage.getHeaders().getContentType());
+
+		final String body = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertFalse("body is empty", body.isEmpty());
+
+		Msg.Builder builder = Msg.newBuilder();
+		JsonFormat.parser().merge(body, builder);
+		assertEquals(this.testMsg, builder.build());
+
+		assertNull(outputMessage.getHeaders().getFirst(
+				ProtobufHttpMessageConverter.X_PROTOBUF_MESSAGE_HEADER));
+		assertNull(outputMessage.getHeaders().getFirst(
+				ProtobufHttpMessageConverter.X_PROTOBUF_SCHEMA_HEADER));
+	}
+
+	@Test
+	public void writeJsonWithJavaFormat() throws IOException {
+		this.converter = new ProtobufHttpMessageConverter(
+				new ProtobufHttpMessageConverter.ProtobufJavaFormatSupport(),
+				this.extensionRegistry);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		MediaType contentType = MediaType.APPLICATION_JSON_UTF8;
+		this.converter.write(this.testMsg, contentType, outputMessage);
+
+		assertEquals(contentType, outputMessage.getHeaders().getContentType());
+
+		final String body = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertFalse("body is empty", body.isEmpty());
+
+		Msg.Builder builder = Msg.newBuilder();
+		JsonFormat.parser().merge(body, builder);
+		assertEquals(this.testMsg, builder.build());
+
+		assertNull(outputMessage.getHeaders().getFirst(
+				ProtobufHttpMessageConverter.X_PROTOBUF_MESSAGE_HEADER));
+		assertNull(outputMessage.getHeaders().getFirst(
+				ProtobufHttpMessageConverter.X_PROTOBUF_SCHEMA_HEADER));
 	}
 
 	@Test

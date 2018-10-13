@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@ package org.springframework.web.accept;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -43,13 +41,11 @@ import org.springframework.util.MultiValueMap;
  */
 public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExtensionResolver {
 
-	private final ConcurrentMap<String, MediaType> mediaTypes =
-			new ConcurrentHashMap<>(64);
+	private final ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<>(64);
 
-	private final MultiValueMap<MediaType, String> fileExtensions =
-			new LinkedMultiValueMap<>();
+	private final MultiValueMap<MediaType, String> fileExtensions = new LinkedMultiValueMap<>();
 
-	private final List<String> allFileExtensions = new LinkedList<>();
+	private final List<String> allFileExtensions = new ArrayList<>();
 
 
 	/**
@@ -57,13 +53,12 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	 */
 	public MappingMediaTypeFileExtensionResolver(@Nullable Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
-			for (Entry<String, MediaType> entries : mediaTypes.entrySet()) {
-				String extension = entries.getKey().toLowerCase(Locale.ENGLISH);
-				MediaType mediaType = entries.getValue();
-				this.mediaTypes.put(extension, mediaType);
-				this.fileExtensions.add(mediaType, extension);
-				this.allFileExtensions.add(extension);
-			}
+			mediaTypes.forEach((extension, mediaType) -> {
+				String lowerCaseExtension = extension.toLowerCase(Locale.ENGLISH);
+				this.mediaTypes.put(lowerCaseExtension, mediaType);
+				this.fileExtensions.add(mediaType, lowerCaseExtension);
+				this.allFileExtensions.add(lowerCaseExtension);
+			});
 		}
 	}
 
@@ -91,7 +86,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	@Override
 	public List<String> resolveFileExtensions(MediaType mediaType) {
 		List<String> fileExtensions = this.fileExtensions.get(mediaType);
-		return (fileExtensions != null) ? fileExtensions : Collections.emptyList();
+		return (fileExtensions != null ? fileExtensions : Collections.emptyList());
 	}
 
 	@Override

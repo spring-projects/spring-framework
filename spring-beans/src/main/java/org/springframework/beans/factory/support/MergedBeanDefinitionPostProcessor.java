@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,19 @@ public interface MergedBeanDefinitionPostProcessor extends BeanPostProcessor {
 	 * @param beanDefinition the merged bean definition for the bean
 	 * @param beanType the actual type of the managed bean instance
 	 * @param beanName the name of the bean
+	 * @see AbstractAutowireCapableBeanFactory#applyMergedBeanDefinitionPostProcessors
 	 */
 	void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName);
+
+	/**
+	 * A notification that the bean definition for the specified name has been reset,
+	 * and that this post-processor should clear any metadata for the affected bean.
+	 * <p>The default implementation is empty.
+	 * @param beanName the name of the bean
+	 * @since 5.1
+	 * @see DefaultListableBeanFactory#resetBeanDefinition
+	 */
+	default void resetBeanDefinition(String beanName) {
+	}
 
 }

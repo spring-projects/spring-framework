@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.orm.jpa.domain;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,6 +27,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.tests.sample.beans.TestBean;
 
 /**
@@ -34,6 +36,7 @@ import org.springframework.tests.sample.beans.TestBean;
  * @author Rod Johnson
  */
 @Entity
+@EntityListeners(PersonListener.class)
 public class Person {
 
 	@Id
@@ -51,6 +54,8 @@ public class Person {
 
 	@Basic(fetch = FetchType.LAZY)
 	private String last_name;
+
+	public transient ApplicationContext postLoaded;
 
 
 	public Integer getId() {
@@ -91,8 +96,8 @@ public class Person {
 
 	@Override
 	public String toString() {
-		return getClass().getName() + ":(" + hashCode() + ") id=" + id + "; firstName=" + first_name + "; lastName="
-				+ last_name + "; testBean=" + testBean;
+		return getClass().getName() + ":(" + hashCode() + ") id=" + id + "; firstName=" + first_name +
+				"; lastName=" + last_name + "; testBean=" + testBean;
 	}
 
 }

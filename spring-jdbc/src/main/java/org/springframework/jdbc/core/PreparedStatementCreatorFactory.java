@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,10 @@ import org.springframework.util.Assert;
  */
 public class PreparedStatementCreatorFactory {
 
-	/** The SQL, which won't change when the parameters change */
+	/** The SQL, which won't change when the parameters change. */
 	private final String sql;
 
-	/** List of SqlParameter objects (may not be {@code null}) */
+	/** List of SqlParameter objects (may not be {@code null}). */
 	private final List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -63,6 +63,7 @@ public class PreparedStatementCreatorFactory {
 	/**
 	 * Create a new factory. Will need to add parameters via the
 	 * {@link #addParameter} method or have no parameters.
+	 * @param sql the SQL statement to execute
 	 */
 	public PreparedStatementCreatorFactory(String sql) {
 		this.sql = sql;
@@ -71,7 +72,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Create a new factory with the given SQL and JDBC types.
-	 * @param sql SQL to execute
+	 * @param sql the SQL statement to execute
 	 * @param types int array of JDBC types
 	 */
 	public PreparedStatementCreatorFactory(String sql, int... types) {
@@ -81,9 +82,8 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Create a new factory with the given SQL and parameters.
-	 * @param sql SQL
+	 * @param sql the SQL statement to execute
 	 * @param declaredParameters list of {@link SqlParameter} objects
-	 * @see SqlParameter
 	 */
 	public PreparedStatementCreatorFactory(String sql, List<SqlParameter> declaredParameters) {
 		this.sql = sql;
@@ -244,7 +244,7 @@ public class PreparedStatementCreatorFactory {
 			for (int i = 0; i < this.parameters.size(); i++) {
 				Object in = this.parameters.get(i);
 				SqlParameter declaredParameter;
-				// SqlParameterValue overrides declared parameter metadata, in particular for
+				// SqlParameterValue overrides declared parameter meta-data, in particular for
 				// independence from the declared parameter position in case of named parameters.
 				if (in instanceof SqlParameterValue) {
 					SqlParameterValue paramValue = (SqlParameterValue) in;

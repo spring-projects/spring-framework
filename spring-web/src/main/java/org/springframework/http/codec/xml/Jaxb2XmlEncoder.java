@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.H
+ * limitations under the License.
  */
 
 package org.springframework.http.codec.xml;
@@ -31,15 +31,21 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractSingleValueEncoder;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.EncodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Encode from {@code Object} stream to a byte stream containing XML elements.
+ * Encode from single value to a byte stream containing XML elements.
+ *
+ * <p>{@link javax.xml.bind.annotation.XmlElements @XmlElements} and
+ * {@link javax.xml.bind.annotation.XmlElement @XmlElement} can be used to specify how
+ * collections should be marshalled.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
@@ -59,7 +65,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		if (super.canEncode(elementType, mimeType)) {
-			Class<?> outputClass = elementType.resolve(Object.class);
+			Class<?> outputClass = elementType.toClass();
 			return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
 					outputClass.isAnnotationPresent(XmlType.class));
 		}
@@ -73,6 +79,12 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		try {
+			if (!Hints.isLoggingSuppressed(hints)) {
+				LogFormatUtils.traceDebug(logger, traceOn -> {
+					String formatted = LogFormatUtils.formatValue(value, !traceOn);
+					return Hints.getLogPrefix(hints) + "Encoding [" + formatted + "]";
+				});
+			}
 			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
 			OutputStream outputStream = buffer.asOutputStream();
 			Class<?> clazz = ClassUtils.getUserClass(value);

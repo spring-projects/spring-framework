@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.lang.Nullable;
 
 /**
  * Defines a factory which can return an Object instance
@@ -34,6 +33,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Colin Sampaleanu
  * @since 1.0.2
+ * @param <T> the object type
  * @see FactoryBean
  */
 @FunctionalInterface
@@ -45,7 +45,6 @@ public interface ObjectFactory<T> {
 	 * @return the resulting instance
 	 * @throws BeansException in case of creation errors
 	 */
-	@Nullable
 	T getObject() throws BeansException;
 
 }

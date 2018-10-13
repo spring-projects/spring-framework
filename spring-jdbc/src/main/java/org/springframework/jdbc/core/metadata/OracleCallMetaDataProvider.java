@@ -58,12 +58,14 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 	}
 
 	@Override
+	@Nullable
 	public String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		// Oracle uses catalog name for package name or an empty string if no package
 		return (catalogName == null ? "" : catalogNameToUse(catalogName));
 	}
 
 	@Override
+	@Nullable
 	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		// Use current user schema if no schema specified
 		return (schemaName == null ? getUserName() : super.metaDataSchemaNameToUse(schemaName));

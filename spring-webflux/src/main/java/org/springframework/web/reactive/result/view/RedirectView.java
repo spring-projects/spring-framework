@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,9 +142,8 @@ public class RedirectView extends AbstractUrlBasedView {
 	/**
 	 * Configure one or more hosts associated with the application.
 	 * All other hosts will be considered external hosts.
-	 * <p>In effect this provides a way turn off encoding via
-	 * {@link ServerHttpResponse#encodeUrl(String)} for URLs that have a
-	 * host and that host is not listed as a known host.
+	 * <p>In effect this provides a way turn off encoding for URLs that
+	 * have a host and that host is not listed as a known host.
 	 * <p>If not set (the default) all redirect URLs are encoded.
 	 * @param hosts one or more application hosts
 	 */
@@ -245,7 +244,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		while (found) {
 			String name = matcher.group(1);
 			Object value = (model.containsKey(name) ? model.get(name) : uriVariables.get(name));
-			Assert.notNull(value, "No value for URI variable '" + name + "'");
+			Assert.notNull(value, () -> "No value for URI variable '" + name + "'");
 			result.append(targetUrl.substring(endLastMatch, matcher.start()));
 			result.append(encodeUriVariable(value.toString()));
 			endLastMatch = matcher.end();
@@ -269,7 +268,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			return new StringBuilder(targetUrl);
 		}
 
-		int index = targetUrl.indexOf("#");
+		int index = targetUrl.indexOf('#');
 		String fragment = (index > -1 ? targetUrl.substring(index) : null);
 
 		StringBuilder result = new StringBuilder();
@@ -284,14 +283,14 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Send a redirect back to the HTTP client
+	 * Send a redirect back to the HTTP client.
 	 * @param targetUrl the target URL to redirect to
 	 * @param exchange current exchange
 	 */
 	protected Mono<Void> sendRedirect(String targetUrl, ServerWebExchange exchange) {
+		String transformedUrl = (isRemoteHost(targetUrl) ? targetUrl : exchange.transformUrl(targetUrl));
 		ServerHttpResponse response = exchange.getResponse();
-		String encodedURL = (isRemoteHost(targetUrl) ? targetUrl : response.encodeUrl(targetUrl));
-		response.getHeaders().setLocation(URI.create(encodedURL));
+		response.getHeaders().setLocation(URI.create(transformedUrl));
 		response.setStatusCode(getStatusCode());
 		return Mono.empty();
 	}

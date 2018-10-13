@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
@@ -56,7 +57,7 @@ public class ResourceHandlerRegistry {
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
 
-	private int order = Integer.MAX_VALUE -1;
+	private int order = Ordered.LOWEST_PRECEDENCE -1;
 
 
 	/**
@@ -76,7 +77,7 @@ public class ResourceHandlerRegistry {
 	 * <p>Patterns like {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"}
 	 * are allowed. See {@link org.springframework.web.util.pattern.PathPattern}
 	 * for more details on the syntax.
-	 * @return A {@link ResourceHandlerRegistration} to use to further
+	 * @return a {@link ResourceHandlerRegistration} to use to further
 	 * configure the registered resource handler
 	 */
 	public ResourceHandlerRegistration addResourceHandler(String... patterns) {

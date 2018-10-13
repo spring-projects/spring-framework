@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,15 +56,15 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Wrapped Connection */
+	/** Wrapped Connection. */
 	@Nullable
 	private Connection target;
 
-	/** Proxy Connection */
+	/** Proxy Connection. */
 	@Nullable
 	private Connection connection;
 
-	/** Synchronization monitor for the shared Connection */
+	/** Synchronization monitor for the shared Connection. */
 	private final Object connectionMonitor = new Object();
 
 
@@ -154,8 +154,8 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 			}
 			this.target = doCreateConnection();
 			prepareConnection(this.target);
-			if (logger.isInfoEnabled()) {
-				logger.info("Established shared CCI Connection: " + this.target);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Established shared CCI Connection: " + this.target);
 			}
 			this.connection = getCloseSuppressingConnectionProxy(this.target);
 		}
@@ -225,7 +225,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	/**
 	 * Invocation handler that suppresses close calls on CCI Connections.
 	 */
-	private static class CloseSuppressingInvocationHandler implements InvocationHandler {
+	private static final class CloseSuppressingInvocationHandler implements InvocationHandler {
 
 		private final Connection target;
 

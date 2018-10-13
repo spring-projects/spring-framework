@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.handler;
 
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,7 +45,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
@@ -128,16 +127,19 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * to the {@link #doResolveException} template method.
 	 */
 	@Override
-	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
-			@Nullable Object handler, Exception ex) {
+	@Nullable
+	public ModelAndView resolveException(
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
-			}
 			prepareResponse(ex, response);
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
+				// Print warn message when warn logger is not enabled...
+				if (logger.isWarnEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
+					logger.warn("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
+				}
+				// warnLogger with full stack trace (requires explicit config)
 				logException(ex, request);
 			}
 			return result;
@@ -200,7 +202,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @return the log message to use
 	 */
 	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
-		return "Resolved exception caused by Handler execution: " + ex;
+		return "Resolved [" + ex + "]";
 	}
 
 	/**
@@ -240,10 +242,11 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @param handler the executed handler, or {@code null} if none chosen at the time
 	 * of the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
-	 * @return a corresponding {@code ModelAndView} to forward to, or {@code null} for default processing
+	 * @return a corresponding {@code ModelAndView} to forward to,
+	 * or {@code null} for default processing in the resolution chain
 	 */
 	@Nullable
-	protected abstract ModelAndView doResolveException(HttpServletRequest request,
-			HttpServletResponse response, @Nullable Object handler, Exception ex);
+	protected abstract ModelAndView doResolveException(
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex);
 
 }

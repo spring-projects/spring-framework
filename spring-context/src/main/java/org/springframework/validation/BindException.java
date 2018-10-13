@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +171,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		return this.bindingResult.getGlobalError();
 	}
@@ -191,6 +192,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		return this.bindingResult.getFieldError();
 	}
@@ -211,16 +213,19 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		return this.bindingResult.getFieldError(field);
 	}
 
 	@Override
+	@Nullable
 	public Object getFieldValue(String field) {
 		return this.bindingResult.getFieldValue(field);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		return this.bindingResult.getFieldType(field);
 	}
@@ -236,6 +241,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public Object getRawFieldValue(String field) {
 		return this.bindingResult.getRawFieldValue(field);
 	}
@@ -254,11 +260,6 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
-	public void addError(ObjectError error) {
-		this.bindingResult.addError(error);
-	}
-
-	@Override
 	public String[] resolveMessageCodes(String errorCode) {
 		return this.bindingResult.resolveMessageCodes(errorCode);
 	}
@@ -266,6 +267,16 @@ public class BindException extends Exception implements BindingResult {
 	@Override
 	public String[] resolveMessageCodes(String errorCode, String field) {
 		return this.bindingResult.resolveMessageCodes(errorCode, field);
+	}
+
+	@Override
+	public void addError(ObjectError error) {
+		this.bindingResult.addError(error);
+	}
+
+	@Override
+	public void recordFieldValue(String field, Class<?> type, @Nullable Object value) {
+		this.bindingResult.recordFieldValue(field, type, value);
 	}
 
 	@Override

@@ -92,6 +92,7 @@ public class ConcurrentMapCacheFactoryBean
 
 
 	@Override
+	@Nullable
 	public ConcurrentMapCache getObject() {
 		return this.cache;
 	}

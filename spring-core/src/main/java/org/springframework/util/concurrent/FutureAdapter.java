@@ -51,7 +51,7 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 	 * @param adaptee the future to delegate to
 	 */
 	protected FutureAdapter(Future<S> adaptee) {
-		Assert.notNull(adaptee, "'delegate' must not be null");
+		Assert.notNull(adaptee, "Delegate must not be null");
 		this.adaptee = adaptee;
 	}
 
@@ -98,6 +98,7 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 				case SUCCESS:
 					return (T) this.result;
 				case FAILURE:
+					Assert.state(this.result instanceof ExecutionException, "Failure without exception");
 					throw (ExecutionException) this.result;
 				case NEW:
 					try {

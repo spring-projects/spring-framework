@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,8 +168,8 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		assertThat("Marshaller writes invalid StreamResult", writer.toString(), isSimilarTo(EXPECTED_STRING));
 	}
 
-    private static CompareMatcher isSimilarTo(final Object content) {
-        return CompareMatcher.isSimilarTo(content)
-                .ignoreWhitespace();
-    }
+	private static CompareMatcher isSimilarTo(final Object content) {
+		return CompareMatcher.isSimilarTo(content)
+				.ignoreWhitespace();
+	}
 }

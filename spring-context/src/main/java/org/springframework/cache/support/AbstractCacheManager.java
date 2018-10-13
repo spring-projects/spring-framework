@@ -85,6 +85,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	// Lazy cache initialization on access
 
 	@Override
+	@Nullable
 	public Cache getCache(String name) {
 		Cache cache = this.cacheMap.get(name);
 		if (cache != null) {

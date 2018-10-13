@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,6 @@ import static org.junit.Assert.*;
 @ContextConfiguration("context.groovy")
 public class GroovySpringContextTests implements BeanNameAware, InitializingBean {
 
-	private boolean beanInitialized = false;
-
-	private String beanName = "replace me with [" + getClass().getName() + "]";
-
-	@Autowired
-	private ApplicationContext applicationContext;
-
 	private Employee employee;
 
 	@Autowired
@@ -63,41 +56,49 @@ public class GroovySpringContextTests implements BeanNameAware, InitializingBean
 
 	protected String bar;
 
+	@Autowired
+	private ApplicationContext applicationContext;
+
+	private String beanName;
+
+	private boolean beanInitialized = false;
+
 
 	@Autowired
-	protected final void setEmployee(final Employee employee) {
+	protected void setEmployee(Employee employee) {
 		this.employee = employee;
 	}
 
 	@Resource
-	protected final void setBar(final String bar) {
+	protected void setBar(String bar) {
 		this.bar = bar;
 	}
 
 	@Override
-	public final void setBeanName(final String beanName) {
+	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 	@Override
-	public final void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		this.beanInitialized = true;
 	}
 
+
 	@Test
-	public final void verifyBeanInitialized() {
+	public void verifyBeanNameSet() {
+		assertTrue("The bean name of this test instance should have been set to the fully qualified class name " +
+				"due to BeanNameAware semantics.", this.beanName.startsWith(getClass().getName()));
+	}
+
+	@Test
+	public void verifyBeanInitialized() {
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-			this.beanInitialized);
+				this.beanInitialized);
 	}
 
 	@Test
-	public final void verifyBeanNameSet() {
-		assertEquals("The bean name of this test instance should have been set to the fully qualified class name "
-				+ "due to BeanNameAware semantics.", getClass().getName(), this.beanName);
-	}
-
-	@Test
-	public final void verifyAnnotationAutowiredFields() {
+	public void verifyAnnotationAutowiredFields() {
 		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
 		assertNotNull("The application context should have been autowired.", this.applicationContext);
 		assertNotNull("The pet field should have been autowired.", this.pet);
@@ -105,18 +106,18 @@ public class GroovySpringContextTests implements BeanNameAware, InitializingBean
 	}
 
 	@Test
-	public final void verifyAnnotationAutowiredMethods() {
+	public void verifyAnnotationAutowiredMethods() {
 		assertNotNull("The employee setter method should have been autowired.", this.employee);
 		assertEquals("Dilbert", this.employee.getName());
 	}
 
 	@Test
-	public final void verifyResourceAnnotationWiredFields() {
+	public void verifyResourceAnnotationWiredFields() {
 		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
 	}
 
 	@Test
-	public final void verifyResourceAnnotationWiredMethods() {
+	public void verifyResourceAnnotationWiredMethods() {
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
 	}
 

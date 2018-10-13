@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
+import static org.springframework.http.HttpMethod.POST;
 
 /**
  * @author Arjen Poutsma
@@ -85,7 +86,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 
 	@Before
 	public void setupClient() {
-		 this.template = new RestTemplate(this.clientHttpRequestFactory);
+		this.template = new RestTemplate(this.clientHttpRequestFactory);
 	}
 
 
@@ -180,6 +181,18 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	}
 
 	@Test
+	public void badRequest() {
+		try {
+			template.execute(baseUrl + "/status/badrequest", HttpMethod.GET, null, null);
+			fail("HttpClientErrorException.BadRequest expected");
+		}
+		catch (HttpClientErrorException.BadRequest ex) {
+			assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+			assertEquals("400 Client Error", ex.getMessage());
+		}
+	}
+
+	@Test
 	public void serverError() {
 		try {
 			template.execute(baseUrl + "/status/server", HttpMethod.GET, null, null);
@@ -248,8 +261,8 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
 		requestHeaders.setContentType(MediaType.TEXT_PLAIN);
-		HttpEntity<String> requestEntity = new HttpEntity<>(helloWorld, requestHeaders);
-		HttpEntity<Void> result = template.exchange(baseUrl + "/{method}", HttpMethod.POST, requestEntity, Void.class, "post");
+		HttpEntity<String> entity = new HttpEntity<>(helloWorld, requestHeaders);
+		HttpEntity<Void> result = template.exchange(baseUrl + "/{method}", POST, entity, Void.class, "post");
 		assertEquals("Invalid location", new URI(baseUrl + "/post/1"), result.getHeaders().getLocation());
 		assertFalse(result.hasBody());
 	}

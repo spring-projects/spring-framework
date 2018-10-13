@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.test.web.servlet;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -55,6 +58,9 @@ class DefaultMvcResult implements MvcResult {
 	private Exception resolvedException;
 
 	private final AtomicReference<Object> asyncResult = new AtomicReference<>(RESULT_NONE);
+
+	@Nullable
+	private CountDownLatch asyncDispatchLatch;
 
 
 	/**
@@ -132,29 +138,35 @@ class DefaultMvcResult implements MvcResult {
 
 	@Override
 	public Object getAsyncResult(long timeToWait) {
-		if (this.mockRequest.getAsyncContext() != null) {
-			timeToWait = (timeToWait == -1 ? this.mockRequest.getAsyncContext().getTimeout() : timeToWait);
+		if (this.mockRequest.getAsyncContext() != null && timeToWait == -1) {
+			long requestTimeout = this.mockRequest.getAsyncContext().getTimeout();
+			timeToWait = requestTimeout == -1 ? Long.MAX_VALUE : requestTimeout;
 		}
-
-		if (timeToWait > 0) {
-			long endTime = System.currentTimeMillis() + timeToWait;
-			while (System.currentTimeMillis() < endTime && this.asyncResult.get() == RESULT_NONE) {
-				try {
-					Thread.sleep(100);
-				}
-				catch (InterruptedException ex) {
-					throw new IllegalStateException("Interrupted while waiting for " +
-							"async result to be set for handler [" + this.handler + "]", ex);
-				}
-			}
+		if (!awaitAsyncDispatch(timeToWait)) {
+			throw new IllegalStateException("Async result for handler [" + this.handler + "]" +
+					" was not set during the specified timeToWait=" + timeToWait);
 		}
-
 		Object result = this.asyncResult.get();
-		if (result == RESULT_NONE) {
-			throw new IllegalStateException("Async result for handler [" + this.handler + "] " +
-					"was not set during the specified timeToWait=" + timeToWait);
+		Assert.state(result != RESULT_NONE, () -> "Async result for handler [" + this.handler + "] was not set");
+		return this.asyncResult.get();
+	}
+
+	/**
+	 * True if the latch count reached 0 within the specified timeout.
+	 */
+	private boolean awaitAsyncDispatch(long timeout) {
+		Assert.state(this.asyncDispatchLatch != null,
+				"The asyncDispatch CountDownLatch was not set by the TestDispatcherServlet.");
+		try {
+			return this.asyncDispatchLatch.await(timeout, TimeUnit.MILLISECONDS);
 		}
-		return result;
+		catch (InterruptedException ex) {
+			return false;
+		}
+	}
+
+	void setAsyncDispatchLatch(CountDownLatch asyncDispatchLatch) {
+		this.asyncDispatchLatch = asyncDispatchLatch;
 	}
 
 }

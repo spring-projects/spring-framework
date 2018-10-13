@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.ClassUtils;
  */
 public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
@@ -78,7 +78,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
 			throw new IllegalArgumentException(
-				 "Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
+				"Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
 		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 		if (this.beanWiringInfoResolver == null) {
@@ -144,15 +144,16 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 		ConfigurableListableBeanFactory beanFactory = this.beanFactory;
 		Assert.state(beanFactory != null, "No BeanFactory available");
 		try {
-			if (bwi.indicatesAutowiring() || (bwi.isDefaultBeanName() && bwi.getBeanName() != null &&
-					!beanFactory.containsBean(bwi.getBeanName()))) {
+			String beanName = bwi.getBeanName();
+			if (bwi.indicatesAutowiring() || (bwi.isDefaultBeanName() && beanName != null &&
+					!beanFactory.containsBean(beanName))) {
 				// Perform autowiring (also applying standard factory / post-processor callbacks).
 				beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
-				beanFactory.initializeBean(beanInstance, bwi.getBeanName());
+				beanFactory.initializeBean(beanInstance, (beanName != null ? beanName : ""));
 			}
 			else {
 				// Perform explicit wiring based on the specified bean definition.
-				beanFactory.configureBean(beanInstance, bwi.getBeanName());
+				beanFactory.configureBean(beanInstance, (beanName != null ? beanName : ""));
 			}
 		}
 		catch (BeanCreationException ex) {

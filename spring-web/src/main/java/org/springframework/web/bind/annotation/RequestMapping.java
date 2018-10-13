@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,219 +21,37 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.concurrent.Callable;
 
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation for mapping web requests onto specific handler classes and/or
- * handler methods.
+ * Annotation for mapping web requests onto methods in request-handling classes
+ * with flexible method signatures.
  *
- * <p>Handler methods which are annotated with this annotation are allowed to
- * have very flexible signatures. They may have parameters of the following
- * types, in arbitrary order (except for validation results, which need to
- * follow right after the corresponding command object, if desired):
+ * <p>Both Spring MVC and Spring WebFlux support this annotation through a
+ * {@code RequestMappingHandlerMapping} and {@code RequestMappingHandlerAdapter}
+ * in their respective modules and package structure. For the exact list of
+ * supported handler method arguments and return types in each, please use the
+ * reference documentation links below:
  * <ul>
- * <li>Request and/or response objects from the Servlet API.
- * You may choose any specific request/response type, e.g.
- * {@link javax.servlet.ServletRequest} / {@link javax.servlet.http.HttpServletRequest}.
- * <li>Session object: typically {@link javax.servlet.http.HttpSession}.
- * An argument of this type will enforce the presence of a corresponding session.
- * As a consequence, such an argument will never be {@code null}.
- * <i>Note that session access may not be thread-safe, in particular in a
- * Servlet environment: Consider switching the
- * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession
- * "synchronizeOnSession"} flag to "true" if multiple requests are allowed to
- * access a session concurrently.</i>
- * <li>{@link org.springframework.web.context.request.WebRequest} or
- * {@link org.springframework.web.context.request.NativeWebRequest}.
- * Allows for generic request parameter access as well as request/session
- * attribute access, without ties to the native Servlet API.
- * <li>{@link java.util.Locale} for the current request locale
- * (determined by the most specific locale resolver available,
- * i.e. the configured {@link org.springframework.web.servlet.LocaleResolver}
- * in a Servlet environment).
- * <li>{@link java.io.InputStream} / {@link java.io.Reader} for access
- * to the request's content. This will be the raw InputStream/Reader as
- * exposed by the Servlet API.
- * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
- * the response's content. This will be the raw OutputStream/Writer as
- * exposed by the Servlet API.
- * <li>{@link org.springframework.http.HttpMethod} for the HTTP request method</li>
- * <li>{@link PathVariable @PathVariable} annotated parameters
- * for access to URI template values (i.e. /hotels/{hotel}). Variable values will be
- * converted to the declared method argument type. By default, the URI template
- * will match against the regular expression {@code [^\.]*} (i.e. any character
- * other than period), but this can be changed by specifying another regular
- * expression, like so: /hotels/{hotel:\d+}.
- * Additionally, {@code @PathVariable} can be used on a
- * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
- * URI template variables.
- * <li>{@link MatrixVariable @MatrixVariable} annotated parameters
- * for access to name-value pairs located in URI path segments. Matrix variables
- * must be represented with a URI template variable. For example /hotels/{hotel}
- * where the incoming URL may be "/hotels/42;q=1".
- * Additionally, {@code @MatrixVariable} can be used on a
- * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
- * matrix variables in the URL or to those in a specific path variable.
- * <li>{@link RequestParam @RequestParam} annotated parameters for access to
- * specific Servlet request parameters. Parameter values will be
- * converted to the declared method argument type. Additionally,
- * {@code @RequestParam} can be used on a {@link java.util.Map Map&lt;String, String&gt;} or
- * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}
- * method parameter to gain access to all request parameters.
- * <li>{@link RequestHeader @RequestHeader} annotated parameters for access to
- * specific Servlet request HTTP headers. Parameter values will be
- * converted to the declared method argument type. Additionally,
- * {@code @RequestHeader} can be used on a {@link java.util.Map Map&lt;String, String&gt;},
- * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}, or
- * {@link org.springframework.http.HttpHeaders HttpHeaders} method parameter to
- * gain access to all request headers.
- * <li>{@link RequestBody @RequestBody} annotated parameters
- * for access to the Servlet request HTTP contents. The request stream will be
- * converted to the declared method argument type using
- * {@linkplain org.springframework.http.converter.HttpMessageConverter message
- * converters}. Such parameters may optionally be annotated with {@code @Valid}
- * and also support access to validation results through an
- * {@link org.springframework.validation.Errors} argument.
- * Instead a {@link org.springframework.web.bind.MethodArgumentNotValidException}
- * exception is raised.
- * <li>{@link RequestPart @RequestPart} annotated parameters for access to the content
- * of a part of "multipart/form-data" request. The request part stream will be
- * converted to the declared method argument type using
- * {@linkplain org.springframework.http.converter.HttpMessageConverter message
- * converters}. Such parameters may optionally be annotated with {@code @Valid}
- * and support access to validation results through a
- * {@link org.springframework.validation.Errors} argument.
- * Instead a {@link org.springframework.web.bind.MethodArgumentNotValidException}
- * exception is raised.
- * <li>{@link SessionAttribute @SessionAttribute} annotated parameters for access
- * to existing, permanent session attributes (e.g. user authentication object)
- * as opposed to model attributes temporarily stored in the session as part of
- * a controller workflow via {@link SessionAttributes}.
- * <li>{@link RequestAttribute @RequestAttribute} annotated parameters for access
- * to request attributes.
- * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
- * for access to the Servlet request HTTP headers and contents.
- * The request stream will be converted to the entity body using
- * {@linkplain org.springframework.http.converter.HttpMessageConverter message
- * converters}.
- * <li>{@link java.util.Map} / {@link org.springframework.ui.Model} /
- * {@link org.springframework.ui.ModelMap} for enriching the implicit model
- * that will be exposed to the web view.
- * <li>{@link org.springframework.web.servlet.mvc.support.RedirectAttributes},
- * to specify the exact set of attributes
- * to use in case of a redirect and also to add flash attributes (attributes
- * stored temporarily on the server-side to make them available to the request
- * after the redirect). {@code RedirectAttributes} is used instead of the
- * implicit model if the method returns a "redirect:" prefixed view name or
- * {@code RedirectView}.
- * <li>Command/form objects to bind parameters to: as bean properties or fields,
- * with customizable type conversion, depending on {@link InitBinder} methods
- * and/or the HandlerAdapter configuration - see the "webBindingInitializer"
- * property on RequestMappingHandlerMethodAdapter.
- * Such command objects along with their validation results will be exposed
- * as model attributes, by default using the non-qualified command class name
- * in property notation (e.g. "orderAddress" for type "mypackage.OrderAddress").
- * Specify a parameter-level {@link ModelAttribute @ModelAttribute} annotation for
- * declaring a specific model attribute name.
- * <li>{@link org.springframework.validation.Errors} /
- * {@link org.springframework.validation.BindingResult} validation results
- * for a preceding command/form object (the immediate preceding argument).
- * <li>{@link org.springframework.web.bind.support.SessionStatus} status handle
- * for marking form processing as complete (triggering the cleanup of session
- * attributes that have been indicated by the {@link SessionAttributes @SessionAttributes}
- * annotation at the handler type level).
- * <li>{@link org.springframework.web.util.UriComponentsBuilder}
- * for preparing a URL relative to the current request's host, port, scheme,
- * context path, and the literal part of the servlet mapping.
+ * <li>Spring MVC
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-ann-arguments">Method Arguments</a>
+ * and
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-ann-return-types">Return Values</a>
+ * </li>
+ * <li>Spring WebFlux
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-ann-arguments">Method Arguments</a>
+ * and
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-ann-return-types">Return Values</a>
+ * </li>
  * </ul>
  *
- * <p><strong>Note:</strong> Java 8's {@code java.util.Optional} is supported
- * as a method parameter type with annotations that provide a {@code required}
- * attribute (e.g. {@code @RequestParam}, {@code @RequestHeader}, etc.). The use
- * of {@code java.util.Optional} in those cases is equivalent to having
- * {@code required=false}.
- *
- * <p>The following return types are supported for handler methods:
- * <ul>
- * <li>{@link org.springframework.web.servlet.ModelAndView} object (Spring MVC only),
- * providing a view, model attributes, and optionally a response status.
- * <li>{@link org.springframework.web.reactive.result.view.Rendering} object (Spring WebFlux only),
- * providing a view, model attributes, and optionally a response status.
- * <li>{@link org.springframework.ui.Model Model} object, with the view name implicitly
- * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
- * and the model implicitly enriched with command objects and the results
- * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * <li>{@link java.util.Map} object for exposing a model,
- * with the view name implicitly determined through a
- * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
- * and the model implicitly enriched with command objects and the results
- * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * <li>{@link org.springframework.web.servlet.View} object, with the
- * model implicitly determined through command objects and
- * {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * The handler method may also programmatically enrich the model by
- * declaring a {@link org.springframework.ui.Model} argument (see above).
- * <li>{@link String} value which is interpreted as view name,
- * with the model implicitly determined through command objects and
- * {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * The handler method may also programmatically enrich the model by
- * declaring a {@link org.springframework.ui.ModelMap} argument
- * (see above).
- * <li>{@link ResponseBody @ResponseBody} annotated methods
- * for access to the Servlet response HTTP contents. The return value will
- * be converted to the response stream using
- * {@linkplain org.springframework.http.converter.HttpMessageConverter message
- * converters}.
- * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
- * {@link org.springframework.http.ResponseEntity ResponseEntity&lt;?&gt;} object
- * to access to the Servlet response HTTP headers and contents.
- * The entity body will be converted to the response stream using
- * {@linkplain org.springframework.http.converter.HttpMessageConverter message
- * converters}.
- * <li>{@link org.springframework.http.HttpHeaders HttpHeaders} object to
- * return a response with no body.</li>
- * <li>{@link Callable} -- async computation in a Spring MVC managed thread.</li>
- * <li>{@link org.springframework.web.context.request.async.DeferredResult DeferredResult} --
- * async result produced later from an application managed, or any thread.
- * <li>{@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}
- * alternative, equivalent to {@code DeferredResult}.</li>
- * <li>{@link java.util.concurrent.CompletionStage CompletionStage} and
- * {@link java.util.concurrent.CompletableFuture CompletableFuture} --
- * alternative, equivalent to {@code DeferredResult}.</li>
- * <li>{@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter} --
- * {@code @ResponseBody}-style, asynchronous writing of a stream of Objects to the
- * response body.</li>
- * <li>{@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter} --
- * variant of {@code ResponseBodyEmitter} for a Server-Sent Events formatted stream.</li>
- * <li>{@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody} --
- * async writing directly to the response body {@link java.io.OutputStream}.</li>
- * <li>Reactive types (e.g. Reactor {@code Flux}/{@code Mono}, RxJava 1 &amp; 2
- * {@code Observable}/{@code Single}, or others via
- * {@link org.springframework.core.ReactiveAdapterRegistry ReactiveAdapterRegistry}) --
- * alternatives, equivalent to {@code DeferredResult} or {@code ResponseBodyEmitter}
- * and {@code SseEmitter} depending also on the requested media types (e.g.
- * "text/event-stream", "application/json+stream").</li>
- * <li>{@code void} if the method handles the response itself (by
- * writing the response content directly, declaring an argument of type
- * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
- * for that purpose) or if the view name is supposed to be implicitly determined
- * through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
- * (not declaring a response argument in the handler method signature).
- * <li>Any other return type will be considered as single model attribute
- * to be exposed to the view, using the attribute name specified through
- * {@link ModelAttribute @ModelAttribute} at the method level (or the default attribute
- * name based on the return type's class name otherwise). The model will be
- * implicitly enriched with command objects and the results of
- * {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * </ul>
- *
- * <p><b>NOTE:</b> {@code @RequestMapping} will only be processed if an
- * an appropriate {@code HandlerMapping}-{@code HandlerAdapter} pair
- * is configured. If you are defining custom {@code HandlerMappings} or
- * {@code HandlerAdapters}, then you need to add {@code RequestMappingHandlerMapping}
- * and {@code RequestMappingHandlerAdapter} to your configuration.</code>.
+ * <p><strong>Note:</strong> This annotation can be used both at the class and
+ * at the method level. In most cases, at the method level applications will
+ * prefer to use one of the HTTP method specific variants
+ * {@link GetMapping @GetMapping}, {@link PostMapping @PostMapping},
+ * {@link PutMapping @PutMapping}, {@link DeleteMapping @DeleteMapping}, or
+ * {@link PatchMapping @PatchMapping}.</p>
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations - such as
@@ -249,15 +67,8 @@ import org.springframework.core.annotation.AliasFor;
  * @see PutMapping
  * @see DeleteMapping
  * @see PatchMapping
- * @see RequestParam
- * @see RequestAttribute
- * @see PathVariable
- * @see ModelAttribute
- * @see SessionAttribute
- * @see SessionAttributes
- * @see InitBinder
- * @see org.springframework.web.context.request.WebRequest
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
+ * @see org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -288,11 +99,11 @@ public @interface RequestMapping {
 	String[] value() default {};
 
 	/**
-	 * In a Servlet environment only: the path mapping URIs (e.g. "/myPath.do").
+	 * The path mapping URIs (e.g. "/myPath.do").
 	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
-	 * At the method level, relative paths (e.g. "edit.do") are supported within
-	 * the primary mapping expressed at the type level. Path mapping URIs may
-	 * contain placeholders (e.g. "/${connect}")
+	 * At the method level, relative paths (e.g. "edit.do") are supported
+	 * within the primary mapping expressed at the type level.
+	 * Path mapping URIs may contain placeholders (e.g. "/${connect}").
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
@@ -382,10 +193,10 @@ public @interface RequestMapping {
 	 * <pre class="code">
 	 * produces = "text/plain"
 	 * produces = {"text/plain", "application/*"}
-	 * produces = "application/json; charset=UTF-8"
+	 * produces = MediaType.APPLICATION_JSON_UTF8_VALUE
 	 * </pre>
 	 * <p>It affects the actual content type written, for example to produce a JSON response
-	 * with UTF-8 encoding, {@code "application/json; charset=UTF-8"} should be used.
+	 * with UTF-8 encoding, {@link org.springframework.http.MediaType#APPLICATION_JSON_UTF8_VALUE} should be used.
 	 * <p>Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>

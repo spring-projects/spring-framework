@@ -167,6 +167,7 @@ public class FormattingConversionServiceFactoryBean
 
 
 	@Override
+	@Nullable
 	public FormattingConversionService getObject() {
 		return this.conversionService;
 	}

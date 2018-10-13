@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 public abstract class SpringRuleConfigurer {
 
 	@ClassRule
-	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+	public static final SpringClassRule springClassRule = new SpringClassRule();
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();

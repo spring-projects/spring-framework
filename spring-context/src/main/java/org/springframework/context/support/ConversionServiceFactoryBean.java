@@ -87,6 +87,7 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 	// implementing FactoryBean
 
 	@Override
+	@Nullable
 	public ConversionService getObject() {
 		return this.conversionService;
 	}

@@ -1,0 +1,84 @@
+description = "Spring Web MVC"
+
+dependencyManagement {
+	imports {
+		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		mavenBom "org.eclipse.jetty:jetty-bom:${jettyVersion}"
+	}
+}
+
+dependencies {
+	provided("javax.servlet:javax.servlet-api:4.0.1")
+	compile(project(":spring-aop"))
+	compile(project(":spring-beans"))
+	compile(project(":spring-context"))
+	compile(project(":spring-core"))
+	compile(project(":spring-expression"))
+	compile(project(":spring-web"))
+	optional(project(":spring-context-support"))  // for FreeMarker support
+	optional(project(":spring-oxm"))
+	optional("javax.servlet.jsp:javax.servlet.jsp-api:2.3.2-b02")
+	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
+	optional("javax.el:javax.el-api:3.0.1-b04")
+	optional("javax.xml.bind:jaxb-api:2.3.0")
+	optional("org.webjars:webjars-locator-core:0.35")
+	optional("com.rometools:rome:1.11.0")
+	optional("com.github.librepdf:openpdf:1.2.2")
+	optional("org.apache.poi:poi-ooxml:3.17")
+	optional("org.freemarker:freemarker:${freemarkerVersion}")
+	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
+	optional("org.apache.tiles:tiles-api:${tiles3Version}", withoutJclOverSlf4J)
+	optional("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
+	optional("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
+	optional("org.apache.tiles:tiles-jsp:${tiles3Version}", withoutJclOverSlf4J)
+	optional("org.apache.tiles:tiles-el:${tiles3Version}", withoutJclOverSlf4J)
+	optional("org.apache.tiles:tiles-extras:${tiles3Version}") {
+		exclude group: "org.springframework", module: "spring-web"
+		exclude group: "org.slf4j", module: "jcl-over-slf4j"
+	}
+	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
+	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("org.reactivestreams:reactive-streams")
+	testCompile("javax.servlet:javax.servlet-api:4.0.1")
+	testCompile("org.eclipse.jetty:jetty-servlet") {
+		exclude group: "javax.servlet", module: "javax.servlet"
+	}
+	testCompile("org.eclipse.jetty:jetty-server") {
+		exclude group: "javax.servlet", module: "javax.servlet"
+	}
+	testCompile("org.apache.httpcomponents:httpclient:4.5.6") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
+	testCompile("commons-fileupload:commons-fileupload:1.3.3")
+	testCompile("commons-io:commons-io:2.5")
+	testCompile("joda-time:joda-time:2.10")
+	testCompile("org.mozilla:rhino:1.7.10")
+	testCompile("dom4j:dom4j:1.6.1") {
+		exclude group: "xml-apis", module: "xml-apis"
+	}
+	testCompile("jaxen:jaxen:1.1.1") {
+		exclude group: "xml-apis", module: "xml-apis"
+		exclude group: "xom", module: "xom"
+		exclude group: "xerces", module: "xercesImpl"
+	}
+	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
+	testCompile("org.hibernate:hibernate-validator:6.0.13.Final")
+	testCompile("io.projectreactor:reactor-core")
+	testCompile("io.reactivex:rxjava:${rxjavaVersion}")
+	testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+	testCompile("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
+	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
+	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
+	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+	testRuntime("org.jruby:jruby:9.2.0.0")
+	testRuntime("org.python:jython-standalone:2.7.1")
+	testRuntime("org.webjars:underscorejs:1.8.3")
+	testRuntime("org.glassfish:javax.el:3.0.1-b08")
+	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
+	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
+	testRuntime("com.sun.activation:javax.activation:1.2.0")
+}

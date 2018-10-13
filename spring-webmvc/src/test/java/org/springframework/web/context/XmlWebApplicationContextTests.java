@@ -85,6 +85,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void environmentMerge() {
 		assertThat(this.root.getEnvironment().acceptsProfiles("rootProfile1"), is(true));
 		assertThat(this.root.getEnvironment().acceptsProfiles("wacProfile1"), is(false));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -35,12 +34,14 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Decoder for {@link Resource}s.
+ * Decoder for {@link Resource Resources}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ResourceDecoder extends AbstractDecoder<Resource> {
+public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
+
 
 	public ResourceDecoder() {
 		super(MimeTypeUtils.ALL);
@@ -50,9 +51,7 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
-		return (clazz != null &&
-				(InputStreamResource.class == clazz || clazz.isAssignableFrom(ByteArrayResource.class)) &&
-				super.canDecode(elementType, mimeType));
+		return clazz != null && Resource.class.isAssignableFrom(clazz) && super.canDecode(elementType, mimeType);
 	}
 
 	@Override
@@ -63,30 +62,28 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 	}
 
 	@Override
-	public Mono<Resource> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	protected Resource decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		byte[] bytes = new byte[dataBuffer.readableByteCount()];
+		dataBuffer.read(bytes);
+		DataBufferUtils.release(dataBuffer);
 
 		Class<?> clazz = elementType.getRawClass();
 		Assert.state(clazz != null, "No resource class");
 
-		Mono<byte[]> byteArray = Flux.from(inputStream).
-				reduce(DataBuffer::write).
-				map(dataBuffer -> {
-					byte[] bytes = new byte[dataBuffer.readableByteCount()];
-					dataBuffer.read(bytes);
-					DataBufferUtils.release(dataBuffer);
-					return bytes;
-				});
-
+		if (logger.isDebugEnabled()) {
+			logger.debug(Hints.getLogPrefix(hints) + "Read " + bytes.length + " bytes");
+		}
 
 		if (InputStreamResource.class == clazz) {
-			return Mono.from(byteArray.map(ByteArrayInputStream::new).map(InputStreamResource::new));
+			return new InputStreamResource(new ByteArrayInputStream(bytes));
 		}
-		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
-			return Mono.from(byteArray.map(ByteArrayResource::new));
+		else if (Resource.class.isAssignableFrom(clazz)) {
+			return new ByteArrayResource(bytes);
 		}
 		else {
-			return Mono.error(new IllegalStateException("Unsupported resource class: " + clazz));
+			throw new IllegalStateException("Unsupported resource class: " + clazz);
 		}
 	}
 

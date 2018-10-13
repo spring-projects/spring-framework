@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
@@ -67,15 +62,15 @@ import static org.springframework.mock.http.server.reactive.test.MockServerHttpR
  */
 public class HttpEntityArgumentResolverTests {
 
-	private HttpEntityArgumentResolver resolver = createResolver();
+	private final HttpEntityArgumentResolver resolver = createResolver();
 
 	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	private HttpEntityArgumentResolver createResolver() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
-		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		return new HttpEntityArgumentResolver(readers, new ReactiveAdapterRegistry());
+		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
+		return new HttpEntityArgumentResolver(readers, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 
@@ -282,9 +277,9 @@ public class HttpEntityArgumentResolverTests {
 
 		assertEquals(exchange.getRequest().getHeaders(), httpEntity.getHeaders());
 		StepVerifier.create(httpEntity.getBody())
-				.expectNext("line1\n")
-				.expectNext("line2\n")
-				.expectNext("line3\n")
+				.expectNext("line1")
+				.expectNext("line2")
+				.expectNext("line3")
 				.expectComplete()
 				.verify();
 	}
@@ -303,7 +298,7 @@ public class HttpEntityArgumentResolverTests {
 
 
 	private MockServerWebExchange postExchange(String body) {
-		return post("/path").header("foo", "bar").contentType(TEXT_PLAIN).body(body).toExchange();
+		return MockServerWebExchange.from(post("/path").header("foo", "bar").contentType(TEXT_PLAIN).body(body));
 	}
 
 	private ResolvableType httpEntityType(Class<?> bodyType, Class<?>... generics) {
@@ -328,7 +323,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> HttpEntity<T> resolveValueWithEmptyBody(ResolvableType type) {
-		ServerWebExchange exchange = post("/path").toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(post("/path"));
 		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		HttpEntity<String> httpEntity = (HttpEntity<String>) result.block(Duration.ofSeconds(5));

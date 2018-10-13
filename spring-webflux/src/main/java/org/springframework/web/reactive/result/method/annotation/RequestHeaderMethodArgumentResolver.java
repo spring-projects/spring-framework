@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
@@ -49,12 +48,15 @@ import org.springframework.web.server.ServerWebInputException;
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
 	/**
-	 * @param factory a bean factory to use for resolving  ${...}
-	 * placeholder and #{...} SpEL expressions in default values;
+	 * Create a new {@link RequestHeaderMethodArgumentResolver} instance.
+	 * @param factory a bean factory to use for resolving {@code ${...}}
+	 * placeholder and {@code #{...}} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public RequestHeaderMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public RequestHeaderMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory,
+			ReactiveAdapterRegistry registry) {
+
 		super(factory, registry);
 	}
 
@@ -93,7 +95,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 	}
 
 
-	private static class RequestHeaderNamedValueInfo extends NamedValueInfo {
+	private static final class RequestHeaderNamedValueInfo extends NamedValueInfo {
 
 		private RequestHeaderNamedValueInfo(RequestHeader annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());
