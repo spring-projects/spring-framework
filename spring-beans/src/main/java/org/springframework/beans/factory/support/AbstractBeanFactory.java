@@ -30,11 +30,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -142,16 +142,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private TypeConverter typeConverter;
 
 	/** String resolvers to apply e.g. to annotation attribute values */
-	private final List<StringValueResolver> embeddedValueResolvers = new CopyOnWriteArrayList<StringValueResolver>();
+	private final List<StringValueResolver> embeddedValueResolvers = new LinkedList<StringValueResolver>();
 
 	/** BeanPostProcessors to apply in createBean */
-	private volatile List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
+	private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
 
 	/** Indicates whether any InstantiationAwareBeanPostProcessors have been registered */
-	private volatile boolean hasInstantiationAwareBeanPostProcessors;
+	private boolean hasInstantiationAwareBeanPostProcessors;
 
 	/** Indicates whether any DestructionAwareBeanPostProcessors have been registered */
-	private volatile boolean hasDestructionAwareBeanPostProcessors;
+	private boolean hasDestructionAwareBeanPostProcessors;
 
 	/** Map from scope identifier String to corresponding Scope */
 	private final Map<String, Scope> scopes = new LinkedHashMap<String, Scope>(8);
@@ -845,22 +845,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
-		// Local copy set into volatile field, as an alternative to CopyOnWriteArrayList
-		// (which doesn't support Iterator.remove for our getBeanPostProcessors result List)
-		List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
-		beanPostProcessors.addAll(this.beanPostProcessors);
-		// Remove from old position, if any
-		beanPostProcessors.remove(beanPostProcessor);
-		// Track whether it is instantiation/destruction aware
+		this.beanPostProcessors.remove(beanPostProcessor);
+		this.beanPostProcessors.add(beanPostProcessor);
 		if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
 			this.hasInstantiationAwareBeanPostProcessors = true;
 		}
 		if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
 			this.hasDestructionAwareBeanPostProcessors = true;
 		}
-		// Add to end of list
-		beanPostProcessors.add(beanPostProcessor);
-		this.beanPostProcessors = beanPostProcessors;
 	}
 
 	@Override
