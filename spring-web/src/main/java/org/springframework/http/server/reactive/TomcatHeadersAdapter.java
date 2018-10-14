@@ -38,15 +38,17 @@ import org.springframework.util.MultiValueMap;
  * {@code MultiValueMap} implementation for wrapping Tomcat HTTP headers.
  *
  * @author Brian Clozel
- * @since 5.1
+ * @since 5.1.1
  */
 class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	private final MimeHeaders headers;
 
+
 	TomcatHeadersAdapter(MimeHeaders headers) {
 		this.headers = headers;
 	}
+
 
 	@Override
 	public String getFirst(String key) {
@@ -54,7 +56,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 	@Override
-	public void add(String key, String value) {
+	public void add(String key, @Nullable String value) {
 		this.headers.addValue(key).setString(value);
 	}
 
@@ -69,7 +71,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 	@Override
-	public void set(String key, String value) {
+	public void set(String key, @Nullable String value) {
 		this.headers.setValue(key).setString(value);
 	}
 
@@ -98,13 +100,13 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean isEmpty() {
-		return this.headers.size() == 0;
+		return (this.headers.size() == 0);
 	}
 
 	@Override
 	public boolean containsKey(Object key) {
 		if (key instanceof String) {
-			return this.headers.findHeader((String) key, 0) != -1;
+			return (this.headers.findHeader((String) key, 0) != -1);
 		}
 		return false;
 	}
@@ -152,8 +154,8 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends List<String>> m) {
-		m.forEach(this::put);
+	public void putAll(Map<? extends String, ? extends List<String>> map) {
+		map.forEach(this::put);
 	}
 
 	@Override
@@ -191,6 +193,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 		};
 	}
 
+
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
 		private Enumeration<String> names = headers.names();
@@ -206,11 +209,12 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 		}
 	}
 
+
 	private final class HeaderEntry implements Entry<String, List<String>> {
 
 		private final String key;
 
-		private HeaderEntry(String key) {
+		HeaderEntry(String key) {
 			this.key = key;
 		}
 
@@ -234,4 +238,5 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 			return previous;
 		}
 	}
+
 }

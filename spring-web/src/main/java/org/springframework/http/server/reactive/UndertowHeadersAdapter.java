@@ -36,15 +36,17 @@ import org.springframework.util.MultiValueMap;
  * {@code MultiValueMap} implementation for wrapping Undertow HTTP headers.
  *
  * @author Brian Clozel
- * @since 5.1
+ * @since 5.1.1
  */
 class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HeaderMap headers;
 
+
 	UndertowHeadersAdapter(HeaderMap headers) {
 		this.headers = headers;
 	}
+
 
 	@Override
 	public String getFirst(String key) {
@@ -92,25 +94,20 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean isEmpty() {
-		return this.headers.size() == 0;
+		return (this.headers.size() == 0);
 	}
 
 	@Override
 	public boolean containsKey(Object key) {
-		if (key instanceof String) {
-			return this.headers.contains((String) key);
-		}
-		return false;
+		return (key instanceof String && this.headers.contains((String) key));
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		if (value instanceof String) {
-			return this.headers.getHeaderNames().stream()
-					.map(this.headers::get)
-					.anyMatch(values -> values.contains(value));
-		}
-		return false;
+		return (value instanceof String &&
+				this.headers.getHeaderNames().stream()
+						.map(this.headers::get)
+						.anyMatch(values -> values.contains(value)));
 	}
 
 	@Override
@@ -140,8 +137,8 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends List<String>> m) {
-		m.forEach((key, values) ->
+	public void putAll(Map<? extends String, ? extends List<String>> map) {
+		map.forEach((key, values) ->
 				this.headers.putAll(HttpString.tryFromString(key), values));
 	}
 
@@ -179,6 +176,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 		};
 	}
 
+
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
 		private Iterator<HttpString> names = headers.getHeaderNames().iterator();
@@ -193,6 +191,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 			return new HeaderEntry(this.names.next());
 		}
 	}
+
 
 	private class HeaderEntry implements Entry<String, List<String>> {
 
@@ -219,4 +218,5 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 			return previousValues;
 		}
 	}
+
 }

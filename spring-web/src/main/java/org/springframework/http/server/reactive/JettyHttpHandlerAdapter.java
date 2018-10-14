@@ -34,12 +34,14 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for writing
  * to the response with {@link ByteBuffer}.
  *
  * @author Violeta Georgieva
+ * @author Brian Clozel
  * @since 5.0
  * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
@@ -53,6 +55,8 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	@Override
 	protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
 			throws IOException, URISyntaxException {
+
+		Assert.notNull(getServletPath(), "Servlet path is not initialized");
 		return new JettyServerHttpRequest(request, context, getServletPath(), getDataBufferFactory(), getBufferSize());
 	}
 
@@ -63,6 +67,7 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		return new JettyServerHttpResponse(
 				response, context, getDataBufferFactory(), getBufferSize(), request);
 	}
+
 
 	private static final class JettyServerHttpRequest extends ServletServerHttpRequest {
 

@@ -34,15 +34,17 @@ import org.springframework.util.MultiValueMap;
  * {@code MultiValueMap} implementation for wrapping Netty HTTP headers.
  *
  * @author Brian Clozel
- * @since 5.1
+ * @since 5.1.1
  */
 class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HttpHeaders headers;
 
+
 	NettyHeadersAdapter(HttpHeaders headers) {
 		this.headers = headers;
 	}
+
 
 	@Override
 	@Nullable
@@ -99,14 +101,14 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String) && this.headers.contains((String) key);
+		return (key instanceof String && this.headers.contains((String) key));
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		return (value instanceof String) &&
+		return (value instanceof String &&
 				this.headers.entries().stream()
-						.anyMatch(entry -> value != null && value.equals(entry.getValue()));
+						.anyMatch(entry -> value.equals(entry.getValue())));
 	}
 
 	@Override
@@ -138,8 +140,8 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends List<String>> m) {
-		m.forEach(this.headers::add);
+	public void putAll(Map<? extends String, ? extends List<String>> map) {
+		map.forEach(this.headers::add);
 	}
 
 	@Override
@@ -173,6 +175,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 		};
 	}
 
+
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
 		private Iterator<String> names = headers.names().iterator();
@@ -187,6 +190,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 			return new HeaderEntry(this.names.next());
 		}
 	}
+
 
 	private class HeaderEntry implements Entry<String, List<String>> {
 

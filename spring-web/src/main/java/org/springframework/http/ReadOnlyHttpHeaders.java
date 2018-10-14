@@ -31,7 +31,7 @@ import org.springframework.util.MultiValueMap;
  * {@code HttpHeaders} object that can only be read, not written to.
  *
  * @author Brian Clozel
- * @since 5.1
+ * @since 5.1.1
  */
 class ReadOnlyHttpHeaders extends HttpHeaders {
 
@@ -59,10 +59,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	@Override
 	public List<String> get(Object key) {
 		List<String> values = this.headers.get(key);
-		if (values != null) {
-			return Collections.unmodifiableList(values);
-		}
-		return values;
+		return (values != null ? Collections.unmodifiableList(values) : null);
 	}
 
 	@Override

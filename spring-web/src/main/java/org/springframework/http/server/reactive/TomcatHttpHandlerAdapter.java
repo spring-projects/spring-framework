@@ -48,7 +48,6 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Violeta Georgieva
  * @author Brian Clozel
- * @author Brian Clozel
  * @since 5.0
  * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
@@ -64,7 +63,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext asyncContext)
 			throws IOException, URISyntaxException {
 
-		Assert.notNull(getServletPath(), "servletPath is not initialized.");
+		Assert.notNull(getServletPath(), "Servlet path is not initialized");
 		return new TomcatServerHttpRequest(
 				request, asyncContext, getServletPath(), getDataBufferFactory(), getBufferSize());
 	}
@@ -77,16 +76,20 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 				response, asyncContext, getDataBufferFactory(), getBufferSize(), request);
 	}
 
+
 	private static final class TomcatServerHttpRequest extends ServletServerHttpRequest {
 
-		private static final Field COYOTE_REQUEST_FIELD = ReflectionUtils.findField(RequestFacade.class, "request");
+		private static final Field COYOTE_REQUEST_FIELD;
 
 		private final int bufferSize;
 
 		private final DataBufferFactory factory;
 
 		static {
-			ReflectionUtils.makeAccessible(COYOTE_REQUEST_FIELD);
+			Field field = ReflectionUtils.findField(RequestFacade.class, "request");
+			Assert.state(field != null, "Incompatible Tomcat implementation");
+			ReflectionUtils.makeAccessible(field);
+			COYOTE_REQUEST_FIELD = field;
 		}
 
 		TomcatServerHttpRequest(HttpServletRequest request, AsyncContext context,
@@ -99,8 +102,10 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		private static HttpHeaders createTomcatHttpHeaders(HttpServletRequest request) {
-			Request tomcatRequest = ((org.apache.catalina.connector.Request) ReflectionUtils
-					.getField(COYOTE_REQUEST_FIELD, request)).getCoyoteRequest();
+			org.apache.catalina.connector.Request connectorRequest = (org.apache.catalina.connector.Request)
+					ReflectionUtils.getField(COYOTE_REQUEST_FIELD, request);
+			Assert.state(connectorRequest != null, "No Tomcat connector request");
+			Request tomcatRequest = connectorRequest.getCoyoteRequest();
 			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders());
 			return new HttpHeaders(headers);
 		}
@@ -112,11 +117,9 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			DataBuffer dataBuffer = this.factory.allocateBuffer(capacity);
 			try {
 				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, capacity);
-
 				ServletRequest request = getNativeRequest();
 				int read = ((CoyoteInputStream) request.getInputStream()).read(byteBuffer);
 				logBytesRead(read);
-
 				if (read > 0) {
 					dataBuffer.writePosition(read);
 					release = false;
@@ -140,10 +143,13 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 	private static final class TomcatServerHttpResponse extends ServletServerHttpResponse {
 
-		private static final Field COYOTE_RESPONSE_FIELD = ReflectionUtils.findField(ResponseFacade.class, "response");
+		private static final Field COYOTE_RESPONSE_FIELD;
 
 		static {
-			ReflectionUtils.makeAccessible(COYOTE_RESPONSE_FIELD);
+			Field field = ReflectionUtils.findField(ResponseFacade.class, "response");
+			Assert.state(field != null, "Incompatible Tomcat implementation");
+			ReflectionUtils.makeAccessible(field);
+			COYOTE_RESPONSE_FIELD = field;
 		}
 
 		TomcatServerHttpResponse(HttpServletResponse response, AsyncContext context,
@@ -153,8 +159,10 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		private static HttpHeaders createTomcatHttpHeaders(HttpServletResponse response) {
-			Response tomcatResponse = ((org.apache.catalina.connector.Response) ReflectionUtils
-					.getField(COYOTE_RESPONSE_FIELD, response)).getCoyoteResponse();
+			org.apache.catalina.connector.Response connectorResponse = (org.apache.catalina.connector.Response)
+					ReflectionUtils.getField(COYOTE_RESPONSE_FIELD, response);
+			Assert.state(connectorResponse != null, "No Tomcat connector response");
+			Response tomcatResponse = connectorResponse.getCoyoteResponse();
 			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatResponse.getMimeHeaders());
 			return new HttpHeaders(headers);
 		}
