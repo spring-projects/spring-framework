@@ -101,13 +101,13 @@ configure(allprojects) { project ->
 			 "-Xlint:-deprecation", "-Xlint:-unchecked"]
 
 	compileJava {
-		sourceCompatibility = 1.8  // can be switched to 10 for testing
+		sourceCompatibility = 1.8  // can be switched to 11 for testing
 		targetCompatibility = 1.8
 		options.encoding = "UTF-8"
 	}
 
 	compileTestJava {
-		sourceCompatibility = 1.8  // can be switched to 10 for testing
+		sourceCompatibility = 1.8  // can be switched to 11 for testing
 		targetCompatibility = 1.8
 		options.encoding = "UTF-8"
 		options.compilerArgs += "-parameters"

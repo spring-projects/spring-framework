@@ -66,14 +66,13 @@ import static org.junit.Assert.*;
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
 
 /**
- * Unit tests for {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder}.
+ * Unit tests for {@link MvcUriComponentsBuilder}.
  *
  * @author Oliver Gierke
  * @author Dietrich Schulten
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-@SuppressWarnings("unused")
 public class MvcUriComponentsBuilderTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
@@ -467,12 +466,12 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 
-	private class PersonControllerImpl implements PersonController {
+	static class PersonControllerImpl implements PersonController {
 	}
 
 
 	@RequestMapping("/people/{id}/addresses")
-	private static class PersonsAddressesController {
+	static class PersonsAddressesController {
 
 		@RequestMapping("/{country}")
 		HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {
@@ -539,7 +538,7 @@ public class MvcUriComponentsBuilderTests {
 
 
 	@RequestMapping("/user/{userId}/contacts")
-	private static class UserContactController {
+	static class UserContactController {
 
 		@RequestMapping("/create")
 		public String showCreate(@PathVariable Integer userId) {
@@ -554,7 +553,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 
-	private static class PersonCrudController extends AbstractCrudController<Person, Long> {
+	static class PersonCrudController extends AbstractCrudController<Person, Long> {
 
 		@RequestMapping(path = "/{id}", method = RequestMethod.GET)
 		public Person get(@PathVariable Long id) {
@@ -564,7 +563,7 @@ public class MvcUriComponentsBuilderTests {
 
 
 	@Controller
-	private static class MetaAnnotationController {
+	static class MetaAnnotationController {
 
 		@RequestMapping
 		public void handle() {

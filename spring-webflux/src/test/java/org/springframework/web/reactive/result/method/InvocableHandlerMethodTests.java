@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,12 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static org.mockito.Mockito.*;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
+import static org.springframework.web.method.ResolvableMethod.*;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.
@@ -251,7 +250,7 @@ public class InvocableHandlerMethodTests {
 
 
 	@SuppressWarnings("unused")
-	private static class TestController {
+	static class TestController {
 
 		public String noArgs() {
 			return "success";
@@ -271,8 +270,9 @@ public class InvocableHandlerMethodTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
-	private static class VoidController {
+	static class VoidController {
 
 		@ResponseStatus(HttpStatus.BAD_REQUEST)
 		public void responseStatus() {
