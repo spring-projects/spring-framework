@@ -4,7 +4,6 @@ dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
-		mavenBom "org.eclipse.jetty:jetty-bom:${jettyVersion}"
 	}
 }
 
