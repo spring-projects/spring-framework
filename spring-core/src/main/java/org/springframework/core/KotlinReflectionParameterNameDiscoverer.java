@@ -58,7 +58,7 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 	@Override
 	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
-		if (!KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
+		if (ctor.getDeclaringClass().isEnum() || !KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
 			return null;
 		}
 
