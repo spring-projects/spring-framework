@@ -16,37 +16,19 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import javax.sql.DataSource;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
-
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
-import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.IllegalTransactionStateException;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.TransactionTimedOutException;
-import org.springframework.transaction.UnexpectedRollbackException;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.*;
+import org.springframework.transaction.support.*;
+
+import javax.sql.DataSource;
+import java.sql.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -1066,6 +1048,12 @@ public class DataSourceTransactionManagerTests  {
 		verify(con, times(2)).close();
 	}
 
+    /**
+     * 首先，PROPAGATION_REQUIRES_NEW
+     * 然后，PROPAGATION_REQUIRES_NEW
+     *
+     * @throws Exception
+     */
 	@Test
 	public void testTransactionAwareDataSourceProxyWithSuspensionAndReobtaining() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
@@ -1075,6 +1063,7 @@ public class DataSourceTransactionManagerTests  {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
@@ -1119,11 +1108,77 @@ public class DataSourceTransactionManagerTests  {
 
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		InOrder ordered = inOrder(con);
-		ordered.verify(con).setAutoCommit(false);
+ 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(con).commit();
 		ordered.verify(con).setAutoCommit(true);
 		verify(con, times(2)).close();
 	}
+
+	@Test
+	public void test01() throws SQLException {
+        given(con.getAutoCommit()).willReturn(true);
+
+        final TransactionTemplate tt01 = new TransactionTemplate(tm);
+        tt01.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+
+        final TransactionTemplate tt02 = new TransactionTemplate(tm);
+        tt02.setPropagationBehavior(TransactionTemplate.PROPAGATION_NOT_SUPPORTED);
+
+        // 首先，PROPAGATION_REQUIRES_NEW
+        tt01.execute(new TransactionCallbackWithoutResult() {
+
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+
+                // 然后，PROPAGATION_NOT_SUPPORTED
+                tt02.execute(new TransactionCallbackWithoutResult() {
+
+                    @Override
+                    protected void doInTransactionWithoutResult(TransactionStatus status) {
+                        System.out.println("滴滴滴");
+
+                        // 最后，PROPAGATION_REQUIRES_NEW
+                        tt01.execute(new TransactionCallbackWithoutResult() {
+                            @Override
+                            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                                System.out.println("滴滴滴");
+                            }
+                        });
+
+                    }
+
+                });
+            }
+
+        });
+    }
+
+    @Test
+    public void test02() throws SQLException {
+        given(con.getAutoCommit()).willReturn(true);
+
+        final TransactionTemplate tt01 = new TransactionTemplate(tm);
+        tt01.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
+
+        // 首先，PROPAGATION_REQUIRED
+        tt01.execute(new TransactionCallbackWithoutResult() {
+
+            // 然后，PROPAGATION_REQUIRED
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                tt01.execute(new TransactionCallbackWithoutResult() {
+
+                    @Override
+                    protected void doInTransactionWithoutResult(TransactionStatus status) {
+                        System.out.println("滴滴滴");
+                    }
+
+                });
+            }
+
+        });
+    }
+
 
 	/**
 	 * Test behavior if the first operation on a connection (getAutoCommit) throws SQLException.

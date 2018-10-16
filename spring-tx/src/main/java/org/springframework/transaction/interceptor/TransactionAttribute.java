@@ -20,6 +20,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
+ * 支持定义返回异常回滚的事务定义接口。
+ *
  * This interface adds a {@code rollbackOn} specification to {@link TransactionDefinition}.
  * As custom {@code rollbackOn} is only possible with AOP, this class resides
  * in the AOP transaction package.
@@ -41,6 +43,8 @@ public interface TransactionAttribute extends TransactionDefinition {
 	String getQualifier();
 
 	/**
+     * 当发生指定异常时，回滚事务。
+     *
 	 * Should we roll back on the given exception?
 	 * @param ex the exception to evaluate
 	 * @return whether to perform a rollback or not

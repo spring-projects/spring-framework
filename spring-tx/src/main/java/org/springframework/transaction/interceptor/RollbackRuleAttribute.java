@@ -16,11 +16,13 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.Serializable;
-
 import org.springframework.util.Assert;
 
+import java.io.Serializable;
+
 /**
+ * Rollback 规则属性
+ *
  * Rule determining whether or not a given exception (and any subclasses)
  * should cause a rollback.
  *
@@ -41,8 +43,9 @@ public class RollbackRuleAttribute implements Serializable{
 	public static final RollbackRuleAttribute ROLLBACK_ON_RUNTIME_EXCEPTIONS =
 			new RollbackRuleAttribute(RuntimeException.class);
 
-
 	/**
+     * 异常名
+     *
 	 * Could hold exception, resolving class name but would always require FQN.
 	 * This way does multiple string comparisons, but how often do we decide
 	 * whether to roll back a transaction following an exception?

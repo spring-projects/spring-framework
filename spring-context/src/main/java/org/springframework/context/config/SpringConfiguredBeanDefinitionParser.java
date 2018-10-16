@@ -42,9 +42,9 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 	static final String BEAN_CONFIGURER_ASPECT_CLASS_NAME =
 			"org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect";
 
-
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+	    // 创建 BEAN_CONFIGURER_ASPECT_CLASS_NAME 对应的 RootBeanDefinition 对象
 		if (!parserContext.getRegistry().containsBeanDefinition(BEAN_CONFIGURER_ASPECT_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();
 			def.setBeanClassName(BEAN_CONFIGURER_ASPECT_CLASS_NAME);

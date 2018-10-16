@@ -38,11 +38,13 @@ public class BeanFactoryTransactionAttributeSourceAdvisor extends AbstractBeanFa
 	private TransactionAttributeSource transactionAttributeSource;
 
 	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut() {
+
 		@Override
 		@Nullable
 		protected TransactionAttributeSource getTransactionAttributeSource() {
 			return transactionAttributeSource;
 		}
+
 	};
 
 

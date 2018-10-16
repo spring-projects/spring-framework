@@ -73,33 +73,48 @@ class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefinitionPar
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
+		// 判断切面织入是否开启
 		if (isAspectJWeavingEnabled(element.getAttribute(ASPECTJ_WEAVING_ATTRIBUTE), parserContext)) {
+		    // 创建 ASPECTJ_WEAVING_ENABLER_CLASS_NAME 对象的 RootBeanDefinition 对象
 			if (!parserContext.getRegistry().containsBeanDefinition(ASPECTJ_WEAVING_ENABLER_BEAN_NAME)) {
 				RootBeanDefinition def = new RootBeanDefinition(ASPECTJ_WEAVING_ENABLER_CLASS_NAME);
-				parserContext.registerBeanComponent(
-						new BeanComponentDefinition(def, ASPECTJ_WEAVING_ENABLER_BEAN_NAME));
+				parserContext.registerBeanComponent(new BeanComponentDefinition(def, ASPECTJ_WEAVING_ENABLER_BEAN_NAME));
 			}
 
+			// 判断配置切面是否开启
 			if (isBeanConfigurerAspectEnabled(parserContext.getReaderContext().getBeanClassLoader())) {
+			    // 创建 SpringConfiguredBeanDefinitionParser 对象，作为解析器
+                // 执行解析
 				new SpringConfiguredBeanDefinitionParser().parse(element, parserContext);
 			}
 		}
 	}
 
+    /**
+     * 判断切面织入是否开启
+     *
+     * @param value 值
+     * @param parserContext 解析上下文
+     * @return 是否开启
+     */
 	protected boolean isAspectJWeavingEnabled(String value, ParserContext parserContext) {
 		if ("on".equals(value)) {
 			return true;
-		}
-		else if ("off".equals(value)) {
+		} else if ("off".equals(value)) {
 			return false;
-		}
-		else {
+		} else {
 			// Determine default...
 			ClassLoader cl = parserContext.getReaderContext().getBeanClassLoader();
 			return (cl != null && cl.getResource(AspectJWeavingEnabler.ASPECTJ_AOP_XML_RESOURCE) != null);
 		}
 	}
 
+    /**
+     * 判断配置切面是否开启
+     *
+     * @param beanClassLoader 类加载器
+     * @return 是否开启
+     */
 	protected boolean isBeanConfigurerAspectEnabled(@Nullable ClassLoader beanClassLoader) {
 		return ClassUtils.isPresent(SpringConfiguredBeanDefinitionParser.BEAN_CONFIGURER_ASPECT_CLASS_NAME,
 				beanClassLoader);

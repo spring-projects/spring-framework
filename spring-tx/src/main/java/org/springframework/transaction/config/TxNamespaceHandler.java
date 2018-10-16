@@ -43,16 +43,16 @@ public class TxNamespaceHandler extends NamespaceHandlerSupport {
 
 	static final String DEFAULT_TRANSACTION_MANAGER_BEAN_NAME = "transactionManager";
 
-
 	static String getTransactionManagerName(Element element) {
 		return (element.hasAttribute(TRANSACTION_MANAGER_ATTRIBUTE) ?
 				element.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE) : DEFAULT_TRANSACTION_MANAGER_BEAN_NAME);
 	}
 
-
 	@Override
 	public void init() {
+	    // 标签 <tx:advice /> 的解析器
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
+		// 标签 <tx:annotation-driven /> 的解析器
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
 		registerBeanDefinitionParser("jta-transaction-manager", new JtaTransactionManagerBeanDefinitionParser());
 	}

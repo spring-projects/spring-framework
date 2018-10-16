@@ -31,10 +31,8 @@ public final class InstrumentationSavingAgent {
 
 	private static volatile Instrumentation instrumentation;
 
-
 	private InstrumentationSavingAgent() {
 	}
-
 
 	/**
 	 * Save the {@link Instrumentation} interface exposed by the JVM.

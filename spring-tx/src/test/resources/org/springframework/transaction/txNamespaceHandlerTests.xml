@@ -7,11 +7,15 @@
 				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-	<aop:config>
-		<aop:advisor pointcut="execution(* *..ITestBean.*(..))" advice-ref="txAdvice"/>
+    <!-- add by 芋艿：用于触发 AnnotationDrivenBeanDefinitionParser 的调试 -->
+    <tx:annotation-driven proxy-target-class="true" order="0" />
+
+    <aop:config>
+        <!-- modify by 芋艿：增加 order="1" -->
+		<aop:advisor pointcut="execution(* *..ITestBean.*(..))" advice-ref="txAdvice" order="1" />
 	</aop:config>
 
-	<tx:advice id="txAdvice">
+	<tx:advice id="txAdvice"> <!-- 创建 TransactionInterceptor -->
 		<tx:attributes>
 			<tx:method name="get*" read-only="true"/>
 			<tx:method name="set*"/>
@@ -19,7 +23,7 @@
 		</tx:attributes>
 	</tx:advice>
 
-	<tx:advice id="txRollbackAdvice">
+	<tx:advice id="txRollbackAdvice"> <!-- 创建 TransactionInterceptor -->
 		<tx:attributes>
 			<tx:method name="get*" rollback-for="java.lang.Exception"/>
 			<tx:method name="set*" no-rollback-for="java.lang.RuntimeException"/>
@@ -29,5 +33,7 @@
 	<bean id="transactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
 
 	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+
+    <bean id="testBean2" class="org.springframework.transaction.yunai.TestBean2" /> <!-- add by 芋艿：增加 TestBean2 的声明  -->
 
 </beans>

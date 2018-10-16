@@ -63,7 +63,7 @@ public interface ITestBean extends AgeHolder {
 	 * Throws a given (non-null) exception.
 	 */
 	void exceptional(Throwable t) throws Throwable;
-
+	
 	Object returnsThis();
 
 	INestedTestBean getDoctor();

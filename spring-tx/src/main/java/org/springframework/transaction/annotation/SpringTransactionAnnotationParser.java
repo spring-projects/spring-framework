@@ -16,11 +16,6 @@
 
 package org.springframework.transaction.annotation;
 
-import java.io.Serializable;
-import java.lang.reflect.AnnotatedElement;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -30,8 +25,15 @@ import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 
+import java.io.Serializable;
+import java.lang.reflect.AnnotatedElement;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Strategy implementation for parsing Spring's {@link Transactional} annotation.
+ *
+ * {@link Transactional} 注解的解析器
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -42,12 +44,12 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 	@Override
 	@Nullable
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement element) {
+	    // 获得所有 @Transactional 注解
 		AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
 				element, Transactional.class, false, false);
 		if (attributes != null) {
 			return parseTransactionAnnotation(attributes);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -56,9 +58,17 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		return parseTransactionAnnotation(AnnotationUtils.getAnnotationAttributes(ann, false, false));
 	}
 
+    /**
+     * 将 @Transactional 注解，解析成事务属性 TransactionAttribute 对象
+     *
+     * @param attributes @Transactional 注解
+     * @return 事务属性 TransactionAttribute 对象
+     */
 	protected TransactionAttribute parseTransactionAnnotation(AnnotationAttributes attributes) {
+	    // 创建 RuleBasedTransactionAttribute 对象
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 
+		// 从注解中，解析属性
 		Propagation propagation = attributes.getEnum("propagation");
 		rbta.setPropagationBehavior(propagation.value());
 		Isolation isolation = attributes.getEnum("isolation");

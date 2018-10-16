@@ -16,11 +16,13 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.lang.reflect.Method;
-
 import org.springframework.lang.Nullable;
 
+import java.lang.reflect.Method;
+
 /**
+ * 事务属性源接口
+ *
  * Strategy interface used by {@link TransactionInterceptor} for metadata retrieval.
  *
  * <p>Implementations know how to source transaction attributes, whether from configuration,

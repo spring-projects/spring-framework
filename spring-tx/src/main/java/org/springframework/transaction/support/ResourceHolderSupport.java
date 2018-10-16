@@ -39,6 +39,9 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 
 	private boolean rollbackOnly = false;
 
+    /**
+     * 设置过期时间
+     */
 	@Nullable
 	private Date deadline;
 

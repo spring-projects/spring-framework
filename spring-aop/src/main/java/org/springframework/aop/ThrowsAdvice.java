@@ -17,6 +17,8 @@
 package org.springframework.aop;
 
 /**
+ * Throws Advice
+ *
  * Tag interface for throws advice.
  *
  * <p>There are not any methods on this interface, as methods are invoked by

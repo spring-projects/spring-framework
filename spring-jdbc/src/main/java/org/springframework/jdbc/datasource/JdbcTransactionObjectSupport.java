@@ -16,21 +16,15 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.sql.SQLException;
-import java.sql.Savepoint;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
-import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.NestedTransactionNotSupportedException;
-import org.springframework.transaction.SavepointManager;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.TransactionUsageException;
+import org.springframework.transaction.*;
 import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.util.Assert;
+
+import java.sql.SQLException;
+import java.sql.Savepoint;
 
 /**
  * Convenient base class for JDBC-aware transaction objects. Can contain a
@@ -50,15 +44,24 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 
 	private static final Log logger = LogFactory.getLog(JdbcTransactionObjectSupport.class);
 
-
-	@Nullable
+    /**
+     * 数据库连接持有者
+     */
+    @Nullable
 	private ConnectionHolder connectionHolder;
 
+    /**
+     * 之前的事务隔离级别
+     */
 	@Nullable
 	private Integer previousIsolationLevel;
 
+    /**
+     * 保存事务，是否允许。
+     *
+     * 默认不允许。{@link DataSourceTransactionManager#isNestedTransactionAllowed()}
+     */
 	private boolean savepointAllowed = false;
-
 
 	public void setConnectionHolder(@Nullable ConnectionHolder connectionHolder) {
 		this.connectionHolder = connectionHolder;

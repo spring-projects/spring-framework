@@ -25,6 +25,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * 事务属性源 Advisor 实现类
+ *
  * Advisor driven by a {@link TransactionAttributeSource}, used to include
  * a {@link TransactionInterceptor} only for methods that are transactional.
  *
@@ -44,11 +46,13 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	private TransactionInterceptor transactionInterceptor;
 
 	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut() {
-		@Override
+
+	    @Override
 		@Nullable
 		protected TransactionAttributeSource getTransactionAttributeSource() {
 			return (transactionInterceptor != null ? transactionInterceptor.getTransactionAttributeSource() : null);
 		}
+
 	};
 
 

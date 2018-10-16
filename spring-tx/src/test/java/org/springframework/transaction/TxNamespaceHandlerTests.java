@@ -16,11 +16,8 @@
 
 package org.springframework.transaction;
 
-import java.lang.reflect.Method;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -29,6 +26,8 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 
@@ -97,8 +96,21 @@ public class TxNamespaceHandlerTests {
 		assertFalse("should not rollback on RuntimeException",txAttr.rollbackOn(new RuntimeException()));
 	}
 
+	// add by 芋艿
+	@Test
+    public void invokeTransactional2() {
+        ITestBean bean = getTestBean2();
+        bean.returnsThis(); // 测试，我们对 @Transactional 注解的效果
+//        bean.getAge(); // 测试，原有 xml 配置的事务的效果
+    }
+
 	private ITestBean getTestBean() {
 		return (ITestBean) context.getBean("testBean");
 	}
+
+	// add by 芋艿
+	private ITestBean getTestBean2() {
+        return (ITestBean) context.getBean("testBean2");
+    }
 
 }

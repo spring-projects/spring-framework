@@ -24,6 +24,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionUsageException;
 
 /**
+ * 事务状态抽象类
+ *
  * Abstract base implementation of the
  * {@link org.springframework.transaction.TransactionStatus} interface.
  *
@@ -50,6 +52,9 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 
 	private boolean completed = false;
 
+    /**
+     * TODO 芋艿，后续有时间，详细研究
+     */
 	@Nullable
 	private Object savepoint;
 

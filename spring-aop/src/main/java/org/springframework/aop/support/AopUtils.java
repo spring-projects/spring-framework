@@ -59,7 +59,8 @@ public abstract class AopUtils {
 	 */
 	public static boolean isAopProxy(@Nullable Object object) {
 		return (object instanceof SpringProxy &&
-				(Proxy.isProxyClass(object.getClass()) || ClassUtils.isCglibProxyClass(object.getClass())));
+				(Proxy.isProxyClass(object.getClass()) // JDK Proxy 类
+                        || ClassUtils.isCglibProxyClass(object.getClass()))); // CGLIB Proxy 类
 	}
 
 	/**

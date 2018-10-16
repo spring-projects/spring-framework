@@ -16,20 +16,19 @@
 
 package org.springframework.transaction.interceptor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.PatternMatchUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.PatternMatchUtils;
 
 /**
  * Simple {@link TransactionAttributeSource} implementation that
@@ -49,11 +48,22 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	 */
 	protected static final Log logger = LogFactory.getLog(NameMatchTransactionAttributeSource.class);
 
-	/** Keys are method names; values are TransactionAttributes. */
+	/**
+     * Keys are method names; values are TransactionAttributes.
+     *
+     * 方法名与事务属性的映射
+     *
+     * KEY：方法名
+     * VALUE ：事务属性
+     */
 	private Map<String, TransactionAttribute> nameMap = new HashMap<>();
 
 
 	/**
+     * 设置到 {@link #nameMap}
+     *
+     * 附加的方式
+     *
 	 * Set a name/attribute map, consisting of method names
 	 * (e.g. "myMethod") and TransactionAttribute instances
 	 * (or Strings to be converted to TransactionAttribute instances).
@@ -65,6 +75,10 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 	/**
+     * 从 Properties 中，读取事务相关配置，添加到 {@link #nameMap} 中
+     *
+     * TODO 芋艿，后续在详细调试
+     *
 	 * Parses the given properties into a name/attribute map.
 	 * Expects method names as keys and String attributes definitions as values,
 	 * parsable into TransactionAttribute instances via TransactionAttributeEditor.
@@ -84,11 +98,13 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 	/**
+     * 添加一个方法的事务属性
+     *
 	 * Add an attribute for a transactional method.
 	 * <p>Method names can be exact matches, or of the pattern "xxx*",
 	 * "*xxx" or "*xxx*" for matching multiple methods.
-	 * @param methodName the name of the method
-	 * @param attr attribute associated with the method
+	 * @param methodName the name of the method 方法
+	 * @param attr attribute associated with the method 事务属性
 	 */
 	public void addTransactionalMethod(String methodName, TransactionAttribute attr) {
 		if (logger.isDebugEnabled()) {
@@ -98,23 +114,26 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 
-	@Override
+	@SuppressWarnings("Duplicates")
+    @Override
 	@Nullable
 	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
-		if (!ClassUtils.isUserLevelMethod(method)) {
+		// 非用户定义的方法，忽略
+	    if (!ClassUtils.isUserLevelMethod(method)) {
 			return null;
 		}
 
 		// Look for direct name match.
+        // 直接使用方法名，作为全匹配
 		String methodName = method.getName();
 		TransactionAttribute attr = this.nameMap.get(methodName);
-
+		// 匹配不上，模糊匹配
 		if (attr == null) {
 			// Look for most specific name match.
-			String bestNameMatch = null;
+			String bestNameMatch = null; // 最佳匹配
 			for (String mappedName : this.nameMap.keySet()) {
-				if (isMatch(methodName, mappedName) &&
-						(bestNameMatch == null || bestNameMatch.length() <= mappedName.length())) {
+				if (isMatch(methodName, mappedName) && // 模式匹配
+						(bestNameMatch == null || bestNameMatch.length() <= mappedName.length())) { // 最有匹配的条件：最有匹配不存在，或者更长
 					attr = this.nameMap.get(mappedName);
 					bestNameMatch = mappedName;
 				}
@@ -125,6 +144,8 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 	/**
+     * 模式匹配
+     *
 	 * Return if the given method name matches the mapped name.
 	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
 	 * as well as direct equality. Can be overridden in subclasses.

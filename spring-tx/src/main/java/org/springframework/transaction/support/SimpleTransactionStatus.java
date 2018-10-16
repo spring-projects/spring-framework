@@ -17,6 +17,10 @@
 package org.springframework.transaction.support;
 
 /**
+ * 简单的事务状态实现类。
+ *
+ * 目前看下来，只用于单元测试中。
+ *
  * A simple {@link org.springframework.transaction.TransactionStatus}
  * implementation. Derives from {@link AbstractTransactionStatus} and
  * adds an explicit {@link #isNewTransaction() "newTransaction"} flag.

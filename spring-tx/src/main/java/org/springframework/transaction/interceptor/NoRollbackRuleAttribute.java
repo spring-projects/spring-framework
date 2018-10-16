@@ -17,6 +17,8 @@
 package org.springframework.transaction.interceptor;
 
 /**
+ * 不 Rollback 规则属性
+ *
  * Tag subclass of {@link RollbackRuleAttribute} that has the opposite behavior
  * to the {@code RollbackRuleAttribute} superclass.
  *
