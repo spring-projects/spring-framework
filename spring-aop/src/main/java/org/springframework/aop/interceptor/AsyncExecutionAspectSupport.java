@@ -17,6 +17,9 @@
 package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -29,11 +32,10 @@ import java.util.function.Supplier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.aop.AsyncExecutionPreProcessor;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -81,6 +83,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	@Nullable
 	private BeanFactory beanFactory;
 
+	protected List<AsyncExecutionPreProcessor> preProcessorList;
 
 	/**
 	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
@@ -105,6 +108,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	public AsyncExecutionAspectSupport(@Nullable Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
 		this.defaultExecutor = new SingletonSupplier<>(defaultExecutor, () -> getDefaultExecutor(this.beanFactory));
 		this.exceptionHandler = SingletonSupplier.of(exceptionHandler);
+
+		this.preProcessorList = new ArrayList<AsyncExecutionPreProcessor>();
 	}
 
 
@@ -151,8 +156,21 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+
+		findAllAsyncExecutionPreProcessor();
 	}
 
+	private void findAllAsyncExecutionPreProcessor(){
+		if (beanFactory instanceof ListableBeanFactory){
+			String[] preProcessorNames = ((ListableBeanFactory) beanFactory).getBeanNamesForType(AsyncExecutionPreProcessor.class, true, false);
+
+			for (String ppName : preProcessorNames) {
+				preProcessorList.add(beanFactory.getBean(ppName, AsyncExecutionPreProcessor.class));
+			}
+
+			Collections.sort(preProcessorList, AnnotationAwareOrderComparator.INSTANCE);
+		}
+	}
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
