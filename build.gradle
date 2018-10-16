@@ -269,7 +269,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 
 	artifacts {
 		archives sourcesJar
-		archives javadocJar
+//		archives javadocJar
 	}
 }
 
