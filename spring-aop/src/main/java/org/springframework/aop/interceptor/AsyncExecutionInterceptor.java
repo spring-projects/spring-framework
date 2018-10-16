@@ -25,6 +25,7 @@ import java.util.concurrent.Future;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.AsyncExecutionPreProcessor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
@@ -112,6 +113,11 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 			@Override
 			public Object call() throws Exception {
 				try {
+					if (!preProcessorList.isEmpty()){
+						for (AsyncExecutionPreProcessor preProcessor : preProcessorList){
+							preProcessor.preProcessBeforeAsyncExecution(invocation);
+						}
+					}
 					Object result = invocation.proceed();
 					if (result instanceof Future) {
 						return ((Future<?>) result).get();
