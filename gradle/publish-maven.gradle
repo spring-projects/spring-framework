@@ -1,8 +1,16 @@
 apply plugin: "propdeps-maven"
 
 install {
-	repositories.mavenInstaller {
-		customizePom(pom, project)
+	
+//	repositories.mavenInstaller {
+//		customizePom(pom, project)
+//	}
+
+	//将spring编译到本地maven仓库，方便调试
+	repositories {
+		maven {
+			url = "file:///Users/huqichao/java/my-repo"
+		}
 	}
 }
 
