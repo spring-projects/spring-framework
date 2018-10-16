@@ -115,7 +115,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 				try {
 					if (!preProcessorList.isEmpty()){
 						for (AsyncExecutionPreProcessor preProcessor : preProcessorList){
-							preProcessor.preProcessBeforeAsyncExecution();
+							preProcessor.preProcessBeforeAsyncExecution(invocation);
 						}
 					}
 					Object result = invocation.proceed();

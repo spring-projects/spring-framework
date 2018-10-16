@@ -1,11 +1,17 @@
 package org.springframework.aop;
 
+import org.aopalliance.intercept.MethodInvocation;
+
 /**
- * 在异步执行之前，执行一些异步提前处理
+ * Performs pre processing before asynchronous execution.
  * @author huqichao
  * @date 2018-10-15 17:35
  */
 public interface AsyncExecutionPreProcessor {
 
-    void preProcessBeforeAsyncExecution();
+    /**
+     * Performs pre processing before asynchronous execution.
+     * @param invocation the method to intercept and make asynchronous
+     */
+    void preProcessBeforeAsyncExecution(MethodInvocation invocation);
 }
