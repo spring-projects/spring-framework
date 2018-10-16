@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.nio.file.Path;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -49,16 +48,11 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 
 	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory) {
-		super(bufferFactory, initHeaders(response));
+		super(bufferFactory, new HttpHeaders(new NettyHeadersAdapter(response.responseHeaders())));
 		Assert.notNull(response, "HttpServerResponse must not be null");
 		this.response = response;
 	}
 
-	private static HttpHeaders initHeaders(HttpServerResponse channel) {
-		channel.responseHeaders().remove(HttpHeaderNames.TRANSFER_ENCODING);
-		NettyHeadersAdapter headersMap = new NettyHeadersAdapter(channel.responseHeaders());
-		return new HttpHeaders(headersMap);
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -87,9 +81,6 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 	@Override
 	protected void applyHeaders() {
-		if (getHeaders().getContentLength() == -1) {
-			this.response.chunkedTransfer(true);
-		}
 	}
 
 	@Override
