@@ -2,11 +2,15 @@ package org.springframework.aop.async;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.AsyncExecutionPreProcessor;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 /**
  * @author huqichao
  * @date 2018-10-16 18:19
  */
+@Order(1)
+@Configuration
 public class StepTwoAsyncExecPreProcessor implements AsyncExecutionPreProcessor {
 	/**
 	 * Performs pre processing before asynchronous execution.

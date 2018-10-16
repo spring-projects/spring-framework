@@ -108,8 +108,6 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	public AsyncExecutionAspectSupport(@Nullable Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
 		this.defaultExecutor = new SingletonSupplier<>(defaultExecutor, () -> getDefaultExecutor(this.beanFactory));
 		this.exceptionHandler = SingletonSupplier.of(exceptionHandler);
-
-		this.preProcessorList = new ArrayList<AsyncExecutionPreProcessor>();
 	}
 
 
@@ -156,6 +154,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		this.preProcessorList = new ArrayList<>();
 
 		findAllAsyncExecutionPreProcessor();
 	}
@@ -168,7 +167,9 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				preProcessorList.add(beanFactory.getBean(ppName, AsyncExecutionPreProcessor.class));
 			}
 
-			Collections.sort(preProcessorList, AnnotationAwareOrderComparator.INSTANCE);
+			if (!preProcessorList.isEmpty()){
+				Collections.sort(preProcessorList, AnnotationAwareOrderComparator.INSTANCE);
+			}
 		}
 	}
 
