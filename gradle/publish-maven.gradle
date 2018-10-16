@@ -1,15 +1,10 @@
 apply plugin: "propdeps-maven"
 
 install {
-//	repositories.mavenInstaller {
-//		customizePom(pom, project)
-//	}
-
-	repositories {
-		maven {
-			url = "file:///Users/huqichao/java/my-repo"
-		}
+	repositories.mavenInstaller {
+		customizePom(pom, project)
 	}
+
 }
 
 def customizePom(pom, gradleProject) {
