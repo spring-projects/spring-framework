@@ -99,7 +99,6 @@ public class VelocityToolboxView extends VelocityView {
 	 * @see #initTool
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	protected Context createVelocityContext(
 			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -111,7 +110,7 @@ public class VelocityToolboxView extends VelocityView {
 		if (getToolboxConfigLocation() != null) {
 			ToolboxManager toolboxManager = ServletToolboxManager.getInstance(
 					getServletContext(), getToolboxConfigLocation());
-			Map<String, Object> toolboxContext = toolboxManager.getToolbox(velocityContext);
+			Map<?, ?> toolboxContext = toolboxManager.getToolbox(velocityContext);
 			velocityContext.setToolbox(toolboxContext);
 		}
 
