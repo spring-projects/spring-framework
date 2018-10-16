@@ -33,10 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.AsyncExecutionPreProcessor;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -156,13 +153,15 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	}
 
 	private void findAllAsyncExecutionPreProcessor(){
-		String[] preProcessorNames = ((ConfigurableListableBeanFactory) beanFactory).getBeanNamesForType(AsyncExecutionPreProcessor.class, true, false);
+		if (beanFactory instanceof ListableBeanFactory){
+			String[] preProcessorNames = ((ListableBeanFactory) beanFactory).getBeanNamesForType(AsyncExecutionPreProcessor.class, true, false);
 
-		for (String ppName : preProcessorNames) {
-			preProcessorList.add(beanFactory.getBean(ppName, AsyncExecutionPreProcessor.class));
+			for (String ppName : preProcessorNames) {
+				preProcessorList.add(beanFactory.getBean(ppName, AsyncExecutionPreProcessor.class));
+			}
+
+			Collections.sort(preProcessorList, AnnotationAwareOrderComparator.INSTANCE);
 		}
-
-		Collections.sort(preProcessorList, AnnotationAwareOrderComparator.INSTANCE);
 	}
 
 	/**
