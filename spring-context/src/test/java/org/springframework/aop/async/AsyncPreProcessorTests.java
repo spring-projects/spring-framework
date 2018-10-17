@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.fail;
+
 /**
  * @author huqichao
  * @date 2018-10-16 18:23
@@ -23,11 +25,11 @@ public class AsyncPreProcessorTests {
 		ctx.refresh();
 
 		TestService testService = ctx.getBean(TestService.class);
-		testService.sayHello();
 		try {
+			testService.sayHello();
 			TimeUnit.MILLISECONDS.sleep(10);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 
