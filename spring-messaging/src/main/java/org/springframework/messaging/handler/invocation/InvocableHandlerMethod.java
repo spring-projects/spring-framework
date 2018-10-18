@@ -95,14 +95,19 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Invoke the method after resolving its argument values in the context of the given message.
-	 * <p>Argument values are commonly resolved through {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
+	 * <p>Argument values are commonly resolved through
+	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 * The {@code providedArgs} parameter however may supply argument values to be used directly,
 	 * i.e. without argument resolution.
+	 * <p>Delegates to {@link #getMethodArgumentValues} and calls {@link #doInvoke} with the
+	 * resolved arguments.
 	 * @param message the current message being processed
 	 * @param providedArgs "given" arguments matched by type, not resolved
 	 * @return the raw value returned by the invoked method
 	 * @throws Exception raised if no suitable argument resolver can be found,
 	 * or if the method raised an exception
+	 * @see #getMethodArgumentValues
+	 * @see #doInvoke
 	 */
 	@Nullable
 	public Object invoke(Message<?> message, Object... providedArgs) throws Exception {
@@ -120,9 +125,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Get the method argument values for the current request.
+	 * Get the method argument values for the current message, checking the provided
+	 * argument values and falling back to the configured argument resolvers.
+	 * <p>The resulting array will be passed into {@link #doInvoke}.
+	 * @since 5.1.2
 	 */
-	private Object[] getMethodArgumentValues(Message<?> message, Object... providedArgs) throws Exception {
+	protected Object[] getMethodArgumentValues(Message<?> message, Object... providedArgs) throws Exception {
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
