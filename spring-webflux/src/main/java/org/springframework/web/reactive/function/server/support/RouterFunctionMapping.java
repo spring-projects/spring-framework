@@ -34,6 +34,7 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
 
 /**
  * {@code HandlerMapping} implementation that supports {@link RouterFunction RouterFunctions}.
@@ -159,8 +160,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		attributes.put(RouterFunctions.REQUEST_ATTRIBUTE, serverRequest);
 		attributes.put(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerFunction);
 
-		String matchingPattern =
-				(String) attributes.get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE);
+		PathPattern matchingPattern =
+				(PathPattern) attributes.get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE);
 		if (matchingPattern != null) {
 			attributes.put(BEST_MATCHING_PATTERN_ATTRIBUTE, matchingPattern);
 		}

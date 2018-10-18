@@ -369,12 +369,9 @@ public abstract class RequestPredicates {
 		}
 	}
 
-	private static String mergePatterns(@Nullable String oldPattern, String newPattern) {
+	private static PathPattern mergePatterns(@Nullable PathPattern oldPattern, PathPattern newPattern) {
 		if (oldPattern != null) {
-			if (oldPattern.endsWith("/") && newPattern.startsWith("/")) {
-				oldPattern = oldPattern.substring(0, oldPattern.length() - 1);
-			}
-			return oldPattern + newPattern;
+			return oldPattern.combine(newPattern);
 		}
 		else {
 			return newPattern;
@@ -429,10 +426,9 @@ public abstract class RequestPredicates {
 		public boolean test(ServerRequest request) {
 			PathContainer pathContainer = request.pathContainer();
 			PathPattern.PathMatchInfo info = this.pattern.matchAndExtract(pathContainer);
-			String patternString = this.pattern.getPatternString();
-			traceMatch("Pattern", patternString, request.path(), info != null);
+			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), info != null);
 			if (info != null) {
-				mergeAttributes(request, info.getUriVariables(), patternString);
+				mergeAttributes(request, info.getUriVariables(), this.pattern);
 				return true;
 			}
 			else {
@@ -441,13 +437,13 @@ public abstract class RequestPredicates {
 		}
 
 		private static void mergeAttributes(ServerRequest request, Map<String, String> variables,
-				String pattern) {
+				PathPattern pattern) {
 			Map<String, String> pathVariables = mergePathVariables(request.pathVariables(), variables);
 			request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
 						Collections.unmodifiableMap(pathVariables));
 
 			pattern = mergePatterns(
-					(String) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
+					(PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
 					pattern);
 			request.attributes().put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
 		}
@@ -455,7 +451,7 @@ public abstract class RequestPredicates {
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
 			return Optional.ofNullable(this.pattern.matchStartOfPath(request.pathContainer()))
-					.map(info -> new SubPathServerRequestWrapper(request, info, this.pattern.getPatternString()));
+					.map(info -> new SubPathServerRequestWrapper(request, info, this.pattern));
 		}
 
 		@Override
@@ -662,21 +658,21 @@ public abstract class RequestPredicates {
 		private final Map<String, Object> attributes;
 
 		public SubPathServerRequestWrapper(ServerRequest request,
-				PathPattern.PathRemainingMatchInfo info, String pattern) {
+				PathPattern.PathRemainingMatchInfo info, PathPattern pattern) {
 			this.request = request;
 			this.pathContainer = new SubPathContainer(info.getPathRemaining());
 			this.attributes = mergeAttributes(request, info.getUriVariables(), pattern);
 		}
 
 		private static Map<String, Object> mergeAttributes(ServerRequest request,
-		Map<String, String> pathVariables, String pattern) {
+		Map<String, String> pathVariables, PathPattern pattern) {
 			Map<String, Object> result = new ConcurrentHashMap<>(request.attributes());
 
 			result.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
 					mergePathVariables(request.pathVariables(), pathVariables));
 
 			pattern = mergePatterns(
-					(String) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
+					(PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
 					pattern);
 			result.put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
 			return result;

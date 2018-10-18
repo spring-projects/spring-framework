@@ -25,7 +25,9 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.pattern.PathPattern;
 
 import static org.junit.Assert.*;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -122,7 +124,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	private static class NestedHandler {
 
 		public Mono<ServerResponse> pattern(ServerRequest request) {
-			String pattern = matchingPattern(request);
+			String pattern = matchingPattern(request).getPatternString();
 			return ServerResponse.ok().syncBody(pattern);
 		}
 
@@ -134,7 +136,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 			assertTrue( (pathVariables.equals(attributePathVariables))
 					|| (pathVariables.isEmpty() && (attributePathVariables == null)));
 
-			String pattern = matchingPattern(request);
+			PathPattern pathPattern = matchingPattern(request);
+			String pattern = pathPattern != null ? pathPattern.getPatternString() : "";
 			Flux<String> responseBody;
 			if (!pattern.isEmpty()) {
 				responseBody = Flux.just(pattern, "\n", pathVariables.toString());
@@ -144,8 +147,9 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 			return ServerResponse.ok().body(responseBody, String.class);
 		}
 
-		private String matchingPattern(ServerRequest request) {
-			return (String) request.attributes().getOrDefault(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, "");
+		@Nullable
+		private PathPattern matchingPattern(ServerRequest request) {
+			return (PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE);
 		}
 
 	}
