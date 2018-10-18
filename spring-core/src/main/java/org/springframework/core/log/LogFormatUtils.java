@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
  * with other Commons Logging bridges.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.1
  */
 public abstract class LogFormatUtils {
@@ -41,14 +42,24 @@ public abstract class LogFormatUtils {
 	 * @param value the value to format
 	 * @param limitLength whether to truncate large formatted values (over 100)
 	 * @return the formatted value
-	 * @since 5.1
 	 */
 	public static String formatValue(@Nullable Object value, boolean limitLength) {
 		if (value == null) {
 			return "";
 		}
-		String s = (value instanceof CharSequence ? "\"" + value + "\"" : value.toString());
-		return (limitLength && s.length() > 100 ? s.substring(0, 100) + " (truncated)..." : s);
+		String str;
+		if (value instanceof CharSequence) {
+			str = "\"" + value + "\"";
+		}
+		else {
+			try {
+				str = value.toString();
+			}
+			catch (Throwable ex) {
+				str = ex.toString();
+			}
+		}
+		return (limitLength && str.length() > 100 ? str.substring(0, 100) + " (truncated)..." : str);
 	}
 
 	/**
@@ -56,13 +67,13 @@ public abstract class LogFormatUtils {
 	 * messages) at TRACE vs DEBUG log levels. Effectively, a substitute for:
 	 * <pre class="code">
 	 * if (logger.isDebugEnabled()) {
-	 *	String s = logger.isTraceEnabled() ? "..." : "...";
-	 *	if (logger.isTraceEnabled()) {
-	 *		logger.trace(s);
-	 *	}
-	 *	else {
-	 *		logger.debug(s);
-	 *	}
+	 *   String str = logger.isTraceEnabled() ? "..." : "...";
+	 *   if (logger.isTraceEnabled()) {
+	 *     logger.trace(str);
+	 *   }
+	 *   else {
+	 *     logger.debug(str);
+	 *   }
 	 * }
 	 * </pre>
 	 * @param logger the logger to use to log the message
