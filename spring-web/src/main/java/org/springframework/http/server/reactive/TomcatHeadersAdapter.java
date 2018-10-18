@@ -128,7 +128,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	@Nullable
 	public List<String> get(Object key) {
-		if (key instanceof String) {
+		if (containsKey(key)) {
 			return Collections.list(this.headers.values((String) key));
 		}
 		return null;

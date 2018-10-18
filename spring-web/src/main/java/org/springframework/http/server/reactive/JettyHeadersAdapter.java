@@ -114,7 +114,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	@Override
 	public List<String> get(Object key) {
-		if (key instanceof String) {
+		if (containsKey(key)) {
 			return this.headers.getValuesList((String) key);
 		}
 		return null;

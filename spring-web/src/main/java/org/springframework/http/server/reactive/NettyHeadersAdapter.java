@@ -91,7 +91,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public int size() {
-		return this.headers.size();
+		return this.headers.names().size();
 	}
 
 	@Override
@@ -114,7 +114,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	@Nullable
 	public List<String> get(Object key) {
-		if (key instanceof String) {
+		if (containsKey(key)) {
 			return this.headers.getAll((String) key);
 		}
 		return null;
