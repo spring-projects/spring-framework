@@ -413,6 +413,20 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
+	public void takeUntilByteCountErrorInFlux() {
+		DataBuffer foo = stringBuffer("foo");
+		Flux<DataBuffer> flux =
+				Flux.just(foo).concatWith(Mono.error(new RuntimeException()));
+
+		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(flux, 5L);
+
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("foo"))
+				.expectError(RuntimeException.class)
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
 	public void takeUntilByteCountExact() {
 
 		DataBuffer extraBuffer = stringBuffer("baz");
@@ -441,6 +455,18 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("r"))
 				.consumeNextWith(stringConsumer("baz"))
 				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	public void skipUntilByteCountErrorInFlux() {
+		DataBuffer foo = stringBuffer("foo");
+		Flux<DataBuffer> flux =
+				Flux.just(foo).concatWith(Mono.error(new RuntimeException()));
+		Flux<DataBuffer> result = DataBufferUtils.skipUntilByteCount(flux, 3L);
+
+		StepVerifier.create(result)
+				.expectError(RuntimeException.class)
 				.verify(Duration.ofSeconds(5));
 	}
 
