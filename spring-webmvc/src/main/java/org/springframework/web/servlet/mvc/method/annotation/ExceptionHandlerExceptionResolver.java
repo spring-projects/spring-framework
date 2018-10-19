@@ -491,4 +491,10 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		return null;
 	}
 
+	@Override
+	protected boolean useWarnLevelWhenWarnLoggerNotEnabled() {
+		// Use DEBUG level
+		return false;
+	}
+
 }
