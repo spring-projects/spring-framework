@@ -32,6 +32,13 @@ import static org.junit.Assert.*;
 public class StringUtilsTests {
 
 	@Test
+	public void testIsNotEmpty() {
+		assertEquals(false, StringUtils.isNotEmpty(null));
+		assertEquals(false, StringUtils.isNotEmpty(""));
+		assertEquals(true, StringUtils.isNotEmpty("a"));
+	}
+
+	@Test
 	public void testHasTextBlank() {
 		String blank = "          ";
 		assertEquals(false, StringUtils.hasText(blank));

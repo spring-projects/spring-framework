@@ -90,6 +90,15 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Check whether the given {@code String} is not empty.
+	 * @param str the candidate String
+	 * @see #isEmpty(String)
+	 */
+	public static boolean isNotEmpty(@Nullable Object str) {
+		return !isEmpty(str);
+	}
+
+	/**
 	 * Check that the given {@code CharSequence} is neither {@code null} nor
 	 * of length 0.
 	 * <p>Note: this method returns {@code true} for a {@code CharSequence}
