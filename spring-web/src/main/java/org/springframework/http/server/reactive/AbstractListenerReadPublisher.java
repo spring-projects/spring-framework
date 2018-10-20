@@ -163,6 +163,14 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 */
 	protected abstract void readingPaused();
 
+	/**
+	 * Invoked after an I/O read error from the underlying server or after a
+	 * cancellation signal from the downstream consumer to allow sub-classes
+	 * to discard any current cached data they might have.
+	 * @since 5.1.2
+	 */
+	protected abstract void discardData();
+
 
 	// Private methods for use in State...
 
@@ -416,7 +424,10 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		}
 
 		<T> void cancel(AbstractListenerReadPublisher<T> publisher) {
-			if (!publisher.changeState(this, COMPLETED)) {
+			if (publisher.changeState(this, COMPLETED)) {
+				publisher.discardData();
+			}
+			else {
 				publisher.state.get().cancel(publisher);
 			}
 		}
@@ -439,6 +450,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 		<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable t) {
 			if (publisher.changeState(this, COMPLETED)) {
+				publisher.discardData();
 				Subscriber<? super T> s = publisher.subscriber;
 				if (s != null) {
 					s.onError(t);

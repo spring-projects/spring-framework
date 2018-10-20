@@ -116,8 +116,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return Flux.from(this.body)
-				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+		return Flux.from(this.body);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -201,6 +200,10 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 			}
 		}
 
+		@Override
+		protected void discardData() {
+			// Nothing to discard since we pass data buffers on immediately..
+		}
 	}
 
 	private static class UndertowDataBuffer implements PooledDataBuffer {
