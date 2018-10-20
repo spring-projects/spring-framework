@@ -194,6 +194,10 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 			}
 		}
 
+		@Override
+		protected void discardData() {
+			// Nothing to discard since we pass data buffers on immediately..
+		}
 	}
 
 	private static class UndertowDataBuffer implements PooledDataBuffer {

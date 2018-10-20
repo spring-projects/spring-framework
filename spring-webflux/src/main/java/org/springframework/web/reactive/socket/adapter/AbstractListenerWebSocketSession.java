@@ -250,10 +250,22 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 				logger.trace("Received message: " + message);
 			}
 			if (!this.pendingMessages.offer(message)) {
-				throw new IllegalStateException("Too many messages received. " +
-						"Please ensure WebSocketSession.receive() is subscribed to.");
+				discardData();
+				throw new IllegalStateException(
+						"Too many messages. Please ensure WebSocketSession.receive() is subscribed to.");
 			}
 			onDataAvailable();
+		}
+
+		@Override
+		protected void discardData() {
+			while (true) {
+				WebSocketMessage message = (WebSocketMessage) this.pendingMessages.poll();
+				if (message == null) {
+					return;
+				}
+				message.release();
+			}
 		}
 	}
 
@@ -267,6 +279,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 			if (logger.isTraceEnabled()) {
 				logger.trace("Sending message " + message);
 			}
+			// In case of IOException, onError handling should call discardData(WebSocketMessage)..
 			return sendMessage(message);
 		}
 
@@ -290,6 +303,11 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 				logger.trace("Send succeeded, ready to send again");
 			}
 			this.isReady = ready;
+		}
+
+		@Override
+		protected void discardData(WebSocketMessage message) {
+			message.release();
 		}
 	}
 

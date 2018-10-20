@@ -174,6 +174,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			// Track write listener calls from here on..
 			this.writePossible = false;
 
+			// In case of IOException, onError handling should call discardData(DataBuffer)..
 			int total = buffer.remaining();
 			int written = writeByteBuffer(buffer);
 
@@ -227,6 +228,11 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 		protected void writingFailed(Throwable ex) {
 			cancel();
 			onError(ex);
+		}
+
+		@Override
+		protected void discardData(DataBuffer dataBuffer) {
+			DataBufferUtils.release(dataBuffer);
 		}
 	}
 

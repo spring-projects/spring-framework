@@ -318,6 +318,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 			}
 			int remaining = dataBuffer.readableByteCount();
 			if (ready && remaining > 0) {
+				// In case of IOException, onError handling should call discardData(DataBuffer)..
 				int written = writeToOutputStream(dataBuffer);
 				if (this.logger.isTraceEnabled()) {
 					this.logger.trace("written: " + written + " total: " + remaining);
@@ -336,6 +337,11 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		@Override
 		protected void writingComplete() {
 			bodyProcessor = null;
+		}
+
+		@Override
+		protected void discardData(DataBuffer dataBuffer) {
+			DataBufferUtils.release(dataBuffer);
 		}
 	}
 
