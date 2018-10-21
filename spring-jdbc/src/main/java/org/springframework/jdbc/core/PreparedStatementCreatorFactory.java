@@ -176,6 +176,9 @@ public class PreparedStatementCreatorFactory {
 				sqlToUse, params != null ? Arrays.asList(params) : Collections.emptyList());
 	}
 
+	public String getSql() {
+		return sql;
+	}
 
 	/**
 	 * PreparedStatementCreator implementation returned by this class.

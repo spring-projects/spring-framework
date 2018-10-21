@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BatchUpdateUtils;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 
 /**
  * Generic utility methods for working with JDBC batch statements using named parameters.
@@ -32,22 +34,17 @@ import org.springframework.jdbc.core.JdbcOperations;
  */
 public abstract class NamedParameterBatchUpdateUtils extends BatchUpdateUtils {
 
-	public static int[] executeBatchUpdateWithNamedParameters(final ParsedSql parsedSql,
-			final SqlParameterSource[] batchArgs, JdbcOperations jdbcOperations) {
+	public static int[] executeBatchUpdateWithNamedParameters(ParsedSql parsedSql, final PreparedStatementCreatorFactory pscf,
+															  final SqlParameterSource[] batchArgs, JdbcOperations jdbcOperations) {
 
-		if (batchArgs.length <= 0) {
-			return new int[] {0};
-		}
-
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, batchArgs[0]);
 		return jdbcOperations.batchUpdate(
-				sqlToUse,
+				pscf.getSql(),
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
-						int[] columnTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, batchArgs[i]);
-						setStatementParameters(values, ps, columnTypes);
+						PreparedStatementSetter preparedStatementSetter = pscf.newPreparedStatementSetter(values);
+						preparedStatementSetter.setValues(ps);
 					}
 					@Override
 					public int getBatchSize() {

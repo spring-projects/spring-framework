@@ -352,8 +352,13 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
+		if (batchArgs.length <= 0) {
+			return new int[] {0};
+		}
+		ParsedSql parsedSql = getParsedSql(sql);
+		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, batchArgs[0], null);
 		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(
-				getParsedSql(sql), batchArgs, getJdbcOperations());
+				parsedSql, pscf, batchArgs, getJdbcOperations());
 	}
 
 
@@ -389,14 +394,20 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			@Nullable Consumer<PreparedStatementCreatorFactory> customizer) {
 
 		ParsedSql parsedSql = getParsedSql(sql);
+		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, paramSource, customizer);
+		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+		return pscf.newPreparedStatementCreator(params);
+	}
+
+	protected PreparedStatementCreatorFactory getPreparedStatementCreatorFactory(ParsedSql parsedSql, SqlParameterSource paramSource,
+																				 @Nullable Consumer<PreparedStatementCreatorFactory> customizer){
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
 		List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
 		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, declaredParameters);
 		if (customizer != null) {
 			customizer.accept(pscf);
 		}
-		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
-		return pscf.newPreparedStatementCreator(params);
+		return pscf;
 	}
 
 	/**
