@@ -456,8 +456,8 @@ initialization parameters (`init-param` elements) to the Servlet declaration in 
 | Parameter| Explanation
 
 | `contextClass`
-| Class that implements `WebApplicationContext`, which instantiates the context used by
-  this Servlet. By default, `XmlWebApplicationContext` is used.
+| Class that implements `ConfigurableWebApplicationContext`, to be instantiated and
+  locally configured by this Servlet. By default, `XmlWebApplicationContext` is used.
 
 | `contextConfigLocation`
 | String that is passed to the context instance (specified by `contextClass`) to
