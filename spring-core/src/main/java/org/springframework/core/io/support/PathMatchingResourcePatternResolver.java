@@ -17,6 +17,7 @@
 package org.springframework.core.io.support;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -697,10 +698,16 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		try {
 			rootDir = rootDirResource.getFile().getAbsoluteFile();
 		}
-		catch (IOException ex) {
+		catch (FileNotFoundException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot search for matching files underneath " + rootDirResource +
+						" in the file system: " + ex.getMessage());
+			}
+			return Collections.emptySet();
+		}
+		catch (Exception ex) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Cannot search for matching files underneath " + rootDirResource +
-						" because it does not correspond to a directory in the file system", ex);
+				logger.info("Failed to resolve " + rootDirResource + " in the file system: " + ex);
 			}
 			return Collections.emptySet();
 		}
@@ -755,7 +762,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		if (!rootDir.canRead()) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Cannot search for matching files underneath directory [" + rootDir.getAbsolutePath() +
+				logger.info("Skipping search for matching files underneath directory [" + rootDir.getAbsolutePath() +
 						"] because the application is not allowed to read the directory");
 			}
 			return Collections.emptySet();
