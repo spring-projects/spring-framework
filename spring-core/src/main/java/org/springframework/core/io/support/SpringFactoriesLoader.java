@@ -57,13 +57,13 @@ import org.springframework.util.StringUtils;
  */
 public abstract class SpringFactoriesLoader {
 
-	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
-
 	/**
 	 * The location to look for factories.
 	 * <p>Can be present in multiple JAR files.
 	 */
 	public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";
+
+	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
 
 	/**
@@ -74,9 +74,9 @@ public abstract class SpringFactoriesLoader {
 	 * to obtain all registered factory names.
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
-	 * @see #loadFactoryNames
 	 * @throws IllegalArgumentException if any factory implementation class cannot
 	 * be loaded or if an error occurs while instantiating any factory
+	 * @see #loadFactoryNames
 	 */
 	public static <T> List<T> loadFactories(Class<T> factoryClass, ClassLoader classLoader) {
 		Assert.notNull(factoryClass, "'factoryClass' must not be null");
@@ -103,8 +103,8 @@ public abstract class SpringFactoriesLoader {
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading resources; can be
 	 * {@code null} to use the default
-	 * @see #loadFactories
 	 * @throws IllegalArgumentException if an error occurs while loading factory names
+	 * @see #loadFactories
 	 */
 	public static List<String> loadFactoryNames(Class<?> factoryClass, ClassLoader classLoader) {
 		String factoryClassName = factoryClass.getName();
@@ -115,14 +115,16 @@ public abstract class SpringFactoriesLoader {
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));
-				String factoryClassNames = properties.getProperty(factoryClassName);
-				result.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(factoryClassNames)));
+				String propertyValue = properties.getProperty(factoryClassName);
+				for (String factoryName : StringUtils.commaDelimitedListToStringArray(propertyValue)) {
+					result.add(factoryName.trim());
+				}
 			}
 			return result;
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException("Unable to load [" + factoryClass.getName() +
-					"] factories from location [" + FACTORIES_RESOURCE_LOCATION + "]", ex);
+			throw new IllegalArgumentException("Unable to load factories from location [" +
+					FACTORIES_RESOURCE_LOCATION + "]", ex);
 		}
 	}
 
