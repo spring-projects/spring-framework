@@ -17,6 +17,7 @@
 package org.springframework.core.io.support;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -171,7 +172,7 @@ import org.springframework.util.StringUtils;
  * @author Colin Sampaleanu
  * @author Marius Bogoevici
  * @author Costin Leau
- * @author Phil Webb
+ * @author Phillip Webb
  * @since 1.0.2
  * @see #CLASSPATH_ALL_URL_PREFIX
  * @see org.springframework.util.AntPathMatcher
@@ -696,10 +697,16 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		try {
 			rootDir = rootDirResource.getFile().getAbsoluteFile();
 		}
-		catch (IOException ex) {
+		catch (FileNotFoundException ex) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Cannot search for matching files underneath " + rootDirResource +
+						" in the file system: " + ex.getMessage());
+			}
+			return Collections.emptySet();
+		}
+		catch (Exception ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Cannot search for matching files underneath " + rootDirResource +
-						" because it does not correspond to a directory in the file system", ex);
+				logger.warn("Failed to resolve " + rootDirResource + " in the file system: " + ex);
 			}
 			return Collections.emptySet();
 		}
