@@ -33,6 +33,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -96,7 +97,8 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream)
 				.flatMap(dataBuffer -> splitOnDelimiter(dataBuffer, delimiterBytes))
 				.bufferUntil(StringDecoder::isEndFrame)
-				.flatMap(StringDecoder::joinUntilEndFrame);
+				.flatMap(StringDecoder::joinUntilEndFrame)
+				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		return super.decode(inputFlux, elementType, mimeType, hints);
 	}
 
