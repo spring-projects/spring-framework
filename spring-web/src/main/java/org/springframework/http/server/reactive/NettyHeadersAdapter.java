@@ -124,7 +124,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public List<String> put(String key, @Nullable List<String> value) {
 		List<String> previousValues = this.headers.getAll(key);
-		this.headers.add(key, value);
+		this.headers.set(key, value);
 		return previousValues;
 	}
 

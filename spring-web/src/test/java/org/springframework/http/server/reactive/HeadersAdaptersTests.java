@@ -16,12 +16,14 @@
 
 package org.springframework.http.server.reactive;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.undertow.util.HeaderMap;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.eclipse.jetty.http.HttpFields;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -55,6 +57,11 @@ public class HeadersAdaptersTests {
 				{new UndertowHeadersAdapter(new HeaderMap())},
 				{new JettyHeadersAdapter(new HttpFields())}
 		};
+	}
+
+	@After
+	public void tearDown() {
+		this.headers.clear();
 	}
 
 	@Test
@@ -94,6 +101,14 @@ public class HeadersAdaptersTests {
 		this.headers.add("TestHeader", "second");
 		assertEquals("first", this.headers.getFirst("TestHeader"));
 		assertEquals("first", this.headers.get("TestHeader").get(0));
+	}
+
+	@Test
+	public void putShouldOverrideExisting() {
+		this.headers.add("TestHeader", "first");
+		this.headers.put("TestHeader", Arrays.asList("override"));
+		assertEquals("override", this.headers.getFirst("TestHeader"));
+		assertEquals(1, this.headers.get("TestHeader").size());
 	}
 
 }

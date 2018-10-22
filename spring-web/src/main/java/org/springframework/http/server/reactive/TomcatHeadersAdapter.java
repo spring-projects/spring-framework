@@ -138,6 +138,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	public List<String> put(String key, List<String> value) {
 		List<String> previousValues = get(key);
+		this.headers.removeHeader(key);
 		value.forEach(v -> this.headers.addValue(key).setString(v));
 		return previousValues;
 	}
