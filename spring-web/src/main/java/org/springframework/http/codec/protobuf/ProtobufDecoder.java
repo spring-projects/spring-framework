@@ -216,11 +216,17 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 				} while (remainingBytesToRead > 0);
 				return messages;
 			}
+			catch (DecodingException ex) {
+				throw ex;
+			}
 			catch (IOException ex) {
 				throw new DecodingException("I/O error while parsing input stream", ex);
 			}
 			catch (Exception ex) {
 				throw new DecodingException("Could not read Protobuf message: " + ex.getMessage(), ex);
+			}
+			finally {
+				DataBufferUtils.release(input);
 			}
 		}
 	}
