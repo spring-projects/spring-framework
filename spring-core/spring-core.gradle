@@ -12,7 +12,7 @@ dependencyManagement {
 // further transformed by the JarJar task to depend on org.springframework.asm; this
 // avoids including two different copies of asm unnecessarily.
 def cglibVersion = "3.2.8"
-def objenesisVersion = "3.0"
+def objenesisVersion = "3.0.1"
 
 configurations {
 	jarjar
