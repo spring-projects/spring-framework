@@ -136,8 +136,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
 				// Print warn message when warn logger is not enabled...
-				if (logger.isWarnEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
-					logger.warn("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
+				if (logger.isDebugEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
+					logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
 				}
 				// warnLogger with full stack trace (requires explicit config)
 				logException(ex, request);
