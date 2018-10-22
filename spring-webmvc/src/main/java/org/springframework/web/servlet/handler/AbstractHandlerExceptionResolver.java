@@ -135,18 +135,11 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			prepareResponse(ex, response);
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
-				// Print warn or debug message when warn logger is not enabled...
-				if (this.warnLogger == null || !this.warnLogger.isWarnEnabled()) {
-					if (!useWarnLevelWhenWarnLoggerNotEnabled()) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
-						}
-					}
-					else if (logger.isWarnEnabled()) {
-						logger.warn("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
-					}
+				// Print warn message when warn logger is not enabled...
+				if (logger.isWarnEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
+					logger.warn("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
 				}
-				// Log with warnLogger (requires explicit config)
+				// warnLogger with full stack trace (requires explicit config)
 				logException(ex, request);
 			}
 			return result;
@@ -184,16 +177,6 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		}
 		// Else only apply if there are no explicit handler mappings.
 		return (this.mappedHandlers == null && this.mappedHandlerClasses == null);
-	}
-
-	/**
-	 * Whether to log warn level messages (return value "true") or debug level
-	 * messages (return value "false") through the regular class logger when
-	 * {@link #setWarnLogCategory warn logging} is not activated.
-	 * <p>By default returns "true".
-	 */
-	protected boolean useWarnLevelWhenWarnLoggerNotEnabled() {
-		return true;
 	}
 
 	/**
