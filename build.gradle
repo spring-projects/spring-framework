@@ -41,11 +41,11 @@ ext {
 	reactorVersion       = "Californium-SR1"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
-	rxjava2Version       = "2.2.2"
+	rxjava2Version       = "2.2.3"
 	slf4jVersion         = "1.7.25"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
 	tomcatVersion        = "9.0.12"
-	undertowVersion      = "2.0.13.Final"
+	undertowVersion      = "2.0.14.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
 	withoutJclOverSlf4J = {
