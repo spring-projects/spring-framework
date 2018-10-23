@@ -2147,19 +2147,21 @@ configure or customize message writing.
 ==== ResponseEntity
 [.small]#<<web.adoc#mvc-ann-responseentity,Same in Spring MVC>>#
 
-`ResponseEntity` is more or less identical to using <<webflux-ann-responsebody>> but based
-on a container object that specifies request headers and body. Below is an example:
+`ResponseEntity` is like <<webflux-ann-responsebody>> but with status and headers. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/something")
+	@GetMapping("/something")
 	public ResponseEntity<String> handle() {
-		// ...
-		URI location = ...
-		return new ResponseEntity.created(location).build();
+		String body = ... ;
+		String etag = ... ;
+		return ResponseEntity.ok().eTag(etag).build(body);
 	}
 ----
+WebFlux supports using a single value <<webflux-reactive-libraries,reactive type>> to
+produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types
+for the body.
 
 
 [[webflux-ann-jackson]]
