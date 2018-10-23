@@ -70,8 +70,7 @@ public class ReactorNettyWebSocketSession
 
 	@Override
 	public Mono<Void> close(CloseStatus status) {
-		WebSocketFrame closeFrame = new CloseWebSocketFrame(status.getCode(), status.getReason());
-		return getDelegate().getOutbound().sendObject(closeFrame).then();
+		return getDelegate().getOutbound().sendClose(status.getCode(), status.getReason());
 	}
 
 
