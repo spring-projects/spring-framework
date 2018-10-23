@@ -2789,21 +2789,25 @@ See <<mvc-ann-jackson>> for details.
 ==== ResponseEntity
 [.small]#<<web-reactive.adoc#webflux-ann-responseentity,Same as in Spring WebFlux>>#
 
-`ResponseEntity` is more or less identical to using <<mvc-ann-responsebody>> but is based
-on a container object that specifies request headers and body. The following listing shows an example:
+`ResponseEntity` is like <<mvc-ann-responsebody>> but with status and headers. For example:
 
 ====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/something")
+	@GetMapping("/something")
 	public ResponseEntity<String> handle() {
-		// ...
-		URI location = ... ;
-		return ResponseEntity.created(location).build();
+		String body = ... ;
+		String etag = ... ;
+		return ResponseEntity.ok().eTag(etag).build(body);
 	}
 ----
 ====
+
+Spring MVC supports using a single value <<mvc-ann-async-reactive-types,reactive type>>
+to produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive
+types for the body.
+
 
 
 
@@ -3854,10 +3858,11 @@ customize the status and headers of the response.
 === Reactive Types
 [.small]#<<web-reactive.adoc#webflux-codecs-streaming,Same as in Spring WebFlux>>#
 
-Spring MVC supports use of reactive client libraries in a controller. This includes the
-`WebClient` from `spring-webflux` and others, such as Spring Data reactive data
-repositories. In such scenarios, it is convenient to be able to return reactive types
-from the controller method .
+Spring MVC supports use of reactive client libraries in a controller (also read
+<<web-reactive.adoc#webflux-reactive-libraries,Reactive Libraries>> in the WebFlux section).
+This includes the `WebClient` from `spring-webflux` and others, such as Spring Data
+reactive data repositories. In such scenarios, it is convenient to be able to return
+reactive types from the controller method.
 
 Reactive return values are handled as follows:
 
