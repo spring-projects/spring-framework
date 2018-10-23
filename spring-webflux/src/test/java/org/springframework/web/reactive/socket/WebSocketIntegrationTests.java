@@ -197,7 +197,10 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 
 		@Override
 		public Mono<Void> handle(WebSocketSession session) {
-			return Flux.never().mergeWith(session.close(CloseStatus.GOING_AWAY)).then();
+			return session.send(Flux
+					.error(new Throwable())
+					.onErrorResume(ex -> session.close(CloseStatus.GOING_AWAY)) // SPR-17306 (nested close)
+					.cast(WebSocketMessage.class));
 		}
 	}
 
