@@ -40,6 +40,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
@@ -138,6 +139,36 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("bar"))
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	public void readResourcePositionAndTakeUntil() throws Exception {
+		Resource resource = new ClassPathResource("DataBufferUtilsTests.txt", getClass());
+		Flux<DataBuffer> flux = DataBufferUtils.read(resource, 3, this.bufferFactory, 3);
+
+		flux = DataBufferUtils.takeUntilByteCount(flux, 5);
+
+
+		StepVerifier.create(flux)
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("ba"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	public void readByteArrayResourcePositionAndTakeUntil() throws Exception {
+		Resource resource = new ByteArrayResource("foobarbazqux" .getBytes());
+		Flux<DataBuffer> flux = DataBufferUtils.read(resource, 3, this.bufferFactory, 3);
+
+		flux = DataBufferUtils.takeUntilByteCount(flux, 5);
+
+
+		StepVerifier.create(flux)
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("ba"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
 	}

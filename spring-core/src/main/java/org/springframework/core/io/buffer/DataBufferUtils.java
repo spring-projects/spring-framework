@@ -139,12 +139,14 @@ public abstract class DataBufferUtils {
 		DataBuffer dataBuffer = dataBufferFactory.allocateBuffer(bufferSize);
 		ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, bufferSize);
 
+
 		Flux<DataBuffer> result = Flux.using(channelSupplier,
 				channel -> Flux.create(sink -> {
-					CompletionHandler<Integer, DataBuffer> completionHandler =
+					AsynchronousFileChannelReadCompletionHandler completionHandler =
 							new AsynchronousFileChannelReadCompletionHandler(channel,
 									sink, position, dataBufferFactory, bufferSize);
 					channel.read(byteBuffer, position, dataBuffer, completionHandler);
+					sink.onDispose(completionHandler::dispose);
 				}),
 				DataBufferUtils::closeChannel);
 
@@ -544,6 +546,10 @@ public abstract class DataBufferUtils {
 		public void failed(Throwable exc, DataBuffer dataBuffer) {
 			release(dataBuffer);
 			this.sink.error(exc);
+		}
+
+		public void dispose() {
+			this.disposed.set(true);
 		}
 	}
 
