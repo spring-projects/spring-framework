@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,17 +31,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for {@link ResourceRegionEncoder} class.
@@ -55,7 +49,6 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 	@Before
 	public void setUp() {
 		this.encoder = new ResourceRegionEncoder();
-		this.bufferFactory = new DefaultDataBufferFactory();
 	}
 
 	@Test
@@ -111,6 +104,30 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 				new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)));
 	}
 
+	@Test
+	public void nonExisting() {
+		Resource resource = new ClassPathResource("ResourceRegionEncoderTests.txt", getClass());
+		Resource nonExisting = new ClassPathResource("does not exist", getClass());
+		Flux<ResourceRegion> regions = Flux.just(
+				new ResourceRegion(resource, 0, 6),
+				new ResourceRegion(nonExisting, 0, 6));
+
+		String boundary = MimeTypeUtils.generateMultipartBoundaryString();
+
+		Flux<DataBuffer> result = this.encoder.encode(regions, this.bufferFactory,
+				ResolvableType.forClass(ResourceRegion.class),
+				MimeType.valueOf("text/plain"),
+				Collections.singletonMap(ResourceRegionEncoder.BOUNDARY_STRING_HINT, boundary));
+
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("\r\n--" + boundary + "\r\n"))
+				.consumeNextWith(stringConsumer("Content-Type: text/plain\r\n"))
+				.consumeNextWith(stringConsumer("Content-Range: bytes 0-5/39\r\n\r\n"))
+				.consumeNextWith(stringConsumer("Spring"))
+				.expectError(EncodingException.class)
+				.verify();
+	}
+
 	private void shouldEncodeMultipleResourceRegions(Resource resource) {
 		Flux<ResourceRegion> regions = Flux.just(
 				new ResourceRegion(resource, 0, 6),
@@ -120,45 +137,30 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 		);
 		String boundary = MimeTypeUtils.generateMultipartBoundaryString();
 
-		Flux<DataBuffer> result = this.encoder.encode(regions, this.bufferFactory,
+		Flux<DataBuffer> result = this.encoder.encode(regions, super.bufferFactory,
 				ResolvableType.forClass(ResourceRegion.class),
 				MimeType.valueOf("text/plain"),
 				Collections.singletonMap(ResourceRegionEncoder.BOUNDARY_STRING_HINT, boundary)
 		);
 
-		Mono<DataBuffer> reduced = result
-				.reduce(bufferFactory.allocateBuffer(), (previous, current) -> {
-					previous.write(current);
-					DataBufferUtils.release(current);
-					return previous;
-				});
-
-		StepVerifier.create(reduced)
-				.consumeNextWith(buf -> {
-					String content = DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
-					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n",
-							false, true);
-					String[] expected = new String[] {
-							"--" + boundary,
-							"Content-Type: text/plain",
-							"Content-Range: bytes 0-5/39",
-							"Spring",
-							"--" + boundary,
-							"Content-Type: text/plain",
-							"Content-Range: bytes 7-15/39",
-							"Framework",
-							"--" + boundary,
-							"Content-Type: text/plain",
-							"Content-Range: bytes 17-20/39",
-							"test",
-							"--" + boundary,
-							"Content-Type: text/plain",
-							"Content-Range: bytes 22-38/39",
-							"resource content.",
-							"--" + boundary + "--"
-					};
-					assertArrayEquals(expected, ranges);
-				})
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("\r\n--" + boundary + "\r\n"))
+				.consumeNextWith(stringConsumer("Content-Type: text/plain\r\n"))
+				.consumeNextWith(stringConsumer("Content-Range: bytes 0-5/39\r\n\r\n"))
+				.consumeNextWith(stringConsumer("Spring"))
+				.consumeNextWith(stringConsumer("\r\n--" + boundary + "\r\n"))
+				.consumeNextWith(stringConsumer("Content-Type: text/plain\r\n"))
+				.consumeNextWith(stringConsumer("Content-Range: bytes 7-15/39\r\n\r\n"))
+				.consumeNextWith(stringConsumer("Framework"))
+				.consumeNextWith(stringConsumer("\r\n--" + boundary + "\r\n"))
+				.consumeNextWith(stringConsumer("Content-Type: text/plain\r\n"))
+				.consumeNextWith(stringConsumer("Content-Range: bytes 17-20/39\r\n\r\n"))
+				.consumeNextWith(stringConsumer("test"))
+				.consumeNextWith(stringConsumer("\r\n--" + boundary + "\r\n"))
+				.consumeNextWith(stringConsumer("Content-Type: text/plain\r\n"))
+				.consumeNextWith(stringConsumer("Content-Range: bytes 22-38/39\r\n\r\n"))
+				.consumeNextWith(stringConsumer("resource content."))
+				.consumeNextWith(stringConsumer("\r\n--" + boundary + "--"))
 				.expectComplete()
 				.verify();
 	}
