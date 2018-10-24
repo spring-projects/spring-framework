@@ -246,23 +246,12 @@ public abstract class DataBufferUtils {
 		Assert.notNull(channel, "'channel' must not be null");
 
 		Flux<DataBuffer> flux = Flux.from(source);
-		return Flux.create(sink ->
-				flux.subscribe(dataBuffer -> {
-							try {
-								ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
-								while (byteBuffer.hasRemaining()) {
-									channel.write(byteBuffer);
-								}
-								sink.next(dataBuffer);
-							}
-							catch (IOException ex) {
-								sink.next(dataBuffer);
-								sink.error(ex);
-							}
-
-						},
-						sink::error,
-						sink::complete));
+		return Flux.create(sink -> {
+			WritableByteChannelSubscriber subscriber =
+					new WritableByteChannelSubscriber(sink, channel);
+			sink.onDispose(subscriber);
+			flux.subscribe(subscriber);
+		});
 	}
 
 	/**
@@ -305,11 +294,15 @@ public abstract class DataBufferUtils {
 		Assert.isTrue(position >= 0, "'position' must be >= 0");
 
 		Flux<DataBuffer> flux = Flux.from(source);
-		return Flux.create(sink ->
-				flux.subscribe(new AsynchronousFileChannelWriteCompletionHandler(sink, channel, position)));
+		return Flux.create(sink -> {
+			AsynchronousFileChannelWriteCompletionHandler completionHandler =
+					new AsynchronousFileChannelWriteCompletionHandler(sink, channel, position);
+			sink.onDispose(completionHandler);
+			flux.subscribe(completionHandler);
+		});
 	}
 
-	private static void closeChannel(@Nullable Channel channel) {
+	static void closeChannel(@Nullable Channel channel) {
 		if (channel != null && channel.isOpen()) {
 			try {
 				channel.close();
@@ -550,6 +543,50 @@ public abstract class DataBufferUtils {
 
 		public void dispose() {
 			this.disposed.set(true);
+		}
+	}
+
+
+	private static class WritableByteChannelSubscriber extends BaseSubscriber<DataBuffer> {
+
+		private final FluxSink<DataBuffer> sink;
+
+		private final WritableByteChannel channel;
+
+		public WritableByteChannelSubscriber(FluxSink<DataBuffer> sink, WritableByteChannel channel) {
+			this.sink = sink;
+			this.channel = channel;
+		}
+
+		@Override
+		protected void hookOnSubscribe(Subscription subscription) {
+			request(1);
+		}
+
+		@Override
+		protected void hookOnNext(DataBuffer dataBuffer) {
+			try {
+				ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
+				while (byteBuffer.hasRemaining()) {
+					this.channel.write(byteBuffer);
+				}
+				this.sink.next(dataBuffer);
+				request(1);
+			}
+			catch (IOException ex) {
+				this.sink.next(dataBuffer);
+				this.sink.error(ex);
+			}
+		}
+
+		@Override
+		protected void hookOnError(Throwable throwable) {
+			this.sink.error(throwable);
+		}
+
+		@Override
+		protected void hookOnComplete() {
+			this.sink.complete();
 		}
 	}
 

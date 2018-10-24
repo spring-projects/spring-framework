@@ -30,6 +30,7 @@ import org.junit.Rule;
 import org.junit.rules.Verifier;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
@@ -67,6 +68,10 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 
 	protected DataBuffer stringBuffer(String value) {
 		return byteBuffer(value.getBytes(StandardCharsets.UTF_8));
+	}
+
+	protected Mono<DataBuffer> deferStringBuffer(String value) {
+		return Mono.defer(() -> Mono.just(stringBuffer(value)));
 	}
 
 	protected DataBuffer byteBuffer(byte[] value) {
