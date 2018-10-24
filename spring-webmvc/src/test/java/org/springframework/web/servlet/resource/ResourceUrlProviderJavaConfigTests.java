@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,14 @@
 
 package org.springframework.web.servlet.resource;
 
+import java.io.IOException;
+import java.util.Arrays;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -55,8 +64,6 @@ public class ResourceUrlProviderJavaConfigTests {
 	@Before
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
-		this.filterChain = new MockFilterChain(this.servlet, new ResourceUrlEncodingFilter());
-
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
 		context.register(WebConfig.class);
@@ -66,8 +73,9 @@ public class ResourceUrlProviderJavaConfigTests {
 		this.request.setContextPath("/myapp");
 		this.response = new MockHttpServletResponse();
 
-		Object urlProvider = context.getBean(ResourceUrlProvider.class);
-		this.request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, urlProvider);
+		this.filterChain = new MockFilterChain(this.servlet,
+				new ResourceUrlEncodingFilter(),
+				new ResourceUrlProviderExposingFilter(context));
 	}
 
 	@Test
@@ -113,6 +121,34 @@ public class ResourceUrlProviderJavaConfigTests {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("classpath:org/springframework/web/servlet/resource/test/")
 				.resourceChain(true).addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class ResourceUrlProviderExposingFilter implements Filter {
+
+		private final ApplicationContext context;
+
+		public ResourceUrlProviderExposingFilter(ApplicationContext context) {
+			this.context = context;
+		}
+
+		@Override
+		public void init(FilterConfig filterConfig) throws ServletException {
+
+		}
+
+		@Override
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+				throws IOException, ServletException {
+			Object urlProvider = context.getBean(ResourceUrlProvider.class);
+			request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, urlProvider);
+			chain.doFilter(request, response);
+		}
+
+		@Override
+		public void destroy() {
+
 		}
 	}
 
