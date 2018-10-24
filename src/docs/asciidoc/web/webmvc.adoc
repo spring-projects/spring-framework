@@ -1790,10 +1790,11 @@ and others) and is equivalent to `required=false`.
 | For access to name-value pairs in URI path segments. See <<mvc-ann-matrix-variables>>.
 
 | `@RequestParam`
-| For access to the Servlet request parameters. Parameter values are converted to the declared
-  method argument type. See <<mvc-ann-requestparam>>.
+| For access to the Servlet request parameters, including multipart files. Parameter values
+  are converted to the declared method argument type. See <<mvc-ann-requestparam>> as well
+  as <<mvc-multipart-forms>>.
 
-  Note that use of `@RequestParam` is optional (for example, to set its attributes).
+  Note that use of `@RequestParam` is optional for simple parameter values.
   See "`Any other argument`", at the end of this table.
 
 | `@RequestHeader`
@@ -1809,12 +1810,12 @@ and others) and is equivalent to `required=false`.
   argument type by using `HttpMessageConverter` implementations. See <<mvc-ann-requestbody>>.
 
 | `HttpEntity<B>`
-| For access to request headers and body. The body is converted with `HttpMessageConverter` implementations.
+| For access to request headers and body. The body is converted with an `HttpMessageConverter`.
   See <<mvc-ann-httpentity>>.
 
 | `@RequestPart`
-| For access to a part in  a `multipart/form-data` request.
-  See <<mvc-multipart-forms>>.
+| For access to a part in a `multipart/form-data` request, converting the part's body
+  with an `HttpMessageConverter`. See <<mvc-multipart-forms>>.
 
 | `java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
 | For access to the model that is used in HTML controllers and exposed to templates as
@@ -2073,8 +2074,8 @@ To get all matrix variables, you can use a `MultiValueMap`, as the following exa
 ----
 ====
 
-Note that you need to enable the use of matrix variables. In the MVC Java configuration, you need
-to set a `UrlPathHelper` with `removeSemicolonContent=false` through
+Note that you need to enable the use of matrix variables. In the MVC Java configuration,
+you need to set a `UrlPathHelper` with `removeSemicolonContent=false` through
 <<mvc-config-path-matching>>. In the MVC XML namespace, you can set
 `<mvc:annotation-driven enable-matrix-variables="true"/>`.
 
@@ -2084,8 +2085,8 @@ to set a `UrlPathHelper` with `removeSemicolonContent=false` through
 ==== `@RequestParam`
 [.small]#<<web-reactive.adoc#webflux-ann-requestparam,Same as in Spring WebFlux>>#
 
-You can use the `@RequestParam` annotation to bind Servlet request parameters (that is, query
-parameters or form data) to a method argument in a controller.
+You can use the `@RequestParam` annotation to bind Servlet request parameters (that is,
+query parameters or form data) to a method argument in a controller.
 
 The following example shows how to do so:
 
@@ -2114,17 +2115,20 @@ The following example shows how to do so:
 ====
 
 By default, method parameters that use this annotation are required, but you can specify that
-a method parameter is optional by setting the `@RequestParam` annotation's `required` flag to `false`
-or by declaring the argument with an `java.util.Optional` wrapper.
+a method parameter is optional by setting the `@RequestParam` annotation's `required` flag to
+`false` or by declaring the argument with an `java.util.Optional` wrapper.
 
 Type conversion is automatically applied if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
 
-When an `@RequestParam` annotation is declared as a `Map<String, String>` or
-`MultiValueMap<String, String>` argument, the map is populated with all request
-parameters.
+Declaring the argument type as an array or list allows for resolving multiple parameter
+values for the same parameter name.
 
-Note that use of `@RequestParam` is optional, (for example, to set its attributes).
+When an `@RequestParam` annotation is declared as a `Map<String, String>` or
+`MultiValueMap<String, String>`, without a parameter name specified in the annotation,
+then the map is populated with the request parameter values for each given parameter name.
+
+Note that use of `@RequestParam` is optional (for example, to set its attributes).
 By default, any argument that is a simple value type (as determined by
 {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
 and is not resolved by any other argument resolver, is treated as if it were annotated
@@ -2534,8 +2538,8 @@ after the redirect, attributes from the "`input`" `FlashMap` are automatically a
 
 .Matching requests to flash attributes
 ****
-The concept of flash attributes exists in many other web frameworks and has proven to sometimes be
-exposed to concurrency issues. This is because, by definition, flash attributes
+The concept of flash attributes exists in many other web frameworks and has proven to sometimes
+be exposed to concurrency issues. This is because, by definition, flash attributes
 are to be stored until the next request. However the very "`next`" request may not be the
 intended recipient but another asynchronous request (for example, polling or resource requests),
 in which case the flash attributes are removed too early.
@@ -2577,16 +2581,21 @@ public class FileUploadController {
 			// store the bytes somewhere
 			return "redirect:uploadSuccess";
 		}
-
 		return "redirect:uploadFailure";
 	}
-
 }
 ----
 ====
 
-NOTE: When you use Servlet 3.0 multipart parsing, you can also use `javax.servlet.http.Part`,
-instead of Spring's `MultipartFile`, as a method argument
+Declaring the argument type as a `List<MultipartFile>` allows for resolving multiple
+files for the same parameter name.
+
+When the `@RequestParam` annotation is declared as a `Map<String, MultipartFile>` or
+`MultiValueMap<String, MultipartFile>`, without a parameter name specified in the annotation,
+then the map is populated with the multipart files for each given parameter name.
+
+NOTE: With Servlet 3.0 multipart parsing, you may also declare `javax.servlet.http.Part`
+instead of Spring's `MultipartFile`, as a method argument or collection value type.
 
 You can also use multipart content as part of data binding to a
 <<mvc-ann-modelattrib-method-args,command object>>. For example, the form field
@@ -2604,7 +2613,6 @@ class MyForm {
 	private MultipartFile file;
 
 	// ...
-
 }
 
 @Controller
@@ -2612,16 +2620,13 @@ public class FileUploadController {
 
 	@PostMapping("/form")
 	public String handleFormUpload(MyForm form, BindingResult errors) {
-
 		if (!form.getFile().isEmpty()) {
 			byte[] bytes = form.getFile().getBytes();
 			// store the bytes somewhere
 			return "redirect:uploadSuccess";
 		}
-
 		return "redirect:uploadFailure";
 	}
-
 }
 ----
 ====
