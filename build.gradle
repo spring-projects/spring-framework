@@ -142,7 +142,7 @@ configure(allprojects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.13"
+		toolVersion = "8.14"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
