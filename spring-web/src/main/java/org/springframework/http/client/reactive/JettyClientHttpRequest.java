@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.reactive.client.ContentChunk;
 import org.eclipse.jetty.reactive.client.ReactiveRequest;
 import org.eclipse.jetty.util.Callback;
@@ -86,22 +85,24 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
-	public Mono<Void> writeWith(Publisher<? extends DataBuffer> publisher) {
-		Flux<ContentChunk> chunks = Flux.from(publisher).map(this::toContentChunk);
-		MediaType contentType = getHeaders().getContentType();
-		ReactiveRequest.Content requestContent = ReactiveRequest.Content.fromPublisher(chunks,
-				(contentType != null ? contentType.toString() : MediaType.APPLICATION_OCTET_STREAM_VALUE));
-		this.reactiveRequest = ReactiveRequest.newBuilder(this.jettyRequest).content(requestContent).build();
+	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+		Flux<ContentChunk> chunks = Flux.from(body).map(this::toContentChunk);
+		ReactiveRequest.Content content = ReactiveRequest.Content.fromPublisher(chunks, getContentType());
+		this.reactiveRequest = ReactiveRequest.newBuilder(this.jettyRequest).content(content).build();
 		return doCommit(this::completes);
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		String contentType = this.jettyRequest.getHeaders().getField(HttpHeader.CONTENT_TYPE).getValue();
 		Flux<ContentChunk> chunks = Flux.from(body).flatMap(Function.identity()).map(this::toContentChunk);
-		ReactiveRequest.Content content = ReactiveRequest.Content.fromPublisher(chunks, contentType);
+		ReactiveRequest.Content content = ReactiveRequest.Content.fromPublisher(chunks, getContentType());
 		this.reactiveRequest = ReactiveRequest.newBuilder(this.jettyRequest).content(content).build();
 		return doCommit(this::completes);
+	}
+
+	private String getContentType() {
+		MediaType contentType = getHeaders().getContentType();
+		return contentType != null ? contentType.toString() : MediaType.APPLICATION_OCTET_STREAM_VALUE;
 	}
 
 	private Mono<Void> completes() {
@@ -146,4 +147,5 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 		}
 		return this.reactiveRequest;
 	}
+
 }
