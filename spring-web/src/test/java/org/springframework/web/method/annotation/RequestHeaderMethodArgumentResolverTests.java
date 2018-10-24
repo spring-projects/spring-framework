@@ -44,7 +44,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture with {@link org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver}.
+ * Test fixture with {@link RequestHeaderMethodArgumentResolver}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -70,7 +70,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	@Before
 	@SuppressWarnings("resource")
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();
 		resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory());
@@ -94,7 +94,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	}
 
 	@After
-	public void teardown() {
+	public void reset() {
 		RequestContextHolder.resetRequestAttributes();
 	}
 

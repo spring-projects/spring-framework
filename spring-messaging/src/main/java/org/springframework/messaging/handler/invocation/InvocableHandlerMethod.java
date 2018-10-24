@@ -120,7 +120,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Get the method argument values for the current request.
+	 * Get the method argument values for the current message.
 	 */
 	private Object[] getMethodArgumentValues(Message<?> message, Object... providedArgs) throws Exception {
 		MethodParameter[] parameters = getMethodParameters();

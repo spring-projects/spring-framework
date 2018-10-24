@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.method.annotation;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
@@ -32,10 +31,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.ResolvableMethod;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
+import static org.junit.Assert.*;
+import static org.springframework.web.method.MvcAnnotationPredicates.*;
 
 /**
  * Test fixture with {@link RequestParamMapMethodArgumentResolver}.
@@ -45,22 +42,13 @@ import static org.springframework.web.method.MvcAnnotationPredicates.requestPara
  */
 public class RequestParamMapMethodArgumentResolverTests {
 
-	private RequestParamMapMethodArgumentResolver resolver;
+	private RequestParamMapMethodArgumentResolver resolver = new RequestParamMapMethodArgumentResolver();
 
-	private NativeWebRequest webRequest;
+	private MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private MockHttpServletRequest request;
+	private NativeWebRequest webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
-
-
-	@Before
-	public void setUp() throws Exception {
-		resolver = new RequestParamMapMethodArgumentResolver();
-
-		request = new MockHttpServletRequest();
-		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
-	}
 
 
 	@Test
