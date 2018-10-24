@@ -180,8 +180,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Mono<DataBuffer> encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
 		Assert.notNull(mediaType.getCharset(), "Expected MediaType with charset");
 		byte[] bytes = text.toString().getBytes(mediaType.getCharset());
-		DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length).write(bytes);
-		return Mono.just(buffer);
+		return Mono.defer(() ->
+				Mono.just(bufferFactory.allocateBuffer(bytes.length).write(bytes)));
 	}
 
 	@Override

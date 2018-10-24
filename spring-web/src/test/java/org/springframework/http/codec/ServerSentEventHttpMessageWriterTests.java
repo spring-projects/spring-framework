@@ -37,7 +37,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.springframework.core.ResolvableType.forClass;
 
 /**
  * Unit tests for {@link ServerSentEventHttpMessageWriter}.
@@ -79,6 +79,24 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.expectNext("id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n")
 				.expectComplete()
 				.verify();
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void writeServerSentEventError() {
+		ServerSentEvent<?> event = ServerSentEvent.builder().data("bar").id("c42").event("foo")
+				.comment("bla\nbla bla\nbla bla bla").retry(Duration.ofMillis(123L)).build();
+
+		Flux<ServerSentEvent> source = Flux.concat(
+				Flux.just(event),
+				Flux.error(new RuntimeException()));
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
+
+		Mono<Void> result = this.messageWriter.write(source, forClass(ServerSentEvent.class),
+						MediaType.TEXT_EVENT_STREAM, outputMessage, HINTS);
+
+		StepVerifier.create(result)
+				.verifyError(RuntimeException.class);
 	}
 
 	@Test
@@ -172,8 +190,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	private <T> void testWrite(
 			Publisher<T> source, MediaType mediaType, MockServerHttpResponse response, Class<T> clazz) {
 
-		this.messageWriter.write(source, forClass(clazz), mediaType, response, HINTS)
-				.block(Duration.ofMillis(5000));
+		Mono<Void> result =
+				this.messageWriter.write(source, forClass(clazz), mediaType, response, HINTS);
+
+		StepVerifier.create(result)
+				.verifyComplete();
 	}
 
 }
