@@ -72,8 +72,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			}
 		}
 		else if (ex.getCause() instanceof Exception) {
-			ex = (Exception) ex.getCause();
-			return doResolveException(request, response, handler, ex);
+			return doResolveException(request, response, handler, (Exception) ex.getCause());
 		}
 		return null;
 	}

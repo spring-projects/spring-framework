@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * <p>The created {@link Map} contains all request parameter name/value pairs.
  * If the method parameter type is {@link MultiValueMap} instead, the created
- * map contains all request parameters and all there values for cases where
+ * map contains all request parameters and all their values for cases where
  * request parameters have multiple values.
  *
  * @author Arjen Poutsma
@@ -50,22 +50,16 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
-		if (requestParam != null) {
-			if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-				return !StringUtils.hasText(requestParam.name());
-			}
-		}
-		return false;
+		return (requestParam != null && Map.class.isAssignableFrom(parameter.getParameterType()) &&
+				!StringUtils.hasText(requestParam.name()));
 	}
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-		Class<?> paramType = parameter.getParameterType();
-
 		Map<String, String[]> parameterMap = webRequest.getParameterMap();
-		if (MultiValueMap.class.isAssignableFrom(paramType)) {
+		if (MultiValueMap.class.isAssignableFrom(parameter.getParameterType())) {
 			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(parameterMap.size());
 			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
 				for (String value : entry.getValue()) {
@@ -84,4 +78,5 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 			return result;
 		}
 	}
+
 }

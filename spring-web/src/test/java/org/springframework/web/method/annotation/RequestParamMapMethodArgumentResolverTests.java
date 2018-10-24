@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,10 +59,10 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		resolver = new RequestParamMapMethodArgumentResolver();
 
-		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, Map.class, Map.class);
+		Method method = getClass().getMethod("handle", Map.class, MultiValueMap.class, Map.class, Map.class);
 		paramMap = new SynthesizingMethodParameter(method, 0);
 		paramMultiValueMap = new SynthesizingMethodParameter(method, 1);
 		paramNamedMap = new SynthesizingMethodParameter(method, 2);
@@ -99,9 +99,9 @@ public class RequestParamMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
-		request.addParameter(name, new String[]{value1, value2});
+		request.addParameter(name, value1, value2);
 
-		MultiValueMap<String, String> expected = new LinkedMultiValueMap<String, String>(1);
+		MultiValueMap<String, String> expected = new LinkedMultiValueMap<>(1);
 		expected.add(name, value1);
 		expected.add(name, value2);
 
@@ -112,10 +112,11 @@ public class RequestParamMapMethodArgumentResolverTests {
 	}
 
 
-	public void params(@RequestParam Map<?, ?> param1,
-					   @RequestParam MultiValueMap<?, ?> param2,
-					   @RequestParam("name") Map<?, ?> param3,
-					   Map<?, ?> param4) {
+	public void handle(
+			@RequestParam Map<?, ?> param1,
+			@RequestParam MultiValueMap<?, ?> param2,
+			@RequestParam("name") Map<?, ?> param3,
+			Map<?, ?> param4) {
 	}
 
 }

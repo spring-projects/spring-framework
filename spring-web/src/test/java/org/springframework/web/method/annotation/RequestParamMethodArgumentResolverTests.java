@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		resolver = new RequestParamMethodArgumentResolver(null, true);
 		ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
@@ -369,7 +369,7 @@ public class RequestParamMethodArgumentResolverTests {
 		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
 		given(binderFactory.createBinder(webRequest, null, "stringNotAnnot")).willReturn(binder);
 
-		this.request.addParameter("stringNotAnnot", "");
+		request.addParameter("stringNotAnnot", "");
 
 		Object arg = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, binderFactory);
 		assertNull(arg);
@@ -383,7 +383,7 @@ public class RequestParamMethodArgumentResolverTests {
 		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
 		given(binderFactory.createBinder(webRequest, null, "name")).willReturn(binder);
 
-		this.request.addParameter("name", "");
+		request.addParameter("name", "");
 
 		Object arg = resolver.resolveArgument(paramNotRequired, null, webRequest, binderFactory);
 		assertNull(arg);
@@ -406,21 +406,21 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test  // SPR-10180
 	public void resolveEmptyValueToDefault() throws Exception {
-		this.request.addParameter("name", "");
+		request.addParameter("name", "");
 		Object result = resolver.resolveArgument(paramNamedDefaultValueString, null, webRequest, null);
 		assertEquals("bar", result);
 	}
 
 	@Test
 	public void resolveEmptyValueWithoutDefault() throws Exception {
-		this.request.addParameter("stringNotAnnot", "");
+		request.addParameter("stringNotAnnot", "");
 		Object result = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, null);
 		assertEquals("", result);
 	}
 
 	@Test
 	public void resolveEmptyValueRequiredWithoutDefault() throws Exception {
-		this.request.addParameter("name", "");
+		request.addParameter("name", "");
 		Object result = resolver.resolveArgument(paramRequired, null, webRequest, null);
 		assertEquals("", result);
 	}
@@ -435,7 +435,7 @@ public class RequestParamMethodArgumentResolverTests {
 		Object result = resolver.resolveArgument(paramOptional, null, webRequest, binderFactory);
 		assertEquals(Optional.empty(), result);
 
-		this.request.addParameter("name", "123");
+		request.addParameter("name", "123");
 		result = resolver.resolveArgument(paramOptional, null, webRequest, binderFactory);
 		assertEquals(Optional.class, result.getClass());
 		assertEquals(123, ((Optional) result).get());
@@ -466,7 +466,7 @@ public class RequestParamMethodArgumentResolverTests {
 		Object result = resolver.resolveArgument(paramOptionalArray, null, webRequest, binderFactory);
 		assertEquals(Optional.empty(), result);
 
-		this.request.addParameter("name", "123", "456");
+		request.addParameter("name", "123", "456");
 		result = resolver.resolveArgument(paramOptionalArray, null, webRequest, binderFactory);
 		assertEquals(Optional.class, result.getClass());
 		assertArrayEquals(new Integer[] {123, 456}, (Integer[]) ((Optional) result).get());
@@ -497,7 +497,7 @@ public class RequestParamMethodArgumentResolverTests {
 		Object result = resolver.resolveArgument(paramOptionalList, null, webRequest, binderFactory);
 		assertEquals(Optional.empty(), result);
 
-		this.request.addParameter("name", "123", "456");
+		request.addParameter("name", "123", "456");
 		result = resolver.resolveArgument(paramOptionalList, null, webRequest, binderFactory);
 		assertEquals(Optional.class, result.getClass());
 		assertEquals(Arrays.asList("123", "456"), ((Optional) result).get());

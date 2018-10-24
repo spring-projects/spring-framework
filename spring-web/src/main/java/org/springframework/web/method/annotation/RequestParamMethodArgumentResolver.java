@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 
 	/**
+	 * Create a new {@link RequestParamMethodArgumentResolver} instance.
 	 * @param useDefaultResolution in default resolution mode a method argument
 	 * that is a simple type, as defined in {@link BeanUtils#isSimpleProperty},
 	 * is treated as a request parameter even if it isn't annotated, the
@@ -90,6 +91,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	/**
+	 * Create a new {@link RequestParamMethodArgumentResolver} instance.
 	 * @param beanFactory a bean factory used for resolving  ${...} placeholder
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
@@ -108,15 +110,11 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * Supports the following:
 	 * <ul>
 	 * <li>@RequestParam-annotated method arguments.
-	 * This excludes {@link Map} params where the annotation doesn't
-	 * specify a name.	See {@link RequestParamMapMethodArgumentResolver}
-	 * instead for such params.
-	 * <li>Arguments of type {@link MultipartFile}
-	 * unless annotated with @{@link RequestPart}.
-	 * <li>Arguments of type {@code javax.servlet.http.Part}
-	 * unless annotated with @{@link RequestPart}.
-	 * <li>In default resolution mode, simple type arguments
-	 * even if not with @{@link RequestParam}.
+	 * This excludes {@link Map} params where the annotation does not specify a name.
+	 * See {@link RequestParamMapMethodArgumentResolver} instead for such params.
+	 * <li>Arguments of type {@link MultipartFile} unless annotated with @{@link RequestPart}.
+	 * <li>Arguments of type {@code Part} unless annotated with @{@link RequestPart}.
+	 * <li>In default resolution mode, simple type arguments even if not with @{@link RequestParam}.
 	 * </ul>
 	 */
 	@Override
