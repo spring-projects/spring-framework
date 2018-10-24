@@ -35,9 +35,7 @@ import org.springframework.protobuf.SecondMsg;
 import org.springframework.util.MimeType;
 
 import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -78,6 +76,19 @@ public class ProtobufEncoderTests extends AbstractDataBufferAllocatingTestCase {
 					}
 				})
 				.verifyComplete();
+	}
+
+	@Test
+	public void encodeError() {
+		Flux<Msg> messages = Flux.just(this.testMsg)
+				.concatWith(Flux.error(new RuntimeException()));
+
+		ResolvableType elementType = forClass(Msg.class);
+		Flux<DataBuffer> output = this.encoder.encode(messages, this.bufferFactory, elementType, PROTOBUF_MIME_TYPE, emptyMap());
+		StepVerifier.create(output)
+				.consumeNextWith(DataBufferUtils::release)
+				.expectError(RuntimeException.class)
+				.verify();
 	}
 
 	@Test
