@@ -33,6 +33,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -94,7 +95,10 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		Flux<ContentChunk> chunks = Flux.from(body).flatMap(Function.identity()).map(this::toContentChunk);
+		Flux<ContentChunk> chunks = Flux.from(body)
+				.flatMap(Function.identity())
+				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release)
+				.map(this::toContentChunk);
 		ReactiveRequest.Content content = ReactiveRequest.Content.fromPublisher(chunks, getContentType());
 		this.reactiveRequest = ReactiveRequest.newBuilder(this.jettyRequest).content(content).build();
 		return doCommit(this::completes);
