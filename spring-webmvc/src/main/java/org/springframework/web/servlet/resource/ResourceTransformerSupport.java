@@ -94,10 +94,13 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @return the absolute request path for the given resource path
 	 */
 	protected String toAbsolutePath(String path, HttpServletRequest request) {
-		ResourceUrlProvider urlProvider = findResourceUrlProvider(request);
-		Assert.state(urlProvider != null, "No ResourceUrlProvider");
-		String requestPath = urlProvider.getUrlPathHelper().getRequestUri(request);
-		String absolutePath = StringUtils.applyRelativePath(requestPath, path);
+		String absolutePath = path;
+		if(!path.startsWith("/")) {
+			ResourceUrlProvider urlProvider = findResourceUrlProvider(request);
+			Assert.state(urlProvider != null, "No ResourceUrlProvider");
+			String requestPath = urlProvider.getUrlPathHelper().getRequestUri(request);
+			absolutePath = StringUtils.applyRelativePath(requestPath, path);
+		}
 		return StringUtils.cleanPath(absolutePath);
 	}
 
