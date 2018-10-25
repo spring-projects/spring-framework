@@ -58,7 +58,7 @@ dependencies {
 	optional("com.google.code.gson:gson:2.8.5")
 	optional("com.google.protobuf:protobuf-java-util:3.6.1")
 	optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
-	optional("com.rometools:rome:1.11.0")
+	optional("com.rometools:rome:1.11.1")
 	optional("com.caucho:hessian:4.0.51")
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")

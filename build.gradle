@@ -28,7 +28,7 @@ ext {
 		!it.name.equals("spring-build-src") && !it.name.equals("spring-framework-bom")
 	}
 
-	aspectjVersion       = "1.9.1"
+	aspectjVersion       = "1.9.2"
 	freemarkerVersion    = "2.3.28"
 	groovyVersion        = "2.5.3"
 	hsqldbVersion        = "2.4.1"

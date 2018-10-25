@@ -67,7 +67,7 @@ dependencies {
 	testCompile("org.junit.jupiter:junit-jupiter-params")
 	testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
-	testCompile("com.rometools:rome:1.11.0")
+	testCompile("com.rometools:rome:1.11.1")
 	testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
 	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
