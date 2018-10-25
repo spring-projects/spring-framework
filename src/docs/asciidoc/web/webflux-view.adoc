@@ -3,9 +3,10 @@
 [.small]#<<web.adoc#mvc-view,Same as in Spring MVC>>#
 
 The use of view technologies in Spring WebFlux is pluggable. Whether you decide to
-use Thymeleaf, FreeMarker, or some other view technology is primarily a matter of a configuration change.
-This chapter covers the view technologies integrated with Spring WebFlux. We assume you are
-already familiar with <<webflux-viewresolution>>.
+use Thymeleaf, FreeMarker, or some other view technology is primarily a matter of a
+configuration change. This chapter covers the view technologies integrated with Spring
+WebFlux. We assume you are already familiar with <<webflux-viewresolution>>.
+
 
 
 
@@ -26,6 +27,7 @@ configuration involves a few bean declarations, such as
 `ThymeleafReactiveViewResolver`. For more details, see
 http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] and the WebFlux integration
 http://forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announcement].
+
 
 
 
@@ -113,6 +115,7 @@ the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
 
 See the FreeMarker documentation for details of settings and variables as they apply to
 the `Configuration` object.
+
 
 
 
@@ -277,6 +280,7 @@ Check out the Spring Framework unit tests,
 https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and
 https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/resources/org/springframework/web/reactive/result/view/script[resources],
 for more configuration examples.
+
 
 
 

@@ -1,6 +1,8 @@
 = Appendix
 
 
+
+
 [[xsd-schemas]]
 == XML Schemas
 
@@ -28,8 +30,8 @@ correct schema so that the elements in the `jee` namespace are available to you:
 		__xmlns:jee="http://www.springframework.org/schema/jee"__ xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 			__http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"__>
-			<!-- bean definitions here -->
 
+		<!-- bean definitions here -->
 	</beans>
 ----
 ====
@@ -39,8 +41,7 @@ correct schema so that the elements in the `jee` namespace are available to you:
 [[xsd-schemas-jee-jndi-lookup]]
 ==== <jee:jndi-lookup/> (simple)
 
-The following example shows how to use JNDI to look up a data source without the `jee`
-schema:
+The following example shows how to use JNDI to look up a data source without the `jee` schema:
 
 ====
 [source,xml,indent=0]
@@ -329,8 +330,9 @@ are available to you:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:jms="http://www.springframework.org/schema/jms"__ xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"__> <!-- bean definitions here -->
+			__http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"__>
 
+		<!-- bean definitions here -->
 	</beans>
 ----
 ====
@@ -366,8 +368,9 @@ the correct schema so that the elements in the `cache` namespace are available t
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:cache="http://www.springframework.org/schema/cache"__ xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"__> <!-- bean definitions here -->
+			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"__>
 
+		<!-- bean definitions here -->
 	</beans>
 ----
 ====

@@ -16,6 +16,7 @@ with which the Spring Framework integrates.
 
 
 
+
 [[transaction]]
 == Transaction Management
 
@@ -88,7 +89,6 @@ negatives of EJB in general are so great that this is not an attractive proposit
 especially in the face of compelling alternatives for declarative transaction management.
 
 
-
 [[transaction-local]]
 ==== Local Transactions
 
@@ -100,7 +100,6 @@ the application server is not involved in transaction management, it cannot help
 correctness across multiple resources. (It is worth noting that most applications use a
 single transaction resource.) Another downside is that local transactions are invasive
 to the programming model.
-
 
 
 [[transaction-programming-model]]
@@ -390,7 +389,6 @@ also discusses how transaction synchronization is (optionally) triggered through
 relevant `PlatformTransactionManager`.
 
 
-
 [[tx-resource-synchronization-high]]
 ==== High-level Synchronization Approach
 
@@ -403,7 +401,6 @@ not have to address these tasks but can focus purely on non-boilerplate
 persistence logic. Generally, you use the native ORM API or take a template approach
 for JDBC access by using the `JdbcTemplate`. These solutions are detailed in subsequent
 chapters of this reference documentation.
-
 
 
 [[tx-resource-synchronization-low]]
@@ -447,7 +444,6 @@ because you are much happier working through the Spring abstraction than directl
 with the relevant APIs. For example, if you use the Spring `JdbcTemplate` or
 `jdbc.object` package to simplify your use of JDBC, correct connection retrieval occurs
 behind the scenes and you need not write any special code.
-
 
 
 [[tx-resource-synchronization-tadsp]]
@@ -529,7 +525,6 @@ declarative transaction management follows EJB convention (roll back is automati
 on unchecked exceptions), it is often useful to customize this behavior.
 
 
-
 [[tx-decl-explained]]
 ==== Understanding the Spring Framework's Declarative Transaction Implementation
 
@@ -552,7 +547,6 @@ NOTE: Spring AOP is covered in <<core.adoc#aop, the AOP section>>.
 The following images shows a Conceptual view of calling a method on a transactional proxy:
 
 image::images/tx.png[]
-
 
 
 [[transaction-declarative-first-example]]
@@ -788,7 +782,6 @@ insertFoo(..) method of the DefaultFooService class have been truncated for clar
 ====
 
 
-
 [[transaction-declarative-rolling-back]]
 ==== Rolling Back a Declarative Transaction
 
@@ -886,7 +879,6 @@ a required rollback:
 You are strongly encouraged to use the declarative approach to rollback, if at all
 possible. Programmatic rollback is available should you absolutely need it, but its
 usage flies in the face of achieving a clean POJO-based architecture.
-
 
 
 [[transaction-declarative-diff-tx]]
@@ -1009,7 +1001,6 @@ transactional settings:
 ====
 
 
-
 [[transaction-declarative-txadvice-settings]]
 ==== <tx:advice/> Settings
 
@@ -1071,7 +1062,6 @@ that are nested within `<tx:advice/>` and `<tx:attributes/>` tags:
 | Comma-delimited list of `Exception` instances that do not trigger rollback. For example,
   `com.foo.MyBusinessException,ServletException.`
 |===
-
 
 
 [[transaction-declarative-annotations]]
@@ -1148,15 +1138,16 @@ transactional by adding only one line of XML configuration:
 <1> The line that makes the bean instance transactional.
 ====
 
-TIP: You can omit the `transaction-manager` attribute in the `<tx:annotation-driven/>` tag if
-the bean name of the `PlatformTransactionManager` that you want to wire in has the name,
+TIP: You can omit the `transaction-manager` attribute in the `<tx:annotation-driven/>` tag
+if the bean name of the `PlatformTransactionManager` that you want to wire in has the name,
 `transactionManager`. If the `PlatformTransactionManager` bean that you want to
-dependency-inject has any other name, you have to use the `transaction-manager`
-attribute, as in the preceding example.
+dependency-inject has any other name, you have to use the `transaction-manager` attribute,
+as in the preceding example.
 
-NOTE: If you
-use Java-based configuration, the `@EnableTransactionManagement` annotation provides equivalent support . You can add the annotation to a `@Configuration` class.
-See the {api-spring-framework}/transaction/annotation/EnableTransactionManagement.html[Javadoc] for full details.
+NOTE: If you use Java-based configuration, the `@EnableTransactionManagement` annotation
+provides equivalent support . You can add the annotation to a `@Configuration` class.
+See the {api-spring-framework}/transaction/annotation/EnableTransactionManagement.html[javadoc]
+for full details.
 
 .Method visibility and `@Transactional`
 ****
@@ -1205,7 +1196,7 @@ any kind of method.
 | XML Attribute| Annotation Attribute| Default| Description
 
 | `transaction-manager`
-| N/A (See {api-spring-framework}/transaction/annotation/TransactionManagementConfigurer.html[`TransactionManagementConfigurer` Javadoc])
+| N/A (see {api-spring-framework}/transaction/annotation/TransactionManagementConfigurer.html[`TransactionManagementConfigurer`] javadoc)
 | `transactionManager`
 | Name of the transaction manager to use. Required only if the name of the transaction
   manager is not `transactionManager`, as in the preceding example.
@@ -1285,8 +1276,6 @@ precedence over the transactional settings defined at the class level.
 ----
 ====
 
-
-
 [[transaction-declarative-attransactional-settings]]
 ===== `@Transactional` Settings
 
@@ -1355,8 +1344,6 @@ transactions, the transaction name is always the fully-qualified class name + `.
 `handlePayment(..)` method of the `BusinessService` class started a transaction, the
 name of the transaction would be: `com.example.BusinessService.handlePayment`.
 
-
-
 [[tx-multiple-tx-mgrs-with-attransactional]]
 ===== Multiple Transaction Managers with `@Transactional`
 
@@ -1408,8 +1395,6 @@ transaction managers, differentiated by the `order` and `account` qualifiers. Th
 default `<tx:annotation-driven>` target bean name, `transactionManager`, is still
 used if no specifically qualified `PlatformTransactionManager` bean is found.
 
-
-
 [[tx-custom-attributes]]
 ===== Custom Shortcut Annotations
 
@@ -1457,7 +1442,6 @@ In the preceding example, we used the syntax to define the transaction manager q
 have included propagation behavior, rollback rules, timeouts, and other features.
 
 
-
 [[tx-propagation]]
 ==== Transaction Propagation
 
@@ -1467,8 +1451,6 @@ details some of the semantics regarding transaction propagation in Spring.
 
 In Spring-managed transactions, be aware of the difference between physical and
 logical transactions, and how the propagation setting applies to this difference.
-
-
 
 [[tx-propagation-required]]
 ===== Understanding `PROPAGATION_REQUIRED`
@@ -1507,8 +1489,6 @@ is not aware) silently marks a transaction as rollback-only, the outer caller st
 calls commit. The outer caller needs to receive an `UnexpectedRollbackException` to
 indicate clearly that a rollback was performed instead.
 
-
-
 [[tx-propagation-requires_new]]
 ===== Understanding `PROPAGATION_REQUIRES_NEW`
 
@@ -1523,8 +1503,6 @@ status and with an inner transaction's locks released immediately after its comp
 Such an independent inner transaction can also declare its own isolation level, timeout,
 and read-only settings and not inherit an outer transaction's characteristics.
 
-
-
 [[tx-propagation-nested]]
 ===== Understanding `PROPAGATION_NESTED`
 
@@ -1534,7 +1512,6 @@ trigger a rollback for its scope, with the outer transaction being able to conti
 the physical transaction despite some operations having been rolled back. This setting
 is typically mapped onto JDBC savepoints, so it works only with JDBC resource
 transactions. See Spring's {api-spring-framework}/jdbc/datasource/DataSourceTransactionManager.html[`DataSourceTransactionManager`].
-
 
 
 [[transaction-declarative-applying-more-than-just-tx-advice]]
@@ -1722,7 +1699,6 @@ order value.
 You can configure additional aspects in similar fashion.
 
 
-
 [[transaction-declarative-aspectj]]
 ==== Using `@Transactional` with AspectJ
 
@@ -1787,7 +1763,6 @@ The Spring Framework provides two means of programmatic transaction management, 
 The Spring team generally recommends the `TransactionTemplate` for programmatic
 transaction management. The second approach is similar to using the JTA
 `UserTransaction` API, although exception handling is less cumbersome.
-
 
 
 [[tx-prog-template]]
@@ -1875,8 +1850,6 @@ Code within the callback can roll the transaction back by calling the
 ----
 ====
 
-
-
 [[tx-prog-template-settings]]
 ===== Specifying Transaction Settings
 
@@ -1931,7 +1904,6 @@ maintain configuration state. So, while a number of classes may share a single i
 of a `TransactionTemplate`, if a class needs to use a `TransactionTemplate` with
 different settings (for example, a different isolation level), you need to create
 two distinct `TransactionTemplate` instances.
-
 
 
 [[transaction-programmatic-ptm]]
@@ -2035,8 +2007,10 @@ Spring's transaction abstraction is generally application server-agnostic. Addit
 Spring's `JtaTransactionManager` class (which can optionally perform a JNDI lookup for
 the JTA `UserTransaction` and `TransactionManager` objects) autodetects the location for
 the latter object, which varies by application server. Having access to the JTA
-`TransactionManager` allows for enhanced transaction semantics -- in particular, supporting
-transaction suspension. See the {api-spring-framework}/transaction/jta/JtaTransactionManager.html[`JtaTransactionManager` Javadoc] for details.
+`TransactionManager` allows for enhanced transaction semantics -- in particular,
+supporting transaction suspension. See the
+{api-spring-framework}/transaction/jta/JtaTransactionManager.html[`JtaTransactionManager`]
+javadoc for details.
 
 Spring's `JtaTransactionManager` is the standard choice to run on Java EE application
 servers and is known to work on all common servers. Advanced functionality, such as
@@ -2055,7 +2029,6 @@ Rather, they are chosen automatically, with the standard
 `JtaTransactionManager` as the default fallback.
 
 
-
 [[transaction-application-server-integration-websphere]]
 ==== IBM WebSphere
 
@@ -2064,7 +2037,6 @@ On WebSphere 6.1.0.9 and above, the recommended Spring JTA transaction manager t
 which is available in WebSphere Application Server 6.1.0.9 and later. With this adapter,
 Spring-driven transaction suspension (suspend and resume as initiated by
 `PROPAGATION_REQUIRES_NEW`) is officially supported by IBM.
-
 
 
 [[transaction-application-server-integration-weblogic]]
@@ -2083,7 +2055,6 @@ per-transaction isolation levels, and proper resuming of transactions in all cas
 === Solutions to Common Problems
 
 This section describes solutions to some commmon problems.
-
 
 
 [[transaction-solutions-to-common-problems-wrong-ptm]]
@@ -2262,6 +2233,7 @@ configure the application context to take advantage of these annotations.
 
 
 
+
 [[jdbc]]
 == Data Access with JDBC
 
@@ -2401,7 +2373,6 @@ including error handling. It includes the following topics:
 * <<jdbc-auto-genereted-keys>>
 
 
-
 [[jdbc-JdbcTemplate]]
 ==== Using `JdbcTemplate`
 
@@ -2437,19 +2408,12 @@ corresponding to the fully qualified class name of the template instance (typica
 `JdbcTemplate`, but it may be different if you use a custom subclass of the
 `JdbcTemplate` class).
 
-
-
-[[jdbc-JdbcTemplate-examples]]
-===== Examples of JdbcTemplate class usage
-
-This section provides some examples of `JdbcTemplate` class usage. These examples are
-not an exhaustive list of all of the functionality exposed by the `JdbcTemplate`. See
-the attendant {api-spring-framework}/jdbc/core/JdbcTemplate.html[Javadoc] for that.
-
-
+The following sections provide some examples of `JdbcTemplate` usage. These examples
+are not an exhaustive list of all of the functionality exposed by the `JdbcTemplate`.
+See the attendant {api-spring-framework}/jdbc/core/JdbcTemplate.html[javadoc] for that.
 
 [[jdbc-JdbcTemplate-examples-query]]
-====== Querying (`SELECT`)
+===== Querying (`SELECT`)
 
 The following query gets the number of rows in a relation:
 
@@ -2549,10 +2513,8 @@ preceding code snippet as follows:
 ----
 ====
 
-
-
 [[jdbc-JdbcTemplate-examples-update]]
-====== Updating (`INSERT`, `UPDATE`, and `DELETE`) with `JdbcTemplate`
+===== Updating (`INSERT`, `UPDATE`, and `DELETE`) with `JdbcTemplate`
 
 You can use the `update(..)` method to perform insert, update, and delete operations.
 Parameter values are usually provided as variable argumets or, alternatively, as an object array.
@@ -2593,10 +2555,8 @@ The following example deletes an entry:
 ----
 ====
 
-
-
 [[jdbc-JdbcTemplate-examples-other]]
-====== Other `JdbcTemplate` Operations
+===== Other `JdbcTemplate` Operations
 
 You can use the `execute(..)` method to run any arbitrary SQL. Consequently, the
 method is often used for DDL statements. It is heavily overloaded with variants that take
@@ -2624,8 +2584,6 @@ The following example invokes a stored procedure:
 ====
 
 More sophisticated stored procedure support is <<jdbc-StoredProcedure,covered later>>.
-
-
 
 [[jdbc-JdbcTemplate-idioms]]
 ===== `JdbcTemplate` Best Practices
@@ -2762,7 +2720,6 @@ time you want to run SQL. Once configured, a `JdbcTemplate` instance is thread-s
 If your application accesses multiple
 databases, you may want multiple `JdbcTemplate` instances, which requires multiple `DataSources` and, subsequently, multiple differently
 configured `JdbcTemplate` instances.
-
 
 
 [[jdbc-NamedParameterJdbcTemplate]]
@@ -2911,7 +2868,6 @@ See also <<jdbc-JdbcTemplate-idioms>> for guidelines on using the
 `NamedParameterJdbcTemplate` class in the context of an application.
 
 
-
 [[jdbc-SQLExceptionTranslator]]
 ==== Using `SQLExceptionTranslator`
 
@@ -3007,7 +2963,6 @@ The custom translator is passed a data source in order to look up the error code
 `sql-error-codes.xml`.
 
 
-
 [[jdbc-statements-executing]]
 ==== Running Statements
 
@@ -3037,7 +2992,6 @@ fully functional class that creates a new table:
 	}
 ----
 ====
-
 
 
 [[jdbc-statements-querying]]
@@ -3108,7 +3062,6 @@ The returned list would resemble the following:
 ====
 
 
-
 [[jdbc-updates]]
 ==== Updating the Database
 
@@ -3140,7 +3093,6 @@ In the preceding example,
 an SQL statement has placeholders for row parameters. You can pass the parameter values
 in as varargs or ,alternatively, as an array of objects. Thus, you should explictly wrap primitives
 in the primitive wrapper classes, or you should use auto-boxing.
-
 
 
 [[jdbc-auto-genereted-keys]]
@@ -3192,7 +3144,6 @@ This section covers:
 * <<jdbc-DriverManagerDataSource>>
 * <<jdbc-TransactionAwareDataSourceProxy>>
 * <<jdbc-DataSourceTransactionManager>>
-
 
 
 [[jdbc-datasource]]
@@ -3298,14 +3249,12 @@ The following example shows C3P0 configuration:
 ====
 
 
-
 [[jdbc-DataSourceUtils]]
 ==== Using `DataSourceUtils`
 
 The `DataSourceUtils` class is a convenient and powerful helper class that provides
 `static` methods to obtain connections from JNDI and close connections if necessary. It
 supports thread-bound connections with, for example, `DataSourceTransactionManager`.
-
 
 
 [[jdbc-SmartDataSource]]
@@ -3317,7 +3266,6 @@ classes that use it query whether the connection should be closed after a given
 operation. This usage is efficient when you know that you need to reuse a connection.
 
 
-
 [[jdbc-AbstractDataSource]]
 ==== Extending `AbstractDataSource`
 
@@ -3325,7 +3273,6 @@ operation. This usage is efficient when you know that you need to reuse a connec
 implementations. It implements code that is common to all `DataSource` implementations.
 You should extend the `AbstractDataSource` class if you write your own `DataSource`
 implementation.
-
 
 
 [[jdbc-SingleConnectionDataSource]]
@@ -3377,8 +3324,8 @@ participating in Spring managed transactions. It is generally preferable to writ
 own new code by using the higher level abstractions for resource management, such as
 `JdbcTemplate` or `DataSourceUtils`.
 
-See the {api-spring-framework}/jdbc/datasource/TransactionAwareDataSourceProxy.html[`TransactionAwareDataSourceProxy` Javadoc] for more details.
-
+See the {api-spring-framework}/jdbc/datasource/TransactionAwareDataSourceProxy.html[`TransactionAwareDataSourceProxy`]
+javadoc for more details.
 
 
 [[jdbc-DataSourceTransactionManager]]
@@ -3414,7 +3361,6 @@ pattern. JTA does not support custom isolation levels.
 Most JDBC drivers provide improved performance if you batch multiple calls to the same
 prepared statement. By grouping updates into batches, you limit the number of round trips
 to the database.
-
 
 
 [[jdbc-batch-classic]]
@@ -3465,7 +3411,6 @@ preferred batch size, but the last batch might not have that number of entries. 
 case, you can use the `InterruptibleBatchPreparedStatementSetter` interface, which lets
 you interrupt a batch once the input source is exhausted. The `isBatchExhausted` method
 lets you signal the end of the batch.
-
 
 
 [[jdbc-batch-list]]
@@ -3564,7 +3509,6 @@ array given to a 'List<Object[]>' based call, through 'registerSqlType' calls on
 custom 'MapSqlParameterSource' instance, or through a 'BeanPropertySqlParameterSource'
 that derives the SQL type from the Java-declared property type even for a null value.
 ====
-
 
 
 [[jdbc-batch-multi]]
@@ -3678,7 +3622,6 @@ names of the table, as defined in the database. This is because we read the meta
 to construct the actual insert statement.
 
 
-
 [[jdbc-simple-jdbc-insert-2]]
 ==== Retrieving Auto-generated Keys by Using `SimpleJdbcInsert`
 
@@ -3726,7 +3669,6 @@ multiple auto-generated columns or the generated values are non-numeric, you can
 use a `KeyHolder` that is returned from the `executeAndReturnKeyHolder` method.
 
 
-
 [[jdbc-simple-jdbc-insert-3]]
 ==== Specifying Columns for a `SimpleJdbcInsert`
 
@@ -3765,7 +3707,6 @@ You can limit the columns for an insert by specifying a list of column names wit
 
 The execution of the insert is the same as if you had relied on the metadata to determine
 which columns to use.
-
 
 
 [[jdbc-simple-jdbc-parameters]]
@@ -3839,7 +3780,6 @@ convenient `addValue` method that can be chained. The following example shows ho
 
 As you can see, the configuration is the same. Only the executing code has to change to
 use these alternative input classes.
-
 
 
 [[jdbc-simple-jdbc-call-1]]
@@ -3960,7 +3900,6 @@ By taking this action, you avoid conflicts in the case used for the names of you
 returned `out` parameters.
 
 
-
 [[jdbc-simple-jdbc-call-2]]
 ==== Explicitly Declaring Parameters to Use for a `SimpleJdbcCall`
 
@@ -4018,7 +3957,6 @@ The execution and end results of the two examples are the same. The second examp
 details explicitly rather than relying on metadata.
 
 
-
 [[jdbc-params]]
 ==== How to Define `SqlParameters`
 
@@ -4055,7 +3993,6 @@ numeric data or a type name for custom database types. For `out` parameters, you
 provide a `RowMapper` to handle mapping of rows returned from a `REF` cursor. Another
 option is to specify an `SqlReturnType` that provides an opportunity to define
 customized handling of the return values.
-
 
 
 [[jdbc-simple-jdbc-call-3]]
@@ -4120,9 +4057,8 @@ as the following example shows:
 ----
 ====
 
-The `executeFunction` method used returns a `String` that contains the return value from the function
-call.
-
+The `executeFunction` method used returns a `String` that contains the return value from the
+function call.
 
 
 [[jdbc-simple-jdbc-call-4]]
@@ -4139,8 +4075,8 @@ results must match the order in which you declare the `RowMapper`
 implementations. The name specified is still used to store the processed list of results
 in the results map that is returned from the `execute` statement.
 
-The next example (for MySQL) uses a stored procedure that takes no IN parameters and returns all
-rows from the `t_actor` table:
+The next example (for MySQL) uses a stored procedure that takes no IN parameters and returns
+all rows from the `t_actor` table:
 
 ====
 [source,sql,indent=0]
@@ -4153,9 +4089,9 @@ rows from the `t_actor` table:
 ----
 ====
 
-To call this procedure, you can declare the `RowMapper`. Because the class to which you want to map
-follows the JavaBean rules, you can use a `BeanPropertyRowMapper` that is
-created by passing in the required class to map to in the `newInstance` method.
+To call this procedure, you can declare the `RowMapper`. Because the class to which you want
+to map follows the JavaBean rules, you can use a `BeanPropertyRowMapper` that is created by
+passing in the required class to map to in the `newInstance` method.
 The following example shows how to do so:
 
 ====
@@ -4212,7 +4148,6 @@ you should continue to use these classes.
 ====
 
 
-
 [[jdbc-SqlQuery]]
 ==== Understanding `SqlQuery`
 
@@ -4223,7 +4158,6 @@ during the execution of the query. The `SqlQuery` class is rarely used directly,
 the `MappingSqlQuery` subclass provides a much more convenient implementation for
 mapping rows to Java classes. Other implementations that extend `SqlQuery` are
 `MappingSqlQueryWithParameters` and `UpdatableSqlQuery`.
-
 
 
 [[jdbc-MappingSqlQuery]]
@@ -4308,7 +4242,6 @@ example shows such a method:
 ====
 
 
-
 [[jdbc-SqlUpdate]]
 ==== Using `SqlUpdate`
 
@@ -4351,7 +4284,6 @@ The following example creates a custom update method named `execute`:
 	}
 ----
 ====
-
 
 
 [[jdbc-StoredProcedure]]
@@ -4585,7 +4517,6 @@ Common problems with parameters and data values exist in the different approache
 provided by Spring Framework's JDBC support. This section covers how to address them.
 
 
-
 [[jdbc-type-information]]
 ==== Providing SQL Type Information for Parameters
 
@@ -4606,7 +4537,6 @@ You can provide SQL type information in several ways:
 * For methods that work with named parameters, you can use the `SqlParameterSource` classes,
   `BeanPropertySqlParameterSource` or `MapSqlParameterSource`. They both have methods
   for registering the SQL type for any of the named parameter values.
-
 
 
 [[jdbc-lob]]
@@ -4714,7 +4644,6 @@ The following example shows how to do so:
 ====
 
 
-
 [[jdbc-in-clause]]
 ==== Passing in Lists of Values for IN Clause
 
@@ -4738,7 +4667,6 @@ In addition to the primitive values in the value list, you can create a `java.ut
 of object arrays. This list can support multiple expressions being defined for the `in`
 clause, such as `select * from T_ACTOR where (id, last_name) in \((1, 'Johnson'), (2,
 'Harrop'\))`. This, of course, requires that your database supports this syntax.
-
 
 
 [[jdbc-complex-types]]
@@ -4843,14 +4771,12 @@ natively. You can also use an extensible API to plug in new embedded database ty
 `DataSource` implementations.
 
 
-
 [[jdbc-why-embedded-database]]
 ==== Why Use an Embedded Database?
 
 An embedded database can be useful during the development phase of a project because of its
 lightweight nature. Benefits include ease of configuration, quick startup time,
 testability, and the ability to rapidly evolve your SQL during development.
-
 
 
 [[jdbc-embedded-database-xml]]
@@ -4875,7 +4801,6 @@ the `schema.sql` and `test-data.sql` resources in the root of the classpath. In 
 a best practice, the embedded database is assigned a uniquely generated name. The
 embedded database is made available to the Spring container as a bean of type
 `javax.sql.DataSource` that can then be injected into data access objects as needed.
-
 
 
 [[jdbc-embedded-database-java]]
@@ -4904,8 +4829,8 @@ db.shutdown()
 ----
 ====
 
-See the {api-spring-framework}/jdbc/datasource/embedded/EmbeddedDatabaseBuilder.html[Javadoc for `EmbeddedDatabaseBuilder`] for further details on all supported
-options.
+See the {api-spring-framework}/jdbc/datasource/embedded/EmbeddedDatabaseBuilder.html[javadoc for `EmbeddedDatabaseBuilder`]
+for further details on all supported options.
 
 You can also use the `EmbeddedDatabaseBuilder` to create an embedded database by using Java
 configuration, as the following example shows:
@@ -4933,7 +4858,6 @@ public class DataSourceConfig {
 ====
 
 
-
 [[jdbc-embedded-database-types]]
 ==== Selecting the Embedded Database Type
 
@@ -4944,8 +4868,6 @@ supports. It includes the following topics:
 * <<jdbc-embedded-database-using-H2>>
 * <<jdbc-embedded-database-using-Derby>>
 
-
-
 [[jdbc-embedded-database-using-HSQL]]
 ===== Using HSQL
 
@@ -4954,8 +4876,6 @@ explicitly specified. To specify HSQL explicitly, set the `type` attribute of th
 `embedded-database` tag to `HSQL`. If you use the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.HSQL`.
 
-
-
 [[jdbc-embedded-database-using-H2]]
 ===== Using H2
 
@@ -4963,15 +4883,12 @@ Spring supports the H2 database. To enable H2, set the `type` attribute of the
 `embedded-database` tag to `H2`. If you use the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.H2`.
 
-
-
 [[jdbc-embedded-database-using-Derby]]
 ===== Using Derby
 
 Spring supports Apache Derby 10.5 and above. To enable Derby, set the `type`
 attribute of the `embedded-database` tag to `DERBY`. If you use the builder API,
 call the `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.DERBY`.
-
 
 
 [[jdbc-embedded-database-dao-testing]]
@@ -5020,7 +4937,6 @@ Framework>> and configuring the embedded database as a bean in the Spring
 ====
 
 
-
 [[jdbc-embedded-database-unique-names]]
 ==== Generating Unique Names for Embedded Databases
 
@@ -5052,7 +4968,6 @@ the following options.
 * `<jdbc:embedded-database generate-name="true" ... >`
 
 
-
 [[jdbc-embedded-database-extension]]
 ==== Extending the Embedded Database Support
 
@@ -5074,7 +4989,6 @@ The `org.springframework.jdbc.datasource.init` package provides support for init
 an existing `DataSource`. The embedded database support provides one option for creating
 and initializing a `DataSource` for an application. However, you may sometimes need to initialize
 an instance that runs on a server somewhere.
-
 
 
 [[jdbc-initializing-datasource-xml]]
@@ -5175,8 +5089,6 @@ is `@@` and overrides that default for the `db-schema` script.
 If you need more control than you get from the XML namespace, you can use the
 `DataSourceInitializer` directly and define it as a component in your application.
 
-
-
 [[jdbc-client-component-initialization]]
 ===== Initialization of Other Components that Depend on the Database
 
@@ -5224,6 +5136,7 @@ Ensuring that the database initializer is initialized first can also be easy. So
   parent context contains the `DataSource`, and the child context contains the business
   components). This structure is common in Spring web applications but can be more
   generally applied.
+
 
 
 
@@ -5322,7 +5235,6 @@ transaction managers, business services that use the data access objects and tra
 managers, web view resolvers, web controllers that use the business services, and so on.
 
 
-
 [[orm-resource-mngmnt]]
 ==== Resource and Transaction Management
 
@@ -5418,7 +5330,6 @@ Note that the Hibernate team does not maintain any versions prior to 5.1 anymore
 is likely to focus on 5.3+ exclusively soon.
 
 
-
 [[orm-session-factory-setup]]
 ==== `SessionFactory` Setup in a Spring Container
 
@@ -5496,7 +5407,6 @@ As of Spring Framework 5.1, such a native Hibernate setup can also expose a JPA
 `EntityManagerFactory` for standard JPA interaction next to native Hibernate access.
 See <<orm-jpa-hibernate,Native Hibernate Setup for JPA>> for details.
 ====
-
 
 
 [[orm-hibernate-straight]]
@@ -5577,7 +5487,6 @@ This behavior applies regardless of whether you use Spring's
 
 In summary, you can implement DAOs based on the plain Hibernate API, while still being
 able to participate in Spring-managed transactions.
-
 
 
 [[orm-hibernate-tx-declarative]]
@@ -5663,7 +5572,6 @@ opting into `@Transactional` processing at runtime. The following example shows 
 ====
 
 
-
 [[orm-hibernate-tx-programmatic]]
 ==== Programmatic Transaction Demarcation
 
@@ -5724,11 +5632,10 @@ and an example for a business method implementation:
 
 Spring's `TransactionInterceptor` lets any checked application exception be thrown
 with the callback code, while `TransactionTemplate` is restricted to unchecked
-exceptions within the callback. `TransactionTemplate` triggers a rollback in case of an
-unchecked application exception or if the transaction is marked rollback-only by the
-application (by setting `TransactionStatus`). By default, `TransactionInterceptor` behaves the same way
-but allows configurable rollback policies per method.
-
+exceptions within the callback. `TransactionTemplate` triggers a rollback in case of
+an unchecked application exception or if the transaction is marked rollback-only by
+the application (by setting `TransactionStatus`). By default, `TransactionInterceptor`
+behaves the same way but allows configurable rollback policies per method.
 
 
 [[orm-hibernate-tx-strategies]]
@@ -5767,7 +5674,6 @@ exposes the Hibernate transaction as a JDBC transaction if you have set up the p
 `LocalSessionFactoryBean` class. Alternatively, you can specify explicitly the
 `DataSource` for which the transactions are supposed to be exposed through the
 `dataSource` property of the `HibernateTransactionManager` class.
-
 
 
 [[orm-hibernate-resources]]
@@ -5814,7 +5720,6 @@ the benefits, including proper transactional JVM-level caching and distributed
 transactions, without the inconvenience of container deployment. JNDI registration of a
 Hibernate `SessionFactory` through the JCA connector adds value only when used in
 conjunction with EJBs.
-
 
 
 [[orm-hibernate-invalid-jdbc-access-error]]
@@ -5898,7 +5803,6 @@ API] in a manner similar to the integration with Hibernate while being aware of
 the underlying implementation in order to provide additional features.
 
 
-
 [[orm-jpa-setup]]
 ==== Three Options for JPA Setup in a Spring Environment
 
@@ -5908,8 +5812,6 @@ that is used by the application to obtain an entity manager.
 * <<orm-jpa-setup-lemfb>>
 * <<orm-jpa-setup-jndi>>
 * <<orm-jpa-setup-lcemfb>>
-
-
 
 [[orm-jpa-setup-lemfb]]
 ===== Using `LocalEntityManagerFactoryBean`
@@ -5941,8 +5843,6 @@ exists. Furthermore, weaving (byte-code transformation) of persistent classes is
 provider-specific, often requiring a specific JVM agent to specified on startup. This
 option is sufficient only for stand-alone applications and test environments, for which
 the JPA specification is designed.
-
-
 
 [[orm-jpa-setup-jndi]]
 ===== Obtaining an EntityManagerFactory from JNDI
@@ -5981,8 +5881,6 @@ If you use multiple persistence units in the same application, the bean names of
 JNDI-retrieved persistence units should match the persistence unit names that the
 application uses to refer to them (for example, in `@PersistenceUnit` and
 `@PersistenceContext` annotations).
-
-
 
 [[orm-jpa-setup-lcemfb]]
 ===== Using `LocalContainerEntityManagerFactoryBean`
@@ -6126,8 +6024,6 @@ This is especially important when the hosting applications rely on different JPA
 implementations, because the JPA transformers are applied only at the class-loader level and
 are, thus, isolated from each other.
 
-
-
 [[orm-jpa-setup-multiple]]
 ===== Dealing with Multiple Persistence Units
 
@@ -6175,8 +6071,6 @@ affect all hosted units) or programmatically (through the
 `PersistenceUnitManager` is specified, one is created and used internally by
 `LocalContainerEntityManagerFactoryBean`.
 
-
-
 [[orm-jpa-setup-background]]
 ===== Background Bootstrapping
 
@@ -6202,7 +6096,6 @@ proxy can be injected into other application components and is even able to resp
 is being accessed by other components (for example, calling `createEntityManager`), those calls
 block until the background bootstrapping has completed. In particular, when you use
 Spring Data JPA, make sure to set up deferred bootstrapping for its repositories as well.
-
 
 
 [[orm-jpa-dao]]
@@ -6351,7 +6244,6 @@ the injections are applied automatically by the Spring container. This is appeal
 a non-invasiveness perspective and can feel more natural to JPA developers.
 
 
-
 [[orm-jpa-tx]]
 ==== Spring-driven JPA transactions
 
@@ -6374,7 +6266,6 @@ of interacting with JPA access code as of Spring Framework 5.1 and Hibernate 5.2
 adapting to several Hibernate specifics and providing JDBC interaction.
 This makes particular sense in combination with `LocalSessionFactoryBean` setup.
 See <<orm-jpa-hibernate,Native Hibernate Setup for JPA Interaction>> for details.
-
 
 
 [[orm-jpa-dialect]]
@@ -6403,9 +6294,9 @@ way of auto-configuring an `EntityManagerFactory` setup for Hibernate or Eclipse
 respectively. Note that those provider adapters are primarily designed for use with
 Spring-driven transaction management (that is, for use with `JpaTransactionManager`).
 
-See the {api-spring-framework}/orm/jpa/JpaDialect.html[`JpaDialect`] and {api-spring-framework}/orm/jpa/JpaVendorAdapter.html[`JpaVendorAdapter`] Javadoc for more details of its operations
-and how they are used within Spring's JPA support.
-
+See the {api-spring-framework}/orm/jpa/JpaDialect.html[`JpaDialect`] and
+{api-spring-framework}/orm/jpa/JpaVendorAdapter.html[`JpaVendorAdapter`] javadoc for
+more details of its operations and how they are used within Spring's JPA support.
 
 
 [[orm-jpa-jta]]
@@ -6441,7 +6332,6 @@ server itself (that is, through a JNDI lookup instead of a locally declared
 `LocalContainerEntityManagerFactoryBean`). A server-provided `EntityManagerFactory`
 might require special definitions in your server configuration (making the deployment
 less portable) but is set up for the server's JTA environment.
-
 
 
 [[orm-jpa-hibernate]]
@@ -6481,6 +6371,7 @@ property. On the programmatic `LocalSessionFactoryBuilder`, an overloaded
 
 
 
+
 [[oxm]]
 == Marshalling XML by Using Object-XML Mappers
 
@@ -6506,7 +6397,6 @@ Some of the benefits of using Spring for your O/X mapping needs are:
 * <<oxm-consistent-exception-hierarchy>>
 
 
-
 [[oxm-ease-of-configuration]]
 ==== Ease of configuration
 
@@ -6515,7 +6405,6 @@ construct JAXB context, JiBX binding factories, and so on. You can configure the
 as you would any other bean in your application context. Additionally, XML namespace-based
 configuration is available for a number of marshallers, making the configuration even
 simpler.
-
 
 
 [[oxm-consistent-interfaces]]
@@ -6528,7 +6417,6 @@ marshalling. This approach has the additional benefit of making it possible to d
 marshalling with a mix-and-match approach (for example, some marshalling performed using JAXB
 and some by Castor) in a non-intrusive fashion, letting you use the strength of each
 technology.
-
 
 
 [[oxm-consistent-exception-hierarchy]]
@@ -6546,7 +6434,6 @@ These runtime exceptions wrap the original exception so that no information is l
 As stated in the <<oxm-introduction,introduction>>, a marshaller serializes an object to XML, and an
 unmarshaller deserializes XML stream to an object. This section describes
 the two Spring interfaces used for this purpose.
-
 
 
 [[oxm-marshaller]]
@@ -6595,7 +6482,6 @@ marshaller, or have a common base class. Refer to the later sections in this cha
 to determine how your O-X technology manages this.
 
 
-
 [[oxm-unmarshaller]]
 ==== Understanding `Unmarshaller`
 
@@ -6639,7 +6525,6 @@ Even though there are two separate marshalling interfaces (`Marshaller` and
 `Unmarshaller`), all implementations in Spring-WS implement both in one class.
 This means that you can wire up one marshaller class and refer to it both as a
 marshaller and as an unmarshaller in your `applicationContext.xml`.
-
 
 
 [[oxm-xmlmappingexception]]
@@ -6846,7 +6731,6 @@ The corresponding integration classes reside in the `org.springframework.oxm.jax
 package.
 
 
-
 [[oxm-jaxb2]]
 ==== Using `Jaxb2Marshaller`
 
@@ -6877,8 +6761,6 @@ validation is performed by specifying one or more schema resources to the bean, 
 	</beans>
 ----
 ====
-
-
 
 [[oxm-jaxb2-xsd]]
 ===== XML Configuration Namespace
@@ -6938,7 +6820,6 @@ http://castor-data-binding.github.io/castor[Castor web site]. The Spring
 integration classes reside in the `org.springframework.oxm.castor` package.
 
 
-
 [[oxm-castor-marshaller]]
 ==== Using `CastorMarshaller`
 
@@ -6955,7 +6836,6 @@ interface. It can be wired up as follows:
 	</beans>
 ----
 ====
-
 
 
 [[oxm-castor-mapping]]
@@ -6980,8 +6860,6 @@ with a classpath resource:
 	</beans>
 ----
 ====
-
-
 
 [[oxm-castor-xsd]]
 ===== XML Configuration Namespace
@@ -7048,7 +6926,6 @@ site]. The Spring integration classes reside in the `org.springframework.oxm.jib
 package.
 
 
-
 [[oxm-jibx-marshaller]]
 ==== Using `JibxMarshaller`
 
@@ -7073,8 +6950,6 @@ set using the `targetClass` property. Optionally, you can set the binding name b
 A `JibxMarshaller` is configured for a single class. If you want to marshal multiple
 classes, you have to configure multiple `JibxMarshaller` instances with different `targetClass`
 property values.
-
-
 
 [[oxm-jibx-xsd]]
 ===== XML Configuration Namespace
@@ -7119,7 +6994,6 @@ require any mapping and generates clean XML.
 For more information on XStream, see the http://x-stream.github.io/[XStream
 web site]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
-
 
 
 [[oxm-xstream-marshaller]]
@@ -7181,6 +7055,7 @@ vulnerabilities do not get invoked.
 NOTE: Note that XStream is an XML serialization library, not a data binding library.
 Therefore, it has limited namespace support. As a result, it is rather unsuitable for usage
 within Web services.
+
 
 
 

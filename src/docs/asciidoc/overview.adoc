@@ -113,7 +113,7 @@ libraries that depend on Spring.
 * Care about API design. The Spring team puts a lot of thought and time into making APIs
 that are intuitive and that hold up across many versions and many years.
 * Set high standards for code quality. The Spring Framework puts a strong emphasis on
-meaningful, current, and accurate Javadoc. It is one of very few projects that can claim
+meaningful, current, and accurate javadoc. It is one of very few projects that can claim
 clean code structure with  no circular dependencies between packages.
 
 

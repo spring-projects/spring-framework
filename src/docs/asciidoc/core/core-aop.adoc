@@ -37,6 +37,7 @@ Spring AOP, and can skip most of this chapter.
 
 
 
+
 [[aop-introduction-defn]]
 == AOP Concepts
 
@@ -115,6 +116,7 @@ multiple objects (such as all business operations in the service layer).
 
 
 
+
 [[aop-introduction-spring-defn]]
 == Spring AOP Capabilities and Goals
 
@@ -175,6 +177,7 @@ style.
 
 
 
+
 [[aop-introduction-proxies]]
 == AOP Proxies
 
@@ -192,6 +195,7 @@ pass a proxied object to a method as a concrete type.
 It is important to grasp the fact that Spring AOP is proxy-based. See
 <<aop-understanding-aop-proxies>> for a thorough examination of exactly what this
 implementation detail actually means.
+
 
 
 
@@ -242,7 +246,6 @@ annotation, as the following example shows:
 	}
 ----
 ====
-
 
 
 [[aop-enable-aspectj-xml]]
@@ -458,7 +461,6 @@ it is natural and straightforward to identify specific beans by name.
 ====
 
 
-
 [[aop-pointcuts-combining]]
 ==== Combining Pointcut Expressions
 
@@ -485,8 +487,6 @@ of any public method.
 <3> `tradingOperation` matches if a method execution represents any public method in the
 trading module.
 ====
-
-
 
 It is a best practice to build more complex pointcut expressions out of smaller named
 components, as shown earlier. When referring to pointcuts by name, normal Java visibility
@@ -824,7 +824,6 @@ match the wildcard expression `*Service`:
 ====
 
 
-
 [[writing-good-pointcuts]]
 ==== Writing Good Pointcuts
 
@@ -918,7 +917,6 @@ following example:
 ====
 
 
-
 [[aop-advice-after-returning]]
 ==== After Returning Advice
 
@@ -981,7 +979,6 @@ type (in this case, `Object`, which matches any return value).
 
 Please note that it is not possible to return a totally different reference when
 using after returning advice.
-
 
 
 [[aop-advice-after-throwing]]
@@ -1072,7 +1069,6 @@ The following example shows how to use after finally advice:
 ====
 
 
-
 [[aop-ataspectj-around-advice]]
 ==== Around Advice
 
@@ -1136,7 +1132,6 @@ many times, or not at all within the body of the around advice. All of these are
 legal.
 
 
-
 [[aop-ataspectj-advice-params]]
 ==== Advice Parameters
 
@@ -1161,7 +1156,7 @@ a first parameter of type `ProceedingJoinPoint`, which is a subclass of `JoinPoi
 * `getSignature()`: Returns a description of the method that is being advised.
 * `toString()`: Prints a useful description of the method being advised.
 
-See the https://www.eclipse.org/aspectj/doc/released/runtime-api/org/aspectj/lang/JoinPoint.html[Javadoc] for more detail.
+See the https://www.eclipse.org/aspectj/doc/released/runtime-api/org/aspectj/lang/JoinPoint.html[javadoc] for more detail.
 
 [[aop-ataspectj-advice-params-passing]]
 ===== Passing Parameters to Advice
@@ -1646,6 +1641,7 @@ expression so that only `@Idempotent` operations match, as follows:
 
 
 
+
 [[aop-schema]]
 == Schema-based AOP Support
 
@@ -1846,7 +1842,6 @@ The schema-based AOP support uses the same five kinds of advice as the @AspectJ 
 exactly the same semantics.
 
 
-
 [[aop-schema-advice-before]]
 ==== Before Advice
 
@@ -1897,7 +1892,6 @@ the advice. This method must be defined for the bean referenced by the aspect el
 that contains the advice. Before a data access operation is executed (a method execution
 join point matched by the pointcut expression), the `doAccessCheck` method on the aspect
 bean is invoked.
-
 
 
 [[aop-schema-advice-after-returning]]
@@ -1957,7 +1951,6 @@ example, you can decleare the method signature as follows:
 ====
 
 
-
 [[aop-schema-advice-after-throwing]]
 ==== After Throwing Advice
 
@@ -2015,7 +2008,6 @@ example, the method signature may be declared as follows:
 ====
 
 
-
 [[aop-schema-advice-after-finally]]
 ==== After (Finally) Advice
 
@@ -2037,7 +2029,6 @@ by using the `after` element, as the following example shows:
 	</aop:aspect>
 ----
 ====
-
 
 
 [[aop-schema-advice-around]]
@@ -2090,7 +2081,6 @@ The implementation of the `doBasicProfiling` advice can be exactly the same as i
 	}
 ----
 ====
-
 
 
 [[aop-schema-params]]
@@ -2242,7 +2232,6 @@ ms     %     Task name
 00000  ?  execution(getFoo)
 ----
 ====
-
 
 
 [[aop-ordering]]
@@ -2502,6 +2491,7 @@ pointcut expression so that only `@Idempotent` operations match, as follows:
 
 
 
+
 [[aop-choosing]]
 == Choosing which AOP Declaration Style to Use
 
@@ -2610,6 +2600,7 @@ schema-defined `<aop:aspect>` aspects, `<aop:advisor>` declared advisors, and ev
 proxies and interceptors defined with the Spring 1.2 style in the same configuration.
 All of these are implemented by using the same underlying support mechanism and can
 co-exist without any difficulty.
+
 
 
 
@@ -2823,6 +2814,7 @@ it is not a proxy-based AOP framework.
 
 
 
+
 [[aop-aspectj-programmatic]]
 == Programmatic Creation of @AspectJ Proxies
 
@@ -2855,7 +2847,8 @@ The basic usage for this class is very simple, as the following example shows:
 ----
 ====
 
-See the {api-spring-framework}/aop/aspectj/annotation/AspectJProxyFactory.html[Javadoc] for more information.
+See the {api-spring-framework}/aop/aspectj/annotation/AspectJProxyFactory.html[javadoc] for more information.
+
 
 
 
@@ -3058,7 +3051,6 @@ with the container. Doing so results in double initialization, once through the
 container and once through the aspect.
 
 
-
 [[aop-configurable-testing]]
 ==== Unit Testing `@Configurable` Objects
 
@@ -3070,7 +3062,6 @@ object under test and proceed as normal. If `@Configurable` types have been wove
 AspectJ, you can still unit test outside of the container as normal, but you
 see a warning message each time that you construct an `@Configurable` object indicating
 that it has not been configured by Spring.
-
 
 
 [[aop-configurable-container]]
@@ -3474,7 +3465,6 @@ and then easily exclude from builds of the application being deployed
 into UAT or production.
 
 
-
 [[aop-aj-ltw-the-aspects]]
 ==== Aspects
 
@@ -3482,7 +3472,6 @@ The aspects that you use in LTW have to be AspectJ aspects. You can write them i
 either the AspectJ language itself, or you can write your aspects in the @AspectJ-style.
 Your aspects are then both valid AspectJ and Spring AOP aspects.
 Furthermore, the compiled aspect classes need to be available on the classpath.
-
 
 
 [[aop-aj-ltw-aop_dot_xml]]
@@ -3520,10 +3509,10 @@ adding one or more `java.lang.instrument.ClassFileTransformers` to a `ClassLoade
 runtime, which opens the door to all manner of interesting applications, one of which
 happens to be the LTW of aspects.
 
-TIP: If you are unfamiliar with the idea of runtime class file transformation, se
-the Javadoc API documentation for the `java.lang.instrument` package
-before continuing. While that documentation is not comprehensive, at least you can see the
-key interfaces and classes (for reference as you read through this section).
+TIP: If you are unfamiliar with the idea of runtime class file transformation, see the
+javadoc API documentation for the `java.lang.instrument` package before continuing.
+While that documentation is not comprehensive, at least you can see the key interfaces
+and classes (for reference as you read through this section).
 
 Configuring a `LoadTimeWeaver` for a particular `ApplicationContext` can be as easy as
 adding one line. (Note that you almost certainly need to use an
@@ -3660,7 +3649,7 @@ retrieved from the Spring container by using the well known name, `loadTimeWeave
 Remember that the `LoadTimeWeaver` exists only as a mechanism for Spring's LTW
 infrastructure to add one or more `ClassFileTransformers`. The actual
 `ClassFileTransformer` that does the LTW is the `ClassPreProcessorAgentAdapter` (from
-the `org.aspectj.weaver.loadtime` package) class. See the class-level Javadoc of the
+the `org.aspectj.weaver.loadtime` package) class. See the class-level javadoc of the
 `ClassPreProcessorAgentAdapter` class for further details, because the specifics of how
 the weaving is actually effected is beyond the scope of this document.
 
@@ -3774,8 +3763,6 @@ to your artifact a file named `WEB-INF/jboss-scanning.xml` with the following co
 ----
 ====
 
-
-
 [[aop-aj-ltw-environment-generic]]
 ===== Generic Java Applications
 
@@ -3806,11 +3793,11 @@ support) a dedicated LTW.
 
 
 
+
 [[aop-resources]]
 == Further Resources
 
-More information on AspectJ can be found on the http://www.eclipse.org/aspectj[AspectJ
-website].
+More information on AspectJ can be found on the http://www.eclipse.org/aspectj[AspectJ website].
 
 _Eclipse AspectJ_ by Adrian Colyer et. al. (Addison-Wesley, 2005) provides a
 comprehensive introduction and reference for the AspectJ language.

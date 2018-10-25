@@ -54,6 +54,7 @@ The expression language supports the following functionality:
 
 
 
+
 [[expressions-evaluation]]
 == Evaluation
 
@@ -322,19 +323,18 @@ someArray[0].someProperty.someOtherProperty < 0.1
 ----
 ====
 
-Because the preceding expression involves array access, some property de-referencing, and numeric operations, the performance
-gain can be very noticeable. In an example micro benchmark run of 50000 iterations, it
-took 75ms to evaluate by using the interpreter and only 3ms using the compiled version
-of the expression.
-
+Because the preceding expression involves array access, some property de-referencing,
+and numeric operations, the performance gain can be very noticeable. In an example
+micro benchmark run of 50000 iterations, it took 75ms to evaluate by using the
+interpreter and only 3ms using the compiled version of the expression.
 
 
 [[expressions-compiler-configuration]]
 ==== Compiler Configuration
 
-The compiler is not turned on by default, but you can turn it on in either of two different
-ways. You can turn it on by using the parser configuration process (<<expressions-parser-configuration,discussed earlier>>) or
-by using a system property when SpEL usage is embedded inside another component. This section
+The compiler is not turned on by default, but you can turn it on in either of two different ways.
+You can turn it on by using the parser configuration process (<<expressions-parser-configuration,discussed earlier>>)
+or by using a system property when SpEL usage is embedded inside another component. This section
 discusses both of these options.
 
 The compiler can operate in one of three modes, which are captured
@@ -406,6 +406,7 @@ at the moment:
 * Expressions using selection or projection
 
 More types of expression will be compilable in the future.
+
 
 
 
@@ -574,6 +575,7 @@ examples show:
 
 
 
+
 [[expressions-language-ref]]
 == Language Reference
 
@@ -595,6 +597,8 @@ topics:
 * <<expressions-operator-ternary>>
 * <<expressions-operator-elvis>>
 * <<expressions-operator-safe-navigation>>
+
+
 
 [[expressions-ref-literal]]
 === Literal Expressions
@@ -886,7 +890,6 @@ which the expression is embedded (such as in an XML document). The textual equiv
 All of the textual operators are case-insensitive.
 
 
-
 [[expressions-operators-logical]]
 ==== Logical Operators
 
@@ -932,7 +935,6 @@ The following example shows how to use the logical operators
 ====
 
 
-
 [[expressions-operators-mathematical]]
 ==== Mathematical Operators
 
@@ -975,7 +977,6 @@ following example shows the mathematical operators in use:
 	int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class);  // -21
 ----
 ====
-
 
 
 [[expressions-assignment]]
@@ -1073,7 +1074,6 @@ following example shows how to use variables:
 	System.out.println(tesla.getName())  // "Mike Tesla"
 ----
 ====
-
 
 
 [[expressions-this-root]]
@@ -1454,6 +1454,7 @@ The definition of `TemplateParserContext` follows:
 	}
 ----
 ====
+
 
 
 

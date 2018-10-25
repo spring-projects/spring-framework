@@ -952,7 +952,9 @@ are available to you:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:lang="http://www.springframework.org/schema/lang"__ xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"__> <!-- bean definitions here -->
+			__http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"__>
+
+		<!-- bean definitions here -->
 
 	</beans>
 ----

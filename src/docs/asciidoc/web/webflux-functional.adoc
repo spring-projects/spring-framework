@@ -8,6 +8,7 @@ the same <<web-reactive.adoc#webflux-reactive-spring-web>> foundation.
 
 
 
+
 [[webflux-fn-overview]]
 == Overview
 
@@ -68,6 +69,7 @@ through one of the built-in <<web-reactive.adoc#webflux-httphandler,server adapt
 * `RouterFunctions.toHttpHandler(RouterFunction, HandlerStrategies)`
 
 Most applications can run through the WebFlux Java configuration, see <<webflux-fn-running>>.
+
 
 
 
@@ -245,6 +247,7 @@ found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not F
 
 
 
+
 [[webflux-fn-router-functions]]
 == `RouterFunction`
 
@@ -320,6 +323,7 @@ RouterFunction<ServerResponse> personRoute =
 
 
 
+
 [[webflux-fn-running]]
 == Running a Server
 
@@ -391,6 +395,7 @@ public class WebConfig implements WebFluxConfigurer {
 }
 ----
 ====
+
 
 
 

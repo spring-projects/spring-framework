@@ -1,8 +1,6 @@
 [[validation]]
 = Validation, Data Binding, and Type Conversion
 
-
-
 There are pros and cons for considering validation as business logic, and Spring offers
 a design for validation (and data binding) that does not exclude either one of them.
 Specifically, validation should not be tied to the web tier and should be easy to localize,
@@ -42,6 +40,7 @@ An application can also register additional Spring `Validator` instances for eac
 `DataBinder` instance, as described in <<validation-binder>>. This may be useful for
 plugging in validation logic without the use of annotations.
 ****
+
 
 
 
@@ -105,10 +104,10 @@ example implements `Validator` for `Person` instances:
 ----
 ====
 
-The `static` `rejectIfEmpty(..)` method on the `ValidationUtils` class
-is used to reject the `name` property if it is `null` or the empty string. See
-at the {api-spring-framework}/validation/ValidationUtils.html[`ValidationUtils` Javadoc] to see what functionality it provides besides the
-example shown previously.
+The `static` `rejectIfEmpty(..)` method on the `ValidationUtils` class is used to
+reject the `name` property if it is `null` or the empty string. Have a look at the
+{api-spring-framework}/validation/ValidationUtils.html[`ValidationUtils`] javadoc
+to see what functionality it provides besides the example shown previously.
 
 While it is certainly possible to implement a single `Validator` class to validate each
 of the nested objects in a rich object, it may be better to encapsulate the validation
@@ -166,7 +165,8 @@ as the following example shows:
 Validation errors are reported to the `Errors` object passed to the validator. In the case
 of Spring Web MVC, you can use the `<spring:bind/>` tag to inspect the error messages, but
 you can also inspect the `Errors` object yourself. More information about the
-methods it offers can be found in the {api-spring-framework}validation/Errors.html[Javadoc].
+methods it offers can be found in the {api-spring-framework}validation/Errors.html[javadoc].
+
 
 
 
@@ -191,11 +191,11 @@ the field name and the second includes the type of the field). This is done as a
 convenience to aid developers when targeting error messages.
 
 More information on the `MessageCodesResolver` and the default strategy can be found
-in the Javadoc of
-{api-spring-framework}/validation/MessageCodesResolver.html[`MessageCodesResolver`]
-and
+in the javadoc of
+{api-spring-framework}/validation/MessageCodesResolver.html[`MessageCodesResolver`] and
 {api-spring-framework}/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
 respectively.
+
 
 
 
@@ -210,16 +210,16 @@ more information about JavaBeans and the specification, see
 http://docs.oracle.com/javase/8/docs/api/java/beans/package-summary.html[javabeans].
 
 One quite important class in the beans package is the `BeanWrapper` interface and its
-corresponding implementation (`BeanWrapperImpl`). As quoted from the Javadoc, the
+corresponding implementation (`BeanWrapperImpl`). As quoted from the javadoc, the
 `BeanWrapper` offers functionality to set and get property values (individually or in
 bulk), get property descriptors, and query properties to determine if they are
 readable or writable. Also, the `BeanWrapper` offers support for nested properties,
 enabling the setting of properties on sub-properties to an unlimited depth. The
 `BeanWrapper` also supports the ability to add standard JavaBeans `PropertyChangeListeners`
 and `VetoableChangeListeners`, without the need for supporting code in the target class.
-Last but not least, the `BeanWrapper` provides support for setting indexed
-properties. The `BeanWrapper` usually is not used by application code directly but is used by
-the `DataBinder` and the `BeanFactory`.
+Last but not least, the `BeanWrapper` provides support for setting indexed properties.
+The `BeanWrapper` usually is not used by application code directly but is used by the
+`DataBinder` and the `BeanFactory`.
 
 The way the `BeanWrapper` works is partly indicated by its name: it wraps a bean to
 perform actions on that bean, such as setting and retrieving properties.
@@ -229,9 +229,9 @@ perform actions on that bean, such as setting and retrieving properties.
 [[beans-beans-conventions]]
 === Setting and Getting Basic and Nested Properties
 
-Setting and getting properties is done by using the `setPropertyValue`, `setPropertyValues`,
-`getPropertyValue`, and `getPropertyValues` methods that both come with a couple of overloaded variants.
-Springs Javadoc describes them all in more detail.
+Setting and getting properties is done by using the `setPropertyValue`,
+`setPropertyValues`, `getPropertyValue`, and `getPropertyValues` methods which come
+with a couple of overloaded variants. Springs javadoc describes them in more detail.
 The JavaBeans specification has conventions for indicating properties of an
 object. The following table shows some examples of these conventions:
 
@@ -359,7 +359,7 @@ behavior can be achieved by registering custom editors of type
 `java.beans.PropertyEditor`. Registering custom editors on a `BeanWrapper` or,
 alternatively, in a specific IoC container (as mentioned in the previous chapter), gives it
 the knowledge of how to convert properties to the desired type. For more about
-`PropertyEditor`, see https://docs.oracle.com/javase/8/docs/api/java/beans/package-summary.html[the Javadoc of the `java.beans` package from Oracle].
+`PropertyEditor`, see https://docs.oracle.com/javase/8/docs/api/java/beans/package-summary.html[the javadoc of the `java.beans` package from Oracle].
 
 A couple of examples where property editing is used in Spring:
 
@@ -431,8 +431,8 @@ the various `PropertyEditor` implementations that Spring provides:
 | Can resolve strings to `java.util.regex.Pattern` objects and vice-versa.
 
 | `PropertiesEditor`
-| Can convert strings (formatted with the format defined in the Javadoc
-  of the `java.util.Properties` class) to `Properties` objects. By default, registered
+| Can convert strings (formatted with the format defined in the javadoc of the
+  `java.util.Properties` class) to `Properties` objects. By default, registered
   by `BeanWrapperImpl`.
 
 | `StringTrimmerEditor`
@@ -625,8 +625,6 @@ Finally, the following example shows how to use `CustomEditorConfigurer` to regi
 ----
 ====
 
-
-
 [[beans-beans-conversion-customeditor-registration-per]]
 ===== Using `PropertyEditorRegistrar`
 
@@ -721,6 +719,7 @@ This style of `PropertyEditor` registration can lead to concise code (the implem
 of `initBinder(..)` is only one line long) and lets common `PropertyEditor`
 registration code be encapsulated in a class and then shared amongst as many
 `Controllers` as needed.
+
 
 
 
@@ -881,9 +880,9 @@ the target collection type to resolve the collection's element type. This lets e
 element in the source array be converted to the collection element type before the
 collection is set on the target field.
 
-NOTE: Because `GenericConverter` is a more complex SPI interface, you should use it only when you need it.
-Favor `Converter` or `ConverterFactory` for basic type conversion needs.
-
+NOTE: Because `GenericConverter` is a more complex SPI interface, you should use
+it only when you need it. Favor `Converter` or `ConverterFactory` for basic type
+conversion needs.
 
 
 [[core-convert-ConditionalGenericConverter-SPI]]
@@ -1064,6 +1063,7 @@ method on the `DefaultConversionService` class.
 Converters for value types are reused for arrays and collections, so there is
 no need to create a specific converter to convert from a `Collection` of `S` to a
 `Collection` of `T`, assuming that standard collection handling is appropriate.
+
 
 
 
@@ -1387,6 +1387,7 @@ See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring 
 
 
 
+
 [[format-configuring-formatting-globaldatetimeformat]]
 == Configuring a Global Date and Time Format
 
@@ -1613,7 +1614,6 @@ the Spring Validation API, as the following example shows:
 ====
 
 
-
 [[validation-beanvalidation-spring-constraints]]
 ==== Configuring Custom Constraints
 
@@ -1681,10 +1681,10 @@ through a `MethodValidationPostProcessor` bean definition, as follows:
 ----
 ====
 
-To be eligible for Spring-driven method validation, all target classes need
-to be annotated with Spring's `@Validated` annotation. (Optionally, you can also declare the
-validation groups to use.) See the {api-spring-framework}/validation/beanvalidation/MethodValidationPostProcessor.html[`MethodValidationPostProcessor` Javadoc]
-for setup details with the Hibernate Validator and Bean Validation 1.1 providers.
+To be eligible for Spring-driven method validation, all target classes need to be annotated with
+Spring's `@Validated` annotation. (Optionally, you can also declare the validation groups to use.)
+See the {api-spring-framework}/validation/beanvalidation/MethodValidationPostProcessor.html[`MethodValidationPostProcessor`]
+javadoc for setup details with the Hibernate Validator and Bean Validation 1.1 providers.
 
 
 [[validation-beanvalidation-spring-other]]
@@ -1693,7 +1693,8 @@ for setup details with the Hibernate Validator and Bean Validation 1.1 providers
 The default `LocalValidatorFactoryBean` configuration suffices for most
 cases. There are a number of configuration options for various Bean Validation
 constructs, from message interpolation to traversal resolution. See the
-{api-spring-framework}/validation/beanvalidation/LocalValidatorFactoryBean.html[`LocalValidatorFactoryBean` Javadoc] for more information on these options.
+{api-spring-framework}/validation/beanvalidation/LocalValidatorFactoryBean.html[`LocalValidatorFactoryBean`]
+javadoc for more information on these options.
 
 
 

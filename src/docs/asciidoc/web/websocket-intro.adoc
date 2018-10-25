@@ -57,6 +57,7 @@ instructions of the cloud provider related to WebSocket support.
 
 
 
+
 [[websocket-intro-architecture]]
 == HTTP Versus WebSocket
 
@@ -79,6 +80,7 @@ a message unless the client and the server agree on message semantics.
 WebSocket clients and servers can negotiate the use of a higher-level, messaging protocol
 (for example, STOMP), through the `Sec-WebSocket-Protocol` header on the HTTP handshake request.
 In the absence of that, they need to come up with their own conventions.
+
 
 
 

@@ -9,14 +9,15 @@ We assume you are already familiar with <<mvc-viewresolver>>.
 
 
 
+
 [[mvc-view-thymeleaf]]
 == Thymeleaf
 [.small]#<<web-reactive.adoc#webflux-view-thymeleaf,Same as in Spring WebFlux>>#
 
 Thymeleaf is a modern server-side Java template engine that emphasizes natural HTML
-templates that can be previewed in a browser by double-clicking, which is very
-helpful for independent work on UI templates (for example, by a designer) without the need for a
-running server. If you want to replace JSPs, Thymeleaf offers one of the most
+templates that can be previewed in a browser by double-clicking, which is very helpful
+for independent work on UI templates (for example, by a designer) without the need for
+a running server. If you want to replace JSPs, Thymeleaf offers one of the most
 extensive set of features to make such a transition easier. Thymeleaf is actively
 developed and maintained. For a more complete introduction, see the
 http://www.thymeleaf.org/[Thymeleaf] project home page.
@@ -25,6 +26,7 @@ The Thymeleaf integration with Spring MVC is managed by the Thymeleaf project.
 The configuration involves a few bean declarations, such as
 `ServletContextTemplateResolver`, `SpringTemplateEngine`, and `ThymeleafViewResolver`.
 See http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more details.
+
 
 
 
@@ -149,7 +151,6 @@ web or business tier. Spring also has support for the same functionality in Free
 with additional convenience macros for generating form input elements themselves.
 
 
-
 [[mvc-view-bind-macros]]
 ==== The Bind Macros
 
@@ -162,7 +163,6 @@ code and user templates. The following sections concentrate only on the macros y
 to directly call from within your templates. If you wish to view the macro code
 directly, the file is called `spring.ftl` and is in the
 `org.springframework.web.servlet.view.freemarker` package.
-
 
 
 [[mvc-view-simple-binding]]
@@ -210,7 +210,6 @@ and explicitly specifies whether HTML escaping should be used in the status erro
 messages or values. You can set it to `true` or `false` as required. Additional form handling macros
 simplify the use of HTML escaping, and you should use these macros wherever possible.
 They are explained in the next section.
-
 
 
 [[mvc-views-form-macros]]
@@ -304,8 +303,6 @@ The parameters to any of the above macros have consistent meanings:
 The following sections outline examples of the macros (some in FTL and some in VTL). Where usage
 differences exist between the two languages, they are explained in the notes.
 
-
-
 [[mvc-views-form-macros-input]]
 ===== Input Fields
 
@@ -352,8 +349,6 @@ The generated HTML resembles the following example:
 The `formTextarea` macro works the same way as the `formInput` macro and accepts the same
 parameter list. Commonly, the second parameter (attributes) is used to pass style
 information or `rows` and `cols` attributes for the `textarea`.
-
-
 
 [[mvc-views-form-macros-select]]
 ===== Selection Fields
@@ -438,7 +433,6 @@ user still sees the more user-friendly city names, as follows:
 ====
 
 
-
 [[mvc-views-form-macros-html-escaping]]
 ==== HTML Escaping
 
@@ -481,6 +475,7 @@ In similar fashion, you can specify HTML escaping per field, as the following ex
 	<#-- all future fields will be bound with HTML escaping off -->
 ----
 ====
+
 
 
 
@@ -567,6 +562,7 @@ syntax. The following example shows a sample template for an HTML page:
 	}
 ----
 ====
+
 
 
 
@@ -787,6 +783,7 @@ for more configuration examples.
 
 
 
+
 [[mvc-view-jsp]]
 == JSP and JSTL
 
@@ -878,7 +875,6 @@ We go through the form tags and look at an example of how each tag is used. We h
 included generated HTML snippets where certain tags require further commentary.
 
 
-
 [[mvc-view-jsp-formtaglib-configuration]]
 ==== Configuration
 
@@ -896,7 +892,6 @@ page:
 ----
 where `form` is the tag name prefix you want to use for the tags from this library.
 ====
-
 
 
 [[mvc-view-jsp-formtaglib-formtag]]
@@ -994,7 +989,6 @@ following example shows:
 	</form:form>
 ----
 ====
-
 
 
 [[mvc-view-jsp-formtaglib-inputtag]]
@@ -1254,7 +1248,6 @@ password value to be shown, you can set the value of the `showPassword` attribut
 ====
 
 
-
 [[mvc-view-jsp-formtaglib-selecttag]]
 ==== The `select` Tag
 
@@ -1420,7 +1413,6 @@ This tag renders an HTML `textarea` element. The following HTML shows typical ou
 ====
 
 
-
 [[mvc-view-jsp-formtaglib-hiddeninputtag]]
 ==== The `hidden` Tag
 
@@ -1446,7 +1438,6 @@ If we choose to submit the `house` value as a hidden one, the HTML would be as f
 
 ----
 ====
-
 
 
 [[mvc-view-jsp-formtaglib-errorstag]]
@@ -1682,7 +1673,6 @@ The following example shows the corresponding `@Controller` method:
 ====
 
 
-
 [[mvc-view-jsp-formtaglib-html5]]
 ==== HTML5 Tags
 
@@ -1693,6 +1683,7 @@ The form `input` tag supports entering a type attribute other than `text`. This 
 intended to allow rendering new HTML5 specific input types, such as `email`, `date`,
 `range`, and others. Note that entering `type='text'` is not required, since `text`
 is the default type.
+
 
 
 
@@ -1793,7 +1784,6 @@ resolve. The following bean defines a `UrlBasedViewResolver`:
 ====
 
 
-
 [[mvc-view-tiles-resource]]
 ==== `ResourceBundleViewResolver`
 
@@ -1810,7 +1800,6 @@ classes (taken from the Pet Clinic sample):
 		<property name="basename" value="views"/>
 	</bean>
 ----
-
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1832,7 +1821,6 @@ When you use the `ResourceBundleViewResolver`, you can easily mix
 different view technologies.
 
 Note that the `TilesView` class supports JSTL (the JSP Standard Tag Library).
-
 
 
 [[mvc-view-tiles-preparer]]
@@ -1879,6 +1867,7 @@ how to define a set a `SpringBeanPreparerFactory` property on a `TilesConfigurer
 	</bean>
 ----
 ====
+
 
 
 
@@ -1949,6 +1938,7 @@ https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-sp
 
 
 
+
 [[mvc-view-document]]
 == PDF and Excel
 
@@ -2006,7 +1996,7 @@ A controller can return such a view either from an external view definition
 
 
 
-[[mvc-view-document-pdf]]
+[[mvc-view-document-excel]]
 === Excel Views
 
 Since Spring Framework 4.2,
@@ -2017,6 +2007,7 @@ and `AbstractXlsxStreamingView`) that supersede the outdated `AbstractExcelView`
 The programming model is similar to `AbstractPdfView`, with `buildExcelDocument()`
 as the central template method and controllers being able to return such a view from
 an external definition (by name) or as a `View` instance from the handler method.
+
 
 
 
@@ -2075,6 +2066,7 @@ iterates over all model properties and marshals the first type that is supported
 by the `Marshaller`. For more information on the functionality in the
 `org.springframework.oxm` package, see
 <<data-access.adoc#oxm,Marshalling XML using O/X Mappers>>.
+
 
 
 

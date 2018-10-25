@@ -14,8 +14,10 @@ popular third party web frameworks.
 
 
 
+
 [[web-integration-common]]
 == Common Configuration
+
 Before diving into the integration specifics of each supported web framework, let us
 first take a look at the Spring configuration that is not specific to any one web
 framework. (This section is equally applicable to Spring's own web framework, Spring
@@ -105,6 +107,7 @@ has more detail on its specific integration strategies.
 
 
 
+
 [[jsf]]
 == JSF
 
@@ -173,6 +176,7 @@ The following example shows how to use `FacesContextUtils`:
 
 
 
+
 [[struts]]
 == Apache Struts 2.x
 
@@ -186,6 +190,7 @@ among Java web developers.
 Check out the Struts
 https://struts.apache.org/release/2.3.x/docs/spring-plugin.html[Spring Plugin] for the
 built-in Spring integration shipped with Struts.
+
 
 
 
@@ -205,8 +210,10 @@ Spring].
 
 
 
+
 [[web-integration-resources]]
 == Further Resources
+
 The following links go to further resources about the various web frameworks described in this
 chapter.
 

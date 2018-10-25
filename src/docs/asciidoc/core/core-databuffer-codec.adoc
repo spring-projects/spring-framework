@@ -9,6 +9,7 @@ platforms (that is, Servlet 3.1+).
 
 
 
+
 == `DataBufferFactory`
 
 The `DataBufferFactory` offers functionality to allocate new data buffers as well as to wrap
@@ -21,9 +22,9 @@ Wrapping does not involve allocation. It decorates the given data with a `DataBu
 implementation.
 
 There are two implementation of `DataBufferFactory`: the `NettyDataBufferFactory`
-(for Netty platforms, such as Reactor Netty) and
-`DefaultDataBufferFactory` (for other platforms, such as
-Servlet 3.1+ servers).
+(for Netty platforms, such as Reactor Netty) and `DefaultDataBufferFactory`
+(for other platforms, such as Servlet 3.1+ servers).
+
 
 
 
@@ -150,6 +151,7 @@ from that, a `String` or `InputStream`).
 This is particularly useful when dealing with older, blocking APIs.
 Note, however, that this puts the entire body in memory, and therefore uses more memory than a pure
 streaming solution would.
+
 
 
 

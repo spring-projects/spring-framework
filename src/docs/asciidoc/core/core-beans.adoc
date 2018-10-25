@@ -5,6 +5,7 @@ This chapter covers Spring's Inversion of Control (IoC) container.
 
 
 
+
 [[beans-introduction]]
 == Introduction to the Spring IoC Container and Beans
 
@@ -3072,7 +3073,7 @@ To integrate your custom scopes into the Spring container, you need to implement
 `org.springframework.beans.factory.config.Scope` interface, which is described in this
 section. For an idea of how to implement your own scopes, see the `Scope`
 implementations that are supplied with the Spring Framework itself and the
-{api-spring-framework}/beans/factory/config/Scope.html[`Scope` Javadoc],
+{api-spring-framework}/beans/factory/config/Scope.html[`Scope`] javadoc,
 which explains the methods you need to implement in more detail.
 
 The `Scope` interface has four methods to get objects from the scope, remove them from
@@ -3115,7 +3116,7 @@ destroyed or when the specified object in the scope is destroyed:
 ----
 ====
 
-See the {api-spring-framework}/beans/factory/config/Scope.html#registerDestructionCallback[Javadoc]
+See the {api-spring-framework}/beans/factory/config/Scope.html#registerDestructionCallback[javadoc]
 or a Spring scope implementation for more information on destruction callbacks.
 
 The following method obtains the conversation identifier for the underlying scope:
@@ -3963,12 +3964,13 @@ after the Spring container finishes instantiating, configuring, and initializing
 you can plug in one or more `BeanPostProcessor` implementations.
 
 You can configure multiple `BeanPostProcessor` instances, and you can control the order
-in which these `BeanPostProcessor` instances execute by setting the `order` property. You can
-set this property only if the `BeanPostProcessor` implements the `Ordered` interface. If
-you write your own `BeanPostProcessor`, you should consider implementing the `Ordered`
-interface, too. For further details, see the Javadoc of the {api-spring-framework}/beans/factory/config/BeanPostProcessor.html[`BeanPostProcessor`] and
-{api-spring-framework}/core/Ordered.html[`Ordered`] interfaces. See also the note on
-<<beans-factory-programmatically-registering-beanpostprocessors, programmatic
+in which these `BeanPostProcessor` instances execute by setting the `order` property.
+You can set this property only if the `BeanPostProcessor` implements the `Ordered`
+interface. If you write your own `BeanPostProcessor`, you should consider implementing
+the `Ordered` interface, too. For further details, see the javadoc of the
+{api-spring-framework}/beans/factory/config/BeanPostProcessor.html[`BeanPostProcessor`]
+and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces. See also the note
+on <<beans-factory-programmatically-registering-beanpostprocessors, programmatic
 registration of `BeanPostProcessor` instances>>.
 
 [NOTE]
@@ -4184,7 +4186,7 @@ You can configure multiple `BeanFactoryPostProcessor` instances, and you can con
 which these `BeanFactoryPostProcessor` instances run by setting the `order` property.
 However, you can only set this property if the `BeanFactoryPostProcessor` implements the
 `Ordered` interface. If you write your own `BeanFactoryPostProcessor`, you should
-consider implementing the `Ordered` interface, too. See the Javadoc of the
+consider implementing the `Ordered` interface, too. See the javadoc of the
 {api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`] and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
 
 [NOTE]
@@ -4302,7 +4304,7 @@ the following three supported integer values:
 * `override` (2): Check system properties first, before trying the specified
   properties files. This lets system properties override any other property source.
 
-See the {api-spring-framework}/beans/factory/config/PropertyPlaceholderConfigurer.html[`PropertyPlaceholderConfigurer`] Javadoc for more information.
+See the {api-spring-framework}/beans/factory/config/PropertyPlaceholderConfigurer.html[`PropertyPlaceholderConfigurer`] javadoc for more information.
 
 [TIP]
 =====
@@ -7778,8 +7780,8 @@ method that returns `true` or `false`. For example, the following listing shows 
 ----
 ====
 
-See the {api-spring-framework}/context/annotation/Conditional.html[
-`@Conditional` Javadoc] for more detail.
+See the {api-spring-framework}/context/annotation/Conditional.html[`@Conditional`]
+javadoc for more detail.
 
 
 [[beans-java-combining]]
@@ -8617,8 +8619,8 @@ may implement `LoadTimeWeaverAware`, thereby receiving a reference to the load-t
 weaver instance. This is particularly useful in combination with
 <<data-access.adoc#orm-jpa,Spring's JPA support>> where load-time weaving may be necessary
 for JPA class transformation.
-Consult the {api-spring-framework}/orm/jpa/LocalContainerEntityManagerFactoryBean.html[`LocalContainerEntityManagerFactoryBean` javadoc]
-for more detail. For more on AspectJ load-time weaving, see <<aop-aj-ltw>>.
+Consult the {api-spring-framework}/orm/jpa/LocalContainerEntityManagerFactoryBean.html[`LocalContainerEntityManagerFactoryBean`]
+javadoc for more detail. For more on AspectJ load-time weaving, see <<aop-aj-ltw>>.
 
 
 
@@ -8863,8 +8865,8 @@ file format but is more flexible than the standard JDK based
 `ResourceBundleMessageSource` implementation. In particular, it allows for reading
 files from any Spring resource location (not only from the classpath) and supports hot
 reloading of bundle property files (while efficiently caching them in between).
-See the {api-spring-framework}/context/support/ReloadableResourceBundleMessageSource.html[`ReloadableResourceBundleMessageSource` javadoc]
-for details.
+See the {api-spring-framework}/context/support/ReloadableResourceBundleMessageSource.html[`ReloadableResourceBundleMessageSource`]
+javadoc for details.
 
 
 
