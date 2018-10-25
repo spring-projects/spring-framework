@@ -230,7 +230,7 @@ The table below lists the special beans detected by the `DispatcherHandler`:
 |===
 | Bean type| Explanation
 
-| <<mvc-handlermapping,HandlerMapping>>
+| HandlerMapping
 | Map a request to a handler along with a list of
   <<mvc-handlermapping-interceptor, interceptors>> for pre- and post-processing.
   The mapping is based on some criteria the details of which vary by `HandlerMapping`
@@ -857,12 +857,12 @@ modify corresponding `HttpSession` attributes against the current `HttpServletRe
 ==== Locale interceptor
 
 You can enable changing of locales by adding the `LocaleChangeInterceptor` to one of the
-handler mappings (see <<mvc-handlermapping>>). It will detect a parameter in the request
-and change the locale. It calls `setLocale()` on the `LocaleResolver` that also exists
-in the context. The following example shows that calls to all `{asterisk}.view` resources
-containing a parameter named `siteLanguage` will now change the locale. So, for example,
-a request for the following URL, `http://www.sf.net/home.view?siteLanguage=nl` will
-change the site language to Dutch.
+`HandlerMapping` definitions. It detects a parameter in the request and changes the locale
+accordingly, calling the `setLocale` method on the `LocaleResolver` in the dispatcher's
+application context. The next example shows that calls to all `{asterisk}.view` resources
+that contain a parameter named `siteLanguage` now changes the locale. So, for example,
+a request for the URL, `http://www.sf.net/home.view?siteLanguage=nl`, changes the site
+language to Dutch. The following example shows how to intercept the locale:
 
 [source,xml,indent=0]
 [subs="verbatim"]
@@ -999,7 +999,7 @@ provide access to resolved parts in addition to exposing them as request paramet
 
 
 [[mvc-multipart-resolver-commons]]
-==== Apache FileUpload
+==== Apache Commons FileUpload
 
 To use Apache Commons FileUpload, simply configure a bean of type
 `CommonsMultipartResolver` with the name `multipartResolver`. Of course you also need to
