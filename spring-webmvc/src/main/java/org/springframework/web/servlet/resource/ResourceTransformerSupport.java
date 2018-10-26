@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 */
 	protected String toAbsolutePath(String path, HttpServletRequest request) {
 		String absolutePath = path;
-		if(!path.startsWith("/")) {
+		if (!path.startsWith("/")) {
 			ResourceUrlProvider urlProvider = findResourceUrlProvider(request);
 			Assert.state(urlProvider != null, "No ResourceUrlProvider");
 			String requestPath = urlProvider.getUrlPathHelper().getRequestUri(request);
