@@ -55,6 +55,7 @@ import org.springframework.web.reactive.function.server.support.RouterFunctionMa
 import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.handler.WebFluxResponseStatusExceptionHandler;
+import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
@@ -74,6 +75,7 @@ import org.springframework.web.server.i18n.LocaleContextResolver;
  * <p>Import directly or extend and override protected methods to customize.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
@@ -229,6 +231,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			resourceLoader = new DefaultResourceLoader();
 		}
 		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(resourceLoader);
+		registry.setResourceUrlProvider(resourceUrlProvider());
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
@@ -247,6 +250,11 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			handlerMapping = new EmptyHandlerMapping();
 		}
 		return handlerMapping;
+	}
+
+	@Bean
+	public ResourceUrlProvider resourceUrlProvider() {
+		return new ResourceUrlProvider();
 	}
 
 	/**
