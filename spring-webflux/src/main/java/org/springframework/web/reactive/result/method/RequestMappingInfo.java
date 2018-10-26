@@ -201,7 +201,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			return this.name;
 		}
 		else {
-			return (other.name != null ? other.name : null);
+			return other.name;
 		}
 	}
 
