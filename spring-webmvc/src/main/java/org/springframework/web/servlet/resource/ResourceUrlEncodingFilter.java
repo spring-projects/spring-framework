@@ -36,8 +36,7 @@ import org.springframework.web.util.UrlPathHelper;
 /**
  * A filter that wraps the {@link HttpServletResponse} and overrides its
  * {@link HttpServletResponse#encodeURL(String) encodeURL} method in order to
- * translate internal resource request URLs into public URL paths for external
- * use.
+ * translate internal resource request URLs into public URL paths for external use.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
@@ -52,7 +51,8 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
-			throws IOException, ServletException {
+			throws ServletException, IOException {
+
 		if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
 			throw new ServletException("ResourceUrlEncodingFilter only supports HTTP requests");
 		}
@@ -62,6 +62,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				new ResourceUrlEncodingResponseWrapper(wrappedRequest, (HttpServletResponse) response);
 		filterChain.doFilter(wrappedRequest, wrappedResponse);
 	}
+
 
 	private static class ResourceUrlEncodingRequestWrapper extends HttpServletRequestWrapper {
 
@@ -78,11 +79,11 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		}
 
 		@Override
-		public void setAttribute(String name, Object o) {
-			super.setAttribute(name, o);
+		public void setAttribute(String name, Object value) {
+			super.setAttribute(name, value);
 			if (ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR.equals(name)) {
-				if(o instanceof ResourceUrlProvider) {
-					initLookupPath((ResourceUrlProvider) o);
+				if (value instanceof ResourceUrlProvider) {
+					initLookupPath((ResourceUrlProvider) value);
 				}
 			}
 
@@ -109,11 +110,11 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		@Nullable
 		public String resolveUrlPath(String url) {
 			if (this.resourceUrlProvider == null) {
-				logger.trace("ResourceUrlProvider not available via " +
-						"request attribute ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR");
+				logger.trace("ResourceUrlProvider not available via request attribute " +
+						"ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR");
 				return null;
 			}
-			if (url.startsWith(this.prefixLookupPath)) {
+			if (this.indexLookupPath != null && url.startsWith(this.prefixLookupPath)) {
 				int suffixIndex = getQueryParamsIndex(url);
 				String suffix = url.substring(suffixIndex);
 				String lookupPath = url.substring(this.indexLookupPath, suffixIndex);
