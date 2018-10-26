@@ -422,13 +422,16 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Return a new {@code DataBuffer} composed of the {@code dataBuffers} elements joined together.
-	 * Depending on the {@link DataBuffer} implementation, the returned buffer may be a single
-	 * buffer containing all data of the provided buffers, or it may be a true composite that
-	 * contains references to the buffers.
-	 * <p>If {@code dataBuffers} contains an error signal, then all buffers that preceded the error
-	 * will be {@linkplain #release(DataBuffer) released}, and the error is stored in the
-	 * returned {@code Mono}.
+	 * Return a new {@code DataBuffer} composed from joining together the given
+	 * {@code dataBuffers} elements. Depending on the {@link DataBuffer} type,
+	 * the returned buffer may be a single buffer containing all data of the
+	 * provided buffers, or it may be a zero-copy, composite with references to
+	 * the given buffers.
+	 * <p>If {@code dataBuffers} produces an error or if there is a cancel
+	 * signal, then all accumulated buffers will be
+	 * {@linkplain #release(DataBuffer) released}.
+	 * <p>Note that the given data buffers do <strong>not</strong> have to be
+	 * released. They will be released as part of the returned composite.
 	 * @param dataBuffers the data buffers that are to be composed
 	 * @return a buffer that is composed from the {@code dataBuffers} argument
 	 * @since 5.0.3
@@ -439,10 +442,7 @@ public abstract class DataBufferUtils {
 		return Flux.from(dataBuffers)
 				.collectList()
 				.filter(list -> !list.isEmpty())
-				.map(list -> {
-					DataBufferFactory bufferFactory = list.get(0).factory();
-					return bufferFactory.join(list);
-				})
+				.map(list -> list.get(0).factory().join(list))
 				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 
 	}
