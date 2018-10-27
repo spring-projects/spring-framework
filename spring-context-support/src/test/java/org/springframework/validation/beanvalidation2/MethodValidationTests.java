@@ -123,7 +123,16 @@ public class MethodValidationTests {
 	@Test
 	public void testLazyValidatorForMethodValidation() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-				LazyMethodValidationConfig.class, CustomValidatorBean.class, MyValidBean.class, MyValidFactoryBean.class);
+				LazyMethodValidationConfig.class, CustomValidatorBean.class,
+				MyValidBean.class, MyValidFactoryBean.class);
+		ctx.getBeansOfType(MyValidInterface.class).values().forEach(bean -> bean.myValidMethod("value", 5));
+	}
+
+	@Test
+	public void testLazyValidatorForMethodValidationWithProxyTargetClass() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				LazyMethodValidationConfigWithProxyTargetClass.class, CustomValidatorBean.class,
+				MyValidBean.class, MyValidFactoryBean.class);
 		ctx.getBeansOfType(MyValidInterface.class).values().forEach(bean -> bean.myValidMethod("value", 5));
 	}
 
@@ -214,6 +223,19 @@ public class MethodValidationTests {
 		public static MethodValidationPostProcessor methodValidationPostProcessor(@Lazy Validator validator) {
 			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
 			postProcessor.setValidator(validator);
+			return postProcessor;
+		}
+	}
+
+
+	@Configuration
+	public static class LazyMethodValidationConfigWithProxyTargetClass {
+
+		@Bean
+		public static MethodValidationPostProcessor methodValidationPostProcessor(@Lazy Validator validator) {
+			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
+			postProcessor.setValidator(validator);
+			postProcessor.setProxyTargetClass(true);
 			return postProcessor;
 		}
 	}

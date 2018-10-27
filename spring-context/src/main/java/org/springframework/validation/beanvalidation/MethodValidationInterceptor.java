@@ -128,8 +128,23 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 	private boolean isFactoryBeanMetadataMethod(Method method) {
 		Class<?> clazz = method.getDeclaringClass();
-		return ((clazz == FactoryBean.class || clazz == SmartFactoryBean.class) &&
-				!method.getName().equals("getObject"));
+
+		// Call from interface-based proxy handle, allowing for an efficient check?
+		if (clazz.isInterface()) {
+			return ((clazz == FactoryBean.class || clazz == SmartFactoryBean.class) &&
+					!method.getName().equals("getObject"));
+		}
+
+		// Call from CGLIB proxy handle, potentially implementing a FactoryBean method?
+		Class<?> factoryBeanType = null;
+		if (SmartFactoryBean.class.isAssignableFrom(clazz)) {
+			factoryBeanType = SmartFactoryBean.class;
+		}
+		else if (FactoryBean.class.isAssignableFrom(clazz)) {
+			factoryBeanType = FactoryBean.class;
+		}
+		return (factoryBeanType != null && !method.getName().equals("getObject") &&
+				ClassUtils.hasMethod(factoryBeanType, method.getName(), method.getParameterTypes()));
 	}
 
 	/**
