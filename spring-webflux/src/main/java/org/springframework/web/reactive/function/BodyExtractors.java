@@ -50,12 +50,13 @@ public abstract class BodyExtractors {
 	private static final ResolvableType FORM_MAP_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
-	private static final ResolvableType MULTIPART_MAP_TYPE = ResolvableType.forClassWithGenerics(
-			MultiValueMap.class, String.class, Part.class);
+	private static final ResolvableType MULTIPART_MAP_TYPE =
+			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 
 	private static final ResolvableType PART_TYPE = ResolvableType.forClass(Part.class);
 
 	private static final ResolvableType VOID_TYPE = ResolvableType.forClass(Void.class);
+
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Mono}.
@@ -69,8 +70,9 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Mono}.
-	 * The given {@link ParameterizedTypeReference} is used to pass generic type information, for
-	 * instance when using the {@link org.springframework.web.reactive.function.client.WebClient WebClient}
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type
+	 * information, for instance when using the
+	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient}:
 	 * <pre class="code">
 	 * Mono&lt;Map&lt;String, String&gt;&gt; body = this.webClient
 	 *  .get()
@@ -118,8 +120,9 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Flux}.
-	 * The given {@link ParameterizedTypeReference} is used to pass generic type information, for
-	 * instance when using the {@link org.springframework.web.reactive.function.client.WebClient WebClient}
+	 * <p>The given {@link ParameterizedTypeReference} is used to pass generic type
+	 * information, for instance when using the
+	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient}:
 	 * <pre class="code">
 	 * Flux&lt;ServerSentEvent&lt;String&gt;&gt; body = this.webClient
 	 *  .get()
@@ -167,9 +170,7 @@ public abstract class BodyExtractors {
 	 * Return a {@code BodyExtractor} that reads form data into a {@link MultiValueMap}.
 	 * @return a {@code BodyExtractor} that reads form data
 	 */
-	// Note that the returned BodyExtractor is parameterized to ServerHttpRequest, not
-	// ReactiveHttpInputMessage like other methods, since reading form data only typically happens on
-	// the server-side
+	// Parameterized for server-side use
 	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> toFormData() {
 		return (request, context) -> {
 			ResolvableType type = FORM_MAP_TYPE;
@@ -182,13 +183,11 @@ public abstract class BodyExtractors {
 	}
 
 	/**
-	 * Return a {@code BodyExtractor} that reads multipart (i.e. file upload) form data into a
-	 * {@link MultiValueMap}.
+	 * Return a {@code BodyExtractor} that reads multipart (i.e. file upload) form data
+	 * into a {@link MultiValueMap}.
 	 * @return a {@code BodyExtractor} that reads multipart data
 	 */
-	// Note that the returned BodyExtractor is parameterized to ServerHttpRequest, not
-	// ReactiveHttpInputMessage like other methods, since reading form data only typically happens on
-	// the server-side
+	// Parameterized for server-side use
 	public static BodyExtractor<Mono<MultiValueMap<String, Part>>, ServerHttpRequest> toMultipartData() {
 		return (serverRequest, context) -> {
 			ResolvableType type = MULTIPART_MAP_TYPE;
@@ -201,13 +200,11 @@ public abstract class BodyExtractors {
 	}
 
 	/**
-	 * Return a {@code BodyExtractor} that reads multipart (i.e. file upload) form data into a
-	 * {@link MultiValueMap}.
+	 * Return a {@code BodyExtractor} that reads multipart (i.e. file upload) form data
+	 * into a {@link MultiValueMap}.
 	 * @return a {@code BodyExtractor} that reads multipart data
 	 */
-	// Note that the returned BodyExtractor is parameterized to ServerHttpRequest, not
-	// ReactiveHttpInputMessage like other methods, since reading form data only typically happens on
-	// the server-side
+	// Parameterized for server-side use
 	public static BodyExtractor<Flux<Part>, ServerHttpRequest> toParts() {
 		return (serverRequest, context) -> {
 			ResolvableType type = PART_TYPE;
@@ -219,10 +216,10 @@ public abstract class BodyExtractors {
 	}
 
 	/**
-	 * Return a {@code BodyExtractor} that returns the body of the message as a {@link Flux} of
-	 * {@link DataBuffer}s.
-	 * <p><strong>Note</strong> that the returned buffers should be released after usage by calling
-	 * {@link org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)}
+	 * Return a {@code BodyExtractor} that returns the body of the message as a {@link Flux}
+	 * of {@link DataBuffer}s.
+	 * <p><strong>Note</strong> that the returned buffers should be released after usage by
+	 * calling {@link org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)}.
 	 * @return a {@code BodyExtractor} that returns the body
 	 * @see ReactiveHttpInputMessage#getBody()
 	 */

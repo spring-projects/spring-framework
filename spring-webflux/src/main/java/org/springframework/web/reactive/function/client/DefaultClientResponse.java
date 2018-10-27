@@ -102,11 +102,61 @@ class DefaultClientResponse implements ClientResponse {
 
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
-		if (Void.class.isAssignableFrom(elementClass)) {
+		if (Void.class == elementClass) {
 			return consumeAndCancel();
 		}
 		else {
 			return body(BodyExtractors.toMono(elementClass));
+		}
+	}
+
+	@Override
+	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
+		if (Void.class == typeReference.getType()) {
+			return consumeAndCancel();
+		}
+		else {
+			return body(BodyExtractors.toMono(typeReference));
+		}
+	}
+
+	@Override
+	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
+		if (Void.class == elementClass) {
+			return Flux.from(consumeAndCancel());
+		}
+		else {
+			return body(BodyExtractors.toFlux(elementClass));
+		}
+	}
+
+	@Override
+	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
+		if (Void.class == typeReference.getType()) {
+			return Flux.from(consumeAndCancel());
+		}
+		else {
+			return body(BodyExtractors.toFlux(typeReference));
+		}
+	}
+
+	@Override
+	public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {
+		if (Void.class == bodyType) {
+			return toEntityInternal(consumeAndCancel());
+		}
+		else {
+			return toEntityInternal(bodyToMono(bodyType));
+		}
+	}
+
+	@Override
+	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference) {
+		if (Void.class == typeReference.getType()) {
+			return toEntityInternal(consumeAndCancel());
+		}
+		else {
+			return toEntityInternal(bodyToMono(typeReference));
 		}
 	}
 
@@ -119,56 +169,6 @@ class DefaultClientResponse implements ClientResponse {
 				})
 				.onErrorResume(ReadCancellationException.class, ex -> Mono.empty())
 				.then();
-	}
-
-	@Override
-	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
-		if (Void.class.isAssignableFrom(typeReference.getType().getClass())) {
-			return consumeAndCancel();
-		}
-		else {
-			return body(BodyExtractors.toMono(typeReference));
-		}
-	}
-
-	@Override
-	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
-		if (Void.class.isAssignableFrom(elementClass)) {
-			return Flux.from(consumeAndCancel());
-		}
-		else {
-			return body(BodyExtractors.toFlux(elementClass));
-		}
-	}
-
-	@Override
-	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
-		if (Void.class.isAssignableFrom(typeReference.getType().getClass())) {
-			return Flux.from(consumeAndCancel());
-		}
-		else {
-			return body(BodyExtractors.toFlux(typeReference));
-		}
-	}
-
-	@Override
-	public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {
-		if (Void.class.isAssignableFrom(bodyType)) {
-			return toEntityInternal(consumeAndCancel());
-		}
-		else {
-			return toEntityInternal(bodyToMono(bodyType));
-		}
-	}
-
-	@Override
-	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference) {
-		if (Void.class.isAssignableFrom(typeReference.getType().getClass())) {
-			return toEntityInternal(consumeAndCancel());
-		}
-		else {
-			return toEntityInternal(bodyToMono(typeReference));
-		}
 	}
 
 	private <T> Mono<ResponseEntity<T>> toEntityInternal(Mono<T> bodyMono) {
