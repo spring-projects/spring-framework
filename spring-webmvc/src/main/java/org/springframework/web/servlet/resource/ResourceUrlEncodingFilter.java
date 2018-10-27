@@ -35,8 +35,7 @@ import org.springframework.web.util.UrlPathHelper;
 /**
  * A filter that wraps the {@link HttpServletResponse} and overrides its
  * {@link HttpServletResponse#encodeURL(String) encodeURL} method in order to
- * translate internal resource request URLs into public URL paths for external
- * use.
+ * translate internal resource request URLs into public URL paths for external use.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
@@ -51,7 +50,8 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
-			throws IOException, ServletException {
+			throws ServletException, IOException {
+
 		if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
 			throw new ServletException("ResourceUrlEncodingFilter only supports HTTP requests");
 		}
@@ -62,11 +62,11 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		filterChain.doFilter(wrappedRequest, wrappedResponse);
 	}
 
+
 	private static class ResourceUrlEncodingRequestWrapper extends HttpServletRequestWrapper {
 
 		private ResourceUrlProvider resourceUrlProvider;
 
-		/* Cache the index and prefix of the path within the DispatcherServlet mapping */
 		private Integer indexLookupPath;
 
 		private String prefixLookupPath;
@@ -76,11 +76,11 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		}
 
 		@Override
-		public void setAttribute(String name, Object o) {
-			super.setAttribute(name, o);
+		public void setAttribute(String name, Object value) {
+			super.setAttribute(name, value);
 			if (ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR.equals(name)) {
-				if(o instanceof ResourceUrlProvider) {
-					initLookupPath((ResourceUrlProvider) o);
+				if (value instanceof ResourceUrlProvider) {
+					initLookupPath((ResourceUrlProvider) value);
 				}
 			}
 
@@ -94,7 +94,6 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				String lookupPath = pathHelper.getLookupPathForRequest(this);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
-
 				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
 					String contextPath = pathHelper.getContextPath(this);
 					if (requestUri.equals(contextPath)) {
@@ -107,10 +106,11 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 
 		public String resolveUrlPath(String url) {
 			if (this.resourceUrlProvider == null) {
-				logger.debug("Request attribute exposing ResourceUrlProvider not found");
+				logger.trace("ResourceUrlProvider not available via request attribute " +
+						"ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR");
 				return null;
 			}
-			if (url.startsWith(this.prefixLookupPath)) {
+			if (this.indexLookupPath != null && url.startsWith(this.prefixLookupPath)) {
 				int suffixIndex = getQueryParamsIndex(url);
 				String suffix = url.substring(suffixIndex);
 				String lookupPath = url.substring(this.indexLookupPath, suffixIndex);
