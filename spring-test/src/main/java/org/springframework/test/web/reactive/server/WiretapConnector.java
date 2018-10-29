@@ -192,8 +192,8 @@ class WiretapConnector implements ClientHttpConnector {
 					//noinspection ConstantConditions
 					(this.publisher != null ? this.publisher : this.publisherNested)
 							.onErrorMap(ex -> new IllegalStateException(
-									"Content was not been consumed and " +
-											"an error was raised on attempt to produce it:", ex))
+									"Content has not been consumed, and " +
+											"an error was raised while attempting to produce it.", ex))
 							.subscribe();
 				}
 				return this.content;
