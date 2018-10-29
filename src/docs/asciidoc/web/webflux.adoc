@@ -58,7 +58,7 @@ code, it becomes important to control the rate of events so that a fast producer
 overwhelm its destination.
 
 Reactive Streams is a
-https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.1/README.md#specification[small spec]
+https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md#specification[small spec]
 (also https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.html[adopted] in Java 9)
 that defines the interaction between asynchronous components with back pressure.
 For example a data repository (acting as
