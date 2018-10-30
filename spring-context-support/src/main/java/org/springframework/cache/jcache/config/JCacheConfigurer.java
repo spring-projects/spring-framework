@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,20 @@ package org.springframework.cache.jcache.config;
 
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.interceptor.CacheResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link CachingConfigurer} for the JSR-107 implementation.
  *
  * <p>To be implemented by classes annotated with
- * @{@link org.springframework.cache.annotation.EnableCaching} that wish or
- * need to specify explicitly how exception caches are resolved for
+ * {@link org.springframework.cache.annotation.EnableCaching} that wish
+ * or need to specify explicitly how exception caches are resolved for
  * annotation-driven cache management. Consider extending {@link JCacheConfigurerSupport},
  * which provides a stub implementation of all interface methods.
  *
- * <p>See @{@link org.springframework.cache.annotation.EnableCaching} for
- * general examples and context; see {@link #exceptionCacheResolver()} for detailed
- * instructions.
+ * <p>See {@link org.springframework.cache.annotation.EnableCaching} for
+ * general examples and context; see {@link #exceptionCacheResolver()} for
+ * detailed instructions.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -58,6 +59,7 @@ public interface JCacheConfigurer extends CachingConfigurer {
 	 * </pre>
 	 * See {@link org.springframework.cache.annotation.EnableCaching} for more complete examples.
 	 */
+	@Nullable
 	CacheResolver exceptionCacheResolver();
 
 }

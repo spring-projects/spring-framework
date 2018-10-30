@@ -19,12 +19,13 @@ package org.springframework.core.serializer;
 import java.io.NotSerializableException;
 import java.io.Serializable;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.core.serializer.support.DeserializingConverter;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.core.serializer.support.SerializingConverter;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Gary Russell

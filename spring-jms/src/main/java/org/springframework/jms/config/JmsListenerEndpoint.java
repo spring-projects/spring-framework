@@ -41,8 +41,8 @@ public interface JmsListenerEndpoint {
 	 * setting the {@code destination} and the {@code messageListener} to
 	 * use but an implementation may override any default setting that
 	 * was already set.
-	 * @param container the container to configure
+	 * @param listenerContainer the listener container to configure
 	 */
-	void setupMessageContainer(MessageListenerContainer container);
+	void setupListenerContainer(MessageListenerContainer listenerContainer);
 
 }

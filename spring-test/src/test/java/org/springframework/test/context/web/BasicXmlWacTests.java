@@ -16,10 +16,11 @@
 
 package org.springframework.test.context.web;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.test.context.ContextConfiguration;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Sam Brannen

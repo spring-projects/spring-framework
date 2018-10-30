@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,19 +16,18 @@
 
 package org.springframework.messaging.simp;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.BeansException;
+
 import org.springframework.beans.factory.ObjectFactory;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.SimpSessionScope}.
@@ -40,6 +39,7 @@ public class SimpSessionScopeTests {
 
 	private SimpSessionScope scope;
 
+	@SuppressWarnings("rawtypes")
 	private ObjectFactory objectFactory;
 
 	private SimpAttributes simpAttributes;
@@ -68,7 +68,7 @@ public class SimpSessionScopeTests {
 
 	@Test
 	public void getWithObjectFactory() {
-		when(this.objectFactory.getObject()).thenReturn("value");
+		given(this.objectFactory.getObject()).willReturn("value");
 		Object actual = this.scope.get("name", this.objectFactory);
 
 		assertThat(actual, is("value"));

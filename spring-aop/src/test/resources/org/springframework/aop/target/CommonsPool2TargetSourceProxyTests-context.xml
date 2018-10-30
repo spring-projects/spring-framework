@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="testBeanTarget" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
+
+	<bean id="targetSource" class="org.springframework.aop.target.CommonsPool2TargetSource">
+		<property name="targetBeanName" value="testBeanTarget"/>
+	</bean>
+
+	<bean id="testBean" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="targetSource" ref="targetSource"/>
+	</bean>
+
+</beans>

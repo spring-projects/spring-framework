@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.springframework.aop.support;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ClassUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Colin Sampaleanu
@@ -27,9 +29,10 @@ import org.springframework.util.ClassUtils;
  * @author Rob Harrop
  * @author Rick Evans
  */
-public class ClassUtilsTests extends TestCase {
+public class ClassUtilsTests {
 
-	public void testGetShortNameForCglibClass() {
+	@Test
+	public void getShortNameForCglibClass() {
 		TestBean tb = new TestBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(tb);

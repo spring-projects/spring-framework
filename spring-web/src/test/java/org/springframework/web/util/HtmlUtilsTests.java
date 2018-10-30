@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,11 @@ public class HtmlUtilsTests {
 	public void testHtmlUnescape() {
 		String escaped = "&quot;This is a quote&#39;";
 		String unescaped = HtmlUtils.htmlUnescape(escaped);
-		assertEquals(unescaped, "\"This is a quote'");
+		assertEquals("\"This is a quote'", unescaped);
 	}
 
 	@Test
 	public void testEncodeIntoHtmlCharacterSet() {
-		assertNull("A null string should be converted to a null string",
-				HtmlUtils.htmlEscape(null));
 		assertEquals("An empty string should be converted to an empty string",
 				"", HtmlUtils.htmlEscape(""));
 		assertEquals("A string containing no special characters should not be affected",
@@ -71,10 +69,28 @@ public class HtmlUtilsTests {
 				"&#977;", HtmlUtils.htmlEscapeDecimal("" + (char) 977));
 	}
 
+	// SPR-9293
+	@Test
+	public void testEncodeIntoHtmlCharacterSetFromUtf8() {
+		String utf8 = ("UTF-8");
+		assertEquals("An empty string should be converted to an empty string",
+				"", HtmlUtils.htmlEscape("", utf8));
+		assertEquals("A string containing no special characters should not be affected",
+				"A sentence containing no special characters.",
+				HtmlUtils.htmlEscape("A sentence containing no special characters."));
+
+		assertEquals("'< >' should be encoded to '&lt; &gt;'",
+				"&lt; &gt;", HtmlUtils.htmlEscape("< >", utf8));
+		assertEquals("'< >' should be encoded to '&#60; &#62;'",
+				"&#60; &#62;", HtmlUtils.htmlEscapeDecimal("< >", utf8));
+
+		assertEquals("UTF-8 supported chars should not be escaped",
+				"Μερικοί Ελληνικοί &quot;χαρακτήρες&quot;",
+				HtmlUtils.htmlEscape("Μερικοί Ελληνικοί \"χαρακτήρες\"", utf8));
+	}
+
 	@Test
 	public void testDecodeFromHtmlCharacterSet() {
-		assertNull("A null string should be converted to a null string",
-				HtmlUtils.htmlUnescape(null));
 		assertEquals("An empty string should be converted to an empty string",
 				"", HtmlUtils.htmlUnescape(""));
 		assertEquals("A string containing no special characters should not be affected",

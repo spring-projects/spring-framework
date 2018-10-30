@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,12 +22,11 @@ import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
-import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter}.
@@ -48,8 +47,8 @@ public class JettyWebSocketHandlerAdapterTests {
 	@Before
 	public void setup() {
 		this.session = mock(Session.class);
-		when(this.session.getUpgradeRequest()).thenReturn(Mockito.mock(UpgradeRequest.class));
-		when(this.session.getUpgradeResponse()).thenReturn(Mockito.mock(UpgradeResponse.class));
+		given(this.session.getUpgradeRequest()).willReturn(Mockito.mock(UpgradeRequest.class));
+		given(this.session.getUpgradeResponse()).willReturn(Mockito.mock(UpgradeResponse.class));
 
 		this.webSocketHandler = mock(WebSocketHandler.class);
 		this.webSocketSession = new JettyWebSocketSession(null, null);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.jmx.export.naming;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Strategy interface that encapsulates the creation of {@code ObjectName} instances.
  *
@@ -30,6 +32,7 @@ import javax.management.ObjectName;
  * @see org.springframework.jmx.export.MBeanExporter
  * @see javax.management.ObjectName
  */
+@FunctionalInterface
 public interface ObjectNamingStrategy {
 
 	/**
@@ -41,6 +44,6 @@ public interface ObjectNamingStrategy {
 	 * @return the {@code ObjectName} instance
 	 * @throws MalformedObjectNameException if the resulting {@code ObjectName} is invalid
 	 */
-	ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException;
+	ObjectName getObjectName(Object managedBean, @Nullable String beanKey) throws MalformedObjectNameException;
 
 }

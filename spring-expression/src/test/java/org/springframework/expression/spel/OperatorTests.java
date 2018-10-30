@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import org.junit.Test;
 
@@ -414,7 +415,6 @@ public class OperatorTests extends AbstractExpressionTests {
 		// string concatenation
 		evaluate("'abc'+'def'","abcdef",String.class);
 
-		//
 		evaluate("5 + new Integer('37')",42,Integer.class);
 	}
 
@@ -423,17 +423,17 @@ public class OperatorTests extends AbstractExpressionTests {
 		evaluate("'c' - 2", "a", String.class);
 		evaluate("3.0f - 5.0f", -2.0f, Float.class);
 		evaluateAndCheckError("'ab' - 2", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		evaluateAndCheckError("2-'ab'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("2-'ab'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		SpelExpression expr = (SpelExpression)parser.parseExpression("-3");
-		assertEquals("-3",expr.toStringAST());
+		assertEquals("-3", expr.toStringAST());
 		expr = (SpelExpression)parser.parseExpression("2-3");
-		assertEquals("(2 - 3)",expr.toStringAST());
+		assertEquals("(2 - 3)", expr.toStringAST());
 
 		evaluate("-5d",-5d,Double.class);
 		evaluate("-5L",-5L,Long.class);
-		evaluate("-5",-5,Integer.class);
+		evaluate("-5", -5, Integer.class);
 		evaluate("-new java.math.BigDecimal('5')", new BigDecimal("-5"),BigDecimal.class);
-		evaluateAndCheckError("-'abc'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluateAndCheckError("-'abc'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
 	@Test
@@ -482,7 +482,6 @@ public class OperatorTests extends AbstractExpressionTests {
 		evaluate("3.0d / 5.0d", 0.6d, Double.class);
 		evaluate("6.0d % 3.5d", 2.5d, Double.class);
 	}
-
 
 	@Test
 	public void testBigDecimals() {
@@ -545,7 +544,7 @@ public class OperatorTests extends AbstractExpressionTests {
 		evaluate("3^2",9,Integer.class);
 		evaluate("3.0d^2.0d",9.0d,Double.class);
 		evaluate("3L^2L",9L,Long.class);
-		evaluate("(2^32)^2",9223372036854775807L,Long.class);
+		evaluate("(2^32)^2", 9223372036854775807L, Long.class);
 		evaluate("new java.math.BigDecimal('5') ^ 3", new BigDecimal("125"), BigDecimal.class);
 	}
 
@@ -586,6 +585,17 @@ public class OperatorTests extends AbstractExpressionTests {
 		evaluate("3L * 50L", 150L, Long.class);
 		evaluate("3L + 50L", 53L, Long.class);
 		evaluate("3L - 50L", -47L, Long.class);
+	}
+
+	@Test
+	public void testBigIntegers() {
+		evaluate("3 + new java.math.BigInteger('5')", new BigInteger("8"), BigInteger.class);
+		evaluate("3 - new java.math.BigInteger('5')", new BigInteger("-2"), BigInteger.class);
+		evaluate("3 * new java.math.BigInteger('5')", new BigInteger("15"), BigInteger.class);
+		evaluate("3 / new java.math.BigInteger('5')", new BigInteger("0"), BigInteger.class);
+		evaluate("5 % new java.math.BigInteger('3')", new BigInteger("2"), BigInteger.class);
+		evaluate("new java.math.BigInteger('5') % 3", new BigInteger("2"), BigInteger.class);
+		evaluate("new java.math.BigInteger('5') ^ 3", new BigInteger("125"), BigInteger.class);
 	}
 
 

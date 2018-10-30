@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.MessageConversionException;
 
 /**
  * An extension of {@link AbstractMessageReceivingTemplate} that adds support for
@@ -28,68 +27,72 @@ import org.springframework.messaging.converter.MessageConversionException;
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 4.0
+ * @param <D> the destination type
  */
 public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceivingTemplate<D>
 		implements MessageRequestReplyOperations<D> {
 
 	@Override
+	@Nullable
 	public Message<?> sendAndReceive(Message<?> requestMessage) {
 		return sendAndReceive(getRequiredDefaultDestination(), requestMessage);
 	}
 
 	@Override
+	@Nullable
 	public Message<?> sendAndReceive(D destination, Message<?> requestMessage) {
 		return doSendAndReceive(destination, requestMessage);
 	}
 
+	@Nullable
 	protected abstract Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
 
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(Object request, Class<T> targetClass) {
 		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass) {
 		return convertSendAndReceive(destination, request, null, targetClass);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers, Class<T> targetClass) {
+	@Nullable
+	public <T> T convertSendAndReceive(
+			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) {
+
 		return convertSendAndReceive(destination, request, headers, targetClass, null);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+	@Nullable
+	public <T> T convertSendAndReceive(
+			Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+
 		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass, postProcessor);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+	@Nullable
+	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
+			@Nullable MessagePostProcessor postProcessor) {
+
 		return convertSendAndReceive(destination, request, null, targetClass, postProcessor);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
-			Class<T> targetClass, MessagePostProcessor postProcessor) {
+	@Nullable
+	public <T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers,
+			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 
-		MessageHeaders messageHeaders = (headers != null ? new MessageHeaders(headers) : null);
-		Message<?> requestMessage = getMessageConverter().toMessage(request, messageHeaders);
-
-		if (requestMessage == null) {
-			String payloadType = (request != null ? request.getClass().getName() : null);
-			Object contentType = (messageHeaders != null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);
-			throw new MessageConversionException("Unable to convert payload with type '" + payloadType +
-					"', contentType='" + contentType + "', converter=[" + getMessageConverter() + "]");
-		}
-
-		if (postProcessor != null) {
-			requestMessage = postProcessor.postProcessMessage(requestMessage);
-		}
-
+		Message<?> requestMessage = doConvert(request, headers, postProcessor);
 		Message<?> replyMessage = sendAndReceive(destination, requestMessage);
 		return (replyMessage != null ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null);
 	}

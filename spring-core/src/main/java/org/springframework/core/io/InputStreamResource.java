@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,23 @@ package org.springframework.core.io;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 /**
- * {@link Resource} implementation for a given InputStream. Should only
- * be used if no specific Resource implementation is applicable.
- * In particular, prefer {@link ByteArrayResource} or any of the
- * file-based Resource implementations where possible.
+ * {@link Resource} implementation for a given {@link InputStream}.
+ * <p>Should only be used if no other specific {@code Resource} implementation
+ * is applicable. In particular, prefer {@link ByteArrayResource} or any of the
+ * file-based {@code Resource} implementations where possible.
  *
- * <p>In contrast to other Resource implementations, this is a descriptor
- * for an <i>already opened</i> resource - therefore returning "true" from
- * {@code isOpen()}. Do not use it if you need to keep the resource
- * descriptor somewhere, or if you need to read a stream multiple times.
+ * <p>In contrast to other {@code Resource} implementations, this is a descriptor
+ * for an <i>already opened</i> resource - therefore returning {@code true} from
+ * {@link #isOpen()}. Do not use an {@code InputStreamResource} if you need to
+ * keep the resource descriptor somewhere, or if you need to read from a stream
+ * multiple times.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 28.12.2003
  * @see ByteArrayResource
  * @see ClassPathResource
@@ -59,10 +64,8 @@ public class InputStreamResource extends AbstractResource {
 	 * @param inputStream the InputStream to use
 	 * @param description where the InputStream comes from
 	 */
-	public InputStreamResource(InputStream inputStream, String description) {
-		if (inputStream == null) {
-			throw new IllegalArgumentException("InputStream must not be null");
-		}
+	public InputStreamResource(InputStream inputStream, @Nullable String description) {
+		Assert.notNull(inputStream, "InputStream must not be null");
 		this.inputStream = inputStream;
 		this.description = (description != null ? description : "");
 	}
@@ -99,11 +102,12 @@ public class InputStreamResource extends AbstractResource {
 	}
 
 	/**
-	 * This implementation returns the passed-in description, if any.
+	 * This implementation returns a description that includes the passed-in
+	 * description, if any.
 	 */
 	@Override
 	public String getDescription() {
-		return this.description;
+		return "InputStream resource [" + this.description + "]";
 	}
 
 
@@ -111,9 +115,9 @@ public class InputStreamResource extends AbstractResource {
 	 * This implementation compares the underlying InputStream.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof InputStreamResource && ((InputStreamResource) obj).inputStream.equals(this.inputStream)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof InputStreamResource &&
+				((InputStreamResource) other).inputStream.equals(this.inputStream)));
 	}
 
 	/**

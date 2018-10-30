@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.transaction;
 
 import java.sql.Connection;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Interface that defines Spring-compliant transaction properties.
@@ -86,8 +88,8 @@ public interface TransactionDefinition {
 	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
 	 * on all transaction managers. This in particular applies to
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
-	 * which requires the {@code javax.transaction.TransactionManager}
-	 * to be made available it to it (which is server-specific in standard J2EE).
+	 * which requires the {@code javax.transaction.TransactionManager} to be
+	 * made available it to it (which is server-specific in standard Java EE).
 	 * <p>A {@code PROPAGATION_REQUIRES_NEW} scope always defines its own
 	 * transaction synchronizations. Existing synchronizations will be suspended
 	 * and resumed appropriately.
@@ -101,8 +103,8 @@ public interface TransactionDefinition {
 	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
 	 * on all transaction managers. This in particular applies to
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
-	 * which requires the {@code javax.transaction.TransactionManager}
-	 * to be made available it to it (which is server-specific in standard J2EE).
+	 * which requires the {@code javax.transaction.TransactionManager} to be
+	 * made available it to it (which is server-specific in standard Java EE).
 	 * <p>Note that transaction synchronization is <i>not</i> available within a
 	 * {@code PROPAGATION_NOT_SUPPORTED} scope. Existing synchronizations
 	 * will be suspended and resumed appropriately.
@@ -120,8 +122,8 @@ public interface TransactionDefinition {
 
 	/**
 	 * Execute within a nested transaction if a current transaction exists,
-	 * behave like {@link #PROPAGATION_REQUIRED} else. There is no analogous
-	 * feature in EJB.
+	 * behave like {@link #PROPAGATION_REQUIRED} otherwise. There is no
+	 * analogous feature in EJB.
 	 * <p><b>NOTE:</b> Actual creation of a nested transaction will only work on
 	 * specific transaction managers. Out of the box, this only applies to the JDBC
 	 * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
@@ -203,21 +205,29 @@ public interface TransactionDefinition {
 
 	/**
 	 * Return the isolation level.
-	 * <p>Must return one of the {@code ISOLATION_XXX} constants
-	 * defined on {@link TransactionDefinition this interface}.
-	 * <p>Only makes sense in combination with {@link #PROPAGATION_REQUIRED}
-	 * or {@link #PROPAGATION_REQUIRES_NEW}.
+	 * <p>Must return one of the {@code ISOLATION_XXX} constants defined on
+	 * {@link TransactionDefinition this interface}. Those constants are designed
+	 * to match the values of the same constants on {@link java.sql.Connection}.
+	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
+	 * transactions. Consider switching the "validateExistingTransactions" flag to
+	 * "true" on your transaction manager if you'd like isolation level declarations
+	 * to get rejected when participating in an existing transaction with a different
+	 * isolation level.
 	 * <p>Note that a transaction manager that does not support custom isolation levels
 	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
 	 * @return the isolation level
+	 * @see #ISOLATION_DEFAULT
+	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setValidateExistingTransaction
 	 */
 	int getIsolationLevel();
 
 	/**
 	 * Return the transaction timeout.
 	 * <p>Must return a number of seconds, or {@link #TIMEOUT_DEFAULT}.
-	 * <p>Only makes sense in combination with {@link #PROPAGATION_REQUIRED}
-	 * or {@link #PROPAGATION_REQUIRES_NEW}.
+	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
+	 * transactions.
 	 * <p>Note that a transaction manager that does not support timeouts will throw
 	 * an exception when given any other timeout than {@link #TIMEOUT_DEFAULT}.
 	 * @return the transaction timeout
@@ -226,14 +236,13 @@ public interface TransactionDefinition {
 
 	/**
 	 * Return whether to optimize as a read-only transaction.
-	 * <p>The read-only flag applies to any transaction context, whether
-	 * backed by an actual resource transaction
-	 * ({@link #PROPAGATION_REQUIRED}/{@link #PROPAGATION_REQUIRES_NEW}) or
-	 * operating non-transactionally at the resource level
-	 * ({@link #PROPAGATION_SUPPORTS}). In the latter case, the flag will
-	 * only apply to managed resources within the application, such as a
-	 * Hibernate {@code Session}.
-	 <<	 * <p>This just serves as a hint for the actual transaction subsystem;
+	 * <p>The read-only flag applies to any transaction context, whether backed
+	 * by an actual resource transaction ({@link #PROPAGATION_REQUIRED}/
+	 * {@link #PROPAGATION_REQUIRES_NEW}) or operating non-transactionally at
+	 * the resource level ({@link #PROPAGATION_SUPPORTS}). In the latter case,
+	 * the flag will only apply to managed resources within the application,
+	 * such as a Hibernate {@code Session}.
+	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
 	 * A transaction manager which cannot interpret the read-only hint will
 	 * <i>not</i> throw an exception when asked for a read-only transaction.
@@ -253,6 +262,7 @@ public interface TransactionDefinition {
 	 * @see org.springframework.transaction.interceptor.TransactionAspectSupport
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionName()
 	 */
+	@Nullable
 	String getName();
 
 }

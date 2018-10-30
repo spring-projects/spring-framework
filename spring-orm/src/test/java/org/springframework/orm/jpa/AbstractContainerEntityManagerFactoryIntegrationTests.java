@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,18 @@ package org.springframework.orm.jpa;
 
 import java.lang.reflect.Proxy;
 import java.util.List;
-
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.FlushModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.junit.Test;
+
 import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.SerializationTestUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for LocalContainerEntityManagerFactoryBean.
@@ -39,52 +38,57 @@ import org.springframework.util.SerializationTestUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-@SuppressWarnings("deprecation")
-public abstract class AbstractContainerEntityManagerFactoryIntegrationTests extends
-		AbstractEntityManagerFactoryIntegrationTests {
+public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
+		extends AbstractEntityManagerFactoryIntegrationTests {
 
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Test
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
-		assertTrue(Proxy.isProxyClass(entityManagerFactory.getClass()));
 		assertTrue("Must have introduced config interface", entityManagerFactory instanceof EntityManagerFactoryInfo);
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
-		// assertEquals("Person", emfi.getPersistenceUnitName());
+		assertEquals("Person", emfi.getPersistenceUnitName());
 		assertNotNull("PersistenceUnitInfo must be available", emfi.getPersistenceUnitInfo());
 		assertNotNull("Raw EntityManagerFactory must be available", emfi.getNativeEntityManagerFactory());
 	}
 
+	@Test
 	public void testStateClean() {
 		assertEquals("Should be no people from previous transactions", 0, countRowsInTable("person"));
 	}
 
+	@Test
 	public void testJdbcTx1_1() {
 		testJdbcTx2();
 	}
 
+	@Test
 	public void testJdbcTx1_2() {
 		testJdbcTx2();
 	}
 
+	@Test
 	public void testJdbcTx1_3() {
 		testJdbcTx2();
 	}
 
+	@Test
 	public void testJdbcTx2() {
 		assertEquals("Any previous tx must have been rolled back", 0, countRowsInTable("person"));
-		executeSqlScript("/org/springframework/orm/jpa/insertPerson.sql", false);
+		executeSqlScript("/org/springframework/orm/jpa/insertPerson.sql");
 	}
 
-	@SuppressWarnings({ "unused", "unchecked" })
+	@Test
+	@SuppressWarnings("unchecked")
 	public void testEntityManagerProxyIsProxy() {
 		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
-		List<Person> people = q.getResultList();
+		q.getResultList();
 
 		assertTrue("Should be open to start with", sharedEntityManager.isOpen());
 		sharedEntityManager.close();
 		assertTrue("Close should have been silently ignored", sharedEntityManager.isOpen());
 	}
 
+	@Test
 	public void testBogusQuery() {
 		try {
 			Query query = sharedEntityManager.createQuery("It's raining toads");
@@ -92,26 +96,27 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 			query.executeUpdate();
 			fail("Should have thrown a RuntimeException");
 		}
-		catch (RuntimeException e) {
-			/* expected */
+		catch (RuntimeException ex) {
+			// expected
 		}
 	}
 
+	@Test
 	public void testGetReferenceWhenNoRow() {
 		try {
 			Person notThere = sharedEntityManager.getReference(Person.class, 666);
 
-			// We may get here (as with Hibernate).
-			// Either behaviour is valid: throw exception on first access
-			// or on getReference itself.
+			// We may get here (as with Hibernate). Either behaviour is valid:
+			// throw exception on first access or on getReference itself.
 			notThere.getFirstName();
-			fail("Should have thrown an EntityNotFoundException");
+			fail("Should have thrown an EntityNotFoundException or ObjectNotFoundException");
 		}
-		catch (EntityNotFoundException e) {
-			/* expected */
+		catch (Exception ex) {
+			assertTrue(ex.getClass().getName().endsWith("NotFoundException"));
 		}
 	}
 
+	@Test
 	public void testLazyLoading() {
 		try {
 			Person tony = new Person();
@@ -133,10 +138,11 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 			newTony.getDriversLicense().getSerialNumber();
 		}
 		finally {
-			deleteFromTables(new String[] { "person", "drivers_license" });
+			deleteFromTables("person", "drivers_license");
 		}
 	}
 
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testMultipleResults() {
 		// Add with JDBC
@@ -151,11 +157,12 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		assertEquals(firstName, people.get(0).getFirstName());
 	}
 
-	protected final void insertPerson(String firstName) {
+	protected void insertPerson(String firstName) {
 		String INSERT_PERSON = "INSERT INTO PERSON (ID, FIRST_NAME, LAST_NAME) VALUES (?, ?, ?)";
 		jdbcTemplate.update(INSERT_PERSON, 1, firstName, "Blair");
 	}
 
+	@Test
 	public void testEntityManagerProxyRejectsProgrammaticTxManagement() {
 		try {
 			sharedEntityManager.getTransaction();
@@ -165,6 +172,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		}
 	}
 
+	@Test
 	public void testInstantiateAndSaveWithSharedEmProxy() {
 		testInstantiateAndSave(sharedEntityManager);
 	}
@@ -180,6 +188,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		assertEquals("1 row must have been inserted", 1, countRowsInTable("person"));
 	}
 
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testQueryNoPersons() {
 		EntityManager em = entityManagerFactory.createEntityManager();
@@ -195,9 +204,11 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		}
 	}
 
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testQueryNoPersonsNotTransactional() {
+		endTransaction();
+
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
@@ -211,12 +222,13 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		}
 	}
 
-	@SuppressWarnings({ "unused", "unchecked" })
+	@Test
+	@SuppressWarnings("unchecked")
 	public void testQueryNoPersonsShared() {
-		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
-		Query q = em.createQuery("select p from Person as p");
+		Query q = this.sharedEntityManager.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
+		assertEquals(0, people.size());
 		try {
 			assertNull(q.getSingleResult());
 			fail("Should have thrown NoResultException");
@@ -226,10 +238,12 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		}
 	}
 
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testQueryNoPersonsSharedNotTransactional() {
-		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
+		endTransaction();
+
+		EntityManager em = this.sharedEntityManager;
 		Query q = em.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
@@ -240,8 +254,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		}
 		catch (Exception ex) {
 			// We would typically expect an IllegalStateException, but Hibernate throws a
-			// PersistenceException. So we assert the contents of the exception message
-			// instead.
+			// PersistenceException. So we assert the contents of the exception message instead.
 			assertTrue(ex.getMessage().contains("closed"));
 		}
 		q = em.createQuery("select p from Person as p");
@@ -255,10 +268,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests exte
 		}
 	}
 
+	@Test
 	public void testCanSerializeProxies() throws Exception {
-		// just necessary because of AbstractJpaTests magically cloning the BeanFactory
-		((DefaultListableBeanFactory) getApplicationContext().getBeanFactory()).setSerializationId("emf-it");
-
 		assertNotNull(SerializationTestUtils.serializeAndDeserialize(entityManagerFactory));
 		assertNotNull(SerializationTestUtils.serializeAndDeserialize(sharedEntityManager));
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,7 +24,7 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that a component is only eligible for registration when all
- * {@linkplain #value() specified conditions} match.
+ * {@linkplain #value specified conditions} match.
  *
  * <p>A <em>condition</em> is any state that can be determined programmatically
  * before the bean definition is due to be registered (see {@link Condition} for details).
@@ -37,23 +38,31 @@ import java.lang.annotation.Target;
  * <li>as a method-level annotation on any {@link Bean @Bean} method</li>
  * </ul>
  *
- * <p>If a {@code @Configuration} class is marked with {@code @Conditional}, all of the
- * {@code @Bean} methods, {@link Import @Import} and {@link ComponentScan @ComponentScan}
- * annotations associated with that class will be subject to the conditions.
+ * <p>If a {@code @Configuration} class is marked with {@code @Conditional},
+ * all of the {@code @Bean} methods, {@link Import @Import} annotations, and
+ * {@link ComponentScan @ComponentScan} annotations associated with that
+ * class will be subject to the conditions.
  *
- * <p>NOTE: {@code @Conditional} annotations are not inherited; any conditions from
- * superclasses or from overridden methods are not being considered.
+ * <p><strong>NOTE</strong>: Inheritance of {@code @Conditional} annotations
+ * is not supported; any conditions from superclasses or from overridden
+ * methods will not be considered. In order to enforce these semantics,
+ * {@code @Conditional} itself is not declared as
+ * {@link java.lang.annotation.Inherited @Inherited}; furthermore, any
+ * custom <em>composed annotation</em> that is meta-annotated with
+ * {@code @Conditional} must not be declared as {@code @Inherited}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 4.0
  * @see Condition
  */
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface Conditional {
 
 	/**
-	 * All {@link Condition}s that must {@linkplain Condition#matches match}
+	 * All {@link Condition Conditions} that must {@linkplain Condition#matches match}
 	 * in order for the component to be registered.
 	 */
 	Class<? extends Condition>[] value();

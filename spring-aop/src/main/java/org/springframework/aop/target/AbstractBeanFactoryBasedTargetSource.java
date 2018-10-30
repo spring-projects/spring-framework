@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -46,23 +45,22 @@ import org.springframework.util.ObjectUtils;
  * @see LazyInitTargetSource
  * @see PrototypeTargetSource
  * @see ThreadLocalTargetSource
- * @see CommonsPoolTargetSource
+ * @see CommonsPool2TargetSource
  */
-public abstract class AbstractBeanFactoryBasedTargetSource
-		implements TargetSource, BeanFactoryAware, Serializable {
+public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSource, BeanFactoryAware, Serializable {
 
-	/** use serialVersionUID from Spring 1.2.7 for interoperability */
+	/** use serialVersionUID from Spring 1.2.7 for interoperability. */
 	private static final long serialVersionUID = -4721607536018568393L;
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Name of the target bean we will create on each invocation */
+	/** Name of the target bean we will create on each invocation. */
 	private String targetBeanName;
 
-	/** Class of the target */
-	private Class<?> targetClass;
+	/** Class of the target. */
+	private volatile Class<?> targetClass;
 
 	/**
 	 * BeanFactory that owns this TargetSource. We need to hold onto this
@@ -108,7 +106,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (this.targetBeanName == null) {
-			throw new IllegalStateException("Property'targetBeanName' is required");
+			throw new IllegalStateException("Property 'targetBeanName' is required");
 		}
 		this.beanFactory = beanFactory;
 	}
@@ -122,21 +120,28 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 
 
 	@Override
-	public synchronized Class<?> getTargetClass() {
-		if (this.targetClass == null && this.beanFactory != null) {
-			// Determine type of the target bean.
-			this.targetClass = this.beanFactory.getType(this.targetBeanName);
-			if (this.targetClass == null) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Getting bean with name '" + this.targetBeanName + "' in order to determine type");
-				}
-				Object beanInstance = this.beanFactory.getBean(this.targetBeanName);
-				if (beanInstance != null) {
-					this.targetClass = beanInstance.getClass();
-				}
-			}
+	public Class<?> getTargetClass() {
+		Class<?> targetClass = this.targetClass;
+		if (targetClass != null) {
+			return targetClass;
 		}
-		return this.targetClass;
+		synchronized (this) {
+			// Full check within synchronization, entering the BeanFactory interaction algorithm only once...
+			targetClass = this.targetClass;
+			if (targetClass == null && this.beanFactory != null) {
+				// Determine type of the target bean.
+				targetClass = this.beanFactory.getType(this.targetBeanName);
+				if (targetClass == null) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Getting bean with name '" + this.targetBeanName + "' for type determination");
+					}
+					Object beanInstance = this.beanFactory.getBean(this.targetBeanName);
+					targetClass = beanInstance.getClass();
+				}
+				this.targetClass = targetClass;
+			}
+			return targetClass;
+		}
 	}
 
 	@Override
@@ -167,7 +172,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		if (this == other) {
 			return true;
 		}
-		if (other == null || !getClass().equals(other.getClass())) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
 		AbstractBeanFactoryBasedTargetSource otherTargetSource = (AbstractBeanFactoryBasedTargetSource) other;
@@ -185,8 +190,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(ClassUtils.getShortName(getClass()));
+		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
 		sb.append(" for target bean '").append(this.targetBeanName).append("'");
 		if (this.targetClass != null) {
 			sb.append(" of type [").append(this.targetClass.getName()).append("]");

@@ -17,6 +17,7 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -26,7 +27,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class ImplicitJPArgumentMatchingTests {
+public class ImplicitJPArgumentMatchingTests {
 
 	@Test
 	public void testAspect() {

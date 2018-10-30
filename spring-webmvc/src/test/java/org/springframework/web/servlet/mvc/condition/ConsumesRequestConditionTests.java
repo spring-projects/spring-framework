@@ -16,19 +16,15 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.Collection;
 import java.util.Collections;
 
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition.ConsumeMediaTypeExpression;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

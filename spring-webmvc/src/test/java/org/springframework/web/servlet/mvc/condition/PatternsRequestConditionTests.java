@@ -18,10 +18,10 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
 import static org.junit.Assert.*;

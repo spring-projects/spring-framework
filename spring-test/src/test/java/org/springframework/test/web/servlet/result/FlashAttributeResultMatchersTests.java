@@ -17,8 +17,8 @@
 package org.springframework.test.web.servlet.result;
 
 import org.junit.Test;
+
 import org.springframework.test.web.servlet.StubMvcResult;
-import org.springframework.test.web.servlet.result.FlashAttributeResultMatchers;
 import org.springframework.web.servlet.FlashMap;
 
 /**
@@ -31,7 +31,7 @@ public class FlashAttributeResultMatchersTests {
 		new FlashAttributeResultMatchers().attributeExists("good").match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void attributeExists_doesntExist() throws Exception {
 		new FlashAttributeResultMatchers().attributeExists("bad").match(getStubMvcResult());
 	}
@@ -41,7 +41,7 @@ public class FlashAttributeResultMatchersTests {
 		new FlashAttributeResultMatchers().attribute("good", "good").match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void attribute_incorrectValue() throws Exception {
 		new FlashAttributeResultMatchers().attribute("good", "not good").match(getStubMvcResult());
 	}

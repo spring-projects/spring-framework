@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2018 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.servlet.resource;
 
 import java.util.regex.Matcher;
@@ -6,87 +22,130 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for {@link VersionStrategy} implementations.
- * Supports versions as:
+ *
+ * <p>Supports versions as:
  * <ul>
- *     <li>prefix in the request path, like "version/static/myresource.js"
- *     <li>file name suffix in the request path, like "static/myresource-version.js"
+ * <li>prefix in the request path, like "version/static/myresource.js"
+ * <li>file name suffix in the request path, like "static/myresource-version.js"
  * </ul>
  *
  * <p>Note: This base class does <i>not</i> provide support for generating the
  * version string.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 4.1
  */
 public abstract class AbstractVersionStrategy implements VersionStrategy {
 
-	private static final Pattern pattern = Pattern.compile("-(\\S*)\\.");
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private final VersionPathStrategy pathStrategy;
+
+
+	protected AbstractVersionStrategy(VersionPathStrategy pathStrategy) {
+		Assert.notNull(pathStrategy, "VersionPathStrategy is required");
+		this.pathStrategy = pathStrategy;
+	}
+
+
+	public VersionPathStrategy getVersionPathStrategy() {
+		return this.pathStrategy;
+	}
+
+
+	@Override
+	@Nullable
+	public String extractVersion(String requestPath) {
+		return this.pathStrategy.extractVersion(requestPath);
+	}
+
+	@Override
+	public String removeVersion(String requestPath, String version) {
+		return this.pathStrategy.removeVersion(requestPath, version);
+	}
+
+	@Override
+	public String addVersion(String requestPath, String version) {
+		return this.pathStrategy.addVersion(requestPath, version);
+	}
+
+
 	/**
-	 * Extracts a version string from the request path, as a suffix in the resource
-	 * file name.
-	 * @param requestPath the request path to extract the version string from
-	 * @return a version string or an empty string if none was found
+	 * A prefix-based {@code VersionPathStrategy},
+	 * e.g. {@code "{version}/path/foo.js"}.
 	 */
-	protected String extractVersionFromFilename(String requestPath) {
-		Matcher matcher = pattern.matcher(requestPath);
-		if (matcher.find()) {
-			String match = matcher.group(1);
-			return match.contains("-") ? match.substring(match.lastIndexOf("-") + 1) : match;
+	protected static class PrefixVersionPathStrategy implements VersionPathStrategy {
+
+		private final String prefix;
+
+		public PrefixVersionPathStrategy(String version) {
+			Assert.hasText(version, "Version must not be empty");
+			this.prefix = version;
 		}
-		else {
-			return "";
+
+		@Override
+		@Nullable
+		public String extractVersion(String requestPath) {
+			return (requestPath.startsWith(this.prefix) ? this.prefix : null);
+		}
+
+		@Override
+		public String removeVersion(String requestPath, String version) {
+			return requestPath.substring(this.prefix.length());
+		}
+
+		@Override
+		public String addVersion(String path, String version) {
+			if (path.startsWith(".")) {
+				return path;
+			}
+			else {
+				return (this.prefix.endsWith("/") || path.startsWith("/") ?
+						this.prefix + path : this.prefix + '/' + path);
+			}
 		}
 	}
 
-	/**
-	 * Deletes the given candidate version string from the request path.
-	 * The version string should be a suffix in the resource file name.
-	 */
-	protected String deleteVersionFromFilename(String requestPath, String candidateVersion) {
-		return StringUtils.delete(requestPath, "-" + candidateVersion);
-	}
 
 	/**
-	 * Adds the given version string to the baseUrl, as a file name suffix.
+	 * File name-based {@code VersionPathStrategy},
+	 * e.g. {@code "path/foo-{version}.css"}.
 	 */
-	protected String addVersionToFilename(String baseUrl, String version) {
-		String baseFilename = StringUtils.stripFilenameExtension(baseUrl);
-		String extension = StringUtils.getFilenameExtension(baseUrl);
-		return baseFilename + "-" + version + "." + extension;
-	}
+	protected static class FileNameVersionPathStrategy implements VersionPathStrategy {
 
-	/**
-	 * Extracts a version string from the request path, as a prefix in the request path.
-	 * @param requestPath the request path to extract the version string from
-	 * @return a version string or an empty string if none was found
-	 */
-	protected String extractVersionAsPrefix(String requestPath, String prefix) {
-		if (requestPath.startsWith(prefix)) {
-			return prefix;
+		private static final Pattern pattern = Pattern.compile("-(\\S*)\\.");
+
+		@Override
+		@Nullable
+		public String extractVersion(String requestPath) {
+			Matcher matcher = pattern.matcher(requestPath);
+			if (matcher.find()) {
+				String match = matcher.group(1);
+				return (match.contains("-") ? match.substring(match.lastIndexOf('-') + 1) : match);
+			}
+			else {
+				return null;
+			}
 		}
-		return "";
-	}
 
-	/**
-	 * Deletes the given candidate version string from the request path.
-	 * The version string should be a prefix in the request path.
-	 */
-	protected String deleteVersionAsPrefix(String requestPath, String version) {
-		return requestPath.substring(version.length());
-	}
+		@Override
+		public String removeVersion(String requestPath, String version) {
+			return StringUtils.delete(requestPath, "-" + version);
+		}
 
-	/**
-	 * Adds the given version string to the baseUrl, as a prefix in the request path.
-	 */
-	protected String addVersionAsPrefix(String baseUrl, String version) {
-		return version + baseUrl;
+		@Override
+		public String addVersion(String requestPath, String version) {
+			String baseFilename = StringUtils.stripFilenameExtension(requestPath);
+			String extension = StringUtils.getFilenameExtension(requestPath);
+			return (baseFilename + '-' + version + '.' + extension);
+		}
 	}
 
 }

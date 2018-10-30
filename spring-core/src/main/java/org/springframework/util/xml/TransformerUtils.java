@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import javax.xml.transform.Transformer;
 import org.springframework.util.Assert;
 
 /**
- * Contains common behavior relating to {@link javax.xml.transform.Transformer Transformers}, and the
- * {@code javax.xml.transform} package in general.
+ * Contains common behavior relating to {@link javax.xml.transform.Transformer Transformers}
+ * and the {@code javax.xml.transform} package in general.
  *
  * @author Rick Evans
  * @author Juergen Hoeller
@@ -32,16 +32,16 @@ import org.springframework.util.Assert;
 public abstract class TransformerUtils {
 
 	/**
-	 * The indent amount of characters if {@link #enableIndenting(javax.xml.transform.Transformer) indenting is enabled}.
+	 * The indent amount of characters if {@link #enableIndenting indenting is enabled}.
 	 * <p>Defaults to "2".
 	 */
 	public static final int DEFAULT_INDENT_AMOUNT = 2;
 
+
 	/**
-	 * Enable indenting for the supplied {@link javax.xml.transform.Transformer}. <p>If the underlying XSLT engine is
-	 * Xalan, then the special output key {@code indent-amount} will be also be set to a value of {@link
-	 * #DEFAULT_INDENT_AMOUNT} characters.
-	 *
+	 * Enable indenting for the supplied {@link javax.xml.transform.Transformer}.
+	 * <p>If the underlying XSLT engine is Xalan, then the special output key {@code indent-amount}
+	 * will be also be set to a value of {@link #DEFAULT_INDENT_AMOUNT} characters.
 	 * @param transformer the target transformer
 	 * @see javax.xml.transform.Transformer#setOutputProperty(String, String)
 	 * @see javax.xml.transform.OutputKeys#INDENT
@@ -51,18 +51,19 @@ public abstract class TransformerUtils {
 	}
 
 	/**
-	 * Enable indenting for the supplied {@link javax.xml.transform.Transformer}. <p>If the underlying XSLT engine is
-	 * Xalan, then the special output key {@code indent-amount} will be also be set to a value of {@link
-	 * #DEFAULT_INDENT_AMOUNT} characters.
-	 *
-	 * @param transformer  the target transformer
-	 * @param indentAmount the size of the indent (2 characters, 3 characters, etc.)
+	 * Enable indenting for the supplied {@link javax.xml.transform.Transformer}.
+	 * <p>If the underlying XSLT engine is Xalan, then the special output key {@code indent-amount}
+	 * will be also be set to a value of {@link #DEFAULT_INDENT_AMOUNT} characters.
+	 * @param transformer the target transformer
+	 * @param indentAmount the size of the indent (2 characters, 3 characters, etc)
 	 * @see javax.xml.transform.Transformer#setOutputProperty(String, String)
 	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */
 	public static void enableIndenting(Transformer transformer, int indentAmount) {
 		Assert.notNull(transformer, "Transformer must not be null");
-		Assert.isTrue(indentAmount > -1, "The indent amount cannot be less than zero : got " + indentAmount);
+		if (indentAmount < 0) {
+			throw new IllegalArgumentException("Invalid indent amount (must not be less than zero): " + indentAmount);
+		}
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		try {
 			// Xalan-specific, but this is the most common XSLT engine in any case
@@ -74,7 +75,6 @@ public abstract class TransformerUtils {
 
 	/**
 	 * Disable indenting for the supplied {@link javax.xml.transform.Transformer}.
-	 *
 	 * @param transformer the target transformer
 	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */

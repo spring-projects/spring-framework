@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.transaction;
+
+import org.springframework.lang.Nullable;
 
 /**
  * This is the central interface in Spring's transaction infrastructure.
@@ -54,7 +56,7 @@ public interface PlatformTransactionManager {
 	 * <p>An exception to the above rule is the read-only flag, which should be
 	 * ignored if no explicit read-only mode is supported. Essentially, the
 	 * read-only flag is just a hint for potential optimization.
-	 * @param definition TransactionDefinition instance (can be {@code null} for defaults),
+	 * @param definition the TransactionDefinition instance (can be {@code null} for defaults),
 	 * describing propagation behavior, isolation level, timeout etc.
 	 * @return transaction status object representing the new or current transaction
 	 * @throws TransactionException in case of lookup, creation, or system errors
@@ -66,7 +68,7 @@ public interface PlatformTransactionManager {
 	 * @see TransactionDefinition#getTimeout
 	 * @see TransactionDefinition#isReadOnly
 	 */
-	TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
+	TransactionStatus getTransaction(@Nullable TransactionDefinition definition) throws TransactionException;
 
 	/**
 	 * Commit the given transaction, with regard to its status. If the transaction

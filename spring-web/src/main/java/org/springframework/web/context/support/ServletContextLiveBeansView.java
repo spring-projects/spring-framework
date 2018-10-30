@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class ServletContextLiveBeansView extends LiveBeansView {
 
 	@Override
 	protected Set<ConfigurableApplicationContext> findApplicationContexts() {
-		Set<ConfigurableApplicationContext> contexts = new LinkedHashSet<ConfigurableApplicationContext>();
+		Set<ConfigurableApplicationContext> contexts = new LinkedHashSet<>();
 		Enumeration<String> attrNames = this.servletContext.getAttributeNames();
 		while (attrNames.hasMoreElements()) {
 			String attrName = attrNames.nextElement();

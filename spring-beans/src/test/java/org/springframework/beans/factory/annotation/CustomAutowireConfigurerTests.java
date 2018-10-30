@@ -36,7 +36,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class CustomAutowireConfigurerTests {
+public class CustomAutowireConfigurerTests {
 
 	private static final Resource CONTEXT = qualifiedResource(CustomAutowireConfigurerTests.class, "context.xml");
 

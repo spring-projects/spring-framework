@@ -33,7 +33,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * {@link org.springframework.beans.factory.Aware Aware} interfaces, and their respective
  * methods will be called prior to {@link #registerBeanDefinitions}:
  * <ul>
- * <li>{@link org.springframework.context.EnvironmentAware}</li>
+ * <li>{@link org.springframework.context.EnvironmentAware EnvironmentAware}</li>
  * <li>{@link org.springframework.beans.factory.BeanFactoryAware BeanFactoryAware}
  * <li>{@link org.springframework.beans.factory.BeanClassLoaderAware BeanClassLoaderAware}
  * <li>{@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,28 @@
 package org.springframework.cache.jcache.interceptor;
 
 import java.lang.annotation.Annotation;
-
 import javax.cache.annotation.CacheKeyInvocationContext;
 
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.cache.jcache.model.BaseKeyCacheOperation;
 
 /**
  * A base interceptor for JSR-107 key-based cache annotations.
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <O> the operation type
+ * @param <A> the annotation type
  */
 @SuppressWarnings("serial")
-public abstract class AbstractKeyCacheInterceptor<O extends BaseKeyCacheOperation<A>, A extends Annotation>
+abstract class AbstractKeyCacheInterceptor<O extends AbstractJCacheKeyOperation<A>, A extends Annotation>
 		extends AbstractCacheInterceptor<O, A> {
 
 	protected AbstractKeyCacheInterceptor(CacheErrorHandler errorHandler) {
 		super(errorHandler);
 	}
+
 
 	/**
 	 * Generate a key for the specified invocation.
@@ -58,9 +59,8 @@ public abstract class AbstractKeyCacheInterceptor<O extends BaseKeyCacheOperatio
 	 * @param context the context of the invocation.
 	 * @return the related {@code CacheKeyInvocationContext}
 	 */
-	protected CacheKeyInvocationContext<A> createCacheKeyInvocationContext(
-			CacheOperationInvocationContext<O> context) {
-		return new DefaultCacheKeyInvocationContext<A>(context.getOperation(), context.getTarget(), context.getArgs());
+	protected CacheKeyInvocationContext<A> createCacheKeyInvocationContext(CacheOperationInvocationContext<O> context) {
+		return new DefaultCacheKeyInvocationContext<>(context.getOperation(), context.getTarget(), context.getArgs());
 	}
 
 }

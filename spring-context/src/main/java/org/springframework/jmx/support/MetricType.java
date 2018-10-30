@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,19 @@ package org.springframework.jmx.support;
 
 /**
  * Represents how the measurement values of a {@code ManagedMetric} will change over time.
+ *
  * @author Jennifer Hickey
  * @since 3.0
  */
 public enum MetricType {
 
 	/**
-	 * The measurement values may go up or down over time
+	 * The measurement values may go up or down over time.
 	 */
 	GAUGE,
 
 	/**
-	 * The measurement values will always increase
+	 * The measurement values will always increase.
 	 */
 	COUNTER
 

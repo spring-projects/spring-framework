@@ -6,8 +6,8 @@
 	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
 			<list>
-				<ref local="exportTrigger"/>
-				<ref local="importTrigger"/>
+				<ref bean="exportTrigger"/>
+				<ref bean="importTrigger"/>
 			</list>
 		</property>
 	</bean>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,16 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Locale;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.StreamingHttpOutputMessage;
@@ -32,18 +34,32 @@ import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
 
-/** @author Arjen Poutsma */
-public abstract class AbstractHttpRequestFactoryTestCase extends
-		AbstractJettyServerTestCase {
+/**
+ * @author Arjen Poutsma
+ */
+public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWebServerTestCase {
 
 	protected ClientHttpRequestFactory factory;
 
+
 	@Before
-	public final void createFactory() {
+	public final void createFactory() throws Exception {
 		factory = createRequestFactory();
+		if (factory instanceof InitializingBean) {
+			((InitializingBean) factory).afterPropertiesSet();
+		}
 	}
 
+	@After
+	public final void destroyFactory() throws Exception {
+		if (factory instanceof DisposableBean) {
+			((DisposableBean) factory).destroy();
+		}
+	}
+
+
 	protected abstract ClientHttpRequestFactory createRequestFactory();
+
 
 	@Test
 	public void status() throws Exception {
@@ -51,14 +67,21 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 		ClientHttpRequest request = factory.createRequest(uri, HttpMethod.GET);
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
+
 		ClientHttpResponse response = request.execute();
-		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		try {
+			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
+		}
+		finally {
+			response.close();
+		}
 	}
 
 	@Test
 	public void echo() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.PUT);
 		assertEquals("Invalid HTTP method", HttpMethod.PUT, request.getMethod());
+
 		String headerName = "MyHeader";
 		String headerValue1 = "value1";
 		request.getHeaders().add(headerName, headerValue1);
@@ -66,19 +89,15 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 		request.getHeaders().add(headerName, headerValue2);
 		final byte[] body = "Hello World".getBytes("UTF-8");
 		request.getHeaders().setContentLength(body.length);
+
 		if (request instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingRequest =
-					(StreamingHttpOutputMessage) request;
-			streamingRequest.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					StreamUtils.copy(body, outputStream);
-				}
-			});
+			StreamingHttpOutputMessage streamingRequest = (StreamingHttpOutputMessage) request;
+			streamingRequest.setBody(outputStream -> StreamUtils.copy(body, outputStream));
 		}
 		else {
 			StreamUtils.copy(body, request.getBody());
 		}
+
 		ClientHttpResponse response = request.execute();
 		try {
 			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
@@ -96,36 +115,32 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 	@Test(expected = IllegalStateException.class)
 	public void multipleWrites() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
+
 		final byte[] body = "Hello World".getBytes("UTF-8");
 		if (request instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingRequest =
-					(StreamingHttpOutputMessage) request;
-			streamingRequest.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					StreamUtils.copy(body, outputStream);
-				}
+			StreamingHttpOutputMessage streamingRequest = (StreamingHttpOutputMessage) request;
+			streamingRequest.setBody(outputStream -> {
+				StreamUtils.copy(body, outputStream);
+				outputStream.flush();
+				outputStream.close();
 			});
 		}
 		else {
 			StreamUtils.copy(body, request.getBody());
 		}
 
-		ClientHttpResponse response = request.execute();
-		try {
-			FileCopyUtils.copy(body, request.getBody());
-		}
-		finally {
-			response.close();
-		}
+		request.execute();
+		FileCopyUtils.copy(body, request.getBody());
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void headersAfterExecute() throws Exception {
-		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
+		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/status/ok"), HttpMethod.POST);
+
 		request.getHeaders().add("MyHeader", "value");
 		byte[] body = "Hello World".getBytes("UTF-8");
 		FileCopyUtils.copy(body, request.getBody());
+
 		ClientHttpResponse response = request.execute();
 		try {
 			request.getHeaders().add("MyHeader", "value");
@@ -149,6 +164,15 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 		ClientHttpResponse response = null;
 		try {
 			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/" + path), method);
+			if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
+				// requires a body
+				try {
+					request.getBody().write(32);
+				}
+				catch (UnsupportedOperationException ex) {
+					// probably a streaming request - let's simply ignore it
+				}
+			}
 			response = request.execute();
 			assertEquals("Invalid response status", HttpStatus.OK, response.getStatusCode());
 			assertEquals("Invalid method", path.toUpperCase(Locale.ENGLISH), request.getMethod().name());
@@ -157,6 +181,20 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 			if (response != null) {
 				response.close();
 			}
+		}
+	}
+
+	@Test
+	public void queryParameters() throws Exception {
+		URI uri = new URI(baseUrl + "/params?param1=value&param2=value1&param2=value2");
+		ClientHttpRequest request = factory.createRequest(uri, HttpMethod.GET);
+
+		ClientHttpResponse response = request.execute();
+		try {
+			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
+		}
+		finally {
+			response.close();
 		}
 	}
 

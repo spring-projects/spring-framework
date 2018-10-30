@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<!-- Simple target -->
+	<bean id="target1" class="org.springframework.tests.sample.beans.SideEffectBean">
+		<property name="count"><value>10</value></property>
+	</bean>
+
+	<bean id="target2" class="org.springframework.tests.sample.beans.SideEffectBean" scope="singleton">
+		<property name="count"><value>20</value></property>
+	</bean>
+
+	<!--
+		Hot swappable target source. Note the use of Type 3 IoC.
+	-->
+	<bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource">
+		<constructor-arg><ref bean="target1"/></constructor-arg>
+	</bean>
+
+	<bean id="swappable" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="targetSource"><ref bean="swapper"/></property>
+	</bean>
+
+</beans>

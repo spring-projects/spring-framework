@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.Test;
+
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
@@ -39,9 +40,13 @@ import static org.mockito.BDDMockito.*;
 public class DefaultLobHandlerTests {
 
 	private ResultSet rs = mock(ResultSet.class);
+
 	private PreparedStatement ps = mock(PreparedStatement.class);
+
 	private LobHandler lobHandler = new DefaultLobHandler();
+
 	private LobCreator lobCreator = lobHandler.getLobCreator();
+
 
 	@Test
 	public void testGetBlobAsBytes() throws SQLException {
@@ -82,10 +87,16 @@ public class DefaultLobHandlerTests {
 
 	@Test
 	public void testSetBlobAsBinaryStream() throws SQLException, IOException {
-
 		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
 		lobCreator.setBlobAsBinaryStream(ps, 1, bis, 11);
 		verify(ps).setBinaryStream(1, bis, 11);
+	}
+
+	@Test
+	public void testSetBlobAsBinaryStreamWithoutLength() throws SQLException, IOException {
+		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
+		lobCreator.setBlobAsBinaryStream(ps, 1, bis, -1);
+		verify(ps).setBinaryStream(1, bis);
 	}
 
 	@Test
@@ -103,10 +114,24 @@ public class DefaultLobHandlerTests {
 	}
 
 	@Test
+	public void testSetClobAsAsciiStreamWithoutLength() throws SQLException, IOException {
+		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
+		lobCreator.setClobAsAsciiStream(ps, 1, bis, -1);
+		verify(ps).setAsciiStream(1, bis);
+	}
+
+	@Test
 	public void testSetClobAsCharacterStream() throws SQLException, IOException {
 		Reader str = new StringReader("testContent");
 		lobCreator.setClobAsCharacterStream(ps, 1, str, 11);
 		verify(ps).setCharacterStream(1, str, 11);
+	}
+
+	@Test
+	public void testSetClobAsCharacterStreamWithoutLength() throws SQLException, IOException {
+		Reader str = new StringReader("testContent");
+		lobCreator.setClobAsCharacterStream(ps, 1, str, -1);
+		verify(ps).setCharacterStream(1, str);
 	}
 
 }

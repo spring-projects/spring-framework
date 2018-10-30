@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,19 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
-import javax.jms.Topic;
 
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionSynchronizationUtils;
+import org.springframework.util.Assert;
 
 /**
  * Base class for listener container implementations which are based on polling.
@@ -47,20 +48,19 @@ import org.springframework.transaction.support.TransactionSynchronizationUtils;
  * configured through the {@link #setReceiveTimeout "receiveTimeout"} property.
  *
  * <p>The underlying mechanism is based on standard JMS MessageConsumer handling,
- * which is perfectly compatible with both native JMS and JMS in a J2EE environment.
- * Neither the JMS {@code MessageConsumer.setMessageListener} facility
- * nor the JMS ServerSessionPool facility is required. A further advantage
- * of this approach is full control over the listening process, allowing for
- * custom scaling and throttling and of concurrent message processing
- * (which is up to concrete subclasses).
+ * which is perfectly compatible with both native JMS and JMS in a Java EE environment.
+ * Neither the JMS {@code MessageConsumer.setMessageListener} facility  nor the JMS
+ * ServerSessionPool facility is required. A further advantage of this approach is
+ * full control over the listening process, allowing for custom scaling and throttling
+ * and of concurrent message processing (which is up to concrete subclasses).
  *
  * <p>Message reception and listener execution can automatically be wrapped
  * in transactions through passing a Spring
  * {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually
  * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
- * J2EE enviroment, in combination with a JTA-aware JMS ConnectionFactory obtained
- * from JNDI (check your J2EE server's documentation).
+ * Java EE environment, in combination with a JTA-aware JMS ConnectionFactory
+ * obtained from JNDI (check your application server's documentation).
  *
  * <p>This base class does not assume any specific mechanism for asynchronous
  * execution of polling invokers. Check out {@link DefaultMessageListenerContainer}
@@ -87,37 +87,18 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 	private boolean sessionTransactedCalled = false;
 
-	private boolean pubSubNoLocal = false;
-
+	@Nullable
 	private PlatformTransactionManager transactionManager;
 
 	private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 
-	private volatile Boolean commitAfterNoMessageReceived;
-
 
 	@Override
 	public void setSessionTransacted(boolean sessionTransacted) {
 		super.setSessionTransacted(sessionTransacted);
 		this.sessionTransactedCalled = true;
-	}
-
-	/**
-	 * Set whether to inhibit the delivery of messages published by its own connection.
-	 * Default is "false".
-	 * @see javax.jms.TopicSession#createSubscriber(javax.jms.Topic, String, boolean)
-	 */
-	public void setPubSubNoLocal(boolean pubSubNoLocal) {
-		this.pubSubNoLocal = pubSubNoLocal;
-	}
-
-	/**
-	 * Return whether to inhibit the delivery of messages published by its own connection.
-	 */
-	protected boolean isPubSubNoLocal() {
-		return this.pubSubNoLocal;
 	}
 
 	/**
@@ -142,7 +123,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 * @see org.springframework.jms.connection.JmsTransactionManager
 	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
@@ -150,6 +131,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * Return the Spring PlatformTransactionManager to use for transactional
 	 * wrapping of message reception plus listener execution.
 	 */
+	@Nullable
 	protected final PlatformTransactionManager getTransactionManager() {
 		return this.transactionManager;
 	}
@@ -178,14 +160,26 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * The default is 1000 ms, that is, 1 second.
 	 * <p><b>NOTE:</b> This value needs to be smaller than the transaction
 	 * timeout used by the transaction manager (in the appropriate unit,
-	 * of course). -1 indicates no timeout at all; however, this is only
-	 * feasible if not running within a transaction manager.
+	 * of course). 0 indicates no timeout at all; however, this is only
+	 * feasible if not running within a transaction manager and generally
+	 * discouraged since such a listener container cannot cleanly shut down.
+	 * A negative value such as -1 indicates a no-wait receive operation.
+	 * @see #receiveFromConsumer(MessageConsumer, long)
 	 * @see javax.jms.MessageConsumer#receive(long)
+	 * @see javax.jms.MessageConsumer#receiveNoWait()
 	 * @see javax.jms.MessageConsumer#receive()
 	 * @see #setTransactionTimeout
 	 */
 	public void setReceiveTimeout(long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
+	}
+
+	/**
+	 * Return the receive timeout (ms) configured for this listener container.
+	 * @since 4.2
+	 */
+	protected long getReceiveTimeout() {
+		return this.receiveTimeout;
 	}
 
 
@@ -195,13 +189,16 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 		if (!this.sessionTransactedCalled &&
 				this.transactionManager instanceof ResourceTransactionManager &&
 				!TransactionSynchronizationUtils.sameResourceFactory(
-						(ResourceTransactionManager) this.transactionManager, getConnectionFactory())) {
+						(ResourceTransactionManager) this.transactionManager, obtainConnectionFactory())) {
 			super.setSessionTransacted(true);
 		}
 
 		// Use bean name as default transaction name.
 		if (this.transactionDefinition.getName() == null) {
-			this.transactionDefinition.setName(getBeanName());
+			String beanName = getBeanName();
+			if (beanName != null) {
+				this.transactionDefinition.setName(beanName);
+			}
 		}
 
 		// Proceed with superclass initialization.
@@ -220,7 +217,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	protected MessageConsumer createListenerConsumer(Session session) throws JMSException {
 		Destination destination = getDestination();
 		if (destination == null) {
-			destination = resolveDestinationName(session, getDestinationName());
+			String destinationName = getDestinationName();
+			Assert.state(destinationName != null, "No destination set");
+			destination = resolveDestinationName(session, destinationName);
 		}
 		return createConsumer(session, destination);
 	}
@@ -234,7 +233,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doReceiveAndExecute
 	 */
-	protected boolean receiveAndExecute(Object invoker, Session session, MessageConsumer consumer)
+	protected boolean receiveAndExecute(
+			Object invoker, @Nullable Session session, @Nullable MessageConsumer consumer)
 			throws JMSException {
 
 		if (this.transactionManager != null) {
@@ -244,17 +244,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			try {
 				messageReceived = doReceiveAndExecute(invoker, session, consumer, status);
 			}
-			catch (JMSException ex) {
-				rollbackOnException(status, ex);
+			catch (JMSException | RuntimeException | Error ex) {
+				rollbackOnException(this.transactionManager, status, ex);
 				throw ex;
-			}
-			catch (RuntimeException ex) {
-				rollbackOnException(status, ex);
-				throw ex;
-			}
-			catch (Error err) {
-				rollbackOnException(status, err);
-				throw err;
 			}
 			this.transactionManager.commit(status);
 			return messageReceived;
@@ -276,9 +268,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doExecuteListener(javax.jms.Session, javax.jms.Message)
 	 */
-	protected boolean doReceiveAndExecute(
-			Object invoker, Session session, MessageConsumer consumer, TransactionStatus status)
-			throws JMSException {
+	protected boolean doReceiveAndExecute(Object invoker, @Nullable Session session,
+			@Nullable MessageConsumer consumer, @Nullable TransactionStatus status) throws JMSException {
 
 		Connection conToClose = null;
 		Session sessionToClose = null;
@@ -288,7 +279,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			boolean transactional = false;
 			if (sessionToUse == null) {
 				sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(
-						getConnectionFactory(), this.transactionalResourceFactory, true);
+						obtainConnectionFactory(), this.transactionalResourceFactory, true);
 				transactional = (sessionToUse != null);
 			}
 			if (sessionToUse == null) {
@@ -318,10 +309,10 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				}
 				messageReceived(invoker, sessionToUse);
 				boolean exposeResource = (!transactional && isExposeListenerSession() &&
-						!TransactionSynchronizationManager.hasResource(getConnectionFactory()));
+						!TransactionSynchronizationManager.hasResource(obtainConnectionFactory()));
 				if (exposeResource) {
 					TransactionSynchronizationManager.bindResource(
-							getConnectionFactory(), new LocallyExposedJmsResourceHolder(sessionToUse));
+							obtainConnectionFactory(), new LocallyExposedJmsResourceHolder(sessionToUse));
 				}
 				try {
 					doExecuteListener(sessionToUse, message);
@@ -342,7 +333,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				}
 				finally {
 					if (exposeResource) {
-						TransactionSynchronizationManager.unbindResource(getConnectionFactory());
+						TransactionSynchronizationManager.unbindResource(obtainConnectionFactory());
 					}
 				}
 				// Indicate that a message has been received.
@@ -355,9 +346,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				}
 				noMessageReceived(invoker, sessionToUse);
 				// Nevertheless call commit, in order to reset the transaction timeout (if any).
-				// However, don't do this on Tibco since this may lead to a deadlock there.
 				if (shouldCommitAfterNoMessageReceived(sessionToUse)) {
-					commitIfNecessary(sessionToUse, message);
+					commitIfNecessary(sessionToUse, null);
 				}
 				// Indicate that no message has been received.
 				return false;
@@ -382,24 +372,19 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			return false;
 		}
 		JmsResourceHolder resourceHolder =
-				(JmsResourceHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
+				(JmsResourceHolder) TransactionSynchronizationManager.getResource(obtainConnectionFactory());
 		return (resourceHolder == null || resourceHolder instanceof LocallyExposedJmsResourceHolder ||
 				!resourceHolder.containsSession(session));
 	}
 
 	/**
 	 * Determine whether to trigger a commit after no message has been received.
-	 * This is a good idea on any JMS provider other than Tibco, which is what
-	 * this default implementation checks for.
+	 * This is a good idea on any modern-day JMS provider.
 	 * @param session the current JMS Session which received no message
 	 * @return whether to call {@link #commitIfNecessary} on the given Session
 	 */
 	protected boolean shouldCommitAfterNoMessageReceived(Session session) {
-		if (this.commitAfterNoMessageReceived == null) {
-			Session target = ConnectionFactoryUtils.getTargetSession(session);
-			this.commitAfterNoMessageReceived = !target.getClass().getName().startsWith("com.tibco.tibjms.");
-		}
-		return this.commitAfterNoMessageReceived;
+		return true;
 	}
 
 	/**
@@ -407,10 +392,10 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @param status object representing the transaction
 	 * @param ex the thrown listener exception or error
 	 */
-	private void rollbackOnException(TransactionStatus status, Throwable ex) {
+	private void rollbackOnException(PlatformTransactionManager manager, TransactionStatus status, Throwable ex) {
 		logger.debug("Initiating transaction rollback on listener exception", ex);
 		try {
-			this.transactionManager.rollback(status);
+			manager.rollback(status);
 		}
 		catch (RuntimeException ex2) {
 			logger.error("Listener exception overridden by rollback exception", ex);
@@ -428,8 +413,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @return the Message, or {@code null} if none
 	 * @throws JMSException if thrown by JMS methods
 	 */
+	@Nullable
 	protected Message receiveMessage(MessageConsumer consumer) throws JMSException {
-		return (this.receiveTimeout < 0 ? consumer.receive() : consumer.receive(this.receiveTimeout));
+		return receiveFromConsumer(consumer, getReceiveTimeout());
 	}
 
 	/**
@@ -452,11 +438,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	protected void noMessageReceived(Object invoker, Session session) {
 	}
 
-
-	//-------------------------------------------------------------------------
-	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Fetch an appropriate Connection from the given JmsResourceHolder.
 	 * <p>This implementation accepts any JMS 1.1 Connection.
@@ -464,6 +445,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @return an appropriate Connection fetched from the holder,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	protected Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection();
 	}
@@ -475,34 +457,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @return an appropriate Session fetched from the holder,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
-	}
-
-	/**
-	 * Create a JMS MessageConsumer for the given Session and Destination.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to create a MessageConsumer for
-	 * @param destination the JMS Destination to create a MessageConsumer for
-	 * @return the new JMS MessageConsumer
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
-		// Only pass in the NoLocal flag in case of a Topic:
-		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
-		// in case of the NoLocal flag being specified for a Queue.
-		if (isPubSubDomain()) {
-			if (isSubscriptionDurable() && destination instanceof Topic) {
-				return session.createDurableSubscriber(
-						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
-			}
-			else {
-				return session.createConsumer(destination, getMessageSelector(), isPubSubNoLocal());
-			}
-		}
-		else {
-			return session.createConsumer(destination, getMessageSelector());
-		}
 	}
 
 
@@ -512,11 +469,13 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	private class MessageListenerContainerResourceFactory implements ConnectionFactoryUtils.ResourceFactory {
 
 		@Override
+		@Nullable
 		public Connection getConnection(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getConnection(holder);
 		}
 
 		@Override
+		@Nullable
 		public Session getSession(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getSession(holder);
 		}

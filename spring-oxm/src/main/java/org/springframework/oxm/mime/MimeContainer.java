@@ -18,6 +18,8 @@ package org.springframework.oxm.mime;
 
 import javax.activation.DataHandler;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Represents a container for MIME attachments
  * Concrete implementations might adapt a SOAPMessage or an email message.
@@ -56,6 +58,7 @@ public interface MimeContainer {
 	 * @param contentId the content id
 	 * @return the attachment, as a data handler
 	 */
+	@Nullable
 	DataHandler getAttachment(String contentId);
 
 }

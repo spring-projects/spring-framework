@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -64,7 +65,7 @@ public class HeadersMethodArgumentResolverTests {
 		this.paramMessageHeaderAccessor = new MethodParameter(method, 3);
 		this.paramMessageHeaderAccessorSubclass = new MethodParameter(method, 4);
 
-		Map<String, Object> headers = new HashMap<String, Object>();
+		Map<String, Object> headers = new HashMap<>();
 		headers.put("foo", "bar");
 		this.message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers).build();
 	}
@@ -88,7 +89,7 @@ public class HeadersMethodArgumentResolverTests {
 		assertEquals("bar", headers.get("foo"));
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void resolveArgumentAnnotatedNotMap() throws Exception {
 		this.resolver.resolveArgument(this.paramAnnotatedNotMap, this.message);
 	}

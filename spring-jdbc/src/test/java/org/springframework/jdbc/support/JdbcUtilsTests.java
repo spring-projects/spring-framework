@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,32 @@
 
 package org.springframework.jdbc.support;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
- * Unit tests for JdbcUtils.
+ * Unit tests for {@link JdbcUtils}.
  *
  * @author Thomas Risberg
  */
-public class JdbcUtilsTests extends TestCase {
+public class JdbcUtilsTests {
 
-	public void testCommonDatabaseName() {
-		assertEquals("Wrong db name", "Oracle", JdbcUtils.commonDatabaseName("Oracle"));
-		assertEquals("Wrong db name", "DB2", JdbcUtils.commonDatabaseName("DB2-for-Spring"));
-		assertEquals("Wrong db name", "Sybase", JdbcUtils.commonDatabaseName("Sybase SQL Server"));
-		assertEquals("Wrong db name", "Sybase", JdbcUtils.commonDatabaseName("Adaptive Server Enterprise"));
-		assertEquals("Wrong db name", "MySQL", JdbcUtils.commonDatabaseName("MySQL"));
+	@Test
+	public void commonDatabaseName() {
+		assertEquals("Oracle", JdbcUtils.commonDatabaseName("Oracle"));
+		assertEquals("DB2", JdbcUtils.commonDatabaseName("DB2-for-Spring"));
+		assertEquals("Sybase", JdbcUtils.commonDatabaseName("Sybase SQL Server"));
+		assertEquals("Sybase", JdbcUtils.commonDatabaseName("Adaptive Server Enterprise"));
+		assertEquals("MySQL", JdbcUtils.commonDatabaseName("MySQL"));
 	}
 
-	public void testConvertUnderscoreNameToPropertyName() {
-		assertEquals("Wrong property name", "myName", JdbcUtils.convertUnderscoreNameToPropertyName("MY_NAME"));
-		assertEquals("Wrong property name", "yourName", JdbcUtils.convertUnderscoreNameToPropertyName("yOUR_nAME"));
-		assertEquals("Wrong property name", "AName", JdbcUtils.convertUnderscoreNameToPropertyName("a_name"));
-		assertEquals("Wrong property name", "someoneElsesName", JdbcUtils.convertUnderscoreNameToPropertyName("someone_elses_name"));
+	@Test
+	public void convertUnderscoreNameToPropertyName() {
+		assertEquals("myName", JdbcUtils.convertUnderscoreNameToPropertyName("MY_NAME"));
+		assertEquals("yourName", JdbcUtils.convertUnderscoreNameToPropertyName("yOUR_nAME"));
+		assertEquals("AName", JdbcUtils.convertUnderscoreNameToPropertyName("a_name"));
+		assertEquals("someoneElsesName", JdbcUtils.convertUnderscoreNameToPropertyName("someone_elses_name"));
 	}
 
 }

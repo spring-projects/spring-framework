@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,10 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class AutowireCandidateQualifier extends BeanMetadataAttributeAccessor {
 
-	public static String VALUE_KEY = "value";
+	/**
+	 * The name of the key used to store the value.
+	 */
+	public static final String VALUE_KEY = "value";
 
 	private final String typeName;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,12 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * {@link BeanDefinitionParser} for the {@code &lt;aop:config&gt;} tag.
+ * {@link BeanDefinitionParser} for the {@code <aop:config>} tag.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -96,6 +97,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
 				new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
@@ -123,7 +125,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	/**
 	 * Configures the auto proxy creator needed to support the {@link BeanDefinition BeanDefinitions}
-	 * created by the '{@code &lt;aop:config/&gt;}' tag. Will force class proxying if the
+	 * created by the '{@code <aop:config/>}' tag. Will force class proxying if the
 	 * '{@code proxy-target-class}' attribute is set to '{@code true}'.
 	 * @see AopNamespaceUtils
 	 */
@@ -132,7 +134,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Parses the supplied {@code &lt;advisor&gt;} element and registers the resulting
+	 * Parses the supplied {@code <advisor>} element and registers the resulting
 	 * {@link org.springframework.aop.Advisor} and any resulting {@link org.springframework.aop.Pointcut}
 	 * with the supplied {@link BeanDefinitionRegistry}.
 	 */
@@ -199,8 +201,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		try {
 			this.parseState.push(new AspectEntry(aspectId, aspectName));
-			List<BeanDefinition> beanDefinitions = new ArrayList<BeanDefinition>();
-			List<BeanReference> beanReferences = new ArrayList<BeanReference>();
+			List<BeanDefinition> beanDefinitions = new ArrayList<>();
+			List<BeanReference> beanReferences = new ArrayList<>();
 
 			List<Element> declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS);
 			for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
@@ -251,8 +253,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			Element aspectElement, String aspectId, List<BeanDefinition> beanDefs,
 			List<BeanReference> beanRefs, ParserContext parserContext) {
 
-		BeanDefinition[] beanDefArray = beanDefs.toArray(new BeanDefinition[beanDefs.size()]);
-		BeanReference[] beanRefArray = beanRefs.toArray(new BeanReference[beanRefs.size()]);
+		BeanDefinition[] beanDefArray = beanDefs.toArray(new BeanDefinition[0]);
+		BeanReference[] beanRefArray = beanRefs.toArray(new BeanReference[0]);
 		Object source = parserContext.extractSource(aspectElement);
 		return new AspectComponentDefinition(aspectId, beanDefArray, beanRefArray, source);
 	}
@@ -428,7 +430,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Parses the supplied {@code &lt;pointcut&gt;} and registers the resulting
+	 * Parses the supplied {@code <pointcut>} and registers the resulting
 	 * Pointcut with the BeanDefinitionRegistry.
 	 */
 	private AbstractBeanDefinition parsePointcut(Element pointcutElement, ParserContext parserContext) {
@@ -466,6 +468,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if  necessary
 	 * and returns its bean name, otherwise returns the bean name of the referred pointcut.
 	 */
+	@Nullable
 	private Object parsePointcutProperty(Element element, ParserContext parserContext) {
 		if (element.hasAttribute(POINTCUT) && element.hasAttribute(POINTCUT_REF)) {
 			parserContext.getReaderContext().error(

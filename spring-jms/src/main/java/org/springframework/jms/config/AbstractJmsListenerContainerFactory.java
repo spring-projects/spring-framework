@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.jms.config;
 
-
 import javax.jms.ConnectionFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -32,6 +33,7 @@ import org.springframework.util.ErrorHandler;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <C> the container type
  * @see AbstractMessageListenerContainer
  */
 public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMessageListenerContainer>
@@ -39,23 +41,48 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
+	@Nullable
 	private DestinationResolver destinationResolver;
 
+	@Nullable
 	private ErrorHandler errorHandler;
 
+	@Nullable
 	private MessageConverter messageConverter;
 
+	@Nullable
 	private Boolean sessionTransacted;
 
+	@Nullable
 	private Integer sessionAcknowledgeMode;
 
+	@Nullable
 	private Boolean pubSubDomain;
 
+	@Nullable
+	private Boolean replyPubSubDomain;
+
+	@Nullable
+	private QosSettings replyQosSettings;
+
+	@Nullable
 	private Boolean subscriptionDurable;
 
+	@Nullable
+	private Boolean subscriptionShared;
+
+	@Nullable
 	private String clientId;
+
+	@Nullable
+	private Integer phase;
+
+	@Nullable
+	private Boolean autoStartup;
+
 
 	/**
 	 * @see AbstractMessageListenerContainer#setConnectionFactory(ConnectionFactory)
@@ -107,10 +134,31 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
+	 * @see AbstractMessageListenerContainer#setReplyPubSubDomain(boolean)
+	 */
+	public void setReplyPubSubDomain(Boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	/**
+	 * @see AbstractMessageListenerContainer#setReplyQosSettings(QosSettings)
+	 */
+	public void setReplyQosSettings(QosSettings replyQosSettings) {
+		this.replyQosSettings = replyQosSettings;
+	}
+
+	/**
 	 * @see AbstractMessageListenerContainer#setSubscriptionDurable(boolean)
 	 */
 	public void setSubscriptionDurable(Boolean subscriptionDurable) {
 		this.subscriptionDurable = subscriptionDurable;
+	}
+
+	/**
+	 * @see AbstractMessageListenerContainer#setSubscriptionShared(boolean)
+	 */
+	public void setSubscriptionShared(Boolean subscriptionShared) {
+		this.subscriptionShared = subscriptionShared;
 	}
 
 	/**
@@ -121,12 +169,21 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
-	 * Create an empty container instance.
+	 * @see AbstractMessageListenerContainer#setPhase(int)
 	 */
-	protected abstract C createContainerInstance();
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	/**
+	 * @see AbstractMessageListenerContainer#setAutoStartup(boolean)
+	 */
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
 
 	@Override
-	public C createMessageListenerContainer(JmsListenerEndpoint endpoint) {
+	public C createListenerContainer(JmsListenerEndpoint endpoint) {
 		C instance = createContainerInstance();
 
 		if (this.connectionFactory != null) {
@@ -141,30 +198,47 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		if (this.messageConverter != null) {
 			instance.setMessageConverter(this.messageConverter);
 		}
-
 		if (this.sessionTransacted != null) {
 			instance.setSessionTransacted(this.sessionTransacted);
 		}
 		if (this.sessionAcknowledgeMode != null) {
 			instance.setSessionAcknowledgeMode(this.sessionAcknowledgeMode);
 		}
-
 		if (this.pubSubDomain != null) {
 			instance.setPubSubDomain(this.pubSubDomain);
+		}
+		if (this.replyPubSubDomain != null) {
+			instance.setReplyPubSubDomain(this.replyPubSubDomain);
+		}
+		if (this.replyQosSettings != null) {
+			instance.setReplyQosSettings(this.replyQosSettings);
 		}
 		if (this.subscriptionDurable != null) {
 			instance.setSubscriptionDurable(this.subscriptionDurable);
 		}
+		if (this.subscriptionShared != null) {
+			instance.setSubscriptionShared(this.subscriptionShared);
+		}
 		if (this.clientId != null) {
 			instance.setClientId(this.clientId);
 		}
-
-		endpoint.setupMessageContainer(instance);
+		if (this.phase != null) {
+			instance.setPhase(this.phase);
+		}
+		if (this.autoStartup != null) {
+			instance.setAutoStartup(this.autoStartup);
+		}
 
 		initializeContainer(instance);
+		endpoint.setupListenerContainer(instance);
 
 		return instance;
 	}
+
+	/**
+	 * Create an empty container instance.
+	 */
+	protected abstract C createContainerInstance();
 
 	/**
 	 * Further initialize the specified container.
@@ -172,7 +246,6 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	 * configuration if necessary.
 	 */
 	protected void initializeContainer(C instance) {
-
 	}
 
 }

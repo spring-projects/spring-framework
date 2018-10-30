@@ -16,10 +16,8 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -28,6 +26,8 @@ import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.junit.Assert.*;
+
 /**
  * Unit tests relating to the abstract {@link AbstractPrototypeBasedTargetSource}
  * and not subclasses.
@@ -35,7 +35,7 @@ import org.springframework.util.SerializationTestUtils;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class PrototypeBasedTargetSourceTests {
+public class PrototypeBasedTargetSourceTests {
 
 	@Test
 	public void testSerializability() throws Exception {

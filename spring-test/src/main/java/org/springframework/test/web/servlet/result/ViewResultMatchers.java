@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,25 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-import static org.springframework.test.util.AssertionErrors.*;
-
 import org.hamcrest.Matcher;
-import org.springframework.test.web.servlet.MvcResult;
+
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.servlet.ModelAndView;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.fail;
+
 /**
- * Factory for assertions on the selected view. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#view()}.
+ * Factory for assertions on the selected view.
+ *
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#view}.
+ *
+ * @author Rossen Stoyanchev
  * @since 3.2
  */
 public class ViewResultMatchers {
-
 
 	/**
 	 * Protected constructor.
@@ -39,17 +43,17 @@ public class ViewResultMatchers {
 	protected ViewResultMatchers() {
 	}
 
+
 	/**
 	 * Assert the selected view name with the given Hamcrest {@link Matcher}.
 	 */
 	public ResultMatcher name(final Matcher<? super String> matcher) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				ModelAndView mav = result.getModelAndView();
-				assertTrue("No ModelAndView found", mav != null);
-				assertThat("View name", mav.getViewName(), matcher);
+		return result -> {
+			ModelAndView mav = result.getModelAndView();
+			if (mav == null) {
+				fail("No ModelAndView found");
 			}
+			assertThat("View name", mav.getViewName(), matcher);
 		};
 	}
 
@@ -57,13 +61,13 @@ public class ViewResultMatchers {
 	 * Assert the selected view name.
 	 */
 	public ResultMatcher name(final String expectedViewName) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				ModelAndView mav = result.getModelAndView();
-				assertTrue("No ModelAndView found", mav != null);
-				assertEquals("View name", expectedViewName, mav.getViewName());
+		return result -> {
+			ModelAndView mav = result.getModelAndView();
+			if (mav == null) {
+				fail("No ModelAndView found");
 			}
+			assertEquals("View name", expectedViewName, mav.getViewName());
 		};
 	}
+
 }

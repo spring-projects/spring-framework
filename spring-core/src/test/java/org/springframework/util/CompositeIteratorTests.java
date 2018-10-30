@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class CompositeIteratorTests {
 
 	@Test
 	public void testNoIterators() {
-		CompositeIterator<String> it = new CompositeIterator<String>();
+		CompositeIterator<String> it = new CompositeIterator<>();
 		assertFalse(it.hasNext());
 		try {
 			it.next();
@@ -49,7 +49,7 @@ public class CompositeIteratorTests {
 
 	@Test
 	public void testSingleIterator() {
-		CompositeIterator<String> it = new CompositeIterator<String>();
+		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(Arrays.asList("0", "1").iterator());
 		for (int i = 0; i < 2; i++) {
 			assertTrue(it.hasNext());
@@ -67,7 +67,7 @@ public class CompositeIteratorTests {
 
 	@Test
 	public void testMultipleIterators() {
-		CompositeIterator<String> it = new CompositeIterator<String>();
+		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(Arrays.asList("0", "1").iterator());
 		it.add(Arrays.asList("2").iterator());
 		it.add(Arrays.asList("3", "4").iterator());
@@ -88,7 +88,7 @@ public class CompositeIteratorTests {
 	@Test
 	public void testInUse() {
 		List<String> list = Arrays.asList("0", "1");
-		CompositeIterator<String> it = new CompositeIterator<String>();
+		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(list.iterator());
 		it.hasNext();
 		try {
@@ -98,7 +98,7 @@ public class CompositeIteratorTests {
 		catch (IllegalStateException ex) {
 			// expected
 		}
-		it = new CompositeIterator<String>();
+		it = new CompositeIterator<>();
 		it.add(list.iterator());
 		it.next();
 		try {
@@ -114,7 +114,7 @@ public class CompositeIteratorTests {
 	public void testDuplicateIterators() {
 		List<String> list = Arrays.asList("0", "1");
 		Iterator<String> iterator = list.iterator();
-		CompositeIterator<String> it = new CompositeIterator<String>();
+		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(iterator);
 		it.add(list.iterator());
 		try {

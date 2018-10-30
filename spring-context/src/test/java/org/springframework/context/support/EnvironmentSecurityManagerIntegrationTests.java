@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,10 +15,6 @@
  */
 
 package org.springframework.context.support;
-
-import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.security.AccessControlException;
 import java.security.Permission;
@@ -35,6 +31,10 @@ import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.StandardEnvironmentTests;
 import org.springframework.stereotype.Component;
 
+import static java.lang.String.format;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
 /**
  * Tests integration between Environment and SecurityManagers. See SPR-9970.
  *
@@ -43,7 +43,9 @@ import org.springframework.stereotype.Component;
 public class EnvironmentSecurityManagerIntegrationTests {
 
 	private SecurityManager originalSecurityManager;
+
 	private Map<String, String> env;
+
 
 	@Before
 	public void setUp() {
@@ -58,16 +60,16 @@ public class EnvironmentSecurityManagerIntegrationTests {
 		System.setSecurityManager(originalSecurityManager);
 	}
 
+
 	@Test
 	public void securityManagerDisallowsAccessToSystemEnvironmentButAllowsAccessToIndividualKeys() {
 		SecurityManager securityManager = new SecurityManager() {
 			@Override
 			public void checkPermission(Permission perm) {
-				// disallowing access to System#getenv means that our
+				// Disallowing access to System#getenv means that our
 				// ReadOnlySystemAttributesMap will come into play.
 				if ("getenv.*".equals(perm.getName())) {
-					throw new AccessControlException(
-							"Accessing the system environment is disallowed");
+					throw new AccessControlException("Accessing the system environment is disallowed");
 				}
 			}
 		};
@@ -84,18 +86,17 @@ public class EnvironmentSecurityManagerIntegrationTests {
 		SecurityManager securityManager = new SecurityManager() {
 			@Override
 			public void checkPermission(Permission perm) {
-				// disallowing access to System#getenv means that our
+				// Disallowing access to System#getenv means that our
 				// ReadOnlySystemAttributesMap will come into play.
 				if ("getenv.*".equals(perm.getName())) {
-					throw new AccessControlException(
-							"Accessing the system environment is disallowed");
+					throw new AccessControlException("Accessing the system environment is disallowed");
 				}
-				// disallowing access to the spring.profiles.active property means that
+				// Disallowing access to the spring.profiles.active property means that
 				// the BeanDefinitionReader won't be able to determine which profiles are
 				// active. We should see an INFO-level message in the console about this
 				// and as a result, any components marked with a non-default profile will
 				// be ignored.
-				if (("getenv."+AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME).equals(perm.getName())) {
+				if (("getenv." + AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME).equals(perm.getName())) {
 					throw new AccessControlException(
 							format("Accessing system environment variable [%s] is disallowed",
 									AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME));
@@ -110,8 +111,10 @@ public class EnvironmentSecurityManagerIntegrationTests {
 		assertThat(bf.containsBean("c1"), is(false));
 	}
 
+
 	@Component("c1")
 	@Profile("p1")
 	static class C1 {
 	}
+
 }

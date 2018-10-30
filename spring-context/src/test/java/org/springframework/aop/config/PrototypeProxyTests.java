@@ -17,13 +17,14 @@
 package org.springframework.aop.config;
 
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class PrototypeProxyTests {
+public class PrototypeProxyTests {
 
 	@Test
 	public void testInjectionBeforeWrappingCheckDoesNotKickInForPrototypeProxy() {

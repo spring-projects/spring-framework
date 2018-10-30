@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,12 @@
 
 package org.springframework.cache;
 
+import java.util.concurrent.Callable;
+
+import org.springframework.lang.Nullable;
+
 /**
- * Interface that defines the common cache operations.
+ * Interface that defines common cache operations.
  *
  * <b>Note:</b> Due to the generic use of caching, it is recommended that
  * implementations allow storage of <tt>null</tt> values (for example to
@@ -25,6 +29,7 @@ package org.springframework.cache;
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public interface Cache {
@@ -35,7 +40,7 @@ public interface Cache {
 	String getName();
 
 	/**
-	 * Return the the underlying native cache provider.
+	 * Return the underlying native cache provider.
 	 */
 	Object getNativeCache();
 
@@ -51,6 +56,7 @@ public interface Cache {
 	 * returned means that the cache contains no mapping for this key.
 	 * @see #get(Object, Class)
 	 */
+	@Nullable
 	ValueWrapper get(Object key);
 
 	/**
@@ -66,10 +72,31 @@ public interface Cache {
 	 * @return the value to which this cache maps the specified key
 	 * (which may be {@code null} itself), or also {@code null} if
 	 * the cache contains no mapping for this key
-	 * @see #get(Object)
+	 * @throws IllegalStateException if a cache entry has been found
+	 * but failed to match the specified type
 	 * @since 4.0
+	 * @see #get(Object)
 	 */
-	<T> T get(Object key, Class<T> type);
+	@Nullable
+	<T> T get(Object key, @Nullable Class<T> type);
+
+	/**
+	 * Return the value to which this cache maps the specified key, obtaining
+	 * that value from {@code valueLoader} if necessary. This method provides
+	 * a simple substitute for the conventional "if cached, return; otherwise
+	 * create, cache and return" pattern.
+	 * <p>If possible, implementations should ensure that the loading operation
+	 * is synchronized so that the specified {@code valueLoader} is only called
+	 * once in case of concurrent access on the same key.
+	 * <p>If the {@code valueLoader} throws an exception, it is wrapped in
+	 * a {@link ValueRetrievalException}
+	 * @param key the key whose associated value is to be returned
+	 * @return the value to which this cache maps the specified key
+	 * @throws ValueRetrievalException if the {@code valueLoader} throws an exception
+	 * @since 4.3
+	 */
+	@Nullable
+	<T> T get(Object key, Callable<T> valueLoader);
 
 	/**
 	 * Associate the specified value with the specified key in this cache.
@@ -78,7 +105,7 @@ public interface Cache {
 	 * @param key the key with which the specified value is to be associated
 	 * @param value the value to be associated with the specified key
 	 */
-	void put(Object key, Object value);
+	void put(Object key, @Nullable Object value);
 
 	/**
 	 * Atomically associate the specified value with the specified key in this cache
@@ -106,7 +133,8 @@ public interface Cache {
 	 * an indicator that the given {@code value} has been associated with the key.
 	 * @since 4.1
 	 */
-	ValueWrapper putIfAbsent(Object key, Object value);
+	@Nullable
+	ValueWrapper putIfAbsent(Object key, @Nullable Object value);
 
 	/**
 	 * Evict the mapping for this key from this cache if it is present.
@@ -123,12 +151,37 @@ public interface Cache {
 	/**
 	 * A (wrapper) object representing a cache value.
 	 */
+	@FunctionalInterface
 	interface ValueWrapper {
 
 		/**
 		 * Return the actual value in the cache.
 		 */
+		@Nullable
 		Object get();
+	}
+
+
+	/**
+	 * Wrapper exception to be thrown from {@link #get(Object, Callable)}
+	 * in case of the value loader callback failing with an exception.
+	 * @since 4.3
+	 */
+	@SuppressWarnings("serial")
+	class ValueRetrievalException extends RuntimeException {
+
+		@Nullable
+		private final Object key;
+
+		public ValueRetrievalException(@Nullable Object key, Callable<?> loader, Throwable ex) {
+			super(String.format("Value for key '%s' could not be loaded using '%s'", key, loader), ex);
+			this.key = key;
+		}
+
+		@Nullable
+		public Object getKey() {
+			return this.key;
+		}
 	}
 
 }

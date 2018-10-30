@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	<bean id="employee" class="org.springframework.tests.sample.beans.Employee" p:name="John Smith" p:age="42"
+		p:company="Acme Widgets, Inc." />
+
+	<bean id="pet" class="org.springframework.tests.sample.beans.Pet" c:_="Fido" />
+
+	<bean id="foo" class="java.lang.String" c:_="Foo" />
+
+	<bean id="bar" class="java.lang.String" c:_="Bar" />
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:data-source-ref="dataSource" />
+
+	<jdbc:embedded-database id="dataSource">
+		<jdbc:script location="classpath:/org/springframework/test/jdbc/schema.sql" />
+		<jdbc:script location="classpath:/org/springframework/test/jdbc/data.sql" />
+	</jdbc:embedded-database>
+
+</beans>

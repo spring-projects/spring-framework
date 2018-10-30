@@ -16,11 +16,10 @@
 
 package org.springframework.jdbc.support;
 
-import static org.junit.Assert.*;
-
 import java.sql.SQLException;
 
 import org.junit.Test;
+
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -28,6 +27,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
@@ -43,7 +44,7 @@ public class SQLStateSQLExceptionTranslatorTests {
 	private static final String SQL = "select count(0) from t_sheep where over_fence = ... yawn... 1";
 
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testTranslateNullException() throws Exception {
 		new SQLStateSQLExceptionTranslator().translate("", "", null);
 	}

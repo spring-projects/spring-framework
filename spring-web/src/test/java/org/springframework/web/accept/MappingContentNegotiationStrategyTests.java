@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.web.accept;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import static org.junit.Assert.*;
 
 /**
  * A test fixture with a test sub-class of AbstractMappingContentNegotiationStrategy.
@@ -52,7 +53,7 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertEquals(0, mediaTypes.size());
+		assertEquals(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST, mediaTypes);
 	}
 
 	@Test
@@ -62,7 +63,7 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertEquals(0, mediaTypes.size());
+		assertEquals(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST, mediaTypes);
 	}
 
 	@Test

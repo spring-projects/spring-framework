@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.cache.ehcache;
 
-import java.io.IOException;
 import java.util.Set;
 
 import net.sf.ehcache.Cache;
@@ -37,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.ClassUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that creates a named EhCache {@link net.sf.ehcache.Cache} instance
@@ -52,7 +51,7 @@ import org.springframework.util.ClassUtils;
  * <p>Note: If the named Cache instance is found, the properties will be ignored and the
  * Cache instance will be retrieved from the CacheManager.
  *
- * <p>Note: As of Spring 4.1, Spring's EhCache support requires EhCache 2.5 or higher.
+ * <p>Note: As of Spring 5.0, Spring's EhCache support requires EhCache 2.10 or higher.
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
@@ -63,37 +62,34 @@ import org.springframework.util.ClassUtils;
  */
 public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBean<Ehcache>, BeanNameAware, InitializingBean {
 
-	// EhCache's setStatisticsEnabled(boolean) available? Not anymore as of EhCache 2.7...
-	private static final boolean setStatisticsAvailable =
-			ClassUtils.hasMethod(Ehcache.class, "setStatisticsEnabled", boolean.class);
-
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private CacheManager cacheManager;
 
 	private boolean blocking = false;
 
+	@Nullable
 	private CacheEntryFactory cacheEntryFactory;
 
+	@Nullable
 	private BootstrapCacheLoader bootstrapCacheLoader;
 
+	@Nullable
 	private Set<CacheEventListener> cacheEventListeners;
-
-	private boolean statisticsEnabled = false;
-
-	private boolean sampledStatisticsEnabled = false;
 
 	private boolean disabled = false;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private Ehcache cache;
 
 
 	public EhCacheFactoryBean() {
 		setMaxEntriesLocalHeap(10000);
-		setMaxElementsOnDisk(10000000);
+		setMaxEntriesLocalDisk(10000000);
 		setTimeToLiveSeconds(120);
 		setTimeToIdleSeconds(120);
 	}
@@ -123,6 +119,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	}
 
 	/**
+	 * Set the time to live.
 	 * @see #setTimeToLiveSeconds(long)
 	 */
 	public void setTimeToLive(int timeToLive) {
@@ -130,6 +127,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	}
 
 	/**
+	 * Set the time to idle.
 	 * @see #setTimeToIdleSeconds(long)
 	 */
 	public void setTimeToIdle(int timeToIdle) {
@@ -137,6 +135,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	}
 
 	/**
+	 * Set the disk spool buffer size (in MB).
 	 * @see #setDiskSpoolBufferSizeMB(int)
 	 */
 	public void setDiskSpoolBufferSize(int diskSpoolBufferSize) {
@@ -190,26 +189,6 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	}
 
 	/**
-	 * Set whether to enable EhCache statistics on this cache.
-	 * <p>Note: As of EhCache 2.7, statistics are enabled by default, and cannot be turned off.
-	 * This setter therefore has no effect in such a scenario.
-	 * @see net.sf.ehcache.Ehcache#setStatisticsEnabled
-	 */
-	public void setStatisticsEnabled(boolean statisticsEnabled) {
-		this.statisticsEnabled = statisticsEnabled;
-	}
-
-	/**
-	 * Set whether to enable EhCache's sampled statistics on this cache.
-	 * <p>Note: As of EhCache 2.7, statistics are enabled by default, and cannot be turned off.
-	 * This setter therefore has no effect in such a scenario.
-	 * @see net.sf.ehcache.Ehcache#setSampledStatisticsEnabled
-	 */
-	public void setSampledStatisticsEnabled(boolean sampledStatisticsEnabled) {
-		this.sampledStatisticsEnabled = sampledStatisticsEnabled;
-	}
-
-	/**
 	 * Set whether this cache should be marked as disabled.
 	 * @see net.sf.ehcache.Cache#setDisabled
 	 */
@@ -224,12 +203,14 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 
 
 	@Override
-	public void afterPropertiesSet() throws CacheException, IOException {
+	public void afterPropertiesSet() throws CacheException {
 		// If no cache name given, use bean name as cache name.
 		String cacheName = getName();
 		if (cacheName == null) {
 			cacheName = this.beanName;
-			setName(cacheName);
+			if (cacheName != null) {
+				setName(cacheName);
+			}
 		}
 
 		// If no CacheManager given, fetch the default.
@@ -270,15 +251,6 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 				this.cacheManager.addCache(rawCache);
 			}
 
-			// Only necessary on EhCache <2.7: As of 2.7, statistics are on by default.
-			if (setStatisticsAvailable) {
-				if (this.statisticsEnabled) {
-					rawCache.setStatisticsEnabled(true);
-				}
-				if (this.sampledStatisticsEnabled) {
-					rawCache.setSampledStatisticsEnabled(true);
-				}
-			}
 			if (this.disabled) {
 				rawCache.setDisabled(true);
 			}
@@ -320,6 +292,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 
 
 	@Override
+	@Nullable
 	public Ehcache getObject() {
 		return this.cache;
 	}

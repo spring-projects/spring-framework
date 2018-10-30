@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <T> the payload type
  */
 public abstract class AbstractWebSocketMessage<T> implements WebSocketMessage<T> {
 
@@ -56,7 +57,7 @@ public abstract class AbstractWebSocketMessage<T> implements WebSocketMessage<T>
 
 
 	/**
-	 * Return the message payload, never be {@code null}.
+	 * Return the message payload (never {@code null}).
 	 */
 	public T getPayload() {
 		return this.payload;
@@ -69,10 +70,6 @@ public abstract class AbstractWebSocketMessage<T> implements WebSocketMessage<T>
 		return this.last;
 	}
 
-	@Override
-	public int hashCode() {
-		return AbstractWebSocketMessage.class.hashCode() * 13 + ObjectUtils.nullSafeHashCode(this.payload);
-	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -87,9 +84,14 @@ public abstract class AbstractWebSocketMessage<T> implements WebSocketMessage<T>
 	}
 
 	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(this.payload);
+	}
+
+	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " payload= " + toStringPayload()
-				+ ", byteCount=" + getPayloadLength() + ", last=" + isLast() + "]";
+		return getClass().getSimpleName() + " payload=[" + toStringPayload() +
+				"], byteCount=" + getPayloadLength() + ", last=" + isLast() + "]";
 	}
 
 	protected abstract String toStringPayload();

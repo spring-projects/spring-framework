@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.web.servlet.samples.spr;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+package org.springframework.test.web.servlet.samples.spr;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,7 +28,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
  * Test for SPR-10277 (multiple method chaining when building MockMvc).
@@ -40,20 +42,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @ContextConfiguration
 public class MockMvcBuilderMethodChainTests {
 
-    @Autowired
-    private WebApplicationContext wac;
+	@Autowired
+	private WebApplicationContext wac;
 
-    @Test
-    public void chainMultiple() {
-        MockMvcBuilders
-                .webAppContextSetup(wac)
-                .addFilter(new CharacterEncodingFilter() )
-                .defaultRequest(get("/").contextPath("/mywebapp"))
-                .build();
-    }
+	@Test
+	public void chainMultiple() {
+		MockMvcBuilders
+				.webAppContextSetup(wac)
+				.addFilter(new CharacterEncodingFilter() )
+				.defaultRequest(get("/").contextPath("/mywebapp"))
+				.build();
+	}
 
-    @Configuration
-    @EnableWebMvc
-    static class WebConfig extends WebMvcConfigurerAdapter {
-    }
+	@Configuration
+	@EnableWebMvc
+	static class WebConfig implements WebMvcConfigurer {
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect.AfterThrowingAdviceBindingCollaborator;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -30,7 +31,7 @@ import static org.mockito.BDDMockito.*;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class AfterThrowingAdviceBindingTests {
+public class AfterThrowingAdviceBindingTests {
 
 	private ITestBean testBean;
 
@@ -38,10 +39,11 @@ public final class AfterThrowingAdviceBindingTests {
 
 	private AfterThrowingAdviceBindingCollaborator mockCollaborator;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		testBean = (ITestBean) ctx.getBean("testBean");
 		afterThrowingAdviceAspect = (AfterThrowingAdviceBindingTestAspect) ctx.getBean("testAspect");
@@ -50,20 +52,21 @@ public final class AfterThrowingAdviceBindingTests {
 		afterThrowingAdviceAspect.setCollaborator(mockCollaborator);
 	}
 
-	@Test(expected=Throwable.class)
+
+	@Test(expected = Throwable.class)
 	public void testSimpleAfterThrowing() throws Throwable {
 		this.testBean.exceptional(new Throwable());
 		verify(mockCollaborator).noArgs();
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithBinding() throws Throwable {
 		Throwable t = new Throwable();
 		this.testBean.exceptional(t);
 		verify(mockCollaborator).oneThrowable(t);
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithNamedTypeRestriction() throws Throwable {
 		Throwable t = new Throwable();
 		this.testBean.exceptional(t);
@@ -72,20 +75,20 @@ public final class AfterThrowingAdviceBindingTests {
 		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithRuntimeExceptionBinding() throws Throwable {
 		RuntimeException ex = new RuntimeException();
 		this.testBean.exceptional(ex);
 		verify(mockCollaborator).oneRuntimeException(ex);
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithTypeSpecified() throws Throwable {
 		this.testBean.exceptional(new Throwable());
 		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithRuntimeTypeSpecified() throws Throwable {
 		this.testBean.exceptional(new RuntimeException());
 		verify(mockCollaborator).noArgsOnRuntimeExceptionMatch();
@@ -131,5 +134,4 @@ final class AfterThrowingAdviceBindingTestAspect {
 	public void noArgsOnRuntimeExceptionMatch() {
 		this.collaborator.noArgsOnRuntimeExceptionMatch();
 	}
-
 }

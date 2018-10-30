@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * Unit tests for {@link PropertyPathFactoryBean}.
@@ -39,6 +37,7 @@ import org.springframework.tests.sample.beans.TestBean;
 public class PropertyPathFactoryBeanTests {
 
 	private static final Resource CONTEXT = qualifiedResource(PropertyPathFactoryBeanTests.class, "context.xml");
+
 
 	@Test
 	public void testPropertyPathFactoryBeanWithSingletonResult() {
@@ -80,7 +79,7 @@ public class PropertyPathFactoryBeanTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
 		assertNull(xbf.getType("tb.spouse.spouse"));
-		assertNull(xbf.getBean("tb.spouse.spouse"));
+		assertEquals("null", xbf.getBean("tb.spouse.spouse").toString());
 	}
 
 	@Test
@@ -92,6 +91,20 @@ public class PropertyPathFactoryBeanTests {
 		assertSame(spouse, tbWithInner.getSpouse());
 		assertTrue(!tbWithInner.getFriends().isEmpty());
 		assertSame(spouse, tbWithInner.getFriends().iterator().next());
+	}
+
+	@Test
+	public void testPropertyPathFactoryBeanAsNullReference() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
+		assertNull(xbf.getBean("tbWithNullReference", TestBean.class).getSpouse());
+	}
+
+	@Test
+	public void testPropertyPathFactoryBeanAsInnerNull() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
+		assertNull(xbf.getBean("tbWithInnerNull", TestBean.class).getSpouse());
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,36 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.assertEquals;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
-	public TestInterface testBean;
-	public TestInterface testAnnotatedClassBean;
-	public TestInterface testAnnotatedMethodBean;
+public class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 
-	protected Counter counter;
+	private TestInterface testBean;
+
+	private TestInterface testAnnotatedClassBean;
+
+	private TestInterface testAnnotatedMethodBean;
+
+	private Counter counter;
+
 
 	@org.junit.Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testBean = (TestInterface) ctx.getBean("testBean");
 		testAnnotatedClassBean = (TestInterface) ctx.getBean("testAnnotatedClassBean");
 		testAnnotatedMethodBean = (TestInterface) ctx.getBean("testAnnotatedMethodBean");
@@ -48,57 +53,58 @@ public final class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 		counter.reset();
 	}
 
+
 	@Test
-	public void testThisAsClassDoesNotMatch() {
+	public void thisAsClassDoesNotMatch() {
 		testBean.doIt();
 		assertEquals(0, counter.thisAsClassCounter);
 	}
 
 	@Test
-	public void testThisAsInterfaceMatch() {
+	public void thisAsInterfaceMatch() {
 		testBean.doIt();
 		assertEquals(1, counter.thisAsInterfaceCounter);
 	}
 
 	@Test
-	public void testTargetAsClassDoesMatch() {
+	public void targetAsClassDoesMatch() {
 		testBean.doIt();
 		assertEquals(1, counter.targetAsClassCounter);
 	}
 
 	@Test
-	public void testTargetAsInterfaceMatch() {
+	public void targetAsInterfaceMatch() {
 		testBean.doIt();
 		assertEquals(1, counter.targetAsInterfaceCounter);
 	}
 
 	@Test
-	public void testThisAsClassAndTargetAsClassCounterNotMatch() {
+	public void thisAsClassAndTargetAsClassCounterNotMatch() {
 		testBean.doIt();
 		assertEquals(0, counter.thisAsClassAndTargetAsClassCounter);
 	}
 
 	@Test
-	public void testThisAsInterfaceAndTargetAsInterfaceCounterMatch() {
+	public void thisAsInterfaceAndTargetAsInterfaceCounterMatch() {
 		testBean.doIt();
 		assertEquals(1, counter.thisAsInterfaceAndTargetAsInterfaceCounter);
 	}
 
 	@Test
-	public void testThisAsInterfaceAndTargetAsClassCounterMatch() {
+	public void thisAsInterfaceAndTargetAsClassCounterMatch() {
 		testBean.doIt();
 		assertEquals(1, counter.thisAsInterfaceAndTargetAsInterfaceCounter);
 	}
 
 
 	@Test
-	public void testAtTargetClassAnnotationMatch() {
+	public void atTargetClassAnnotationMatch() {
 		testAnnotatedClassBean.doIt();
 		assertEquals(1, counter.atTargetClassAnnotationCounter);
 	}
 
 	@Test
-	public void testAtAnnotationMethodAnnotationMatch() {
+	public void atAnnotationMethodAnnotationMatch() {
 		testAnnotatedMethodBean.doIt();
 		assertEquals(1, counter.atAnnotationMethodAnnotationCounter);
 	}

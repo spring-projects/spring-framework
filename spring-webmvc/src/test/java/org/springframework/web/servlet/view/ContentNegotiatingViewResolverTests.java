@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,10 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameWithInvalidAcceptHeader() throws Exception {
 		request.addHeader("Accept", "application");
 
+		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 		viewResolver.afterPropertiesSet();
+
 		View result = viewResolver.resolveViewName("test", Locale.ENGLISH);
 		assertNull(result);
 	}
@@ -281,7 +284,7 @@ public class ContentNegotiatingViewResolverTests {
 		View viewMock2 = mock(View.class, "text_html");
 		View viewMock3 = mock(View.class, "application_json");
 
-		List<View> defaultViews = new ArrayList<View>();
+		List<View> defaultViews = new ArrayList<>();
 		defaultViews.add(viewMock3);
 		viewResolver.setDefaultViews(defaultViews);
 
@@ -343,7 +346,7 @@ public class ContentNegotiatingViewResolverTests {
 		View viewMock2 = mock(View.class, "text_html");
 		View viewMock3 = mock(View.class, "application_json");
 
-		List<View> defaultViews = new ArrayList<View>();
+		List<View> defaultViews = new ArrayList<>();
 		defaultViews.add(viewMock3);
 		viewResolver.setDefaultViews(defaultViews);
 
@@ -470,7 +473,7 @@ public class ContentNegotiatingViewResolverTests {
 		InternalResourceViewResolver nestedResolver = new InternalResourceViewResolver();
 		nestedResolver.setApplicationContext(webAppContext);
 		nestedResolver.setViewClass(InternalResourceView.class);
-		viewResolver.setViewResolvers(new ArrayList<ViewResolver>(Arrays.asList(nestedResolver)));
+		viewResolver.setViewResolvers(new ArrayList<>(Arrays.asList(nestedResolver)));
 
 		FixedContentNegotiationStrategy fixedStrategy = new FixedContentNegotiationStrategy(MediaType.TEXT_HTML);
 		viewResolver.setContentNegotiationManager(new ContentNegotiationManager(fixedStrategy));

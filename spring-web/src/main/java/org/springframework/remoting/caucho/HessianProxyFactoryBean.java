@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.remoting.caucho;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} for Hessian proxies. Exposes the proxied service
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.FactoryBean;
  */
 public class HessianProxyFactoryBean extends HessianClientInterceptor implements FactoryBean<Object> {
 
+	@Nullable
 	private Object serviceProxy;
 
 
@@ -53,6 +55,7 @@ public class HessianProxyFactoryBean extends HessianClientInterceptor implements
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.serviceProxy;
 	}

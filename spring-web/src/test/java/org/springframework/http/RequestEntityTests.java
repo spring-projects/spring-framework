@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,25 @@ package org.springframework.http;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.util.UriTemplate;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link org.springframework.http.RequestEntity}.
+ *
  * @author Arjen Poutsma
  */
 public class RequestEntityTests {
-
 
 	@Test
 	public void normal() throws URISyntaxException {
@@ -54,22 +58,24 @@ public class RequestEntityTests {
 
 	@Test
 	public void uriVariablesExpansion() throws URISyntaxException {
-		RequestEntity.get("http://example.com/{foo}", "bar").accept(MediaType.TEXT_PLAIN).build();
+		URI uri = new UriTemplate("http://example.com/{foo}").expand("bar");
+		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
 		String url = "http://www.{host}.com/{path}";
 		String host = "example";
 		String path = "foo/bar";
-
 		URI expected = new URI("http://www.example.com/foo/bar");
 
-		RequestEntity<?> entity = RequestEntity.method(HttpMethod.GET, url, host, path).build();
+		uri = new UriTemplate(url).expand(host, path);
+		RequestEntity<?> entity = RequestEntity.get(uri).build();
 		assertEquals(expected, entity.getUrl());
 
 		Map<String, String> uriVariables = new HashMap<>(2);
 		uriVariables.put("host", host);
 		uriVariables.put("path", path);
 
-		entity = RequestEntity.method(HttpMethod.GET, url, uriVariables).build();
+		uri = new UriTemplate(url).expand(uriVariables);
+		entity = RequestEntity.get(uri).build();
 		assertEquals(expected, entity.getUrl());
 	}
 
@@ -88,15 +94,14 @@ public class RequestEntityTests {
 	@Test
 	public void headers() throws URISyntaxException {
 		MediaType accept = MediaType.TEXT_PLAIN;
-		Charset charset = Charset.forName("UTF-8");
 		long ifModifiedSince = 12345L;
 		String ifNoneMatch = "\"foo\"";
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
-		RequestEntity<Void> responseEntity = RequestEntity.post("http://example.com").
+		RequestEntity<Void> responseEntity = RequestEntity.post(new URI("http://example.com")).
 				accept(accept).
-				acceptCharset(charset).
+				acceptCharset(StandardCharsets.UTF_8).
 				ifModifiedSince(ifModifiedSince).
 				ifNoneMatch(ifNoneMatch).
 				contentLength(contentLength).
@@ -110,7 +115,7 @@ public class RequestEntityTests {
 
 		assertEquals("text/plain", responseHeaders.getFirst("Accept"));
 		assertEquals("utf-8", responseHeaders.getFirst("Accept-Charset"));
-		assertEquals("Thu, 01 Jan 1970 00:00:12 GMT", responseHeaders.getFirst("If-Modified-Since"));
+		assertEquals("Thu, 1 Jan 1970 00:00:12 GMT", responseHeaders.getFirst("If-Modified-Since"));
 		assertEquals(ifNoneMatch, responseHeaders.getFirst("If-None-Match"));
 		assertEquals(String.valueOf(contentLength), responseHeaders.getFirst("Content-Length"));
 		assertEquals(contentType.toString(), responseHeaders.getFirst("Content-Type"));
@@ -143,6 +148,16 @@ public class RequestEntityTests {
 		entity = RequestEntity.delete(url).build();
 		assertEquals(HttpMethod.DELETE, entity.getMethod());
 
+	}
+
+	@Test  // SPR-13154
+	public void types() throws URISyntaxException {
+		URI url = new URI("http://example.com");
+		List<String> body = Arrays.asList("foo", "bar");
+		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<String>>() {};
+
+		RequestEntity<?> entity = RequestEntity.post(url).body(body, typeReference.getType());
+		assertEquals(typeReference.getType(), entity.getType());
 	}
 
 }

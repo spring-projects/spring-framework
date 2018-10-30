@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,24 @@
 
 package org.springframework.test.web.servlet.result;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
-
+import java.util.stream.Collectors;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.method.HandlerMethod;
@@ -37,14 +43,21 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * Result handler that prints {@link MvcResult} details to the "standard" output
- * stream. An instance of this class is typically accessed via
- * {@link MockMvcResultHandlers#print()}.
+ * Result handler that prints {@link MvcResult} details to a given output
+ * stream &mdash; for example: {@code System.out}, {@code System.err}, a
+ * custom {@code java.io.PrintWriter}, etc.
+ *
+ * <p>An instance of this class is typically accessed via one of the
+ * {@link MockMvcResultHandlers#print print} or {@link MockMvcResultHandlers#log log}
+ * methods in {@link MockMvcResultHandlers}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class PrintingResultHandler implements ResultHandler {
+
+	private static final String MISSING_CHARACTER_ENCODING = "<no character encoding set>";
 
 	private final ResultValuePrinter printer;
 
@@ -58,18 +71,18 @@ public class PrintingResultHandler implements ResultHandler {
 	}
 
 	/**
-	 * @return the result value printer.
+	 * Return the result value printer.
+	 * @return the printer
 	 */
 	protected ResultValuePrinter getPrinter() {
 		return this.printer;
 	}
 
 	/**
-	 * Print {@link MvcResult} details to the "standard" output stream.
+	 * Print {@link MvcResult} details.
 	 */
 	@Override
 	public final void handle(MvcResult result) throws Exception {
-
 		this.printer.printHeading("MockHttpServletRequest");
 		printRequest(result.getRequest());
 
@@ -92,12 +105,19 @@ public class PrintingResultHandler implements ResultHandler {
 		printResponse(result.getResponse());
 	}
 
-	/** Print the request */
+	/**
+	 * Print the request.
+	 */
 	protected void printRequest(MockHttpServletRequest request) throws Exception {
+		String body = (request.getCharacterEncoding() != null ?
+				request.getContentAsString() : MISSING_CHARACTER_ENCODING);
+
 		this.printer.printValue("HTTP Method", request.getMethod());
 		this.printer.printValue("Request URI", request.getRequestURI());
 		this.printer.printValue("Parameters", getParamsMultiValueMap(request));
 		this.printer.printValue("Headers", getRequestHeaders(request));
+		this.printer.printValue("Body", body);
+		this.printer.printValue("Session Attrs", getSessionAttributes(request));
 	}
 
 	protected final HttpHeaders getRequestHeaders(MockHttpServletRequest request) {
@@ -115,25 +135,48 @@ public class PrintingResultHandler implements ResultHandler {
 
 	protected final MultiValueMap<String, String> getParamsMultiValueMap(MockHttpServletRequest request) {
 		Map<String, String[]> params = request.getParameterMap();
-		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<String, String>();
-		for (String name : params.keySet()) {
+		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
+		params.forEach((name, values) -> {
 			if (params.get(name) != null) {
-				for (String value : params.get(name)) {
+				for (String value : values) {
 					multiValueMap.add(name, value);
 				}
 			}
-		}
+		});
 		return multiValueMap;
+	}
+
+	protected final Map<String, Object> getSessionAttributes(MockHttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			Enumeration<String> attrNames = session.getAttributeNames();
+			if (attrNames != null) {
+				return Collections.list(attrNames).stream().
+						collect(Collectors.toMap(n -> n, session::getAttribute));
+			}
+		}
+		return Collections.emptyMap();
 	}
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
 		HttpServletRequest request = result.getRequest();
-		this.printer.printValue("Was async started", request.isAsyncStarted());
-		this.printer.printValue("Async result", (request.isAsyncStarted() ? result.getAsyncResult(0) : null));
+		this.printer.printValue("Async started", request.isAsyncStarted());
+		Object asyncResult = null;
+		try {
+			asyncResult = result.getAsyncResult(0);
+		}
+		catch (IllegalStateException ex) {
+			// Not set
+		}
+		this.printer.printValue("Async result", asyncResult);
 	}
 
-	/** Print the handler */
-	protected void printHandler(Object handler, HandlerInterceptor[] interceptors) throws Exception {
+	/**
+	 * Print the handler.
+	 */
+	protected void printHandler(@Nullable Object handler, @Nullable HandlerInterceptor[] interceptors)
+			throws Exception {
+
 		if (handler == null) {
 			this.printer.printValue("Type", null);
 		}
@@ -149,8 +192,10 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print exceptions resolved through a HandlerExceptionResolver */
-	protected void printResolvedException(Exception resolvedException) throws Exception {
+	/**
+	 * Print exceptions resolved through a HandlerExceptionResolver.
+	 */
+	protected void printResolvedException(@Nullable Exception resolvedException) throws Exception {
 		if (resolvedException == null) {
 			this.printer.printValue("Type", null);
 		}
@@ -159,8 +204,10 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print the ModelAndView */
-	protected void printModelAndView(ModelAndView mav) throws Exception {
+	/**
+	 * Print the ModelAndView.
+	 */
+	protected void printModelAndView(@Nullable ModelAndView mav) throws Exception {
 		this.printer.printValue("View name", (mav != null) ? mav.getViewName() : null);
 		this.printer.printValue("View", (mav != null) ? mav.getView() : null);
 		if (mav == null || mav.getModel().size() == 0) {
@@ -181,29 +228,60 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print "output" flash attributes */
+	/**
+	 * Print "output" flash attributes.
+	 */
 	protected void printFlashMap(FlashMap flashMap) throws Exception {
-		if (flashMap == null) {
+		if (ObjectUtils.isEmpty(flashMap)) {
 			this.printer.printValue("Attributes", null);
 		}
 		else {
-			for (String name : flashMap.keySet()) {
+			flashMap.forEach((name, value) -> {
 				this.printer.printValue("Attribute", name);
-				this.printer.printValue("value", flashMap.get(name));
-			}
+				this.printer.printValue("value", value);
+			});
 		}
 	}
 
-	/** Print the response */
+	/**
+	 * Print the response.
+	 */
 	protected void printResponse(MockHttpServletResponse response) throws Exception {
+		String body = (response.getCharacterEncoding() != null ?
+				response.getContentAsString() : MISSING_CHARACTER_ENCODING);
+
 		this.printer.printValue("Status", response.getStatus());
 		this.printer.printValue("Error message", response.getErrorMessage());
 		this.printer.printValue("Headers", getResponseHeaders(response));
 		this.printer.printValue("Content type", response.getContentType());
-		this.printer.printValue("Body", response.getContentAsString());
+		this.printer.printValue("Body", body);
 		this.printer.printValue("Forwarded URL", response.getForwardedUrl());
 		this.printer.printValue("Redirected URL", response.getRedirectedUrl());
-		this.printer.printValue("Cookies", response.getCookies());
+		printCookies(response.getCookies());
+	}
+
+	/**
+	 * Print the supplied cookies in a human-readable form, assuming the
+	 * {@link Cookie} implementation does not provide its own {@code toString()}.
+	 * @since 4.2
+	 */
+	private void printCookies(Cookie[] cookies) {
+		String[] cookieStrings = new String[cookies.length];
+		for (int i = 0; i < cookies.length; i++) {
+			Cookie cookie = cookies[i];
+			cookieStrings[i] = new ToStringCreator(cookie)
+				.append("name", cookie.getName())
+				.append("value", cookie.getValue())
+				.append("comment", cookie.getComment())
+				.append("domain", cookie.getDomain())
+				.append("maxAge", cookie.getMaxAge())
+				.append("path", cookie.getPath())
+				.append("secure", cookie.getSecure())
+				.append("version", cookie.getVersion())
+				.append("httpOnly", cookie.isHttpOnly())
+				.toString();
+		}
+		this.printer.printValue("Cookies", cookieStrings);
 	}
 
 	protected final HttpHeaders getResponseHeaders(MockHttpServletResponse response) {
@@ -222,7 +300,7 @@ public class PrintingResultHandler implements ResultHandler {
 
 		void printHeading(String heading);
 
-		void printValue(String label, Object value);
+		void printValue(String label, @Nullable Object value);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Simple stop watch, allowing for timing of a number of tasks,
@@ -49,22 +51,21 @@ public class StopWatch {
 
 	private boolean keepTaskList = true;
 
-	private final List<TaskInfo> taskList = new LinkedList<TaskInfo>();
+	private final List<TaskInfo> taskList = new LinkedList<>();
 
-	/** Start time of the current task */
+	/** Start time of the current task. */
 	private long startTimeMillis;
 
-	/** Is the stop watch currently running? */
-	private boolean running;
-
-	/** Name of the current task */
+	/** Name of the current task. */
+	@Nullable
 	private String currentTaskName;
 
+	@Nullable
 	private TaskInfo lastTaskInfo;
 
 	private int taskCount;
 
-	/** Total running time */
+	/** Total running time. */
 	private long totalTimeMillis;
 
 
@@ -72,7 +73,7 @@ public class StopWatch {
 	 * Construct a new stop watch. Does not start any task.
 	 */
 	public StopWatch() {
-		this.id = "";
+		this("");
 	}
 
 	/**
@@ -86,6 +87,16 @@ public class StopWatch {
 		this.id = id;
 	}
 
+
+	/**
+	 * Return the id of this stop watch, as specified on construction.
+	 * @return the id (empty String by default)
+	 * @since 4.2.2
+	 * @see #StopWatch(String)
+	 */
+	public String getId() {
+		return this.id;
+	}
 
 	/**
 	 * Determine whether the TaskInfo array is built over time. Set this to
@@ -113,40 +124,49 @@ public class StopWatch {
 	 * @see #stop()
 	 */
 	public void start(String taskName) throws IllegalStateException {
-		if (this.running) {
+		if (this.currentTaskName != null) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
-		this.startTimeMillis = System.currentTimeMillis();
-		this.running = true;
 		this.currentTaskName = taskName;
+		this.startTimeMillis = System.currentTimeMillis();
 	}
 
 	/**
 	 * Stop the current task. The results are undefined if timing
 	 * methods are called without invoking at least one pair
-	 * {@link #start()} / {@link #stop()} methods.
+	 * {@code start()} / {@code stop()} methods.
 	 * @see #start()
 	 */
 	public void stop() throws IllegalStateException {
-		if (!this.running) {
+		if (this.currentTaskName == null) {
 			throw new IllegalStateException("Can't stop StopWatch: it's not running");
 		}
 		long lastTime = System.currentTimeMillis() - this.startTimeMillis;
 		this.totalTimeMillis += lastTime;
 		this.lastTaskInfo = new TaskInfo(this.currentTaskName, lastTime);
 		if (this.keepTaskList) {
-			this.taskList.add(lastTaskInfo);
+			this.taskList.add(this.lastTaskInfo);
 		}
 		++this.taskCount;
-		this.running = false;
 		this.currentTaskName = null;
 	}
 
 	/**
 	 * Return whether the stop watch is currently running.
+	 * @see #currentTaskName()
 	 */
 	public boolean isRunning() {
-		return this.running;
+		return (this.currentTaskName != null);
+	}
+
+	/**
+	 * Return the name of the currently running task, if any.
+	 * @since 4.2.2
+	 * @see #isRunning()
+	 */
+	@Nullable
+	public String currentTaskName() {
+		return this.currentTaskName;
 	}
 
 
@@ -209,7 +229,7 @@ public class StopWatch {
 		if (!this.keepTaskList) {
 			throw new UnsupportedOperationException("Task info is not being kept!");
 		}
-		return this.taskList.toArray(new TaskInfo[this.taskList.size()]);
+		return this.taskList.toArray(new TaskInfo[0]);
 	}
 
 
@@ -217,7 +237,7 @@ public class StopWatch {
 	 * Return a short description of the total running time.
 	 */
 	public String shortSummary() {
-		return "StopWatch '" + this.id + "': running time (millis) = " + getTotalTimeMillis();
+		return "StopWatch '" + getId() + "': running time (millis) = " + getTotalTimeMillis();
 	}
 
 	/**
@@ -229,7 +249,8 @@ public class StopWatch {
 		sb.append('\n');
 		if (!this.keepTaskList) {
 			sb.append("No task info kept");
-		} else {
+		}
+		else {
 			sb.append("-----------------------------------------\n");
 			sb.append("ms     %     Task name\n");
 			sb.append("-----------------------------------------\n");
@@ -261,7 +282,8 @@ public class StopWatch {
 				long percent = Math.round((100.0 * task.getTimeSeconds()) / getTotalTimeSeconds());
 				sb.append(" = ").append(percent).append("%");
 			}
-		} else {
+		}
+		else {
 			sb.append("; no task info kept");
 		}
 		return sb.toString();
@@ -300,7 +322,7 @@ public class StopWatch {
 		 * Return the time in seconds this task took.
 		 */
 		public double getTimeSeconds() {
-			return this.timeMillis / 1000.0;
+			return (this.timeMillis / 1000.0);
 		}
 	}
 

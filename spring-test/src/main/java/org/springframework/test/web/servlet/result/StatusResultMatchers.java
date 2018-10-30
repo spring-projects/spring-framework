@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.result;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-
 import org.hamcrest.Matcher;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+
 /**
- * Factory for assertions on the response status. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#status()}.
+ * Factory for assertions on the response status.
+ *
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#status}.
  *
  * @author Keesun Baik
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 3.2
  */
 public class StatusResultMatchers {
-
 
 	/**
 	 * Protected constructor.
@@ -41,93 +46,61 @@ public class StatusResultMatchers {
 	protected StatusResultMatchers() {
 	}
 
+
 	/**
 	 * Assert the response status code with the given Hamcrest {@link Matcher}.
+	 * Use the {@code StatusResultMatchers.isEqualTo} extension in Kotlin.
 	 */
 	public ResultMatcher is(final Matcher<Integer> matcher) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				assertThat("Response status", result.getResponse().getStatus(), matcher);
-			}
-		};
+		return result -> assertThat("Response status", result.getResponse().getStatus(), matcher);
 	}
 
 	/**
 	 * Assert the response status code is equal to an integer value.
+	 * Use the {@code StatusResultMatchers.isEqualTo} extension in Kotlin.
 	 */
 	public ResultMatcher is(final int status) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				assertEquals("Response status", status, result.getResponse().getStatus());
-			}
-		};
+		return result -> assertEquals("Response status", status, result.getResponse().getStatus());
 	}
 
 	/**
 	 * Assert the response status code is in the 1xx range.
 	 */
 	public ResultMatcher is1xxInformational() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						HttpStatus.Series.INFORMATIONAL, getHttpStatusSeries(result));
-			}
-		};
+		return result -> assertEquals("Range for response status value " + result.getResponse().getStatus(),
+				HttpStatus.Series.INFORMATIONAL, getHttpStatusSeries(result));
 	}
 
 	/**
 	 * Assert the response status code is in the 2xx range.
 	 */
 	public ResultMatcher is2xxSuccessful() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						HttpStatus.Series.SUCCESSFUL, getHttpStatusSeries(result));
-			}
-		};
+		return result -> assertEquals("Range for response status value " + result.getResponse().getStatus(),
+				HttpStatus.Series.SUCCESSFUL, getHttpStatusSeries(result));
 	}
 
 	/**
 	 * Assert the response status code is in the 3xx range.
 	 */
 	public ResultMatcher is3xxRedirection() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						HttpStatus.Series.REDIRECTION, getHttpStatusSeries(result));
-			}
-		};
+		return result -> assertEquals("Range for response status value " + result.getResponse().getStatus(),
+				HttpStatus.Series.REDIRECTION, getHttpStatusSeries(result));
 	}
 
 	/**
 	 * Assert the response status code is in the 4xx range.
 	 */
 	public ResultMatcher is4xxClientError() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						HttpStatus.Series.CLIENT_ERROR, getHttpStatusSeries(result));
-			}
-		};
+		return result -> assertEquals("Range for response status value " + result.getResponse().getStatus(),
+				HttpStatus.Series.CLIENT_ERROR, getHttpStatusSeries(result));
 	}
 
 	/**
 	 * Assert the response status code is in the 5xx range.
 	 */
 	public ResultMatcher is5xxServerError() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				assertEquals("Range for response status value " + result.getResponse().getStatus(),
-						HttpStatus.Series.SERVER_ERROR, getHttpStatusSeries(result));
-			}
-		};
+		return result -> assertEquals("Range for response status value " + result.getResponse().getStatus(),
+				HttpStatus.Series.SERVER_ERROR, getHttpStatusSeries(result));
 	}
 
 	private HttpStatus.Series getHttpStatusSeries(MvcResult result) {
@@ -140,24 +113,14 @@ public class StatusResultMatchers {
 	 * Assert the Servlet response error message with the given Hamcrest {@link Matcher}.
 	 */
 	public ResultMatcher reason(final Matcher<? super String> matcher) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				assertThat("Response status reason", result.getResponse().getErrorMessage(), matcher);
-			}
-		};
+		return result -> assertThat("Response status reason", result.getResponse().getErrorMessage(), matcher);
 	}
 
 	/**
 	 * Assert the Servlet response error message.
 	 */
 	public ResultMatcher reason(final String reason) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				assertEquals("Response status reason", reason, result.getResponse().getErrorMessage());
-			}
-		};
+		return result -> assertEquals("Response status reason", reason, result.getResponse().getErrorMessage());
 	}
 
 	/**
@@ -282,8 +245,9 @@ public class StatusResultMatchers {
 	/**
 	 * Assert the response status code is {@code HttpStatus.MOVED_TEMPORARILY} (302).
 	 * @see #isFound()
+	 * @deprecated in favor of {@link #isFound()}
 	 */
-	@SuppressWarnings("deprecation")
+	@Deprecated
 	public ResultMatcher isMovedTemporarily() {
 		return matcher(HttpStatus.MOVED_TEMPORARILY);
 	}
@@ -304,7 +268,9 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.USE_PROXY} (305).
+	 * @deprecated matching the deprecation of {@code HttpStatus.USE_PROXY}
 	 */
+	@Deprecated
 	public ResultMatcher isUseProxy() {
 		return matcher(HttpStatus.USE_PROXY);
 	}
@@ -415,15 +381,37 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	 * Assert the response status code is {@code HttpStatus.REQUEST_ENTITY_TOO_LARGE} (413).
+	 * Assert the response status code is {@code HttpStatus.PAYLOAD_TOO_LARGE} (413).
+	 * @since 4.1
 	 */
+	public ResultMatcher isPayloadTooLarge() {
+		return matcher(HttpStatus.PAYLOAD_TOO_LARGE);
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.REQUEST_ENTITY_TOO_LARGE} (413).
+	 * @deprecated matching the deprecation of {@code HttpStatus.REQUEST_ENTITY_TOO_LARGE}
+	 * @see #isPayloadTooLarge()
+	 */
+	@Deprecated
 	public ResultMatcher isRequestEntityTooLarge() {
 		return matcher(HttpStatus.REQUEST_ENTITY_TOO_LARGE);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.REQUEST_URI_TOO_LONG} (414).
+	 * @since 4.1
 	 */
+	public ResultMatcher isUriTooLong() {
+		return matcher(HttpStatus.URI_TOO_LONG);
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.REQUEST_URI_TOO_LONG} (414).
+	 * @deprecated matching the deprecation of {@code HttpStatus.REQUEST_URI_TOO_LONG}
+	 * @see #isUriTooLong()
+	 */
+	@Deprecated
 	public ResultMatcher isRequestUriTooLong() {
 		return matcher(HttpStatus.REQUEST_URI_TOO_LONG);
 	}
@@ -457,31 +445,31 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	  * Assert the response status code is {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE} (419).
-	  * @deprecated matching the deprecation of HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE
-	  */
-	 @Deprecated
-	 public ResultMatcher isInsufficientSpaceOnResource() {
-		 return matcher(HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE);
-	 }
+	 * Assert the response status code is {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE} (419).
+	 * @deprecated matching the deprecation of {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE}
+	 */
+	@Deprecated
+	public ResultMatcher isInsufficientSpaceOnResource() {
+		return matcher(HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE);
+	}
 
-	 /**
-	  * Assert the response status code is {@code HttpStatus.METHOD_FAILURE} (420).
-	  * @deprecated matching the deprecation of HttpStatus.METHOD_FAILURE
-	  */
-	 @Deprecated
-	 public ResultMatcher isMethodFailure() {
-		 return matcher(HttpStatus.METHOD_FAILURE);
-	 }
+	/**
+	 * Assert the response status code is {@code HttpStatus.METHOD_FAILURE} (420).
+	 * @deprecated matching the deprecation of {@code HttpStatus.METHOD_FAILURE}
+	 */
+	@Deprecated
+	public ResultMatcher isMethodFailure() {
+		return matcher(HttpStatus.METHOD_FAILURE);
+	}
 
-	 /**
-	  * Assert the response status code is {@code HttpStatus.DESTINATION_LOCKED} (421).
-	  * @deprecated matching the deprecation of HttpStatus.DESTINATION_LOCKED
-	  */
-	 @Deprecated
-	 public ResultMatcher isDestinationLocked() {
-		 return matcher(HttpStatus.DESTINATION_LOCKED);
-	 }
+	/**
+	 * Assert the response status code is {@code HttpStatus.DESTINATION_LOCKED} (421).
+	 * @deprecated matching the deprecation of {@code HttpStatus.DESTINATION_LOCKED}
+	 */
+	@Deprecated
+	public ResultMatcher isDestinationLocked() {
+		return matcher(HttpStatus.DESTINATION_LOCKED);
+	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.UNPROCESSABLE_ENTITY} (422).
@@ -530,6 +518,14 @@ public class StatusResultMatchers {
 	 */
 	public ResultMatcher isRequestHeaderFieldsTooLarge() {
 		return matcher(HttpStatus.valueOf(431));
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS} (451).
+	 * @since 4.3
+	 */
+	public ResultMatcher isUnavailableForLegalReasons() {
+		return matcher(HttpStatus.valueOf(451));
 	}
 
 	/**
@@ -617,15 +613,10 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	 * Match the expected response status to that of the HttpServletResponse
+	 * Match the expected response status to that of the HttpServletResponse.
 	 */
 	private ResultMatcher matcher(final HttpStatus status) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) {
-				assertEquals("Status", status.value(), result.getResponse().getStatus());
-			}
-		};
+		return result -> assertEquals("Status", status.value(), result.getResponse().getStatus());
 	}
 
 }

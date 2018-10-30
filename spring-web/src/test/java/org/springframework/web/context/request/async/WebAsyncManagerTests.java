@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -44,7 +46,7 @@ public class WebAsyncManagerTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.servletRequest = new MockHttpServletRequest();
 		this.asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 		this.asyncManager.setTaskExecutor(new SyncTaskExecutor());
@@ -53,6 +55,7 @@ public class WebAsyncManagerTests {
 		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
 		reset(this.asyncWebRequest);
 	}
+
 
 	@Test
 	public void startAsyncProcessingWithoutAsyncWebRequest() throws Exception {
@@ -63,7 +66,7 @@ public class WebAsyncManagerTests {
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertEquals(ex.getMessage(), "AsyncWebRequest must not be null");
+			assertEquals("AsyncWebRequest must not be null", ex.getMessage());
 		}
 
 		try {
@@ -71,7 +74,7 @@ public class WebAsyncManagerTests {
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertEquals(ex.getMessage(), "AsyncWebRequest must not be null");
+			assertEquals("AsyncWebRequest must not be null", ex.getMessage());
 		}
 	}
 
@@ -87,7 +90,7 @@ public class WebAsyncManagerTests {
 		assertTrue(this.asyncManager.isConcurrentHandlingStarted());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setAsyncWebRequestAfterAsyncStarted() {
 		this.asyncWebRequest.startAsync();
 		this.asyncManager.setAsyncWebRequest(null);
@@ -112,7 +115,7 @@ public class WebAsyncManagerTests {
 		verifyDefaultAsyncScenario();
 		verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest, task);
 		verify(interceptor).preProcess(this.asyncWebRequest, task);
-		verify(interceptor).postProcess(this.asyncWebRequest, task, new Integer(concurrentResult));
+		verify(interceptor).postProcess(this.asyncWebRequest, task, concurrentResult);
 	}
 
 	@Test
@@ -137,6 +140,7 @@ public class WebAsyncManagerTests {
 		verify(interceptor).postProcess(this.asyncWebRequest, task, concurrentResult);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void startCallableProcessingBeforeConcurrentHandlingException() throws Exception {
 		Callable<Object> task = new StubCallable(21);
@@ -150,19 +154,20 @@ public class WebAsyncManagerTests {
 		try {
 			this.asyncManager.startCallableProcessing(task);
 			fail("Expected Exception");
-		}catch(Exception e) {
-			assertEquals(exception, e);
+		}
+		catch (Exception ex) {
+			assertEquals(exception, ex);
 		}
 
 		assertFalse(this.asyncManager.hasConcurrentResult());
 
-		verify(this.asyncWebRequest).addTimeoutHandler((Runnable) notNull());
-		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addTimeoutHandler(notNull());
+		verify(this.asyncWebRequest).addErrorHandler(notNull());
+		verify(this.asyncWebRequest).addCompletionHandler(notNull());
 	}
 
 	@Test
 	public void startCallableProcessingPreProcessException() throws Exception {
-
 		Callable<Object> task = new StubCallable(21);
 		Exception exception = new Exception();
 
@@ -183,7 +188,6 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startCallableProcessingPostProcessException() throws Exception {
-
 		Callable<Object> task = new StubCallable(21);
 		Exception exception = new Exception();
 
@@ -205,7 +209,6 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startCallableProcessingPostProcessContinueAfterException() throws Exception {
-
 		Callable<Object> task = new StubCallable(21);
 		Exception exception = new Exception();
 
@@ -229,19 +232,19 @@ public class WebAsyncManagerTests {
 		verify(interceptor2).preProcess(this.asyncWebRequest, task);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void startCallableProcessingWithAsyncTask() throws Exception {
-
 		AsyncTaskExecutor executor = mock(AsyncTaskExecutor.class);
 		given(this.asyncWebRequest.getNativeRequest(HttpServletRequest.class)).willReturn(this.servletRequest);
 
-		@SuppressWarnings("unchecked")
-		WebAsyncTask<Object> asyncTask = new WebAsyncTask<Object>(1000L, executor, mock(Callable.class));
+		WebAsyncTask<Object> asyncTask = new WebAsyncTask<>(1000L, executor, mock(Callable.class));
 		this.asyncManager.startCallableProcessing(asyncTask);
 
 		verify(executor).submit((Runnable) notNull());
 		verify(this.asyncWebRequest).setTimeout(1000L);
 		verify(this.asyncWebRequest).addTimeoutHandler(any(Runnable.class));
+		verify(this.asyncWebRequest).addErrorHandler(any(Consumer.class));
 		verify(this.asyncWebRequest).addCompletionHandler(any(Runnable.class));
 		verify(this.asyncWebRequest).startAsync();
 	}
@@ -253,14 +256,13 @@ public class WebAsyncManagerTests {
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
-			assertEquals(ex.getMessage(), "Callable must not be null");
+			assertEquals("Callable must not be null", ex.getMessage());
 		}
 	}
 
 	@Test
 	public void startDeferredResultProcessing() throws Exception {
-
-		DeferredResult<String> deferredResult = new DeferredResult<String>(1000L);
+		DeferredResult<String> deferredResult = new DeferredResult<>(1000L);
 		String concurrentResult = "abc";
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
@@ -280,10 +282,10 @@ public class WebAsyncManagerTests {
 		verify(this.asyncWebRequest).setTimeout(1000L);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void startDeferredResultProcessingBeforeConcurrentHandlingException() throws Exception {
-
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
@@ -295,20 +297,21 @@ public class WebAsyncManagerTests {
 			this.asyncManager.startDeferredResultProcessing(deferredResult);
 			fail("Expected Exception");
 		}
-		catch(Exception success) {
+		catch (Exception success) {
 			assertEquals(exception, success);
 		}
 
 		assertFalse(this.asyncManager.hasConcurrentResult());
 
-		verify(this.asyncWebRequest).addTimeoutHandler((Runnable) notNull());
-		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addTimeoutHandler(notNull());
+		verify(this.asyncWebRequest).addErrorHandler(notNull());
+		verify(this.asyncWebRequest).addCompletionHandler(notNull());
 	}
 
 	@Test
 	public void startDeferredResultProcessingPreProcessException() throws Exception {
 
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
@@ -328,12 +331,11 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startDeferredResultProcessingPostProcessException() throws Exception {
-
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
-		willThrow(exception).given(interceptor).postProcess(this.asyncWebRequest, deferredResult, 25);;
+		willThrow(exception).given(interceptor).postProcess(this.asyncWebRequest, deferredResult, 25);
 
 		setupDefaultAsyncScenario();
 
@@ -351,11 +353,11 @@ public class WebAsyncManagerTests {
 	@Test
 	public void startDeferredResultProcessingNullInput() throws Exception {
 		try {
-			this.asyncManager.startDeferredResultProcessing((DeferredResult<?>) null);
+			this.asyncManager.startDeferredResultProcessing(null);
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
-			assertEquals(ex.getMessage(), "DeferredResult must not be null");
+			assertEquals("DeferredResult must not be null", ex.getMessage());
 		}
 	}
 
@@ -364,12 +366,15 @@ public class WebAsyncManagerTests {
 		given(this.asyncWebRequest.isAsyncComplete()).willReturn(false);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void verifyDefaultAsyncScenario() {
-		verify(this.asyncWebRequest).addTimeoutHandler((Runnable) notNull());
-		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addTimeoutHandler(notNull());
+		verify(this.asyncWebRequest).addErrorHandler(notNull());
+		verify(this.asyncWebRequest).addCompletionHandler(notNull());
 		verify(this.asyncWebRequest).startAsync();
 		verify(this.asyncWebRequest).dispatch();
 	}
+
 
 	private final class StubCallable implements Callable<Object> {
 
@@ -387,6 +392,7 @@ public class WebAsyncManagerTests {
 			return this.value;
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class SyncTaskExecutor extends SimpleAsyncTaskExecutor {

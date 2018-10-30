@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,43 +21,45 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class JmsListenerEndpointRegistryTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private final JmsListenerEndpointRegistry registry = new JmsListenerEndpointRegistry();
 
 	private final JmsListenerContainerTestFactory containerFactory = new JmsListenerContainerTestFactory();
 
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
+
 	@Test
 	public void createWithNullEndpoint() {
 		thrown.expect(IllegalArgumentException.class);
-		registry.createJmsListenerContainer(null, containerFactory);
+		registry.registerListenerContainer(null, containerFactory);
 	}
 
 	@Test
 	public void createWithNullEndpointId() {
 		thrown.expect(IllegalArgumentException.class);
-		registry.createJmsListenerContainer(new SimpleJmsListenerEndpoint(), containerFactory);
+		registry.registerListenerContainer(new SimpleJmsListenerEndpoint(), containerFactory);
 	}
 
 	@Test
 	public void createWithNullContainerFactory() {
 		thrown.expect(IllegalArgumentException.class);
-		registry.createJmsListenerContainer(createEndpoint("foo", "myDestination"), null);
+		registry.registerListenerContainer(createEndpoint("foo", "myDestination"), null);
 	}
 
 	@Test
 	public void createWithDuplicateEndpointId() {
-		registry.createJmsListenerContainer(createEndpoint("test", "queue"), containerFactory);
+		registry.registerListenerContainer(createEndpoint("test", "queue"), containerFactory);
 
 		thrown.expect(IllegalStateException.class);
-		registry.createJmsListenerContainer(createEndpoint("test", "queue"), containerFactory);
+		registry.registerListenerContainer(createEndpoint("test", "queue"), containerFactory);
 	}
+
 
 	private SimpleJmsListenerEndpoint createEndpoint(String id, String destinationName) {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();

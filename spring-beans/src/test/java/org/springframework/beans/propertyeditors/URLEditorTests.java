@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,25 @@
 
 package org.springframework.beans.propertyeditors;
 
-import static org.junit.Assert.*;
-
 import java.beans.PropertyEditor;
 import java.net.URL;
 
 import org.junit.Test;
+
 import org.springframework.util.ClassUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class URLEditorTests {
+public class URLEditorTests {
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testCtorWithNullResourceEditor() throws Exception {
+		new URLEditor(null);
+	}
 
 	@Test
 	public void testStandardURI() throws Exception {
@@ -62,7 +68,7 @@ public final class URLEditorTests {
 		assertTrue(!url.getProtocol().startsWith("classpath"));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNonExistentResource() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening");
@@ -80,11 +86,6 @@ public final class URLEditorTests {
 	public void testGetAsTextReturnsEmptyStringIfValueNotSet() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		assertEquals("", urlEditor.getAsText());
-	}
-
-	@Test(expected=IllegalArgumentException.class)
-	public void testCtorWithNullResourceEditor() throws Exception {
-		new URLEditor(null);
 	}
 
 }

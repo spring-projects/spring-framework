@@ -29,7 +29,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class DebugInterceptorTests {
+public class DebugInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
@@ -61,7 +61,8 @@ public final class DebugInterceptorTests {
 		try {
 			interceptor.invoke(methodInvocation);
 			fail("Must have propagated the IllegalArgumentException.");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 		checkCallCountTotal(interceptor);
 

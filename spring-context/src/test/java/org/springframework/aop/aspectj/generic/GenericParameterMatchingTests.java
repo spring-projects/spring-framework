@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.aop.aspectj.generic;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Collection;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests that poitncut matching is correct with generic method parameter.
@@ -33,7 +34,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class GenericParameterMatchingTests {
+public class GenericParameterMatchingTests {
 
 	private CounterAspect counterAspect;
 
@@ -42,9 +43,9 @@ public final class GenericParameterMatchingTests {
 
 	@SuppressWarnings("unchecked")
 	@org.junit.Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 
 		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
 		counterAspect.reset();

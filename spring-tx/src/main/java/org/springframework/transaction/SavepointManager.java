@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,12 @@ public interface SavepointManager {
 
 	/**
 	 * Create a new savepoint. You can roll back to a specific savepoint
-	 * via {@code rollbackToSavepoint}, and explicitly release a
-	 * savepoint that you don't need anymore via {@code releaseSavepoint}.
+	 * via {@code rollbackToSavepoint}, and explicitly release a savepoint
+	 * that you don't need anymore via {@code releaseSavepoint}.
 	 * <p>Note that most transaction managers will automatically release
 	 * savepoints at transaction completion.
-	 * @return a savepoint object, to be passed into rollbackToSavepoint
-	 * or releaseSavepoint
+	 * @return a savepoint object, to be passed into
+	 * {@link #rollbackToSavepoint} or {@link #releaseSavepoint}
 	 * @throws NestedTransactionNotSupportedException if the underlying
 	 * transaction does not support savepoints
 	 * @throws TransactionException if the savepoint could not be created,
@@ -53,8 +53,10 @@ public interface SavepointManager {
 	Object createSavepoint() throws TransactionException;
 
 	/**
-	 * Roll back to the given savepoint. The savepoint will be
-	 * automatically released afterwards.
+	 * Roll back to the given savepoint.
+	 * <p>The savepoint will <i>not</i> be automatically released afterwards.
+	 * You may explicitly call {@link #releaseSavepoint(Object)} or rely on
+	 * automatic release on transaction completion.
 	 * @param savepoint the savepoint to roll back to
 	 * @throws NestedTransactionNotSupportedException if the underlying
 	 * transaction does not support savepoints
@@ -66,9 +68,9 @@ public interface SavepointManager {
 	/**
 	 * Explicitly release the given savepoint.
 	 * <p>Note that most transaction managers will automatically release
-	 * savepoints at transaction completion.
-	 * <p>Implementations should fail as silently as possible if
-	 * proper resource cleanup will still happen at transaction completion.
+	 * savepoints on transaction completion.
+	 * <p>Implementations should fail as silently as possible if proper
+	 * resource cleanup will eventually happen at transaction completion.
 	 * @param savepoint the savepoint to release
 	 * @throws NestedTransactionNotSupportedException if the underlying
 	 * transaction does not support savepoints

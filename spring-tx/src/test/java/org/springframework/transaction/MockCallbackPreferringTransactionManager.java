@@ -16,6 +16,7 @@
 
 package org.springframework.transaction;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -47,7 +48,7 @@ public class MockCallbackPreferringTransactionManager implements CallbackPreferr
 
 
 	@Override
-	public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
+	public TransactionStatus getTransaction(@Nullable TransactionDefinition definition) throws TransactionException {
 		throw new UnsupportedOperationException();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.cache.config;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.CacheTestUtils;
@@ -37,13 +36,16 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.junit.Assert.*;
+
 /**
- * Integration tests for @EnableCaching and its related @Configuration classes.
+ * Integration tests for {@code @EnableCaching} and its related
+ * {@code @Configuration} classes.
  *
  * @author Chris Beams
  * @author Stephane Nicoll
  */
-public class EnableCachingTests extends AbstractAnnotationTests {
+public class EnableCachingTests extends AbstractCacheAnnotationTests {
 
 	/** hook into superclass suite of tests */
 	@Override
@@ -53,35 +55,32 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 
 	@Test
 	public void testKeyStrategy() {
-		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
-		assertSame(ctx.getBean("keyGenerator", KeyGenerator.class), ci.getKeyGenerator());
+		CacheInterceptor ci = this.ctx.getBean(CacheInterceptor.class);
+		assertSame(this.ctx.getBean("keyGenerator", KeyGenerator.class), ci.getKeyGenerator());
 	}
 
 	@Test
 	public void testCacheErrorHandler() {
-		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
-		assertSame(ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
+		CacheInterceptor ci = this.ctx.getBean(CacheInterceptor.class);
+		assertSame(this.ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
 	}
 
-	// --- local tests -------
-
 	@Test
-	public void singleCacheManagerBean() throws Throwable {
+	public void singleCacheManagerBean() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(SingleCacheManagerConfig.class);
 		ctx.refresh();
 	}
 
-	@Test(expected=IllegalStateException.class)
-	public void multipleCacheManagerBeans() throws Throwable {
+	@Test
+	public void multipleCacheManagerBeans() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfig.class);
 		try {
 			ctx.refresh();
-		} catch (BeanCreationException ex) {
-			Throwable root = ex.getRootCause();
-			assertTrue(root.getMessage().contains("beans of type CacheManager"));
-			throw root;
+		}
+		catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("no unique bean of type CacheManager"));
 		}
 	}
 
@@ -89,53 +88,48 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 	public void multipleCacheManagerBeans_implementsCachingConfigurer() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfigurer.class);
-		ctx.refresh(); // does not throw
+		ctx.refresh();  // does not throw an exception
 	}
 
-	@Test(expected=IllegalStateException.class)
-	public void multipleCachingConfigurers() throws Throwable {
+	@Test
+	public void multipleCachingConfigurers() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfigurer.class, EnableCachingConfig.class);
 		try {
 			ctx.refresh();
-		} catch (BeanCreationException ex) {
+		}
+		catch (BeanCreationException ex) {
 			Throwable root = ex.getRootCause();
+			assertTrue(root instanceof IllegalStateException);
 			assertTrue(root.getMessage().contains("implementations of CachingConfigurer"));
-			throw root;
 		}
 	}
 
-	@Test(expected=IllegalStateException.class)
-	public void noCacheManagerBeans() throws Throwable {
+	@Test
+	public void noCacheManagerBeans() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(EmptyConfig.class);
 		try {
 			ctx.refresh();
-		} catch (BeanCreationException ex) {
-			Throwable root = ex.getRootCause();
-			assertTrue(root.getMessage().contains("No bean of type CacheManager"));
-			throw root;
+		}
+		catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("no bean of type CacheManager"));
 		}
 	}
 
 	@Test
 	public void emptyConfigSupport() {
-		ConfigurableApplicationContext context =
-				new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
-
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
 		assertNotNull(ci.getCacheResolver());
 		assertEquals(SimpleCacheResolver.class, ci.getCacheResolver().getClass());
-		assertSame(context.getBean(CacheManager.class),
-				((SimpleCacheResolver)ci.getCacheResolver()).getCacheManager());
+		assertSame(context.getBean(CacheManager.class), ((SimpleCacheResolver)ci.getCacheResolver()).getCacheManager());
 		context.close();
 	}
 
 	@Test
 	public void bothSetOnlyResolverIsUsed() {
-		ConfigurableApplicationContext context =
-				new AnnotationConfigApplicationContext(FullCachingConfig.class);
-
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(FullCachingConfig.class);
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
 		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
 		assertSame(context.getBean("keyGenerator"), ci.getKeyGenerator());
@@ -146,10 +140,11 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 	@Configuration
 	@EnableCaching
 	static class EnableCachingConfig extends CachingConfigurerSupport {
+
 		@Override
 		@Bean
 		public CacheManager cacheManager() {
-			return CacheTestUtils.createSimpleCacheManager("default", "primary", "secondary");
+			return CacheTestUtils.createSimpleCacheManager("testCache", "primary", "secondary");
 		}
 
 		@Bean
@@ -181,7 +176,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 
 		@Bean
 		public CacheManager customCacheManager() {
-			return CacheTestUtils.createSimpleCacheManager("default");
+			return CacheTestUtils.createSimpleCacheManager("testCache");
 		}
 	}
 
@@ -195,38 +190,55 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 	@Configuration
 	@EnableCaching
 	static class SingleCacheManagerConfig {
+
 		@Bean
-		public CacheManager cm1() { return new NoOpCacheManager(); }
+		public CacheManager cm1() {
+			return new NoOpCacheManager();
+		}
 	}
 
 
 	@Configuration
 	@EnableCaching
 	static class MultiCacheManagerConfig {
+
 		@Bean
-		public CacheManager cm1() { return new NoOpCacheManager(); }
+		public CacheManager cm1() {
+			return new NoOpCacheManager();
+		}
+
 		@Bean
-		public CacheManager cm2() { return new NoOpCacheManager(); }
+		public CacheManager cm2() {
+			return new NoOpCacheManager();
+		}
 	}
 
 
 	@Configuration
 	@EnableCaching
 	static class MultiCacheManagerConfigurer extends CachingConfigurerSupport {
+
 		@Bean
-		public CacheManager cm1() { return new NoOpCacheManager(); }
+		public CacheManager cm1() {
+			return new NoOpCacheManager();
+		}
+
 		@Bean
-		public CacheManager cm2() { return new NoOpCacheManager(); }
+		public CacheManager cm2() {
+			return new NoOpCacheManager();
+		}
 
 		@Override
 		public CacheManager cacheManager() {
 			return cm1();
 		}
+
 		@Override
 		public KeyGenerator keyGenerator() {
 			return null;
 		}
 	}
+
 
 	@Configuration
 	@EnableCaching
@@ -237,6 +249,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 			return new NoOpCacheManager();
 		}
 	}
+
 
 	@Configuration
 	@EnableCaching
@@ -260,4 +273,5 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 			return new NamedCacheResolver(cacheManager(), "foo");
 		}
 	}
+
 }

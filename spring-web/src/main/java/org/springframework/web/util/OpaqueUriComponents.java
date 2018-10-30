@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.web.util;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -37,28 +38,32 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 final class OpaqueUriComponents extends UriComponents {
 
-	private static final MultiValueMap<String, String> QUERY_PARAMS_NONE = new LinkedMultiValueMap<String, String>(0);
+	private static final MultiValueMap<String, String> QUERY_PARAMS_NONE = new LinkedMultiValueMap<>();
 
+	@Nullable
 	private final String ssp;
 
 
-	OpaqueUriComponents(String scheme, String schemeSpecificPart, String fragment) {
+	OpaqueUriComponents(@Nullable String scheme, @Nullable String schemeSpecificPart, @Nullable String fragment) {
 		super(scheme, fragment);
 		this.ssp = schemeSpecificPart;
 	}
 
 
 	@Override
+	@Nullable
 	public String getSchemeSpecificPart() {
 		return this.ssp;
 	}
 
 	@Override
+	@Nullable
 	public String getUserInfo() {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public String getHost() {
 		return null;
 	}
@@ -69,6 +74,7 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getPath() {
 		return null;
 	}
@@ -79,6 +85,7 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getQuery() {
 		return null;
 	}
@@ -89,16 +96,16 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
-	public UriComponents encode(String encoding) throws UnsupportedEncodingException {
+	public UriComponents encode(Charset charset) {
 		return this;
 	}
 
 	@Override
 	protected UriComponents expandInternal(UriTemplateVariables uriVariables) {
-		String expandedScheme = expandUriComponent(this.getScheme(), uriVariables);
-		String expandedSSp = expandUriComponent(this.ssp, uriVariables);
-		String expandedFragment = expandUriComponent(this.getFragment(), uriVariables);
-		return new OpaqueUriComponents(expandedScheme, expandedSSp, expandedFragment);
+		String expandedScheme = expandUriComponent(getScheme(), uriVariables);
+		String expandedSsp = expandUriComponent(getSchemeSpecificPart(), uriVariables);
+		String expandedFragment = expandUriComponent(getFragment(), uriVariables);
+		return new OpaqueUriComponents(expandedScheme, expandedSsp, expandedFragment);
 	}
 
 	@Override
@@ -135,21 +142,32 @@ final class OpaqueUriComponents extends UriComponents {
 		}
 	}
 
+	@Override
+	protected void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
+		if (getScheme() != null) {
+			builder.scheme(getScheme());
+		}
+		if (getSchemeSpecificPart() != null) {
+			builder.schemeSpecificPart(getSchemeSpecificPart());
+		}
+		if (getFragment() != null) {
+			builder.fragment(getFragment());
+		}
+	}
+
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof OpaqueUriComponents)) {
+		if (!(other instanceof OpaqueUriComponents)) {
 			return false;
 		}
-
-		OpaqueUriComponents other = (OpaqueUriComponents) obj;
-		return ObjectUtils.nullSafeEquals(getScheme(), other.getScheme()) &&
-				ObjectUtils.nullSafeEquals(this.ssp, other.ssp) &&
-				ObjectUtils.nullSafeEquals(getFragment(), other.getFragment());
-
+		OpaqueUriComponents otherComp = (OpaqueUriComponents) other;
+		return (ObjectUtils.nullSafeEquals(getScheme(), otherComp.getScheme()) &&
+				ObjectUtils.nullSafeEquals(this.ssp, otherComp.ssp) &&
+				ObjectUtils.nullSafeEquals(getFragment(), otherComp.getFragment()));
 	}
 
 	@Override

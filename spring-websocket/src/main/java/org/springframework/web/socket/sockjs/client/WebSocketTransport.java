@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,16 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.context.Lifecycle;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -29,9 +37,7 @@ import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import java.net.URI;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.web.socket.sockjs.transport.TransportType;
 
 /**
  * A SockJS {@link Transport} that uses a
@@ -40,15 +46,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class WebSocketTransport implements Transport {
+public class WebSocketTransport implements Transport, Lifecycle {
 
-	private static Log logger = LogFactory.getLog(WebSocketTransport.class);
+	private static final Log logger = LogFactory.getLog(WebSocketTransport.class);
 
 	private final WebSocketClient webSocketClient;
 
+	private volatile boolean running = false;
+
 
 	public WebSocketTransport(WebSocketClient webSocketClient) {
-		Assert.notNull(webSocketClient, "'webSocketClient' is required");
+		Assert.notNull(webSocketClient, "WebSocketClient is required");
 		this.webSocketClient = webSocketClient;
 	}
 
@@ -61,8 +69,13 @@ public class WebSocketTransport implements Transport {
 	}
 
 	@Override
+	public List<TransportType> getTransportTypes() {
+		return Collections.singletonList(TransportType.WEBSOCKET);
+	}
+
+	@Override
 	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
-		final SettableListenableFuture<WebSocketSession> future = new SettableListenableFuture<WebSocketSession>();
+		final SettableListenableFuture<WebSocketSession> future = new SettableListenableFuture<>();
 		WebSocketClientSockJsSession session = new WebSocketClientSockJsSession(request, handler, future);
 		handler = new ClientSockJsWebSocketHandler(session);
 		request.addTimeoutTask(session.getTimeoutTask());
@@ -70,21 +83,57 @@ public class WebSocketTransport implements Transport {
 		URI url = request.getTransportUrl();
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders(request.getHandshakeHeaders());
 		if (logger.isDebugEnabled()) {
-			logger.debug("Opening WebSocket connection, url=" + url);
+			logger.debug("Starting WebSocket session on " + url);
 		}
 		this.webSocketClient.doHandshake(handler, headers, url).addCallback(
 				new ListenableFutureCallback<WebSocketSession>() {
 					@Override
-					public void onSuccess(WebSocketSession webSocketSession) {
+					public void onSuccess(@Nullable WebSocketSession webSocketSession) {
 						// WebSocket session ready, SockJS Session not yet
 					}
 					@Override
-					public void onFailure(Throwable t) {
-						future.setException(t);
+					public void onFailure(Throwable ex) {
+						future.setException(ex);
 					}
 				});
 		return future;
 	}
+
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			if (this.webSocketClient instanceof Lifecycle) {
+				((Lifecycle) this.webSocketClient).start();
+			}
+			else {
+				this.running = true;
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			if (this.webSocketClient instanceof Lifecycle) {
+				((Lifecycle) this.webSocketClient).stop();
+			}
+			else {
+				this.running = false;
+			}
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		if (this.webSocketClient instanceof Lifecycle) {
+			return ((Lifecycle) this.webSocketClient).isRunning();
+		}
+		else {
+			return this.running;
+		}
+	}
+
 
 	@Override
 	public String toString() {
@@ -96,17 +145,16 @@ public class WebSocketTransport implements Transport {
 
 		private final WebSocketClientSockJsSession sockJsSession;
 
-		private final AtomicInteger connectCount = new AtomicInteger(0);
+		private final AtomicBoolean connected = new AtomicBoolean(false);
 
-
-		private ClientSockJsWebSocketHandler(WebSocketClientSockJsSession session) {
-			Assert.notNull(session);
+		public ClientSockJsWebSocketHandler(WebSocketClientSockJsSession session) {
+			Assert.notNull(session, "Session must not be null");
 			this.sockJsSession = session;
 		}
 
 		@Override
 		public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
-			Assert.isTrue(this.connectCount.compareAndSet(0, 1));
+			Assert.state(this.connected.compareAndSet(false, true), "Already connected");
 			this.sockJsSession.initializeDelegateSession(webSocketSession);
 		}
 

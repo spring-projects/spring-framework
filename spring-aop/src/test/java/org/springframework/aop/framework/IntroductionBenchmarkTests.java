@@ -17,11 +17,11 @@
 package org.springframework.aop.framework;
 
 import org.junit.Test;
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.util.StopWatch;
 
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.StopWatch;
 
 /**
  * Benchmarks for introductions.
@@ -32,7 +32,7 @@ import org.springframework.tests.sample.beans.TestBean;
  * @author Chris Beams
  * @since 2.0
  */
-public final class IntroductionBenchmarkTests {
+public class IntroductionBenchmarkTests {
 
 	private static final int EXPECTED_COMPARE = 13;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.messaging.core;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.Assert;
 
@@ -33,6 +34,7 @@ import org.springframework.util.Assert;
 public class BeanFactoryMessageChannelDestinationResolver
 		implements DestinationResolver<MessageChannel>, BeanFactoryAware {
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 

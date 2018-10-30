@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.core;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
@@ -28,30 +29,41 @@ import org.springframework.messaging.converter.MessageConverter;
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <D> the destination type
  */
 public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessageSendingTemplate<D>
 		implements MessageReceivingOperations<D> {
 
 	@Override
+	@Nullable
 	public Message<?> receive() {
-		return receive(getRequiredDefaultDestination());
+		return doReceive(getRequiredDefaultDestination());
 	}
 
 	@Override
+	@Nullable
 	public Message<?> receive(D destination) {
 		return doReceive(destination);
 	}
 
+	/**
+	 * Actually receive a message from the given destination.
+	 * @param destination the target destination
+	 * @return the received message, possibly {@code null} if the message could not
+	 * be received, for example due to a timeout
+	 */
+	@Nullable
 	protected abstract Message<?> doReceive(D destination);
 
 
 	@Override
+	@Nullable
 	public <T> T receiveAndConvert(Class<T> targetClass) {
 		return receiveAndConvert(getRequiredDefaultDestination(), targetClass);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
 		Message<?> message = doReceive(destination);
 		if (message != null) {
@@ -62,14 +74,20 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		}
 	}
 
+	/**
+	 * Convert from the given message to the given target class.
+	 * @param message the message to convert
+	 * @param targetClass the target class to convert the payload to
+	 * @return the converted payload of the reply message (never {@code null})
+	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	protected <T> T doConvert(Message<?> message, Class<T> targetClass) {
 		MessageConverter messageConverter = getMessageConverter();
 		T value = (T) messageConverter.fromMessage(message, targetClass);
 		if (value == null) {
-			throw new MessageConversionException(message, "Unable to convert payload='"
-					+ message.getPayload() + "' to type='" + targetClass
-					+ "', converter=[" + messageConverter + "]", null);
+			throw new MessageConversionException(message, "Unable to convert payload [" + message.getPayload() +
+					"] to type [" + targetClass + "] using converter [" + messageConverter + "]");
 		}
 		return value;
 	}

@@ -15,15 +15,15 @@
  */
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigDecimal;
 
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.support.StandardTypeComparator;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for type comparison

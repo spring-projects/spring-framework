@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package org.springframework.aop.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
@@ -30,11 +27,13 @@ import org.springframework.tests.sample.beans.Person;
 import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class NameMatchMethodPointcutTests {
+public class NameMatchMethodPointcutTests {
 
 	protected NameMatchMethodPointcut pc;
 
@@ -42,17 +41,19 @@ public final class NameMatchMethodPointcutTests {
 
 	protected SerializableNopInterceptor nop;
 
+
 	/**
 	 * Create an empty pointcut, populating instance variables.
 	 */
 	@Before
-	public void setUp() {
+	public void setup() {
 		ProxyFactory pf = new ProxyFactory(new SerializablePerson());
 		nop = new SerializableNopInterceptor();
 		pc = new NameMatchMethodPointcut();
 		pf.addAdvisor(new DefaultPointcutAdvisor(pc, nop));
 		proxied = (Person) pf.getProxy();
 	}
+
 
 	@Test
 	public void testMatchingOnly() {
@@ -95,7 +96,7 @@ public final class NameMatchMethodPointcutTests {
 
 	@Test
 	public void testSets() throws Throwable {
-		pc.setMappedNames(new String[] { "set*", "echo" });
+		pc.setMappedNames("set*", "echo");
 		assertEquals(0, nop.getCount());
 		proxied.getName();
 		proxied.setName("");
@@ -117,7 +118,7 @@ public final class NameMatchMethodPointcutTests {
 	}
 
 	@Test
-	public void testEqualsAndHashCode() throws Exception {
+	public void testEqualsAndHashCode() {
 		NameMatchMethodPointcut pc1 = new NameMatchMethodPointcut();
 		NameMatchMethodPointcut pc2 = new NameMatchMethodPointcut();
 

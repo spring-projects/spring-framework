@@ -18,6 +18,7 @@ package org.springframework.scripting.support;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;

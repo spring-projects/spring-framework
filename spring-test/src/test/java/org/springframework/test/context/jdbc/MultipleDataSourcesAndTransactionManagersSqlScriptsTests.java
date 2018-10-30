@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,14 @@
 
 package org.springframework.test.context.jdbc;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import javax.sql.DataSource;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +40,7 @@ import static org.junit.Assert.*;
 /**
  * Integration tests for {@link Sql @Sql} that verify support for multiple
  * {@link DataSource}s and {@link PlatformTransactionManager}s.
+ * <p>Simultaneously tests for method-level overrides via {@code @SqlConfig}.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -44,6 +49,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @DirtiesContext
+@SqlConfig(dataSource = "dataSource1", transactionManager = "txMgr1")
 public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 
 	@Autowired
@@ -54,23 +60,23 @@ public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 
 
 	@Test
-	@Sql(scripts = "data-add-dogbert.sql", dataSource = "dataSource1", transactionManager = "txMgr1")
+	@Sql("data-add-dogbert.sql")
 	public void database1() {
-		assertUsersExist(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
+		assertUsers(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
 	}
 
 	@Test
-	@Sql(scripts = "data-add-catbert.sql", dataSource = "dataSource2", transactionManager = "txMgr2")
+	@Sql(scripts = "data-add-catbert.sql", config = @SqlConfig(dataSource = "dataSource2", transactionManager = "txMgr2"))
 	public void database2() {
-		assertUsersExist(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
+		assertUsers(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
 	}
 
-	private void assertUsersExist(JdbcTemplate jdbcTemplate, String... users) {
-		String query = "select count(name) from user where name =?";
-		for (String user : users) {
-			assertTrue("User [" + user + "] must exist.",
-				jdbcTemplate.queryForObject(query, Integer.class, user).intValue() == 1);
-		}
+	private void assertUsers(JdbcTemplate jdbcTemplate, String... users) {
+		List<String> expected = Arrays.asList(users);
+		Collections.sort(expected);
+		List<String> actual = jdbcTemplate.queryForList("select name from user", String.class);
+		Collections.sort(actual);
+		assertEquals("Users in database;", expected, actual);
 	}
 
 

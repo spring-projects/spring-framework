@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,37 +19,42 @@ package org.springframework.orm.jpa.hibernate;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.junit.Test;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
+import org.springframework.orm.jpa.EntityManagerFactoryInfo;
+
+import static org.junit.Assert.*;
 
 /**
  * Hibernate-specific JPA tests with multiple EntityManagerFactory instances.
  *
  * @author Juergen Hoeller
  */
-@SuppressWarnings("deprecation")
-public class HibernateMultiEntityManagerFactoryIntegrationTests extends
-		AbstractContainerEntityManagerFactoryIntegrationTests {
+public class HibernateMultiEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
+	@Autowired
 	private EntityManagerFactory entityManagerFactory2;
 
 
-	public HibernateMultiEntityManagerFactoryIntegrationTests() {
-		setAutowireMode(AUTOWIRE_BY_NAME);
-	}
-
-	public void setEntityManagerFactory2(EntityManagerFactory entityManagerFactory2) {
-		this.entityManagerFactory2 = entityManagerFactory2;
-	}
-
 	@Override
 	protected String[] getConfigLocations() {
-		return new String[] {
-			"/org/springframework/orm/jpa/hibernate/hibernate-manager-multi.xml",
-			"/org/springframework/orm/jpa/memdb.xml",
-		};
+		return new String[] {"/org/springframework/orm/jpa/hibernate/hibernate-manager-multi.xml",
+				"/org/springframework/orm/jpa/memdb.xml"};
 	}
 
 
+	@Test
+	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
+		assertTrue("Must have introduced config interface", this.entityManagerFactory instanceof EntityManagerFactoryInfo);
+		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) this.entityManagerFactory;
+		assertEquals("Drivers", emfi.getPersistenceUnitName());
+		assertNotNull("PersistenceUnitInfo must be available", emfi.getPersistenceUnitInfo());
+		assertNotNull("Raw EntityManagerFactory must be available", emfi.getNativeEntityManagerFactory());
+	}
+
+	@Test
 	public void testEntityManagerFactory2() {
 		EntityManager em = this.entityManagerFactory2.createEntityManager();
 		try {

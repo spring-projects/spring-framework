@@ -1,5 +1,5 @@
- /*
- * Copyright 2002-2013 the original author or authors.
+/*
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,23 @@ import java.lang.annotation.Annotation;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
- /**
+/**
  * Convenient base class for {@link ImportSelector} implementations that select imports
  * based on an {@link AdviceMode} value from an annotation (such as the {@code @Enable*}
  * annotations).
  *
- * @param <A> Annotation containing {@linkplain #getAdviceModeAttributeName() AdviceMode attribute}
  * @author Chris Beams
  * @since 3.1
+ * @param <A> annotation containing {@linkplain #getAdviceModeAttributeName() AdviceMode attribute}
  */
 public abstract class AdviceModeImportSelector<A extends Annotation> implements ImportSelector {
 
+	/**
+	 * The default advice mode attribute name.
+	 */
 	public static final String DEFAULT_ADVICE_MODE_ATTRIBUTE_NAME = "mode";
 
 
@@ -60,28 +64,35 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 	 */
 	@Override
 	public final String[] selectImports(AnnotationMetadata importingClassMetadata) {
-		Class<?> annoType = GenericTypeResolver.resolveTypeArgument(getClass(), AdviceModeImportSelector.class);
-		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(importingClassMetadata, annoType);
-		Assert.notNull(attributes, String.format(
-				"@%s is not present on importing class '%s' as expected",
-				annoType.getSimpleName(), importingClassMetadata.getClassName()));
+		Class<?> annType = GenericTypeResolver.resolveTypeArgument(getClass(), AdviceModeImportSelector.class);
+		Assert.state(annType != null, "Unresolvable type argument for AdviceModeImportSelector");
 
-		AdviceMode adviceMode = attributes.getEnum(this.getAdviceModeAttributeName());
+		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(importingClassMetadata, annType);
+		if (attributes == null) {
+			throw new IllegalArgumentException(String.format(
+					"@%s is not present on importing class '%s' as expected",
+					annType.getSimpleName(), importingClassMetadata.getClassName()));
+		}
+
+		AdviceMode adviceMode = attributes.getEnum(getAdviceModeAttributeName());
 		String[] imports = selectImports(adviceMode);
-		Assert.notNull(imports, String.format("Unknown AdviceMode: '%s'", adviceMode));
+		if (imports == null) {
+			throw new IllegalArgumentException("Unknown AdviceMode: " + adviceMode);
+		}
 		return imports;
 	}
 
 	/**
 	 * Determine which classes should be imported based on the given {@code AdviceMode}.
-	 * <p>Returning {@code null} from this method indicates that the {@code AdviceMode} could
-	 * not be handled or was unknown and that an {@code IllegalArgumentException} should
-	 * be thrown.
+	 * <p>Returning {@code null} from this method indicates that the {@code AdviceMode}
+	 * could not be handled or was unknown and that an {@code IllegalArgumentException}
+	 * should be thrown.
 	 * @param adviceMode the value of the {@linkplain #getAdviceModeAttributeName()
 	 * advice mode attribute} for the annotation specified via generics.
-	 * @return array containing classes to import; empty array if none, {@code null} if
-	 * the given {@code AdviceMode} is unknown.
+	 * @return array containing classes to import (empty array if none;
+	 * {@code null} if the given {@code AdviceMode} is unknown)
 	 */
+	@Nullable
 	protected abstract String[] selectImports(AdviceMode adviceMode);
 
 }

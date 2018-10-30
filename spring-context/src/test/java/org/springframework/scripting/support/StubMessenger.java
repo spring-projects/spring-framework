@@ -21,7 +21,7 @@ import org.springframework.scripting.ConfigurableMessenger;
 /**
  * @author Rick Evans
  */
-public final class StubMessenger implements ConfigurableMessenger {
+public class StubMessenger implements ConfigurableMessenger {
 
 	private String message = "I used to be smart... now I'm just stupid.";
 

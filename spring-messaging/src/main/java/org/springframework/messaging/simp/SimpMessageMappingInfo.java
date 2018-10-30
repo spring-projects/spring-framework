@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,14 @@
 
 package org.springframework.messaging.simp;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.MessageCondition;
 
 /**
- * Encapsulates the following request mapping conditions:
+ * {@link MessageCondition} for SImple Messaging Protocols. Encapsulates the following
+ * request mapping conditions:
  * <ol>
  * <li>{@link SimpMessageTypeMessageCondition}
  * <li>{@link DestinationPatternsMessageCondition}
@@ -64,6 +66,7 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 	}
 
 	@Override
+	@Nullable
 	public SimpMessageMappingInfo getMatchingCondition(Message<?> message) {
 		SimpMessageTypeMessageCondition typeCond = this.messageTypeMessageCondition.getMatchingCondition(message);
 		if (typeCond == null) {
@@ -91,16 +94,16 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof SimpMessageMappingInfo) {
-			SimpMessageMappingInfo other = (SimpMessageMappingInfo) obj;
-			return (this.destinationConditions.equals(other.destinationConditions) &&
-					this.messageTypeMessageCondition.equals(other.messageTypeMessageCondition));
+		if (!(other instanceof SimpMessageMappingInfo)) {
+			return false;
 		}
-		return false;
+		SimpMessageMappingInfo otherInfo = (SimpMessageMappingInfo) other;
+		return (this.destinationConditions.equals(otherInfo.destinationConditions) &&
+				this.messageTypeMessageCondition.equals(otherInfo.messageTypeMessageCondition));
 	}
 
 	@Override
@@ -110,11 +113,7 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder("{");
-		builder.append(this.destinationConditions);
-		builder.append(",messageType=").append(this.messageTypeMessageCondition);
-		builder.append('}');
-		return builder.toString();
+		return "{" + this.destinationConditions + ",messageType=" + this.messageTypeMessageCondition + '}';
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.mail.javamail;
 
 import java.io.InputStream;
-
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.mail.MailException;
@@ -104,7 +103,7 @@ public interface JavaMailSender extends MailSender {
 	 * in case of failure when sending a message
 	 * @see #createMimeMessage
 	 */
-	void send(MimeMessage[] mimeMessages) throws MailException;
+	void send(MimeMessage... mimeMessages) throws MailException;
 
 	/**
 	 * Send the JavaMail MIME message prepared by the given MimeMessagePreparator.
@@ -138,6 +137,6 @@ public interface JavaMailSender extends MailSender {
 	 * @throws org.springframework.mail.MailSendException
 	 * in case of failure when sending a message
 	 */
-	void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException;
+	void send(MimeMessagePreparator... mimeMessagePreparators) throws MailException;
 
 }

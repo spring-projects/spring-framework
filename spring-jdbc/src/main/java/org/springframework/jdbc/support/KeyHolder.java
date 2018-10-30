@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface for retrieving keys, typically used for auto-generated keys
@@ -51,26 +52,28 @@ public interface KeyHolder {
 	 * multiple entries as well. If this method encounters multiple entries in
 	 * either the map or the list meaning that multiple keys were returned,
 	 * then an InvalidDataAccessApiUsageException is thrown.
-	 * @return the generated key
-	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered.
+	 * @return the generated key as a number
+	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered
 	 */
+	@Nullable
 	Number getKey() throws InvalidDataAccessApiUsageException;
 
 	/**
-	 * Retrieve the first map of keys. If there are multiple entries in the list
-	 * (meaning that multiple rows had keys returned), then an
-	 * InvalidDataAccessApiUsageException is thrown.
-	 * @return the Map of generated keys
+	 * Retrieve the first map of keys.
+	 * <p>If there are multiple entries in the list (meaning that multiple rows
+	 * had keys returned), then an InvalidDataAccessApiUsageException is thrown.
+	 * @return the Map of generated keys for a single row
 	 * @throws InvalidDataAccessApiUsageException if keys for multiple rows are encountered
 	 */
+	@Nullable
 	Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException;
 
 	/**
 	 * Return a reference to the List that contains the keys.
-	 * Can be used for extracting keys for multiple rows (an unusual case),
+	 * <p>Can be used for extracting keys for multiple rows (an unusual case),
 	 * and also for adding new maps of keys.
-	 * @return the List for the generated keys, with each entry being a Map
-	 * of column names and key values
+	 * @return the List for the generated keys, with each entry representing
+	 * an individual row through a Map of column names and key values
 	 */
 	List<Map<String, Object>> getKeyList();
 

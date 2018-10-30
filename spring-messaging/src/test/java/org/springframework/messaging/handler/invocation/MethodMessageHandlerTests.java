@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,34 @@
 
 package org.springframework.messaging.handler.invocation;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
-import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
-import java.lang.reflect.Method;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for
@@ -68,7 +75,7 @@ public class MethodMessageHandlerTests {
 		this.messageHandler.registerHandler(this.testController);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void duplicateMapping() {
 		this.messageHandler.registerHandler(new DuplicateMappingsController());
 	}
@@ -130,16 +137,18 @@ public class MethodMessageHandlerTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestController {
 
 		public String method;
 
-		private Map<String, Object> arguments = new LinkedHashMap<String, Object>();
+		private Map<String, Object> arguments = new LinkedHashMap<>();
 
 		public void handlerPathMatchWildcard() {
 			this.method = "pathMatchWildcard";
 		}
 
+		@SuppressWarnings("rawtypes")
 		public void handlerArgumentResolver(Message message) {
 			this.method = "handlerArgumentResolver";
 			this.arguments.put("message", message);
@@ -164,6 +173,7 @@ public class MethodMessageHandlerTests {
 
 	}
 
+	@SuppressWarnings("unused")
 	private static class DuplicateMappingsController {
 
 		public void handlerFoo() { }
@@ -186,15 +196,15 @@ public class MethodMessageHandlerTests {
 
 		@Override
 		protected List<? extends HandlerMethodArgumentResolver> initArgumentResolvers() {
-			List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
-			resolvers.add(new MessageMethodArgumentResolver());
+			List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+			resolvers.add(new MessageMethodArgumentResolver(new SimpleMessageConverter()));
 			resolvers.addAll(getCustomArgumentResolvers());
 			return resolvers;
 		}
 
 		@Override
 		protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
-			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 			handlers.addAll(getCustomReturnValueHandlers());
 			return handlers;
 		}
@@ -207,7 +217,7 @@ public class MethodMessageHandlerTests {
 		@Override
 		protected String getMappingForMethod(Method method, Class<?> handlerType) {
 			String methodName = method.getName();
-			if(methodName.startsWith("handler")) {
+			if (methodName.startsWith("handler")) {
 				return "/" + methodName;
 			}
 			return null;
@@ -215,7 +225,7 @@ public class MethodMessageHandlerTests {
 
 		@Override
 		protected Set<String> getDirectLookupDestinations(String mapping) {
-			Set<String> result = new LinkedHashSet<String>();
+			Set<String> result = new LinkedHashSet<>();
 			if (!this.pathMatcher.isPattern(mapping)) {
 				result.add(mapping);
 			}
@@ -231,7 +241,7 @@ public class MethodMessageHandlerTests {
 		protected String getMatchingMapping(String mapping, Message<?> message) {
 
 			String destination = getLookupDestination(getDestination(message));
-			if(mapping.equals(destination) || this.pathMatcher.match(mapping, destination)) {
+			if (mapping.equals(destination) || this.pathMatcher.match(mapping, destination)) {
 				return mapping;
 			}
 			return null;
@@ -255,6 +265,7 @@ public class MethodMessageHandlerTests {
 		}
 	}
 
+
 	private static class TestExceptionHandlerMethodResolver extends AbstractExceptionHandlerMethodResolver {
 
 		public TestExceptionHandlerMethodResolver(Class<?> handlerType) {
@@ -262,9 +273,9 @@ public class MethodMessageHandlerTests {
 		}
 
 		private static Map<Class<? extends Throwable>, Method> initExceptionMappings(Class<?> handlerType) {
-			Map<Class<? extends Throwable>, Method> result = new HashMap<Class<? extends Throwable>, Method>();
-			for (Method method : HandlerMethodSelector.selectMethods(handlerType, EXCEPTION_HANDLER_METHOD_FILTER)) {
-				for(Class<? extends Throwable> exception : getExceptionsFromMethodSignature(method)) {
+			Map<Class<? extends Throwable>, Method> result = new HashMap<>();
+			for (Method method : MethodIntrospector.selectMethods(handlerType, EXCEPTION_HANDLER_METHOD_FILTER)) {
+				for (Class<? extends Throwable> exception : getExceptionsFromMethodSignature(method)) {
 					result.put(exception, method);
 				}
 			}
@@ -272,13 +283,11 @@ public class MethodMessageHandlerTests {
 		}
 
 		public final static MethodFilter EXCEPTION_HANDLER_METHOD_FILTER = new MethodFilter() {
-
 			@Override
 			public boolean matches(Method method) {
 				return method.getName().contains("Exception");
 			}
 		};
-
 	}
 
 }

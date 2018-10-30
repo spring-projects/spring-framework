@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,62 +16,62 @@
 
 package org.springframework.mail.javamail;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Brian Hanafee
+ * @author Sam Brannen
  * @since 09.07.2005
  */
-public class InternetAddressEditorTests extends TestCase {
+public class InternetAddressEditorTests {
 
 	private static final String EMPTY = "";
 	private static final String SIMPLE = "nobody@nowhere.com";
 	private static final String BAD = "(";
 
-	private InternetAddressEditor editor;
+	private final InternetAddressEditor editor = new InternetAddressEditor();
 
-	@Override
-	protected void setUp() {
-		editor = new InternetAddressEditor();
-	}
 
-	public void testUninitialized() {
+	@Test
+	public void uninitialized() {
 		assertEquals("Uninitialized editor did not return empty value string", EMPTY, editor.getAsText());
 	}
 
-	public void testSetNull() {
+	@Test
+	public void setNull() {
 		editor.setAsText(null);
 		assertEquals("Setting null did not result in empty value string", EMPTY, editor.getAsText());
 	}
 
-	public void testSetEmpty() {
+	@Test
+	public void setEmpty() {
 		editor.setAsText(EMPTY);
 		assertEquals("Setting empty string did not result in empty value string", EMPTY, editor.getAsText());
 	}
 
-	public void testAllWhitespace() {
+	@Test
+	public void allWhitespace() {
 		editor.setAsText(" ");
 		assertEquals("All whitespace was not recognized", EMPTY, editor.getAsText());
 	}
 
-	public void testSimpleGoodAddess() {
+	@Test
+	public void simpleGoodAddess() {
 		editor.setAsText(SIMPLE);
 		assertEquals("Simple email address failed", SIMPLE, editor.getAsText());
 	}
 
-	public void testExcessWhitespace() {
+	@Test
+	public void excessWhitespace() {
 		editor.setAsText(" " + SIMPLE + " ");
 		assertEquals("Whitespace was not stripped", SIMPLE, editor.getAsText());
 	}
 
-	public void testSimpleBadAddress() {
-		try {
-			editor.setAsText(BAD);
-			fail("Should have failed on \"" + BAD + "\", instead got " + editor.getAsText());
-		}
-		catch (IllegalArgumentException e) {
-			// Passed the test
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void simpleBadAddress() {
+		editor.setAsText(BAD);
 	}
 
 }

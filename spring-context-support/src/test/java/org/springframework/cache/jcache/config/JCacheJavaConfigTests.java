@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package org.springframework.cache.jcache.config;
 
-import static org.junit.Assert.*;
-
 import java.util.Arrays;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.config.SomeKeyGenerator;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
@@ -37,7 +38,6 @@ import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.jcache.interceptor.AnnotatedJCacheableService;
 import org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource;
 import org.springframework.cache.jcache.interceptor.JCacheInterceptor;
-import org.springframework.cache.jcache.interceptor.SimpleExceptionCacheResolver;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.ApplicationContext;
@@ -46,26 +46,33 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Stephane Nicoll
  */
 public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 	@Override
 	protected ApplicationContext getApplicationContext() {
 		return new AnnotationConfigApplicationContext(EnableCachingConfig.class);
 	}
 
+
 	@Test
 	public void fullCachingConfig() throws Exception {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(FullCachingConfig.class);
+
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-		assertSame(context.getBean(KeyGenerator.class), cos.getDefaultKeyGenerator());
+		assertSame(context.getBean(KeyGenerator.class), cos.getKeyGenerator());
 		assertSame(context.getBean("cacheResolver", CacheResolver.class),
-				cos.getDefaultCacheResolver());
+				cos.getCacheResolver());
 		assertSame(context.getBean("exceptionCacheResolver", CacheResolver.class),
-				cos.getDefaultExceptionCacheResolver());
+				cos.getExceptionCacheResolver());
 		JCacheInterceptor interceptor = context.getBean(JCacheInterceptor.class);
 		assertSame(context.getBean("errorHandler", CacheErrorHandler.class), interceptor.getErrorHandler());
 	}
@@ -76,14 +83,11 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 				new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
 
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-		assertNotNull(cos.getDefaultCacheResolver());
-		assertEquals(SimpleCacheResolver.class, cos.getDefaultCacheResolver().getClass());
+		assertNotNull(cos.getCacheResolver());
+		assertEquals(SimpleCacheResolver.class, cos.getCacheResolver().getClass());
 		assertSame(context.getBean(CacheManager.class),
-				((SimpleCacheResolver) cos.getDefaultCacheResolver()).getCacheManager());
-		assertNotNull(cos.getDefaultExceptionCacheResolver());
-		assertEquals(SimpleExceptionCacheResolver.class, cos.getDefaultExceptionCacheResolver().getClass());
-		assertSame(context.getBean(CacheManager.class),
-				((SimpleExceptionCacheResolver) cos.getDefaultExceptionCacheResolver()).getCacheManager());
+				((SimpleCacheResolver) cos.getCacheResolver()).getCacheManager());
+		assertNull(cos.getExceptionCacheResolver());
 		context.close();
 	}
 
@@ -93,10 +97,31 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 				new AnnotationConfigApplicationContext(FullCachingConfigSupport.class);
 
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-		assertSame(context.getBean("cacheResolver"), cos.getDefaultCacheResolver());
-		assertSame(context.getBean("keyGenerator"), cos.getDefaultKeyGenerator());
-		assertSame(context.getBean("exceptionCacheResolver"), cos.getDefaultExceptionCacheResolver());
+		assertSame(context.getBean("cacheResolver"), cos.getCacheResolver());
+		assertSame(context.getBean("keyGenerator"), cos.getKeyGenerator());
+		assertSame(context.getBean("exceptionCacheResolver"), cos.getExceptionCacheResolver());
 		context.close();
+	}
+
+	@Test
+	public void exceptionCacheResolverLazilyRequired() {
+		ConfigurableApplicationContext context =
+				new AnnotationConfigApplicationContext(NoExceptionCacheResolverConfig.class);
+
+		try {
+			DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
+			assertSame(context.getBean("cacheResolver"), cos.getCacheResolver());
+
+			JCacheableService<?> service = context.getBean(JCacheableService.class);
+			service.cache("id");
+
+			// This call requires the cache manager to be set
+			thrown.expect(IllegalStateException.class);
+			service.cacheWithException("test", false);
+		}
+		finally {
+			context.close();
+		}
 	}
 
 
@@ -126,10 +151,10 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		}
 	}
 
+
 	@Configuration
 	@EnableCaching
 	public static class FullCachingConfig implements JCacheConfigurer {
-
 
 		@Override
 		@Bean
@@ -162,6 +187,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		}
 	}
 
+
 	@Configuration
 	@EnableCaching
 	public static class EmptyConfigSupportConfig extends JCacheConfigurerSupport {
@@ -170,6 +196,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 			return new NoOpCacheManager();
 		}
 	}
+
 
 	@Configuration
 	@EnableCaching
@@ -197,6 +224,23 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		@Bean
 		public CacheResolver exceptionCacheResolver() {
 			return new NamedCacheResolver(cacheManager(), "exception");
+		}
+	}
+
+
+	@Configuration
+	@EnableCaching
+	static class NoExceptionCacheResolverConfig extends JCacheConfigurerSupport {
+
+		@Override
+		@Bean
+		public CacheResolver cacheResolver() {
+			return new NamedCacheResolver(new ConcurrentMapCacheManager(), "default");
+		}
+
+		@Bean
+		public JCacheableService<?> cacheableService() {
+			return new AnnotatedJCacheableService(new ConcurrentMapCache("default"));
 		}
 	}
 

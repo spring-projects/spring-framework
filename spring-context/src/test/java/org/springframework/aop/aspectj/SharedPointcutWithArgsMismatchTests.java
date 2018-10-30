@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -26,23 +27,23 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class SharedPointcutWithArgsMismatchTests {
+public class SharedPointcutWithArgsMismatchTests {
 
 	private ToBeAdvised toBeAdvised;
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		toBeAdvised = (ToBeAdvised) ctx.getBean("toBeAdvised");
 	}
+
 
 	@Test
 	public void testMismatchedArgBinding() {
 		this.toBeAdvised.foo("Hello");
 	}
-
 
 }
 
@@ -65,4 +66,3 @@ class MyAspect {
 		System.out.println(x);
 	}
 }
-

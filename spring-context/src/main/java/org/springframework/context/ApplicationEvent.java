@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +27,16 @@ import java.util.EventObject;
  */
 public abstract class ApplicationEvent extends EventObject {
 
-	/** use serialVersionUID from Spring 1.2 for interoperability */
+	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = 7099057708183571937L;
 
-	/** System time when the event happened */
+	/** System time when the event happened. */
 	private final long timestamp;
 
 
 	/**
 	 * Create a new ApplicationEvent.
-	 * @param source the component that published the event (never {@code null})
+	 * @param source the object on which the event initially occurred (never {@code null})
 	 */
 	public ApplicationEvent(Object source) {
 		super(source);

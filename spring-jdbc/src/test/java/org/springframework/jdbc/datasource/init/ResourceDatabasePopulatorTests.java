@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.jdbc.datasource.init;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.core.io.Resource;
 
 import static org.junit.Assert.*;
@@ -49,22 +50,22 @@ public class ResourceDatabasePopulatorTests {
 	@Test
 	public void constructWithResource() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1);
-		assertEquals(1, databasePopulator.getScripts().size());
+		assertEquals(1, databasePopulator.scripts.size());
 	}
 
 	@Test
 	public void constructWithMultipleResources() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1, script2);
-		assertEquals(2, databasePopulator.getScripts().size());
+		assertEquals(2, databasePopulator.scripts.size());
 	}
 
 	@Test
 	public void constructWithMultipleResourcesAndThenAddScript() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1, script2);
-		assertEquals(2, databasePopulator.getScripts().size());
+		assertEquals(2, databasePopulator.scripts.size());
 
 		databasePopulator.addScript(script3);
-		assertEquals(3, databasePopulator.getScripts().size());
+		assertEquals(3, databasePopulator.scripts.size());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -94,13 +95,13 @@ public class ResourceDatabasePopulatorTests {
 	@Test
 	public void setScriptsAndThenAddScript() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		assertEquals(0, databasePopulator.getScripts().size());
+		assertEquals(0, databasePopulator.scripts.size());
 
 		databasePopulator.setScripts(script1, script2);
-		assertEquals(2, databasePopulator.getScripts().size());
+		assertEquals(2, databasePopulator.scripts.size());
 
 		databasePopulator.addScript(script3);
-		assertEquals(3, databasePopulator.getScripts().size());
+		assertEquals(3, databasePopulator.scripts.size());
 	}
 
 }

@@ -18,6 +18,7 @@ package org.springframework.validation;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -36,6 +37,7 @@ public abstract class BindingResultUtils {
 	 * @return the BindingResult, or {@code null} if none found
 	 * @throws IllegalStateException if the attribute found is not of type BindingResult
 	 */
+	@Nullable
 	public static BindingResult getBindingResult(Map<?, ?> model, String name) {
 		Assert.notNull(model, "Model map must not be null");
 		Assert.notNull(name, "Name must not be null");

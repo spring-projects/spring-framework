@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,26 +20,49 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.PostConstruct;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
+import org.springframework.stereotype.Component;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import static org.junit.Assert.*;
 
@@ -50,17 +73,16 @@ import static org.junit.Assert.*;
  */
 public class ConfigurationClassPostProcessorTests {
 
-	private DefaultListableBeanFactory beanFactory;
+	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
 	@Before
-	public void setUp() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+	public void setup() {
 		QualifierAnnotationAutowireCandidateResolver acr = new QualifierAnnotationAutowireCandidateResolver();
-		acr.setBeanFactory(bf);
-		bf.setAutowireCandidateResolver(acr);
-		this.beanFactory = bf;
+		acr.setBeanFactory(this.beanFactory);
+		this.beanFactory.setAutowireCandidateResolver(acr);
 	}
+
 
 	/**
 	 * Enhanced {@link Configuration} classes are only necessary for respecting
@@ -74,6 +96,17 @@ public class ConfigurationClassPostProcessorTests {
 	@Test
 	public void enhancementIsPresentBecauseSingletonSemanticsAreRespected() {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertSame(foo, bar.foo);
+		assertTrue(Arrays.asList(beanFactory.getDependentBeans("foo")).contains("bar"));
+	}
+
+	@Test
+	public void configurationIntrospectionOfInnerClassesWorksWithDotNameSyntax() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(getClass().getName() + ".SingletonBeanConfig"));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
 		Foo foo = beanFactory.getBean("foo", Foo.class);
@@ -124,17 +157,31 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void postProcessorWorksWithComposedConfigurationWithAttributeOverridesUsingReflection() {
+	public void postProcessorWorksWithComposedConfigurationWithAttributeOverrideForBasePackageUsingReflection() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-				ComposedConfigurationWithAttributeOverridesClass.class);
+				ComposedConfigurationWithAttributeOverrideForBasePackage.class);
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
 	@Test
-	public void postProcessorWorksWithComposedConfigurationWithAttributeOverridesUsingAsm() {
+	public void postProcessorWorksWithComposedConfigurationWithAttributeOverrideForBasePackageUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-				ComposedConfigurationWithAttributeOverridesClass.class.getName());
+				ComposedConfigurationWithAttributeOverrideForBasePackage.class.getName());
 		assertSupportForComposedAnnotation(beanDefinition);
+	}
+
+	@Test
+	public void postProcessorWorksWithComposedConfigurationWithAttributeOverrideForExcludeFilterUsingReflection() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(
+				ComposedConfigurationWithAttributeOverrideForExcludeFilter.class);
+		assertSupportForComposedAnnotationWithExclude(beanDefinition);
+	}
+
+	@Test
+	public void postProcessorWorksWithComposedConfigurationWithAttributeOverrideForExcludeFilterUsingAsm() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(
+				ComposedConfigurationWithAttributeOverrideForExcludeFilter.class.getName());
+		assertSupportForComposedAnnotationWithExclude(beanDefinition);
 	}
 
 	@Test
@@ -179,6 +226,29 @@ public class ConfigurationClassPostProcessorTests {
 		assertSupportForComposedAnnotation(beanDefinition);
 	}
 
+	private void assertSupportForComposedAnnotation(RootBeanDefinition beanDefinition) {
+		beanFactory.registerBeanDefinition("config", beanDefinition);
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.setEnvironment(new StandardEnvironment());
+		pp.postProcessBeanFactory(beanFactory);
+		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
+		assertNotNull(simpleComponent);
+	}
+
+	private void assertSupportForComposedAnnotationWithExclude(RootBeanDefinition beanDefinition) {
+		beanFactory.registerBeanDefinition("config", beanDefinition);
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.setEnvironment(new StandardEnvironment());
+		pp.postProcessBeanFactory(beanFactory);
+		try {
+			beanFactory.getBean(SimpleComponent.class);
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// expected
+		}
+	}
+
 	@Test
 	public void postProcessorOverridesNonApplicationBeanDefinitions() {
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
@@ -219,6 +289,97 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void postProcessorFailsOnImplicitOverrideIfOverridingIsNotAllowed() {
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setResource(new DescriptiveResource("XML or something"));
+		beanFactory.registerBeanDefinition("bar", rbd);
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
+		beanFactory.setAllowBeanDefinitionOverriding(false);
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		try {
+			pp.postProcessBeanFactory(beanFactory);
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.getMessage().contains("bar"));
+			assertTrue(ex.getMessage().contains("SingletonBeanConfig"));
+			assertTrue(ex.getMessage().contains(TestBean.class.getName()));
+		}
+	}
+
+	@Test
+	public void configurationClassesProcessedInCorrectOrder() {
+		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		Foo foo = beanFactory.getBean(Foo.class);
+		assertTrue(foo instanceof ExtendedFoo);
+		Bar bar = beanFactory.getBean(Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void configurationClassesWithValidOverridingForProgrammaticCall() {
+		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(OverridingAgainSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config3", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		Foo foo = beanFactory.getBean(Foo.class);
+		assertTrue(foo instanceof ExtendedAgainFoo);
+		Bar bar = beanFactory.getBean(Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void configurationClassesWithInvalidOverridingForProgrammaticCall() {
+		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(InvalidOverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config3", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		try {
+			beanFactory.getBean(Bar.class);
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("OverridingSingletonBeanConfig.foo"));
+			assertTrue(ex.getMessage().contains(ExtendedFoo.class.getName()));
+			assertTrue(ex.getMessage().contains(Foo.class.getName()));
+			assertTrue(ex.getMessage().contains("InvalidOverridingSingletonBeanConfig"));
+		}
+	}
+
+	@Test  // SPR-15384
+	public void nestedConfigurationClassesProcessedInCorrectOrder() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithOrderedNestedClasses.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		Foo foo = beanFactory.getBean(Foo.class);
+		assertTrue(foo instanceof ExtendedFoo);
+		Bar bar = beanFactory.getBean(Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test  // SPR-16734
+	public void innerConfigurationClassesProcessedInCorrectOrder() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithOrderedInnerClasses.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+
+		Foo foo = beanFactory.getBean(Foo.class);
+		assertTrue(foo instanceof ExtendedFoo);
+		Bar bar = beanFactory.getBean(Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
 	public void scopedProxyTargetMarkedAsNonAutowireCandidate() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
@@ -227,6 +388,7 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("consumer", new RootBeanDefinition(ScopedProxyConsumer.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
+
 		ITestBean injected = beanFactory.getBean("consumer", ScopedProxyConsumer.class).testBean;
 		assertTrue(injected instanceof ScopedObject);
 		assertSame(beanFactory.getBean("scopedClass"), injected);
@@ -304,6 +466,28 @@ public class ConfigurationClassPostProcessorTests {
 		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
 		assertEquals("Repository<String>", bean.stringRepository.toString());
 		assertEquals("Repository<Integer>", bean.integerRepository.toString());
+		assertTrue(AopUtils.isCglibProxy(bean.stringRepository));
+		assertTrue(AopUtils.isCglibProxy(bean.integerRepository));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithScopedProxyUsingAsm() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class.getName());
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		beanFactory.registerBeanDefinition("annotatedBean", bd);
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ScopedProxyRepositoryConfiguration.class.getName()));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.freezeConfiguration();
+
+		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
+		assertEquals("Repository<String>", bean.stringRepository.toString());
+		assertEquals("Repository<Integer>", bean.integerRepository.toString());
+		assertTrue(AopUtils.isCglibProxy(bean.stringRepository));
+		assertTrue(AopUtils.isCglibProxy(bean.integerRepository));
 	}
 
 	@Test
@@ -362,10 +546,8 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Test
 	public void genericsBasedInjectionWithWildcardWithExtendsMatch() {
-		beanFactory.registerBeanDefinition("configClass",
-			new RootBeanDefinition(WildcardWithExtendsConfiguration.class));
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardWithExtendsConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 
 		assertSame(beanFactory.getBean("stringRepo"), beanFactory.getBean("repoConsumer"));
 	}
@@ -373,45 +555,466 @@ public class ConfigurationClassPostProcessorTests {
 	@Test
 	public void genericsBasedInjectionWithWildcardWithGenericExtendsMatch() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(WildcardWithGenericExtendsConfiguration.class));
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.postProcessBeanFactory(beanFactory);
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 
 		assertSame(beanFactory.getBean("genericRepo"), beanFactory.getBean("repoConsumer"));
 	}
 
-	private void assertSupportForComposedAnnotation(RootBeanDefinition beanDefinition) {
-		beanFactory.registerBeanDefinition("config", beanDefinition);
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.setEnvironment(new StandardEnvironment());
-		pp.postProcessBeanFactory(beanFactory);
-		SimpleComponent simpleComponent = beanFactory.getBean(SimpleComponent.class);
-		assertNotNull(simpleComponent);
+	@Test
+	public void genericsBasedInjectionWithEarlyGenericsMatching() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatching() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+	}
+
+	@Test
+	public void genericsBasedInjectionWithEarlyGenericsMatchingOnCglibProxy() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setProxyTargetClass(true);
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatchingOnCglibProxy() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setProxyTargetClass(true);
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatchingOnCglibProxyAndRawFactoryMethod() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RawRepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setProxyTargetClass(true);
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithEarlyGenericsMatchingOnJdkProxy() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+
+		String[] beanNames = beanFactory.getBeanNamesForType(RepositoryInterface.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(RepositoryInterface.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isJdkDynamicProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatchingOnJdkProxy() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(RepositoryInterface.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(RepositoryInterface.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isJdkDynamicProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatchingOnJdkProxyAndRawFactoryMethod() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RawRepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(RepositoryInterface.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(RepositoryInterface.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isJdkDynamicProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void testSelfReferenceExclusionForFactoryMethodOnSameBean() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfig.class));
+		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		beanFactory.getBean(ServiceBean.class);
+	}
+
+	@Test
+	public void testConfigWithDefaultMethods() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfigWithDefaultMethods.class));
+		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		beanFactory.getBean(ServiceBean.class);
+	}
+
+	@Test
+	public void testConfigWithDefaultMethodsUsingAsm() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfigWithDefaultMethods.class.getName()));
+		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class.getName()));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		beanFactory.getBean(ServiceBean.class);
+	}
+
+	@Test
+	public void testCircularDependency() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.registerBeanDefinition("configClass1", new RootBeanDefinition(A.class));
+		beanFactory.registerBeanDefinition("configClass2", new RootBeanDefinition(AStrich.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		try {
+			beanFactory.preInstantiateSingletons();
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("Circular reference"));
+		}
+	}
+
+	@Test
+	public void testCircularDependencyWithApplicationContext() {
+		try {
+			new AnnotationConfigApplicationContext(A.class, AStrich.class);
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("Circular reference"));
+		}
+	}
+
+	@Test
+	public void testPrototypeArgumentThroughBeanMethodCall() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithPrototype.class);
+		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
+	}
+
+	@Test
+	public void testSingletonArgumentThroughBeanMethodCall() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithSingleton.class);
+		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
+	}
+
+	@Test
+	public void testNullArgumentThroughBeanMethodCall() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithNull.class);
+		ctx.getBean("aFoo");
+	}
+
+	@Test
+	public void testInjectionPointMatchForNarrowTargetReturnType() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(FooBarConfiguration.class);
+		assertSame(ctx.getBean(BarImpl.class), ctx.getBean(FooImpl.class).bar);
+	}
+
+	@Test
+	public void testVarargOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class, TestBean.class);
+		VarargConfiguration bean = ctx.getBean(VarargConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(1, bean.testBeans.length);
+		assertSame(ctx.getBean(TestBean.class), bean.testBeans[0]);
+	}
+
+	@Test
+	public void testEmptyVarargOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class);
+		VarargConfiguration bean = ctx.getBean(VarargConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(0, bean.testBeans.length);
+	}
+
+	@Test
+	public void testCollectionArgumentOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class, TestBean.class);
+		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(1, bean.testBeans.size());
+		assertSame(ctx.getBean(TestBean.class), bean.testBeans.get(0));
+	}
+
+	@Test
+	public void testEmptyCollectionArgumentOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class);
+		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertTrue(bean.testBeans.isEmpty());
+	}
+
+	@Test
+	public void testMapArgumentOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class, DummyRunnable.class);
+		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(1, bean.testBeans.size());
+		assertSame(ctx.getBean(Runnable.class), bean.testBeans.values().iterator().next());
+	}
+
+	@Test
+	public void testEmptyMapArgumentOnBeanMethod() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class);
+		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertTrue(bean.testBeans.isEmpty());
+	}
+
+	@Test
+	public void testCollectionInjectionFromSameConfigurationClass() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionInjectionConfiguration.class);
+		CollectionInjectionConfiguration bean = ctx.getBean(CollectionInjectionConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(1, bean.testBeans.size());
+		assertSame(ctx.getBean(TestBean.class), bean.testBeans.get(0));
+	}
+
+	@Test
+	public void testMapInjectionFromSameConfigurationClass() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MapInjectionConfiguration.class);
+		MapInjectionConfiguration bean = ctx.getBean(MapInjectionConfiguration.class);
+		assertNotNull(bean.testBeans);
+		assertEquals(1, bean.testBeans.size());
+		assertSame(ctx.getBean(Runnable.class), bean.testBeans.get("testBean"));
+	}
+
+	@Test
+	public void testBeanLookupFromSameConfigurationClass() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanLookupConfiguration.class);
+		BeanLookupConfiguration bean = ctx.getBean(BeanLookupConfiguration.class);
+		assertNotNull(bean.getTestBean());
+		assertSame(ctx.getBean(TestBean.class), bean.getTestBean());
+	}
+
+	@Test(expected = BeanDefinitionStoreException.class)
+	public void testNameClashBetweenConfigurationClassAndBean() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MyTestBean.class);
+		ctx.getBean("myTestBean", TestBean.class);
+	}
+
+	@Test
+	public void testBeanDefinitionRegistryPostProcessorConfig() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanDefinitionRegistryPostProcessorConfig.class);
+		assertTrue(ctx.getBean("myTestBean") instanceof TestBean);
 	}
 
 
 	// -------------------------------------------------------------------------
 
 	@Configuration
+	@Order(1)
 	static class SingletonBeanConfig {
 
-		public @Bean
-		Foo foo() {
+		public @Bean Foo foo() {
 			return new Foo();
 		}
 
-		public @Bean
-		Bar bar() {
+		public @Bean Bar bar() {
 			return new Bar(foo());
+		}
+	}
+
+	@Configuration
+	@Order(2)
+	static class OverridingSingletonBeanConfig {
+
+		public @Bean ExtendedFoo foo() {
+			return new ExtendedFoo();
+		}
+
+		public @Bean Bar bar() {
+			return new Bar(foo());
+		}
+	}
+
+	@Configuration
+	static class OverridingAgainSingletonBeanConfig {
+
+		public @Bean ExtendedAgainFoo foo() {
+			return new ExtendedAgainFoo();
+		}
+	}
+
+	@Configuration
+	static class InvalidOverridingSingletonBeanConfig {
+
+		public @Bean Foo foo() {
+			return new Foo();
+		}
+	}
+
+	@Configuration
+	static class ConfigWithOrderedNestedClasses {
+
+		@Configuration
+		@Order(1)
+		static class SingletonBeanConfig {
+
+			public @Bean Foo foo() {
+				return new Foo();
+			}
+
+			public @Bean Bar bar() {
+				return new Bar(foo());
+			}
+		}
+
+		@Configuration
+		@Order(2)
+		static class OverridingSingletonBeanConfig {
+
+			public @Bean ExtendedFoo foo() {
+				return new ExtendedFoo();
+			}
+
+			public @Bean Bar bar() {
+				return new Bar(foo());
+			}
+		}
+	}
+
+	@Configuration
+	static class ConfigWithOrderedInnerClasses {
+
+		@Configuration
+		@Order(1)
+		class SingletonBeanConfig {
+
+			public SingletonBeanConfig(ConfigWithOrderedInnerClasses other) {
+			}
+
+			public @Bean Foo foo() {
+				return new Foo();
+			}
+
+			public @Bean Bar bar() {
+				return new Bar(foo());
+			}
+		}
+
+		@Configuration
+		@Order(2)
+		class OverridingSingletonBeanConfig {
+
+			public OverridingSingletonBeanConfig(ObjectProvider<SingletonBeanConfig> other) {
+				other.getObject();
+			}
+
+			public @Bean ExtendedFoo foo() {
+				return new ExtendedFoo();
+			}
+
+			public @Bean Bar bar() {
+				return new Bar(foo());
+			}
 		}
 	}
 
 	static class Foo {
 	}
 
+	static class ExtendedFoo extends Foo {
+	}
+
+	static class ExtendedAgainFoo extends ExtendedFoo {
+	}
+
 	static class Bar {
 
 		final Foo foo;
-
 
 		public Bar(Foo foo) {
 			this.foo = foo;
@@ -421,8 +1024,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	static class UnloadedConfig {
 
-		public @Bean
-		Foo foo() {
+		public @Bean Foo foo() {
 			return new Foo();
 		}
 	}
@@ -430,8 +1032,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	static class LoadedConfig {
 
-		public @Bean
-		Bar bar() {
+		public @Bean Bar bar() {
 			return new Bar(new Foo());
 		}
 	}
@@ -445,15 +1046,18 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class ScopedProxyConfigurationClass {
 
-		@Bean
-		@Lazy
-		@Scope(proxyMode = ScopedProxyMode.INTERFACES)
+		@Bean @Lazy @Scope(proxyMode = ScopedProxyMode.INTERFACES)
 		public ITestBean scopedClass() {
 			return new TestBean();
 		}
 	}
 
-	public static class Repository<T> {
+	public interface RepositoryInterface<T> {
+
+		String toString();
+	}
+
+	public static class Repository<T> implements RepositoryInterface<T> {
 	}
 
 	public static class GenericRepository<T> extends Repository<T> {
@@ -492,7 +1096,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public Repository<String> stringRepo() {
 			return new Repository<String>() {
-
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -503,7 +1106,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
-
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
@@ -514,10 +1116,23 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public Repository<?> genericRepo() {
 			return new Repository<Object>() {
-
 				@Override
 				public String toString() {
 					return "Repository<Object>";
+				}
+			};
+		}
+	}
+
+	@Configuration
+	public static class RawRepositoryConfiguration {
+
+		@Bean
+		public Repository stringRepo() {
+			return new Repository<String>() {
+				@Override
+				public String toString() {
+					return "Repository<String>";
 				}
 			};
 		}
@@ -530,7 +1145,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Scope("prototype")
 		public Repository<String> stringRepo() {
 			return new Repository<String>() {
-
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -542,7 +1156,6 @@ public class ConfigurationClassPostProcessorTests {
 		@Scope("prototype")
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
-
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
@@ -555,7 +1168,6 @@ public class ConfigurationClassPostProcessorTests {
 		@SuppressWarnings("rawtypes")
 		public Repository genericRepo() {
 			return new Repository<Object>() {
-
 				@Override
 				public String toString() {
 					return "Repository<Object>";
@@ -564,11 +1176,18 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Scope(scopeName = "prototype")
+	public @interface PrototypeScoped {
+
+		ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
+	}
+
 	@Configuration
 	public static class ScopedProxyRepositoryConfiguration {
 
 		@Bean
-		@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Scope(scopeName = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public Repository<String> stringRepo() {
 			return new Repository<String>() {
 				@Override
@@ -579,7 +1198,7 @@ public class ConfigurationClassPostProcessorTests {
 		}
 
 		@Bean
-		@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@PrototypeScoped
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
 				@Override
@@ -601,7 +1220,7 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<Object> genericRepo() {
-			return new GenericRepository<Object>();
+			return new GenericRepository<>();
 		}
 	}
 
@@ -625,6 +1244,11 @@ public class ConfigurationClassPostProcessorTests {
 		@Bean
 		public RepositoryFactoryBean<Object> repoFactoryBean() {
 			return new RepositoryFactoryBean<>();
+		}
+
+		@Bean
+		public FactoryBean<Object> nullFactoryBean() {
+			return null;
 		}
 	}
 
@@ -663,12 +1287,12 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<? extends String> stringRepo() {
-			return new Repository<String>();
+			return new Repository<>();
 		}
 
 		@Bean
 		public Repository<? extends Number> numberRepo() {
-			return new Repository<Number>();
+			return new Repository<>();
 		}
 
 		@Bean
@@ -687,7 +1311,7 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<? extends Number> numberRepo() {
-			return new Repository<Number>();
+			return new Repository<>();
 		}
 
 		@Bean
@@ -700,7 +1324,7 @@ public class ConfigurationClassPostProcessorTests {
 	@ComponentScan(basePackages = "org.springframework.context.annotation.componentscan.simple")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface ComposedConfiguration {
+	public @interface ComposedConfiguration {
 	}
 
 	@ComposedConfiguration
@@ -711,19 +1335,26 @@ public class ConfigurationClassPostProcessorTests {
 	@ComponentScan
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface ComposedConfigurationWithAttributeOverrides {
+	public @interface ComposedConfigurationWithAttributeOverrides {
 
 		String[] basePackages() default {};
+
+		ComponentScan.Filter[] excludeFilters() default {};
 	}
 
 	@ComposedConfigurationWithAttributeOverrides(basePackages = "org.springframework.context.annotation.componentscan.simple")
-	public static class ComposedConfigurationWithAttributeOverridesClass {
+	public static class ComposedConfigurationWithAttributeOverrideForBasePackage {
+	}
+
+	@ComposedConfigurationWithAttributeOverrides(basePackages = "org.springframework.context.annotation.componentscan.simple",
+			excludeFilters = @ComponentScan.Filter(Component.class))
+	public static class ComposedConfigurationWithAttributeOverrideForExcludeFilter {
 	}
 
 	@ComposedConfigurationWithAttributeOverrides
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface ComposedComposedConfigurationWithAttributeOverrides {
+	public @interface ComposedComposedConfigurationWithAttributeOverrides {
 
 		String[] basePackages() default {};
 	}
@@ -735,14 +1366,14 @@ public class ConfigurationClassPostProcessorTests {
 	@ComponentScan
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaComponentScan {
+	public @interface MetaComponentScan {
 	}
 
 	@MetaComponentScan
 	@Configuration
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaComponentScanConfigurationWithAttributeOverrides {
+	public @interface MetaComponentScanConfigurationWithAttributeOverrides {
 
 		String[] basePackages() default {};
 	}
@@ -754,6 +1385,349 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class SubMetaComponentScanConfigurationWithAttributeOverridesClass extends
 			MetaComponentScanConfigurationWithAttributeOverridesClass {
+	}
+
+	public static class ServiceBean {
+
+		private final String parameter;
+
+		public ServiceBean(String parameter) {
+			this.parameter = parameter;
+		}
+
+		public String getParameter() {
+			return parameter;
+		}
+	}
+
+	@Configuration
+	public static abstract class AbstractConfig {
+
+		@Bean
+		public ServiceBean serviceBean() {
+			return provider().getServiceBean();
+		}
+
+		@Bean
+		public ServiceBeanProvider provider() {
+			return new ServiceBeanProvider();
+		}
+	}
+
+	@Configuration
+	public static class ConcreteConfig extends AbstractConfig {
+
+		@Autowired
+		private ServiceBeanProvider provider;
+
+		@Bean
+		@Override
+		public ServiceBeanProvider provider() {
+			return provider;
+		}
+
+		@PostConstruct
+		public void validate() {
+			Assert.notNull(provider, "No ServiceBeanProvider injected");
+		}
+	}
+
+	public interface BaseInterface {
+
+		ServiceBean serviceBean();
+	}
+
+	public interface BaseDefaultMethods extends BaseInterface {
+
+		@Bean
+		default ServiceBeanProvider provider() {
+			return new ServiceBeanProvider();
+		}
+
+		@Bean
+		@Override
+		default ServiceBean serviceBean() {
+			return provider().getServiceBean();
+		}
+	}
+
+	public interface DefaultMethodsConfig extends BaseDefaultMethods {
+
+	}
+
+	@Configuration
+	public static class ConcreteConfigWithDefaultMethods implements DefaultMethodsConfig {
+
+		@Autowired
+		private ServiceBeanProvider provider;
+
+		@Bean
+		@Override
+		public ServiceBeanProvider provider() {
+			return provider;
+		}
+
+		@PostConstruct
+		public void validate() {
+			Assert.notNull(provider, "No ServiceBeanProvider injected");
+		}
+	}
+
+	@Primary
+	public static class ServiceBeanProvider {
+
+		public ServiceBean getServiceBean() {
+			return new ServiceBean("message");
+		}
+	}
+
+	@Configuration
+	public static class A {
+
+		@Autowired(required = true)
+		Z z;
+
+		@Bean
+		public B b() {
+			if (z == null) {
+				throw new NullPointerException("z is null");
+			}
+			return new B(z);
+		}
+	}
+
+	@Configuration
+	public static class AStrich {
+
+		@Autowired
+		B b;
+
+		@Bean
+		public Z z() {
+			return new Z();
+		}
+	}
+
+	public static class B {
+
+		public B(Z z) {
+		}
+	}
+
+	public static class Z {
+	}
+
+	@Configuration
+	static class BeanArgumentConfigWithPrototype {
+
+		@Bean
+		@Scope("prototype")
+		public DependingFoo foo(BarArgument bar) {
+			return new DependingFoo(bar);
+		}
+
+		@Bean
+		public FooFactory fooFactory() {
+			return new FooFactory() {
+				@Override
+				public DependingFoo createFoo(BarArgument bar) {
+					return foo(bar);
+				}
+			};
+		}
+	}
+
+	@Configuration
+	static class BeanArgumentConfigWithSingleton {
+
+		@Bean @Lazy
+		public DependingFoo foo(BarArgument bar) {
+			return new DependingFoo(bar);
+		}
+
+		@Bean
+		public FooFactory fooFactory() {
+			return new FooFactory() {
+				@Override
+				public DependingFoo createFoo(BarArgument bar) {
+					return foo(bar);
+				}
+			};
+		}
+	}
+
+	@Configuration
+	static class BeanArgumentConfigWithNull {
+
+		@Bean
+		public DependingFoo aFoo() {
+			return foo(null);
+		}
+
+		@Bean @Lazy
+		public DependingFoo foo(BarArgument bar) {
+			return new DependingFoo(bar);
+		}
+
+		@Bean
+		public BarArgument bar() {
+			return new BarArgument();
+		}
+	}
+
+	static class BarArgument {
+	}
+
+	static class DependingFoo {
+
+		DependingFoo(BarArgument bar) {
+			Assert.notNull(bar, "No BarArgument injected");
+		}
+	}
+
+	static abstract class FooFactory {
+
+		abstract DependingFoo createFoo(BarArgument bar);
+	}
+
+	interface BarInterface {
+	}
+
+	static class BarImpl implements BarInterface {
+	}
+
+	static class FooImpl {
+
+		@Autowired
+		public BarImpl bar;
+	}
+
+	@Configuration
+	static class FooBarConfiguration {
+
+		@Bean
+		public BarInterface bar() {
+			return new BarImpl();
+		}
+
+		@Bean
+		public FooImpl foo() {
+			return new FooImpl();
+		}
+	}
+
+	public static class DummyRunnable implements Runnable {
+
+		@Override
+		public void run() {
+			/* no-op */
+		}
+	}
+
+	@Configuration
+	static class VarargConfiguration {
+
+		TestBean[] testBeans;
+
+		@Bean(autowireCandidate = false)
+		public TestBean thing(TestBean... testBeans) {
+			this.testBeans = testBeans;
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	static class CollectionArgumentConfiguration {
+
+		List<TestBean> testBeans;
+
+		@Bean(autowireCandidate = false)
+		public TestBean thing(List<TestBean> testBeans) {
+			this.testBeans = testBeans;
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	public static class MapArgumentConfiguration {
+
+		@Autowired
+		ConfigurableEnvironment env;
+
+		Map<String, Runnable> testBeans;
+
+		@Bean(autowireCandidate = false)
+		Runnable testBean(Map<String, Runnable> testBeans,
+				@Qualifier("systemProperties") Map<String, String> sysprops,
+				@Qualifier("systemEnvironment") Map<String, String> sysenv) {
+			this.testBeans = testBeans;
+			assertSame(env.getSystemProperties(), sysprops);
+			assertSame(env.getSystemEnvironment(), sysenv);
+			return () -> {};
+		}
+
+		// Unrelated, not to be considered as a factory method
+		private boolean testBean(boolean param) {
+			return param;
+		}
+	}
+
+	@Configuration
+	static class CollectionInjectionConfiguration {
+
+		@Autowired(required = false)
+		public List<TestBean> testBeans;
+
+		@Bean
+		public TestBean thing() {
+			return new TestBean();
+		}
+	}
+
+	@Configuration
+	public static class MapInjectionConfiguration {
+
+		@Autowired
+		private Map<String, Runnable> testBeans;
+
+		@Bean
+		Runnable testBean() {
+			return () -> {};
+		}
+
+		// Unrelated, not to be considered as a factory method
+		private boolean testBean(boolean param) {
+			return param;
+		}
+	}
+
+	@Configuration
+	static abstract class BeanLookupConfiguration {
+
+		@Bean
+		public TestBean thing() {
+			return new TestBean();
+		}
+
+		@Lookup
+		public abstract TestBean getTestBean();
+	}
+
+	@Configuration
+	static class BeanDefinitionRegistryPostProcessorConfig {
+
+		@Bean
+		public static BeanDefinitionRegistryPostProcessor bdrpp() {
+			return new BeanDefinitionRegistryPostProcessor() {
+				@Override
+				public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+					registry.registerBeanDefinition("myTestBean", new RootBeanDefinition(TestBean.class));
+				}
+				@Override
+				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+				}
+			};
+		}
 	}
 
 }

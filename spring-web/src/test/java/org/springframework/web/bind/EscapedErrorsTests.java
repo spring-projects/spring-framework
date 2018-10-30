@@ -50,12 +50,13 @@ public class EscapedErrorsTests {
 		assertTrue("Correct global errors flag", errors.hasGlobalErrors());
 		assertTrue("Correct number of global errors", errors.getGlobalErrorCount() == 1);
 		ObjectError globalError = errors.getGlobalError();
-		assertTrue("Global error message escaped", "message: &quot; &#39;".equals(globalError.getDefaultMessage()));
+		String defaultMessage = globalError.getDefaultMessage();
+		assertTrue("Global error message escaped", "message: &quot; &#39;".equals(defaultMessage));
 		assertTrue("Global error code not escaped", "GENERAL_ERROR \" '".equals(globalError.getCode()));
 		ObjectError globalErrorInList = errors.getGlobalErrors().get(0);
-		assertTrue("Same global error in list", globalError.getDefaultMessage().equals(globalErrorInList.getDefaultMessage()));
+		assertTrue("Same global error in list", defaultMessage.equals(globalErrorInList.getDefaultMessage()));
 		ObjectError globalErrorInAllList = errors.getAllErrors().get(3);
-		assertTrue("Same global error in list", globalError.getDefaultMessage().equals(globalErrorInAllList.getDefaultMessage()));
+		assertTrue("Same global error in list", defaultMessage.equals(globalErrorInAllList.getDefaultMessage()));
 
 		assertTrue("Correct field errors flag", errors.hasFieldErrors());
 		assertTrue("Correct number of field errors", errors.getFieldErrorCount() == 3);

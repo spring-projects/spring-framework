@@ -16,11 +16,12 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertFalse;
-
 import org.junit.Test;
+
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests the evaluation of basic literals: boolean, integer, hex integer, long, real, null, date

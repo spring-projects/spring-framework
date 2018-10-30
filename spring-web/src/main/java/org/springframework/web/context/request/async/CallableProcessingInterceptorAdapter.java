@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
@@ -26,42 +27,33 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @author Rob Winch
  * @since 3.2
+ * @deprecated as of 5.0 where CallableProcessingInterceptor has default methods
  */
+@Deprecated
 public abstract class CallableProcessingInterceptorAdapter implements CallableProcessingInterceptor {
 
-	/**
-	 * This implementation is empty.
-	 */
 	@Override
 	public <T> void beforeConcurrentHandling(NativeWebRequest request, Callable<T> task) throws Exception {
 	}
 
-	/**
-	 * This implementation is empty.
-	 */
 	@Override
 	public <T> void preProcess(NativeWebRequest request, Callable<T> task) throws Exception {
 	}
 
-	/**
-	 * This implementation is empty.
-	 */
 	@Override
 	public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) throws Exception {
 	}
 
-	/**
-	 * This implementation always returns
-	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
-	 */
 	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
 		return RESULT_NONE;
 	}
 
-	/**
-	 * This implementation is empty.
-	 */
+	@Override
+	public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) throws Exception {
+		return RESULT_NONE;
+	}
+
 	@Override
 	public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
 	}

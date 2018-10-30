@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.method.support;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -25,6 +26,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  *
  * @author Arjen Poutsma
  * @since 3.1
+ * @see HandlerMethodArgumentResolver
  */
 public interface HandlerMethodReturnValueHandler {
 
@@ -44,14 +46,13 @@ public interface HandlerMethodReturnValueHandler {
 	 * to indicate the response has been handled directly.
 	 * @param returnValue the value returned from the handler method
 	 * @param returnType the type of the return value. This type must have
-	 * previously been passed to
-	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
-	 * and it must have returned {@code true}
+	 * previously been passed to {@link #supportsReturnType} which must
+	 * have returned {@code true}.
 	 * @param mavContainer the ModelAndViewContainer for the current request
 	 * @param webRequest the current request
 	 * @throws Exception if the return value handling results in an error
 	 */
-	void handleReturnValue(Object returnValue, MethodParameter returnType,
+	void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception;
 
 }

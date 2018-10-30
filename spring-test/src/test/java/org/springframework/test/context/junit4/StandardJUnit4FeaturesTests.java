@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,15 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
-
 import java.util.ArrayList;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
  * Simple unit test to verify the expected functionality of standard JUnit 4.4+
@@ -73,7 +71,7 @@ public class StandardJUnit4FeaturesTests {
 
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void expectingAnIndexOutOfBoundsException() {
-		new ArrayList<Object>().get(1);
+		new ArrayList<>().get(1);
 	}
 
 	@Test

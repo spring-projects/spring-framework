@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.junit.Before;
@@ -42,6 +41,7 @@ import static org.mockito.BDDMockito.*;
 /**
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Rob Winch
  * @since 19.12.2004
  */
 public class JdbcTemplateQueryTests {
@@ -50,12 +50,19 @@ public class JdbcTemplateQueryTests {
 	public ExpectedException thrown = ExpectedException.none();
 
 	private Connection connection;
+
 	private DataSource dataSource;
+
 	private Statement statement;
+
 	private PreparedStatement preparedStatement;
+
 	private ResultSet resultSet;
+
 	private ResultSetMetaData resultSetMetaData;
+
 	private JdbcTemplate template;
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -75,6 +82,7 @@ public class JdbcTemplateQueryTests {
 		given(this.preparedStatement.executeQuery()).willReturn(this.resultSet);
 		given(this.statement.executeQuery(anyString())).willReturn(this.resultSet);
 	}
+
 
 	@Test
 	public void testQueryForList() throws Exception {
@@ -142,7 +150,8 @@ public class JdbcTemplateQueryTests {
 		this.thrown.expect(IncorrectResultSizeDataAccessException.class);
 		try {
 			this.template.queryForObject(sql, String.class);
-		} finally {
+		}
+		finally {
 			verify(this.resultSet).close();
 			verify(this.statement).close();
 		}
@@ -188,8 +197,8 @@ public class JdbcTemplateQueryTests {
 	public void testQueryForObjectWithBigDecimal() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
-		given(this.resultSet.getBigDecimal(1)).willReturn(new BigDecimal(22.5));
-		assertEquals(new BigDecimal(22.5), this.template.queryForObject(sql, BigDecimal.class));
+		given(this.resultSet.getBigDecimal(1)).willReturn(new BigDecimal("22.5"));
+		assertEquals(new BigDecimal("22.5"), this.template.queryForObject(sql, BigDecimal.class));
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -220,7 +229,18 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
-		int i = this.template.queryForInt(sql);
+		int i = this.template.queryForObject(sql, Integer.class).intValue();
+		assertEquals("Return of an int", 22, i);
+		verify(this.resultSet).close();
+		verify(this.statement).close();
+	}
+
+	@Test
+	public void testQueryForIntPrimitive() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
+		given(this.resultSet.next()).willReturn(true, false);
+		given(this.resultSet.getInt(1)).willReturn(22);
+		int i = this.template.queryForObject(sql, int.class);
 		assertEquals("Return of an int", 22, i);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
@@ -231,7 +251,18 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
-		long l = this.template.queryForLong(sql);
+		long l = this.template.queryForObject(sql, Long.class).longValue();
+		assertEquals("Return of a long", 87, l);
+		verify(this.resultSet).close();
+		verify(this.statement).close();
+	}
+
+	@Test
+	public void testQueryForLongPrimitive() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
+		given(this.resultSet.next()).willReturn(true, false);
+		given(this.resultSet.getLong(1)).willReturn(87L);
+		long l = this.template.queryForObject(sql, long.class);
 		assertEquals("Return of a long", 87, l);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
@@ -342,7 +373,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
-		int i = this.template.queryForInt(sql, new Object[] {3});
+		int i = this.template.queryForObject(sql, new Object[] {3}, Integer.class).intValue();
 		assertEquals("Return of an int", 22, i);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
@@ -354,7 +385,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
-		long l = this.template.queryForLong(sql, new Object[] {3});
+		long l = this.template.queryForObject(sql, new Object[] {3}, Long.class).longValue();
 		assertEquals("Return of a long", 87, l);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();

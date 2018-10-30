@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,12 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
- * FreeMarker TemplateLoader adapter that loads via a Spring ResourceLoader.
- * Used by FreeMarkerConfigurationFactory for any resource loader path that
- * cannot be resolved to a java.io.File.
+ * FreeMarker {@link TemplateLoader} adapter that loads via a Spring {@link ResourceLoader}.
+ * Used by {@link FreeMarkerConfigurationFactory} for any resource loader path that cannot
+ * be resolved to a {@link java.io.File}.
  *
  * @author Juergen Hoeller
  * @since 14.03.2004
@@ -57,13 +58,15 @@ public class SpringTemplateLoader implements TemplateLoader {
 			templateLoaderPath += "/";
 		}
 		this.templateLoaderPath = templateLoaderPath;
-		if (logger.isInfoEnabled()) {
-			logger.info("SpringTemplateLoader for FreeMarker: using resource loader [" + this.resourceLoader +
+		if (logger.isDebugEnabled()) {
+			logger.debug("SpringTemplateLoader for FreeMarker: using resource loader [" + this.resourceLoader +
 					"] and template loader path [" + this.templateLoaderPath + "]");
 		}
 	}
 
+
 	@Override
+	@Nullable
 	public Object findTemplateSource(String name) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for FreeMarker template with name [" + name + "]");
@@ -85,7 +88,6 @@ public class SpringTemplateLoader implements TemplateLoader {
 			throw ex;
 		}
 	}
-
 
 	@Override
 	public long getLastModified(Object templateSource) {

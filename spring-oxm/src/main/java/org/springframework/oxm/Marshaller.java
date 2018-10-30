@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import javax.xml.transform.Result;
 public interface Marshaller {
 
 	/**
-	 * Indicates whether this marshaller can marshal instances of the supplied type.
+	 * Indicate whether this marshaller can marshal instances of the supplied type.
 	 * @param clazz the class that this marshaller is being asked if it can marshal
 	 * @return {@code true} if this marshaller can indeed marshal instances of the supplied class;
 	 * {@code false} otherwise
@@ -43,7 +43,7 @@ public interface Marshaller {
 	boolean supports(Class<?> clazz);
 
 	/**
-	 * Marshals the object graph with the given root into the provided {@link Result}.
+	 * Marshal the object graph with the given root into the provided {@link Result}.
 	 * @param graph the root of the object graph to marshal
 	 * @param result the result to marshal to
 	 * @throws IOException if an I/O error occurs

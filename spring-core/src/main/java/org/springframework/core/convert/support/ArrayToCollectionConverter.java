@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,24 +25,29 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.lang.Nullable;
 
 /**
- * Converts an Array to a Collection.
+ * Converts an array to a Collection.
  *
- * <p>First, creates a new Collection of the requested targetType.
+ * <p>First, creates a new Collection of the requested target type.
  * Then adds each array element to the target collection.
- * Will perform an element conversion from the source component type to the collection's parameterized type if necessary.
+ * Will perform an element conversion from the source component type
+ * to the collection's parameterized type if necessary.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public ArrayToCollectionConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -56,13 +61,18 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	@Nullable
+	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}
+
 		int length = Array.getLength(source);
-		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), length);
-		if (targetType.getElementTypeDescriptor() == null) {
+		TypeDescriptor elementDesc = targetType.getElementTypeDescriptor();
+		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(),
+				(elementDesc != null ? elementDesc.getType() : null), length);
+
+		if (elementDesc == null) {
 			for (int i = 0; i < length; i++) {
 				Object sourceElement = Array.get(source, i);
 				target.add(sourceElement);
@@ -72,7 +82,7 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 			for (int i = 0; i < length; i++) {
 				Object sourceElement = Array.get(source, i);
 				Object targetElement = this.conversionService.convert(sourceElement,
-						sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
+						sourceType.elementTypeDescriptor(sourceElement), elementDesc);
 				target.add(targetElement);
 			}
 		}

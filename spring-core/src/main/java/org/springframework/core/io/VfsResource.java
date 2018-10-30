@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
  * @author Ales Justin
  * @author Juergen Hoeller
  * @author Costin Leau
+ * @author Sam Brannen
  * @since 3.0
  * @see org.jboss.vfs.VirtualFile
  */
@@ -120,12 +121,13 @@ public class VfsResource extends AbstractResource {
 
 	@Override
 	public String getDescription() {
-		return this.resource.toString();
+		return "VFS resource [" + this.resource + "]";
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this || (obj instanceof VfsResource && this.resource.equals(((VfsResource) obj).resource)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof VfsResource &&
+				this.resource.equals(((VfsResource) other).resource)));
 	}
 
 	@Override

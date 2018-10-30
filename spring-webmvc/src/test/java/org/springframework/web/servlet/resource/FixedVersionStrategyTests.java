@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,69 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.servlet.resource;
 
-import java.util.Collections;
-import java.util.concurrent.Callable;
+package org.springframework.web.servlet.resource;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import org.springframework.core.io.Resource;
-
 /**
- * Unit tests for {@link org.springframework.web.servlet.resource.FixedVersionStrategy}
+ * Unit tests for {@link FixedVersionStrategy}.
+ *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  */
 public class FixedVersionStrategyTests {
 
-	private final String version = "1df341f";
+	private static final String VERSION = "1df341f";
 
-	private final String resourceId = "js/foo.js";
+	private static final String PATH = "js/foo.js";
 
-	private FixedVersionStrategy versionStrategy;
+
+	private FixedVersionStrategy strategy;
+
 
 	@Before
 	public void setup() {
-		this.versionStrategy = new FixedVersionStrategy(this.version);
+		this.strategy = new FixedVersionStrategy(VERSION);
 	}
+
 
 	@Test(expected = IllegalArgumentException.class)
-	public void constructWithEmptyPrefixVersion() throws Exception {
-
-		FixedVersionStrategy versionStrategy = new FixedVersionStrategy("  ");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void constructWithEmptyCallableVersion() throws Exception {
-
-		FixedVersionStrategy versionStrategy = new FixedVersionStrategy(
-				new Callable<String>() {
-					@Override
-					public String call() throws Exception {
-						return "  ";
-					}
-				});
+	public void emptyPrefixVersion() {
+		new FixedVersionStrategy("  ");
 	}
 
 	@Test
-	public void extractVersionFromPath() throws Exception {
-		assertEquals(this.version + "/", this.versionStrategy.extractVersionFromPath(this.version + "/" + this.resourceId));
-		assertEquals("", this.versionStrategy.extractVersionFromPath(this.resourceId));
+	public void extractVersion() {
+		assertEquals(VERSION, this.strategy.extractVersion(VERSION + "/" + PATH));
+		assertNull(this.strategy.extractVersion(PATH));
 	}
 
 	@Test
-	public void deleteVersionFromPath() throws Exception {
-		assertEquals(this.resourceId,
-				this.versionStrategy.deleteVersionFromPath(this.version + "/" + this.resourceId, this.version + "/"));
+	public void removeVersion() {
+		assertEquals("/" + PATH, this.strategy.removeVersion(VERSION + "/" + PATH, VERSION));
 	}
 
 	@Test
-	public void addVersionToUrl() throws Exception {
-		assertEquals(this.version + "/" + this.resourceId,
-				this.versionStrategy.addVersionToUrl(this.resourceId, Collections.<Resource>emptyList(), null));
-
+	public void addVersion() {
+		assertEquals(VERSION + "/" + PATH, this.strategy.addVersion("/" + PATH, VERSION));
 	}
+
+	@Test  // SPR-13727
+	public void addVersionRelativePath() {
+		String relativePath = "../" + PATH;
+		assertEquals(relativePath, this.strategy.addVersion(relativePath, VERSION));
+	}
+
 }

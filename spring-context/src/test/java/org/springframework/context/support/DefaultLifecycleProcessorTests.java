@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -63,7 +64,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void singleSmartLifecycleAutoStartup() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean bean = TestSmartLifecycleBean.forStartupTests(1, startedBeans);
 		bean.setAutoStartup(true);
 		StaticApplicationContext context = new StaticApplicationContext();
@@ -104,7 +105,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void singleSmartLifecycleWithoutAutoStartup() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean bean = TestSmartLifecycleBean.forStartupTests(1, startedBeans);
 		bean.setAutoStartup(false);
 		StaticApplicationContext context = new StaticApplicationContext();
@@ -121,7 +122,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void singleSmartLifecycleAutoStartupWithNonAutoStartupDependency() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean bean = TestSmartLifecycleBean.forStartupTests(1, startedBeans);
 		bean.setAutoStartup(true);
 		TestSmartLifecycleBean dependency = TestSmartLifecycleBean.forStartupTests(1, startedBeans);
@@ -143,7 +144,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void smartLifecycleGroupStartup() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean beanMin = TestSmartLifecycleBean.forStartupTests(Integer.MIN_VALUE, startedBeans);
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forStartupTests(1, startedBeans);
 		TestSmartLifecycleBean bean2 = TestSmartLifecycleBean.forStartupTests(2, startedBeans);
@@ -177,7 +178,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void contextRefreshThenStartWithMixedBeans() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
 		TestLifecycleBean simpleBean1 = TestLifecycleBean.forStartupTests(startedBeans);
 		TestLifecycleBean simpleBean2 = TestLifecycleBean.forStartupTests(startedBeans);
 		TestSmartLifecycleBean smartBean1 = TestSmartLifecycleBean.forStartupTests(5, startedBeans);
@@ -211,7 +212,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void contextRefreshThenStopAndRestartWithMixedBeans() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
 		TestLifecycleBean simpleBean1 = TestLifecycleBean.forStartupTests(startedBeans);
 		TestLifecycleBean simpleBean2 = TestLifecycleBean.forStartupTests(startedBeans);
 		TestSmartLifecycleBean smartBean1 = TestSmartLifecycleBean.forStartupTests(5, startedBeans);
@@ -254,7 +255,7 @@ public class DefaultLifecycleProcessorTests {
 	public void smartLifecycleGroupShutdown() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
-		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 300, stoppedBeans);
 		TestSmartLifecycleBean bean2 = TestSmartLifecycleBean.forShutdownTests(3, 100, stoppedBeans);
 		TestSmartLifecycleBean bean3 = TestSmartLifecycleBean.forShutdownTests(1, 600, stoppedBeans);
@@ -285,7 +286,7 @@ public class DefaultLifecycleProcessorTests {
 	public void singleSmartLifecycleShutdown() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
-		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean bean = TestSmartLifecycleBean.forShutdownTests(99, 300, stoppedBeans);
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.getBeanFactory().registerSingleton("bean", bean);
@@ -299,7 +300,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void singleLifecycleShutdown() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		Lifecycle bean = new TestLifecycleBean(null, stoppedBeans);
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.getBeanFactory().registerSingleton("bean", bean);
@@ -315,7 +316,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void mixedShutdown() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		Lifecycle bean1 = TestLifecycleBean.forShutdownTests(stoppedBeans);
 		Lifecycle bean2 = TestSmartLifecycleBean.forShutdownTests(500, 200, stoppedBeans);
 		Lifecycle bean3 = TestSmartLifecycleBean.forShutdownTests(Integer.MAX_VALUE, 100, stoppedBeans);
@@ -363,7 +364,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void dependencyStartedFirstEvenIfItsPhaseIsHigher() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean beanMin = TestSmartLifecycleBean.forStartupTests(Integer.MIN_VALUE, startedBeans);
 		TestSmartLifecycleBean bean2 = TestSmartLifecycleBean.forStartupTests(2, startedBeans);
 		TestSmartLifecycleBean bean99 = TestSmartLifecycleBean.forStartupTests(99, startedBeans);
@@ -393,7 +394,7 @@ public class DefaultLifecycleProcessorTests {
 	public void dependentShutdownFirstEvenIfItsPhaseIsLower() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
-		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean beanMin = TestSmartLifecycleBean.forShutdownTests(Integer.MIN_VALUE, 100, stoppedBeans);
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 200, stoppedBeans);
 		TestSmartLifecycleBean bean99 = TestSmartLifecycleBean.forShutdownTests(99, 100, stoppedBeans);
@@ -435,7 +436,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void dependencyStartedFirstAndIsSmartLifecycle() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean beanNegative = TestSmartLifecycleBean.forStartupTests(-99, startedBeans);
 		TestSmartLifecycleBean bean99 = TestSmartLifecycleBean.forStartupTests(99, startedBeans);
 		TestSmartLifecycleBean bean7 = TestSmartLifecycleBean.forStartupTests(7, startedBeans);
@@ -467,7 +468,7 @@ public class DefaultLifecycleProcessorTests {
 	public void dependentShutdownFirstAndIsSmartLifecycle() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
-		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean beanMin = TestSmartLifecycleBean.forShutdownTests(Integer.MIN_VALUE, 400, stoppedBeans);
 		TestSmartLifecycleBean beanNegative = TestSmartLifecycleBean.forShutdownTests(-99, 100, stoppedBeans);
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 200, stoppedBeans);
@@ -508,7 +509,7 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void dependencyStartedFirstButNotSmartLifecycle() throws Exception {
-		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean beanMin = TestSmartLifecycleBean.forStartupTests(Integer.MIN_VALUE, startedBeans);
 		TestSmartLifecycleBean bean7 = TestSmartLifecycleBean.forStartupTests(7, startedBeans);
 		TestLifecycleBean simpleBean = TestLifecycleBean.forStartupTests(startedBeans);
@@ -532,7 +533,7 @@ public class DefaultLifecycleProcessorTests {
 	public void dependentShutdownFirstButNotSmartLifecycle() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
-		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 200, stoppedBeans);
 		TestLifecycleBean simpleBean = TestLifecycleBean.forShutdownTests(stoppedBeans);
 		TestSmartLifecycleBean bean2 = TestSmartLifecycleBean.forShutdownTests(2, 300, stoppedBeans);

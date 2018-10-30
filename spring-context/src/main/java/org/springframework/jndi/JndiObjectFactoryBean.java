@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -70,6 +72,7 @@ import org.springframework.util.ClassUtils;
 public class JndiObjectFactoryBean extends JndiObjectLocator
 		implements FactoryBean<Object>, BeanFactoryAware, BeanClassLoaderAware {
 
+	@Nullable
 	private Class<?>[] proxyInterfaces;
 
 	private boolean lookupOnStartup = true;
@@ -78,12 +81,16 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 
 	private boolean exposeAccessContext = false;
 
+	@Nullable
 	private Object defaultObject;
 
+	@Nullable
 	private ConfigurableBeanFactory beanFactory;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private Object jndiObject;
 
 
@@ -219,7 +226,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 	}
 
 	/**
-	 * Lookup variant that that returns the specified "defaultObject"
+	 * Lookup variant that returns the specified "defaultObject"
 	 * (if any) in case of lookup failure.
 	 * @return the located object, or the "defaultObject" as fallback
 	 * @throws NamingException in case of lookup failure without fallback
@@ -237,11 +244,11 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 		}
 		catch (NamingException ex) {
 			if (this.defaultObject != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("JNDI lookup failed - returning specified default object instead", ex);
+				if (logger.isTraceEnabled()) {
+					logger.trace("JNDI lookup failed - returning specified default object instead", ex);
 				}
-				else if (logger.isInfoEnabled()) {
-					logger.info("JNDI lookup failed - returning specified default object instead: " + ex);
+				else if (logger.isDebugEnabled()) {
+					logger.debug("JNDI lookup failed - returning specified default object instead: " + ex);
 				}
 				return this.defaultObject;
 			}
@@ -259,6 +266,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 	 * Return the singleton JNDI object.
 	 */
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.jndiObject;
 	}
@@ -310,7 +318,9 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 			// Create a JndiObjectTargetSource that mirrors the JndiObjectFactoryBean's configuration.
 			JndiObjectTargetSource targetSource = new JndiObjectTargetSource();
 			targetSource.setJndiTemplate(jof.getJndiTemplate());
-			targetSource.setJndiName(jof.getJndiName());
+			String jndiName = jof.getJndiName();
+			Assert.state(jndiName != null, "No JNDI name specified");
+			targetSource.setJndiName(jndiName);
 			targetSource.setExpectedType(jof.getExpectedType());
 			targetSource.setResourceRef(jof.isResourceRef());
 			targetSource.setLookupOnStartup(jof.lookupOnStartup);
@@ -368,7 +378,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 		}
 
 		protected boolean isEligible(Method method) {
-			return !Object.class.equals(method.getDeclaringClass());
+			return (Object.class != method.getDeclaringClass());
 		}
 	}
 

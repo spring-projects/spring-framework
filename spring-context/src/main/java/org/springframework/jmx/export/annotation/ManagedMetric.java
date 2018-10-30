@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import java.lang.annotation.Target;
 import org.springframework.jmx.support.MetricType;
 
 /**
- * JDK 1.5+ method-level annotation that indicates to expose a given bean
- * property as JMX attribute, with added Descriptor properties to indicate that
- * it is a metric. Only valid when used on a JavaBean getter.
+ * Method-level annotation that indicates to expose a given bean property as a
+ * JMX attribute, with added descriptor properties to indicate that it is a metric.
+ * Only valid when used on a JavaBean getter.
  *
  * @author Jennifer Hickey
  * @since 3.0

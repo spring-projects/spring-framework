@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import javax.servlet.http.HttpServletRequest;
  *
  * <p>There are two concrete implementations included in Spring, as of Spring 3.1:
  * <ul>
- * <li>{@link org.springframework.web.multipart.commons.CommonsMultipartResolver} for Jakarta Commons FileUpload
- * <li>{@link org.springframework.web.multipart.support.StandardServletMultipartResolver} for Servlet 3.0 Part API
+ * <li>{@link org.springframework.web.multipart.commons.CommonsMultipartResolver}
+ * for Apache Commons FileUpload
+ * <li>{@link org.springframework.web.multipart.support.StandardServletMultipartResolver}
+ * for the Servlet 3.0+ Part API
  * </ul>
  *
  * <p>There is no default resolver implementation used for Spring
@@ -38,14 +40,11 @@ import javax.servlet.http.HttpServletRequest;
  * application context. Such a resolver gets applied to all requests handled
  * by that {@link org.springframework.web.servlet.DispatcherServlet}.
  *
- * <p>If a {@link org.springframework.web.servlet.DispatcherServlet} detects
- * a multipart request, it will resolve it via the configured
- * {@link MultipartResolver} and pass on a
- * wrapped {@link javax.servlet.http.HttpServletRequest}.
- * Controllers can then cast their given request to the
- * {@link MultipartHttpServletRequest}
- * interface, which permits access to any
- * {@link MultipartFile MultipartFiles}.
+ * <p>If a {@link org.springframework.web.servlet.DispatcherServlet} detects a
+ * multipart request, it will resolve it via the configured {@link MultipartResolver}
+ * and pass on a wrapped {@link javax.servlet.http.HttpServletRequest}. Controllers
+ * can then cast their given request to the {@link MultipartHttpServletRequest}
+ * interface, which allows for access to any {@link MultipartFile MultipartFiles}.
  * Note that this cast is only supported in case of an actual multipart request.
  *
  * <pre class="code">
@@ -58,23 +57,19 @@ import javax.servlet.http.HttpServletRequest;
  * Instead of direct access, command or form controllers can register a
  * {@link org.springframework.web.multipart.support.ByteArrayMultipartFileEditor}
  * or {@link org.springframework.web.multipart.support.StringMultipartFileEditor}
- * with their data binder, to automatically apply multipart content to command
+ * with their data binder, to automatically apply multipart content to form
  * bean properties.
  *
- * <p>As an alternative to using a
- * {@link MultipartResolver} with a
+ * <p>As an alternative to using a {@link MultipartResolver} with a
  * {@link org.springframework.web.servlet.DispatcherServlet},
  * a {@link org.springframework.web.multipart.support.MultipartFilter} can be
  * registered in {@code web.xml}. It will delegate to a corresponding
- * {@link MultipartResolver} bean in the root
- * application context. This is mainly intended for applications that do not
- * use Spring's own web MVC framework.
+ * {@link MultipartResolver} bean in the root application context. This is mainly
+ * intended for applications that do not use Spring's own web MVC framework.
  *
- * <p>Note: There is hardly ever a need to access the
- * {@link MultipartResolver} itself
- * from application code. It will simply do its work behind the scenes,
- * making
- * {@link MultipartHttpServletRequest MultipartHttpServletRequests}
+ * <p>Note: There is hardly ever a need to access the {@link MultipartResolver}
+ * itself from application code. It will simply do its work behind the scenes,
+ * making {@link MultipartHttpServletRequest MultipartHttpServletRequests}
  * available to controllers.
  *
  * @author Juergen Hoeller
@@ -101,8 +96,8 @@ public interface MultipartResolver {
 	/**
 	 * Parse the given HTTP request into multipart files and parameters,
 	 * and wrap the request inside a
-	 * {@link org.springframework.web.multipart.MultipartHttpServletRequest} object
-	 * that provides access to file descriptors and makes contained
+	 * {@link org.springframework.web.multipart.MultipartHttpServletRequest}
+	 * object that provides access to file descriptors and makes contained
 	 * parameters accessible via the standard ServletRequest methods.
 	 * @param request the servlet request to wrap (must be of a multipart content type)
 	 * @return the wrapped servlet request

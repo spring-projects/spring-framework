@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.test.context.jdbc;
 
 import org.junit.Test;
+
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
@@ -25,7 +26,7 @@ import static org.junit.Assert.*;
 
 /**
  * Integration tests that verify support for custom SQL script syntax
- * configured via {@link Sql @Sql}.
+ * configured via {@link SqlConfig @SqlConfig}.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -35,16 +36,9 @@ import static org.junit.Assert.*;
 public class CustomScriptSyntaxSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Test
-	@SqlGroup({//
-	@Sql("schema.sql"),//
-		@Sql(//
-		scripts = "data-add-users-with-custom-script-syntax.sql",//
-		commentPrefix = "`",//
-		blockCommentStartDelimiter = "#$",//
-		blockCommentEndDelimiter = "$#",//
-		separator = "@@"//
-		) //
-	})
+	@Sql("schema.sql")
+	@Sql(scripts = "data-add-users-with-custom-script-syntax.sql",//
+	config = @SqlConfig(commentPrefix = "`", blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@"))
 	public void methodLevelScripts() {
 		assertNumUsers(3);
 	}

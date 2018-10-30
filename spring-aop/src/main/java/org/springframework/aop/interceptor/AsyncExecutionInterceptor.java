@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,21 @@ package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * AOP Alliance {@code MethodInterceptor} that processes method invocations
@@ -67,39 +66,27 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
  * @see org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor
  */
-public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
-		implements MethodInterceptor, Ordered {
+public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport implements MethodInterceptor, Ordered {
 
-	private final Log logger = LogFactory.getLog(getClass());
-
-	private AsyncUncaughtExceptionHandler exceptionHandler;
-
+	/**
+	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
+	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
+	 * or {@link java.util.concurrent.ExecutorService}) to delegate to;
+	 * as of 4.2.6, a local executor for this interceptor will be built otherwise
+	 */
+	public AsyncExecutionInterceptor(@Nullable Executor defaultExecutor) {
+		super(defaultExecutor);
+	}
 
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
 	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
-	 * or {@link java.util.concurrent.ExecutorService}) to delegate to
+	 * or {@link java.util.concurrent.ExecutorService}) to delegate to;
+	 * as of 4.2.6, a local executor for this interceptor will be built otherwise
 	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use
 	 */
-	public AsyncExecutionInterceptor(Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
-		super(defaultExecutor);
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	/**
-	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
-	 */
-	public AsyncExecutionInterceptor(Executor defaultExecutor) {
-		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
-	}
-
-
-	/**
-	 * Supply the {@link AsyncUncaughtExceptionHandler} to use to handle exceptions
-	 * thrown by invoking asynchronous methods with a {@code void} return type.
-	 */
-	public void setExceptionHandler(AsyncUncaughtExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
+	public AsyncExecutionInterceptor(@Nullable Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
+		super(defaultExecutor, exceptionHandler);
 	}
 
 
@@ -111,6 +98,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * otherwise.
 	 */
 	@Override
+	@Nullable
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 		Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
@@ -122,61 +110,23 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 					"No executor specified and no default executor set on AsyncExecutionInterceptor either");
 		}
 
-		Callable<Object> task = new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				try {
-					Object result = invocation.proceed();
-					if (result instanceof Future) {
-						return ((Future<?>) result).get();
-					}
+		Callable<Object> task = () -> {
+			try {
+				Object result = invocation.proceed();
+				if (result instanceof Future) {
+					return ((Future<?>) result).get();
 				}
-				catch (Throwable ex) {
-					handleError(ex, userDeclaredMethod, invocation.getArguments());
-				}
-				return null;
 			}
+			catch (ExecutionException ex) {
+				handleError(ex.getCause(), userDeclaredMethod, invocation.getArguments());
+			}
+			catch (Throwable ex) {
+				handleError(ex, userDeclaredMethod, invocation.getArguments());
+			}
+			return null;
 		};
 
-		Class<?> returnType = invocation.getMethod().getReturnType();
-		if (ListenableFuture.class.isAssignableFrom(returnType)) {
-			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
-		}
-		else if (Future.class.isAssignableFrom(returnType)) {
-			return executor.submit(task);
-		}
-		else {
-			executor.submit(task);
-			return null;
-		}
-	}
-
-	/**
-	 * Handles a fatal error thrown while asynchronously invoking the specified
-	 * {@link Method}.
-	 * <p>If the return type of the method is a {@link Future} object, the original
-	 * exception can be propagated by just throwing it at the higher level. However,
-	 * for all other cases, the exception will not be transmitted back to the client.
-	 * In that later case, the current {@link AsyncUncaughtExceptionHandler} will be
-	 * used to manage such exception.
-	 * @param ex the exception to handle
-	 * @param method the method that was invoked
-	 * @param params the parameters used to invoke the method
-	 */
-	protected void handleError(Throwable ex, Method method, Object... params) throws Exception {
-		if (method.getReturnType().isAssignableFrom(Future.class)) {
-			ReflectionUtils.rethrowException(ex);
-		}
-		else {
-			// Could not transmit the exception to the caller with default executor
-			try {
-				this.exceptionHandler.handleUncaughtException(ex, method, params);
-			}
-			catch (Throwable ex2) {
-				logger.error("Exception handler for async method '" + method.toGenericString() +
-						"' threw unexpected exception itself", ex2);
-			}
-		}
+		return doSubmit(task, executor, invocation.getMethod().getReturnType());
 	}
 
 	/**
@@ -188,8 +138,24 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * @see #determineAsyncExecutor(Method)
 	 */
 	@Override
+	@Nullable
 	protected String getExecutorQualifier(Method method) {
 		return null;
+	}
+
+	/**
+	 * This implementation searches for a unique {@link org.springframework.core.task.TaskExecutor}
+	 * bean in the context, or for an {@link Executor} bean named "taskExecutor" otherwise.
+	 * If neither of the two is resolvable (e.g. if no {@code BeanFactory} was configured at all),
+	 * this implementation falls back to a newly created {@link SimpleAsyncTaskExecutor} instance
+	 * for local use if no default could be found.
+	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
+	 */
+	@Override
+	@Nullable
+	protected Executor getDefaultExecutor(@Nullable BeanFactory beanFactory) {
+		Executor defaultExecutor = super.getDefaultExecutor(beanFactory);
+		return (defaultExecutor != null ? defaultExecutor : new SimpleAsyncTaskExecutor());
 	}
 
 	@Override

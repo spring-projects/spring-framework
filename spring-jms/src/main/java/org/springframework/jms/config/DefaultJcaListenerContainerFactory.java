@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,25 +22,33 @@ import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
 import org.springframework.jms.listener.endpoint.JmsActivationSpecFactory;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@link JmsListenerContainerFactory} implementation to build a
- * JCA {@link JmsMessageEndpointManager}.
+ * JCA-based {@link JmsMessageEndpointManager}.
  *
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class DefaultJcaListenerContainerFactory implements JmsListenerContainerFactory<JmsMessageEndpointManager> {
+public class DefaultJcaListenerContainerFactory extends JmsActivationSpecConfig
+		implements JmsListenerContainerFactory<JmsMessageEndpointManager> {
 
+	@Nullable
 	private ResourceAdapter resourceAdapter;
 
+	@Nullable
 	private JmsActivationSpecFactory activationSpecFactory;
 
+	@Nullable
 	private DestinationResolver destinationResolver;
 
+	@Nullable
 	private Object transactionManager;
 
-	private JmsActivationSpecConfig activationSpecConfig;
+	@Nullable
+	private Integer phase;
+
 
 	/**
 	 * @see JmsMessageEndpointManager#setResourceAdapter(ResourceAdapter)
@@ -71,28 +79,15 @@ public class DefaultJcaListenerContainerFactory implements JmsListenerContainerF
 	}
 
 	/**
-	 * @see JmsMessageEndpointManager#setActivationSpecConfig(JmsActivationSpecConfig)
+	 * @see JmsMessageEndpointManager#setPhase(int)
 	 */
-	public void setActivationSpecConfig(JmsActivationSpecConfig activationSpecConfig) {
-		this.activationSpecConfig = activationSpecConfig;
+	public void setPhase(int phase) {
+		this.phase = phase;
 	}
 
-	/**
-	 * Return the current {@link JmsActivationSpecConfig}.
-	 */
-	public JmsActivationSpecConfig getActivationSpecConfig() {
-		return activationSpecConfig;
-	}
-
-	/**
-	 * Create an empty container instance.
-	 */
-	protected JmsMessageEndpointManager createContainerInstance() {
-		return new JmsMessageEndpointManager();
-	}
 
 	@Override
-	public JmsMessageEndpointManager createMessageListenerContainer(JmsListenerEndpoint endpoint) {
+	public JmsMessageEndpointManager createListenerContainer(JmsListenerEndpoint endpoint) {
 		if (this.destinationResolver != null && this.activationSpecFactory != null) {
 			throw new IllegalStateException("Specify either 'activationSpecFactory' or " +
 					"'destinationResolver', not both. If you define a dedicated JmsActivationSpecFactory bean, " +
@@ -113,13 +108,21 @@ public class DefaultJcaListenerContainerFactory implements JmsListenerContainerF
 		if (this.transactionManager != null) {
 			instance.setTransactionManager(this.transactionManager);
 		}
-		if (this.activationSpecConfig != null) {
-			instance.setActivationSpecConfig(this.activationSpecConfig);
+		if (this.phase != null) {
+			instance.setPhase(this.phase);
 		}
 
-		endpoint.setupMessageContainer(instance);
+		instance.setActivationSpecConfig(this);
+		endpoint.setupListenerContainer(instance);
 
 		return instance;
+	}
+
+	/**
+	 * Create an empty container instance.
+	 */
+	protected JmsMessageEndpointManager createContainerInstance() {
+		return new JmsMessageEndpointManager();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,18 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Adrian Colyer
  */
-public class AutoProxyWithCodeStyleAspectsTests extends TestCase {
+public class AutoProxyWithCodeStyleAspectsTests {
 
-	public void testNoAutoproxyingOfAjcCompiledAspects() {
+	@Test
+	@SuppressWarnings("resource")
+	public void noAutoproxyingOfAjcCompiledAspects() {
 		new ClassPathXmlApplicationContext("org/springframework/aop/aspectj/autoproxy/ajcAutoproxyTests.xml");
 	}
 

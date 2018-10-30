@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package org.springframework.beans.factory.serviceloader;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 import java.util.ServiceLoader;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.JdkVersion;
+
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
  * @author Juergen Hoeller
@@ -36,10 +36,7 @@ public class ServiceLoaderTests {
 
 	@Test
 	public void testServiceLoaderFactoryBean() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
-				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
-			return;
-		}
+		assumeTrue(ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext());
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceLoaderFactoryBean.class);
@@ -51,10 +48,7 @@ public class ServiceLoaderTests {
 
 	@Test
 	public void testServiceFactoryBean() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
-				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
-			return;
-		}
+		assumeTrue(ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext());
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceFactoryBean.class);
@@ -65,10 +59,7 @@ public class ServiceLoaderTests {
 
 	@Test
 	public void testServiceListFactoryBean() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
-				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
-			return;
-		}
+		assumeTrue(ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext());
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceListFactoryBean.class);

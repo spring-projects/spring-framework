@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,20 @@
 
 package org.springframework.scheduling.config;
 
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
+import java.util.concurrent.RejectedExecutionHandler;
+
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.StringUtils;
 
 /**
- * FactoryBean for creating ThreadPoolTaskExecutor instances, choosing
- * between the standard concurrent and the backport-concurrent variant.
+ * {@link FactoryBean} for creating {@link ThreadPoolTaskExecutor} instances,
+ * primarily used behind the XML task namespace.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -37,17 +38,23 @@ import org.springframework.util.StringUtils;
 public class TaskExecutorFactoryBean implements
 		FactoryBean<TaskExecutor>, BeanNameAware, InitializingBean, DisposableBean {
 
+	@Nullable
 	private String poolSize;
 
+	@Nullable
 	private Integer queueCapacity;
 
-	private Object rejectedExecutionHandler;
+	@Nullable
+	private RejectedExecutionHandler rejectedExecutionHandler;
 
+	@Nullable
 	private Integer keepAliveSeconds;
 
+	@Nullable
 	private String beanName;
 
-	private TaskExecutor target;
+	@Nullable
+	private ThreadPoolTaskExecutor target;
 
 
 	public void setPoolSize(String poolSize) {
@@ -58,7 +65,7 @@ public class TaskExecutorFactoryBean implements
 		this.queueCapacity = queueCapacity;
 	}
 
-	public void setRejectedExecutionHandler(Object rejectedExecutionHandler) {
+	public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
 		this.rejectedExecutionHandler = rejectedExecutionHandler;
 	}
 
@@ -73,28 +80,26 @@ public class TaskExecutorFactoryBean implements
 
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		BeanWrapper bw = new BeanWrapperImpl(ThreadPoolTaskExecutor.class);
-		determinePoolSizeRange(bw);
+	public void afterPropertiesSet() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		determinePoolSizeRange(executor);
 		if (this.queueCapacity != null) {
-			bw.setPropertyValue("queueCapacity", this.queueCapacity);
+			executor.setQueueCapacity(this.queueCapacity);
 		}
 		if (this.keepAliveSeconds != null) {
-			bw.setPropertyValue("keepAliveSeconds", this.keepAliveSeconds);
+			executor.setKeepAliveSeconds(this.keepAliveSeconds);
 		}
 		if (this.rejectedExecutionHandler != null) {
-			bw.setPropertyValue("rejectedExecutionHandler", this.rejectedExecutionHandler);
+			executor.setRejectedExecutionHandler(this.rejectedExecutionHandler);
 		}
 		if (this.beanName != null) {
-			bw.setPropertyValue("threadNamePrefix", this.beanName + "-");
+			executor.setThreadNamePrefix(this.beanName + "-");
 		}
-		this.target = (TaskExecutor) bw.getWrappedInstance();
-		if (this.target instanceof InitializingBean) {
-			((InitializingBean) this.target).afterPropertiesSet();
-		}
+		executor.afterPropertiesSet();
+		this.target = executor;
 	}
 
-	private void determinePoolSizeRange(BeanWrapper bw) {
+	private void determinePoolSizeRange(ThreadPoolTaskExecutor executor) {
 		if (StringUtils.hasText(this.poolSize)) {
 			try {
 				int corePoolSize;
@@ -108,15 +113,15 @@ public class TaskExecutorFactoryBean implements
 								"Lower bound of pool-size range must not exceed the upper bound");
 					}
 					if (this.queueCapacity == null) {
-						// no queue-capacity provided, so unbounded
+						// No queue-capacity provided, so unbounded
 						if (corePoolSize == 0) {
-							// actually set 'corePoolSize' to the upper bound of the range
-							// but allow core threads to timeout
-							bw.setPropertyValue("allowCoreThreadTimeOut", true);
+							// Actually set 'corePoolSize' to the upper bound of the range
+							// but allow core threads to timeout...
+							executor.setAllowCoreThreadTimeOut(true);
 							corePoolSize = maxPoolSize;
 						}
 						else {
-							// non-zero lower bound implies a core-max size range
+							// Non-zero lower bound implies a core-max size range...
 							throw new IllegalArgumentException(
 									"A non-zero lower bound for the size range requires a queue-capacity value");
 						}
@@ -127,8 +132,8 @@ public class TaskExecutorFactoryBean implements
 					corePoolSize = value;
 					maxPoolSize = value;
 				}
-				bw.setPropertyValue("corePoolSize", corePoolSize);
-				bw.setPropertyValue("maxPoolSize", maxPoolSize);
+				executor.setCorePoolSize(corePoolSize);
+				executor.setMaxPoolSize(maxPoolSize);
 			}
 			catch (NumberFormatException ex) {
 				throw new IllegalArgumentException("Invalid pool-size value [" + this.poolSize + "]: only single " +
@@ -139,6 +144,7 @@ public class TaskExecutorFactoryBean implements
 
 
 	@Override
+	@Nullable
 	public TaskExecutor getObject() {
 		return this.target;
 	}
@@ -155,9 +161,9 @@ public class TaskExecutorFactoryBean implements
 
 
 	@Override
-	public void destroy() throws Exception {
-		if (this.target instanceof DisposableBean) {
-			((DisposableBean) this.target).destroy();
+	public void destroy() {
+		if (this.target != null) {
+			this.target.destroy();
 		}
 	}
 

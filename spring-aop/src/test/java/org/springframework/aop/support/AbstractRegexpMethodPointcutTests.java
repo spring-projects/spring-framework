@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
@@ -53,8 +54,8 @@ public abstract class AbstractRegexpMethodPointcutTests {
 	}
 
 	protected void noPatternSuppliedTests(AbstractRegexpMethodPointcut rpc) throws Exception {
-		assertFalse(rpc.matches(Object.class.getMethod("hashCode", (Class[]) null), String.class));
-		assertFalse(rpc.matches(Object.class.getMethod("wait", (Class[]) null), Object.class));
+		assertFalse(rpc.matches(Object.class.getMethod("hashCode"), String.class));
+		assertFalse(rpc.matches(Object.class.getMethod("wait"), Object.class));
 		assertEquals(0, rpc.getPatterns().length);
 	}
 
@@ -68,38 +69,38 @@ public abstract class AbstractRegexpMethodPointcutTests {
 
 	protected void exactMatchTests(AbstractRegexpMethodPointcut rpc) throws Exception {
 		// assumes rpc.setPattern("java.lang.Object.hashCode");
-		assertTrue(rpc.matches(Object.class.getMethod("hashCode", (Class[]) null), String.class));
-		assertTrue(rpc.matches(Object.class.getMethod("hashCode", (Class[]) null), Object.class));
-		assertFalse(rpc.matches(Object.class.getMethod("wait", (Class[]) null), Object.class));
+		assertTrue(rpc.matches(Object.class.getMethod("hashCode"), String.class));
+		assertTrue(rpc.matches(Object.class.getMethod("hashCode"), Object.class));
+		assertFalse(rpc.matches(Object.class.getMethod("wait"), Object.class));
 	}
 
 	@Test
 	public void testSpecificMatch() throws Exception {
 		rpc.setPattern("java.lang.String.hashCode");
-		assertTrue(rpc.matches(Object.class.getMethod("hashCode", (Class[]) null), String.class));
-		assertFalse(rpc.matches(Object.class.getMethod("hashCode", (Class[]) null), Object.class));
+		assertTrue(rpc.matches(Object.class.getMethod("hashCode"), String.class));
+		assertFalse(rpc.matches(Object.class.getMethod("hashCode"), Object.class));
 	}
 
 	@Test
 	public void testWildcard() throws Exception {
 		rpc.setPattern(".*Object.hashCode");
-		assertTrue(rpc.matches(Object.class.getMethod("hashCode", (Class[]) null), Object.class));
-		assertFalse(rpc.matches(Object.class.getMethod("wait", (Class[]) null), Object.class));
+		assertTrue(rpc.matches(Object.class.getMethod("hashCode"), Object.class));
+		assertFalse(rpc.matches(Object.class.getMethod("wait"), Object.class));
 	}
 
 	@Test
 	public void testWildcardForOneClass() throws Exception {
 		rpc.setPattern("java.lang.Object.*");
-		assertTrue(rpc.matches(Object.class.getMethod("hashCode", (Class[]) null), String.class));
-		assertTrue(rpc.matches(Object.class.getMethod("wait", (Class[]) null), String.class));
+		assertTrue(rpc.matches(Object.class.getMethod("hashCode"), String.class));
+		assertTrue(rpc.matches(Object.class.getMethod("wait"), String.class));
 	}
 
 	@Test
 	public void testMatchesObjectClass() throws Exception {
 		rpc.setPattern("java.lang.Object.*");
-		assertTrue(rpc.matches(Exception.class.getMethod("hashCode", (Class[]) null), IOException.class));
+		assertTrue(rpc.matches(Exception.class.getMethod("hashCode"), IOException.class));
 		// Doesn't match a method from Throwable
-		assertFalse(rpc.matches(Exception.class.getMethod("getMessage", (Class[]) null), Exception.class));
+		assertFalse(rpc.matches(Exception.class.getMethod("getMessage"), Exception.class));
 	}
 
 	@Test

@@ -10,16 +10,14 @@
 	<uri>http://www.springframework.org/tags</uri>
 
 	<tag>
-		<description>
-			Sets default HTML escape value for the current page.
-			Overrides a "defaultHtmlEscape" context-param in web.xml, if any.
-		</description>
+		<description>Sets default HTML escape value for the current page.
+		Overrides a "defaultHtmlEscape" context-param in web.xml, if any.</description>
 		<name>htmlEscape</name>
 		<tag-class>org.springframework.web.servlet.tags.HtmlEscapeTag</tag-class>
 		<body-content>JSP</body-content>
 		<attribute>
 			<description>Set the default value for HTML escaping, to be put
-				into the current PageContext.</description>
+			into the current PageContext.</description>
 			<name>defaultHtmlEscape</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -27,11 +25,9 @@
 	</tag>
 
 	<tag>
-		<description>
-			Escapes its enclosed body content, applying HTML escaping and/or JavaScript escaping.
-			The HTML escaping flag participates in a page-wide or application-wide setting
-			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
-		</description>
+		<description>Escapes its enclosed body content, applying HTML escaping and/or JavaScript
+		escaping. The HTML escaping flag participates in a page-wide or application-wide setting
+		(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).</description>
 		<name>escapeBody</name>
 		<tag-class>org.springframework.web.servlet.tags.EscapeBodyTag</tag-class>
 		<body-content>JSP</body-content>
@@ -44,7 +40,7 @@
 		</attribute>
 		<attribute>
 			<description>Set JavaScript escaping for this tag, as boolean value.
-			Default is false.</description>
+			Default is 'false'.</description>
 			<name>javaScriptEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -52,22 +48,19 @@
 	</tag>
 
 	<tag>
-		<description>
-			Retrieves the message with the given code, or text if code isn't resolvable.
-			The HTML escaping flag participates in a page-wide or application-wide setting
-			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
-		</description>
+		<description>Retrieves the message with the given code, or text if code isn't resolvable.
+		The HTML escaping flag participates in a page-wide or application-wide setting
+		(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).</description>
 		<name>message</name>
 		<tag-class>org.springframework.web.servlet.tags.MessageTag</tag-class>
 		<body-content>JSP</body-content>
 		<attribute>
 			<description>A MessageSourceResolvable argument (direct or through JSP EL).
-				Fits nicely when used in conjunction with Spring's own validation error
-				classes which all implement the MessageSourceResolvable interface. For
-				example, this allows you to iterate over all of the errors in a form,
-				passing each error (using a runtime expression) as the value of this
-				'message' attribute, thus effecting the easy display of such error
-				messages.</description>
+			Fits nicely when used in conjunction with Spring's own validation error classes
+			which all implement the MessageSourceResolvable interface. For example, this
+			allows you to iterate over all of the errors in a form, passing each error
+			(using a runtime expression) as the value of this 'message' attribute, thus
+			effecting the easy display of such error messages.</description>
 			<name>message</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -80,11 +73,10 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Set optional message arguments for this tag, as a
-			(comma-)delimited String (each String argument can contain JSP EL),
-			an Object array (used as argument array), or a single Object (used
-			as single argument). You can additionally use nested spring:argument
-			tags.</description>
+			<description>Set optional message arguments for this tag, as a (comma-)
+			delimited String (each String argument can contain JSP EL), an Object array
+			(used as argument array), or a single Object (used as single argument).
+			You can additionally use nested spring:argument tags.</description>
 			<name>arguments</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -128,7 +120,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Set JavaScript escaping for this tag, as boolean value. Default is false.</description>
+			<description>Set JavaScript escaping for this tag, as boolean value.
+			Default is 'false'.</description>
 			<name>javaScriptEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -136,11 +129,9 @@
 	</tag>
 
 	<tag>
-		<description>
-			Retrieves the theme message with the given code, or text if code isn't resolvable.
-			The HTML escaping flag participates in a page-wide or application-wide setting
-			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
-		</description>
+		<description>Retrieves the theme message with the given code, or text if code isn't
+		resolvable. The HTML escaping flag participates in a page-wide or application-wide setting
+		(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).</description>
 		<name>theme</name>
 		<tag-class>org.springframework.web.servlet.tags.ThemeTag</tag-class>
 		<body-content>JSP</body-content>
@@ -158,11 +149,10 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Set optional message arguments for this tag, as a
-			(comma-)delimited String (each String argument can contain JSP EL),
-			an Object array (used as argument array), or a single Object (used
-			as single argument). You can additionally use nested spring:argument
-			tags.</description>
+			<description>Set optional message arguments for this tag, as a (comma-)
+			delimited String (each String argument can contain JSP EL), an Object array
+			(used as argument array), or a single Object (used as single argument).
+			You can additionally use nested spring:argument tags.</description>
 			<name>arguments</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -206,7 +196,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Set JavaScript escaping for this tag, as boolean value. Default is false.</description>
+			<description>Set JavaScript escaping for this tag, as boolean value.
+			Default is 'false'.</description>
 			<name>javaScriptEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -214,9 +205,8 @@
 	</tag>
 
 	<tag>
-		<description>Argument tag based on the JSTL fmt:param tag.  The purpose is to
-			support arguments inside the spring:message and spring:theme
-			tags.</description>
+		<description>Argument tag based on the JSTL fmt:param tag. The purpose is to
+		support arguments inside the spring:message and spring:theme tags.</description>
 		<name>argument</name>
 		<tag-class>org.springframework.web.servlet.tags.ArgumentTag</tag-class>
 		<body-content>JSP</body-content>
@@ -230,11 +220,9 @@
 	</tag>
 
 	<tag>
-		<description>
-			Provides Errors instance in case of bind errors.
-			The HTML escaping flag participates in a page-wide or application-wide setting
-			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
-		</description>
+		<description>Provides Errors instance in case of bind errors. The HTML escaping
+		flag participates in a page-wide or application-wide setting (i.e. by HtmlEscapeTag
+		or a "defaultHtmlEscape" context-param in web.xml).</description>
 		<name>hasBindErrors</name>
 		<tag-class>org.springframework.web.servlet.tags.BindErrorsTag</tag-class>
 		<body-content>JSP</body-content>
@@ -260,9 +248,7 @@
 	</tag>
 
 	<tag>
-		<description>
-			Sets a nested path to be used by the bind tag's path.
-		</description>
+		<description>Sets a nested path to be used by the bind tag's path.</description>
 		<name>nestedPath</name>
 		<tag-class>org.springframework.web.servlet.tags.NestedPathTag</tag-class>
 		<body-content>JSP</body-content>
@@ -281,11 +267,9 @@
 	</tag>
 
 	<tag>
-		<description>
-			Provides BindStatus object for the given bind path.
-			The HTML escaping flag participates in a page-wide or application-wide setting
-			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
-		</description>
+		<description>Provides BindStatus object for the given bind path. The HTML escaping
+		flag participates in a page-wide or application-wide setting (i.e. by HtmlEscapeTag
+		or a "defaultHtmlEscape" context-param in web.xml).</description>
 		<name>bind</name>
 		<tag-class>org.springframework.web.servlet.tags.BindTag</tag-class>
 		<body-content>JSP</body-content>
@@ -297,13 +281,14 @@
 			<description>The path to the bean or bean property to bind status
 			information for. For instance account.name, company.address.zipCode
 			or just employee. The status object will exported to the page scope,
-			specifically for this bean or bean property</description>
+			specifically for this bean or bean property.</description>
 			<name>path</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Set whether to ignore a nested path, if any. Default is to not ignore.</description>
+			<description>Set whether to ignore a nested path, if any.
+			Default is to not ignore.</description>
 			<name>ignoreNestedPath</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -318,12 +303,10 @@
 	</tag>
 
 	<tag>
-		<description>
-			Provides transformation of variables to Strings, using an appropriate
-			custom PropertyEditor from BindTag (can only be used inside BindTag).
-			The HTML escaping flag participates in a page-wide or application-wide setting
-			(i.e. by HtmlEscapeTag or a 'defaultHtmlEscape' context-param in web.xml).
-		</description>
+		<description>Provides transformation of variables to Strings, using an appropriate
+		custom PropertyEditor from BindTag (can only be used inside BindTag). The HTML
+		escaping flag participates in a page-wide or application-wide setting (i.e. by
+		HtmlEscapeTag or a 'defaultHtmlEscape' context-param in web.xml).</description>
 		<name>transform</name>
 		<tag-class>org.springframework.web.servlet.tags.TransformTag</tag-class>
 		<body-content>JSP</body-content>
@@ -361,22 +344,22 @@
 	</tag>
 
 	<tag>
-		<description>URL tag based on the JSTL c:url tag.  This variant is fully 
-		backwards compatible with the standard tag.  Enhancements include support 
+		<description>URL tag based on the JSTL c:url tag. This variant is fully
+		backwards compatible with the standard tag. Enhancements include support
 		for URL template parameters.</description>
 		<name>url</name>
 		<tag-class>org.springframework.web.servlet.tags.UrlTag</tag-class>
 		<body-content>JSP</body-content>
 		<attribute>
-			<description>The URL to build.  This value can include template place holders 
-			that are replaced with the URL encoded value of the named parameter.  Parameters 
+			<description>The URL to build. This value can include template place holders
+			that are replaced with the URL encoded value of the named parameter. Parameters
 			must be defined using the param tag inside the body of this tag.</description>
 			<name>value</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Specifies a remote application context path.  The default is the 
+			<description>Specifies a remote application context path. The default is the
 			current application context path.</description>
 			<name>context</name>
 			<required>false</required>
@@ -389,8 +372,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>The scope for the var.  'application', 'session', 'request' and 
-			'page' scopes are supported.  Defaults to page scope.  This attribute has no 
+			<description>The scope for the var. 'application', 'session', 'request' and
+			'page' scopes are supported. Defaults to page scope. This attribute has no
 			effect unless the var attribute is also defined.</description>
 			<name>scope</name>
 			<required>false</required>
@@ -405,7 +388,7 @@
 		</attribute>
 		<attribute>
 			<description>Set JavaScript escaping for this tag, as a boolean value.
-			Default is false.</description>
+			Default is 'false'.</description>
 			<name>javaScriptEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -413,7 +396,7 @@
 	</tag>
 
 	<tag>
-		<description>Parameter tag based on the JSTL c:param tag.  The sole purpose is to 
+		<description>Parameter tag based on the JSTL c:param tag. The sole purpose is to
 		support params inside the spring:url tag.</description>
 		<name>param</name>
 		<tag-class>org.springframework.web.servlet.tags.ParamTag</tag-class>
@@ -433,7 +416,8 @@
 	</tag>
 
 	<tag>
-		<description>Evaluates a Spring expression (SpEL) and either prints the result or assigns it to a variable.</description>
+		<description>Evaluates a Spring expression (SpEL) and either prints the result
+		or assigns it to a variable.</description>
 		<name>eval</name>
 		<tag-class>org.springframework.web.servlet.tags.EvalTag</tag-class>
 		<body-content>JSP</body-content>
@@ -450,8 +434,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>The scope for the var.  'application', 'session', 'request' and 
-			'page' scopes are supported.  Defaults to page scope.  This attribute has no 
+			<description>The scope for the var. 'application', 'session', 'request' and
+			'page' scopes are supported. Defaults to page scope. This attribute has no
 			effect unless the var attribute is also defined.</description>
 			<name>scope</name>
 			<required>false</required>
@@ -465,7 +449,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Set JavaScript escaping for this tag, as a boolean value.  Default is false.</description>
+			<description>Set JavaScript escaping for this tag, as a boolean value.
+			Default is 'false'.</description>
 			<name>javaScriptEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>

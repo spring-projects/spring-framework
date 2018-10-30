@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,20 @@ import java.io.ByteArrayOutputStream;
  * <ul>
  * <li>has public {@link org.springframework.util.ResizableByteArrayOutputStream#grow(int)}
  * and {@link org.springframework.util.ResizableByteArrayOutputStream#resize(int)} methods
- * to get more control over the the size of the internal buffer</li>
+ * to get more control over the size of the internal buffer</li>
  * <li>has a higher initial capacity (256) by default</li>
  * </ul>
+ *
+ * <p>As of 4.2, this class has been superseded by {@link FastByteArrayOutputStream}
+ * for Spring's internal use where no assignability to {@link ByteArrayOutputStream}
+ * is needed (since {@link FastByteArrayOutputStream} is more efficient with buffer
+ * resize management but doesn't extend the standard {@link ByteArrayOutputStream}).
  *
  * @author Brian Clozel
  * @author Juergen Hoeller
  * @since 4.0.3
+ * @see #resize
+ * @see FastByteArrayOutputStream
  */
 public class ResizableByteArrayOutputStream extends ByteArrayOutputStream {
 
@@ -38,7 +45,7 @@ public class ResizableByteArrayOutputStream extends ByteArrayOutputStream {
 
 	/**
 	 * Create a new <code>ResizableByteArrayOutputStream</code>
-	 * with the default initial capacity of 128 bytes.
+	 * with the default initial capacity of 256 bytes.
 	 */
 	public ResizableByteArrayOutputStream() {
 		super(DEFAULT_INITIAL_CAPACITY);

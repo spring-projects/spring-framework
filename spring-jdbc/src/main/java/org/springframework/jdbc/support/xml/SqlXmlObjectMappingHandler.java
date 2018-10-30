@@ -19,6 +19,8 @@ package org.springframework.jdbc.support.xml;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Abstraction for handling XML object mapping to fields in a database.
  *
@@ -43,6 +45,7 @@ public interface SqlXmlObjectMappingHandler extends SqlXmlHandler {
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 */
+	@Nullable
 	Object getXmlAsObject(ResultSet rs, String columnName) throws SQLException;
 
 	/**
@@ -55,6 +58,7 @@ public interface SqlXmlObjectMappingHandler extends SqlXmlHandler {
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 */
+	@Nullable
 	Object getXmlAsObject(ResultSet rs, int columnIndex) throws SQLException;
 
 	/**

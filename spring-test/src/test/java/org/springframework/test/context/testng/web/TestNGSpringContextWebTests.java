@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,9 @@
 package org.springframework.test.context.testng.web;
 
 import java.io.File;
-
 import javax.servlet.ServletContext;
+
+import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +34,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.testng.annotations.Test;
 
 import static org.junit.Assert.*;
 
@@ -52,34 +52,34 @@ public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTest
 	static class Config {
 
 		@Bean
-		public String foo() {
+		String foo() {
 			return "enigma";
 		}
 	}
 
 
-	protected ServletContext servletContext;
+	ServletContext servletContext;
 
 	@Autowired
-	protected WebApplicationContext wac;
+	WebApplicationContext wac;
 
 	@Autowired
-	protected MockServletContext mockServletContext;
+	MockServletContext mockServletContext;
 
 	@Autowired
-	protected MockHttpServletRequest request;
+	MockHttpServletRequest request;
 
 	@Autowired
-	protected MockHttpServletResponse response;
+	MockHttpServletResponse response;
 
 	@Autowired
-	protected MockHttpSession session;
+	MockHttpSession session;
 
 	@Autowired
-	protected ServletWebRequest webRequest;
+	ServletWebRequest webRequest;
 
 	@Autowired
-	protected String foo;
+	String foo;
 
 
 	@Override
@@ -88,7 +88,7 @@ public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTest
 	}
 
 	@Test
-	public void basicWacFeatures() throws Exception {
+	void basicWacFeatures() throws Exception {
 		assertNotNull("ServletContext should be set in the WAC.", wac.getServletContext());
 
 		assertNotNull("ServletContext should have been set via ServletContextAware.", servletContext);
@@ -112,7 +112,7 @@ public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTest
 	}
 
 	@Test
-	public void fooEnigmaAutowired() {
+	void fooEnigmaAutowired() {
 		assertEquals("enigma", foo);
 	}
 

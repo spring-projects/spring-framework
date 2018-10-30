@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.sql.Date;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,10 +24,9 @@ import org.junit.Test;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
-import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 
@@ -50,19 +49,21 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Override
 	@Before
-	public void setUp() {
-		super.setUp();
+	public void setup() {
+		super.setup();
 
 		this.webSocketHandler = mock(WebSocketHandler.class);
 		this.taskScheduler = mock(TaskScheduler.class);
 
 		this.sockJsConfig = new StubSockJsServiceConfig();
 		this.sockJsConfig.setTaskScheduler(this.taskScheduler);
+
+		setRequest("POST", "/");
 	}
+
 
 	@Test
 	public void handleRequestXhr() throws Exception {
-
 		XhrPollingTransportHandler transportHandler = new XhrPollingTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 
@@ -74,7 +75,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		assertFalse("Polling request should complete after open frame", this.servletRequest.isAsyncStarted());
 		verify(this.webSocketHandler).afterConnectionEstablished(session);
 
-		resetResponse();
+		resetRequestAndResponse();
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
 		assertTrue("Polling request should remain open", this.servletRequest.isAsyncStarted());
@@ -88,30 +89,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	}
 
 	@Test
-	public void jsonpTransport() throws Exception {
-
-		JsonpPollingTransportHandler transportHandler = new JsonpPollingTransportHandler();
-		transportHandler.initialize(this.sockJsConfig);
-		PollingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
-
-		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
-
-		assertEquals(500, this.servletResponse.getStatus());
-		assertEquals("\"callback\" parameter required", this.servletResponse.getContentAsString());
-
-		resetRequestAndResponse();
-		this.servletRequest.setQueryString("c=callback");
-		this.servletRequest.addParameter("c", "callback");
-		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
-
-		assertEquals("application/javascript;charset=UTF-8", this.response.getHeaders().getContentType().toString());
-		assertFalse("Polling request should complete after open frame", this.servletRequest.isAsyncStarted());
-		verify(this.webSocketHandler).afterConnectionEstablished(session);
-	}
-
-	@Test
 	public void handleRequestXhrStreaming() throws Exception {
-
 		XhrStreamingTransportHandler transportHandler = new XhrStreamingTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		AbstractSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -125,7 +103,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Test
 	public void htmlFileTransport() throws Exception {
-
 		HtmlFileTransportHandler transportHandler = new HtmlFileTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -136,6 +113,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		assertEquals("\"callback\" parameter required", this.servletResponse.getContentAsString());
 
 		resetRequestAndResponse();
+		setRequest("POST", "/");
 		this.servletRequest.setQueryString("c=callback");
 		this.servletRequest.addParameter("c", "callback");
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
@@ -147,7 +125,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Test
 	public void eventSourceTransport() throws Exception {
-
 		EventSourceTransportHandler transportHandler = new EventSourceTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -161,7 +138,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Test
 	public void frameFormats() throws Exception {
-
 		this.servletRequest.setQueryString("c=callback");
 		this.servletRequest.addParameter("c", "callback");
 
@@ -182,10 +158,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		format = new EventSourceTransportHandler().getFrameFormat(this.request);
 		formatted = format.format(frame);
 		assertEquals("data: " + frame.getContent() + "\r\n\r\n", formatted);
-
-		format = new JsonpPollingTransportHandler().getFrameFormat(this.request);
-		formatted = format.format(frame);
-		assertEquals("callback(\"" + frame.getContent() + "\");\r\n", formatted);
 	}
 
 }

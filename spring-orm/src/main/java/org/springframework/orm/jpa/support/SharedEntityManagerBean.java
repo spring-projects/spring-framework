@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
@@ -30,7 +31,7 @@ import org.springframework.util.Assert;
  * {@link FactoryBean} that exposes a shared JPA {@link javax.persistence.EntityManager}
  * reference for a given EntityManagerFactory. Typically used for an EntityManagerFactory
  * created by {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean},
- * as direct alternative to a JNDI lookup for a Java EE 5 server's EntityManager reference.
+ * as direct alternative to a JNDI lookup for a Java EE server's EntityManager reference.
  *
  * <p>The shared EntityManager will behave just like an EntityManager fetched from an
  * application server's JNDI environment, as defined by the JPA specification.
@@ -51,10 +52,12 @@ import org.springframework.util.Assert;
 public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 		implements FactoryBean<EntityManager>, InitializingBean {
 
+	@Nullable
 	private Class<? extends EntityManager> entityManagerInterface;
 
 	private boolean synchronizedWithTransaction = true;
 
+	@Nullable
 	private EntityManager shared;
 
 
@@ -68,7 +71,6 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 	 */
 	public void setEntityManagerInterface(Class<? extends EntityManager> entityManagerInterface) {
 		Assert.notNull(entityManagerInterface, "'entityManagerInterface' must not be null");
-		Assert.isAssignable(EntityManager.class, entityManagerInterface);
 		this.entityManagerInterface = entityManagerInterface;
 	}
 
@@ -107,6 +109,7 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 
 
 	@Override
+	@Nullable
 	public EntityManager getObject() {
 		return this.shared;
 	}

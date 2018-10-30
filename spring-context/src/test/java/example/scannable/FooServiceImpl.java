@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package example.scannable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Future;
 import javax.annotation.PostConstruct;
@@ -23,12 +24,13 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -41,7 +43,11 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  */
 @Service @Lazy @DependsOn("myNamedComponent")
-public class FooServiceImpl implements FooService {
+public abstract class FooServiceImpl implements FooService {
+
+	// Just to test ASM5's bytecode parsing of INVOKESPECIAL/STATIC on interfaces
+	private static final Comparator<MessageBean> COMPARATOR_BY_MESSAGE = Comparator.comparing(MessageBean::getMessage);
+
 
 	@Autowired private FooDao fooDao;
 
@@ -65,6 +71,7 @@ public class FooServiceImpl implements FooService {
 
 	private boolean initCalled = false;
 
+
 	@PostConstruct
 	private void init() {
 		if (this.initCalled) {
@@ -78,16 +85,24 @@ public class FooServiceImpl implements FooService {
 		return this.fooDao.findFoo(id);
 	}
 
+	public String lookupFoo(int id) {
+		return fooDao().findFoo(id);
+	}
+
 	@Override
 	public Future<String> asyncFoo(int id) {
 		System.out.println(Thread.currentThread().getName());
 		Assert.state(ServiceInvocationCounter.getThreadLocalCount() != null, "Thread-local counter not exposed");
-		return new AsyncResult<String>(this.fooDao.findFoo(id));
+		return new AsyncResult<>(fooDao().findFoo(id));
 	}
 
 	@Override
 	public boolean isInitCalled() {
 		return this.initCalled;
 	}
+
+
+	@Lookup
+	protected abstract FooDao fooDao();
 
 }

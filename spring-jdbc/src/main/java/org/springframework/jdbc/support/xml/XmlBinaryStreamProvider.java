@@ -16,8 +16,8 @@
 
 package org.springframework.jdbc.support.xml;
 
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Interface defining handling involved with providing {@code OutputStream}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.context.support;
 
-import static org.junit.Assert.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
-import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -41,14 +39,17 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class ClassPathXmlApplicationContextTests {
+public class ClassPathXmlApplicationContextTests {
 
 	private static final String PATH = "/org/springframework/context/support/";
 	private static final String RESOURCE_CONTEXT = PATH + "ClassPathXmlApplicationContextTests-resource.xml";
@@ -81,13 +82,23 @@ public final class ClassPathXmlApplicationContextTests {
 	@Test
 	public void testMultipleConfigLocations() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
-				new String[] { FQ_CONTEXT_B, FQ_CONTEXT_C, FQ_CONTEXT_A});
+				FQ_CONTEXT_B, FQ_CONTEXT_C, FQ_CONTEXT_A);
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
+
+		// re-refresh (after construction refresh)
 		Service service = (Service) ctx.getBean("service");
 		ctx.refresh();
 		assertTrue(service.isProperlyDestroyed());
+
+		// regular close call
+		service = (Service) ctx.getBean("service");
+		ctx.close();
+		assertTrue(service.isProperlyDestroyed());
+
+		// re-activating and re-closing the context (SPR-13425)
+		ctx.refresh();
 		service = (Service) ctx.getBean("service");
 		ctx.close();
 		assertTrue(service.isProperlyDestroyed());
@@ -106,8 +117,7 @@ public final class ClassPathXmlApplicationContextTests {
 
 	@Test
 	public void testSingleConfigLocationWithClass() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
-				SIMPLE_CONTEXT, getClass());
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(SIMPLE_CONTEXT, getClass());
 		assertTrue(ctx.containsBean("someMessageSource"));
 		ctx.close();
 	}
@@ -115,7 +125,7 @@ public final class ClassPathXmlApplicationContextTests {
 	@Test
 	public void testAliasWithPlaceholder() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
-				new String[] { FQ_CONTEXT_B, FQ_ALIASED_CONTEXT_C, FQ_CONTEXT_A});
+				FQ_CONTEXT_B, FQ_ALIASED_CONTEXT_C, FQ_CONTEXT_A);
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
@@ -143,16 +153,14 @@ public final class ClassPathXmlApplicationContextTests {
 	private void checkExceptionFromInvalidValueType(Throwable ex) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ex.printStackTrace(new PrintStream(baos));
-		String dump = FileCopyUtils.copyToString(
-				new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
+		String dump = FileCopyUtils.copyToString(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
 		assertTrue(dump.contains("someMessageSource"));
 		assertTrue(dump.contains("useCodeAsDefaultMessage"));
 	}
 
 	@Test
 	public void testContextWithInvalidLazyClass() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
-				INVALID_CLASS_CONTEXT, getClass());
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(INVALID_CLASS_CONTEXT, getClass());
 		assertTrue(ctx.containsBean("someMessageSource"));
 		try {
 			ctx.getBean("someMessageSource");
@@ -166,8 +174,7 @@ public final class ClassPathXmlApplicationContextTests {
 
 	@Test
 	public void testContextWithClassNameThatContainsPlaceholder() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
-				CLASS_WITH_PLACEHOLDER_CONTEXT, getClass());
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(CLASS_WITH_PLACEHOLDER_CONTEXT, getClass());
 		assertTrue(ctx.containsBean("someMessageSource"));
 		assertTrue(ctx.getBean("someMessageSource") instanceof StaticMessageSource);
 		ctx.close();
@@ -281,7 +288,7 @@ public final class ClassPathXmlApplicationContextTests {
 	@Test
 	public void testAliasThatOverridesEarlierBean() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
-				new String[] {FQ_SIMPLE_CONTEXT, ALIAS_THAT_OVERRIDES_PARENT_CONTEXT});
+				FQ_SIMPLE_CONTEXT, ALIAS_THAT_OVERRIDES_PARENT_CONTEXT);
 		Object myMs = ctx.getBean("myMessageSource");
 		Object someMs2 = ctx.getBean("someMessageSource");
 		assertSame(myMs, someMs2);

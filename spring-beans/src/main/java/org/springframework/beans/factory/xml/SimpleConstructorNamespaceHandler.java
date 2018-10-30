@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.beans.factory.xml;
 
 import java.util.Collection;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
-import org.springframework.core.Conventions;
-import org.springframework.util.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.core.Conventions;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Simple {@code NamespaceHandler} implementation that maps custom
@@ -34,8 +37,7 @@ import org.w3c.dom.Node;
  * that this {@code NamespaceHandler} does not have a corresponding schema
  * since there is no way to know in advance all possible attribute names.
  *
- * <p>
- * An example of the usage of this {@code NamespaceHandler} is shown below:
+ * <p>An example of the usage of this {@code NamespaceHandler} is shown below:
  *
  * <pre class="code">
  * &lt;bean id=&quot;author&quot; class=&quot;..TestBean&quot; c:name=&quot;Enescu&quot; c:work-ref=&quot;compositions&quot;/&gt;
@@ -51,19 +53,23 @@ import org.w3c.dom.Node;
  * support for indexes or types. Further more, the names are used as hints by
  * the container which, by default, does type introspection.
  *
- * @see SimplePropertyNamespaceHandler
  * @author Costin Leau
+ * @since 3.1
+ * @see SimplePropertyNamespaceHandler
  */
 public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 
 	private static final String REF_SUFFIX = "-ref";
+
 	private static final String DELIMITER_PREFIX = "_";
+
 
 	@Override
 	public void init() {
 	}
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		parserContext.getReaderContext().error(
 				"Class [" + getClass().getName() + "] does not support custom elements.", element);
@@ -102,7 +108,8 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 					int index = -1;
 					try {
 						index = Integer.parseInt(arg);
-					} catch (NumberFormatException ex) {
+					}
+					catch (NumberFormatException ex) {
 						parserContext.getReaderContext().error(
 								"Constructor argument '" + argName + "' specifies an invalid integer", attr);
 					}
@@ -111,7 +118,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 								"Constructor argument '" + argName + "' specifies a negative index", attr);
 					}
 
-					if (cvs.hasIndexedArgumentValue(index)){
+					if (cvs.hasIndexedArgumentValue(index)) {
 						parserContext.getReaderContext().error(
 								"Constructor argument '" + argName + "' with index "+ index+" already defined using <constructor-arg>." +
 								" Only one approach may be used per argument.", attr);
@@ -123,7 +130,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 			// no escaping -> ctr name
 			else {
 				String name = Conventions.attributeNameToPropertyName(argName);
-				if (containsArgWithName(name, cvs)){
+				if (containsArgWithName(name, cvs)) {
 					parserContext.getReaderContext().error(
 							"Constructor argument '" + argName + "' already defined using <constructor-arg>." +
 							" Only one approach may be used per argument.", attr);
@@ -136,11 +143,8 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 	}
 
 	private boolean containsArgWithName(String name, ConstructorArgumentValues cvs) {
-		if (!checkName(name, cvs.getGenericArgumentValues())) {
-			return checkName(name, cvs.getIndexedArgumentValues().values());
-		}
-
-		return true;
+		return (checkName(name, cvs.getGenericArgumentValues()) ||
+				checkName(name, cvs.getIndexedArgumentValues().values()));
 	}
 
 	private boolean checkName(String name, Collection<ValueHolder> values) {
@@ -151,4 +155,5 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 		}
 		return false;
 	}
+
 }

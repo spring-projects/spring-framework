@@ -24,6 +24,7 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * Converts from a Collection to another Collection.
@@ -59,7 +60,8 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	@Nullable
+	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}
@@ -76,7 +78,9 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		}
 
 		// At this point, we need a collection copy in any case, even if just for finding out about element copies...
-		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
+		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(),
+				(elementDesc != null ? elementDesc.getType() : null), sourceCollection.size());
+
 		if (elementDesc == null) {
 			target.addAll(sourceCollection);
 		}

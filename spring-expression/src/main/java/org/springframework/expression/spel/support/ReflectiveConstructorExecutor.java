@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -32,10 +33,11 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @since 3.0
  */
-class ReflectiveConstructorExecutor implements ConstructorExecutor {
+public class ReflectiveConstructorExecutor implements ConstructorExecutor {
 
 	private final Constructor<?> ctor;
 
+	@Nullable
 	private final Integer varargsPosition;
 
 
@@ -53,11 +55,11 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 	@Override
 	public TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException {
 		try {
-			if (arguments != null) {
-				ReflectionHelper.convertArguments(context.getTypeConverter(), arguments, this.ctor, this.varargsPosition);
-			}
+			ReflectionHelper.convertArguments(
+					context.getTypeConverter(), arguments, this.ctor, this.varargsPosition);
 			if (this.ctor.isVarArgs()) {
-				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.ctor.getParameterTypes(), arguments);
+				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(
+						this.ctor.getParameterTypes(), arguments);
 			}
 			ReflectionUtils.makeAccessible(this.ctor);
 			return new TypedValue(this.ctor.newInstance(arguments));
@@ -65,6 +67,10 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 		catch (Exception ex) {
 			throw new AccessException("Problem invoking constructor: " + this.ctor, ex);
 		}
+	}
+
+	public Constructor<?> getConstructor() {
+		return this.ctor;
 	}
 
 }

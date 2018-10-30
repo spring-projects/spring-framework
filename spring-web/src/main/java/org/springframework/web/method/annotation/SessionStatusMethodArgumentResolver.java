@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.method.annotation;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -34,15 +36,14 @@ public class SessionStatusMethodArgumentResolver implements HandlerMethodArgumen
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return SessionStatus.class.equals(parameter.getParameterType());
+		return SessionStatus.class == parameter.getParameterType();
 	}
 
 	@Override
-	public Object resolveArgument(
-			MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
-			throws Exception {
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
+		Assert.state(mavContainer != null, "ModelAndViewContainer is required for session status exposure");
 		return mavContainer.getSessionStatus();
 	}
 

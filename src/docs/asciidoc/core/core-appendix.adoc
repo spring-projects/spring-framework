@@ -1,0 +1,1495 @@
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+
+= Appendix
+
+
+
+[[xsd-schemas]]
+== XML Schemas
+
+This part of the appendix lists XML schemas related to the core container.
+
+
+
+[[xsd-schemas-util]]
+=== The `util` Schema
+
+As the name implies, the `util` tags deal with common, utility configuration
+issues, such as configuring collections, referencing constants, and so forth.
+To use the tags in the `util` schema, you need to have the following preamble at the top
+of your Spring XML configuration file (the text in the snippet references the
+correct schema so that the tags in the `util` namespace are available to you):
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		__xmlns:util="http://www.springframework.org/schema/util"__ xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"__>
+
+			<!-- bean definitions here -->
+	</beans>
+----
+====
+
+
+
+[[xsd-schemas-util-constant]]
+==== Using `<util:constant/>`
+
+Consider the following bean definition:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="..." class="...">
+		<property name="isolation">
+			<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
+					class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
+		</property>
+	</bean>
+----
+====
+
+The preceding configuration uses a Spring `FactoryBean` implementation (the
+`FieldRetrievingFactoryBean`) to set the value of the `isolation` property on a bean
+to the value of the `java.sql.Connection.TRANSACTION_SERIALIZABLE` constant. This is
+all well and good, but it is verbose and (unnecessarily) exposes Spring's internal
+plumbing to the end user.
+
+The following XML Schema-based version is more concise, clearly expresses the
+developer's intent ("`inject this constant value`"), and it reads better:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="..." class="...">
+		<property name="isolation">
+			<util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
+		</property>
+	</bean>
+----
+====
+
+
+
+[[xsd-schemas-util-frfb]]
+===== Setting a Bean Property or Constructor Argument from a Field Value
+
+{api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
+is a `FactoryBean` that retrieves a `static` or non-static field value. It is typically
+used for retrieving `public` `static` `final` constants, which may then be used to set a
+property value or constructor argument for another bean.
+
+The following example shows how a `static` field is exposed, by using the
+{api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)[`staticField`]
+property:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="myField"
+			class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+		<property name="staticField" value="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
+	</bean>
+----
+====
+
+There is also a convenience usage form where the `static` field is specified as the bean
+name, as the following example shows:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
+			class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/>
+----
+====
+
+This does mean that there is no longer any choice in what the bean `id` is (so any other
+bean that refers to it also has to use this longer name), but this form is very
+concise to define and very convenient to use as an inner bean since the `id` does not have
+to be specified for the bean reference, as the following example shows:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="..." class="...">
+		<property name="isolation">
+			<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
+					class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
+		</property>
+	</bean>
+----
+====
+
+You can also access a non-static (instance) field of another bean, as
+described in the API documentation for the
+{api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
+class.
+
+Injecting enumeration values into beans as either property or constructor arguments is
+easy to do in Spring. You do not actually have to do anything or know
+anything about the Spring internals (or even about classes such as the
+`FieldRetrievingFactoryBean`). The following example enumeration shows how easy injecting an
+enum value is:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package javax.persistence;
+
+	public enum PersistenceContextType {
+
+		TRANSACTION,
+		EXTENDED
+	}
+----
+====
+
+Now consider the following setter of type `PersistenceContextType` and the corresponding bean definition:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package example;
+
+	public class Client {
+
+		private PersistenceContextType persistenceContextType;
+
+		public void setPersistenceContextType(PersistenceContextType type) {
+			this.persistenceContextType = type;
+		}
+	}
+----
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean class="example.Client">
+		<property name="persistenceContextType" value="TRANSACTION"/>
+	</bean>
+----
+====
+
+
+
+[[xsd-schemas-util-property-path]]
+==== Using `<util:property-path/>`
+
+Consider the following example:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- target bean to be referenced by name -->
+	<bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
+		<property name="age" value="10"/>
+		<property name="spouse">
+			<bean class="org.springframework.beans.TestBean">
+				<property name="age" value="11"/>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- results in 10, which is the value of property 'age' of bean 'testBean' -->
+	<bean id="testBean.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+----
+====
+
+The preceding configuration uses a Spring `FactoryBean` implementation (the
+`PropertyPathFactoryBean`) to create a bean (of type `int`) called `testBean.age` that
+has a value equal to the `age` property of the `testBean` bean.
+
+Now consider the following example, which adds a `<util:property-path/>` element:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- target bean to be referenced by name -->
+	<bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
+		<property name="age" value="10"/>
+		<property name="spouse">
+			<bean class="org.springframework.beans.TestBean">
+				<property name="age" value="11"/>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- results in 10, which is the value of property 'age' of bean 'testBean' -->
+	<util:property-path id="name" path="testBean.age"/>
+----
+====
+
+The value of the `path` attribute of the `<property-path/>` element follows the form of
+`beanName.beanProperty`. In this case, it picks up the `age` property of the bean named
+`testBean`. The value of that `age` property is `10`.
+
+[[xsd-schemas-util-property-path-dependency]]
+===== Using `<util:property-path/>` to Set a Bean Property or Constructor Argument
+
+`PropertyPathFactoryBean` is a `FactoryBean` that evaluates a property path on a given
+target object. The target object can be specified directly or by a bean name. You can then use this
+value in another bean definition as a property value or constructor
+argument.
+
+The following example shows a path being used against another bean, by name:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	// target bean to be referenced by name
+	<bean id="person" class="org.springframework.beans.TestBean" scope="prototype">
+		<property name="age" value="10"/>
+		<property name="spouse">
+			<bean class="org.springframework.beans.TestBean">
+				<property name="age" value="11"/>
+			</bean>
+		</property>
+	</bean>
+
+	// results in 11, which is the value of property 'spouse.age' of bean 'person'
+	<bean id="theAge"
+			class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
+		<property name="targetBeanName" value="person"/>
+		<property name="propertyPath" value="spouse.age"/>
+	</bean>
+----
+====
+
+In the following example, a path is evaluated against an inner bean:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- results in 12, which is the value of property 'age' of the inner bean -->
+	<bean id="theAge"
+			class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
+		<property name="targetObject">
+			<bean class="org.springframework.beans.TestBean">
+				<property name="age" value="12"/>
+			</bean>
+		</property>
+		<property name="propertyPath" value="age"/>
+	</bean>
+----
+====
+
+There is also a shortcut form, where the bean name is the property path.
+The following example shows the shortcut form:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- results in 10, which is the value of property 'age' of bean 'person' -->
+	<bean id="person.age"
+			class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+----
+====
+
+This form does mean that there is no choice in the name of the bean. Any reference to it
+also has to use the same `id`, which is the path. If used as an inner
+bean, there is no need to refer to it at all, as the following example shows:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="..." class="...">
+		<property name="age">
+			<bean id="person.age"
+					class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		</property>
+	</bean>
+----
+====
+
+You can specifically set the result type in the actual definition. This is not necessary
+for most use cases, but it can sometimes be useful. See the javadoc for more info on
+this feature.
+
+
+[[xsd-schemas-util-properties]]
+==== Using `<util:properties/>`
+
+Consider the following example:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- creates a java.util.Properties instance with values loaded from the supplied location -->
+	<bean id="jdbcConfiguration" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="classpath:com/foo/jdbc-production.properties"/>
+	</bean>
+----
+====
+
+The preceding configuration uses a Spring `FactoryBean` implementation (the
+`PropertiesFactoryBean`) to instantiate a `java.util.Properties` instance with values
+loaded from the supplied <<core.adoc#resources, `Resource`>> location).
+
+The following example uses a `util:properties` element to make a more concise representation:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- creates a java.util.Properties instance with values loaded from the supplied location -->
+	<util:properties id="jdbcConfiguration" location="classpath:com/foo/jdbc-production.properties"/>
+----
+====
+
+
+
+[[xsd-schemas-util-list]]
+==== Using `<util:list/>`
+
+Consider the following example:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- creates a java.util.List instance with values loaded from the supplied 'sourceList' -->
+	<bean id="emails" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>pechorin@hero.org</value>
+				<value>raskolnikov@slums.org</value>
+				<value>stavrogin@gov.org</value>
+				<value>porfiry@gov.org</value>
+			</list>
+		</property>
+	</bean>
+----
+====
+
+The preceding configuration uses a Spring `FactoryBean` implementation (the
+`ListFactoryBean`) to create a `java.util.List` instance and initialize it with values taken
+from the supplied `sourceList`.
+
+The following example uses a `<util:list/>` element to make a more concise representation:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- creates a java.util.List instance with the supplied values -->
+	<util:list id="emails">
+		<value>pechorin@hero.org</value>
+		<value>raskolnikov@slums.org</value>
+		<value>stavrogin@gov.org</value>
+		<value>porfiry@gov.org</value>
+	</util:list>
+----
+====
+
+You can also explicitly control the exact type of `List` that is instantiated and
+populated by using the `list-class` attribute on the `<util:list/>` element. For
+example, if we really need a `java.util.LinkedList` to be instantiated, we could use the
+following configuration:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<util:list id="emails" list-class="java.util.LinkedList">
+		<value>jackshaftoe@vagabond.org</value>
+		<value>eliza@thinkingmanscrumpet.org</value>
+		<value>vanhoek@pirate.org</value>
+		<value>d'Arcachon@nemesis.org</value>
+	</util:list>
+----
+====
+
+If no `list-class` attribute is supplied, the container chooses a `List` implementation.
+
+
+
+[[xsd-schemas-util-map]]
+==== Using `<util:map/>`
+
+Consider the following example:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- creates a java.util.Map instance with values loaded from the supplied 'sourceMap' -->
+	<bean id="emails" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="pechorin" value="pechorin@hero.org"/>
+				<entry key="raskolnikov" value="raskolnikov@slums.org"/>
+				<entry key="stavrogin" value="stavrogin@gov.org"/>
+				<entry key="porfiry" value="porfiry@gov.org"/>
+			</map>
+		</property>
+	</bean>
+----
+====
+
+The preceding configuration uses a Spring `FactoryBean` implementation (the
+`MapFactoryBean`) to create a `java.util.Map` instance initialized with key-value pairs
+taken from the supplied `'sourceMap'`.
+
+The following example uses a `<util:map/>` element to make a more concise representation:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- creates a java.util.Map instance with the supplied key-value pairs -->
+	<util:map id="emails">
+		<entry key="pechorin" value="pechorin@hero.org"/>
+		<entry key="raskolnikov" value="raskolnikov@slums.org"/>
+		<entry key="stavrogin" value="stavrogin@gov.org"/>
+		<entry key="porfiry" value="porfiry@gov.org"/>
+	</util:map>
+----
+====
+
+You can also explicitly control the exact type of `Map` that is instantiated and
+populated by using the `'map-class'` attribute on the `<util:map/>` element. For
+example, if we really need a `java.util.TreeMap` to be instantiated, we could use the
+following configuration:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<util:map id="emails" map-class="java.util.TreeMap">
+		<entry key="pechorin" value="pechorin@hero.org"/>
+		<entry key="raskolnikov" value="raskolnikov@slums.org"/>
+		<entry key="stavrogin" value="stavrogin@gov.org"/>
+		<entry key="porfiry" value="porfiry@gov.org"/>
+	</util:map>
+----
+====
+
+If no `'map-class'` attribute is supplied, the container chooses a `Map` implementation.
+
+
+
+[[xsd-schemas-util-set]]
+==== Using `<util:set/>`
+
+Consider the following example:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- creates a java.util.Set instance with values loaded from the supplied 'sourceSet' -->
+	<bean id="emails" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set>
+				<value>pechorin@hero.org</value>
+				<value>raskolnikov@slums.org</value>
+				<value>stavrogin@gov.org</value>
+				<value>porfiry@gov.org</value>
+			</set>
+		</property>
+	</bean>
+----
+====
+
+The preceding configuration uses a Spring `FactoryBean` implementation (the
+`SetFactoryBean`) to create a `java.util.Set` instance initialized with values taken
+from the supplied `sourceSet`.
+
+The following example uses a `<util:set/>` element to make a more concise representation:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- creates a java.util.Set instance with the supplied values -->
+	<util:set id="emails">
+		<value>pechorin@hero.org</value>
+		<value>raskolnikov@slums.org</value>
+		<value>stavrogin@gov.org</value>
+		<value>porfiry@gov.org</value>
+	</util:set>
+----
+====
+
+You can also explicitly control the exact type of `Set` that is instantiated and
+populated by using the `set-class` attribute on the `<util:set/>` element. For
+example, if we really need a `java.util.TreeSet` to be instantiated, we could use the
+following configuration:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<util:set id="emails" set-class="java.util.TreeSet">
+		<value>pechorin@hero.org</value>
+		<value>raskolnikov@slums.org</value>
+		<value>stavrogin@gov.org</value>
+		<value>porfiry@gov.org</value>
+	</util:set>
+----
+====
+
+If no `set-class` attribute is supplied, the container chooses a `Set` implementation.
+
+
+
+[[xsd-schemas-aop]]
+=== The `aop` Schema
+
+The `aop` tags deal with configuring all things AOP in Spring, including Spring's
+own proxy-based AOP framework and Spring's integration with the AspectJ AOP framework.
+These tags are comprehensively covered in the chapter entitled <<core.adoc#aop,
+Aspect Oriented Programming with Spring>>.
+
+In the interest of completeness, to use the tags in the `aop` schema, you need to have
+the following preamble at the top of your Spring XML configuration file (the text in the
+snippet references the correct schema so that the tags in the `aop` namespace
+are available to you):
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		__xmlns:aop="http://www.springframework.org/schema/aop"__ xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"__>
+
+		<!-- bean definitions here -->
+	</beans>
+----
+====
+
+
+
+[[xsd-schemas-context]]
+=== The `context` Schema
+
+The `context` tags deal with `ApplicationContext` configuration that relates to plumbing
+-- that is, not usually beans that are important to an end-user but rather beans that do
+a lot of the "`grunt`" work in Spring, such as `BeanfactoryPostProcessors`. The following
+snippet references the correct schema so that the elements in the `context` namespace are
+available to you:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		__xmlns:context="http://www.springframework.org/schema/context"__ xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"__>
+
+		<!-- bean definitions here -->
+	</beans>
+----
+====
+
+
+
+[[xsd-schemas-context-pphc]]
+==== Using `<property-placeholder/>`
+
+This element activates the replacement of `${...}` placeholders, which are resolved against a
+specified properties file (as a <<core.adoc#resources,Spring resource location>>). This element is
+a convenience mechanism that sets up a <<core.adoc#beans-factory-placeholderconfigurer,
+`PropertyPlaceholderConfigurer`>> for you. If you need more control over the
+`PropertyPlaceholderConfigurer`, you can explicitly define one yourself.
+
+
+
+[[xsd-schemas-context-ac]]
+==== Using `<annotation-config/>`
+
+This element activates the Spring infrastructure to detect annotations in bean
+classes:
+
+* Spring's <<core.adoc#beans-required-annotation, `@Required`>> and
+<<core.adoc#beans-annotation-config, `@Autowired`>>
+* JSR 250's `@PostConstruct`,
+`@PreDestroy` and `@Resource` (if available)
+* JPA's `@PersistenceContext` and
+`@PersistenceUnit` (if available).
+
+Alternatively, you can choose to explicitly activate the
+individual `BeanPostProcessors` for those annotations.
+
+NOTE: This element does not activate processing of Spring's
+<<data-access.adoc#transaction-declarative-annotations, `@Transactional`>> annotation. You can use the
+<<data-access.adoc#tx-decl-explained, `<tx:annotation-driven/>`>> element for that purpose.
+
+
+
+[[xsd-schemas-context-component-scan]]
+==== Using `<component-scan/>`
+
+This element is detailed in <<core.adoc#beans-annotation-config,
+Annotation-based container configuration>>.
+
+
+
+[[xsd-schemas-context-ltw]]
+==== Using `<load-time-weaver/>`
+
+This element is detailed in <<core.adoc#aop-aj-ltw,
+Load-time weaving with AspectJ in the Spring Framework>>.
+
+
+
+[[xsd-schemas-context-sc]]
+==== Using `<spring-configured/>`
+
+This element is detailed in <<core.adoc#aop-atconfigurable,
+Using AspectJ to dependency inject domain objects with Spring>>.
+
+
+
+[[xsd-schemas-context-mbe]]
+==== Using `<mbean-export/>`
+
+This element is detailed in <<integration.adoc#jmx-context-mbeanexport,
+Configuring annotation based MBean export>>.
+
+
+
+[[xsd-schemas-beans]]
+=== The Beans Schema
+
+Last but not least, we have the elements in the `beans` schema. These elements
+have been in Spring since the very dawn of the framework. Examples of the various elements
+in the `beans` schema are not shown here because they are quite comprehensively covered
+in <<core.adoc#beans-factory-properties-detailed,Dependencies and configuration in detail>>
+(and, indeed, in that entire <<core.adoc#beans,chapter>>).
+
+Note that you can add zero or more key-value pairs to `<bean/>` XML definitions.
+What, if anything, is done with this extra metadata is totally up to your own custom
+logic (and so is typically only of use if you write your own custom elements as described
+in the appendix entitled <<xml-custom>>).
+
+The following example shows the `<meta/>` element in the context of a surrounding `<bean/>`
+(note that, without any logic to interpret it, the metadata is effectively useless
+as it stands).
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+		<bean id="foo" class="x.y.Foo">
+			<meta key="cacheName" value="foo"/> <1>
+			<property name="name" value="Rick"/>
+		</bean>
+
+	</beans>
+----
+<1> This is the example `meta` element
+====
+
+In the case of the preceding example, you could assume that there is some logic that
+consumes the bean definition and sets up some caching infrastructure that uses the supplied
+metadata.
+
+
+
+[[xml-custom]]
+== XML Schema Authoring
+
+[[xsd-custom-introduction]]
+Since version 2.0, Spring has featured a mechanism for adding schema-based extensions to the
+basic Spring XML format for defining and configuring beans. This section covers
+how to write your own custom XML bean definition parsers and
+integrate such parsers into the Spring IoC container.
+
+To facilitate authoring configuration files that use a schema-aware XML editor,
+Spring's extensible XML configuration mechanism is based on XML Schema. If you are not
+familiar with Spring's current XML configuration extensions that come with the standard
+Spring distribution, you should first read the appendix entitled <<xsd-config>>.
+
+To create new XML configuration extensions:
+
+. <<xsd-custom-schema,Author>> an XML schema to describe your custom element(s).
+. <<xsd-custom-namespacehandler,Code>> a custom `NamespaceHandler` implementation.
+. <<xsd-custom-parser,Code>> one or more `BeanDefinitionParser` implementations
+  (this is where the real work is done).
+. <<xsd-custom-registration,Register>> your new artifacts with Spring.
+
+For a unified example, we create an
+XML extension (a custom XML element) that lets us configure objects of the type
+`SimpleDateFormat` (from the `java.text` package). When we are done,
+we will be able to define bean definitions of type `SimpleDateFormat` as follows:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<myns:dateformat id="dateFormat"
+		pattern="yyyy-MM-dd HH:mm"
+		lenient="true"/>
+----
+====
+
+(We include much more detailed
+examples follow later in this appendix. The intent of this first simple example is to walk you
+through the basic steps of making a custom extension.)
+
+
+
+[[xsd-custom-schema]]
+=== Authoring the Schema
+
+Creating an XML configuration extension for use with Spring's IoC container starts with
+authoring an XML Schema to describe the extension. For our example, we use the following schema
+to configure `SimpleDateFormat` objects:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<!-- myns.xsd (inside package org/springframework/samples/xml) -->
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<xsd:schema xmlns="http://www.mycompany.com/schema/myns"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:beans="http://www.springframework.org/schema/beans"
+			targetNamespace="http://www.mycompany.com/schema/myns"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
+
+		<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+
+		<xsd:element name="dateformat">
+			<xsd:complexType>
+				<xsd:complexContent>
+					<xsd:extension base="beans:identifiedType"> <1>
+						<xsd:attribute name="lenient" type="xsd:boolean"/>
+						<xsd:attribute name="pattern" type="xsd:string" use="required"/>
+					</xsd:extension>
+				</xsd:complexContent>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+----
+<1> The indicated line contains an extension base for all identifiable tags
+(meaning they have an `id` attribute that we can use as the bean identifier in the
+container). We can use this attribute because we imported the Spring-provided
+`beans` namespace.
+====
+
+
+The preceding schema lets us configure `SimpleDateFormat` objects directly in an
+XML application context file by using the `<myns:dateformat/>` element, as the following
+example shows:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<myns:dateformat id="dateFormat"
+		pattern="yyyy-MM-dd HH:mm"
+		lenient="true"/>
+----
+====
+
+Note that, after we have created the infrastructure classes, the preceding snippet of XML is
+essentially the same as the following XML snippet:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="dateFormat" class="java.text.SimpleDateFormat">
+		<constructor-arg value="yyyy-HH-dd HH:mm"/>
+		<property name="lenient" value="true"/>
+	</bean>
+----
+====
+
+The second of the two preceding snippets
+creates a bean in the container (identified by the name `dateFormat` of type
+`SimpleDateFormat`) with a couple of properties set.
+
+NOTE: The schema-based approach to creating configuration format allows for tight integration
+with an IDE that has a schema-aware XML editor. By using a properly authored schema, you
+can use autocompletion to let a user choose between several configuration options
+defined in the enumeration.
+
+
+
+[[xsd-custom-namespacehandler]]
+=== Coding a `NamespaceHandler`
+
+In addition to the schema, we need a `NamespaceHandler` to parse all elements of
+this specific namespace that Spring encounters while parsing configuration files. For this example, the
+`NamespaceHandler` should take care of the parsing of the `myns:dateformat`
+element.
+
+The `NamespaceHandler` interface features three methods:
+
+* `init()`: Allows for initialization of the `NamespaceHandler` and is called by
+  Spring before the handler is used.
+* `BeanDefinition parse(Element, ParserContext)`: Called when Spring encounters a
+  top-level element (not nested inside a bean definition or a different namespace).
+  This method can itself register bean definitions, return a bean definition, or both.
+* `BeanDefinitionHolder decorate(Node, BeanDefinitionHolder, ParserContext)`: Called
+  when Spring encounters an attribute or nested element of a different namespace.
+  The decoration of one or more bean definitions is used (for example) with the
+  <<core.adoc#beans-factory-scopes,scopes that Spring supports>>.
+  We start by highlighting a simple example, without using decoration, after which
+  we show decoration in a somewhat more advanced example.
+
+Although you can code your own `NamespaceHandler` for the entire
+namespace (and hence provide code that parses each and every element in the namespace),
+it is often the case that each top-level XML element in a Spring XML configuration file
+results in a single bean definition (as in our case, where a single `<myns:dateformat/>`
+element results in a single `SimpleDateFormat` bean definition). Spring features a
+number of convenience classes that support this scenario. In the following example, we
+use the `NamespaceHandlerSupport` class:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package org.springframework.samples.xml;
+
+	import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+
+	public class MyNamespaceHandler extends NamespaceHandlerSupport {
+
+		public void init() {
+			**registerBeanDefinitionParser("dateformat", new SimpleDateFormatBeanDefinitionParser());**
+		}
+
+	}
+----
+====
+
+You may notice that there is not actually a whole lot of parsing logic
+in this class. Indeed, the `NamespaceHandlerSupport` class has a built-in notion of
+delegation. It supports the registration of any number of `BeanDefinitionParser`
+instances, to which it delegates to when it needs to parse an element in its
+namespace. This clean separation of concerns lets a `NamespaceHandler` handle the
+orchestration of the parsing of all of the custom elements in its namespace while
+delegating to `BeanDefinitionParsers` to do the grunt work of the XML parsing. This
+means that each `BeanDefinitionParser` contains only the logic for parsing a single
+custom element, as we can see in the next step.
+
+
+
+[[xsd-custom-parser]]
+=== Using `BeanDefinitionParser`
+
+A `BeanDefinitionParser` is used if the `NamespaceHandler` encounters an XML
+element of the type that has been mapped to the specific bean definition parser
+(`dateformat` in this case). In other words, the `BeanDefinitionParser` is
+responsible for parsing one distinct top-level XML element defined in the schema. In
+the parser, we' have access to the XML element (and thus to its subelements, too) so that
+we can parse our custom XML content, as you can see in the following example:
+
+====
+[source,java,indent=0]
+----
+	package org.springframework.samples.xml;
+
+	import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+	import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
+	import org.springframework.util.StringUtils;
+	import org.w3c.dom.Element;
+
+	import java.text.SimpleDateFormat;
+
+	public class SimpleDateFormatBeanDefinitionParser extends AbstractSingleBeanDefinitionParser { // <1>
+
+		protected Class getBeanClass(Element element) {
+			return SimpleDateFormat.class; // <2>
+		}
+
+		protected void doParse(Element element, BeanDefinitionBuilder bean) {
+			// this will never be null since the schema explicitly requires that a value be supplied
+			String pattern = element.getAttribute("pattern");
+			bean.addConstructorArg(pattern);
+
+			// this however is an optional property
+			String lenient = element.getAttribute("lenient");
+			if (StringUtils.hasText(lenient)) {
+				bean.addPropertyValue("lenient", Boolean.valueOf(lenient));
+			}
+		}
+
+	}
+----
+
+<1> We use the Spring-provided `AbstractSingleBeanDefinitionParser` to handle a lot of
+the basic grunt work of creating a single `BeanDefinition`.
+
+<2> We supply the `AbstractSingleBeanDefinitionParser` superclass with the type that our
+single `BeanDefinition` represents.
+====
+
+In this simple case, this is all that we need to do. The creation of our single
+`BeanDefinition` is handled by the `AbstractSingleBeanDefinitionParser` superclass, as
+is the extraction and setting of the bean definition's unique identifier.
+
+
+
+[[xsd-custom-registration]]
+=== Registering the Handler and the Schema
+The coding is finished. All that remains to be done is to make the Spring XML
+parsing infrastructure aware of our custom element. We do so by registering our custom
+`namespaceHandler` and custom XSD file in two special-purpose properties files. These
+properties files are both placed in a `META-INF` directory in your application and
+can, for example, be distributed alongside your binary classes in a JAR file. The Spring
+XML parsing infrastructure automatically picks up your new extension by consuming
+these special properties files, the formats of which are detailed in the next two sections.
+
+
+
+[[xsd-custom-registration-spring-handlers]]
+==== Writing `META-INF/spring.handlers`
+
+The properties file called `spring.handlers` contains a mapping of XML Schema URIs to
+namespace handler classes. For our example, we need to write the following:
+
+====
+[literal]
+[subs="verbatim,quotes"]
+----
+http\://www.mycompany.com/schema/myns=org.springframework.samples.xml.MyNamespaceHandler
+----
+====
+
+(The `:` character is a valid delimiter in the Java properties format, so
+`:` character in the URI needs to be escaped with a backslash.)
+
+The first part (the key) of the key-value pair is the URI associated with your custom
+namespace extension and needs to exactly match exactly the value of the `targetNamespace`
+attribute, as specified in your custom XSD schema.
+
+
+
+[[xsd-custom-registration-spring-schemas]]
+==== Writing 'META-INF/spring.schemas'
+
+The properties file called `spring.schemas` contains a mapping of XML Schema locations
+(referred to, along with the schema declaration, in XML files that use the schema as part
+of the `xsi:schemaLocation` attribute) to classpath resources. This file is needed
+to prevent Spring from absolutely having to use a default `EntityResolver` that requires
+Internet access to retrieve the schema file. If you specify the mapping in this
+properties file, Spring searches for the schema (in this case,
+`myns.xsd` in the `org.springframework.samples.xml` package) on the classpath.
+The following snippet shows the line we need to add for our custom schema:
+
+====
+[literal]
+[subs="verbatim,quotes"]
+----
+http\://www.mycompany.com/schema/myns/myns.xsd=org/springframework/samples/xml/myns.xsd
+----
+====
+
+(Remember that the `:` character must be escaped.)
+
+You are encouraged to deploy your XSD file (or files) right alongside
+the `NamespaceHandler` and `BeanDefinitionParser` classes on the classpath.
+
+
+
+[[xsd-custom-using]]
+=== Using a Custom Extension in Your Spring XML Configuration
+
+Using a custom extension that you yourself have implemented is no different from using
+one of the "`custom`" extensions that Spring provides. The following
+example uses the custom `<dateformat/>` element developed in the previous steps
+in a Spring XML configuration file:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:myns="http://www.mycompany.com/schema/myns"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.mycompany.com/schema/myns http://www.mycompany.com/schema/myns/myns.xsd">
+
+		<!-- as a top-level bean -->
+		<myns:dateformat id="defaultDateFormat" pattern="yyyy-MM-dd HH:mm" lenient="true"/> <1>
+
+		<bean id="jobDetailTemplate" abstract="true">
+			<property name="dateFormat">
+				<!-- as an inner bean -->
+				<myns:dateformat pattern="HH:mm MM-dd-yyyy"/>
+			</property>
+		</bean>
+
+	</beans>
+----
+<1> Our custom bean.
+====
+
+
+
+[[xsd-custom-meat]]
+=== More Detailed Examples
+
+This section presents some more detailed examples of custom XML extensions.
+
+
+
+[[xsd-custom-custom-nested]]
+==== Nesting Custom Elements within Custom Elements
+
+The example presented in this section shows how you to write the various artifacts required
+to satisfy a target of the following configuration:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:foo="http://www.foo.com/schema/component"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.foo.com/schema/component http://www.foo.com/schema/component/component.xsd">
+
+		<foo:component id="bionic-family" name="Bionic-1">
+			<foo:component name="Mother-1">
+				<foo:component name="Karate-1"/>
+				<foo:component name="Sport-1"/>
+			</foo:component>
+			<foo:component name="Rock-1"/>
+		</foo:component>
+
+	</beans>
+----
+====
+
+The preceding configuration nests custom extensions within each other. The class
+that is actually configured by the `<foo:component/>` element is the `Component`
+class (shown in the next example). Notice how the `Component` class does not expose a
+setter method for the `components` property. This makes it hard (or rather impossible)
+to configure a bean definition for the `Component` class by using setter injection.
+The following listing shows the `Component` class:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package com.foo;
+
+	import java.util.ArrayList;
+	import java.util.List;
+
+	public class Component {
+
+		private String name;
+		private List<Component> components = new ArrayList<Component> ();
+
+		// mmm, there is no setter method for the 'components'
+		public void addComponent(Component component) {
+			this.components.add(component);
+		}
+
+		public List<Component> getComponents() {
+			return components;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+	}
+----
+====
+
+The typical solution to this issue is to create a custom `FactoryBean` that exposes a
+setter property for the `components` property. The following listing shows such a custom
+`FactoryBean`:
+====
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package com.foo;
+
+	import org.springframework.beans.factory.FactoryBean;
+
+	import java.util.List;
+
+	public class ComponentFactoryBean implements FactoryBean<Component> {
+
+		private Component parent;
+		private List<Component> children;
+
+		public void setParent(Component parent) {
+			this.parent = parent;
+		}
+
+		public void setChildren(List<Component> children) {
+			this.children = children;
+		}
+
+		public Component getObject() throws Exception {
+			if (this.children != null && this.children.size() > 0) {
+				for (Component child : children) {
+					this.parent.addComponent(child);
+				}
+			}
+			return this.parent;
+		}
+
+		public Class<Component> getObjectType() {
+			return Component.class;
+		}
+
+		public boolean isSingleton() {
+			return true;
+		}
+
+	}
+----
+====
+
+This works nicely, but it exposes a lot of Spring plumbing to the
+end user. What we are going to do is write a custom extension that hides away all of
+this Spring plumbing. If we stick to <<xsd-custom-introduction,the steps described
+previously>>, we start off by creating the XSD schema to define the structure of our
+custom tag, as the following listing shows:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+	<xsd:schema xmlns="http://www.foo.com/schema/component"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			targetNamespace="http://www.foo.com/schema/component"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
+
+		<xsd:element name="component">
+			<xsd:complexType>
+				<xsd:choice minOccurs="0" maxOccurs="unbounded">
+					<xsd:element ref="component"/>
+				</xsd:choice>
+				<xsd:attribute name="id" type="xsd:ID"/>
+				<xsd:attribute name="name" use="required" type="xsd:string"/>
+			</xsd:complexType>
+		</xsd:element>
+
+	</xsd:schema>
+----
+====
+
+Again following <<xsd-custom-introduction,the process described earlier>>, we then create a custom `NamespaceHandler`:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package com.foo;
+
+	import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+
+	public class ComponentNamespaceHandler extends NamespaceHandlerSupport {
+
+		public void init() {
+			registerBeanDefinitionParser("component", new ComponentBeanDefinitionParser());
+		}
+
+	}
+----
+====
+
+Next up is the custom `BeanDefinitionParser`. Remember that we are creating
+`BeanDefinition` that describes a `ComponentFactoryBean`. The following listing shows our
+custom `BeanDefinitionParser`:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package com.foo;
+
+	import org.springframework.beans.factory.config.BeanDefinition;
+	import org.springframework.beans.factory.support.AbstractBeanDefinition;
+	import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+	import org.springframework.beans.factory.support.ManagedList;
+	import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+	import org.springframework.beans.factory.xml.ParserContext;
+	import org.springframework.util.xml.DomUtils;
+	import org.w3c.dom.Element;
+
+	import java.util.List;
+
+	public class ComponentBeanDefinitionParser extends AbstractBeanDefinitionParser {
+
+		protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+			return parseComponentElement(element);
+		}
+
+		private static AbstractBeanDefinition parseComponentElement(Element element) {
+			BeanDefinitionBuilder factory = BeanDefinitionBuilder.rootBeanDefinition(ComponentFactoryBean.class);
+			factory.addPropertyValue("parent", parseComponent(element));
+
+			List<Element> childElements = DomUtils.getChildElementsByTagName(element, "component");
+			if (childElements != null && childElements.size() > 0) {
+				parseChildComponents(childElements, factory);
+			}
+
+			return factory.getBeanDefinition();
+		}
+
+		private static BeanDefinition parseComponent(Element element) {
+			BeanDefinitionBuilder component = BeanDefinitionBuilder.rootBeanDefinition(Component.class);
+			component.addPropertyValue("name", element.getAttribute("name"));
+			return component.getBeanDefinition();
+		}
+
+		private static void parseChildComponents(List<Element> childElements, BeanDefinitionBuilder factory) {
+			ManagedList<BeanDefinition> children = new ManagedList<BeanDefinition>(childElements.size());
+			for (Element element : childElements) {
+				children.add(parseComponentElement(element));
+			}
+			factory.addPropertyValue("children", children);
+		}
+
+	}
+----
+====
+
+Finally, the various artifacts need to be registered with the Spring XML infrastructure,
+by modifying the `META-INF/spring.handlers` and `META-INF/spring.schemas` files, as follows:
+
+====
+[literal]
+[subs="verbatim,quotes"]
+----
+# in 'META-INF/spring.handlers'
+http\://www.foo.com/schema/component=com.foo.ComponentNamespaceHandler
+----
+
+[literal]
+[subs="verbatim,quotes"]
+----
+# in 'META-INF/spring.schemas'
+http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd
+----
+====
+
+
+
+[[xsd-custom-custom-just-attributes]]
+==== Custom Attributes on "`Normal`" Elements
+
+Writing your own custom parser and the associated artifacts is not hard. However, it is sometimes
+not the right thing to do. Consider a scenario where you need to add metadata to
+already existing bean definitions. In this case, you certainly do not want to have to
+write your own entire custom extension. Rather, you merely want to add an
+additional attribute to the existing bean definition element.
+
+By way of another example, suppose that you define a bean
+definition for a service object that (unknown to it) accesses a clustered
+http://jcp.org/en/jsr/detail?id=107[JCache], and you want to ensure that the named
+JCache instance is eagerly started within the surrounding cluster. The following
+listing shows such a definition:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="checkingAccountService" class="com.foo.DefaultCheckingAccountService"
+			jcache:cache-name="checking.account">
+		<!-- other dependencies here... -->
+	</bean>
+----
+====
+
+We can then create another `BeanDefinition` when the
+`'jcache:cache-name'` attribute is parsed. This `BeanDefinition` then initializes
+the named JCache for us. We can also modify the existing `BeanDefinition` for the
+`'checkingAccountService'` so that it has a dependency on this new
+JCache-initializing `BeanDefinition`. The following listing shows our `JCacheInitializer`:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package com.foo;
+
+	public class JCacheInitializer {
+
+		private String name;
+
+		public JCacheInitializer(String name) {
+			this.name = name;
+		}
+
+		public void initialize() {
+			// lots of JCache API calls to initialize the named cache...
+		}
+
+	}
+----
+====
+
+Now we can move onto the custom extension. First, we need to author the XSD schema that describes the
+custom attribute, as follows:
+
+====
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+	<xsd:schema xmlns="http://www.foo.com/schema/jcache"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			targetNamespace="http://www.foo.com/schema/jcache"
+			elementFormDefault="qualified">
+
+		<xsd:attribute name="cache-name" type="xsd:string"/>
+
+	</xsd:schema>
+----
+====
+
+Next, we need to create the associated `NamespaceHandler`, as follows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package com.foo;
+
+	import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+
+	public class JCacheNamespaceHandler extends NamespaceHandlerSupport {
+
+		public void init() {
+			super.registerBeanDefinitionDecoratorForAttribute("cache-name",
+				new JCacheInitializingBeanDefinitionDecorator());
+		}
+
+	}
+----
+====
+
+Next, we need to create the parser. Note that, in this case, because we are going to parse an XML
+attribute, we write a `BeanDefinitionDecorator` rather than a `BeanDefinitionParser`.
+The following listing shows our `BeanDefinitionDecorator`:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	package com.foo;
+
+	import org.springframework.beans.factory.config.BeanDefinitionHolder;
+	import org.springframework.beans.factory.support.AbstractBeanDefinition;
+	import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+	import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
+	import org.springframework.beans.factory.xml.ParserContext;
+	import org.w3c.dom.Attr;
+	import org.w3c.dom.Node;
+
+	import java.util.ArrayList;
+	import java.util.Arrays;
+	import java.util.List;
+
+	public class JCacheInitializingBeanDefinitionDecorator implements BeanDefinitionDecorator {
+
+		private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+		public BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder holder,
+				ParserContext ctx) {
+			String initializerBeanName = registerJCacheInitializer(source, ctx);
+			createDependencyOnJCacheInitializer(holder, initializerBeanName);
+			return holder;
+		}
+
+		private void createDependencyOnJCacheInitializer(BeanDefinitionHolder holder,
+				String initializerBeanName) {
+			AbstractBeanDefinition definition = ((AbstractBeanDefinition) holder.getBeanDefinition());
+			String[] dependsOn = definition.getDependsOn();
+			if (dependsOn == null) {
+				dependsOn = new String[]{initializerBeanName};
+			} else {
+				List dependencies = new ArrayList(Arrays.asList(dependsOn));
+				dependencies.add(initializerBeanName);
+				dependsOn = (String[]) dependencies.toArray(EMPTY_STRING_ARRAY);
+			}
+			definition.setDependsOn(dependsOn);
+		}
+
+		private String registerJCacheInitializer(Node source, ParserContext ctx) {
+			String cacheName = ((Attr) source).getValue();
+			String beanName = cacheName + "-initializer";
+			if (!ctx.getRegistry().containsBeanDefinition(beanName)) {
+				BeanDefinitionBuilder initializer = BeanDefinitionBuilder.rootBeanDefinition(JCacheInitializer.class);
+				initializer.addConstructorArg(cacheName);
+				ctx.getRegistry().registerBeanDefinition(beanName, initializer.getBeanDefinition());
+			}
+			return beanName;
+		}
+
+	}
+----
+====
+
+Finally, we need to register the various artifacts with the Spring XML infrastructure
+by modifying the `META-INF/spring.handlers` and `META-INF/spring.schemas` files, as follows:
+
+====
+[literal]
+[subs="verbatim,quotes"]
+----
+# in 'META-INF/spring.handlers'
+http\://www.foo.com/schema/jcache=com.foo.JCacheNamespaceHandler
+----
+
+[literal]
+[subs="verbatim,quotes"]
+----
+# in 'META-INF/spring.schemas'
+http\://www.foo.com/schema/jcache/jcache.xsd=com/foo/jcache.xsd
+----
+====

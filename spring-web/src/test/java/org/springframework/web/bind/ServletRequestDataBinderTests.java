@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,20 @@
 
 package org.springframework.web.bind;
 
-import static org.junit.Assert.*;
-
 import java.beans.PropertyEditorSupport;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.tests.sample.beans.ITestBean;
+
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -203,7 +204,7 @@ public class ServletRequestDataBinderTests {
 		request.addParameter("test_age", "" + 50);
 
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertTrue("Didn't fidn normal when given prefix", !pvs.contains("forname"));
+		assertTrue("Didn't find normal when given prefix", !pvs.contains("forname"));
 		assertTrue("Did treat prefix as normal when not given prefix", pvs.contains("test_forname"));
 
 		pvs = new ServletRequestParameterPropertyValues(request, "test");
@@ -241,7 +242,7 @@ public class ServletRequestDataBinderTests {
 		assertTrue("Doesn't contain tory", !pvs.contains("tory"));
 
 		PropertyValue[] ps = pvs.getPropertyValues();
-		Map<String, String> m = new HashMap<String, String>();
+		Map<String, String> m = new HashMap<>();
 		m.put("forname", "Tony");
 		m.put("surname", "Blair");
 		m.put("age", "50");

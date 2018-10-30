@@ -16,33 +16,33 @@
 
 package org.springframework.aop.support;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.target.EmptyTargetSource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class AopUtilsTests {
+public class AopUtilsTests {
 
 	@Test
 	public void testPointcutCanNeverApply() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
 			@Override
-			public boolean matches(Method method, Class<?> clazzy) {
+			public boolean matches(Method method, @Nullable Class<?> clazzy) {
 				return false;
 			}
 		}
@@ -61,7 +61,7 @@ public final class AopUtilsTests {
 	public void testPointcutAppliesToOneMethodOnObject() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
 			@Override
-			public boolean matches(Method method, Class<?> clazz) {
+			public boolean matches(Method method, @Nullable Class<?> clazz) {
 				return method.getName().equals("hashCode");
 			}
 		}

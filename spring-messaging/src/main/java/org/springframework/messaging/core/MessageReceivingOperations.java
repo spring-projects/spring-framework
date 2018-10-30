@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package org.springframework.messaging.core;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
 /**
  * Operations for receiving messages from a destination.
  *
- * @param <D> the type of destination to receive messages from
- *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <D> the type of destination
  * @see GenericMessagingTemplate
  */
 public interface MessageReceivingOperations<D> {
@@ -36,6 +36,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
+	@Nullable
 	Message<?> receive() throws MessagingException;
 
 	/**
@@ -44,6 +45,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
+	@Nullable
 	Message<?> receive(D destination) throws MessagingException;
 
 	/**
@@ -53,6 +55,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T receiveAndConvert(Class<T> targetClass) throws MessagingException;
 
 	/**
@@ -63,6 +66,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T receiveAndConvert(D destination, Class<T> targetClass) throws MessagingException;
 
 }

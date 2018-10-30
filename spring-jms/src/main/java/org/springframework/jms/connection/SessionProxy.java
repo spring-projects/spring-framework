@@ -20,7 +20,7 @@ import javax.jms.Session;
 
 /**
  * Subinterface of {@link javax.jms.Session} to be implemented by
- * Session proxies. Allows access to the the underlying target Session.
+ * Session proxies. Allows access to the underlying target Session.
  *
  * @author Juergen Hoeller
  * @since 2.0.4

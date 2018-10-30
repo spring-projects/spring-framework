@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,20 +20,24 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Generic utility methods for working with SQL scripts. Mainly for internal use
- * within the framework.
+ * Generic utility methods for working with SQL scripts.
+ *
+ * <p>Mainly for internal use within the framework.
  *
  * @author Thomas Risberg
  * @author Sam Brannen
@@ -43,11 +47,10 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Oliver Gierke
  * @author Chris Baldwin
+ * @author Nicolas Debeissat
  * @since 4.0.3
  */
 public abstract class ScriptUtils {
-
-	private static final Log logger = LogFactory.getLog(ScriptUtils.class);
 
 	/**
 	 * Default statement separator within SQL scripts: {@code ";"}.
@@ -88,12 +91,8 @@ public abstract class ScriptUtils {
 	public static final String DEFAULT_BLOCK_COMMENT_END_DELIMITER = "*/";
 
 
-	/**
-	 * Prevent instantiation of this utility class.
-	 */
-	private ScriptUtils() {
-		/* no-op */
-	}
+	private static final Log logger = LogFactory.getLog(ScriptUtils.class);
+
 
 	/**
 	 * Split an SQL script into separate statements delimited by the provided
@@ -139,7 +138,7 @@ public abstract class ScriptUtils {
 	 */
 	public static void splitSqlScript(String script, String separator, List<String> statements) throws ScriptException {
 		splitSqlScript(null, script, separator, DEFAULT_COMMENT_PREFIX, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
-			DEFAULT_BLOCK_COMMENT_END_DELIMITER, statements);
+				DEFAULT_BLOCK_COMMENT_END_DELIMITER, statements);
 	}
 
 	/**
@@ -166,22 +165,23 @@ public abstract class ScriptUtils {
 	 * @param statements the list that will contain the individual statements
 	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 */
-	public static void splitSqlScript(EncodedResource resource, String script, String separator, String commentPrefix,
-			String blockCommentStartDelimiter, String blockCommentEndDelimiter, List<String> statements)
-			throws ScriptException {
+	public static void splitSqlScript(@Nullable EncodedResource resource, String script,
+			String separator, String commentPrefix, String blockCommentStartDelimiter,
+			String blockCommentEndDelimiter, List<String> statements) throws ScriptException {
 
-		Assert.hasText(script, "script must not be null or empty");
-		Assert.notNull(separator, "separator must not be null");
-		Assert.hasText(commentPrefix, "commentPrefix must not be null or empty");
-		Assert.hasText(blockCommentStartDelimiter, "blockCommentStartDelimiter must not be null or empty");
-		Assert.hasText(blockCommentEndDelimiter, "blockCommentEndDelimiter must not be null or empty");
+		Assert.hasText(script, "'script' must not be null or empty");
+		Assert.notNull(separator, "'separator' must not be null");
+		Assert.hasText(commentPrefix, "'commentPrefix' must not be null or empty");
+		Assert.hasText(blockCommentStartDelimiter, "'blockCommentStartDelimiter' must not be null or empty");
+		Assert.hasText(blockCommentEndDelimiter, "'blockCommentEndDelimiter' must not be null or empty");
 
 		StringBuilder sb = new StringBuilder();
-		boolean inLiteral = false;
+		boolean inSingleQuote = false;
+		boolean inDoubleQuote = false;
 		boolean inEscape = false;
-		char[] content = script.toCharArray();
+
 		for (int i = 0; i < script.length(); i++) {
-			char c = content[i];
+			char c = script.charAt(i);
 			if (inEscape) {
 				inEscape = false;
 				sb.append(c);
@@ -193,12 +193,15 @@ public abstract class ScriptUtils {
 				sb.append(c);
 				continue;
 			}
-			if (c == '\'') {
-				inLiteral = !inLiteral;
+			if (!inDoubleQuote && (c == '\'')) {
+				inSingleQuote = !inSingleQuote;
 			}
-			if (!inLiteral) {
+			else if (!inSingleQuote && (c == '"')) {
+				inDoubleQuote = !inDoubleQuote;
+			}
+			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
-					// we've reached the end of the current statement
+					// We've reached the end of the current statement
 					if (sb.length() > 0) {
 						statements.add(sb.toString());
 						sb = new StringBuilder();
@@ -207,32 +210,31 @@ public abstract class ScriptUtils {
 					continue;
 				}
 				else if (script.startsWith(commentPrefix, i)) {
-					// skip over any content from the start of the comment to the EOL
-					int indexOfNextNewline = script.indexOf("\n", i);
+					// Skip over any content from the start of the comment to the EOL
+					int indexOfNextNewline = script.indexOf('\n', i);
 					if (indexOfNextNewline > i) {
 						i = indexOfNextNewline;
 						continue;
 					}
 					else {
-						// if there's no EOL, we must be at the end
-						// of the script, so stop here.
+						// If there's no EOL, we must be at the end of the script, so stop here.
 						break;
 					}
 				}
 				else if (script.startsWith(blockCommentStartDelimiter, i)) {
-					// skip over any block comments
+					// Skip over any block comments
 					int indexOfCommentEnd = script.indexOf(blockCommentEndDelimiter, i);
 					if (indexOfCommentEnd > i) {
 						i = indexOfCommentEnd + blockCommentEndDelimiter.length() - 1;
 						continue;
 					}
 					else {
-						throw new ScriptParseException(String.format("Missing block comment end delimiter [%s].",
-							blockCommentEndDelimiter), resource);
+						throw new ScriptParseException(
+								"Missing block comment end delimiter: " + blockCommentEndDelimiter, resource);
 					}
 				}
 				else if (c == ' ' || c == '\n' || c == '\t') {
-					// avoid multiple adjacent whitespace characters
+					// Avoid multiple adjacent whitespace characters
 					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
 						c = ' ';
 					}
@@ -243,6 +245,7 @@ public abstract class ScriptUtils {
 			}
 			sb.append(c);
 		}
+
 		if (StringUtils.hasText(sb)) {
 			statements.add(sb.toString());
 		}
@@ -273,8 +276,9 @@ public abstract class ScriptUtils {
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
-	private static String readScript(EncodedResource resource, String commentPrefix, String separator)
-			throws IOException {
+	private static String readScript(EncodedResource resource, @Nullable String commentPrefix,
+			@Nullable String separator) throws IOException {
+
 		LineNumberReader lnr = new LineNumberReader(resource.getReader());
 		try {
 			return readScript(lnr, commentPrefix, separator);
@@ -299,8 +303,9 @@ public abstract class ScriptUtils {
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
-	public static String readScript(LineNumberReader lineNumberReader, String commentPrefix, String separator)
-			throws IOException {
+	public static String readScript(LineNumberReader lineNumberReader, @Nullable String commentPrefix,
+			@Nullable String separator) throws IOException {
+
 		String currentStatement = lineNumberReader.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
@@ -316,7 +321,7 @@ public abstract class ScriptUtils {
 		return scriptBuilder.toString();
 	}
 
-	private static void appendSeparatorToScriptIfNecessary(StringBuilder scriptBuilder, String separator) {
+	private static void appendSeparatorToScriptIfNecessary(StringBuilder scriptBuilder, @Nullable String separator) {
 		if (separator == null) {
 			return;
 		}
@@ -334,19 +339,31 @@ public abstract class ScriptUtils {
 	/**
 	 * Does the provided SQL script contain the specified delimiter?
 	 * @param script the SQL script
-	 * @param delim String delimiting each statement - typically a ';' character
+	 * @param delim the string delimiting each statement - typically a ';' character
 	 */
 	public static boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;
-		char[] content = script.toCharArray();
+		boolean inEscape = false;
+
 		for (int i = 0; i < script.length(); i++) {
-			if (content[i] == '\'') {
+			char c = script.charAt(i);
+			if (inEscape) {
+				inEscape = false;
+				continue;
+			}
+			// MySQL style escapes
+			if (c == '\\') {
+				inEscape = true;
+				continue;
+			}
+			if (c == '\'') {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral && script.startsWith(delim, i)) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -355,7 +372,8 @@ public abstract class ScriptUtils {
 	 * separators, comment delimiters, and exception handling flags.
 	 * <p>Statement separators and comments will be removed before executing
 	 * individual statements within the supplied script.
-	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
+	 * <p><strong>Warning</strong>: this method does <em>not</em> release the
+	 * provided {@link Connection}.
 	 * @param connection the JDBC connection to use to execute the script; already
 	 * configured and ready to use
 	 * @param resource the resource to load the SQL script from; encoded with the
@@ -366,6 +384,8 @@ public abstract class ScriptUtils {
 	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
 	public static void executeSqlScript(Connection connection, Resource resource) throws ScriptException {
 		executeSqlScript(connection, new EncodedResource(resource));
@@ -376,7 +396,8 @@ public abstract class ScriptUtils {
 	 * separators, comment delimiters, and exception handling flags.
 	 * <p>Statement separators and comments will be removed before executing
 	 * individual statements within the supplied script.
-	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
+	 * <p><strong>Warning</strong>: this method does <em>not</em> release the
+	 * provided {@link Connection}.
 	 * @param connection the JDBC connection to use to execute the script; already
 	 * configured and ready to use
 	 * @param resource the resource (potentially associated with a specific encoding)
@@ -387,17 +408,20 @@ public abstract class ScriptUtils {
 	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource) throws ScriptException {
 		executeSqlScript(connection, resource, false, false, DEFAULT_COMMENT_PREFIX, DEFAULT_STATEMENT_SEPARATOR,
-			DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+				DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
 	/**
 	 * Execute the given SQL script.
 	 * <p>Statement separators and comments will be removed before executing
 	 * individual statements within the supplied script.
-	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
+	 * <p><strong>Warning</strong>: this method does <em>not</em> release the
+	 * provided {@link Connection}.
 	 * @param connection the JDBC connection to use to execute the script; already
 	 * configured and ready to use
 	 * @param resource the resource (potentially associated with a specific encoding)
@@ -421,18 +445,19 @@ public abstract class ScriptUtils {
 	 * @see #DEFAULT_STATEMENT_SEPARATOR
 	 * @see #FALLBACK_STATEMENT_SEPARATOR
 	 * @see #EOF_STATEMENT_SEPARATOR
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
-			boolean ignoreFailedDrops, String commentPrefix, String separator, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter) throws ScriptException {
+			boolean ignoreFailedDrops, String commentPrefix, @Nullable String separator,
+			String blockCommentStartDelimiter, String blockCommentEndDelimiter) throws ScriptException {
 
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Executing SQL script from " + resource);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executing SQL script from " + resource);
 			}
-
 			long startTime = System.currentTimeMillis();
-			List<String> statements = new LinkedList<String>();
+
 			String script;
 			try {
 				script = readScript(resource, commentPrefix, separator);
@@ -448,30 +473,38 @@ public abstract class ScriptUtils {
 				separator = FALLBACK_STATEMENT_SEPARATOR;
 			}
 
+			List<String> statements = new ArrayList<>();
 			splitSqlScript(resource, script, separator, commentPrefix, blockCommentStartDelimiter,
-				blockCommentEndDelimiter, statements);
-			int lineNumber = 0;
+					blockCommentEndDelimiter, statements);
+
+			int stmtNumber = 0;
 			Statement stmt = connection.createStatement();
 			try {
 				for (String statement : statements) {
-					lineNumber++;
+					stmtNumber++;
 					try {
 						stmt.execute(statement);
 						int rowsAffected = stmt.getUpdateCount();
 						if (logger.isDebugEnabled()) {
-							logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
+							logger.debug(rowsAffected + " returned as update count for SQL: " + statement);
+							SQLWarning warningToLog = stmt.getWarnings();
+							while (warningToLog != null) {
+								logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() +
+										"', error code '" + warningToLog.getErrorCode() +
+										"', message [" + warningToLog.getMessage() + "]");
+								warningToLog = warningToLog.getNextWarning();
+							}
 						}
 					}
 					catch (SQLException ex) {
 						boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 						if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 							if (logger.isDebugEnabled()) {
-								logger.debug("Failed to execute SQL script statement at line " + lineNumber
-										+ " of resource " + resource + ": " + statement, ex);
+								logger.debug(ScriptStatementFailedException.buildErrorMessage(statement, stmtNumber, resource), ex);
 							}
 						}
 						else {
-							throw new ScriptStatementFailedException(statement, lineNumber, resource, ex);
+							throw new ScriptStatementFailedException(statement, stmtNumber, resource, ex);
 						}
 					}
 				}
@@ -481,20 +514,19 @@ public abstract class ScriptUtils {
 					stmt.close();
 				}
 				catch (Throwable ex) {
-					logger.debug("Could not close JDBC Statement", ex);
+					logger.trace("Could not close JDBC Statement", ex);
 				}
 			}
 
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			if (logger.isInfoEnabled()) {
-				logger.info("Executed SQL script from " + resource + " in " + elapsedTime + " ms.");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executed SQL script from " + resource + " in " + elapsedTime + " ms.");
 			}
 		}
 		catch (Exception ex) {
 			if (ex instanceof ScriptException) {
 				throw (ScriptException) ex;
 			}
-
 			throw new UncategorizedScriptException(
 				"Failed to execute database script from resource [" + resource + "]", ex);
 		}

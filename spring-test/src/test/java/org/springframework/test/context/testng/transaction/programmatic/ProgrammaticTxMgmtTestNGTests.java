@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,9 @@
 
 package org.springframework.test.context.testng.transaction.programmatic;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -27,7 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.test.annotation.Rollback;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.test.context.transaction.AfterTransaction;
@@ -37,6 +36,7 @@ import org.springframework.test.context.transaction.programmatic.ProgrammaticTxM
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import org.testng.IHookCallBack;
 import org.testng.ITestResult;
 import org.testng.annotations.Test;
@@ -45,8 +45,8 @@ import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * This class is a copy of {@link ProgrammaticTxMgmtTests} that has been modified
- * to run with TestNG.
+ * This class is a copy of the JUnit-based {@link ProgrammaticTxMgmtTests} class
+ * that has been modified to run with TestNG.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -54,12 +54,12 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
 @ContextConfiguration
 public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSpringContextTests {
 
-	private String testName;
+	private String method;
 
 
 	@Override
 	public void run(IHookCallBack callBack, ITestResult testResult) {
-		this.testName = testResult.getMethod().getMethodName();
+		this.method = testResult.getMethod().getMethodName();
 		super.run(callBack, testResult);
 	}
 
@@ -71,20 +71,15 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 
 	@AfterTransaction
 	public void afterTransaction() {
-		switch (testName) {
-			case "commitTxAndStartNewTx": {
-				assertUsers("Dogbert");
-				break;
-			}
+		switch (method) {
+			case "commitTxAndStartNewTx":
 			case "commitTxButDoNotStartNewTx": {
 				assertUsers("Dogbert");
 				break;
 			}
-			case "rollbackTxAndStartNewTx": {
-				assertUsers("Dilbert");
-				break;
-			}
-			case "rollbackTxButDoNotStartNewTx": {
+			case "rollbackTxAndStartNewTx":
+			case "rollbackTxButDoNotStartNewTx":
+			case "startTxWithExistingTransaction": {
 				assertUsers("Dilbert");
 				break;
 			}
@@ -92,12 +87,8 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 				assertUsers("Dilbert", "Dogbert");
 				break;
 			}
-			case "startTxWithExistingTransaction": {
-				assertUsers("Dilbert");
-				break;
-			}
 			default: {
-				fail("missing 'after transaction' assertion for test method: " + testName);
+				fail("missing 'after transaction' assertion for test method: " + method);
 			}
 		}
 	}
@@ -229,7 +220,7 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 	}
 
 	@Test
-	@Rollback(false)
+	@Commit
 	public void rollbackTxAndStartNewTxWithDefaultCommitSemantics() {
 		assertInTransaction(true);
 		assertTrue(TestTransaction.isActive());
@@ -258,12 +249,11 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 	// -------------------------------------------------------------------------
 
 	private void assertUsers(String... users) {
-		List<Map<String, Object>> results = jdbcTemplate.queryForList("select name from user");
-		List<String> names = new ArrayList<String>();
-		for (Map<String, Object> map : results) {
-			names.add((String) map.get("name"));
-		}
-		assertEquals(Arrays.asList(users), names);
+		List<String> expected = Arrays.asList(users);
+		Collections.sort(expected);
+		List<String> actual = jdbcTemplate.queryForList("select name from user", String.class);
+		Collections.sort(actual);
+		assertEquals("Users in database;", expected, actual);
 	}
 
 

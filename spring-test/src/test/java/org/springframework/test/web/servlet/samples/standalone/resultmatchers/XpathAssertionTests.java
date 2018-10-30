@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -29,6 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
@@ -46,7 +46,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
  * Examples of expectations on XML response content with XPath expressions.
  *
  * @author Rossen Stoyanchev
- *
+ * @author Sam Brannen
  * @see ContentAssertionTests
  * @see XmlContentAssertionTests
  */
@@ -60,9 +60,9 @@ public class XpathAssertionTests {
 	@Before
 	public void setup() throws Exception {
 		this.mockMvc = standaloneSetup(new MusicController())
-				.defaultRequest(get("/").accept(MediaType.APPLICATION_XML))
+				.defaultRequest(get("/").accept(MediaType.APPLICATION_XML, MediaType.parseMediaType("application/xml;charset=UTF-8")))
 				.alwaysExpect(status().isOk())
-				.alwaysExpect(content().contentType(MediaType.APPLICATION_XML))
+				.alwaysExpect(content().contentType(MediaType.parseMediaType("application/xml;charset=UTF-8")))
 				.build();
 	}
 
@@ -158,7 +158,7 @@ public class XpathAssertionTests {
 		standaloneSetup(new BlogFeedController()).build()
 			.perform(get("/blog.atom").accept(MediaType.APPLICATION_ATOM_XML))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_ATOM_XML))
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_ATOM_XML))
 				.andExpect(xpath("//feed/title").string("Test Feed"))
 				.andExpect(xpath("//feed/icon").string("http://www.example.com/favicon.ico"));
 	}

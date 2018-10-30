@@ -1,82 +1,159 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.setup;
 
-import java.io.IOException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.stereotype.Controller;
-import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.junit.rules.ExpectedException;
+
+import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.servlet.DispatcherServlet;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Tests for {@link DefaultMockMvcBuilder}.
  *
  * @author Rob Winch
+ * @author Sebastien Deleuze
+ * @author Sam Brannen
+ * @author Stephane Nicoll
  */
 public class DefaultMockMvcBuilderTests {
 
-	private StandaloneMockMvcBuilder builder;
+	private final MockServletContext servletContext = new MockServletContext();
 
-	@Before
-	public void setup() {
-		builder = MockMvcBuilders.standaloneSetup(new PersonController());
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
+
+	@Test
+	public void webAppContextSetupWithNullWac() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(equalTo("WebApplicationContext is required"));
+		webAppContextSetup(null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void addFiltersFiltersNull() {
-		builder.addFilters((Filter[]) null);
+	@Test
+	public void webAppContextSetupWithNullServletContext() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(equalTo("WebApplicationContext must have a ServletContext"));
+		webAppContextSetup(new StubWebApplicationContext(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void addFiltersFiltersContainsNull() {
-		builder.addFilters(new ContinueFilter(), (Filter) null);
+	/**
+	 * See SPR-12553 and SPR-13075.
+	 */
+	@Test
+	public void rootWacServletContainerAttributePreviouslySet() {
+		StubWebApplicationContext child = new StubWebApplicationContext(this.servletContext);
+		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, child);
+
+		DefaultMockMvcBuilder builder = webAppContextSetup(child);
+		assertSame(builder.initWebAppContext(),
+			WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void addFilterPatternsNull() {
-		builder.addFilter(new ContinueFilter(), (String[]) null);
+	/**
+	 * See SPR-12553 and SPR-13075.
+	 */
+	@Test
+	public void rootWacServletContainerAttributePreviouslySetWithContextHierarchy() {
+		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
+
+		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, root);
+
+		StaticWebApplicationContext child = new StaticWebApplicationContext();
+		child.setParent(root);
+		child.setServletContext(this.servletContext);
+
+		DefaultMockMvcBuilder builder = webAppContextSetup(child);
+		assertSame(builder.initWebAppContext().getParent(),
+			WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void addFilterPatternContainsNull() {
-		builder.addFilter(new ContinueFilter(), (String) null);
+	/**
+	 * See SPR-12553 and SPR-13075.
+	 */
+	@Test
+	public void rootWacServletContainerAttributeNotPreviouslySet() {
+		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
+		DefaultMockMvcBuilder builder = webAppContextSetup(root);
+		WebApplicationContext wac = builder.initWebAppContext();
+		assertSame(root, wac);
+		assertSame(root, WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
 	}
 
+	/**
+	 * See SPR-12553 and SPR-13075.
+	 */
+	@Test
+	public void rootWacServletContainerAttributeNotPreviouslySetWithContextHierarchy() {
+		StaticApplicationContext ear = new StaticApplicationContext();
+		StaticWebApplicationContext root = new StaticWebApplicationContext();
+		root.setParent(ear);
+		root.setServletContext(this.servletContext);
+		StaticWebApplicationContext dispatcher = new StaticWebApplicationContext();
+		dispatcher.setParent(root);
+		dispatcher.setServletContext(this.servletContext);
 
-	@Controller
-	private static class PersonController {
-		@RequestMapping(value="/forward")
-		public String forward() {
-			return "forward:/persons";
-		}
+		DefaultMockMvcBuilder builder = webAppContextSetup(dispatcher);
+		WebApplicationContext wac = builder.initWebAppContext();
+
+		assertSame(dispatcher, wac);
+		assertSame(root, wac.getParent());
+		assertSame(ear, wac.getParent().getParent());
+		assertSame(root, WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
 	}
 
-	private class ContinueFilter extends OncePerRequestFilter {
-		@Override
-		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-				FilterChain filterChain) throws ServletException, IOException {
-			filterChain.doFilter(request, response);
-		}
+	/**
+	 * See /SPR-14277
+	 */
+	@Test
+	public void dispatcherServletCustomizer() {
+		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
+		DefaultMockMvcBuilder builder = webAppContextSetup(root);
+		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("test-id"));
+		builder.dispatchOptions(true);
+		MockMvc mvc = builder.build();
+		DispatcherServlet ds = (DispatcherServlet) new DirectFieldAccessor(mvc)
+				.getPropertyValue("servlet");
+		assertEquals("test-id", ds.getContextId());
+	}
+
+	@Test
+	public void dispatcherServletCustomizerProcessedInOrder() {
+		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
+		DefaultMockMvcBuilder builder = webAppContextSetup(root);
+		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("test-id"));
+		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("override-id"));
+		builder.dispatchOptions(true);
+		MockMvc mvc = builder.build();
+		DispatcherServlet ds = (DispatcherServlet) new DirectFieldAccessor(mvc)
+				.getPropertyValue("servlet");
+		assertEquals("override-id", ds.getContextId());
 	}
 
 }

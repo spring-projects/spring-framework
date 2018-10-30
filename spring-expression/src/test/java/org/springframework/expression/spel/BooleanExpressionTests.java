@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import org.junit.Test;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.expression.spel.support.StandardTypeConverter;
@@ -103,11 +104,12 @@ public class BooleanExpressionTests extends AbstractExpressionTests {
 				return targetType.getType() == Boolean.class ? false : null;
 			}
 		};
-		eContext.setTypeConverter(new StandardTypeConverter(conversionService));
+		context.setTypeConverter(new StandardTypeConverter(conversionService));
 
 		evaluate("null or true", Boolean.TRUE, Boolean.class, false);
 		evaluate("null and true", Boolean.FALSE, Boolean.class, false);
 		evaluate("!null", Boolean.TRUE, Boolean.class, false);
 		evaluate("null ? 'foo' : 'bar'", "bar", String.class, false);
 	}
+
 }

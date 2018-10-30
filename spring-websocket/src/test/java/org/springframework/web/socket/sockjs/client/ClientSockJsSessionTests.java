@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,16 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -30,15 +36,9 @@ import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.util.List;
-
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.*;
  * @author Rossen Stoyanchev
  */
 public class ClientSockJsSessionTests {
-	
+
 	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
 	private TestClientSockJsSession session;
@@ -64,7 +64,7 @@ public class ClientSockJsSessionTests {
 	public void setup() throws Exception {
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
 		Transport transport = mock(Transport.class);
-		TransportRequest request = new DefaultTransportRequest(urlInfo, null, transport, TransportType.XHR, CODEC);
+		TransportRequest request = new DefaultTransportRequest(urlInfo, null, null, transport, TransportType.XHR, CODEC);
 		this.handler = mock(WebSocketHandler.class);
 		this.connectFuture = new SettableListenableFuture<>();
 		this.session = new TestClientSockJsSession(request, this.handler, this.connectFuture);
@@ -92,7 +92,7 @@ public class ClientSockJsSessionTests {
 
 	@Test
 	public void handleFrameOpenWithWebSocketHandlerException() throws Exception {
-		doThrow(new IllegalStateException("Fake error")).when(this.handler).afterConnectionEstablished(this.session);
+		willThrow(new IllegalStateException("Fake error")).given(this.handler).afterConnectionEstablished(this.session);
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThat(this.session.isOpen(), is(true));
 	}
@@ -129,8 +129,10 @@ public class ClientSockJsSessionTests {
 	@Test
 	public void handleFrameMessageWithWebSocketHandlerException() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
-		doThrow(new IllegalStateException("Fake error")).when(this.handler).handleMessage(this.session, new TextMessage("foo"));
-		doThrow(new IllegalStateException("Fake error")).when(this.handler).handleMessage(this.session, new TextMessage("bar"));
+		willThrow(new IllegalStateException("Fake error")).given(this.handler)
+				.handleMessage(this.session, new TextMessage("foo"));
+		willThrow(new IllegalStateException("Fake error")).given(this.handler)
+				.handleMessage(this.session, new TextMessage("bar"));
 		this.session.handleFrame(SockJsFrame.messageFrame(CODEC, "foo", "bar").getContent());
 		assertThat(this.session.isOpen(), equalTo(true));
 		verify(this.handler).afterConnectionEstablished(this.session);

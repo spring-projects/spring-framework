@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ import javax.resource.ResourceException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of the generic JCA 1.5
@@ -58,6 +60,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 
 	private JmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();
 
+	@Nullable
 	private JmsActivationSpecConfig activationSpecConfig;
 
 
@@ -107,7 +110,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * (plus a couple of autodetected vendor-specific properties).
 	 * @see DefaultJmsActivationSpecFactory
 	 */
-	public void setActivationSpecFactory(JmsActivationSpecFactory activationSpecFactory) {
+	public void setActivationSpecFactory(@Nullable JmsActivationSpecFactory activationSpecFactory) {
 		this.activationSpecFactory =
 				(activationSpecFactory != null ? activationSpecFactory : new DefaultJmsActivationSpecFactory());
 	}
@@ -135,7 +138,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * <p>This config object will be turned into a concrete JCA 1.5 ActivationSpec
 	 * object through a {@link #setActivationSpecFactory JmsActivationSpecFactory}.
 	 */
-	public void setActivationSpecConfig(JmsActivationSpecConfig activationSpecConfig) {
+	public void setActivationSpecConfig(@Nullable JmsActivationSpecConfig activationSpecConfig) {
 		this.activationSpecConfig = activationSpecConfig;
 	}
 
@@ -143,26 +146,9 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * Return the {@link JmsActivationSpecConfig} object that this endpoint manager
 	 * should use for activating its listener. Return {@code null} if none is set.
 	 */
+	@Nullable
 	public JmsActivationSpecConfig getActivationSpecConfig() {
-		return activationSpecConfig;
-	}
-
-	@Override
-	public MessageConverter getMessageConverter() {
-		JmsActivationSpecConfig config = getActivationSpecConfig();
-		if (config != null) {
-			return config.getMessageConverter();
-		}
-		return null;
-	}
-
-	@Override
-	public boolean isPubSubDomain() {
-		JmsActivationSpecConfig config = getActivationSpecConfig();
-		if (config != null) {
-			return config.isPubSubDomain();
-		}
-		throw new IllegalStateException("could not determine pubSubDomain, no activation spec config is set");
+		return this.activationSpecConfig;
 	}
 
 	/**
@@ -174,20 +160,12 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 		this.endpointFactory.setBeanName(beanName);
 	}
 
-	@Override
-	public void setupMessageListener(Object messageListener) {
-		if (messageListener instanceof MessageListener) {
-			setMessageListener((MessageListener) messageListener);
-		}
-		else {
-			throw new IllegalArgumentException("Unsupported message listener '"
-					+ messageListener.getClass().getName() + "': only '"
-					+ MessageListener.class.getName() + "' type is supported");
-		}
-	}
 
 	@Override
 	public void afterPropertiesSet() throws ResourceException {
+		if (getResourceAdapter() == null) {
+			throw new IllegalArgumentException("Property 'resourceAdapter' is required");
+		}
 		if (this.messageListenerSet) {
 			setMessageEndpointFactory(this.endpointFactory);
 		}
@@ -195,7 +173,67 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 			setActivationSpec(
 					this.activationSpecFactory.createActivationSpec(getResourceAdapter(), this.activationSpecConfig));
 		}
+
 		super.afterPropertiesSet();
 	}
 
+
+	@Override
+	public void setupMessageListener(Object messageListener) {
+		if (messageListener instanceof MessageListener) {
+			setMessageListener((MessageListener) messageListener);
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported message listener '" +
+					messageListener.getClass().getName() + "': only '" + MessageListener.class.getName() +
+					"' type is supported");
+		}
+	}
+
+	@Override
+	@Nullable
+	public MessageConverter getMessageConverter() {
+		JmsActivationSpecConfig config = getActivationSpecConfig();
+		if (config != null) {
+			return config.getMessageConverter();
+		}
+		return null;
+	}
+
+	@Override
+	@Nullable
+	public DestinationResolver getDestinationResolver() {
+		if (this.activationSpecFactory instanceof StandardJmsActivationSpecFactory) {
+			return ((StandardJmsActivationSpecFactory) this.activationSpecFactory).getDestinationResolver();
+		}
+		return null;
+	}
+
+	@Override
+	public boolean isPubSubDomain() {
+		JmsActivationSpecConfig config = getActivationSpecConfig();
+		if (config != null) {
+			return config.isPubSubDomain();
+		}
+		throw new IllegalStateException("Could not determine pubSubDomain - no activation spec config is set");
+	}
+
+	@Override
+	public boolean isReplyPubSubDomain() {
+		JmsActivationSpecConfig config = getActivationSpecConfig();
+		if (config != null) {
+			return config.isReplyPubSubDomain();
+		}
+		throw new IllegalStateException("Could not determine reply pubSubDomain - no activation spec config is set");
+	}
+
+	@Override
+	@Nullable
+	public QosSettings getReplyQosSettings() {
+		JmsActivationSpecConfig config = getActivationSpecConfig();
+		if (config != null) {
+			return config.getReplyQosSettings();
+		}
+		throw new IllegalStateException("Could not determine reply qosSettings - no activation spec config is set");
+	}
 }

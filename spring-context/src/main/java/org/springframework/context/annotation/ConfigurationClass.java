@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -51,28 +53,30 @@ final class ConfigurationClass {
 
 	private final Resource resource;
 
+	@Nullable
 	private String beanName;
 
-	private final Set<ConfigurationClass> importedBy = new LinkedHashSet<ConfigurationClass>(1);
+	private final Set<ConfigurationClass> importedBy = new LinkedHashSet<>(1);
 
-	private final Set<BeanMethod> beanMethods = new LinkedHashSet<BeanMethod>();
+	private final Set<BeanMethod> beanMethods = new LinkedHashSet<>();
 
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
-			new LinkedHashMap<String, Class<? extends BeanDefinitionReader>>();
+			new LinkedHashMap<>();
 
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
-			new LinkedHashMap<ImportBeanDefinitionRegistrar, AnnotationMetadata>();
+			new LinkedHashMap<>();
+
+	final Set<String> skippedBeanMethods = new HashSet<>();
 
 
 	/**
 	 * Create a new {@link ConfigurationClass} with the given name.
 	 * @param metadataReader reader used to parse the underlying {@link Class}
 	 * @param beanName must not be {@code null}
-	 * @throws IllegalArgumentException if beanName is null (as of Spring 3.1.1)
 	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	public ConfigurationClass(MetadataReader metadataReader, String beanName) {
-		Assert.hasText(beanName, "bean name must not be null");
+		Assert.notNull(beanName, "Bean name must not be null");
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
 		this.beanName = beanName;
@@ -86,7 +90,7 @@ final class ConfigurationClass {
 	 * @param importedBy the configuration class importing this one or {@code null}
 	 * @since 3.1.1
 	 */
-	public ConfigurationClass(MetadataReader metadataReader, ConfigurationClass importedBy) {
+	public ConfigurationClass(MetadataReader metadataReader, @Nullable ConfigurationClass importedBy) {
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
 		this.importedBy.add(importedBy);
@@ -96,13 +100,12 @@ final class ConfigurationClass {
 	 * Create a new {@link ConfigurationClass} with the given name.
 	 * @param clazz the underlying {@link Class} to represent
 	 * @param beanName name of the {@code @Configuration} class bean
-	 * @throws IllegalArgumentException if beanName is null (as of Spring 3.1.1)
 	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	public ConfigurationClass(Class<?> clazz, String beanName) {
-		Assert.hasText(beanName, "Bean name must not be null");
+		Assert.notNull(beanName, "Bean name must not be null");
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
-		this.resource = new DescriptiveResource(clazz.toString());
+		this.resource = new DescriptiveResource(clazz.getName());
 		this.beanName = beanName;
 	}
 
@@ -111,13 +114,26 @@ final class ConfigurationClass {
 	 * using the {@link Import} annotation or automatically processed as a nested
 	 * configuration class (if imported is {@code true}).
 	 * @param clazz the underlying {@link Class} to represent
-	 * @param importedBy the configuration class importing this one or {@code null}
+	 * @param importedBy the configuration class importing this one (or {@code null})
 	 * @since 3.1.1
 	 */
-	public ConfigurationClass(Class<?> clazz, ConfigurationClass importedBy) {
+	public ConfigurationClass(Class<?> clazz, @Nullable ConfigurationClass importedBy) {
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
-		this.resource = new DescriptiveResource(clazz.toString());
+		this.resource = new DescriptiveResource(clazz.getName());
 		this.importedBy.add(importedBy);
+	}
+
+	/**
+	 * Create a new {@link ConfigurationClass} with the given name.
+	 * @param metadata the metadata for the underlying class to represent
+	 * @param beanName name of the {@code @Configuration} class bean
+	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
+	 */
+	public ConfigurationClass(AnnotationMetadata metadata, String beanName) {
+		Assert.notNull(beanName, "Bean name must not be null");
+		this.metadata = metadata;
+		this.resource = new DescriptiveResource(metadata.getClassName());
+		this.beanName = beanName;
 	}
 
 
@@ -137,6 +153,7 @@ final class ConfigurationClass {
 		this.beanName = beanName;
 	}
 
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}
@@ -219,7 +236,7 @@ final class ConfigurationClass {
 
 	@Override
 	public String toString() {
-		return "ConfigurationClass:beanName=" + this.beanName + ",resource=" + this.resource;
+		return "ConfigurationClass: beanName '" + this.beanName + "', " + this.resource;
 	}
 
 

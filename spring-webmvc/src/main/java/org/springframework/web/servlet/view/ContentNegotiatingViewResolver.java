@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,21 +23,17 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-
-import javax.activation.FileTypeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -55,29 +51,31 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
 /**
- * Implementation of {@link ViewResolver} that resolves a view based on the request file name or {@code Accept} header.
+ * Implementation of {@link ViewResolver} that resolves a view based on the request file name
+ * or {@code Accept} header.
  *
- * <p>The {@code ContentNegotiatingViewResolver} does not resolve views itself, but delegates to other {@link
- * ViewResolver}s. By default, these other view resolvers are picked up automatically from the application context,
- * though they can also be set explicitly by using the {@link #setViewResolvers(List) viewResolvers} property.
- * <strong>Note</strong> that in order for this view resolver to work properly, the {@link #setOrder(int) order}
- * property needs to be set to a higher precedence than the others (the default is {@link Ordered#HIGHEST_PRECEDENCE}.)
+ * <p>The {@code ContentNegotiatingViewResolver} does not resolve views itself, but delegates to
+ * other {@link ViewResolver ViewResolvers}. By default, these other view resolvers are picked up automatically
+ * from the application context, though they can also be set explicitly by using the
+ * {@link #setViewResolvers viewResolvers} property. <strong>Note</strong> that in order for this
+ * view resolver to work properly, the {@link #setOrder order} property needs to be set to a higher
+ * precedence than the others (the default is {@link Ordered#HIGHEST_PRECEDENCE}).
  *
- * <p>This view resolver uses the requested {@linkplain MediaType media type} to select a suitable {@link View} for a
- * request. The requested media type is determined through the configured {@link ContentNegotiationManager}.
- * Once the requested media type has been determined, this resolver queries each delegate view resolver for a
- * {@link View} and determines if the requested media type is {@linkplain MediaType#includes(MediaType) compatible}
- * with the view's {@linkplain View#getContentType() content type}). The most compatible view is returned.
+ * <p>This view resolver uses the requested {@linkplain MediaType media type} to select a suitable
+ * {@link View} for a request. The requested media type is determined through the configured
+ * {@link ContentNegotiationManager}. Once the requested media type has been determined, this resolver
+ * queries each delegate view resolver for a {@link View} and determines if the requested media type
+ * is {@linkplain MediaType#includes(MediaType) compatible} with the view's
+ * {@linkplain View#getContentType() content type}). The most compatible view is returned.
  *
- * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property, allowing you to
- * override the views provided by the view resolvers. Note that these default views are offered as candidates, and
- * still need have the content type requested (via file extension, parameter, or {@code Accept} header, described above).
- * You can also set the {@linkplain #setDefaultContentType(MediaType) default content type} directly, which will be
- * returned when the other mechanisms ({@code Accept} header, file extension or parameter) do not result in a match.
+ * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property,
+ * allowing you to override the views provided by the view resolvers. Note that these default views are
+ * offered as candidates, and still need have the content type requested (via file extension, parameter,
+ * or {@code Accept} header, described above).
  *
- * <p>For example, if the request path is {@code /view.html}, this view resolver will look for a view that has the
- * {@code text/html} content type (based on the {@code html} file extension). A request for {@code /view} with a {@code
- * text/html} request {@code Accept} header has the same result.
+ * <p>For example, if the request path is {@code /view.html}, this view resolver will look for a view
+ * that has the {@code text/html} content type (based on the {@code html} file extension). A request
+ * for {@code /view} with a {@code text/html} request {@code Accept} header has the same result.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -87,31 +85,24 @@ import org.springframework.web.servlet.ViewResolver;
  * @see InternalResourceViewResolver
  * @see BeanNameViewResolver
  */
-public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport implements ViewResolver, Ordered, InitializingBean {
+public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
+		implements ViewResolver, Ordered, InitializingBean {
 
-	private static final Log logger = LogFactory.getLog(ContentNegotiatingViewResolver.class);
-
-	private int order = Ordered.HIGHEST_PRECEDENCE;
-
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private final ContentNegotiationManagerFactoryBean cnManagerFactoryBean = new ContentNegotiationManagerFactoryBean();
+	private final ContentNegotiationManagerFactoryBean cnmFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private boolean useNotAcceptableStatusCode = false;
 
+	@Nullable
 	private List<View> defaultViews;
 
+	@Nullable
 	private List<ViewResolver> viewResolvers;
 
+	private int order = Ordered.HIGHEST_PRECEDENCE;
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
 
 	/**
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
@@ -119,92 +110,17 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * applying a {@link org.springframework.web.accept.HeaderContentNegotiationStrategy}.
 	 * @see ContentNegotiationManager#ContentNegotiationManager()
 	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+	public void setContentNegotiationManager(@Nullable ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
 	/**
-	 * Indicate whether the extension of the request path should be used to determine the requested media type,
-	 * in favor of looking at the {@code Accept} header. The default value is {@code true}.
-	 * <p>For instance, when this flag is {@code true} (the default), a request for {@code /hotels.pdf}
-	 * will result in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the
-	 * browser-defined {@code text/html,application/xhtml+xml}.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
+	 * Return the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * @since 4.1.9
 	 */
-	@Deprecated
-	public void setFavorPathExtension(boolean favorPathExtension) {
-		this.cnManagerFactoryBean.setFavorPathExtension(favorPathExtension);
-	}
-
-	/**
-	 * Indicate whether to use the Java Activation Framework to map from file extensions to media types.
-	 * <p>Default is {@code true}, i.e. the Java Activation Framework is used (if available).
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setUseJaf(boolean useJaf) {
-		this.cnManagerFactoryBean.setUseJaf(useJaf);
-	}
-
-	/**
-	 * Indicate whether a request parameter should be used to determine the requested media type,
-	 * in favor of looking at the {@code Accept} header. The default value is {@code false}.
-	 * <p>For instance, when this flag is {@code true}, a request for {@code /hotels?format=pdf} will result
-	 * in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the browser-defined
-	 * {@code text/html,application/xhtml+xml}.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setFavorParameter(boolean favorParameter) {
-		this.cnManagerFactoryBean.setFavorParameter(favorParameter);
-	}
-
-	/**
-	 * Set the parameter name that can be used to determine the requested media type if the {@link
-	 * #setFavorParameter} property is {@code true}. The default parameter name is {@code format}.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setParameterName(String parameterName) {
-		this.cnManagerFactoryBean.setParameterName(parameterName);
-	}
-
-	/**
-	 * Indicate whether the HTTP {@code Accept} header should be ignored. Default is {@code false}.
-	 * <p>If set to {@code true}, this view resolver will only refer to the file extension and/or
-	 * parameter, as indicated by the {@link #setFavorPathExtension favorPathExtension} and
-	 * {@link #setFavorParameter favorParameter} properties.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setIgnoreAcceptHeader(boolean ignoreAcceptHeader) {
-		this.cnManagerFactoryBean.setIgnoreAcceptHeader(ignoreAcceptHeader);
-	}
-
-	/**
-	 * Set the mapping from file extensions to media types.
-	 * <p>When this mapping is not set or when an extension is not present, this view resolver
-	 * will fall back to using a {@link FileTypeMap} when the Java Action Framework is available.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setMediaTypes(Map<String, String> mediaTypes) {
-		if (mediaTypes != null) {
-			Properties props = new Properties();
-			props.putAll(mediaTypes);
-			this.cnManagerFactoryBean.setMediaTypes(props);
-		}
-	}
-
-	/**
-	 * Set the default content type.
-	 * <p>This content type will be used when file extension, parameter, nor {@code Accept}
-	 * header define a content-type, either through being disabled or empty.
-	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
-	 */
-	@Deprecated
-	public void setDefaultContentType(MediaType defaultContentType) {
-		this.cnManagerFactoryBean.setDefaultContentType(defaultContentType);
+	@Nullable
+	public ContentNegotiationManager getContentNegotiationManager() {
+		return this.contentNegotiationManager;
 	}
 
 	/**
@@ -221,11 +137,23 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	}
 
 	/**
+	 * Whether to return HTTP Status 406 if no suitable is found.
+	 */
+	public boolean isUseNotAcceptableStatusCode() {
+		return this.useNotAcceptableStatusCode;
+	}
+
+	/**
 	 * Set the default views to use when a more specific view can not be obtained
 	 * from the {@link ViewResolver} chain.
 	 */
 	public void setDefaultViews(List<View> defaultViews) {
 		this.defaultViews = defaultViews;
+	}
+
+	public List<View> getDefaultViews() {
+		return (this.defaultViews != null ? Collections.unmodifiableList(this.defaultViews) :
+				Collections.emptyList());
 	}
 
 	/**
@@ -236,13 +164,27 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		this.viewResolvers = viewResolvers;
 	}
 
+	public List<ViewResolver> getViewResolvers() {
+		return (this.viewResolvers != null ? Collections.unmodifiableList(this.viewResolvers) :
+				Collections.emptyList());
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
+
 
 	@Override
 	protected void initServletContext(ServletContext servletContext) {
 		Collection<ViewResolver> matchingBeans =
-				BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), ViewResolver.class).values();
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(obtainApplicationContext(), ViewResolver.class).values();
 		if (this.viewResolvers == null) {
-			this.viewResolvers = new ArrayList<ViewResolver>(matchingBeans.size());
+			this.viewResolvers = new ArrayList<>(matchingBeans.size());
 			for (ViewResolver viewResolver : matchingBeans) {
 				if (this != viewResolver) {
 					this.viewResolvers.add(viewResolver);
@@ -250,35 +192,36 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			}
 		}
 		else {
-			for (int i=0; i < viewResolvers.size(); i++) {
-				if (matchingBeans.contains(viewResolvers.get(i))) {
+			for (int i = 0; i < this.viewResolvers.size(); i++) {
+				ViewResolver vr = this.viewResolvers.get(i);
+				if (matchingBeans.contains(vr)) {
 					continue;
 				}
-				String name = viewResolvers.get(i).getClass().getName() + i;
-				getApplicationContext().getAutowireCapableBeanFactory().initializeBean(viewResolvers.get(i), name);
+				String name = vr.getClass().getName() + i;
+				obtainApplicationContext().getAutowireCapableBeanFactory().initializeBean(vr, name);
 			}
 
 		}
-		if (this.viewResolvers.isEmpty()) {
-			logger.warn("Did not find any ViewResolvers to delegate to; please configure them using the " +
-					"'viewResolvers' property on the ContentNegotiatingViewResolver");
-		}
-		OrderComparator.sort(this.viewResolvers);
-		this.cnManagerFactoryBean.setServletContext(servletContext);
+		AnnotationAwareOrderComparator.sort(this.viewResolvers);
+		this.cnmFactoryBean.setServletContext(servletContext);
 	}
 
 	@Override
 	public void afterPropertiesSet() {
 		if (this.contentNegotiationManager == null) {
-			this.cnManagerFactoryBean.afterPropertiesSet();
-			this.contentNegotiationManager = this.cnManagerFactoryBean.getObject();
+			this.contentNegotiationManager = this.cnmFactoryBean.build();
+		}
+		if (this.viewResolvers == null || this.viewResolvers.isEmpty()) {
+			logger.warn("No ViewResolvers configured");
 		}
 	}
 
+
 	@Override
+	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
-		Assert.isInstanceOf(ServletRequestAttributes.class, attrs);
+		Assert.state(attrs instanceof ServletRequestAttributes, "No current ServletRequestAttributes");
 		List<MediaType> requestedMediaTypes = getMediaTypes(((ServletRequestAttributes) attrs).getRequest());
 		if (requestedMediaTypes != null) {
 			List<View> candidateViews = getCandidateViews(viewName, locale, requestedMediaTypes);
@@ -287,14 +230,18 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 				return bestView;
 			}
 		}
+
+		String mediaTypeInfo = logger.isDebugEnabled() && requestedMediaTypes != null ?
+				" given " + requestedMediaTypes.toString() : "";
+
 		if (this.useNotAcceptableStatusCode) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No acceptable view found; returning 406 (Not Acceptable) status code");
+				logger.debug("Using 406 NOT_ACCEPTABLE" + mediaTypeInfo);
 			}
 			return NOT_ACCEPTABLE_VIEW;
 		}
 		else {
-			logger.debug("No acceptable view found; returning null");
+			logger.debug("View remains unresolved" + mediaTypeInfo);
 			return null;
 		}
 	}
@@ -304,16 +251,14 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * @param request the current servlet request
 	 * @return the list of media types requested, if any
 	 */
+	@Nullable
 	protected List<MediaType> getMediaTypes(HttpServletRequest request) {
+		Assert.state(this.contentNegotiationManager != null, "No ContentNegotiationManager set");
 		try {
 			ServletWebRequest webRequest = new ServletWebRequest(request);
-
 			List<MediaType> acceptableMediaTypes = this.contentNegotiationManager.resolveMediaTypes(webRequest);
-			acceptableMediaTypes = acceptableMediaTypes.isEmpty() ?
-					Collections.singletonList(MediaType.ALL) : acceptableMediaTypes;
-
 			List<MediaType> producibleMediaTypes = getProducibleMediaTypes(request);
-			Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
+			Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
 			for (MediaType acceptable : acceptableMediaTypes) {
 				for (MediaType producible : producibleMediaTypes) {
 					if (acceptable.isCompatibleWith(producible)) {
@@ -321,15 +266,14 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 					}
 				}
 			}
-			List<MediaType> selectedMediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
+			List<MediaType> selectedMediaTypes = new ArrayList<>(compatibleMediaTypes);
 			MediaType.sortBySpecificityAndQuality(selectedMediaTypes);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Requested media types are " + selectedMediaTypes + " based on Accept header types " +
-						"and producible media types " + producibleMediaTypes + ")");
-			}
 			return selectedMediaTypes;
 		}
 		catch (HttpMediaTypeNotAcceptableException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(ex.getMessage());
+			}
 			return null;
 		}
 	}
@@ -339,7 +283,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		Set<MediaType> mediaTypes = (Set<MediaType>)
 				request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			return new ArrayList<MediaType>(mediaTypes);
+			return new ArrayList<>(mediaTypes);
 		}
 		else {
 			return Collections.singletonList(MediaType.ALL);
@@ -352,25 +296,28 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 */
 	private MediaType getMostSpecificMediaType(MediaType acceptType, MediaType produceType) {
 		produceType = produceType.copyQualityValue(acceptType);
-		return MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceType) < 0 ? acceptType : produceType;
+		return (MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceType) < 0 ? acceptType : produceType);
 	}
 
 	private List<View> getCandidateViews(String viewName, Locale locale, List<MediaType> requestedMediaTypes)
 			throws Exception {
 
-		List<View> candidateViews = new ArrayList<View>();
-		for (ViewResolver viewResolver : this.viewResolvers) {
-			View view = viewResolver.resolveViewName(viewName, locale);
-			if (view != null) {
-				candidateViews.add(view);
-			}
-			for (MediaType requestedMediaType : requestedMediaTypes) {
-				List<String> extensions = this.contentNegotiationManager.resolveFileExtensions(requestedMediaType);
-				for (String extension : extensions) {
-					String viewNameWithExtension = viewName + "." + extension;
-					view = viewResolver.resolveViewName(viewNameWithExtension, locale);
-					if (view != null) {
-						candidateViews.add(view);
+		List<View> candidateViews = new ArrayList<>();
+		if (this.viewResolvers != null) {
+			Assert.state(this.contentNegotiationManager != null, "No ContentNegotiationManager set");
+			for (ViewResolver viewResolver : this.viewResolvers) {
+				View view = viewResolver.resolveViewName(viewName, locale);
+				if (view != null) {
+					candidateViews.add(view);
+				}
+				for (MediaType requestedMediaType : requestedMediaTypes) {
+					List<String> extensions = this.contentNegotiationManager.resolveFileExtensions(requestedMediaType);
+					for (String extension : extensions) {
+						String viewNameWithExtension = viewName + '.' + extension;
+						view = viewResolver.resolveViewName(viewNameWithExtension, locale);
+						if (view != null) {
+							candidateViews.add(view);
+						}
 					}
 				}
 			}
@@ -381,14 +328,12 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		return candidateViews;
 	}
 
+	@Nullable
 	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes, RequestAttributes attrs) {
 		for (View candidateView : candidateViews) {
 			if (candidateView instanceof SmartView) {
 				SmartView smartView = (SmartView) candidateView;
 				if (smartView.isRedirectView()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Returning redirect view [" + candidateView + "]");
-					}
 					return candidateView;
 				}
 			}
@@ -399,8 +344,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 					MediaType candidateContentType = MediaType.parseMediaType(candidateView.getContentType());
 					if (mediaType.isCompatibleWith(candidateContentType)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Returning [" + candidateView + "] based on requested media type '"
-									+ mediaType + "'");
+							logger.debug("Selected '" + mediaType + "' given " + requestedMediaTypes);
 						}
 						attrs.setAttribute(View.SELECTED_CONTENT_TYPE, mediaType, RequestAttributes.SCOPE_REQUEST);
 						return candidateView;
@@ -415,12 +359,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	private static final View NOT_ACCEPTABLE_VIEW = new View() {
 
 		@Override
+		@Nullable
 		public String getContentType() {
 			return null;
 		}
 
 		@Override
-		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+		public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
 		}
 	};

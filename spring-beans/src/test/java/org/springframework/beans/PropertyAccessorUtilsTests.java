@@ -16,17 +16,17 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.*;
-
 import java.util.Arrays;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class PropertyAccessorUtilsTests {
+public class PropertyAccessorUtilsTests {
 
 	@Test
 	public void testCanonicalPropertyName() {

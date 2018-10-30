@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,26 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -87,9 +95,12 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
 	private final DefaultListableBeanFactory beanFactory;
 
+	@Nullable
 	private ResourceLoader resourceLoader;
 
-	private boolean refreshed = false;
+	private boolean customClassLoader = false;
+
+	private final AtomicBoolean refreshed = new AtomicBoolean();
 
 
 	/**
@@ -118,7 +129,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #registerBeanDefinition
 	 * @see #refresh
 	 */
-	public GenericApplicationContext(ApplicationContext parent) {
+	public GenericApplicationContext(@Nullable ApplicationContext parent) {
 		this();
 		setParent(parent);
 	}
@@ -142,20 +153,16 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
 	 */
 	@Override
-	public void setParent(ApplicationContext parent) {
+	public void setParent(@Nullable ApplicationContext parent) {
 		super.setParent(parent);
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
-	}
-
-	@Override
-	public void setId(String id) {
-		super.setId(id);
 	}
 
 	/**
 	 * Set whether it should be allowed to override bean definitions by registering
 	 * a different definition with the same name, automatically replacing the former.
 	 * If not, an exception will be thrown. Default is "true".
+	 * @since 3.0
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
 	 */
 	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
@@ -167,6 +174,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * try to resolve them.
 	 * <p>Default is "true". Turn this off to throw an exception when encountering
 	 * a circular reference, disallowing them completely.
+	 * @since 3.0
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
 	 */
 	public void setAllowCircularReferences(boolean allowCircularReferences) {
@@ -196,6 +204,10 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 
+	//---------------------------------------------------------------------
+	// ResourceLoader / ResourcePatternResolver override if necessary
+	//---------------------------------------------------------------------
+
 	/**
 	 * This implementation delegates to this context's ResourceLoader if set,
 	 * falling back to the default superclass behavior else.
@@ -223,6 +235,21 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		return super.getResources(locationPattern);
 	}
 
+	@Override
+	public void setClassLoader(@Nullable ClassLoader classLoader) {
+		super.setClassLoader(classLoader);
+		this.customClassLoader = true;
+	}
+
+	@Override
+	@Nullable
+	public ClassLoader getClassLoader() {
+		if (this.resourceLoader != null && !this.customClassLoader) {
+			return this.resourceLoader.getClassLoader();
+		}
+		return super.getClassLoader();
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementations of AbstractApplicationContext's template methods
@@ -235,12 +262,11 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws IllegalStateException {
-		if (this.refreshed) {
+		if (!this.refreshed.compareAndSet(false, true)) {
 			throw new IllegalStateException(
 					"GenericApplicationContext does not support multiple refresh attempts: just call 'refresh' once");
 		}
 		this.beanFactory.setSerializationId(getId());
-		this.refreshed = true;
 	}
 
 	@Override
@@ -276,6 +302,12 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @return the internal bean factory (as DefaultListableBeanFactory)
 	 */
 	public final DefaultListableBeanFactory getDefaultListableBeanFactory() {
+		return this.beanFactory;
+	}
+
+	@Override
+	public AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException {
+		assertBeanFactoryActive();
 		return this.beanFactory;
 	}
 
@@ -319,6 +351,130 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	@Override
 	public boolean isAlias(String beanName) {
 		return this.beanFactory.isAlias(beanName);
+	}
+
+
+	//---------------------------------------------------------------------
+	// Convenient methods for registering individual beans
+	//---------------------------------------------------------------------
+
+	/**
+	 * Register a bean from the given bean class, optionally customizing its
+	 * bean definition metadata (typically declared as a lambda expression
+	 * or method reference).
+	 * @param beanClass the class of the bean (resolving a public constructor
+	 * to be autowired, possibly simply the default constructor)
+	 * @param customizers one or more callbacks for customizing the factory's
+	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @since 5.0
+	 * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)
+	 */
+	public final <T> void registerBean(Class<T> beanClass, BeanDefinitionCustomizer... customizers) {
+		registerBean(null, beanClass, null, customizers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, using the given supplier for
+	 * obtaining a new instance (typically declared as a lambda expression or
+	 * method reference), optionally customizing its bean definition metadata
+	 * (again typically declared as a lambda expression or method reference).
+	 * @param beanName the name of the bean (may be {@code null})
+	 * @param beanClass the class of the bean (resolving a public constructor
+	 * to be autowired, possibly simply the default constructor)
+	 * @param customizers one or more callbacks for customizing the factory's
+	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @since 5.0
+	 * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)
+	 */
+	public final <T> void registerBean(
+			@Nullable String beanName, Class<T> beanClass, BeanDefinitionCustomizer... customizers) {
+
+		registerBean(beanName, beanClass, null, customizers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, using the given supplier for
+	 * obtaining a new instance (typically declared as a lambda expression or
+	 * method reference), optionally customizing its bean definition metadata
+	 * (again typically declared as a lambda expression or method reference).
+	 * @param beanClass the class of the bean
+	 * @param supplier a callback for creating an instance of the bean
+	 * @param customizers one or more callbacks for customizing the factory's
+	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @since 5.0
+	 * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)
+	 */
+	public final <T> void registerBean(
+			Class<T> beanClass, Supplier<T> supplier, BeanDefinitionCustomizer... customizers) {
+
+		registerBean(null, beanClass, supplier, customizers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, using the given supplier for
+	 * obtaining a new instance (typically declared as a lambda expression or
+	 * method reference), optionally customizing its bean definition metadata
+	 * (again typically declared as a lambda expression or method reference).
+	 * <p>This method can be overridden to adapt the registration mechanism for
+	 * all {@code registerBean} methods (since they all delegate to this one).
+	 * @param beanName the name of the bean (may be {@code null})
+	 * @param beanClass the class of the bean
+	 * @param supplier a callback for creating an instance of the bean (in case
+	 * of {@code null}, resolving a public constructor to be autowired instead)
+	 * @param customizers one or more callbacks for customizing the factory's
+	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @since 5.0
+	 */
+	public <T> void registerBean(@Nullable String beanName, Class<T> beanClass,
+			@Nullable Supplier<T> supplier, BeanDefinitionCustomizer... customizers) {
+
+		ClassDerivedBeanDefinition beanDefinition = new ClassDerivedBeanDefinition(beanClass);
+		if (supplier != null) {
+			beanDefinition.setInstanceSupplier(supplier);
+		}
+		for (BeanDefinitionCustomizer customizer : customizers) {
+			customizer.customize(beanDefinition);
+		}
+
+		String nameToUse = (beanName != null ? beanName : beanClass.getName());
+		registerBeanDefinition(nameToUse, beanDefinition);
+	}
+
+
+	/**
+	 * {@link RootBeanDefinition} marker subclass for {@code #registerBean} based
+	 * registrations with flexible autowiring for public constructors.
+	 */
+	@SuppressWarnings("serial")
+	private static class ClassDerivedBeanDefinition extends RootBeanDefinition {
+
+		public ClassDerivedBeanDefinition(Class<?> beanClass) {
+			super(beanClass);
+		}
+
+		public ClassDerivedBeanDefinition(ClassDerivedBeanDefinition original) {
+			super(original);
+		}
+
+		@Override
+		@Nullable
+		public Constructor<?>[] getPreferredConstructors() {
+			Class<?> clazz = getBeanClass();
+			Constructor<?> primaryCtor = BeanUtils.findPrimaryConstructor(clazz);
+			if (primaryCtor != null) {
+				return new Constructor<?>[] {primaryCtor};
+			}
+			Constructor<?>[] publicCtors = clazz.getConstructors();
+			if (publicCtors.length > 0) {
+				return publicCtors;
+			}
+			return null;
+		}
+
+		@Override
+		public RootBeanDefinition cloneBeanDefinition() {
+			return new ClassDerivedBeanDefinition(this);
+		}
 	}
 
 }

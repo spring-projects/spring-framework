@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.cache.interceptor.CacheAspectSupport;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
@@ -66,11 +67,22 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport implements
 
 		CacheOperationInvoker aspectJInvoker = new CacheOperationInvoker() {
 			public Object invoke() {
-				return proceed(cachedObject);
+				try {
+					return proceed(cachedObject);
+				}
+				catch (Throwable ex) {
+					throw new ThrowableWrapper(ex);
+				}
 			}
 		};
 
-		return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
+		try {
+			return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
+		}
+		catch (CacheOperationInvoker.ThrowableWrapper th) {
+			AnyThrow.throwUnchecked(th.getOriginal());
+			return null; // never reached
+		}
 	}
 
 	/**

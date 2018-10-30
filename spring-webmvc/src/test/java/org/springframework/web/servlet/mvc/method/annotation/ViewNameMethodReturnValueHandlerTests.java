@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,17 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.lang.reflect.Method;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.mvc.method.annotation.ViewNameMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link ViewNameMethodReturnValueHandler}.
@@ -45,23 +41,27 @@ public class ViewNameMethodReturnValueHandlerTests {
 
 	private ServletWebRequest webRequest;
 
+	private MethodParameter param;
+
+
 	@Before
-	public void setUp() {
+	public void setup() throws NoSuchMethodException {
 		this.handler = new ViewNameMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
+
+		this.param = new MethodParameter(getClass().getDeclaredMethod("viewName"), -1);
 	}
+
 
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(this.handler.supportsReturnType(createReturnValueParam("viewName")));
+		assertTrue(this.handler.supportsReturnType(this.param));
 	}
 
 	@Test
 	public void returnViewName() throws Exception {
-		MethodParameter param = createReturnValueParam("viewName");
-		this.handler.handleReturnValue("testView", param, this.mavContainer, this.webRequest);
-
+		this.handler.handleReturnValue("testView", this.param, this.mavContainer, this.webRequest);
 		assertEquals("testView", this.mavContainer.getViewName());
 	}
 
@@ -69,18 +69,33 @@ public class ViewNameMethodReturnValueHandlerTests {
 	public void returnViewNameRedirect() throws Exception {
 		ModelMap redirectModel = new RedirectAttributesModelMap();
 		this.mavContainer.setRedirectModel(redirectModel);
-		MethodParameter param = createReturnValueParam("viewName");
-		this.handler.handleReturnValue("redirect:testView", param, this.mavContainer, this.webRequest);
-
+		this.handler.handleReturnValue("redirect:testView", this.param, this.mavContainer, this.webRequest);
 		assertEquals("redirect:testView", this.mavContainer.getViewName());
-		assertSame("Should have switched to the RedirectModel", redirectModel, this.mavContainer.getModel());
+		assertSame(redirectModel, this.mavContainer.getModel());
 	}
 
-	private MethodParameter createReturnValueParam(String methodName) throws Exception {
-		Method method = getClass().getDeclaredMethod(methodName);
-		return new MethodParameter(method, -1);
+	@Test
+	public void returnViewCustomRedirect() throws Exception {
+		ModelMap redirectModel = new RedirectAttributesModelMap();
+		this.mavContainer.setRedirectModel(redirectModel);
+		this.handler.setRedirectPatterns("myRedirect:*");
+		this.handler.handleReturnValue("myRedirect:testView", this.param, this.mavContainer, this.webRequest);
+		assertEquals("myRedirect:testView", this.mavContainer.getViewName());
+		assertSame(redirectModel, this.mavContainer.getModel());
 	}
 
+	@Test
+	public void returnViewRedirectWithCustomRedirectPattern() throws Exception {
+		ModelMap redirectModel = new RedirectAttributesModelMap();
+		this.mavContainer.setRedirectModel(redirectModel);
+		this.handler.setRedirectPatterns("myRedirect:*");
+		this.handler.handleReturnValue("redirect:testView", this.param, this.mavContainer, this.webRequest);
+		assertEquals("redirect:testView", this.mavContainer.getViewName());
+		assertSame(redirectModel, this.mavContainer.getModel());
+	}
+
+
+	@SuppressWarnings("unused")
 	String viewName() {
 		return null;
 	}

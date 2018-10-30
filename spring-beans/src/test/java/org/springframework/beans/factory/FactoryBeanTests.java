@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -39,7 +38,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class FactoryBeanTests {
+public class FactoryBeanTests {
 
 	private static final Class<?> CLASS = FactoryBeanTests.class;
 	private static final Resource RETURNS_NULL_CONTEXT = qualifiedResource(CLASS, "returnsNull.xml");
@@ -47,12 +46,13 @@ public final class FactoryBeanTests {
 	private static final Resource ABSTRACT_CONTEXT = qualifiedResource(CLASS, "abstract.xml");
 	private static final Resource CIRCULAR_CONTEXT = qualifiedResource(CLASS, "circular.xml");
 
+
 	@Test
 	public void testFactoryBeanReturnsNull() throws Exception {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(RETURNS_NULL_CONTEXT);
-		Object result = factory.getBean("factoryBean");
-		assertNull(result);
+
+		assertEquals("null", factory.getBean("factoryBean").toString());
 	}
 
 	@Test
@@ -63,10 +63,13 @@ public final class FactoryBeanTests {
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
 
+		assertNull(factory.getType("betaFactory"));
+
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Beta beta = (Beta) factory.getBean("beta");
 		Gamma gamma = (Gamma) factory.getBean("gamma");
 		Gamma gamma2 = (Gamma) factory.getBean("gammaFactory");
+
 		assertSame(beta, alpha.getBeta());
 		assertSame(gamma, beta.getGamma());
 		assertSame(gamma2, beta.getGamma());
@@ -194,6 +197,9 @@ public final class FactoryBeanTests {
 	@Component
 	public static class BetaFactoryBean implements FactoryBean<Object> {
 
+		public BetaFactoryBean(Alpha alpha) {
+		}
+
 		private Beta beta;
 
 		public void setBeta(Beta beta) {
@@ -238,11 +244,11 @@ public final class FactoryBeanTests {
 		public void setInstanceName(String instanceName) {
 			this.instanceName = instanceName;
 		}
+
 		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		public void setBeanFactory(BeanFactory beanFactory) {
 			this.beanFactory = beanFactory;
 		}
-
 
 		@Override
 		public T getObject() {
@@ -266,7 +272,7 @@ public final class FactoryBeanTests {
 
 	public static class CountingPostProcessor implements BeanPostProcessor {
 
-		private final Map<String, AtomicInteger> count = new HashMap<String, AtomicInteger>();
+		private final Map<String, AtomicInteger> count = new HashMap<>();
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) {

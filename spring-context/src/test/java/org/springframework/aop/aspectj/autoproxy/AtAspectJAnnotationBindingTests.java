@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,31 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import static org.junit.Assert.assertEquals;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.Resource;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Adrian Colyer
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class AtAspectJAnnotationBindingTests {
+public class AtAspectJAnnotationBindingTests {
 
 	private AnnotatedTestBean testBean;
 	private ClassPathXmlApplicationContext ctx;
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 		testBean = (AnnotatedTestBean) ctx.getBean("testBean");
 	}
@@ -83,7 +84,7 @@ class ResourceArrayFactoryBean implements FactoryBean<Object> {
 
 	@Override
 	@TestAnnotation("some value")
-	public Object getObject() throws Exception {
+	public Object getObject() {
 		return new Resource[0];
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -37,21 +38,51 @@ import org.springframework.util.StringUtils;
  */
 public class CustomBooleanEditor extends PropertyEditorSupport {
 
+	/**
+	 * Value of {@code "true"}.
+	 */
 	public static final String VALUE_TRUE = "true";
+
+	/**
+	 * Value of {@code "false"}.
+	 */
 	public static final String VALUE_FALSE = "false";
 
+	/**
+	 * Value of {@code "on"}.
+	 */
 	public static final String VALUE_ON = "on";
+
+	/**
+	 * Value of {@code "off"}.
+	 */
 	public static final String VALUE_OFF = "off";
 
+	/**
+	 * Value of {@code "yes"}.
+	 */
 	public static final String VALUE_YES = "yes";
+
+	/**
+	 * Value of {@code "no"}.
+	 */
 	public static final String VALUE_NO = "no";
 
+	/**
+	 * Value of {@code "1"}.
+	 */
 	public static final String VALUE_1 = "1";
+
+	/**
+	 * Value of {@code "0"}.
+	 */
 	public static final String VALUE_0 = "0";
 
 
+	@Nullable
 	private final String trueString;
 
+	@Nullable
 	private final String falseString;
 
 	private final boolean allowEmpty;
@@ -89,33 +120,34 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 	 * @see #VALUE_YES
 	 * @see #VALUE_NO
 	 */
-	public CustomBooleanEditor(String trueString, String falseString, boolean allowEmpty) {
+	public CustomBooleanEditor(@Nullable String trueString, @Nullable String falseString, boolean allowEmpty) {
 		this.trueString = trueString;
 		this.falseString = falseString;
 		this.allowEmpty = allowEmpty;
 	}
 
+
 	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
+	public void setAsText(@Nullable String text) throws IllegalArgumentException {
 		String input = (text != null ? text.trim() : null);
 		if (this.allowEmpty && !StringUtils.hasLength(input)) {
 			// Treat empty String as null value.
 			setValue(null);
 		}
-		else if (this.trueString != null && input.equalsIgnoreCase(this.trueString)) {
+		else if (this.trueString != null && this.trueString.equalsIgnoreCase(input)) {
 			setValue(Boolean.TRUE);
 		}
-		else if (this.falseString != null && input.equalsIgnoreCase(this.falseString)) {
+		else if (this.falseString != null && this.falseString.equalsIgnoreCase(input)) {
 			setValue(Boolean.FALSE);
 		}
 		else if (this.trueString == null &&
-				(input.equalsIgnoreCase(VALUE_TRUE) || input.equalsIgnoreCase(VALUE_ON) ||
-				input.equalsIgnoreCase(VALUE_YES) || input.equals(VALUE_1))) {
+				(VALUE_TRUE.equalsIgnoreCase(input) || VALUE_ON.equalsIgnoreCase(input) ||
+						VALUE_YES.equalsIgnoreCase(input) || VALUE_1.equals(input))) {
 			setValue(Boolean.TRUE);
 		}
 		else if (this.falseString == null &&
-				(input.equalsIgnoreCase(VALUE_FALSE) || input.equalsIgnoreCase(VALUE_OFF) ||
-				input.equalsIgnoreCase(VALUE_NO) || input.equals(VALUE_0))) {
+				(VALUE_FALSE.equalsIgnoreCase(input) || VALUE_OFF.equalsIgnoreCase(input) ||
+						VALUE_NO.equalsIgnoreCase(input) || VALUE_0.equals(input))) {
 			setValue(Boolean.FALSE);
 		}
 		else {

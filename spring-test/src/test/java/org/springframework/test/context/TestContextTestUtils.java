@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,10 @@
 
 package org.springframework.test.context;
 
+import org.springframework.test.context.cache.ContextCache;
+import org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate;
+import org.springframework.test.context.support.DefaultBootstrapContext;
+
 /**
  * Collection of test-related utility methods for working with {@link TestContext TestContexts}.
  *
@@ -24,22 +28,16 @@ package org.springframework.test.context;
  */
 public abstract class TestContextTestUtils {
 
-	private TestContextTestUtils() {
-		/* no-op */
-	}
-
 	public static TestContext buildTestContext(Class<?> testClass, ContextCache contextCache) {
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = new DefaultCacheAwareContextLoaderDelegate(
-			contextCache);
-		return buildTestContext(testClass, null, cacheAwareContextLoaderDelegate);
+		return buildTestContext(testClass, new DefaultCacheAwareContextLoaderDelegate(contextCache));
 	}
 
-	public static TestContext buildTestContext(Class<?> testClass, String customDefaultContextLoaderClassName,
+	public static TestContext buildTestContext(Class<?> testClass,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+
 		BootstrapContext bootstrapContext = new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 		TestContextBootstrapper testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-
-		return new DefaultTestContext(testContextBootstrapper);
+		return testContextBootstrapper.buildTestContext();
 	}
 
 }

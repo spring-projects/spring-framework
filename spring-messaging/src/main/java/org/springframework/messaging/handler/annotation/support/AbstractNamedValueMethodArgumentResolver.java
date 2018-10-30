@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.ValueConstants;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -54,18 +54,18 @@ import org.springframework.util.ClassUtils;
  * argument value if it doesn't match the method parameter type.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
+
+	private final ConversionService conversionService;
 
 	private final ConfigurableBeanFactory configurableBeanFactory;
 
 	private final BeanExpressionContext expressionContext;
 
-	private Map<MethodParameter, NamedValueInfo> namedValueInfoCache =
-			new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
-
-	private ConversionService conversionService;
+	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -76,41 +76,48 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * and {@code #{...}} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
 	 */
-	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
-		this.conversionService = (cs != null) ? cs : new DefaultConversionService();
+	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs,
+			@Nullable ConfigurableBeanFactory beanFactory) {
+
+		this.conversionService = (cs != null ? cs : DefaultConversionService.getSharedInstance());
 		this.configurableBeanFactory = beanFactory;
-		this.expressionContext = (beanFactory != null) ? new BeanExpressionContext(beanFactory, null) : null;
+		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}
 
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-
-		Class<?> paramType = parameter.getParameterType();
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
+		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
-		Object value = resolveArgumentInternal(parameter, message, namedValueInfo.name);
-		if (value == null) {
+		Object resolvedName = resolveStringValue(namedValueInfo.name);
+		if (resolvedName == null) {
+			throw new IllegalArgumentException(
+					"Specified name must not resolve to null: [" + namedValueInfo.name + "]");
+		}
+
+		Object arg = resolveArgumentInternal(nestedParameter, message, resolvedName.toString());
+		if (arg == null) {
 			if (namedValueInfo.defaultValue != null) {
-				value = resolveDefaultValue(namedValueInfo.defaultValue);
+				arg = resolveStringValue(namedValueInfo.defaultValue);
 			}
-			else if (namedValueInfo.required) {
-				handleMissingValue(namedValueInfo.name, parameter, message);
+			else if (namedValueInfo.required && !nestedParameter.isOptional()) {
+				handleMissingValue(namedValueInfo.name, nestedParameter, message);
 			}
-			value = handleNullValue(namedValueInfo.name, value, paramType);
+			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());
 		}
-		else if ("".equals(value) && (namedValueInfo.defaultValue != null)) {
-			value = resolveDefaultValue(namedValueInfo.defaultValue);
-		}
-
-		if (!ClassUtils.isAssignableValue(paramType, value)) {
-			value = this.conversionService.convert(value,
-					TypeDescriptor.valueOf(value.getClass()), new TypeDescriptor(parameter));
+		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
+			arg = resolveStringValue(namedValueInfo.defaultValue);
 		}
 
-		handleResolvedValue(value, namedValueInfo.name, parameter, message);
+		if (parameter != nestedParameter || !ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {
+			arg = this.conversionService.convert(arg, TypeDescriptor.forObject(arg), new TypeDescriptor(parameter));
+		}
 
-		return value;
+		handleResolvedValue(arg, namedValueInfo.name, parameter, message);
+
+		return arg;
 	}
 
 	/**
@@ -139,13 +146,31 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	private NamedValueInfo updateNamedValueInfo(MethodParameter parameter, NamedValueInfo info) {
 		String name = info.name;
-		if (info.name.length() == 0) {
+		if (info.name.isEmpty()) {
 			name = parameter.getParameterName();
-			Assert.notNull(name, "Name for argument type [" + parameter.getParameterType().getName()
-						+ "] not available, and parameter name information not found in class file either.");
+			if (name == null) {
+				throw new IllegalArgumentException("Name for argument type [" + parameter.getParameterType().getName() +
+						"] not available, and parameter name information not found in class file either.");
+			}
 		}
-		String defaultValue = ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue;
+		String defaultValue = (ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue);
 		return new NamedValueInfo(name, info.required, defaultValue);
+	}
+
+	/**
+	 * Resolve the given annotation-specified value,
+	 * potentially containing placeholders and expressions.
+	 */
+	private Object resolveStringValue(String value) {
+		if (this.configurableBeanFactory == null) {
+			return value;
+		}
+		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(value);
+		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
+		if (exprResolver == null) {
+			return value;
+		}
+		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
 	}
 
 	/**
@@ -156,23 +181,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @return the resolved argument. May be {@code null}
 	 * @throws Exception in case of errors
 	 */
+	@Nullable
 	protected abstract Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)
 			throws Exception;
-
-	/**
-	 * Resolves the given default value into an argument value.
-	 */
-	private Object resolveDefaultValue(String defaultValue) {
-		if (this.configurableBeanFactory == null) {
-			return defaultValue;
-		}
-		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(defaultValue);
-		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
-		if (exprResolver == null) {
-			return defaultValue;
-		}
-		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
-	}
 
 	/**
 	 * Invoked when a named value is required, but
@@ -188,7 +199,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or an
 	 * exception for other primitives.
 	 */
-	private Object handleNullValue(String name, Object value, Class<?> paramType) {
+	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
 		if (value == null) {
 			if (Boolean.TYPE.equals(paramType)) {
 				return Boolean.FALSE;

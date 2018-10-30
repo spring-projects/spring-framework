@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -32,13 +30,15 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * standard J2SE facilities to execute buffered requests. Created via the
+ * standard JDK facilities to execute buffered requests. Created via the
  * {@link org.springframework.http.client.SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
  * @since 3.0
  * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest
+ * @deprecated as of Spring 5.0, with no direct replacement
  */
+@Deprecated
 final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
 
 	private final HttpURLConnection connection;
@@ -58,8 +58,8 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.connection.getRequestMethod());
+	public String getMethodValue() {
+		return this.connection.getRequestMethod();
 	}
 
 	@Override
@@ -79,11 +79,10 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 		return this.taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
 			@Override
 			public ClientHttpResponse call() throws Exception {
-				for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-					String headerName = entry.getKey();
-					for (String headerValue : entry.getValue()) {
-						connection.addRequestProperty(headerName, headerValue);
-					}
+				SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
+				// JDK <1.8 doesn't support getOutputStream with HTTP DELETE
+				if (getMethod() == HttpMethod.DELETE && bufferedOutput.length == 0) {
+					connection.setDoOutput(false);
 				}
 				if (connection.getDoOutput() && outputStreaming) {
 					connection.setFixedLengthStreamingMode(bufferedOutput.length);
@@ -91,6 +90,10 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 				connection.connect();
 				if (connection.getDoOutput()) {
 					FileCopyUtils.copy(bufferedOutput, connection.getOutputStream());
+				}
+				else {
+					// Immediately trigger the request in a no-output scenario as well
+					connection.getResponseCode();
 				}
 				return new SimpleClientHttpResponse(connection);
 			}

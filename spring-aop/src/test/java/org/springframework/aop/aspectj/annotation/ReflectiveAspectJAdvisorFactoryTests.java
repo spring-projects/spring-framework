@@ -23,7 +23,7 @@ package org.springframework.aop.aspectj.annotation;
  * @author Rod Johnson
  * @since 2.0
  */
-public final class ReflectiveAspectJAdvisorFactoryTests extends AbstractAspectJAdvisorFactoryTests {
+public class ReflectiveAspectJAdvisorFactoryTests extends AbstractAspectJAdvisorFactoryTests {
 
 	@Override
 	protected AspectJAdvisorFactory getFixture() {

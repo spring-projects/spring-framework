@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.http.converter;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 
 /**
- * Thrown by {@link HttpMessageConverter} implementations when the conversion fails.
+ * Thrown by {@link HttpMessageConverter} implementations when a conversion attempt fails.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 3.0
  */
 @SuppressWarnings("serial")
@@ -29,7 +31,6 @@ public class HttpMessageConversionException extends NestedRuntimeException {
 
 	/**
 	 * Create a new HttpMessageConversionException.
-	 *
 	 * @param msg the detail message
 	 */
 	public HttpMessageConversionException(String msg) {
@@ -38,11 +39,10 @@ public class HttpMessageConversionException extends NestedRuntimeException {
 
 	/**
 	 * Create a new HttpMessageConversionException.
-	 *
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
-	public HttpMessageConversionException(String msg, Throwable cause) {
+	public HttpMessageConversionException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

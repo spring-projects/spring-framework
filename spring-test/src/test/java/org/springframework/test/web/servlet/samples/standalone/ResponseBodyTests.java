@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Response written from {@code @ResponseBody} method.
@@ -37,13 +38,13 @@ public class ResponseBodyTests {
 
 	@Test
 	public void json() throws Exception {
-
 		standaloneSetup(new PersonController()).build()
-			.perform(get("/person/Lee").accept(MediaType.APPLICATION_JSON))
+				.perform(get("/person/Lee").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType("application/json;charset=UTF-8"))
 				.andExpect(jsonPath("$.name").value("Lee"));
 	}
+
 
 	@Controller
 	private class PersonController {
@@ -51,8 +52,7 @@ public class ResponseBodyTests {
 		@RequestMapping(value="/person/{name}")
 		@ResponseBody
 		public Person get(@PathVariable String name) {
-			Person person = new Person(name);
-			return person;
+			return new Person(name);
 		}
 	}
 

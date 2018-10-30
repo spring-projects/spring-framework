@@ -1,5 +1,5 @@
 /**
- * <p>This package contains the <em>Spring TestContext Framework</em> which
+ * This package contains the <em>Spring TestContext Framework</em> which
  * provides annotation-driven unit and integration testing support that is
  * agnostic of the actual testing framework in use. The same techniques and
  * annotation-based configuration used in, for example, a JUnit environment
@@ -11,6 +11,9 @@
  * and caching, dependency injection of test fixtures, and transactional test
  * management with default rollback semantics.
  */
-
+@NonNullApi
+@NonNullFields
 package org.springframework.test.context;
 
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

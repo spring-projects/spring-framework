@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringValueResolver;
@@ -46,6 +47,7 @@ import org.springframework.util.StringValueResolver;
  */
 public class BeanDefinitionVisitor {
 
+	@Nullable
 	private StringValueResolver valueResolver;
 
 
@@ -79,10 +81,14 @@ public class BeanDefinitionVisitor {
 		visitFactoryBeanName(beanDefinition);
 		visitFactoryMethodName(beanDefinition);
 		visitScope(beanDefinition);
-		visitPropertyValues(beanDefinition.getPropertyValues());
-		ConstructorArgumentValues cas = beanDefinition.getConstructorArgumentValues();
-		visitIndexedArgumentValues(cas.getIndexedArgumentValues());
-		visitGenericArgumentValues(cas.getGenericArgumentValues());
+		if (beanDefinition.hasPropertyValues()) {
+			visitPropertyValues(beanDefinition.getPropertyValues());
+		}
+		if (beanDefinition.hasConstructorArgumentValues()) {
+			ConstructorArgumentValues cas = beanDefinition.getConstructorArgumentValues();
+			visitIndexedArgumentValues(cas.getIndexedArgumentValues());
+			visitGenericArgumentValues(cas.getGenericArgumentValues());
+		}
 	}
 
 	protected void visitParentName(BeanDefinition beanDefinition) {
@@ -164,7 +170,8 @@ public class BeanDefinitionVisitor {
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected Object resolveValue(Object value) {
+	@Nullable
+	protected Object resolveValue(@Nullable Object value) {
 		if (value instanceof BeanDefinition) {
 			visitBeanDefinition((BeanDefinition) value);
 		}
@@ -174,6 +181,9 @@ public class BeanDefinitionVisitor {
 		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
 			String newBeanName = resolveStringValue(ref.getBeanName());
+			if (newBeanName == null) {
+				return null;
+			}
 			if (!newBeanName.equals(ref.getBeanName())) {
 				return new RuntimeBeanReference(newBeanName);
 			}
@@ -181,6 +191,9 @@ public class BeanDefinitionVisitor {
 		else if (value instanceof RuntimeBeanNameReference) {
 			RuntimeBeanNameReference ref = (RuntimeBeanNameReference) value;
 			String newBeanName = resolveStringValue(ref.getBeanName());
+			if (newBeanName == null) {
+				return null;
+			}
 			if (!newBeanName.equals(ref.getBeanName())) {
 				return new RuntimeBeanNameReference(newBeanName);
 			}
@@ -274,6 +287,7 @@ public class BeanDefinitionVisitor {
 	 * @param strVal the original String value
 	 * @return the resolved String value
 	 */
+	@Nullable
 	protected String resolveStringValue(String strVal) {
 		if (this.valueResolver == null) {
 			throw new IllegalStateException("No StringValueResolver specified - pass a resolver " +

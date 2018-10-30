@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import org.springframework.core.convert.TypeDescriptor;
 /**
  * A {@link GenericConverter} that may conditionally execute based on attributes
  * of the {@code source} and {@code target} {@link TypeDescriptor}.
- * See {@link ConditionalConverter} for details.
+ *
+ * <p>See {@link ConditionalConverter} for details.
  *
  * @author Keith Donald
  * @author Phillip Webb

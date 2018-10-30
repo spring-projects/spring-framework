@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,11 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * A convenient base class for {@link WebSocketHandler} implementation that process binary
- * messages only. Text messages are rejected with {@link CloseStatus#NOT_ACCEPTABLE}. All
- * other methods have empty implementations.
+ * A convenient base class for {@link WebSocketHandler} implementations
+ * that process binary messages only.
+ *
+ * <p>Text messages are rejected with {@link CloseStatus#NOT_ACCEPTABLE}.
+ * All other methods have empty implementations.
  *
  * @author Rossen Stoyanchev
  * @author Phillip Webb
@@ -39,7 +41,7 @@ public class BinaryWebSocketHandler extends AbstractWebSocketHandler {
 		try {
 			session.close(CloseStatus.NOT_ACCEPTABLE.withReason("Text messages not supported"));
 		}
-		catch (IOException e) {
+		catch (IOException ex) {
 			// ignore
 		}
 	}

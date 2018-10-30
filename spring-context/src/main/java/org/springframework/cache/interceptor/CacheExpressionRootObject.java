@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.cache.Cache;
-import org.springframework.util.Assert;
 
 /**
  * Class describing the root object used during the expression evaluation.
@@ -45,8 +44,6 @@ class CacheExpressionRootObject {
 	public CacheExpressionRootObject(
 			Collection<? extends Cache> caches, Method method, Object[] args, Object target, Class<?> targetClass) {
 
-		Assert.notNull(method, "Method is required");
-		Assert.notNull(targetClass, "targetClass is required");
 		this.method = method;
 		this.target = target;
 		this.targetClass = targetClass;

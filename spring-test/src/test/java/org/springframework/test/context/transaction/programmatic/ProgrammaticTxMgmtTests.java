@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,26 +16,34 @@
 
 package org.springframework.test.context.transaction.programmatic;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.test.annotation.Rollback;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,17 +52,32 @@ import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * Integration tests that verify support for programmatic transaction management
- * within the <em>Spring TestContext Framework</em>.
+ * JUnit-based integration tests that verify support for programmatic transaction
+ * management within the <em>Spring TestContext Framework</em>.
  *
  * @author Sam Brannen
  * @since 4.1
  */
+@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class ProgrammaticTxMgmtTests extends AbstractTransactionalJUnit4SpringContextTests {
+@Transactional
+public class ProgrammaticTxMgmtTests {
+
+	private String sqlScriptEncoding;
+
+	protected JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	protected ApplicationContext applicationContext;
 
 	@Rule
 	public TestName testName = new TestName();
+
+
+	@Autowired
+	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
 
 	@BeforeTransaction
@@ -67,28 +90,19 @@ public class ProgrammaticTxMgmtTests extends AbstractTransactionalJUnit4SpringCo
 	public void afterTransaction() {
 		String method = testName.getMethodName();
 		switch (method) {
-			case "commitTxAndStartNewTx": {
-				assertUsers("Dogbert");
-				break;
-			}
+			case "commitTxAndStartNewTx":
 			case "commitTxButDoNotStartNewTx": {
 				assertUsers("Dogbert");
 				break;
 			}
-			case "rollbackTxAndStartNewTx": {
-				assertUsers("Dilbert");
-				break;
-			}
-			case "rollbackTxButDoNotStartNewTx": {
+			case "rollbackTxAndStartNewTx":
+			case "rollbackTxButDoNotStartNewTx":
+			case "startTxWithExistingTransaction": {
 				assertUsers("Dilbert");
 				break;
 			}
 			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics": {
 				assertUsers("Dilbert", "Dogbert");
-				break;
-			}
-			case "startTxWithExistingTransaction": {
-				assertUsers("Dilbert");
 				break;
 			}
 			default: {
@@ -224,7 +238,7 @@ public class ProgrammaticTxMgmtTests extends AbstractTransactionalJUnit4SpringCo
 	}
 
 	@Test
-	@Rollback(false)
+	@Commit
 	public void rollbackTxAndStartNewTxWithDefaultCommitSemantics() {
 		assertInTransaction(true);
 		assertTrue(TestTransaction.isActive());
@@ -252,15 +266,22 @@ public class ProgrammaticTxMgmtTests extends AbstractTransactionalJUnit4SpringCo
 
 	// -------------------------------------------------------------------------
 
-	private void assertUsers(String... users) {
-		List<Map<String, Object>> results = jdbcTemplate.queryForList("select name from user");
-		List<String> names = new ArrayList<String>();
-		for (Map<String, Object> map : results) {
-			names.add((String) map.get("name"));
-		}
-		assertEquals(Arrays.asList(users), names);
+	protected int deleteFromTables(String... names) {
+		return JdbcTestUtils.deleteFromTables(this.jdbcTemplate, names);
 	}
 
+	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
+		Resource resource = this.applicationContext.getResource(sqlResourcePath);
+		new ResourceDatabasePopulator(continueOnError, false, this.sqlScriptEncoding, resource).execute(jdbcTemplate.getDataSource());
+	}
+
+	private void assertUsers(String... users) {
+		List<String> expected = Arrays.asList(users);
+		Collections.sort(expected);
+		List<String> actual = jdbcTemplate.queryForList("select name from user", String.class);
+		Collections.sort(actual);
+		assertEquals("Users in database;", expected, actual);
+	}
 
 	// -------------------------------------------------------------------------
 
@@ -275,7 +296,7 @@ public class ProgrammaticTxMgmtTests extends AbstractTransactionalJUnit4SpringCo
 		@Bean
 		public DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
-			.setName("programmatic-tx-mgmt-test-db")//
+			.generateUniqueName(true)//
 			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql") //
 			.build();
 		}

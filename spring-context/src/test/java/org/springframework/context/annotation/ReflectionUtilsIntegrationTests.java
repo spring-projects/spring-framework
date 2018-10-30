@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+
 import org.springframework.util.ReflectionUtils;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests ReflectionUtils methods as used against CGLIB-generated classes created
@@ -37,7 +37,7 @@ public class ReflectionUtilsIntegrationTests {
 
 	@Test
 	public void getUniqueDeclaredMethods_withCovariantReturnType_andCglibRewrittenMethodNames() throws Exception {
-		Class<?> cglibLeaf = new ConfigurationClassEnhancer().enhance(Leaf.class);
+		Class<?> cglibLeaf = new ConfigurationClassEnhancer().enhance(Leaf.class, null);
 		int m1MethodCount = 0;
 		Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(cglibLeaf);
 		for (Method method : methods) {

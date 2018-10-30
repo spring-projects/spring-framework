@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,52 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.servlet.resource;
 
-import java.util.List;
+package org.springframework.web.servlet.resource;
 
 import org.springframework.core.io.Resource;
 
 /**
- * A strategy for handling version strings in request paths when resolving
- * static resources with a {@link VersionResourceResolver}.
+ * An extension of {@link VersionPathStrategy} that adds a method
+ * to determine the actual version of a {@link Resource}.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 4.1
  * @see VersionResourceResolver
 */
-public interface VersionStrategy {
+public interface VersionStrategy extends VersionPathStrategy {
 
 	/**
-	 * Extracts a version string from the request path.
-	 * @param requestPath the request path of the resource being resolved
-	 * @return the version string or an empty string if none was found
+	 * Determine the version for the given resource.
+	 * @param resource the resource to check
+	 * @return the version (never {@code null})
 	 */
-	String extractVersionFromPath(String requestPath);
+	String getResourceVersion(Resource resource);
 
-	/**
-	 * Deletes the given candidate version string from the given request path.
-	 * @param requestPath the request path of the resource being resolved
-	 * @param candidateVersion the candidate version string
-	 * @return the modified request path, without the version string
-	 */
-	String deleteVersionFromPath(String requestPath, String candidateVersion);
-
-	/**
-	 * Checks whether the given {@code Resource} matches the candidate version string.
-	 * Useful when the version string is managed on a per-resource basis.
-	 * @param baseResource the resource to check against the given version
-	 * @param candidateVersion the candidate version for the given resource
-	 * @return true if the resource matches the version string, false otherwise
-	 */
-	boolean resourceVersionMatches(Resource baseResource, String candidateVersion);
-
-	/**
-	 * Adds a version string to the given baseUrl.
-	 * @param baseUrl the baseUrl of the requested resource
-	 * @param locations the resource locations to resolve resources from
-	 * @param chain the chain of resource resolvers
-	 * @return the baseUrl updated with a version string
-	 */
-	String addVersionToUrl(String baseUrl, List<? extends Resource> locations, ResourceResolverChain chain);
 }

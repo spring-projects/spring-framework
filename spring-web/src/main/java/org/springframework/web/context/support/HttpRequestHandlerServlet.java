@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 package org.springframework.web.context.support;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -49,6 +50,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SuppressWarnings("serial")
 public class HttpRequestHandlerServlet extends HttpServlet {
 
+	@Nullable
 	private HttpRequestHandler target;
 
 
@@ -62,6 +64,8 @@ public class HttpRequestHandlerServlet extends HttpServlet {
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
+		Assert.state(this.target != null, "No HttpRequestHandler available");
 
 		LocaleContextHolder.setLocale(request.getLocale());
 		try {

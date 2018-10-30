@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,10 @@
 
 package org.springframework.messaging.handler.annotation.support;
 
-import static org.junit.Assert.*;
-
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
@@ -28,15 +30,17 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link PayloadArgumentResolver}.
@@ -48,8 +52,6 @@ import org.springframework.validation.annotation.Validated;
 public class PayloadArgumentResolverTests {
 
 	private PayloadArgumentResolver resolver;
-
-	private Method payloadMethod;
 
 	private MethodParameter paramAnnotated;
 
@@ -75,19 +77,32 @@ public class PayloadArgumentResolverTests {
 
 		this.resolver = new PayloadArgumentResolver(new StringMessageConverter(), testValidator());
 
-		payloadMethod = PayloadArgumentResolverTests.class.getDeclaredMethod("handleMessage",
-				String.class, String.class, Locale.class, String.class, String.class, String.class, String.class);
+		Method payloadMethod = PayloadArgumentResolverTests.class.getDeclaredMethod(
+				"handleMessage", String.class, String.class, Locale.class,
+				String.class, String.class, String.class, String.class);
 
-		this.paramAnnotated = getMethodParameter(this.payloadMethod, 0);
-		this.paramAnnotatedNotRequired = getMethodParameter(this.payloadMethod, 1);
-		this.paramAnnotatedRequired = getMethodParameter(payloadMethod, 2);
-		this.paramWithSpelExpression = getMethodParameter(payloadMethod, 3);
-		this.paramValidated = getMethodParameter(this.payloadMethod, 4);
+		this.paramAnnotated = new SynthesizingMethodParameter(payloadMethod, 0);
+		this.paramAnnotatedNotRequired = new SynthesizingMethodParameter(payloadMethod, 1);
+		this.paramAnnotatedRequired = new SynthesizingMethodParameter(payloadMethod, 2);
+		this.paramWithSpelExpression = new SynthesizingMethodParameter(payloadMethod, 3);
+		this.paramValidated = new SynthesizingMethodParameter(payloadMethod, 4);
 		this.paramValidated.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		this.paramValidatedNotAnnotated = getMethodParameter(this.payloadMethod, 5);
-		this.paramNotAnnotated = getMethodParameter(this.payloadMethod, 6);
+		this.paramValidatedNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 5);
+		this.paramNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 6);
 	}
 
+	@Test
+	public void supportsParameter() throws Exception {
+
+		assertTrue(this.resolver.supportsParameter(this.paramAnnotated));
+		assertTrue(this.resolver.supportsParameter(this.paramNotAnnotated));
+
+		PayloadArgumentResolver strictResolver = new PayloadArgumentResolver(
+				new StringMessageConverter(), testValidator(), false);
+
+		assertTrue(strictResolver.supportsParameter(this.paramAnnotated));
+		assertFalse(strictResolver.supportsParameter(this.paramNotAnnotated));
+	}
 
 	@Test
 	public void resolveRequired() throws Exception {
@@ -115,7 +130,6 @@ public class PayloadArgumentResolverTests {
 
 	@Test
 	public void resolveNotRequired() throws Exception {
-
 		Message<?> emptyByteArrayMessage = MessageBuilder.withPayload(new byte[0]).build();
 		assertNull(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyByteArrayMessage));
 
@@ -131,7 +145,7 @@ public class PayloadArgumentResolverTests {
 		Message<?> notEmptyMessage = MessageBuilder.withPayload(123).build();
 
 		thrown.expect(MessageConversionException.class);
-		thrown.expectMessage("No converter found");
+		thrown.expectMessage("Cannot convert");
 		this.resolver.resolveArgument(this.paramAnnotatedRequired, notEmptyMessage);
 	}
 
@@ -168,14 +182,12 @@ public class PayloadArgumentResolverTests {
 
 	@Test
 	public void resolveNonAnnotatedParameter() throws Exception {
-
 		Message<?> notEmptyMessage = MessageBuilder.withPayload("ABC".getBytes()).build();
 		assertEquals("ABC", this.resolver.resolveArgument(this.paramNotAnnotated, notEmptyMessage));
 
 		Message<?> emptyStringMessage = MessageBuilder.withPayload("").build();
 		thrown.expect(MethodArgumentNotValidException.class);
 		this.resolver.resolveArgument(this.paramValidated, emptyStringMessage);
-
 	}
 
 	@Test
@@ -188,8 +200,8 @@ public class PayloadArgumentResolverTests {
 		assertEquals("invalidValue", this.resolver.resolveArgument(this.paramValidatedNotAnnotated, message));
 	}
 
-	private Validator testValidator() {
 
+	private Validator testValidator() {
 		return new Validator() {
 			@Override
 			public boolean supports(Class<?> clazz) {
@@ -205,10 +217,6 @@ public class PayloadArgumentResolverTests {
 		};
 	}
 
-	private MethodParameter getMethodParameter(Method method, int index) {
-		Assert.notNull(method, "Method must be set");
-		return new MethodParameter(method, index);
-	}
 
 	@SuppressWarnings("unused")
 	private void handleMessage(
@@ -216,9 +224,16 @@ public class PayloadArgumentResolverTests {
 			@Payload(required=false) String paramNotRequired,
 			@Payload(required=true) Locale nonConvertibleRequiredParam,
 			@Payload("foo.bar") String paramWithSpelExpression,
-			@Validated @Payload String validParam,
+			@MyValid @Payload String validParam,
 			@Validated String validParamNotAnnotated,
 			String paramNotAnnotated) {
+	}
+
+
+	@Validated
+	@Target({ElementType.PARAMETER})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyValid {
 	}
 
 }

@@ -16,11 +16,9 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -28,11 +26,14 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.SideEffectBean;
 
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
+
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class PrototypeTargetSourceTests {
+public class PrototypeTargetSourceTests {
 
 	private static final Resource CONTEXT = qualifiedResource(PrototypeTargetSourceTests.class, "context.xml");
 
@@ -55,14 +56,14 @@ public final class PrototypeTargetSourceTests {
 	@Test
 	public void testPrototypeAndSingletonBehaveDifferently() {
 		SideEffectBean singleton = (SideEffectBean) beanFactory.getBean("singleton");
-		assertEquals(INITIAL_COUNT, singleton.getCount() );
+		assertEquals(INITIAL_COUNT, singleton.getCount());
 		singleton.doWork();
-		assertEquals(INITIAL_COUNT + 1, singleton.getCount() );
+		assertEquals(INITIAL_COUNT + 1, singleton.getCount());
 
 		SideEffectBean prototype = (SideEffectBean) beanFactory.getBean("prototype");
-		assertEquals(INITIAL_COUNT, prototype.getCount() );
+		assertEquals(INITIAL_COUNT, prototype.getCount());
 		prototype.doWork();
-		assertEquals(INITIAL_COUNT, prototype.getCount() );
+		assertEquals(INITIAL_COUNT, prototype.getCount());
 	}
 
 

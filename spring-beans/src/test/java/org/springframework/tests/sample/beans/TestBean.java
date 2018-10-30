@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 15 April 2001
  */
 public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable<Object> {
@@ -57,6 +58,8 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	private int age;
 
 	private boolean jedi;
+
+	private ITestBean spouse;
 
 	protected ITestBean[] spouses;
 
@@ -113,7 +116,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 	public TestBean(ITestBean spouse) {
-		this.spouses = new ITestBean[] {spouse};
+		this.spouse = spouse;
 	}
 
 	public TestBean(String name, int age) {
@@ -122,7 +125,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 	public TestBean(ITestBean spouse, Properties someProperties) {
-		this.spouses = new ITestBean[] {spouse};
+		this.spouse = spouse;
 		this.someProperties = someProperties;
 	}
 
@@ -210,17 +213,17 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	@Override
 	public ITestBean getSpouse() {
-		return (spouses != null ? spouses[0] : null);
+		return this.spouse;
 	}
 
 	@Override
 	public void setSpouse(ITestBean spouse) {
-		this.spouses = new ITestBean[] {spouse};
+		this.spouse = spouse;
 	}
 
 	@Override
 	public ITestBean[] getSpouses() {
-		return spouses;
+		return (spouse != null ? new ITestBean[] {spouse} : null);
 	}
 
 	public String getTouchy() {

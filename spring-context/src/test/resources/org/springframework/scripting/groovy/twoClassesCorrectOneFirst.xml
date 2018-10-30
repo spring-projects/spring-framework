@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+
+	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+
+	<bean id="messenger" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+		<constructor-arg>
+			<value>inline:
+	package org.springframework.scripting.groovy;
+
+	import org.springframework.scripting.Messenger;
+
+	class GroovyMessenger implements Messenger {
+
+		def String message;
+	}
+			
+	class Bingo {
+
+		def String message;
+	}
+			</value>
+		</constructor-arg>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
+</beans>

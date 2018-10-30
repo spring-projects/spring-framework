@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,53 +24,61 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.cache.interceptor.MethodCacheKey;
-import org.springframework.cache.jcache.model.JCacheOperation;
-import org.springframework.core.BridgeMethodResolver;
-import org.springframework.util.ClassUtils;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.MethodClassKey;
+import org.springframework.lang.Nullable;
 
 /**
- * Abstract implementation of {@link JCacheOperationSource} that caches
- * attributes for methods and implements a fallback policy: 1. specific
- * target method; 2. declaring method.
+ * Abstract implementation of {@link JCacheOperationSource} that caches attributes
+ * for methods and implements a fallback policy: 1. specific target method;
+ * 2. declaring method.
  *
- * <p>This implementation caches attributes by method after they are
- * first used.
+ * <p>This implementation caches attributes by method after they are first used.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  * @see org.springframework.cache.interceptor.AbstractFallbackCacheOperationSource
  */
-public abstract class AbstractFallbackJCacheOperationSource
-		implements JCacheOperationSource {
+public abstract class AbstractFallbackJCacheOperationSource implements JCacheOperationSource {
+
+	/**
+	 * Canonical value held in cache to indicate no caching attribute was
+	 * found for this method and we don't need to look again.
+	 */
+	private static final Object NULL_CACHING_ATTRIBUTE = new Object();
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<Object, JCacheOperation<?>> cache =
-			new ConcurrentHashMap<Object, JCacheOperation<?>>(1024);
+	private final Map<MethodClassKey, Object> cache = new ConcurrentHashMap<>(1024);
+
 
 	@Override
-	public JCacheOperation<?> getCacheOperation(Method method, Class<?> targetClass) {
-		// First, see if we have a cached value.
-		Object cacheKey = new MethodCacheKey(method, targetClass);
-		JCacheOperation<?> cached = this.cache.get(cacheKey);
+	public JCacheOperation<?> getCacheOperation(Method method, @Nullable Class<?> targetClass) {
+		MethodClassKey cacheKey = new MethodClassKey(method, targetClass);
+		Object cached = this.cache.get(cacheKey);
+
 		if (cached != null) {
-			return cached;
+			return (cached != NULL_CACHING_ATTRIBUTE ? (JCacheOperation<?>) cached : null);
 		}
 		else {
-			JCacheOperation<?> operation = computeCacheOperations(method, targetClass);
+			JCacheOperation<?> operation = computeCacheOperation(method, targetClass);
 			if (operation != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Adding cacheable method '" + method.getName()
-							+ "' with operation: " + operation);
+					logger.debug("Adding cacheable method '" + method.getName() + "' with operation: " + operation);
 				}
 				this.cache.put(cacheKey, operation);
+			}
+			else {
+				this.cache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
 			}
 			return operation;
 		}
 	}
 
-	private JCacheOperation<?> computeCacheOperations(Method method, Class<?> targetClass) {
+	@Nullable
+	private JCacheOperation<?> computeCacheOperation(Method method, @Nullable Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
@@ -78,9 +86,7 @@ public abstract class AbstractFallbackJCacheOperationSource
 
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
-		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-		// If we are dealing with method with generic parameters, find the original method.
-		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
+		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
 		// First try is the method in the target class.
 		JCacheOperation<?> operation = findCacheOperation(specificMethod, targetClass);
@@ -88,7 +94,7 @@ public abstract class AbstractFallbackJCacheOperationSource
 			return operation;
 		}
 		if (specificMethod != method) {
-			// Fall back is to look at the original method.
+			// Fallback is to look at the original method.
 			operation = findCacheOperation(method, targetClass);
 			if (operation != null) {
 				return operation;
@@ -96,6 +102,7 @@ public abstract class AbstractFallbackJCacheOperationSource
 		}
 		return null;
 	}
+
 
 	/**
 	 * Subclasses need to implement this to return the caching operation
@@ -105,7 +112,8 @@ public abstract class AbstractFallbackJCacheOperationSource
 	 * @return the cache operation associated with this method
 	 * (or {@code null} if none)
 	 */
-	protected abstract JCacheOperation<?> findCacheOperation(Method method, Class<?> targetType);
+	@Nullable
+	protected abstract JCacheOperation<?> findCacheOperation(Method method, @Nullable Class<?> targetType);
 
 	/**
 	 * Should only public methods be allowed to have caching semantics?

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.After;
 import org.junit.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
@@ -38,24 +38,15 @@ import static org.junit.Assert.*;
  */
 public class Spr11202Tests {
 
-	private AnnotationConfigApplicationContext context;
-
-	@After
-	public void close() {
-		if (context != null) {
-			context.close();
-		}
-	}
-
-	@Test // Fails
+	@Test
 	public void testWithImporter() {
-		context = new AnnotationConfigApplicationContext(Wrapper.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(Wrapper.class);
 		assertEquals("foo", context.getBean("value"));
 	}
 
-	@Test // Passes
+	@Test
 	public void testWithoutImporter() {
-		context = new AnnotationConfigApplicationContext(Config.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		assertEquals("foo", context.getBean("value"));
 	}
 
@@ -65,6 +56,7 @@ public class Spr11202Tests {
 	protected static class Wrapper {
 	}
 
+
 	protected static class Selector implements ImportSelector {
 
 		@Override
@@ -72,6 +64,7 @@ public class Spr11202Tests {
 			return new String[] {Config.class.getName()};
 		}
 	}
+
 
 	@Configuration
 	protected static class Config {
@@ -95,6 +88,7 @@ public class Spr11202Tests {
 		}
 	}
 
+
 	protected static class NoBarCondition implements Condition {
 
 		@Override
@@ -106,11 +100,13 @@ public class Spr11202Tests {
 		}
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@Target(ElementType.TYPE)
-	protected static @interface Bar {
+	protected @interface Bar {
 	}
+
 
 	protected static class FooFactoryBean implements FactoryBean<Foo>, InitializingBean {
 
@@ -136,6 +132,7 @@ public class Spr11202Tests {
 			this.foo.name = "foo";
 		}
 	}
+
 
 	protected static class Foo {
 

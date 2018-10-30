@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,25 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+
+import static org.junit.Assert.*;
 
 /**
  * Verifies proper handling of JUnit's {@link Ignore &#064;Ignore} and Spring's
  * {@link IfProfileValue &#064;IfProfileValue} and
  * {@link ProfileValueSourceConfiguration &#064;ProfileValueSourceConfiguration}
  * (with the <em>implicit, default {@link ProfileValueSource}</em>) annotations in
- * conjunction with the {@link SpringJUnit4ClassRunner}.
+ * conjunction with the {@link SpringRunner}.
  * <p>
  * Note that {@link TestExecutionListeners &#064;TestExecutionListeners} is
  * explicitly configured with an empty list, thus disabling all default
@@ -44,7 +44,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * @since 2.5
  * @see HardCodedProfileValueSourceSpringRunnerTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @TestExecutionListeners( {})
 public class EnabledAndIgnoredSpringRunnerTests {
 

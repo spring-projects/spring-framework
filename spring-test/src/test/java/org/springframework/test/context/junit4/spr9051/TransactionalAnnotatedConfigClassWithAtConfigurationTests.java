@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package org.springframework.test.context.junit4.spr9051;
 
-import static org.junit.Assert.assertSame;
-
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.springframework.tests.sample.beans.Employee;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.tests.sample.beans.Employee;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import static org.junit.Assert.*;
 
 /**
  * Concrete implementation of {@link AbstractTransactionalAnnotatedConfigClassTests}
@@ -67,7 +68,7 @@ public class TransactionalAnnotatedConfigClassWithAtConfigurationTests extends
 		@Bean
 		public DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
-			.addScript("classpath:/org/springframework/test/context/junit4/spr9051/schema.sql")//
+			.addScript("classpath:/org/springframework/test/jdbc/schema.sql")//
 			// Ensure that this in-memory database is only used by this class:
 			.setName(getClass().getName())//
 			.build();

@@ -54,7 +54,7 @@ public class ResizableByteArrayOutputStreamTests {
 	@Test
 	public void autoGrow() {
 		assertEquals(INITIAL_CAPACITY, this.baos.capacity());
-		for(int i = 0; i < 129; i++) {
+		for (int i = 0; i < 129; i++) {
 			this.baos.write(0);
 		}
 		assertEquals(256, this.baos.capacity());

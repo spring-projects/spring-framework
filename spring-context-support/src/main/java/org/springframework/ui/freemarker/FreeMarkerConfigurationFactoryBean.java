@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import freemarker.template.TemplateException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.lang.Nullable;
 
 /**
  * Factory bean that creates a FreeMarker Configuration and provides it as
@@ -53,6 +54,7 @@ import org.springframework.context.ResourceLoaderAware;
 public class FreeMarkerConfigurationFactoryBean extends FreeMarkerConfigurationFactory
 		implements FactoryBean<Configuration>, InitializingBean, ResourceLoaderAware {
 
+	@Nullable
 	private Configuration configuration;
 
 
@@ -63,6 +65,7 @@ public class FreeMarkerConfigurationFactoryBean extends FreeMarkerConfigurationF
 
 
 	@Override
+	@Nullable
 	public Configuration getObject() {
 		return this.configuration;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,19 +56,20 @@ public class NumberFormatAnnotationFormatterFactory extends EmbeddedValueResolut
 
 
 	private Formatter<Number> configureFormatterFrom(NumberFormat annotation) {
-		if (StringUtils.hasLength(annotation.pattern())) {
-			return new NumberFormatter(resolveEmbeddedValue(annotation.pattern()));
+		String pattern = resolveEmbeddedValue(annotation.pattern());
+		if (StringUtils.hasLength(pattern)) {
+			return new NumberStyleFormatter(pattern);
 		}
 		else {
 			Style style = annotation.style();
-			if (style == Style.PERCENT) {
-				return new PercentFormatter();
+			if (style == Style.CURRENCY) {
+				return new CurrencyStyleFormatter();
 			}
-			else if (style == Style.CURRENCY) {
-				return new CurrencyFormatter();
+			else if (style == Style.PERCENT) {
+				return new PercentStyleFormatter();
 			}
 			else {
-				return new NumberFormatter();
+				return new NumberStyleFormatter();
 			}
 		}
 	}

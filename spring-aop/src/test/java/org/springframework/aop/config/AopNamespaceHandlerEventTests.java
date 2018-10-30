@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,12 @@
 
 package org.springframework.aop.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -36,12 +32,15 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.beans.CollectingReaderEventListener;
 
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class AopNamespaceHandlerEventTests {
+public class AopNamespaceHandlerEventTests {
 
 	private static final Class<?> CLASS = AopNamespaceHandlerEventTests.class;
 
@@ -52,20 +51,20 @@ public final class AopNamespaceHandlerEventTests {
 
 	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
-	private XmlBeanDefinitionReader reader;
-
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
+	private XmlBeanDefinitionReader reader;
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() {
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
 		this.reader.setEventListener(this.eventListener);
 	}
 
+
 	@Test
-	public void testPointcutEvents() throws Exception {
+	public void testPointcutEvents() {
 		this.reader.loadBeanDefinitions(POINTCUT_EVENTS_CONTEXT);
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
 		assertEquals("Incorrect number of events fired", 1, componentDefinitions.length);
@@ -77,8 +76,7 @@ public final class AopNamespaceHandlerEventTests {
 		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
 		assertEquals("Incorrect number of inner components", 2, nestedComponentDefs.length);
 		PointcutComponentDefinition pcd = null;
-		for (int i = 0; i < nestedComponentDefs.length; i++) {
-			ComponentDefinition componentDefinition = nestedComponentDefs[i];
+		for (ComponentDefinition componentDefinition : nestedComponentDefs) {
 			if (componentDefinition instanceof PointcutComponentDefinition) {
 				pcd = (PointcutComponentDefinition) componentDefinition;
 				break;
@@ -89,7 +87,7 @@ public final class AopNamespaceHandlerEventTests {
 	}
 
 	@Test
-	public void testAdvisorEventsWithPointcutRef() throws Exception {
+	public void testAdvisorEventsWithPointcutRef() {
 		this.reader.loadBeanDefinitions(POINTCUT_REF_CONTEXT);
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
 		assertEquals("Incorrect number of events fired", 2, componentDefinitions.length);
@@ -118,7 +116,7 @@ public final class AopNamespaceHandlerEventTests {
 	}
 
 	@Test
-	public void testAdvisorEventsWithDirectPointcut() throws Exception {
+	public void testAdvisorEventsWithDirectPointcut() {
 		this.reader.loadBeanDefinitions(DIRECT_POINTCUT_EVENTS_CONTEXT);
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
 		assertEquals("Incorrect number of events fired", 2, componentDefinitions.length);
@@ -147,7 +145,7 @@ public final class AopNamespaceHandlerEventTests {
 	}
 
 	@Test
-	public void testAspectEvent() throws Exception {
+	public void testAspectEvent() {
 		this.reader.loadBeanDefinitions(CONTEXT);
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
 		assertEquals("Incorrect number of events fired", 5, componentDefinitions.length);
@@ -159,8 +157,7 @@ public final class AopNamespaceHandlerEventTests {
 		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
 		assertEquals("Incorrect number of inner components", 2, nestedComponentDefs.length);
 		AspectComponentDefinition acd = null;
-		for (int i = 0; i < nestedComponentDefs.length; i++) {
-			ComponentDefinition componentDefinition = nestedComponentDefs[i];
+		for (ComponentDefinition componentDefinition : nestedComponentDefs) {
 			if (componentDefinition instanceof AspectComponentDefinition) {
 				acd = (AspectComponentDefinition) componentDefinition;
 				break;
@@ -173,11 +170,10 @@ public final class AopNamespaceHandlerEventTests {
 		BeanReference[] beanReferences = acd.getBeanReferences();
 		assertEquals(6, beanReferences.length);
 
-		Set<String> expectedReferences = new HashSet<String>();
+		Set<String> expectedReferences = new HashSet<>();
 		expectedReferences.add("pc");
 		expectedReferences.add("countingAdvice");
-		for (int i = 0; i < beanReferences.length; i++) {
-			BeanReference beanReference = beanReferences[i];
+		for (BeanReference beanReference : beanReferences) {
 			expectedReferences.remove(beanReference.getBeanName());
 		}
 		assertEquals("Incorrect references found", 0, expectedReferences.size());

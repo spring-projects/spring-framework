@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,13 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.junit.Test;
+
 import org.springframework.mock.web.test.MockPageContext;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.servlet.tags.NestedPathTag;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -57,7 +61,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 	}
 
 
-	public void testSimpleRender() throws Exception {
+	@Test
+	public void simpleRender() throws Exception {
 		this.tag.setPath("name");
 		int startResult = this.tag.doStartTag();
 		int endResult = this.tag.doEndTag();
@@ -66,7 +71,7 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, endResult);
 
 		String output = getOutput();
-		// we are using a nexted path (see extendPageContext(..)), so...
+		// we are using a nested path (see extendPageContext(..)), so...
 		assertContainsAttribute(output, "for", "spouse.name");
 		// name attribute is not supported by <label/>
 		assertAttributeNotPresent(output, "name");
@@ -76,7 +81,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertTrue(output.endsWith("</label>"));
 	}
 
-	public void testSimpleRenderWithDynamicAttributes() throws Exception {
+	@Test
+	public void simpleRenderWithDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
 
@@ -91,7 +97,7 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, endResult);
 
 		String output = getOutput();
-		// we are using a nexted path (see extendPageContext(..)), so...
+		// we are using a nested path (see extendPageContext(..)), so...
 		assertContainsAttribute(output, "for", "spouse.name");
 		assertContainsAttribute(output, dynamicAttribute1, dynamicAttribute1);
 		assertContainsAttribute(output, dynamicAttribute2, dynamicAttribute2);
@@ -103,7 +109,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertTrue(output.endsWith("</label>"));
 	}
 
-	public void testSimpleRenderWithMapElement() throws Exception {
+	@Test
+	public void simpleRenderWithMapElement() throws Exception {
 		this.tag.setPath("someMap[1]");
 		int startResult = this.tag.doStartTag();
 		int endResult = this.tag.doEndTag();
@@ -112,7 +119,7 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, endResult);
 
 		String output = getOutput();
-		// we are using a nexted path (see extendPageContext(..)), so...
+		// we are using a nested path (see extendPageContext(..)), so...
 		assertContainsAttribute(output, "for", "spouse.someMap1");
 		// name attribute is not supported by <label/>
 		assertAttributeNotPresent(output, "name");
@@ -122,7 +129,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertTrue(output.endsWith("</label>"));
 	}
 
-	public void testOverrideFor() throws Exception {
+	@Test
+	public void overrideFor() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setFor("myElement");
 		int startResult = this.tag.doStartTag();

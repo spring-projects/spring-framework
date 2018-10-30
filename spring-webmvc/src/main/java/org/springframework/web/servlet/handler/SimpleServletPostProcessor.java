@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.handler;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -27,6 +26,7 @@ import javax.servlet.ServletException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
@@ -69,8 +69,10 @@ public class SimpleServletPostProcessor implements
 
 	private boolean useSharedServletConfig = true;
 
+	@Nullable
 	private ServletContext servletContext;
 
+	@Nullable
 	private ServletConfig servletConfig;
 
 
@@ -126,6 +128,11 @@ public class SimpleServletPostProcessor implements
 		}
 	}
 
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		return (bean instanceof Servlet);
+	}
+
 
 	/**
 	 * Internal implementation of the {@link ServletConfig} interface,
@@ -135,9 +142,10 @@ public class SimpleServletPostProcessor implements
 
 		private final String servletName;
 
+		@Nullable
 		private final ServletContext servletContext;
 
-		public DelegatingServletConfig(String servletName, ServletContext servletContext) {
+		public DelegatingServletConfig(String servletName, @Nullable ServletContext servletContext) {
 			this.servletName = servletName;
 			this.servletContext = servletContext;
 		}
@@ -148,18 +156,20 @@ public class SimpleServletPostProcessor implements
 		}
 
 		@Override
+		@Nullable
 		public ServletContext getServletContext() {
 			return this.servletContext;
 		}
 
 		@Override
+		@Nullable
 		public String getInitParameter(String paramName) {
 			return null;
 		}
 
 		@Override
 		public Enumeration<String> getInitParameterNames() {
-			return Collections.enumeration(new HashSet<String>());
+			return Collections.enumeration(Collections.emptySet());
 		}
 	}
 

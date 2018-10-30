@@ -23,7 +23,10 @@ import java.io.InputStream;
 import org.springframework.util.Assert;
 
 /**
- * @author Arjen Poutsma
+ * Mock implementation of {@link HttpInputMessage}.
+ *
+ * @author Rossen Stoyanchev
+ * @since 3.2
  */
 public class MockHttpInputMessage implements HttpInputMessage {
 
@@ -42,6 +45,7 @@ public class MockHttpInputMessage implements HttpInputMessage {
 		this.body = body;
 	}
 
+
 	@Override
 	public HttpHeaders getHeaders() {
 		return headers;
@@ -51,4 +55,5 @@ public class MockHttpInputMessage implements HttpInputMessage {
 	public InputStream getBody() throws IOException {
 		return body;
 	}
+
 }

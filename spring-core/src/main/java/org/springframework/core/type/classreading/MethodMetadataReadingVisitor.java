@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.type.classreading;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,11 +28,12 @@ import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * ASM method visitor which looks for the annotations defined on the method,
+ * ASM method visitor which looks for the annotations defined on a method,
  * exposing them through the {@link org.springframework.core.type.MethodMetadata}
  * interface.
  *
@@ -44,27 +46,32 @@ import org.springframework.util.MultiValueMap;
  */
 public class MethodMetadataReadingVisitor extends MethodVisitor implements MethodMetadata {
 
-	protected final String name;
+	protected final String methodName;
 
 	protected final int access;
 
 	protected final String declaringClassName;
 
+	protected final String returnTypeName;
+
+	@Nullable
 	protected final ClassLoader classLoader;
 
 	protected final Set<MethodMetadata> methodMetadataSet;
 
-	protected final MultiValueMap<String, AnnotationAttributes> attributeMap =
-			new LinkedMultiValueMap<String, AnnotationAttributes>(4);
+	protected final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<>(4);
+
+	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap = new LinkedMultiValueMap<>(4);
 
 
-	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName,
-			ClassLoader classLoader, Set<MethodMetadata> methodMetadataSet) {
+	public MethodMetadataReadingVisitor(String methodName, int access, String declaringClassName,
+			String returnTypeName, @Nullable ClassLoader classLoader, Set<MethodMetadata> methodMetadataSet) {
 
 		super(SpringAsmInfo.ASM_VERSION);
-		this.name = name;
+		this.methodName = methodName;
 		this.access = access;
 		this.declaringClassName = declaringClassName;
+		this.returnTypeName = returnTypeName;
 		this.classLoader = classLoader;
 		this.methodMetadataSet = methodMetadataSet;
 	}
@@ -72,14 +79,21 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
-		String className = Type.getType(desc).getClassName();
 		this.methodMetadataSet.add(this);
-		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null, this.classLoader);
+		String className = Type.getType(desc).getClassName();
+		return new AnnotationAttributesReadingVisitor(
+				className, this.attributesMap, this.metaAnnotationMap, this.classLoader);
 	}
+
 
 	@Override
 	public String getMethodName() {
-		return this.name;
+		return this.methodName;
+	}
+
+	@Override
+	public boolean isAbstract() {
+		return ((this.access & Opcodes.ACC_ABSTRACT) != 0);
 	}
 
 	@Override
@@ -98,37 +112,47 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	}
 
 	@Override
-	public boolean isAnnotated(String annotationType) {
-		return this.attributeMap.containsKey(annotationType);
+	public boolean isAnnotated(String annotationName) {
+		return this.attributesMap.containsKey(annotationName);
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		return getAnnotationAttributes(annotationType, false);
+	@Nullable
+	public AnnotationAttributes getAnnotationAttributes(String annotationName) {
+		return getAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationType);
-		return (attributes == null ? null : AnnotationReadingVisitorUtils.convertClassValues(
-				this.classLoader, attributes.get(0), classValuesAsString));
-	}
-
-	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
-		return getAllAnnotationAttributes(annotationType, false);
-	}
-
-	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		if (!this.attributeMap.containsKey(annotationType)) {
+	@Nullable
+	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
+				this.attributesMap, this.metaAnnotationMap, annotationName);
+		if (raw == null) {
 			return null;
 		}
-		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<String, Object>();
-		for (AnnotationAttributes annotationAttributes : this.attributeMap.get(annotationType)) {
-			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
-					this.classLoader, annotationAttributes, classValuesAsString).entrySet()) {
-				allAttributes.add(entry.getKey(), entry.getValue());
+		return AnnotationReadingVisitorUtils.convertClassValues(
+				"method '" + getMethodName() + "'", this.classLoader, raw, classValuesAsString);
+	}
+
+	@Override
+	@Nullable
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
+		return getAllAnnotationAttributes(annotationName, false);
+	}
+
+	@Override
+	@Nullable
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		if (!this.attributesMap.containsKey(annotationName)) {
+			return null;
+		}
+		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<>();
+		List<AnnotationAttributes> attributesList = this.attributesMap.get(annotationName);
+		if (attributesList != null) {
+			for (AnnotationAttributes annotationAttributes : attributesList) {
+				AnnotationAttributes convertedAttributes = AnnotationReadingVisitorUtils.convertClassValues(
+						"method '" + getMethodName() + "'", this.classLoader, annotationAttributes, classValuesAsString);
+				convertedAttributes.forEach(allAttributes::add);
 			}
 		}
 		return allAttributes;
@@ -137,6 +161,11 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	@Override
 	public String getDeclaringClassName() {
 		return this.declaringClassName;
+	}
+
+	@Override
+	public String getReturnTypeName() {
+		return this.returnTypeName;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,22 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.junit.Test;
+
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.util.WebUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  * @author Alef Arendsen
  */
+@SuppressWarnings("serial")
 public class HtmlEscapeTagTests extends AbstractTagTests {
 
-	@SuppressWarnings("serial")
-	public void testHtmlEscapeTag() throws JspException {
+	@Test
+	public void htmlEscapeTag() throws JspException {
 		PageContext pc = createPageContext();
 		HtmlEscapeTag tag = new HtmlEscapeTag();
 		tag.setPageContext(pc);
@@ -74,7 +79,8 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertTrue("Correctly applied", !testTag.isHtmlEscape());
 	}
 
-	public void testHtmlEscapeTagWithContextParamTrue() throws JspException {
+	@Test
+	public void htmlEscapeTagWithContextParamTrue() throws JspException {
 		PageContext pc = createPageContext();
 		MockServletContext sc = (MockServletContext) pc.getServletContext();
 		sc.addInitParameter(WebUtils.HTML_ESCAPE_CONTEXT_PARAM, "true");
@@ -92,7 +98,8 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
 	}
 
-	public void testHtmlEscapeTagWithContextParamFalse() throws JspException {
+	@Test
+	public void htmlEscapeTagWithContextParamFalse() throws JspException {
 		PageContext pc = createPageContext();
 		MockServletContext sc = (MockServletContext) pc.getServletContext();
 		HtmlEscapeTag tag = new HtmlEscapeTag();
@@ -109,8 +116,8 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
 	}
 
-	@SuppressWarnings("serial")
-	public void testEscapeBody() throws JspException {
+	@Test
+	public void escapeBody() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
@@ -129,8 +136,8 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertEquals("test text", result.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testEscapeBodyWithHtmlEscape() throws JspException {
+	@Test
+	public void escapeBodyWithHtmlEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
@@ -150,8 +157,8 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertEquals("test &amp; text", result.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testEscapeBodyWithJavaScriptEscape() throws JspException {
+	@Test
+	public void escapeBodyWithJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
@@ -171,8 +178,8 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertEquals("Correct content", "\\' test & text \\\\", result.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testEscapeBodyWithHtmlEscapeAndJavaScriptEscape() throws JspException {
+	@Test
+	public void escapeBodyWithHtmlEscapeAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {

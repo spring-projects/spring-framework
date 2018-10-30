@@ -17,12 +17,13 @@
 package org.springframework.transaction.interceptor;
 
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 
 import org.junit.Test;
+
 import org.springframework.transaction.TransactionDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests to check conversion from String to TransactionAttribute.
@@ -61,7 +62,7 @@ public class TransactionAttributeEditorTests {
 		assertTrue(!ta.isReadOnly());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidPropagationCodeOnly() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should have failed with bogus propagation code
@@ -78,7 +79,7 @@ public class TransactionAttributeEditorTests {
 		assertTrue(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testValidPropagationAndIsolationCodesAndInvalidRollbackRule() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should fail with bogus rollback rule
@@ -91,9 +92,9 @@ public class TransactionAttributeEditorTests {
 		pe.setAsText("PROPAGATION_MANDATORY,ISOLATION_REPEATABLE_READ,timeout_10,-IOException,+MyRuntimeException");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
 		assertNotNull(ta);
-		assertEquals(ta.getPropagationBehavior(), TransactionDefinition.PROPAGATION_MANDATORY);
-		assertEquals(ta.getIsolationLevel(), TransactionDefinition.ISOLATION_REPEATABLE_READ);
-		assertEquals(ta.getTimeout(), 10);
+		assertEquals(TransactionDefinition.PROPAGATION_MANDATORY, ta.getPropagationBehavior());
+		assertEquals(TransactionDefinition.ISOLATION_REPEATABLE_READ, ta.getIsolationLevel());
+		assertEquals(10, ta.getTimeout());
 		assertFalse(ta.isReadOnly());
 		assertTrue(ta.rollbackOn(new RuntimeException()));
 		assertFalse(ta.rollbackOn(new Exception()));
@@ -108,9 +109,9 @@ public class TransactionAttributeEditorTests {
 		pe.setAsText("+IOException,readOnly,ISOLATION_READ_COMMITTED,-MyRuntimeException,PROPAGATION_SUPPORTS");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
 		assertNotNull(ta);
-		assertEquals(ta.getPropagationBehavior(), TransactionDefinition.PROPAGATION_SUPPORTS);
-		assertEquals(ta.getIsolationLevel(), TransactionDefinition.ISOLATION_READ_COMMITTED);
-		assertEquals(ta.getTimeout(), TransactionDefinition.TIMEOUT_DEFAULT);
+		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
+		assertEquals(TransactionDefinition.ISOLATION_READ_COMMITTED, ta.getIsolationLevel());
+		assertEquals(TransactionDefinition.TIMEOUT_DEFAULT, ta.getTimeout());
 		assertTrue(ta.isReadOnly());
 		assertTrue(ta.rollbackOn(new RuntimeException()));
 		assertFalse(ta.rollbackOn(new Exception()));
@@ -131,9 +132,9 @@ public class TransactionAttributeEditorTests {
 		pe.setAsText(source.toString());
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
 		assertEquals(ta, source);
-		assertEquals(ta.getPropagationBehavior(), TransactionDefinition.PROPAGATION_SUPPORTS);
-		assertEquals(ta.getIsolationLevel(), TransactionDefinition.ISOLATION_REPEATABLE_READ);
-		assertEquals(ta.getTimeout(), 10);
+		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
+		assertEquals(TransactionDefinition.ISOLATION_REPEATABLE_READ, ta.getIsolationLevel());
+		assertEquals(10, ta.getTimeout());
 		assertTrue(ta.isReadOnly());
 		assertTrue(ta.rollbackOn(new RuntimeException()));
 		assertFalse(ta.rollbackOn(new Exception()));
@@ -158,9 +159,9 @@ public class TransactionAttributeEditorTests {
 		pe.setAsText(source.toString());
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
 		assertEquals(ta, source);
-		assertEquals(ta.getPropagationBehavior(), TransactionDefinition.PROPAGATION_SUPPORTS);
-		assertEquals(ta.getIsolationLevel(), TransactionDefinition.ISOLATION_REPEATABLE_READ);
-		assertEquals(ta.getTimeout(), 10);
+		assertEquals(TransactionDefinition.PROPAGATION_SUPPORTS, ta.getPropagationBehavior());
+		assertEquals(TransactionDefinition.ISOLATION_REPEATABLE_READ, ta.getIsolationLevel());
+		assertEquals(10, ta.getTimeout());
 		assertTrue(ta.isReadOnly());
 		assertTrue(ta.rollbackOn(new IllegalArgumentException()));
 		assertFalse(ta.rollbackOn(new IllegalStateException()));

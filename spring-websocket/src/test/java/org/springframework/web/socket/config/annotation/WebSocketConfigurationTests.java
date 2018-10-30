@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,11 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.*;
+import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
+import org.springframework.web.socket.JettyWebSocketTestServer;
+import org.springframework.web.socket.TomcatWebSocketTestServer;
+import org.springframework.web.socket.UndertowTestServer;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
@@ -45,7 +49,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTests {
 
-	@Parameters
+	@Parameters(name = "server [{0}], client [{1}]")
 	public static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][] {
 				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
@@ -57,7 +61,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
-		return new Class<?>[] { TestConfig.class };
+		return new Class<?>[] {TestConfig.class};
 	}
 
 	@Test
@@ -93,9 +97,9 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 			registry.addHandler(serverHandler(), "/ws")
-				.setHandshakeHandler(this.handshakeHandler);
+					.setHandshakeHandler(this.handshakeHandler);
 			registry.addHandler(serverHandler(), "/sockjs").withSockJS()
-				.setTransportHandlerOverrides(new WebSocketTransportHandler(this.handshakeHandler));
+					.setTransportHandlerOverrides(new WebSocketTransportHandler(this.handshakeHandler));
 		}
 
 		@Bean
@@ -103,6 +107,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 			return new TestHandler();
 		}
 	}
+
 
 	private static class TestHandler extends AbstractWebSocketHandler {
 

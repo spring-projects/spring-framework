@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ package org.springframework.mock.web;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.WebUtils;
 
 import static org.junit.Assert.*;
@@ -36,6 +37,7 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  * @author Rob Winch
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 19.02.2006
  */
 public class MockHttpServletResponseTests {
@@ -91,6 +93,21 @@ public class MockHttpServletResponseTests {
 		assertEquals("UTF-8", response.getCharacterEncoding());
 	}
 
+	@Test  // SPR-12677
+	public void contentTypeHeaderWithMoreComplexCharsetSyntax() {
+		String contentType = "test/plain;charset=\"utf-8\";foo=\"charset=bar\";foocharset=bar;foo=bar";
+		response.setHeader("Content-Type", contentType);
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
+		assertEquals("UTF-8", response.getCharacterEncoding());
+
+		response = new MockHttpServletResponse();
+		response.addHeader("Content-Type", contentType);
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
+		assertEquals("UTF-8", response.getCharacterEncoding());
+	}
+
 	@Test
 	public void setContentTypeThenCharacterEncoding() {
 		response.setContentType("test/plain");
@@ -124,6 +141,13 @@ public class MockHttpServletResponseTests {
 	}
 
 	@Test
+	public void contentLengthIntHeader() {
+		response.addIntHeader("Content-Length", 66);
+		assertEquals(66, response.getContentLength());
+		assertEquals("66", response.getHeader("Content-Length"));
+	}
+
+	@Test
 	public void httpHeaderNameCasingIsPreserved() throws Exception {
 		final String headerName = "Header1";
 		response.addHeader(headerName, "value1");
@@ -131,6 +155,22 @@ public class MockHttpServletResponseTests {
 		assertNotNull(responseHeaders);
 		assertEquals(1, responseHeaders.size());
 		assertEquals("HTTP header casing not being preserved", headerName, responseHeaders.iterator().next());
+	}
+
+	@Test
+	public void cookies() {
+		Cookie cookie = new Cookie("foo", "bar");
+		cookie.setPath("/path");
+		cookie.setDomain("example.com");
+		cookie.setMaxAge(0);
+		cookie.setSecure(true);
+		cookie.setHttpOnly(true);
+
+		response.addCookie(cookie);
+
+		assertEquals("foo=bar; Path=/path; Domain=example.com; " +
+				"Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT; " +
+				"Secure; HttpOnly", response.getHeader(HttpHeaders.SET_COOKIE));
 	}
 
 	@Test
@@ -187,6 +227,16 @@ public class MockHttpServletResponseTests {
 		assertEquals(1, response.getContentAsByteArray().length);
 	}
 
+	@Test // SPR-16683
+	public void servletWriterCommittedOnWriterClose() throws IOException {
+		assertFalse(response.isCommitted());
+		response.getWriter().write("X");
+		assertFalse(response.isCommitted());
+		response.getWriter().close();
+		assertTrue(response.isCommitted());
+		assertEquals(1, response.getContentAsByteArray().length);
+	}
+
 	@Test
 	public void servletWriterAutoFlushedForString() throws IOException {
 		response.getWriter().write("X");
@@ -222,25 +272,85 @@ public class MockHttpServletResponseTests {
 		assertEquals(redirectUrl, response.getRedirectedUrl());
 	}
 
-	/**
-	 * SPR-10414
-	 */
 	@Test
+	public void setDateHeader() {
+		response.setDateHeader("Last-Modified", 1437472800000L);
+		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void addDateHeader() {
+		response.addDateHeader("Last-Modified", 1437472800000L);
+		response.addDateHeader("Last-Modified", 1437472801000L);
+		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeaders("Last-Modified").get(0));
+		assertEquals("Tue, 21 Jul 2015 10:00:01 GMT", response.getHeaders("Last-Modified").get(1));
+	}
+
+	@Test
+	public void getDateHeader() {
+		long time = 1437472800000L;
+		response.setDateHeader("Last-Modified", time);
+		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeader("Last-Modified"));
+		assertEquals(time, response.getDateHeader("Last-Modified"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void getInvalidDateHeader() {
+		response.setHeader("Last-Modified", "invalid");
+		assertEquals("invalid", response.getHeader("Last-Modified"));
+		response.getDateHeader("Last-Modified");
+	}
+
+	@Test  // SPR-16160
+	public void getNonExistentDateHeader() {
+		assertNull(response.getHeader("Last-Modified"));
+		assertEquals(-1, response.getDateHeader("Last-Modified"));
+	}
+
+	@Test  // SPR-10414
 	public void modifyStatusAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		response.setStatus(HttpServletResponse.SC_OK);
-		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
+		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
 
-	/**
-	 * SPR-10414
-	 */
-	@Test
+	@Test  // SPR-10414
 	@SuppressWarnings("deprecation")
 	public void modifyStatusMessageAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Server Error");
-		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
+		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
+	}
+
+	@Test
+	public void setCookieHeaderValid() {
+		response.addHeader(HttpHeaders.SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
+		Cookie cookie = response.getCookie("SESSION");
+		assertNotNull(cookie);
+		assertTrue(cookie instanceof MockCookie);
+		assertEquals("SESSION", cookie.getName());
+		assertEquals("123", cookie.getValue());
+		assertEquals("/", cookie.getPath());
+		assertTrue(cookie.getSecure());
+		assertTrue(cookie.isHttpOnly());
+		assertEquals("Lax", ((MockCookie) cookie).getSameSite());
+	}
+
+	@Test
+	public void addMockCookie() {
+		MockCookie mockCookie = new MockCookie("SESSION", "123");
+		mockCookie.setPath("/");
+		mockCookie.setDomain("example.com");
+		mockCookie.setMaxAge(0);
+		mockCookie.setSecure(true);
+		mockCookie.setHttpOnly(true);
+		mockCookie.setSameSite("Lax");
+
+		response.addCookie(mockCookie);
+
+		assertEquals("SESSION=123; Path=/; Domain=example.com; Max-Age=0; " +
+				"Expires=Thu, 1 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Lax",
+				response.getHeader(HttpHeaders.SET_COOKIE));
 	}
 
 }

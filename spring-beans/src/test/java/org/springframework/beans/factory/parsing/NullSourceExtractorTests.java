@@ -16,15 +16,15 @@
 
 package org.springframework.beans.factory.parsing;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class NullSourceExtractorTests {
+public class NullSourceExtractorTests {
 
 	@Test
 	public void testPassThroughContract() throws Exception {

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="jmxAdapter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="namingTest">
+					<ref bean="testBean"/>
+				</entry>
+			</map>
+		</property>
+		<property name="assembler">
+			<ref bean="metadataAssembler"/>
+		</property>
+		<property name="namingStrategy">
+			<ref bean="metadataNamingStrategy"/>
+		</property>
+	</bean>
+
+	<bean id="testBean" class="org.springframework.jmx.export.annotation.AnnotationTestSubBean">
+		<property name="name" value="TEST"/>
+		<property name="age" value="100"/>
+	</bean>
+
+	<bean id="testInterfaceBean" class="org.springframework.jmx.export.annotation.AnotherAnnotationTestBeanImpl">
+		<property name="bar" value="Init value"/>
+	</bean>
+
+	<bean id="attributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+
+	<bean id="metadataNamingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+		<property name="attributeSource" ref="attributeSource"/>
+	</bean>
+
+	<bean id="metadataAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+		<property name="attributeSource" ref="attributeSource"/>
+	</bean>
+
+</beans>

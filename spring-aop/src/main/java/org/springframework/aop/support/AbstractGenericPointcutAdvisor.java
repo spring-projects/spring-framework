@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ package org.springframework.aop.support;
 import org.aopalliance.aop.Advice;
 
 /**
- * Abstract generic PointcutAdvisor that allows for any Advice to be configured.
+ * Abstract generic {@link org.springframework.aop.PointcutAdvisor}
+ * that allows for any {@link Advice} to be configured.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -29,7 +30,7 @@ import org.aopalliance.aop.Advice;
 @SuppressWarnings("serial")
 public abstract class AbstractGenericPointcutAdvisor extends AbstractPointcutAdvisor {
 
-	private Advice advice;
+	private Advice advice = EMPTY_ADVICE;
 
 
 	/**

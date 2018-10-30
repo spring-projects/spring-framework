@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 public class NumberUtilsTests {
 
 	@Test
-	public void testParseNumber() {
+	public void parseNumber() {
 		String aByte = "" + Byte.MAX_VALUE;
 		String aShort = "" + Short.MAX_VALUE;
 		String anInteger = "" + Integer.MAX_VALUE;
@@ -40,16 +40,16 @@ public class NumberUtilsTests {
 		String aFloat = "" + Float.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
 
-		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class));
-		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class));
-		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class));
-		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
-		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class));
-		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+		assertEquals("Byte did not parse", Byte.valueOf(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class));
+		assertEquals("Short did not parse", Short.valueOf(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class));
+		assertEquals("Integer did not parse", Integer.valueOf(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class));
+		assertEquals("Long did not parse", Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+		assertEquals("Float did not parse", Float.valueOf(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class));
+		assertEquals("Double did not parse", Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
 	}
 
 	@Test
-	public void testParseNumberUsingNumberFormat() {
+	public void parseNumberUsingNumberFormat() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 		String aByte = "" + Byte.MAX_VALUE;
 		String aShort = "" + Short.MAX_VALUE;
@@ -58,16 +58,16 @@ public class NumberUtilsTests {
 		String aFloat = "" + Float.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
 
-		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
-		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
-		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
-		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
-		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
-		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+		assertEquals("Byte did not parse", Byte.valueOf(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
+		assertEquals("Short did not parse", Short.valueOf(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
+		assertEquals("Integer did not parse", Integer.valueOf(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
+		assertEquals("Long did not parse", Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals("Float did not parse", Float.valueOf(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
+		assertEquals("Double did not parse", Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	@Test
-	public void testParseWithTrim() {
+	public void parseNumberRequiringTrim() {
 		String aByte = " " + Byte.MAX_VALUE + " ";
 		String aShort = " " + Short.MAX_VALUE + " ";
 		String anInteger = " " + Integer.MAX_VALUE + " ";
@@ -75,16 +75,16 @@ public class NumberUtilsTests {
 		String aFloat = " " + Float.MAX_VALUE + " ";
 		String aDouble = " " + Double.MAX_VALUE + " ";
 
-		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class));
-		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class));
-		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class));
-		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
-		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class));
-		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+		assertEquals("Byte did not parse", Byte.valueOf(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class));
+		assertEquals("Short did not parse", Short.valueOf(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class));
+		assertEquals("Integer did not parse", Integer.valueOf(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class));
+		assertEquals("Long did not parse", Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+		assertEquals("Float did not parse", Float.valueOf(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class));
+		assertEquals("Double did not parse", Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
 	}
 
 	@Test
-	public void testParseWithTrimUsingNumberFormat() {
+	public void parseNumberRequiringTrimUsingNumberFormat() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 		String aByte = " " + Byte.MAX_VALUE + " ";
 		String aShort = " " + Short.MAX_VALUE + " ";
@@ -93,18 +93,18 @@ public class NumberUtilsTests {
 		String aFloat = " " + Float.MAX_VALUE + " ";
 		String aDouble = " " + Double.MAX_VALUE + " ";
 
-		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
-		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
-		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
-		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
-		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
-		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+		assertEquals("Byte did not parse", Byte.valueOf(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
+		assertEquals("Short did not parse", Short.valueOf(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
+		assertEquals("Integer did not parse", Integer.valueOf(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
+		assertEquals("Long did not parse", Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals("Float did not parse", Float.valueOf(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
+		assertEquals("Double did not parse", Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	@Test
-	public void testParseAsHex() {
-		String aByte = "0x" + Integer.toHexString(new Byte(Byte.MAX_VALUE).intValue());
-		String aShort = "0x" + Integer.toHexString(new Short(Short.MAX_VALUE).intValue());
+	public void parseNumberAsHex() {
+		String aByte = "0x" + Integer.toHexString(Byte.valueOf(Byte.MAX_VALUE).intValue());
+		String aShort = "0x" + Integer.toHexString(Short.valueOf(Short.MAX_VALUE).intValue());
 		String anInteger = "0x" + Integer.toHexString(Integer.MAX_VALUE);
 		String aLong = "0x" + Long.toHexString(Long.MAX_VALUE);
 		String aReallyBigInt = "FEBD4E677898DFEBFFEE44";
@@ -118,7 +118,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void testParseNegativeHex() {
+	public void parseNumberAsNegativeHex() {
 		String aByte = "-0x80";
 		String aShort = "-0x8000";
 		String anInteger = "-0x80000000";
@@ -134,47 +134,47 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void testDoubleToBigInteger() {
-		Double decimal = new Double(3.14d);
+	public void convertDoubleToBigInteger() {
+		Double decimal = Double.valueOf(3.14d);
 		assertEquals(new BigInteger("3"), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
 	}
 
 	@Test
-	public void testBigDecimalToBigInteger() {
+	public void convertBigDecimalToBigInteger() {
 		String number = "987459837583750387355346";
 		BigDecimal decimal = new BigDecimal(number);
 		assertEquals(new BigInteger(number), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
 	}
 
 	@Test
-	public void testNonExactBigDecimalToBigInteger() {
+	public void convertNonExactBigDecimalToBigInteger() {
 		BigDecimal decimal = new BigDecimal("987459837583750387355346.14");
 		assertEquals(new BigInteger("987459837583750387355346"), NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class));
 	}
 
 	@Test
-	public void testParseBigDecimalNumber1() {
+	public void parseBigDecimalNumber1() {
 		String bigDecimalAsString = "0.10";
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class);
 		assertEquals(new BigDecimal(bigDecimalAsString), bigDecimal);
 	}
 
 	@Test
-	public void testParseBigDecimalNumber2() {
+	public void parseBigDecimalNumber2() {
 		String bigDecimalAsString = "0.001";
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class);
 		assertEquals(new BigDecimal(bigDecimalAsString), bigDecimal);
 	}
 
 	@Test
-	public void testParseBigDecimalNumber3() {
+	public void parseBigDecimalNumber3() {
 		String bigDecimalAsString = "3.14159265358979323846";
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class);
 		assertEquals(new BigDecimal(bigDecimalAsString), bigDecimal);
 	}
 
 	@Test
-	public void testParseLocalizedBigDecimalNumber1() {
+	public void parseLocalizedBigDecimalNumber1() {
 		String bigDecimalAsString = "0.10";
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
@@ -182,7 +182,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void testParseLocalizedBigDecimalNumber2() {
+	public void parseLocalizedBigDecimalNumber2() {
 		String bigDecimalAsString = "0.001";
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
@@ -190,7 +190,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void testParseLocalizedBigDecimalNumber3() {
+	public void parseLocalizedBigDecimalNumber3() {
 		String bigDecimalAsString = "3.14159265358979323846";
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
@@ -198,7 +198,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void testParseOverflow() {
+	public void parseOverflow() {
 		String aLong = "" + Long.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
 
@@ -223,12 +223,12 @@ public class NumberUtilsTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		assertEquals(new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
-		assertEquals(new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+		assertEquals(Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+		assertEquals(Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
 	}
 
 	@Test
-	public void testParseNegativeOverflow() {
+	public void parseNegativeOverflow() {
 		String aLong = "" + Long.MIN_VALUE;
 		String aDouble = "" + Double.MIN_VALUE;
 
@@ -253,12 +253,12 @@ public class NumberUtilsTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		assertEquals(new Long(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class));
-		assertEquals(new Double(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+		assertEquals(Double.valueOf(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
 	}
 
 	@Test
-	public void testParseOverflowUsingNumberFormat() {
+	public void parseOverflowUsingNumberFormat() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 		String aLong = "" + Long.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
@@ -284,12 +284,12 @@ public class NumberUtilsTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		assertEquals(new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
-		assertEquals(new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+		assertEquals(Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals(Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	@Test
-	public void testParseNegativeOverflowUsingNumberFormat() {
+	public void parseNegativeOverflowUsingNumberFormat() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 		String aLong = "" + Long.MIN_VALUE;
 		String aDouble = "" + Double.MIN_VALUE;
@@ -315,12 +315,12 @@ public class NumberUtilsTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		assertEquals(new Long(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
-		assertEquals(new Double(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals(Double.valueOf(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	@Test
-	public void testToNumberInteger() {
+	public void convertToInteger() {
 		assertEquals(Integer.valueOf(Integer.valueOf(-1)), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(-1), Integer.class));
 		assertEquals(Integer.valueOf(Integer.valueOf(0)), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(0), Integer.class));
 		assertEquals(Integer.valueOf(Integer.valueOf(1)), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), Integer.class));
@@ -328,8 +328,6 @@ public class NumberUtilsTests {
 		assertEquals(Integer.valueOf(Integer.MIN_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MAX_VALUE + 1), Integer.class));
 		assertEquals(Integer.valueOf(Integer.MIN_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MIN_VALUE), Integer.class));
 		assertEquals(Integer.valueOf(Integer.MAX_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MIN_VALUE - 1), Integer.class));
-		assertToNumberOverflow(BigInteger.valueOf(Integer.MAX_VALUE).add(BigInteger.ONE), Integer.class);
-		assertToNumberOverflow(BigInteger.valueOf(Integer.MIN_VALUE).subtract(BigInteger.ONE), Integer.class);
 
 		assertEquals(Integer.valueOf(Integer.valueOf(-1)), NumberUtils.convertNumberToTargetClass(Long.valueOf(-1), Integer.class));
 		assertEquals(Integer.valueOf(Integer.valueOf(0)), NumberUtils.convertNumberToTargetClass(Long.valueOf(0), Integer.class));
@@ -338,8 +336,6 @@ public class NumberUtilsTests {
 		assertEquals(Integer.valueOf(Integer.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MAX_VALUE + 1), Integer.class));
 		assertEquals(Integer.valueOf(Integer.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MIN_VALUE), Integer.class));
 		assertEquals(Integer.valueOf(Integer.MAX_VALUE), NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MIN_VALUE - 1), Integer.class));
-		assertToNumberOverflow(Long.valueOf(Long.MAX_VALUE + 1), Integer.class);
-		assertToNumberOverflow(Long.valueOf(Long.MIN_VALUE - 1), Integer.class);
 
 		assertEquals(Integer.valueOf(Integer.valueOf(-1)), NumberUtils.convertNumberToTargetClass(Integer.valueOf(-1), Integer.class));
 		assertEquals(Integer.valueOf(Integer.valueOf(0)), NumberUtils.convertNumberToTargetClass(Integer.valueOf(0), Integer.class));
@@ -364,10 +360,16 @@ public class NumberUtilsTests {
 		assertEquals(Integer.valueOf(Byte.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MAX_VALUE + 1)), Integer.class));
 		assertEquals(Integer.valueOf(Byte.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf(Byte.MIN_VALUE), Integer.class));
 		assertEquals(Integer.valueOf(Byte.MAX_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MIN_VALUE - 1)), Integer.class));
+
+		assertToNumberOverflow(Long.valueOf(Long.MAX_VALUE + 1), Integer.class);
+		assertToNumberOverflow(Long.valueOf(Long.MIN_VALUE - 1), Integer.class);
+		assertToNumberOverflow(BigInteger.valueOf(Integer.MAX_VALUE).add(BigInteger.ONE), Integer.class);
+		assertToNumberOverflow(BigInteger.valueOf(Integer.MIN_VALUE).subtract(BigInteger.ONE), Integer.class);
+		assertToNumberOverflow(new BigDecimal("18446744073709551611"), Integer.class);
 	}
 
 	@Test
-	public void testToNumberLong() {
+	public void convertToLong() {
 		assertEquals(Long.valueOf(Long.valueOf(-1)), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(-1), Long.class));
 		assertEquals(Long.valueOf(Long.valueOf(0)), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(0), Long.class));
 		assertEquals(Long.valueOf(Long.valueOf(1)), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), Long.class));
@@ -375,9 +377,6 @@ public class NumberUtilsTests {
 		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MAX_VALUE + 1), Long.class));
 		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MIN_VALUE), Long.class));
 		assertEquals(Long.valueOf(Long.MAX_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MIN_VALUE - 1), Long.class));
-
-		assertToNumberOverflow(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), Long.class);
-		assertToNumberOverflow(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), Long.class);
 
 		assertEquals(Long.valueOf(Long.valueOf(-1)), NumberUtils.convertNumberToTargetClass(Long.valueOf(-1), Long.class));
 		assertEquals(Long.valueOf(Long.valueOf(0)), NumberUtils.convertNumberToTargetClass(Long.valueOf(0), Long.class));
@@ -410,6 +409,10 @@ public class NumberUtilsTests {
 		assertEquals(Long.valueOf(Byte.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MAX_VALUE + 1)), Long.class));
 		assertEquals(Long.valueOf(Byte.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf(Byte.MIN_VALUE), Long.class));
 		assertEquals(Long.valueOf(Byte.MAX_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MIN_VALUE - 1)), Long.class));
+
+		assertToNumberOverflow(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), Long.class);
+		assertToNumberOverflow(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), Long.class);
+		assertToNumberOverflow(new BigDecimal("18446744073709551611"), Long.class);
 	}
 
 

@@ -16,6 +16,8 @@
 
 package org.springframework.ui.context;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface to be implemented by objects that can resolve {@link Theme Themes}.
  * This enables parameterization and internationalization of messages
@@ -38,6 +40,7 @@ public interface ThemeSource {
 	 * return default Themes for other theme names.
 	 * @see org.springframework.web.servlet.theme.AbstractThemeResolver#ORIGINAL_DEFAULT_THEME_NAME
 	 */
+	@Nullable
 	Theme getTheme(String themeName);
 
 }

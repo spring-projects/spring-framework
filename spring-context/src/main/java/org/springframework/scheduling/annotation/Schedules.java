@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,9 @@ import java.lang.annotation.Target;
  * Can also be used in conjunction with Java 8's support for repeatable annotations,
  * where {@link Scheduled} can simply be declared several times on the same method,
  * implicitly generating this container annotation.
+ *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em>.
  *
  * @author Juergen Hoeller
  * @since 4.0

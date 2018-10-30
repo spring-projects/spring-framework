@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,17 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Date;
+import java.util.concurrent.ExecutionException;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -29,19 +35,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Date;
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link DefaultTransportRequest}.
@@ -78,7 +73,6 @@ public class DefaultTransportRequestTests {
 
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void connect() throws Exception {
 		DefaultTransportRequest request = createTransportRequest(this.webSocketTransport, TransportType.WEBSOCKET);
 		request.connect(null, this.connectFuture);
@@ -133,7 +127,7 @@ public class DefaultTransportRequestTests {
 
 	protected DefaultTransportRequest createTransportRequest(Transport transport, TransportType type) throws Exception {
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
-		return new DefaultTransportRequest(urlInfo, new HttpHeaders(), transport, type, CODEC);
+		return new DefaultTransportRequest(urlInfo, new HttpHeaders(), new HttpHeaders(), transport, type, CODEC);
 	}
 
 }

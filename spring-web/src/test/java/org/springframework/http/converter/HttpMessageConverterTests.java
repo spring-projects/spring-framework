@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,48 +17,62 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Test-case for AbstractHttpMessageConverter.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class HttpMessageConverterTests {
 
-	private static final MediaType MEDIA_TYPE = new MediaType("foo", "bar");
 
 	@Test
 	public void canRead() {
-		AbstractHttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(MEDIA_TYPE) {
-			@Override
-			protected boolean supports(Class<?> clazz) {
-				return MyType.class.equals(clazz);
-			}
+		MediaType mediaType = new MediaType("foo", "bar");
+		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
-		};
-
-		assertTrue(converter.canRead(MyType.class, MEDIA_TYPE));
+		assertTrue(converter.canRead(MyType.class, mediaType));
 		assertFalse(converter.canRead(MyType.class, new MediaType("foo", "*")));
 		assertFalse(converter.canRead(MyType.class, MediaType.ALL));
 	}
 
 	@Test
+	public void canReadWithWildcardSubtype() {
+		MediaType mediaType = new MediaType("foo");
+		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
+
+		assertTrue(converter.canRead(MyType.class, new MediaType("foo", "bar")));
+		assertTrue(converter.canRead(MyType.class, new MediaType("foo", "*")));
+		assertFalse(converter.canRead(MyType.class, MediaType.ALL));
+	}
+
+	@Test
 	public void canWrite() {
-		AbstractHttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(MEDIA_TYPE) {
-			@Override
-			protected boolean supports(Class<?> clazz) {
-				return MyType.class.equals(clazz);
-			}
+		MediaType mediaType = new MediaType("foo", "bar");
+		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
 
-		};
+		assertTrue(converter.canWrite(MyType.class, mediaType));
+		assertTrue(converter.canWrite(MyType.class, new MediaType("foo", "*")));
+		assertTrue(converter.canWrite(MyType.class, MediaType.ALL));
+	}
 
-		assertTrue(converter.canWrite(MyType.class, MEDIA_TYPE));
+	@Test
+	public void canWriteWithWildcardInSupportedSubtype() {
+		MediaType mediaType = new MediaType("foo");
+		HttpMessageConverter<MyType> converter = new MyHttpMessageConverter<>(mediaType);
+
+		assertTrue(converter.canWrite(MyType.class, new MediaType("foo", "bar")));
 		assertTrue(converter.canWrite(MyType.class, new MediaType("foo", "*")));
 		assertTrue(converter.canWrite(MyType.class, MediaType.ALL));
 	}
@@ -72,8 +86,7 @@ public class HttpMessageConverterTests {
 
 		@Override
 		protected boolean supports(Class<?> clazz) {
-			fail("Not expected");
-			return false;
+			return MyType.class.equals(clazz);
 		}
 
 		@Override

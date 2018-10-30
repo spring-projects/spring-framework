@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Used by the {@link org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader} to
  * locate a {@link NamespaceHandler} implementation for a particular namespace URI.
@@ -25,6 +27,7 @@ package org.springframework.beans.factory.xml;
  * @see NamespaceHandler
  * @see org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader
  */
+@FunctionalInterface
 public interface NamespaceHandlerResolver {
 
 	/**
@@ -33,6 +36,7 @@ public interface NamespaceHandlerResolver {
 	 * @param namespaceUri the relevant namespace URI
 	 * @return the located {@link NamespaceHandler} (may be {@code null})
 	 */
+	@Nullable
 	NamespaceHandler resolve(String namespaceUri);
 
 }

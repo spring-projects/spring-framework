@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package org.springframework.http;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
  * Represents an HTTP request or response entity, consisting of headers and body.
  *
- * <p>Typically used in combination with the {@link org.springframework.web.client.RestTemplate RestTemplate}, like so:
+ * <p>Typically used in combination with the {@link org.springframework.web.client.RestTemplate},
+ * like so:
  * <pre class="code">
  * HttpHeaders headers = new HttpHeaders();
  * headers.setContentType(MediaType.TEXT_PLAIN);
@@ -46,7 +48,9 @@ import org.springframework.util.ObjectUtils;
  * </pre>
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0.2
+ * @param <T> the body type
  * @see org.springframework.web.client.RestTemplate
  * @see #getBody()
  * @see #getHeaders()
@@ -56,11 +60,12 @@ public class HttpEntity<T> {
 	/**
 	 * The empty {@code HttpEntity}, with no body or headers.
 	 */
-	public static final HttpEntity<?> EMPTY = new HttpEntity<Object>();
+	public static final HttpEntity<?> EMPTY = new HttpEntity<>();
 
 
 	private final HttpHeaders headers;
 
+	@Nullable
 	private final T body;
 
 
@@ -92,7 +97,7 @@ public class HttpEntity<T> {
 	 * @param body the entity body
 	 * @param headers the entity headers
 	 */
-	public HttpEntity(T body, MultiValueMap<String, String> headers) {
+	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
 		this.body = body;
 		HttpHeaders tempHeaders = new HttpHeaders();
 		if (headers != null) {
@@ -112,6 +117,7 @@ public class HttpEntity<T> {
 	/**
 	 * Returns the body of this entity.
 	 */
+	@Nullable
 	public T getBody() {
 		return this.body;
 	}
@@ -123,12 +129,13 @@ public class HttpEntity<T> {
 		return (this.body != null);
 	}
 
+
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof HttpEntity)) {
+		if (other == null || other.getClass() != getClass()) {
 			return false;
 		}
 		HttpEntity<?> otherEntity = (HttpEntity<?>) other;
@@ -138,21 +145,17 @@ public class HttpEntity<T> {
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.headers) * 29 + ObjectUtils.nullSafeHashCode(this.body);
+		return (ObjectUtils.nullSafeHashCode(this.headers) * 29 + ObjectUtils.nullSafeHashCode(this.body));
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		if (body != null) {
-			builder.append(body);
-			if (headers != null) {
-				builder.append(',');
-			}
+		if (this.body != null) {
+			builder.append(this.body);
+			builder.append(',');
 		}
-		if (headers != null) {
-			builder.append(headers);
-		}
+		builder.append(this.headers);
 		builder.append('>');
 		return builder.toString();
 	}

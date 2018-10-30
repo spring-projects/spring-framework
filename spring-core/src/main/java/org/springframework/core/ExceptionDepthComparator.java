@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -63,12 +62,12 @@ public class ExceptionDepthComparator implements Comparator<Class<? extends Thro
 	}
 
 	private int getDepth(Class<?> declaredException, Class<?> exceptionToMatch, int depth) {
-		if (declaredException.equals(exceptionToMatch)) {
+		if (exceptionToMatch.equals(declaredException)) {
 			// Found it!
 			return depth;
 		}
 		// If we've gone as far as we can go and haven't found it...
-		if (Throwable.class.equals(exceptionToMatch)) {
+		if (exceptionToMatch == Throwable.class) {
 			return Integer.MAX_VALUE;
 		}
 		return getDepth(declaredException, exceptionToMatch.getSuperclass(), depth + 1);
@@ -88,9 +87,8 @@ public class ExceptionDepthComparator implements Comparator<Class<? extends Thro
 		if (exceptionTypes.size() == 1) {
 			return exceptionTypes.iterator().next();
 		}
-		List<Class<? extends Throwable>> handledExceptions =
-				new ArrayList<Class<? extends Throwable>>(exceptionTypes);
-		Collections.sort(handledExceptions, new ExceptionDepthComparator(targetException));
+		List<Class<? extends Throwable>> handledExceptions = new ArrayList<>(exceptionTypes);
+		handledExceptions.sort(new ExceptionDepthComparator(targetException));
 		return handledExceptions.get(0);
 	}
 

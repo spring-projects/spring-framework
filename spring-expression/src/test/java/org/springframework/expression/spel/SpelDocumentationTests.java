@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -31,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -40,6 +35,8 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
+import static org.junit.Assert.*;
+
 /**
  * Test the examples specified in the documentation.
  *
@@ -48,6 +45,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
  *
  * @author Andy Clement
  */
+@SuppressWarnings("rawtypes")
 public class SpelDocumentationTests extends AbstractExpressionTests {
 
 	static Inventor tesla ;
@@ -72,9 +70,9 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 
 		public Inventor[] Members = new Inventor[1];
 		public List Members2 = new ArrayList();
-		public Map<String,Object> officers = new HashMap<String,Object>();
+		public Map<String,Object> officers = new HashMap<>();
 
-		public List<Map<String, Object>> reverse = new ArrayList<Map<String, Object>>();
+		public List<Map<String, Object>> reverse = new ArrayList<>();
 
 		@SuppressWarnings("unchecked")
 		IEEE() {
@@ -145,7 +143,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 
 	@Test
 	public void testXMLBasedConfig() {
-		 evaluate("(T(java.lang.Math).random() * 100.0 )>0",true,Boolean.class);
+		evaluate("(T(java.lang.Math).random() * 100.0 )>0",true,Boolean.class);
 	}
 
 	// Section 7.5
@@ -396,7 +394,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 		StandardEvaluationContext societyContext = new StandardEvaluationContext();
 		societyContext.setRootObject(new IEEE());
 		Inventor einstein =
-			   parser.parseExpression("new org.springframework.expression.spel.testresources.Inventor('Albert Einstein',new java.util.Date(), 'German')").getValue(Inventor.class);
+				parser.parseExpression("new org.springframework.expression.spel.testresources.Inventor('Albert Einstein',new java.util.Date(), 'German')").getValue(Inventor.class);
 		assertEquals("Albert Einstein", einstein.getName());
 		//create new inventor instance within add method of List
 		parser.parseExpression("Members2.add(new org.springframework.expression.spel.testresources.Inventor('Albert Einstein', 'German'))").getValue(societyContext);
@@ -421,7 +419,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 	@Test
 	public void testSpecialVariables() throws Exception {
 		// create an array of integers
-		List<Integer> primes = new ArrayList<Integer>();
+		List<Integer> primes = new ArrayList<>();
 		primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
 
 		// create parser and set variable 'primes' as the array of integers
@@ -440,9 +438,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 	public void testFunctions() throws Exception {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-
-		context.registerFunction("reverseString", StringUtils.class.getDeclaredMethod(
-				"reverseString", new Class[] { String.class }));
+		context.registerFunction("reverseString", StringUtils.class.getDeclaredMethod("reverseString", String.class));
 
 		String helloWorldReversed = parser.parseExpression("#reverseString('hello world')").getValue(context, String.class);
 		assertEquals("dlrow olleh",helloWorldReversed);
@@ -487,7 +483,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 	@Test
 	public void testTemplating() throws Exception {
 		String randomPhrase =
-			   parser.parseExpression("random number is ${T(java.lang.Math).random()}", new TemplatedParserContext()).getValue(String.class);
+				parser.parseExpression("random number is ${T(java.lang.Math).random()}", new TemplatedParserContext()).getValue(String.class);
 		assertTrue(randomPhrase.startsWith("random number"));
 	}
 

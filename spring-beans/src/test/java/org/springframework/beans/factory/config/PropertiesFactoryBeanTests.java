@@ -16,13 +16,14 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import java.util.Properties;
 
 import org.junit.Test;
+
 import org.springframework.core.io.Resource;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * Unit tests for {@link PropertiesFactoryBean}.
@@ -31,7 +32,7 @@ import org.springframework.core.io.Resource;
  * @author Chris Beams
  * @since 01.11.2003
  */
-public final class PropertiesFactoryBeanTests {
+public class PropertiesFactoryBeanTests {
 
 	private static final Class<?> CLASS = PropertiesFactoryBeanTests.class;
 	private static final Resource TEST_PROPS = qualifiedResource(CLASS, "test.properties");

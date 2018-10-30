@@ -16,14 +16,10 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -36,11 +32,14 @@ import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
+
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class HotSwappableTargetSourceTests {
+public class HotSwappableTargetSourceTests {
 
 	private static final Resource CONTEXT = qualifiedResource(HotSwappableTargetSourceTests.class, "context.xml");
 
@@ -71,13 +70,13 @@ public final class HotSwappableTargetSourceTests {
 	@Test
 	public void testBasicFunctionality() {
 		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
-		assertEquals(INITIAL_COUNT, proxied.getCount() );
+		assertEquals(INITIAL_COUNT, proxied.getCount());
 		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 1, proxied.getCount() );
+		assertEquals(INITIAL_COUNT + 1, proxied.getCount());
 
 		proxied = (SideEffectBean) beanFactory.getBean("swappable");
 		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 2, proxied.getCount() );
+		assertEquals(INITIAL_COUNT + 2, proxied.getCount());
 	}
 
 	@Test
@@ -86,9 +85,9 @@ public final class HotSwappableTargetSourceTests {
 		SideEffectBean target2 = (SideEffectBean) beanFactory.getBean("target2");
 
 		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
-		assertEquals(target1.getCount(), proxied.getCount() );
+		assertEquals(target1.getCount(), proxied.getCount());
 		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 1, proxied.getCount() );
+		assertEquals(INITIAL_COUNT + 1, proxied.getCount());
 
 		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 		Object old = swapper.swap(target2);

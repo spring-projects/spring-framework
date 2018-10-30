@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,7 @@ public class ServletRequestAttributesTests {
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY));
 	}
 
 	@Test
@@ -89,37 +88,11 @@ public class ServletRequestAttributesTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
 		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
-	}
-
-	@Test
-	public void setGlobalSessionScopedAttribute() throws Exception {
-		MockHttpSession session = new MockHttpSession();
-		session.setAttribute(KEY, VALUE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setSession(session);
-		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
-		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
-	}
-
-	@Test
-	public void setGlobalSessionScopedAttributeAfterCompletion() throws Exception {
-		MockHttpSession session = new MockHttpSession();
-		session.setAttribute(KEY, VALUE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setSession(session);
-		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
-		attrs.requestCompleted();
-		request.close();
-		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY));
 	}
 
 	@Test
@@ -157,8 +130,8 @@ public class ServletRequestAttributesTests {
 	public void updateAccessedAttributes() throws Exception {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
-		when(request.getSession(anyBoolean())).thenReturn(session);
-		when(session.getAttribute(KEY)).thenReturn(VALUE);
+		given(request.getSession(anyBoolean())).willReturn(session);
+		given(session.getAttribute(KEY)).willReturn(VALUE);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
@@ -202,8 +175,8 @@ public class ServletRequestAttributesTests {
 	private void doSkipImmutableValue(Object immutableValue) {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
-		when(request.getSession(anyBoolean())).thenReturn(session);
-		when(session.getAttribute(KEY)).thenReturn(immutableValue);
+		given(request.getSession(anyBoolean())).willReturn(session);
+		given(session.getAttribute(KEY)).willReturn(immutableValue);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);

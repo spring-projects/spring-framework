@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,18 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.destination.DestinationResolver;
 
 /**
- *
  * @author Stephane Nicoll
  */
-public class MessageListenerTestContainer
-		implements MessageListenerContainer, InitializingBean, DisposableBean {
+public class MessageListenerTestContainer implements MessageListenerContainer, InitializingBean, DisposableBean {
 
 	private final JmsListenerEndpoint endpoint;
+
+	private boolean autoStartup = true;
 
 	private boolean startInvoked;
 
@@ -39,50 +41,79 @@ public class MessageListenerTestContainer
 
 	private boolean destroyInvoked;
 
+
 	MessageListenerTestContainer(JmsListenerEndpoint endpoint) {
 		this.endpoint = endpoint;
 	}
 
+
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
+
 	public JmsListenerEndpoint getEndpoint() {
-		return endpoint;
+		return this.endpoint;
 	}
 
 	public boolean isStarted() {
-		return startInvoked && initializationInvoked;
+		return this.startInvoked && this.initializationInvoked;
 	}
 
 	public boolean isStopped() {
-		return stopInvoked && destroyInvoked;
+		return this.stopInvoked && this.destroyInvoked;
 	}
 
 	@Override
 	public void start() throws JmsException {
-		if (startInvoked) {
+		if (!this.initializationInvoked) {
+			throw new IllegalStateException("afterPropertiesSet should have been invoked before start on " + this);
+		}
+		if (this.startInvoked) {
 			throw new IllegalStateException("Start already invoked on " + this);
 		}
-		startInvoked = true;
-	}
-
-	@Override
-	public boolean isRunning() {
-		return startInvoked && !stopInvoked;
+		this.startInvoked = true;
 	}
 
 	@Override
 	public void stop() throws JmsException {
-		if (stopInvoked) {
+		if (this.stopInvoked) {
 			throw new IllegalStateException("Stop already invoked on " + this);
 		}
-		stopInvoked = true;
+		this.stopInvoked = true;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.startInvoked && !this.stopInvoked;
+	}
+
+	@Override
+	public int getPhase() {
+		return 0;
+	}
+
+	@Override
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
+
+	@Override
+	public void stop(Runnable callback) {
+		this.stopInvoked = true;
+		callback.run();
 	}
 
 	@Override
 	public void setupMessageListener(Object messageListener) {
-
 	}
 
 	@Override
 	public MessageConverter getMessageConverter() {
+		return null;
+	}
+
+	@Override
+	public DestinationResolver getDestinationResolver() {
 		return null;
 	}
 
@@ -92,32 +123,38 @@ public class MessageListenerTestContainer
 	}
 
 	@Override
+	public boolean isReplyPubSubDomain() {
+		return isPubSubDomain();
+	}
+
+	@Override
+	public QosSettings getReplyQosSettings() {
+		return null;
+	}
+
+	@Override
 	public void afterPropertiesSet() {
-		if (!startInvoked) {
-			throw new IllegalStateException("Start should have been invoked before " +
-					"afterPropertiesSet on " + this);
-		}
-		initializationInvoked = true;
+		this.initializationInvoked = true;
 	}
 
 	@Override
 	public void destroy() {
-		if (!stopInvoked) {
-			throw new IllegalStateException("Stop should have been invoked before " +
-					"destroy on " + this);
+		if (!this.stopInvoked) {
+			throw new IllegalStateException("Stop should have been invoked before " + "destroy on " + this);
 		}
-		destroyInvoked = true;
+		this.destroyInvoked = true;
 	}
 
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("TestContainer{");
-		sb.append("endpoint=").append(endpoint);
-		sb.append(", startInvoked=").append(startInvoked);
-		sb.append(", initializationInvoked=").append(initializationInvoked);
-		sb.append(", stopInvoked=").append(stopInvoked);
-		sb.append(", destroyInvoked=").append(destroyInvoked);
+		sb.append("endpoint=").append(this.endpoint);
+		sb.append(", startInvoked=").append(this.startInvoked);
+		sb.append(", initializationInvoked=").append(this.initializationInvoked);
+		sb.append(", stopInvoked=").append(this.stopInvoked);
+		sb.append(", destroyInvoked=").append(this.destroyInvoked);
 		sb.append('}');
 		return sb.toString();
 	}
+
 }

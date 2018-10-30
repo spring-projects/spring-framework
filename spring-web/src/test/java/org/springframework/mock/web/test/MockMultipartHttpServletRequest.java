@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -35,11 +36,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * Mock implementation of the
  * {@link org.springframework.web.multipart.MultipartHttpServletRequest} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
  * <p>Useful for testing application controllers that access multipart uploads.
- * The {@link MockMultipartFile} can be used to populate these mock requests
- * with files.
+ * {@link MockMultipartFile} can be used to populate these mock requests with files.
  *
  * @author Juergen Hoeller
  * @author Eric Crampton
@@ -49,8 +49,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  */
 public class MockMultipartHttpServletRequest extends MockHttpServletRequest implements MultipartHttpServletRequest {
 
-	private final MultiValueMap<String, MultipartFile> multipartFiles =
-			new LinkedMultiValueMap<String, MultipartFile>();
+	private final MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<>();
 
 
 	/**
@@ -67,7 +66,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	 * @param servletContext the ServletContext that the request runs in
 	 * (may be {@code null} to use a default {@link MockServletContext})
 	 */
-	public MockMultipartHttpServletRequest(ServletContext servletContext) {
+	public MockMultipartHttpServletRequest(@Nullable ServletContext servletContext) {
 		super(servletContext);
 		setMethod("POST");
 		setContentType("multipart/form-data");
@@ -112,7 +111,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 
 	@Override
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
-		return new LinkedMultiValueMap<String, MultipartFile>(this.multipartFiles);
+		return new LinkedMultiValueMap<>(this.multipartFiles);
 	}
 
 	@Override
@@ -128,7 +127,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 
 	@Override
 	public HttpMethod getRequestMethod() {
-		return HttpMethod.valueOf(getMethod());
+		return HttpMethod.resolve(getMethod());
 	}
 
 	@Override

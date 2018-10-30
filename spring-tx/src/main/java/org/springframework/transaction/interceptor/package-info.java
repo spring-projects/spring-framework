@@ -1,6 +1,4 @@
-
 /**
- *
  * AOP-based solution for declarative transaction demarcation.
  * Builds on the AOP infrastructure in org.springframework.aop.framework.
  * Any POJO can be transactionally advised with Spring.
@@ -12,7 +10,10 @@
  * delivers transactional advice, based on the Spring transaction abstraction.
  * This allows declarative transaction management in any environment,
  * even without JTA if an application uses only a single database.
- *
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.transaction.interceptor;
 
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

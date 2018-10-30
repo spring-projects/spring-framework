@@ -8,9 +8,13 @@
        		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
 	<cache:advice id="cacheAdviceInterface" cache-manager="cacheManager">
-		<cache:caching cache="default">
+		<cache:caching cache="testCache">
 			<cache:cacheable method="cache"/>
+			<cache:cacheable method="cacheNull"/>
+			<cache:cacheable method="cacheSync" sync="true"/>
+			<cache:cacheable method="cacheSyncNull" sync="true"/>
 			<cache:cacheable method="conditional" condition="#classField == 3"/>
+			<cache:cacheable method="conditionalSync" sync="true" condition="#classField == 3"/>
 			<cache:cacheable method="unless" unless="#result > 10"/>
 			<cache:cacheable method="key" key="#p0"/>
 			<cache:cacheable method="varArgsKey"/>
@@ -20,17 +24,17 @@
 			<cache:cacheable method="unknownCustomKeyGenerator" key-generator="unknownBeanName"/>
 			<cache:cacheable method="customCacheManager" cache-manager="customCacheManager"/>
 			<cache:cacheable method="unknownCustomCacheManager" cache-manager="unknownBeanName"/>
-			<cache:cacheable method="nullValue" cache="default"/>
+			<cache:cacheable method="nullValue" cache="testCache"/>
 		</cache:caching>
 		<cache:caching>
-			<cache:cache-evict method="invalidate" cache="default"/>
-			<cache:cache-evict method="evict" key="#p0" cache="default"/>
-			<cache:cache-evict method="evictWithException" cache="default"/>
-			<cache:cache-evict method="evictEarly" cache="default" before-invocation="true"/>
-			<cache:cache-evict method="invalidateEarly" key="#p0" cache="default" before-invocation="true"/>
-			<cache:cache-evict method="evictAll" cache="default" all-entries="true"/>
+			<cache:cache-evict method="invalidate" cache="testCache"/>
+			<cache:cache-evict method="evict" key="#p0" cache="testCache"/>
+			<cache:cache-evict method="evictWithException" cache="testCache"/>
+			<cache:cache-evict method="evictEarly" cache="testCache" before-invocation="true"/>
+			<cache:cache-evict method="invalidateEarly" key="#p0" cache="testCache" before-invocation="true"/>
+			<cache:cache-evict method="evictAll" cache="testCache" all-entries="true"/>
 		</cache:caching>
-		<cache:caching cache="default">
+		<cache:caching cache="testCache">
 			<cache:cache-put method="update"/>
 			<cache:cache-put method="conditionalUpdate" condition="#arg.equals(3)"/>
 		</cache:caching>
@@ -55,7 +59,7 @@
 	</cache:advice>
 
 	<cache:advice id="cacheAdviceClass" cache-manager="cacheManager" key-generator="keyGenerator">
-		<cache:caching cache="default">
+		<cache:caching cache="testCache">
 			<cache:cacheable method="key" key="#p0"/>
 			<cache:cacheable method="varArgsKey"/>
 			<cache:cacheable method="nam*" key="#root.methodName + #root.caches[0].name"/>
@@ -66,14 +70,14 @@
 			<cache:cacheable method="null*"/>
 		</cache:caching>
 		<cache:caching>
-			<cache:cache-evict method="invalidate" cache="default"/>
-			<cache:cache-evict method="evict" key="#p0" cache="default"/>
-			<cache:cache-evict method="evictWithException" cache="default"/>
-			<cache:cache-evict method="evictEarly" cache="default" before-invocation="true"/>
-			<cache:cache-evict method="invalidateEarly" key="#p0" cache="default" before-invocation="true"/>
-			<cache:cache-evict method="evictAll" cache="default" all-entries="true"/>
+			<cache:cache-evict method="invalidate" cache="testCache"/>
+			<cache:cache-evict method="evict" key="#p0" cache="testCache"/>
+			<cache:cache-evict method="evictWithException" cache="testCache"/>
+			<cache:cache-evict method="evictEarly" cache="testCache" before-invocation="true"/>
+			<cache:cache-evict method="invalidateEarly" key="#p0" cache="testCache" before-invocation="true"/>
+			<cache:cache-evict method="evictAll" cache="testCache" all-entries="true"/>
 		</cache:caching>
-		<cache:caching cache="default">
+		<cache:caching cache="testCache">
 			<cache:cache-put method="update"/>
 			<cache:cache-put method="conditionalUpdate" condition="#arg.equals(3)"/>
 		</cache:caching>
@@ -102,7 +106,7 @@
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
-				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="testCache"/>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="primary"/>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="secondary"/>
 			</set>
@@ -116,7 +120,7 @@
 	<bean id="customCacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
-				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="testCache"/>
 			</set>
 		</property>
 	</bean>

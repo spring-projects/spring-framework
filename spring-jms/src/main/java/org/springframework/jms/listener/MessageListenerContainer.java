@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.jms.listener;
 
-import org.springframework.context.Lifecycle;
+import org.springframework.context.SmartLifecycle;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Internal abstraction used by the framework representing a message
@@ -27,7 +30,7 @@ import org.springframework.jms.support.converter.MessageConverter;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public interface MessageListenerContainer extends Lifecycle {
+public interface MessageListenerContainer extends SmartLifecycle {
 
 	/**
 	 * Setup the message listener to use. Throws an {@link IllegalArgumentException}
@@ -39,12 +42,36 @@ public interface MessageListenerContainer extends Lifecycle {
 	 * Return the {@link MessageConverter} that can be used to
 	 * convert {@link javax.jms.Message}, if any.
 	 */
+	@Nullable
 	MessageConverter getMessageConverter();
+
+	/**
+	 * Return the {@link DestinationResolver} to use to resolve
+	 * destinations by names.
+	 */
+	@Nullable
+	DestinationResolver getDestinationResolver();
 
 	/**
 	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used.
 	 * Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues}) is used.
 	 */
 	boolean isPubSubDomain();
+
+	/**
+	 * Return whether the reply destination uses Publish/Subscribe domain
+	 * ({@link javax.jms.Topic Topics}). Otherwise, the Point-to-Point domain
+	 * ({@link javax.jms.Queue Queues}) is used.
+	 * <p>By default, the value is identical to {@link #isPubSubDomain()}.
+	 */
+	boolean isReplyPubSubDomain();
+
+	/**
+	 * Return the {@link QosSettings} to use when sending a reply,
+	 * or {@code null} if the broker's defaults should be used.
+	 * @since 5.0
+	 */
+	@Nullable
+	QosSettings getReplyQosSettings();
 
 }

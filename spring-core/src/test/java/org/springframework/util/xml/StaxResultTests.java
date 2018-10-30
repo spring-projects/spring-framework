@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.util.xml;
 
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
+import org.junit.Before;
+import org.junit.Test;
+
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
@@ -26,13 +26,14 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Arjen Poutsma
@@ -62,7 +63,7 @@ public class StaxResultTests {
 		assertEquals("Invalid streamWriter returned", streamWriter, result.getXMLStreamWriter());
 		assertNull("EventWriter returned", result.getXMLEventWriter());
 		transformer.transform(source, result);
-		assertXMLEqual("Invalid result", XML, stringWriter.toString());
+		assertThat("Invalid result", stringWriter.toString(), isSimilarTo(XML));
 	}
 
 	@Test
@@ -75,7 +76,7 @@ public class StaxResultTests {
 		assertEquals("Invalid eventWriter returned", eventWriter, result.getXMLEventWriter());
 		assertNull("StreamWriter returned", result.getXMLStreamWriter());
 		transformer.transform(source, result);
-		assertXMLEqual("Invalid result", XML, stringWriter.toString());
+		assertThat("Invalid result", stringWriter.toString(), isSimilarTo(XML));
 	}
 
 }

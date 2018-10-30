@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,29 +22,40 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.messaging.converter.MessageConverter;
 
 /**
- * Annotation that binds a method parameter to the payload of a message. The payload may
- * be passed through a {@link MessageConverter} to convert it from serialized form with a
+ * Annotation that binds a method parameter to the payload of a message. Can also
+ * be used to associate a payload to a method invocation. The payload may be passed
+ * through a {@link MessageConverter} to convert it from serialized form with a
  * specific MIME type to an Object matching the target method parameter.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
-@Target(ElementType.PARAMETER)
+@Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Payload {
 
 	/**
-	 * A SpEL expression to be evaluated against the payload object as the root context.
-	 * This attribute may or may not be supported depending on whether the message being
-	 * handled contains a non-primitive Object as its payload or is in serialized form
-	 * and requires message conversion.
-	 * <p>When processing STOMP over WebSocket messages this attribute is not supported.
+	 * Alias for {@link #expression}.
 	 */
+	@AliasFor("expression")
 	String value() default "";
+
+	/**
+	 * A SpEL expression to be evaluated against the payload object as the root context.
+	 * <p>This attribute may or may not be supported depending on whether the message being
+	 * handled contains a non-primitive Object as its payload or is in serialized form and
+	 * requires message conversion.
+	 * <p>When processing STOMP over WebSocket messages this attribute is not supported.
+	 * @since 4.2
+	 */
+	@AliasFor("value")
+	String expression() default "";
 
 	/**
 	 * Whether payload content is required.

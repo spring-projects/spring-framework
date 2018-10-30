@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.web.context.support;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.util.WebUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -34,6 +35,7 @@ import org.springframework.web.util.WebUtils;
 public class WebApplicationObjectSupportTests {
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testWebApplicationObjectSupport() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
@@ -47,6 +49,7 @@ public class WebApplicationObjectSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testWebApplicationObjectSupportWithWrongContext() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerBeanDefinition("test", new RootBeanDefinition(TestWebApplicationObject.class));

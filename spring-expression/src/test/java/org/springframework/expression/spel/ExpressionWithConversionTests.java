@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,9 @@ import static org.junit.Assert.*;
  */
 public class ExpressionWithConversionTests extends AbstractExpressionTests {
 
-	private static List<String> listOfString = new ArrayList<String>();
+	private static List<String> listOfString = new ArrayList<>();
 	private static TypeDescriptor typeDescriptorForListOfString = null;
-	private static List<Integer> listOfInteger = new ArrayList<Integer>();
+	private static List<Integer> listOfInteger = new ArrayList<>();
 	private static TypeDescriptor typeDescriptorForListOfInteger = null;
 
 	static {

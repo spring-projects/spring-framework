@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.springframework.orm.jpa.support;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
@@ -28,6 +30,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.AsyncWebRequestInterceptor;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 
@@ -43,9 +46,8 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  * or {@link org.springframework.transaction.jta.JtaTransactionManager} as well
  * as for non-transactional read-only execution.
  *
- * <p>In contrast to {@link OpenEntityManagerInViewFilter}, this interceptor
- * is set up in a Spring application context and can thus take advantage of
- * bean wiring.
+ * <p>In contrast to {@link OpenEntityManagerInViewFilter}, this interceptor is set
+ * up in a Spring application context and can thus take advantage of bean wiring.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -67,19 +69,16 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 
 	@Override
 	public void preHandle(WebRequest request) throws DataAccessException {
-
-		String participateAttributeName = getParticipateAttributeName();
-
+		String key = getParticipateAttributeName();
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		if (asyncManager.hasConcurrentResult()) {
-			if (applyCallableInterceptor(asyncManager, participateAttributeName)) {
-				return;
-			}
+		if (asyncManager.hasConcurrentResult() && applyEntityManagerBindingInterceptor(asyncManager, key)) {
+			return;
 		}
 
-		if (TransactionSynchronizationManager.hasResource(getEntityManagerFactory())) {
-			// do not modify the EntityManager: just mark the request accordingly
-			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
+		EntityManagerFactory emf = obtainEntityManagerFactory();
+		if (TransactionSynchronizationManager.hasResource(emf)) {
+			// Do not modify the EntityManager: just mark the request accordingly.
+			Integer count = (Integer) request.getAttribute(key, WebRequest.SCOPE_REQUEST);
 			int newCount = (count != null ? count + 1 : 1);
 			request.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);
 		}
@@ -88,11 +87,11 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 			try {
 				EntityManager em = createEntityManager();
 				EntityManagerHolder emHolder = new EntityManagerHolder(em);
-				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), emHolder);
+				TransactionSynchronizationManager.bindResource(emf, emHolder);
 
-				AsyncRequestInterceptor interceptor = new AsyncRequestInterceptor(getEntityManagerFactory(), emHolder);
-				asyncManager.registerCallableInterceptor(participateAttributeName, interceptor);
-				asyncManager.registerDeferredResultInterceptor(participateAttributeName, interceptor);
+				AsyncRequestInterceptor interceptor = new AsyncRequestInterceptor(emf, emHolder);
+				asyncManager.registerCallableInterceptor(key, interceptor);
+				asyncManager.registerDeferredResultInterceptor(key, interceptor);
 			}
 			catch (PersistenceException ex) {
 				throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
@@ -101,14 +100,14 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 	}
 
 	@Override
-	public void postHandle(WebRequest request, ModelMap model) {
+	public void postHandle(WebRequest request, @Nullable ModelMap model) {
 	}
 
 	@Override
-	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
+	public void afterCompletion(WebRequest request, @Nullable Exception ex) throws DataAccessException {
 		if (!decrementParticipateCount(request)) {
 			EntityManagerHolder emHolder = (EntityManagerHolder)
-					TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+					TransactionSynchronizationManager.unbindResource(obtainEntityManagerFactory());
 			logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewInterceptor");
 			EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
 		}
@@ -133,7 +132,7 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 	@Override
 	public void afterConcurrentHandlingStarted(WebRequest request) {
 		if (!decrementParticipateCount(request)) {
-			TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+			TransactionSynchronizationManager.unbindResource(obtainEntityManagerFactory());
 		}
 	}
 
@@ -144,15 +143,16 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 	 * @see #PARTICIPATE_SUFFIX
 	 */
 	protected String getParticipateAttributeName() {
-		return getEntityManagerFactory().toString() + PARTICIPATE_SUFFIX;
+		return obtainEntityManagerFactory().toString() + PARTICIPATE_SUFFIX;
 	}
 
 
-	private boolean applyCallableInterceptor(WebAsyncManager asyncManager, String key) {
-		if (asyncManager.getCallableInterceptor(key) == null) {
+	private boolean applyEntityManagerBindingInterceptor(WebAsyncManager asyncManager, String key) {
+		CallableProcessingInterceptor cpi = asyncManager.getCallableInterceptor(key);
+		if (cpi == null) {
 			return false;
 		}
-		((AsyncRequestInterceptor) asyncManager.getCallableInterceptor(key)).bindSession();
+		((AsyncRequestInterceptor) cpi).bindEntityManager();
 		return true;
 	}
 

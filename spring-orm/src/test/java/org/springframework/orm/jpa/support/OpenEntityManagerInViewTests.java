@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,24 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.servlet.*;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.mock.web.test.*;
+import org.springframework.mock.web.test.MockAsyncContext;
+import org.springframework.mock.web.test.MockFilterConfig;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.mock.web.test.PassThroughFilterChain;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -210,6 +220,48 @@ public class OpenEntityManagerInViewTests {
 		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
 		for (AsyncListener listener : asyncContext.getListeners()) {
 			listener.onTimeout(new AsyncEvent(asyncContext));
+		}
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onComplete(new AsyncEvent(asyncContext));
+		}
+
+		verify(this.manager).close();
+	}
+
+	@Test
+	public void testOpenEntityManagerInViewInterceptorAsyncErrorScenario() throws Exception {
+
+		// Initial request thread
+
+		OpenEntityManagerInViewInterceptor interceptor = new OpenEntityManagerInViewInterceptor();
+		interceptor.setEntityManagerFactory(factory);
+
+		given(this.factory.createEntityManager()).willReturn(this.manager);
+
+		interceptor.preHandle(this.webRequest);
+		assertTrue(TransactionSynchronizationManager.hasResource(this.factory));
+
+		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
+		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return "anything";
+			}
+		});
+
+		interceptor.afterConcurrentHandlingStarted(this.webRequest);
+		assertFalse(TransactionSynchronizationManager.hasResource(this.factory));
+
+		// Async request timeout
+
+		given(this.manager.isOpen()).willReturn(true);
+
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onError(new AsyncEvent(asyncContext, new Exception()));
 		}
 		for (AsyncListener listener : asyncContext.getListeners()) {
 			listener.onComplete(new AsyncEvent(asyncContext));

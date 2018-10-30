@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource.lookup;
 import javax.sql.DataSource;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 
@@ -62,10 +63,11 @@ public class BeanFactoryDataSourceLookupTests {
 				BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup(beanFactory);
 				lookup.getDataSource(DATASOURCE_BEAN_NAME);
 				fail("should have thrown DataSourceLookupFailureException");
-		} catch (DataSourceLookupFailureException ex) { /* expected */ }
+		}
+		catch (DataSourceLookupFailureException ex) { /* expected */ }
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testLookupWhereBeanFactoryHasNotBeenSupplied() throws Exception {
 		BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
 		lookup.getDataSource(DATASOURCE_BEAN_NAME);

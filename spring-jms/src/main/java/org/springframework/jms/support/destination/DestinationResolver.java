@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Strategy interface for resolving JMS destinations.
  *
@@ -38,6 +40,7 @@ import javax.jms.Session;
  * @see org.springframework.jms.support.destination.DynamicDestinationResolver
  * @see org.springframework.jms.support.destination.JndiDestinationResolver
  */
+@FunctionalInterface
 public interface DestinationResolver {
 
 	/**
@@ -51,7 +54,7 @@ public interface DestinationResolver {
 	 * @throws javax.jms.JMSException if the JMS Session failed to resolve the destination
 	 * @throws DestinationResolutionException in case of general destination resolution failure
 	 */
-	Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
+	Destination resolveDestinationName(@Nullable Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException;
 
 }

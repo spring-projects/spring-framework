@@ -21,6 +21,7 @@ import org.w3c.dom.Node;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.lang.Nullable;
 
 /**
  * Base interface used by the {@link DefaultBeanDefinitionDocumentReader}
@@ -32,8 +33,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
  * custom nested tags.
  *
  * <p>The parser will call {@link #parse} when it encounters a custom tag
- * directly under the {@code &lt;beans&gt;} tags and {@link #decorate} when
- * it encounters a custom tag directly under a {@code &lt;bean&gt;} tag.
+ * directly under the {@code <beans>} tags and {@link #decorate} when
+ * it encounters a custom tag directly under a {@code <bean>} tag.
  *
  * <p>Developers writing their own custom element extensions typically will
  * not implement this interface directly, but rather make use of the provided
@@ -61,13 +62,14 @@ public interface NamespaceHandler {
 	 * that is embedded in the supplied {@link ParserContext}.
 	 * <p>Implementations should return the primary {@code BeanDefinition}
 	 * that results from the parse phase if they wish to be used nested
-	 * inside (for example) a {@code &lt;property&gt;} tag.
+	 * inside (for example) a {@code <property>} tag.
 	 * <p>Implementations may return {@code null} if they will
 	 * <strong>not</strong> be used in a nested scenario.
 	 * @param element the element that is to be parsed into one or more {@code BeanDefinitions}
 	 * @param parserContext the object encapsulating the current state of the parsing process
 	 * @return the primary {@code BeanDefinition} (can be {@code null} as explained above)
 	 */
+	@Nullable
 	BeanDefinition parse(Element element, ParserContext parserContext);
 
 	/**
@@ -89,6 +91,7 @@ public interface NamespaceHandler {
 	 * A {@code null} value is strictly speaking invalid, but will be leniently
 	 * treated like the case where the original bean definition gets returned.
 	 */
+	@Nullable
 	BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition, ParserContext parserContext);
 
 }

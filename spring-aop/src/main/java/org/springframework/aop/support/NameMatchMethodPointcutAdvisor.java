@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class NameMatchMethodPointcutAdvisor extends AbstractGenericPointcutAdvis
 	 * the pointcut matches.
 	 * @see NameMatchMethodPointcut#setMappedNames
 	 */
-	public void setMappedNames(String[] mappedNames) {
+	public void setMappedNames(String... mappedNames) {
 		this.pointcut.setMappedNames(mappedNames);
 	}
 

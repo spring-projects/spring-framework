@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,28 @@ import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Convenient superclass for application objects running in a WebApplicationContext.
- * Provides {@code getWebApplicationContext()}, {@code getServletContext()},
- * and {@code getTempDir()} methods.
+ * Convenient superclass for application objects running in a {@link WebApplicationContext}.
+ * Provides {@code getWebApplicationContext()}, {@code getServletContext()}, and
+ * {@code getTempDir()} accessors.
+ *
+ * <p>Note: It is generally recommended to use individual callback interfaces for the actual
+ * callbacks needed. This broad base class is primarily intended for use within the framework,
+ * in case of {@link ServletContext} access etc typically being needed.
  *
  * @author Juergen Hoeller
  * @since 28.08.2003
  * @see SpringBeanAutowiringSupport
  */
-public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport
-		implements ServletContextAware {
+public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport implements ServletContextAware {
 
+	@Nullable
 	private ServletContext servletContext;
 
 
@@ -44,9 +50,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	public final void setServletContext(ServletContext servletContext) {
 		if (servletContext != this.servletContext) {
 			this.servletContext = servletContext;
-			if (servletContext != null) {
-				initServletContext(servletContext);
-			}
+			initServletContext(servletContext);
 		}
 	}
 
@@ -100,6 +104,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * @throws IllegalStateException if not running in a WebApplicationContext
 	 * @see #getApplicationContext()
 	 */
+	@Nullable
 	protected final WebApplicationContext getWebApplicationContext() throws IllegalStateException {
 		ApplicationContext ctx = getApplicationContext();
 		if (ctx instanceof WebApplicationContext) {
@@ -116,13 +121,19 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 
 	/**
 	 * Return the current ServletContext.
-	 * @throws IllegalStateException if not running within a ServletContext
+	 * @throws IllegalStateException if not running within a required ServletContext
+	 * @see #isContextRequired()
 	 */
+	@Nullable
 	protected final ServletContext getServletContext() throws IllegalStateException {
 		if (this.servletContext != null) {
 			return this.servletContext;
 		}
-		ServletContext servletContext = getWebApplicationContext().getServletContext();
+		ServletContext servletContext = null;
+		WebApplicationContext wac = getWebApplicationContext();
+		if (wac != null) {
+			servletContext = wac.getServletContext();
+		}
 		if (servletContext == null && isContextRequired()) {
 			throw new IllegalStateException("WebApplicationObjectSupport instance [" + this +
 					"] does not run within a ServletContext. Make sure the object is fully configured!");
@@ -138,7 +149,9 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * @see org.springframework.web.util.WebUtils#getTempDir(javax.servlet.ServletContext)
 	 */
 	protected final File getTempDir() throws IllegalStateException {
-		return WebUtils.getTempDir(getServletContext());
+		ServletContext servletContext = getServletContext();
+		Assert.state(servletContext != null, "ServletContext is required");
+		return WebUtils.getTempDir(servletContext);
 	}
 
 }

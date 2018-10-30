@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.response;
 
 import java.net.URI;
@@ -20,6 +21,7 @@ import java.net.URI;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.client.ResponseCreator;
 
 /**
@@ -33,10 +35,6 @@ import org.springframework.test.web.client.ResponseCreator;
  */
 public abstract class MockRestResponseCreators {
 
-
-	private MockRestResponseCreators() {
-	}
-
 	/**
 	 * {@code ResponseCreator} for a 200 response (OK).
 	 */
@@ -47,28 +45,31 @@ public abstract class MockRestResponseCreators {
 	/**
 	 * {@code ResponseCreator} for a 200 response (OK) with String body.
 	 * @param body the response body, a "UTF-8" string
-	 * @param mediaType the type of the content, may be {@code null}
+	 * @param contentType the type of the content (may be {@code null})
 	 */
-	public static DefaultResponseCreator withSuccess(String body, MediaType mediaType) {
-		return new DefaultResponseCreator(HttpStatus.OK).body(body).contentType(mediaType);
+	public static DefaultResponseCreator withSuccess(String body, @Nullable MediaType contentType) {
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).body(body);
+		return (contentType != null ? creator.contentType(contentType) : creator);
 	}
 
 	/**
 	 * {@code ResponseCreator} for a 200 response (OK) with byte[] body.
 	 * @param body the response body
-	 * @param contentType the type of the content, may be {@code null}
+	 * @param contentType the type of the content (may be {@code null})
 	 */
-	public static DefaultResponseCreator withSuccess(byte[] body, MediaType contentType) {
-		return new DefaultResponseCreator(HttpStatus.OK).body(body).contentType(contentType);
+	public static DefaultResponseCreator withSuccess(byte[] body, @Nullable MediaType contentType) {
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).body(body);
+		return (contentType != null ? creator.contentType(contentType) : creator);
 	}
 
 	/**
 	 * {@code ResponseCreator} for a 200 response (OK) content with {@link Resource}-based body.
 	 * @param body the response body
-	 * @param contentType the type of the content, may be {@code null}
+	 * @param contentType the type of the content (may be {@code null})
 	 */
-	public static DefaultResponseCreator withSuccess(Resource body, MediaType contentType) {
-		return new DefaultResponseCreator(HttpStatus.OK).body(body).contentType(contentType);
+	public static DefaultResponseCreator withSuccess(Resource body, @Nullable MediaType contentType) {
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).body(body);
+		return (contentType != null ? creator.contentType(contentType) : creator);
 	}
 
 	/**

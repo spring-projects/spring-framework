@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import static org.springframework.core.env.AbstractEnvironment.*;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 public class StandardEnvironmentTests {
 
 	private static final String ALLOWED_PROPERTY_NAME = "theanswer";
@@ -51,7 +52,8 @@ public class StandardEnvironmentTests {
 	private static final Object NON_STRING_PROPERTY_NAME = new Object();
 	private static final Object NON_STRING_PROPERTY_VALUE = new Object();
 
-	private ConfigurableEnvironment environment = new StandardEnvironment();
+	private final ConfigurableEnvironment environment = new StandardEnvironment();
+
 
 	@Test
 	public void merge() {
@@ -129,42 +131,42 @@ public class StandardEnvironmentTests {
 		assertThat(activeProfiles.length, is(2));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNullProfileArray() {
-		environment.setActiveProfiles((String[])null);
+		environment.setActiveProfiles((String[]) null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNullProfile() {
-		environment.setActiveProfiles((String)null);
+		environment.setActiveProfiles((String) null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withEmptyProfile() {
 		environment.setActiveProfiles("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNotOperator() {
 		environment.setActiveProfiles("p1", "!p2");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfileArray() {
-		environment.setDefaultProfiles((String[])null);
+		environment.setDefaultProfiles((String[]) null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfile() {
-		environment.setDefaultProfiles((String)null);
+		environment.setDefaultProfiles((String) null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withEmptyProfile() {
 		environment.setDefaultProfiles("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNotOperator() {
 		environment.setDefaultProfiles("d1", "!d2");
 	}
@@ -202,6 +204,17 @@ public class StandardEnvironmentTests {
 		environment.setDefaultProfiles("d1", "d2");
 		assertThat(environment.getDefaultProfiles(), equalTo(new String[]{"d1","d2"}));
 		System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void defaultProfileWithCircularPlaceholder() {
+		System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "${spring.profiles.default}");
+		try {
+			environment.getDefaultProfiles();
+		}
+		finally {
+			System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
+		}
 	}
 
 	@Test
@@ -252,26 +265,25 @@ public class StandardEnvironmentTests {
 		assertThat(Arrays.asList(environment.getDefaultProfiles()), hasItems("pd2", "pd3"));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withEmptyArgumentList() {
 		environment.acceptsProfiles();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withNullArgumentList() {
-		environment.acceptsProfiles((String[])null);
+		environment.acceptsProfiles((String[]) null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withNullArgument() {
-		environment.acceptsProfiles((String)null);
+		environment.acceptsProfiles((String) null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withEmptyArgument() {
 		environment.acceptsProfiles("");
 	}
-
 
 	@Test
 	public void acceptsProfiles_activeProfileSetProgrammatically() {
@@ -310,9 +322,18 @@ public class StandardEnvironmentTests {
 		assertThat(environment.acceptsProfiles("!p1"), is(false));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withInvalidNotOperator() {
 		environment.acceptsProfiles("p1", "!");
+	}
+
+	@Test
+	public void acceptsProfiles_withProfileExpression() {
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
+		environment.addActiveProfile("p1");
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
+		environment.addActiveProfile("p2");
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(true));
 	}
 
 	@Test
@@ -476,6 +497,7 @@ public class StandardEnvironmentTests {
 		getModifiableSystemEnvironment().remove(ALLOWED_PROPERTY_NAME);
 		getModifiableSystemEnvironment().remove(DISALLOWED_PROPERTY_NAME);
 	}
+
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, String> getModifiableSystemEnvironment() {

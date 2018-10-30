@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.aspectj.AdviceBindingTestAspect.AdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -35,7 +36,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class BeforeAdviceBindingTests {
+public class BeforeAdviceBindingTests {
 
 	private AdviceBindingCollaborator mockCollaborator;
 
@@ -43,14 +44,11 @@ public final class BeforeAdviceBindingTests {
 
 	private TestBean testBeanTarget;
 
-	protected String getConfigPath() {
-		return "before-advice-tests.xml";
-	}
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(testBeanProxy));

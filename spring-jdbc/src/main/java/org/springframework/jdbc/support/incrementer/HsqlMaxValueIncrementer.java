@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,7 @@
 
 package org.springframework.jdbc.support.incrementer;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import javax.sql.DataSource;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * {@link DataFieldMaxValueIncrementer} that increments the maximum value of a given HSQL table
@@ -55,14 +45,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Juergen Hoeller
  * @see HsqlSequenceMaxValueIncrementer
  */
-public class HsqlMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
-
-	/** The current cache of values */
-	private long[] valueCache;
-
-	/** The next id to serve from the value cache */
-	private int nextValueIndex = -1;
-
+public class HsqlMaxValueIncrementer extends AbstractIdentityColumnMaxValueIncrementer {
 
 	/**
 	 * Default constructor for bean property style usage.
@@ -85,45 +68,13 @@ public class HsqlMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
 
 
 	@Override
-	protected synchronized long getNextKey() throws DataAccessException {
-		if (this.nextValueIndex < 0 || this.nextValueIndex >= getCacheSize()) {
-			/*
-			* Need to use straight JDBC code because we need to make sure that the insert and select
-			* are performed on the same Connection. Otherwise we can't be sure that last_insert_id()
-			* returned the correct value.
-			*/
-			Connection con = DataSourceUtils.getConnection(getDataSource());
-			Statement stmt = null;
-			try {
-				stmt = con.createStatement();
-				DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
-				this.valueCache = new long[getCacheSize()];
-				this.nextValueIndex = 0;
-				for (int i = 0; i < getCacheSize(); i++) {
-					stmt.executeUpdate("insert into " + getIncrementerName() + " values(null)");
-					ResultSet rs = stmt.executeQuery("select max(identity()) from " + getIncrementerName());
-					try {
-						if (!rs.next()) {
-							throw new DataAccessResourceFailureException("identity() failed after executing an update");
-						}
-						this.valueCache[i] = rs.getLong(1);
-					}
-					finally {
-						JdbcUtils.closeResultSet(rs);
-					}
-				}
-				long maxValue = this.valueCache[(this.valueCache.length - 1)];
-				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + getColumnName() + " < " + maxValue);
-			}
-			catch (SQLException ex) {
-				throw new DataAccessResourceFailureException("Could not obtain identity()", ex);
-			}
-			finally {
-				JdbcUtils.closeStatement(stmt);
-				DataSourceUtils.releaseConnection(con, getDataSource());
-			}
-		}
-		return this.valueCache[this.nextValueIndex++];
+	protected String getIncrementStatement() {
+		return "insert into " + getIncrementerName() + " values(null)";
+	}
+
+	@Override
+	protected String getIdentityStatement() {
+		return "select max(identity()) from " + getIncrementerName();
 	}
 
 }

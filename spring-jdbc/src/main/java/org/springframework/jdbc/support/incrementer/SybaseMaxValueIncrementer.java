@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,10 @@
 
 package org.springframework.jdbc.support.incrementer;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import javax.sql.DataSource;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.support.JdbcUtils;
-
 /**
- * {@link DataFieldMaxValueIncrementer} that increments
- * the maximum value of a given Sybase SQL Server table
+ * {@link DataFieldMaxValueIncrementer} that increments the maximum value of a given Sybase table
  * with the equivalent of an auto-increment column. Note: If you use this class, your table key
  * column should <i>NOT</i> be defined as an IDENTITY column, as the sequence table does the job.
  *
@@ -40,7 +30,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * <p>Example:
  *
- * <pre class="code"> create table tab (id int not null primary key, text varchar(100))
+ * <pre class="code">create table tab (id int not null primary key, text varchar(100))
  * create table tab_sequence (id bigint identity)
  * insert into tab_sequence values()</pre>
  *
@@ -49,9 +39,9 @@ import org.springframework.jdbc.support.JdbcUtils;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * <b>HINT:</b> Since Sybase supports the JDBC 3.0 {@code getGeneratedKeys} method,
- * it is recommended to use IDENTITY columns directly in the tables and then using a
- * {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert} or utilizing
+ * <b>HINT:</b> Since Sybase Adaptive Server supports the JDBC 3.0 {@code getGeneratedKeys}
+ * method, it is recommended to use IDENTITY columns directly in the tables and then
+ * using a {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert} or utilizing
  * a {@link org.springframework.jdbc.support.KeyHolder} when calling the with the
  * {@code update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder)}
  * method of the {@link org.springframework.jdbc.core.JdbcTemplate}.
@@ -59,16 +49,10 @@ import org.springframework.jdbc.support.JdbcUtils;
  * <p>Thanks to Yinwei Liu for the suggestion!
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5.5
  */
-public class SybaseMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
-
-	/** The current cache of values */
-	private long[] valueCache;
-
-	/** The next id to serve from the value cache */
-	private int nextValueIndex = -1;
-
+public class SybaseMaxValueIncrementer extends AbstractIdentityColumnMaxValueIncrementer {
 
 	/**
 	 * Default constructor for bean property style usage.
@@ -91,53 +75,13 @@ public class SybaseMaxValueIncrementer extends AbstractColumnMaxValueIncrementer
 
 
 	@Override
-	protected synchronized long getNextKey() throws DataAccessException {
-		if (this.nextValueIndex < 0 || this.nextValueIndex >= getCacheSize()) {
-			/*
-			* Need to use straight JDBC code because we need to make sure that the insert and select
-			* are performed on the same connection (otherwise we can't be sure that @@identity
-			* returnes the correct value)
-			*/
-			Connection con = DataSourceUtils.getConnection(getDataSource());
-			Statement stmt = null;
-			try {
-				stmt = con.createStatement();
-				DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
-				this.valueCache = new long[getCacheSize()];
-				this.nextValueIndex = 0;
-				for (int i = 0; i < getCacheSize(); i++) {
-					stmt.executeUpdate(getIncrementStatement());
-					ResultSet rs = stmt.executeQuery("select @@identity");
-					try {
-						if (!rs.next()) {
-							throw new DataAccessResourceFailureException("@@identity failed after executing an update");
-						}
-						this.valueCache[i] = rs.getLong(1);
-					}
-					finally {
-						JdbcUtils.closeResultSet(rs);
-					}
-				}
-				long maxValue = this.valueCache[(this.valueCache.length - 1)];
-				stmt.executeUpdate("delete from " + getIncrementerName() + " where " + getColumnName() + " < " + maxValue);
-			}
-			catch (SQLException ex) {
-				throw new DataAccessResourceFailureException("Could not increment identity", ex);
-			}
-			finally {
-				JdbcUtils.closeStatement(stmt);
-				DataSourceUtils.releaseConnection(con, getDataSource());
-			}
-		}
-		return this.valueCache[this.nextValueIndex++];
-	}
-
-	/**
-	 * Statement to use to increment the "sequence" value. Can be overridden by subclasses.
-	 * @return the SQL statement to use
-	 */
 	protected String getIncrementStatement() {
 		return "insert into " + getIncrementerName() + " values()";
+	}
+
+	@Override
+	protected String getIdentityStatement() {
+		return "select @@identity";
 	}
 
 }

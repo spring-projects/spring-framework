@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.beans.propertyeditors;
 
-import static org.junit.Assert.*;
-
 import java.io.InputStream;
 
 import org.junit.Test;
+
 import org.springframework.util.ClassUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link InputStreamEditor} class.
@@ -29,9 +30,9 @@ import org.springframework.util.ClassUtils;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class InputStreamEditorTests {
+public class InputStreamEditorTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCtorWithNullResourceEditor() throws Exception {
 		new InputStreamEditor(null);
 	}
@@ -40,7 +41,8 @@ public final class InputStreamEditorTests {
 	public void testSunnyDay() throws Exception {
 		InputStream stream = null;
 		try {
-			String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" + ClassUtils.getShortName(getClass()) + ".class";
+			String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
+					"/" + ClassUtils.getShortName(getClass()) + ".class";
 			InputStreamEditor editor = new InputStreamEditor();
 			editor.setAsText(resource);
 			Object value = editor.getValue();
@@ -48,24 +50,25 @@ public final class InputStreamEditorTests {
 			assertTrue(value instanceof InputStream);
 			stream = (InputStream) value;
 			assertTrue(stream.available() > 0);
-		} finally {
+		}
+		finally {
 			if (stream != null) {
 				stream.close();
 			}
 		}
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWhenResourceDoesNotExist() throws Exception {
-		String resource = "classpath:bingo!";
 		InputStreamEditor editor = new InputStreamEditor();
-		editor.setAsText(resource);
+		editor.setAsText("classpath:bingo!");
 	}
 
 	@Test
 	public void testGetAsTextReturnsNullByDefault() throws Exception {
 		assertNull(new InputStreamEditor().getAsText());
-		String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" + ClassUtils.getShortName(getClass()) + ".class";
+		String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
+				"/" + ClassUtils.getShortName(getClass()) + ".class";
 		InputStreamEditor editor = new InputStreamEditor();
 		editor.setAsText(resource);
 		assertNull(editor.getAsText());

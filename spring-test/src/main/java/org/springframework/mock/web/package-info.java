@@ -1,6 +1,6 @@
 /**
- * A comprehensive set of Servlet API 3.0 mock objects, targeted at usage with
- * Spring's web MVC framework.
+ * A comprehensive set of Servlet API 3.0 mock objects,
+ * targeted at usage with Spring's Web MVC framework.
  *
  * <p>Useful for testing web contexts and controllers.
  *
@@ -9,6 +9,9 @@
  * existing Servlet API mock objects
  * (<a href="http://www.mockobjects.com">MockObjects</a>).
  */
-
+@NonNullApi
+@NonNullFields
 package org.springframework.mock.web;
 
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

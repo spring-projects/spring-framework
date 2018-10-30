@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ public class TestBean {
 
 	private String name;
 
-	private List list;
+	private List<?> list;
 
 	private Object objRef;
 
@@ -48,14 +48,14 @@ public class TestBean {
 	/**
 	 * @return Returns the list.
 	 */
-	public List getList() {
+	public List<?> getList() {
 		return list;
 	}
 
 	/**
 	 * @param list The list to set.
 	 */
-	public void setList(List list) {
+	public void setList(List<?> list) {
 		this.list = list;
 	}
 
@@ -72,4 +72,5 @@ public class TestBean {
 	public void setObjRef(Object object) {
 		this.objRef = object;
 	}
+
 }

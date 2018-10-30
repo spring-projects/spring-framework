@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package org.springframework.core.io.support;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
@@ -37,17 +40,20 @@ import org.springframework.util.PropertiesPersister;
  */
 public abstract class PropertiesLoaderSupport {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	protected Properties[] localProperties;
 
 	protected boolean localOverride = false;
 
+	@Nullable
 	private Resource[] locations;
 
 	private boolean ignoreResourceNotFound = false;
 
+	@Nullable
 	private String fileEncoding;
 
 	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
@@ -66,7 +72,7 @@ public abstract class PropertiesLoaderSupport {
 	 * Set local properties, e.g. via the "props" tag in XML bean definitions,
 	 * allowing for merging multiple properties sets into one.
 	 */
-	public void setPropertiesArray(Properties[] propertiesArray) {
+	public void setPropertiesArray(Properties... propertiesArray) {
 		this.localProperties = propertiesArray;
 	}
 
@@ -88,7 +94,7 @@ public abstract class PropertiesLoaderSupport {
 	 * Hence, make sure that the most specific files are the last
 	 * ones in the given list of locations.
 	 */
-	public void setLocations(Resource[] locations) {
+	public void setLocations(Resource... locations) {
 		this.locations = locations;
 	}
 
@@ -127,7 +133,7 @@ public abstract class PropertiesLoaderSupport {
 	 * The default is DefaultPropertiesPersister.
 	 * @see org.springframework.util.DefaultPropertiesPersister
 	 */
-	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
+	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
 		this.propertiesPersister =
 				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
 	}
@@ -168,17 +174,17 @@ public abstract class PropertiesLoaderSupport {
 	protected void loadProperties(Properties props) throws IOException {
 		if (this.locations != null) {
 			for (Resource location : this.locations) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Loading properties file from " + location);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Loading properties file from " + location);
 				}
 				try {
 					PropertiesLoaderUtils.fillProperties(
 							props, new EncodedResource(location, this.fileEncoding), this.propertiesPersister);
 				}
-				catch (IOException ex) {
+				catch (FileNotFoundException | UnknownHostException ex) {
 					if (this.ignoreResourceNotFound) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Could not load properties from " + location + ": " + ex.getMessage());
+						if (logger.isDebugEnabled()) {
+							logger.debug("Properties resource not found: " + ex.getMessage());
 						}
 					}
 					else {

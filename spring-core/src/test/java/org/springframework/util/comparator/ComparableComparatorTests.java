@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.util.comparator;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.Comparator;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link ComparableComparator}.
@@ -38,7 +38,7 @@ public class ComparableComparatorTests {
 
 	@Test
 	public void testComparableComparator() {
-		Comparator<String> c = new ComparableComparator<String>();
+		Comparator<String> c = new ComparableComparator<>();
 		String s1 = "abc";
 		String s2 = "cde";
 		assertTrue(c.compare(s1, s2) < 0);

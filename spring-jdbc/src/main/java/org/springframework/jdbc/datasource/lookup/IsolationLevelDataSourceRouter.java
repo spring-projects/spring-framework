@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.jdbc.datasource.lookup;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -91,7 +92,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class IsolationLevelDataSourceRouter extends AbstractRoutingDataSource {
 
-	/** Constants instance for TransactionDefinition */
+	/** Constants instance for TransactionDefinition. */
 	private static final Constants constants = new Constants(TransactionDefinition.class);
 
 
@@ -119,6 +120,7 @@ public class IsolationLevelDataSourceRouter extends AbstractRoutingDataSource {
 	}
 
 	@Override
+	@Nullable
 	protected Object determineCurrentLookupKey() {
 		return TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
 	}

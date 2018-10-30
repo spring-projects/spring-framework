@@ -16,6 +16,8 @@
 
 package org.springframework.remoting.httpinvoker;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Configuration interface for executing HTTP invoker requests.
  *
@@ -37,6 +39,7 @@ public interface HttpInvokerClientConfiguration {
 	 * @return the codebase URL, or {@code null} if none
 	 * @see java.rmi.server.RMIClassLoader
 	 */
+	@Nullable
 	String getCodebaseUrl();
 
 }

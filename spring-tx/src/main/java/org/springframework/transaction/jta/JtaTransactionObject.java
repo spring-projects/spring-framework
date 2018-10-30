@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ public class JtaTransactionObject implements SmartTransactionObject {
 
 	private final UserTransaction userTransaction;
 
+	boolean resetTransactionTimeout = false;
+
 
 	/**
 	 * Create a new JtaTransactionObject for the given JTA UserTransaction.
@@ -62,9 +64,6 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	 */
 	@Override
 	public boolean isRollbackOnly() {
-		if (this.userTransaction == null) {
-			return false;
-		}
 		try {
 			int jtaStatus = this.userTransaction.getStatus();
 			return (jtaStatus == Status.STATUS_MARKED_ROLLBACK || jtaStatus == Status.STATUS_ROLLEDBACK);

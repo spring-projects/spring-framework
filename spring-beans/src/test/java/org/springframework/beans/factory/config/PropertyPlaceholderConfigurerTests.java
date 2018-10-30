@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,30 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
-import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.registerWithGeneratedName;
-
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
+import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.*;
+
 /**
  * Unit tests for {@link PropertyPlaceholderConfigurer}.
  *
- * @see PropertySourcesPlaceholderConfigurerTests
- * @see PropertyResourceConfigurerTests
  * @author Chris Beams
  */
 public class PropertyPlaceholderConfigurerTests {
+
 	private static final String P1 = "p1";
 	private static final String P1_LOCAL_PROPS_VAL = "p1LocalPropsVal";
 	private static final String P1_SYSTEM_PROPS_VAL = "p1SystemPropsVal";
@@ -57,27 +51,26 @@ public class PropertyPlaceholderConfigurerTests {
 
 	private AbstractBeanDefinition p1BeanDef;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		p1BeanDef = rootBeanDefinition(TestBean.class)
-			.addPropertyValue("name", "${"+P1+"}")
-			.getBeanDefinition();
+				.addPropertyValue("name", "${" + P1 + "}")
+				.getBeanDefinition();
 
 		bf = new DefaultListableBeanFactory();
 
 		ppcProperties = new Properties();
 		ppcProperties.setProperty(P1, P1_LOCAL_PROPS_VAL);
 		System.setProperty(P1, P1_SYSTEM_PROPS_VAL);
-		getModifiableSystemEnvironment().put(P1, P1_SYSTEM_ENV_VAL);
 		ppc = new PropertyPlaceholderConfigurer();
 		ppc.setProperties(ppcProperties);
 
 	}
 
 	@After
-	public void tearDown() {
+	public void cleanup() {
 		System.clearProperty(P1);
-		getModifiableSystemEnvironment().remove(P1);
 	}
 
 
@@ -97,22 +90,22 @@ public class PropertyPlaceholderConfigurerTests {
 
 	@Test
 	public void resolveFromSystemProperties() {
-		getModifiableSystemEnvironment().put("otherKey", "systemValue");
+		System.setProperty("otherKey", "systemValue");
 		p1BeanDef = rootBeanDefinition(TestBean.class)
-			.addPropertyValue("name", "${"+P1+"}")
-			.addPropertyValue("sex", "${otherKey}")
-			.getBeanDefinition();
+				.addPropertyValue("name", "${" + P1 + "}")
+				.addPropertyValue("sex", "${otherKey}")
+				.getBeanDefinition();
 		registerWithGeneratedName(p1BeanDef, bf);
 		ppc.postProcessBeanFactory(bf);
 		TestBean bean = bf.getBean(TestBean.class);
 		assertThat(bean.getName(), equalTo(P1_LOCAL_PROPS_VAL));
 		assertThat(bean.getSex(), equalTo("systemValue"));
-		getModifiableSystemEnvironment().remove("otherKey");
+		System.clearProperty("otherKey");
 	}
 
 	@Test
 	public void resolveFromLocalProperties() {
-		tearDown(); // eliminate entries from system props/environment
+		System.clearProperty(P1);
 		registerWithGeneratedName(p1BeanDef, bf);
 		ppc.postProcessBeanFactory(bf);
 		TestBean bean = bf.getBean(TestBean.class);
@@ -137,16 +130,6 @@ public class PropertyPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void setSystemSystemPropertiesMode_toOverride_andResolveFromSystemEnvironment() {
-		registerWithGeneratedName(p1BeanDef, bf);
-		System.clearProperty(P1); // will now fall all the way back to system environment
-		ppc.setSystemPropertiesMode(PropertyPlaceholderConfigurer.SYSTEM_PROPERTIES_MODE_OVERRIDE);
-		ppc.postProcessBeanFactory(bf);
-		TestBean bean = bf.getBean(TestBean.class);
-		assertThat(bean.getName(), equalTo(P1_SYSTEM_ENV_VAL));
-	}
-
-	@Test
 	public void setSystemSystemPropertiesMode_toOverride_andSetSearchSystemEnvironment_toFalse() {
 		registerWithGeneratedName(p1BeanDef, bf);
 		System.clearProperty(P1); // will now fall all the way back to system environment
@@ -162,16 +145,16 @@ public class PropertyPlaceholderConfigurerTests {
 	 * settings regarding resolving properties from the environment.
 	 */
 	@Test
-	public void twoPlacholderConfigurers_withConflictingSettings() {
+	public void twoPlaceholderConfigurers_withConflictingSettings() {
 		String P2 = "p2";
 		String P2_LOCAL_PROPS_VAL = "p2LocalPropsVal";
 		String P2_SYSTEM_PROPS_VAL = "p2SystemPropsVal";
 		String P2_SYSTEM_ENV_VAL = "p2SystemEnvVal";
 
 		AbstractBeanDefinition p2BeanDef = rootBeanDefinition(TestBean.class)
-			.addPropertyValue("name", "${"+P1+"}")
-			.addPropertyValue("country", "${"+P2+"}")
-			.getBeanDefinition();
+				.addPropertyValue("name", "${" + P1 + "}")
+				.addPropertyValue("country", "${" + P2 + "}")
+				.getBeanDefinition();
 
 		bf.registerBeanDefinition("p1Bean", p1BeanDef);
 		bf.registerBeanDefinition("p2Bean", p2BeanDef);
@@ -180,7 +163,6 @@ public class PropertyPlaceholderConfigurerTests {
 		ppc.postProcessBeanFactory(bf);
 
 		System.setProperty(P2, P2_SYSTEM_PROPS_VAL);
-		getModifiableSystemEnvironment().put(P2, P2_SYSTEM_ENV_VAL);
 		Properties ppc2Properties = new Properties();
 		ppc2Properties.put(P2, P2_LOCAL_PROPS_VAL);
 
@@ -200,7 +182,6 @@ public class PropertyPlaceholderConfigurerTests {
 		assertThat(p2Bean.getCountry(), equalTo(P2_SYSTEM_PROPS_VAL));
 
 		System.clearProperty(P2);
-		getModifiableSystemEnvironment().remove(P2);
 	}
 
 	@Test
@@ -230,67 +211,41 @@ public class PropertyPlaceholderConfigurerTests {
 	public void nullValueIsPreserved() {
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
 		ppc.setNullValue("customNull");
-		getModifiableSystemEnvironment().put("my.name", "customNull");
+		System.setProperty("my.name", "customNull");
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean", rootBeanDefinition(TestBean.class)
 				.addPropertyValue("name", "${my.name}")
 				.getBeanDefinition());
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName(), nullValue());
-		getModifiableSystemEnvironment().remove("my.name");
+		System.clearProperty("my.name");
 	}
 
-
-	@SuppressWarnings("unchecked")
-	private static Map<String, String> getModifiableSystemEnvironment() {
-		// for os x / linux
-		Class<?>[] classes = Collections.class.getDeclaredClasses();
-		Map<String, String> env = System.getenv();
-		for (Class<?> cl : classes) {
-			if ("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
-				try {
-					Field field = cl.getDeclaredField("m");
-					field.setAccessible(true);
-					Object obj = field.get(env);
-					if (obj != null && obj.getClass().getName().equals("java.lang.ProcessEnvironment$StringEnvironment")) {
-						return (Map<String, String>) obj;
-					}
-				} catch (Exception ex) {
-					throw new RuntimeException(ex);
-				}
-			}
-		}
-
-		// for windows
-		Class<?> processEnvironmentClass;
-		try {
-			processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-
-		try {
-			Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
-			theCaseInsensitiveEnvironmentField.setAccessible(true);
-			Object obj = theCaseInsensitiveEnvironmentField.get(null);
-			return (Map<String, String>) obj;
-		} catch (NoSuchFieldException e) {
-			// do nothing
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-
-		try {
-			Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
-			theEnvironmentField.setAccessible(true);
-			Object obj = theEnvironmentField.get(null);
-			return (Map<String, String>) obj;
-		} catch (NoSuchFieldException e) {
-			// do nothing
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-
-		throw new IllegalStateException();
+	@Test
+	public void trimValuesIsOffByDefault() {
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		System.setProperty("my.name", " myValue  ");
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean", rootBeanDefinition(TestBean.class)
+				.addPropertyValue("name", "${my.name}")
+				.getBeanDefinition());
+		ppc.postProcessBeanFactory(bf);
+		assertThat(bf.getBean(TestBean.class).getName(), equalTo(" myValue  "));
+		System.clearProperty("my.name");
 	}
+
+	@Test
+	public void trimValuesIsApplied() {
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		ppc.setTrimValues(true);
+		System.setProperty("my.name", " myValue  ");
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean", rootBeanDefinition(TestBean.class)
+				.addPropertyValue("name", "${my.name}")
+				.getBeanDefinition());
+		ppc.postProcessBeanFactory(bf);
+		assertThat(bf.getBean(TestBean.class).getName(), equalTo("myValue"));
+		System.clearProperty("my.name");
+	}
+
 }

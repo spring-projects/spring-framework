@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package org.springframework.messaging.simp.user;
 
-import org.springframework.util.Assert;
-
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 /**
- * A simple container for the result of parsing and translating a "user" destination
- * in some source message into a set of actual target destinations by calling
- * {@link org.springframework.messaging.simp.user.UserDestinationResolver}.
+ * Contains the result from parsing a "user" destination from a source message
+ * and translating it to target destinations (one per active user session).
  *
  * @author Rossen Stoyanchev
  * @since 4.0.2
+ * @see org.springframework.messaging.simp.user.UserDestinationResolver
  */
 public class UserDestinationResult {
 
@@ -36,11 +37,12 @@ public class UserDestinationResult {
 
 	private final String subscribeDestination;
 
+	@Nullable
 	private final String user;
 
 
-	public UserDestinationResult(String sourceDestination,
-			Set<String> targetDestinations, String subscribeDestination, String user) {
+	public UserDestinationResult(String sourceDestination, Set<String> targetDestinations,
+			String subscribeDestination, @Nullable String user) {
 
 		Assert.notNull(sourceDestination, "'sourceDestination' must not be null");
 		Assert.notNull(targetDestinations, "'targetDestinations' must not be null");
@@ -54,47 +56,51 @@ public class UserDestinationResult {
 
 
 	/**
-	 * The "user" destination as found in the headers of the source message.
-	 *
-	 * @return a destination, never {@code null}
+	 * The "user" destination from the source message. This may look like
+	 * "/user/queue/position-updates" when subscribing or
+	 * "/user/{username}/queue/position-updates" when sending a message.
+	 * @return the "user" destination, never {@code null}.
 	 */
 	public String getSourceDestination() {
 		return this.sourceDestination;
 	}
 
 	/**
-	 * The result of parsing the source destination and translating it into a set
-	 * of actual target destinations to use.
-	 *
-	 * @return a set of destination values, possibly an empty set
+	 * The target destinations that the source destination was translated to,
+	 * one per active user session, e.g. "/queue/position-updates-useri9oqdfzo".
+	 * @return the target destinations, never {@code null} but possibly an empty
+	 * set if there are no active sessions for the user.
 	 */
 	public Set<String> getTargetDestinations() {
 		return this.targetDestinations;
 	}
 
 	/**
-	 * The canonical form of the user destination as would be required to subscribe.
-	 * This may be useful to ensure that messages received by clients contain the
-	 * original destination they used to subscribe.
-	 *
-	 * @return a destination, never {@code null}
+	 * The user destination in the form expected when a client subscribes, e.g.
+	 * "/user/queue/position-updates".
+	 * @return the subscribe form of the "user" destination, never {@code null}.
 	 */
 	public String getSubscribeDestination() {
 		return this.subscribeDestination;
 	}
 
 	/**
-	 * The user associated with the user destination.
-	 *
-	 * @return the user name, never {@code null}
+	 * The user for this user destination.
+	 * @return the user name or {@code null} if we have a session id only such as
+	 * when the user is not authenticated; in such cases it is possible to use
+	 * sessionId in place of a user name thus removing the need for a user-to-session
+	 * lookup via {@link SimpUserRegistry}.
 	 */
+	@Nullable
 	public String getUser() {
 		return this.user;
 	}
 
+
 	@Override
 	public String toString() {
-		return "UserDestinationResult[source=" + this.sourceDestination + ", target=" + this.targetDestinations +
+		return "UserDestinationResult [source=" + this.sourceDestination + ", target=" + this.targetDestinations +
 				", subscribeDestination=" + this.subscribeDestination + ", user=" + this.user + "]";
 	}
+
 }

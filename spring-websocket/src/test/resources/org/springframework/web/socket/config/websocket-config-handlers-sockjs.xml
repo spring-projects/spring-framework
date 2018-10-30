@@ -1,17 +1,24 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:websocket="http://www.springframework.org/schema/websocket"
-       xsi:schemaLocation="
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:websocket="http://www.springframework.org/schema/websocket"
+	   xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-    <websocket:handlers>
-        <websocket:mapping path="/test" handler="testHandler"/>
-        <websocket:mapping path="/foo/" handler="fooHandler"/>
-        <websocket:sockjs/>
-    </websocket:handlers>
+	<websocket:handlers>
+		<websocket:mapping path="/test" handler="testHandler"/>
+		<websocket:mapping path="/foo/" handler="fooHandler"/>
+		<websocket:handshake-handler ref="testHandshakeHandler"/>
+		<websocket:handshake-interceptors>
+			<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>
+			<ref bean="barTestInterceptor"/>
+		</websocket:handshake-interceptors>
+		<websocket:sockjs/>
+	</websocket:handlers>
 
-    <bean id="testHandler" class="org.springframework.web.socket.config.TestWebSocketHandler"/>
-    <bean id="fooHandler" class="org.springframework.web.socket.config.FooWebSocketHandler"/>
+	<bean id="testHandler" class="org.springframework.web.socket.config.TestWebSocketHandler"/>
+	<bean id="fooHandler" class="org.springframework.web.socket.config.FooWebSocketHandler"/>
+	<bean id="testHandshakeHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
+	<bean id="barTestInterceptor" class="org.springframework.web.socket.config.BarTestInterceptor"/>
 
 </beans>

@@ -1,0 +1,26 @@
+= Spring Framework Documentation
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+
+Welcome to the Spring Framework reference documentation!
+
+Please read the <<overview.adoc#overview,*Overview*>> for a quick introduction, including a brief history,
+design philosophy, where to ask questions, and tips to get started. For information on
+"`What's New`", or "`Migrating from previous versions`", check the
+https://github.com/spring-projects/spring-framework/wiki[*Github Wiki*].
+
+The reference documentation is divided into several sections:
+
+[horizontal]
+<<core.adoc#spring-core,Core>> :: IoC container, Events, Resources, i18n, Validation,
+Data Binding, Type Conversion, SpEL, AOP.
+<<testing.adoc#testing,Testing>> :: Mock objects, TestContext framework,
+Spring MVC Test, WebTestClient.
+<<data-access.adoc#spring-data-tier,Data Access>> :: Transactions, DAO support, JDBC,
+ORM, Marshalling XML.
+<<web.adoc#spring-web,Web Servlet>> :: Spring MVC, WebSocket, SockJS, STOMP messaging.
+<<web-reactive.adoc#spring-webflux,Web Reactive>> :: Spring WebFlux,
+WebClient, WebSocket.
+<<integration.adoc#spring-integration,Integration>> :: Remoting, JMS, JCA, JMX, Email,
+Tasks, Scheduling, Cache.
+<<languages.adoc#languages,Languages>> :: Kotlin, Groovy, Dynamic languages.

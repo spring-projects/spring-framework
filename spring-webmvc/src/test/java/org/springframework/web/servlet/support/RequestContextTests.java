@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class RequestContextTests {
 
 	private MockServletContext servletContext = new MockServletContext();
 
-	private Map<String, Object> model = new HashMap<String, Object>();
+	private Map<String, Object> model = new HashMap<>();
 
 	@Before
 	public void init() {
@@ -63,7 +63,7 @@ public class RequestContextTests {
 	public void testGetContextUrlWithMap() throws Exception {
 		request.setContextPath("foo/");
 		RequestContext context = new RequestContext(request, response, servletContext, model);
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("spam", "bucket");
 		assertEquals("foo/bar?spam=bucket", context.getContextUrl("{foo}?spam={spam}", map));
@@ -73,7 +73,7 @@ public class RequestContextTests {
 	public void testGetContextUrlWithMapEscaping() throws Exception {
 		request.setContextPath("foo/");
 		RequestContext context = new RequestContext(request, response, servletContext, model);
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar baz");
 		map.put("spam", "&bucket=");
 		assertEquals("foo/bar%20baz?spam=%26bucket%3D", context.getContextUrl("{foo}?spam={spam}", map));

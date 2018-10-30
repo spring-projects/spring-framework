@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,28 @@
 package org.springframework.core;
 
 /**
- * Interface that can be implemented by objects that should be
- * orderable, for example in a Collection.
+ * {@code Ordered} is an interface that can be implemented by objects that
+ * should be <em>orderable</em>, for example in a {@code Collection}.
  *
- * <p>The actual order can be interpreted as prioritization, with
- * the first object (with the lowest order value) having the highest
+ * <p>The actual {@link #getOrder() order} can be interpreted as prioritization,
+ * with the first object (with the lowest order value) having the highest
  * priority.
  *
- * <p>Note that there is a 'priority' marker for this interface:
- * {@link PriorityOrdered}. Order values expressed by PriorityOrdered
- * objects always apply before order values of 'plain' Ordered values.
+ * <p>Note that there is also a <em>priority</em> marker for this interface:
+ * {@link PriorityOrdered}. Order values expressed by {@code PriorityOrdered}
+ * objects always apply before same order values expressed by <em>plain</em>
+ * {@link Ordered} objects.
+ *
+ * <p>Consult the Javadoc for {@link OrderComparator} for details on the
+ * sort semantics for non-ordered objects.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 07.04.2003
+ * @see PriorityOrdered
  * @see OrderComparator
  * @see org.springframework.core.annotation.Order
+ * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
  */
 public interface Ordered {
 
@@ -49,15 +56,15 @@ public interface Ordered {
 
 
 	/**
-	 * Return the order value of this object, with a
-	 * higher value meaning greater in terms of sorting.
-	 * <p>Normally starting with 0, with {@code Integer.MAX_VALUE}
-	 * indicating the greatest value. Same order values will result
-	 * in arbitrary positions for the affected objects.
-	 * <p>Higher values can be interpreted as lower priority. As a
-	 * consequence, the object with the lowest value has highest priority
-	 * (somewhat analogous to Servlet "load-on-startup" values).
+	 * Get the order value of this object.
+	 * <p>Higher values are interpreted as lower priority. As a consequence,
+	 * the object with the lowest value has the highest priority (somewhat
+	 * analogous to Servlet {@code load-on-startup} values).
+	 * <p>Same order values will result in arbitrary sort positions for the
+	 * affected objects.
 	 * @return the order value
+	 * @see #HIGHEST_PRECEDENCE
+	 * @see #LOWEST_PRECEDENCE
 	 */
 	int getOrder();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,21 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.interceptor.BaseCacheResolver;
-import org.springframework.cache.interceptor.BasicCacheOperation;
+import org.springframework.cache.interceptor.AbstractCacheResolver;
+import org.springframework.cache.interceptor.BasicOperation;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.cache.jcache.model.CacheResultOperation;
 
 /**
  * A simple {@link CacheResolver} that resolves the exception cache
  * based on a configurable {@link CacheManager} and the name of the
- * cache: {@link CacheResultOperation#getExceptionCacheName()}
+ * cache: {@link CacheResultOperation#getExceptionCacheName()}.
  *
  * @author Stephane Nicoll
  * @since 4.1
- * @see org.springframework.cache.jcache.model.CacheResultOperation#getExceptionCacheName()
+ * @see CacheResultOperation#getExceptionCacheName()
  */
-public class SimpleExceptionCacheResolver extends BaseCacheResolver {
+public class SimpleExceptionCacheResolver extends AbstractCacheResolver {
 
 	public SimpleExceptionCacheResolver(CacheManager cacheManager) {
 		super(cacheManager);
@@ -43,7 +42,7 @@ public class SimpleExceptionCacheResolver extends BaseCacheResolver {
 
 	@Override
 	protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
-		BasicCacheOperation operation = context.getOperation();
+		BasicOperation operation = context.getOperation();
 		if (!(operation instanceof CacheResultOperation)) {
 			throw new IllegalStateException("Could not extract exception cache name from " + operation);
 		}

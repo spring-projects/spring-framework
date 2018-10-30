@@ -102,12 +102,12 @@ public class ControllerAdviceBeanTests {
 
 	private void assertApplicable(String message, ControllerAdviceBean controllerAdvice, Class<?> controllerBeanType) {
 		assertNotNull(controllerAdvice);
-		assertTrue(message,controllerAdvice.isApplicableToBeanType(controllerBeanType));
+		assertTrue(message, controllerAdvice.isApplicableToBeanType(controllerBeanType));
 	}
 
 	private void assertNotApplicable(String message, ControllerAdviceBean controllerAdvice, Class<?> controllerBeanType) {
 		assertNotNull(controllerAdvice);
-		assertFalse(message,controllerAdvice.isApplicableToBeanType(controllerBeanType));
+		assertFalse(message, controllerAdvice.isApplicableToBeanType(controllerBeanType));
 	}
 
 
@@ -137,6 +137,7 @@ public class ControllerAdviceBeanTests {
 
 	@ControllerAdvice(basePackages = "java.util", annotations = {RestController.class})
 	static class ShouldNotMatch {}
+
 
 	// Support classes
 

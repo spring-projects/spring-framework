@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.ejb.access;
 
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-
 import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
@@ -26,6 +25,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.junit.Test;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.remoting.RemoteAccessException;
@@ -180,25 +180,6 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 
 		verify(mockContext, times(lookupCount)).close();
 		verify(ejb, times(2)).remove();
-	}
-
-	@Test
-	public void testInvokesMethodOnEjbInstanceWithHomeInterface() throws Exception {
-		Object retVal = new Object();
-		final RemoteInterface ejb = mock(RemoteInterface.class);
-		given(ejb.targetMethod()).willReturn(retVal);
-
-		final String jndiName= "foobar";
-		Context mockContext = mockContext(jndiName, ejb);
-
-		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
-		si.setHomeInterface(SlsbHome.class);
-
-		RemoteInterface target = (RemoteInterface) configuredProxy(si, RemoteInterface.class);
-		assertTrue(target.targetMethod() == retVal);
-
-		verify(mockContext).close();
-		verify(ejb).remove();
 	}
 
 	@Test

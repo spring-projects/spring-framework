@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Static utilities for serialization and deserialization.
  *
@@ -35,7 +37,8 @@ public abstract class SerializationUtils {
 	 * @param object the object to serialize
 	 * @return an array of bytes representing the object in a portable fashion
 	 */
-	public static byte[] serialize(Object object) {
+	@Nullable
+	public static byte[] serialize(@Nullable Object object) {
 		if (object == null) {
 			return null;
 		}
@@ -56,7 +59,8 @@ public abstract class SerializationUtils {
 	 * @param bytes a serialized object
 	 * @return the result of deserializing the bytes
 	 */
-	public static Object deserialize(byte[] bytes) {
+	@Nullable
+	public static Object deserialize(@Nullable byte[] bytes) {
 		if (bytes == null) {
 			return null;
 		}

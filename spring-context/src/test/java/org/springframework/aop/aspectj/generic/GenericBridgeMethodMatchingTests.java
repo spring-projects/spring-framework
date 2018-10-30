@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.aop.aspectj.generic;
 
-import static org.junit.Assert.*;
-
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for AspectJ pointcut expression matching when working with bridge methods.
@@ -47,9 +48,9 @@ public class GenericBridgeMethodMatchingTests {
 
 	@SuppressWarnings("unchecked")
 	@org.junit.Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 
 		counterAspect = (GenericCounterAspect) ctx.getBean("counterAspect");
 		counterAspect.count = 0;

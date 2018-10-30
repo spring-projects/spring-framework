@@ -16,14 +16,15 @@
 
 package org.springframework.beans.factory.xml;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.interceptor.DebugInterceptor;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.sample.beans.ITestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests lookup methods wrapped by a CGLIB proxy (see SPR-391).
@@ -32,7 +33,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class LookupMethodWrappedByCglibProxyTests {
+public class LookupMethodWrappedByCglibProxyTests {
 
 	private static final Class<?> CLASS = LookupMethodWrappedByCglibProxyTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();

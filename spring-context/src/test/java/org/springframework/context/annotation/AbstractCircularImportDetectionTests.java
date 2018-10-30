@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,58 +72,71 @@ public abstract class AbstractCircularImportDetectionTests {
 	@Configuration
 	@Import(B.class)
 	static class A {
+
 		@Bean
 		TestBean b1() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
 	@Import(A.class)
 	static class B {
+
 		@Bean
 		TestBean b2() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
-	@Import( { Y.class, Z.class })
+	@Import({Y.class, Z.class})
 	class X {
+
 		@Bean
 		TestBean x() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
 	class Y {
+
 		@Bean
 		TestBean y() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
-	@Import( { Z1.class, Z2.class })
+	@Import({Z1.class, Z2.class})
 	class Z {
+
 		@Bean
 		TestBean z() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
 	class Z1 {
+
 		@Bean
 		TestBean z1() {
 			return new TestBean();
 		}
 	}
 
+
 	@Configuration
 	@Import(Z.class)
 	class Z2 {
+
 		@Bean
 		TestBean z2() {
 			return new TestBean();

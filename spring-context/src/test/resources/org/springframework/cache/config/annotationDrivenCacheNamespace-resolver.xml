@@ -13,7 +13,7 @@
 				<property name="caches">
 					<set>
 						<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"
-							  p:name="default"/>
+							  p:name="testCache"/>
 					</set>
 				</property>
 			</bean>

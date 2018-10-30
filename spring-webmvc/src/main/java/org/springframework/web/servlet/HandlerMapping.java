@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@ package org.springframework.web.servlet;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface to be implemented by objects that define a mapping between
  * requests and handler objects.
  *
  * <p>This class can be implemented by application developers, although this is not
  * necessary, as {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}
- * and {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping}
+ * and {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
  * are included in the framework. The former is the default if no
  * HandlerMapping bean is registered in the application context.
  *
@@ -49,7 +51,7 @@ import javax.servlet.http.HttpServletRequest;
  * @see org.springframework.core.Ordered
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping
  * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
- * @see org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
  */
 public interface HandlerMapping {
 
@@ -94,11 +96,11 @@ public interface HandlerMapping {
 
 	/**
 	 * Name of the {@link HttpServletRequest} attribute that contains a map with
-	 * URI matrix variables.
+	 * URI variable names and a corresponding MultiValueMap of URI matrix
+	 * variables for each.
 	 * <p>Note: This attribute is not required to be supported by all
 	 * HandlerMapping implementations and may also not be present depending on
 	 * whether the HandlerMapping is configured to keep matrix variable content
-	 * in the request URI.
 	 */
 	String MATRIX_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".matrixVariables";
 
@@ -126,6 +128,7 @@ public interface HandlerMapping {
 	 * any interceptors, or {@code null} if no mapping found
 	 * @throws Exception if there is an internal error
 	 */
+	@Nullable
 	HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;
 
 }

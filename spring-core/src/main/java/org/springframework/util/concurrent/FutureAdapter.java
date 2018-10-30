@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,89 +21,102 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Abstract class that adapts a {@link Future} parameterized over S into a {@code
- * Future} parameterized over T. All methods are delegated to the adaptee, where {@link
- * #get()} and {@link #get(long, TimeUnit)} call {@link #adapt(Object)} on the adaptee's
- * result.
+ * Abstract class that adapts a {@link Future} parameterized over S into a {@code Future}
+ * parameterized over T. All methods are delegated to the adaptee, where {@link #get()}
+ * and {@link #get(long, TimeUnit)} call {@link #adapt(Object)} on the adaptee's result.
  *
- * @param <T> the type of this {@code Future}
- * @param <S> the type of the adaptee's {@code Future}
  * @author Arjen Poutsma
  * @since 4.0
+ * @param <T> the type of this {@code Future}
+ * @param <S> the type of the adaptee's {@code Future}
  */
 public abstract class FutureAdapter<T, S> implements Future<T> {
 
 	private final Future<S> adaptee;
 
-	private Object result = null;
+	@Nullable
+	private Object result;
 
 	private State state = State.NEW;
 
 	private final Object mutex = new Object();
+
 
 	/**
 	 * Constructs a new {@code FutureAdapter} with the given adaptee.
 	 * @param adaptee the future to delegate to
 	 */
 	protected FutureAdapter(Future<S> adaptee) {
-		Assert.notNull(adaptee, "'delegate' must not be null");
+		Assert.notNull(adaptee, "Delegate must not be null");
 		this.adaptee = adaptee;
 	}
+
 
 	/**
 	 * Returns the adaptee.
 	 */
 	protected Future<S> getAdaptee() {
-		return adaptee;
+		return this.adaptee;
 	}
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		return adaptee.cancel(mayInterruptIfRunning);
+		return this.adaptee.cancel(mayInterruptIfRunning);
 	}
 
 	@Override
 	public boolean isCancelled() {
-		return adaptee.isCancelled();
+		return this.adaptee.isCancelled();
 	}
 
 	@Override
 	public boolean isDone() {
-		return adaptee.isDone();
+		return this.adaptee.isDone();
 	}
 
 	@Override
+	@Nullable
 	public T get() throws InterruptedException, ExecutionException {
-		return adaptInternal(adaptee.get());
+		return adaptInternal(this.adaptee.get());
 	}
 
 	@Override
-	public T get(long timeout, TimeUnit unit)
-			throws InterruptedException, ExecutionException, TimeoutException {
-		return adaptInternal(adaptee.get(timeout, unit));
+	@Nullable
+	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+		return adaptInternal(this.adaptee.get(timeout, unit));
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	final T adaptInternal(S adapteeResult) throws ExecutionException {
-		synchronized (mutex) {
-			switch (state) {
+		synchronized (this.mutex) {
+			switch (this.state) {
 				case SUCCESS:
-					return (T) result;
+					return (T) this.result;
 				case FAILURE:
-					throw (ExecutionException) result;
+					Assert.state(this.result instanceof ExecutionException, "Failure without exception");
+					throw (ExecutionException) this.result;
 				case NEW:
 					try {
 						T adapted = adapt(adapteeResult);
-						result = adapted;
-						state = State.SUCCESS;
+						this.result = adapted;
+						this.state = State.SUCCESS;
 						return adapted;
-					} catch (ExecutionException ex) {
-						result = ex;
-						state = State.FAILURE;
+					}
+					catch (ExecutionException ex) {
+						this.result = ex;
+						this.state = State.FAILURE;
 						throw ex;
+					}
+					catch (Throwable ex) {
+						ExecutionException execEx = new ExecutionException(ex);
+						this.result = execEx;
+						this.state = State.FAILURE;
+						throw execEx;
 					}
 				default:
 					throw new IllegalStateException();
@@ -115,7 +128,9 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 	 * Adapts the given adaptee's result into T.
 	 * @return the adapted result
 	 */
+	@Nullable
 	protected abstract T adapt(S adapteeResult) throws ExecutionException;
+
 
 	private enum State {NEW, SUCCESS, FAILURE}
 

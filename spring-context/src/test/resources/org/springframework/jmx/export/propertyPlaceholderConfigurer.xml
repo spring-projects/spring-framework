@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="testBean.name">Rob Harrop</prop>
+				<prop key="testBean.age">100</prop>
+				<prop key="scopeName">myScope</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+		<property name="scopes">
+			<map>
+				<entry key="${scopeName}">
+					<bean class="org.springframework.tests.context.SimpleMapScope"/>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="bean:name=proxyTestBean1">
+					<ref bean="testBean"/>
+				</entry>
+			</map>
+		</property>
+    <property name="server" ref="server"/>
+	</bean>
+
+	<bean id="testBean" class="org.springframework.jmx.JmxTestBean" scope="myScope">
+		<property name="name">
+			<value>${testBean.name}</value>
+		</property>
+		<property name="age">
+			<value>${testBean.age}</value>
+		</property>
+		<property name="nickName">
+			<null/>
+		</property>
+	</bean>
+
+</beans>

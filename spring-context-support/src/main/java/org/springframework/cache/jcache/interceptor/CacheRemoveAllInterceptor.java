@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
-import org.springframework.cache.jcache.model.CacheRemoveAllOperation;
 
 /**
  * Intercept methods annotated with {@link CacheRemoveAll}.
@@ -31,20 +30,20 @@ import org.springframework.cache.jcache.model.CacheRemoveAllOperation;
  * @since 4.1
  */
 @SuppressWarnings("serial")
-public class CacheRemoveAllInterceptor
-		extends AbstractCacheInterceptor<CacheRemoveAllOperation, CacheRemoveAll> {
+class CacheRemoveAllInterceptor extends AbstractCacheInterceptor<CacheRemoveAllOperation, CacheRemoveAll> {
 
 	protected CacheRemoveAllInterceptor(CacheErrorHandler errorHandler) {
 		super(errorHandler);
 	}
 
+
 	@Override
-	protected Object invoke(CacheOperationInvocationContext<CacheRemoveAllOperation> context,
-			CacheOperationInvoker invoker) {
+	protected Object invoke(
+			CacheOperationInvocationContext<CacheRemoveAllOperation> context, CacheOperationInvoker invoker) {
+
 		CacheRemoveAllOperation operation = context.getOperation();
 
-		final boolean earlyRemove = operation.isEarlyRemove();
-
+		boolean earlyRemove = operation.isEarlyRemove();
 		if (earlyRemove) {
 			removeAll(context);
 		}
@@ -56,12 +55,12 @@ public class CacheRemoveAllInterceptor
 			}
 			return result;
 		}
-		catch (CacheOperationInvoker.ThrowableWrapper t) {
-			Throwable ex = t.getOriginal();
-			if (!earlyRemove && operation.getExceptionTypeFilter().match(ex.getClass())) {
+		catch (CacheOperationInvoker.ThrowableWrapper ex) {
+			Throwable original = ex.getOriginal();
+			if (!earlyRemove && operation.getExceptionTypeFilter().match(original.getClass())) {
 				removeAll(context);
 			}
-			throw t;
+			throw ex;
 		}
 	}
 

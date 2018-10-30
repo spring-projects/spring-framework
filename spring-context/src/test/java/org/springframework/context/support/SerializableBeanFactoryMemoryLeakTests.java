@@ -1,19 +1,37 @@
-package org.springframework.context.support;
+/*
+ * Copyright 2002-2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
+package org.springframework.context.support;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 
 /**
  * Unit tests cornering SPR-7502.
@@ -67,9 +85,11 @@ public class SerializableBeanFactoryMemoryLeakTests {
 			ctx.refresh();
 			assertThat(serializableFactoryCount(), equalTo(1));
 			ctx.close();
-		} catch (BeanCreationException ex) {
+		}
+		catch (BeanCreationException ex) {
 			// ignore - this is expected on refresh() for failure case tests
-		} finally {
+		}
+		finally {
 			assertThat(serializableFactoryCount(), equalTo(0));
 		}
 	}

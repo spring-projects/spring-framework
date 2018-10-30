@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,16 @@ package org.springframework.jms.listener.adapter;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
-import org.springframework.jms.support.converter.JmsHeaderMapper;
+import org.springframework.core.MethodParameter;
+import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.Assert;
 
 /**
  * A {@link javax.jms.MessageListener} adapter that invokes a configurable
@@ -45,6 +50,7 @@ import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
  */
 public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageListener {
 
+	@Nullable
 	private InvocableHandlerMethod handlerMethod;
 
 
@@ -56,8 +62,14 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 		this.handlerMethod = handlerMethod;
 	}
 
+	private InvocableHandlerMethod getHandlerMethod() {
+		Assert.state(this.handlerMethod != null, "No HandlerMethod set");
+		return this.handlerMethod;
+	}
+
+
 	@Override
-	public void onMessage(javax.jms.Message jmsMessage, Session session) throws JMSException {
+	public void onMessage(javax.jms.Message jmsMessage, @Nullable Session session) throws JMSException {
 		Message<?> message = toMessagingMessage(jmsMessage);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Processing [" + message + "]");
@@ -71,35 +83,48 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
+	protected Object preProcessResponse(Object result) {
+		MethodParameter returnType = getHandlerMethod().getReturnType();
+		if (result instanceof Message) {
+			return MessageBuilder.fromMessage((Message<?>) result)
+					.setHeader(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType).build();
+		}
+		return MessageBuilder.withPayload(result).setHeader(
+				AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType).build();
+	}
+
 	protected Message<?> toMessagingMessage(javax.jms.Message jmsMessage) {
 		try {
 			return (Message<?>) getMessagingMessageConverter().fromMessage(jmsMessage);
 		}
-		catch (JMSException e) {
-			throw new MessageConversionException("Could not unmarshal message", e);
+		catch (JMSException ex) {
+			throw new MessageConversionException("Could not convert JMS message", ex);
 		}
 	}
 
 	/**
-	 * Invoke the handler, wrapping any exception to a {@link ListenerExecutionFailedException} with
-	 * a dedicated error message.
+	 * Invoke the handler, wrapping any exception to a {@link ListenerExecutionFailedException}
+	 * with a dedicated error message.
 	 */
-	private Object invokeHandler(javax.jms.Message jmsMessage, Session session, Message<?> message) {
+	@Nullable
+	private Object invokeHandler(javax.jms.Message jmsMessage, @Nullable Session session, Message<?> message) {
+		InvocableHandlerMethod handlerMethod = getHandlerMethod();
 		try {
 			return handlerMethod.invoke(message, jmsMessage, session);
 		}
-		catch (MessagingException e) {
-			throw new ListenerExecutionFailedException(createMessagingErrorMessage("Listener method could not " +
-					"be invoked with the incoming message"), e);
+		catch (MessagingException ex) {
+			throw new ListenerExecutionFailedException(
+					createMessagingErrorMessage("Listener method could not be invoked with incoming message"), ex);
 		}
-		catch (Exception e) {
-			throw new ListenerExecutionFailedException("Listener method '"
-					+ handlerMethod.getMethod().toGenericString() + "' threw exception", e);
+		catch (Exception ex) {
+			throw new ListenerExecutionFailedException("Listener method '" +
+					handlerMethod.getMethod().toGenericString() + "' threw exception", ex);
 		}
 	}
 
 	private String createMessagingErrorMessage(String description) {
+		InvocableHandlerMethod handlerMethod = getHandlerMethod();
 		StringBuilder sb = new StringBuilder(description).append("\n")
 				.append("Endpoint handler details:\n")
 				.append("Method [").append(handlerMethod.getMethod()).append("]\n")

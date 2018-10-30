@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,22 @@
 
 package org.springframework.http.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StreamUtils;
 
 /**
- * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
- * Apache HttpComponents HttpClient to execute requests.
+ * {@link ClientHttpResponse} implementation based on
+ * Apache HttpComponents HttpClient.
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequest}.
  *
@@ -39,12 +42,13 @@ import org.springframework.http.HttpHeaders;
  */
 final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 
-	private final CloseableHttpResponse httpResponse;
+	private final HttpResponse httpResponse;
 
+	@Nullable
 	private HttpHeaders headers;
 
 
-	HttpComponentsClientHttpResponse(CloseableHttpResponse httpResponse) {
+	HttpComponentsClientHttpResponse(HttpResponse httpResponse) {
 		this.httpResponse = httpResponse;
 	}
 
@@ -73,24 +77,26 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
 	@Override
 	public InputStream getBody() throws IOException {
 		HttpEntity entity = this.httpResponse.getEntity();
-		return (entity != null ? entity.getContent() : null);
+		return (entity != null ? entity.getContent() : StreamUtils.emptyInput());
 	}
 
 	@Override
 	public void close() {
-        // Release underlying connection back to the connection manager
-        try {
-            try {
-                // Attempt to keep connection alive by consuming its remaining content
-                EntityUtils.consume(this.httpResponse.getEntity());
-            }
+		// Release underlying connection back to the connection manager
+		try {
+			try {
+				// Attempt to keep connection alive by consuming its remaining content
+				EntityUtils.consume(this.httpResponse.getEntity());
+			}
 			finally {
-                this.httpResponse.close();
-            }
-        }
-        catch (IOException ex) {
+				if (this.httpResponse instanceof Closeable) {
+					((Closeable) this.httpResponse).close();
+				}
+			}
+		}
+		catch (IOException ex) {
 			// Ignore exception on close...
-        }
+		}
 	}
 
 }

@@ -16,10 +16,6 @@
 
 package org.springframework.scheduling.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +23,8 @@ import org.junit.Test;
 
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.NumberUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher

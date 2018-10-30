@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.converter.xml;
 
-import java.io.IOException;
 import java.io.StringReader;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -36,39 +35,64 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConversionException;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write XML using JAXB2.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter
+ * HttpMessageConverter} that can read and write XML using JAXB2.
  *
- * <p>This converter can read classes annotated with {@link XmlRootElement} and {@link XmlType},
- * and write classes annotated with with {@link XmlRootElement}, or subclasses thereof.
+ * <p>This converter can read classes annotated with {@link XmlRootElement} and
+ * {@link XmlType}, and write classes annotated with {@link XmlRootElement},
+ * or subclasses thereof.
+ *
+ * <p>Note: When using Spring's Marshaller/Unmarshaller abstractions from {@code spring-oxm},
+ * you should use the {@link MarshallingHttpMessageConverter} instead.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 3.0
+ * @see MarshallingHttpMessageConverter
  */
 public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessageConverter<Object> {
+
+	private boolean supportDtd = false;
 
 	private boolean processExternalEntities = false;
 
 
 	/**
+	 * Indicates whether DTD parsing should be supported.
+	 * <p>Default is {@code false} meaning that DTD is disabled.
+	 */
+	public void setSupportDtd(boolean supportDtd) {
+		this.supportDtd = supportDtd;
+	}
+
+	/**
+	 * Whether DTD parsing is supported.
+	 */
+	public boolean isSupportDtd() {
+		return this.supportDtd;
+	}
+
+	/**
 	 * Indicates whether external XML entities are processed when converting to a Source.
 	 * <p>Default is {@code false}, meaning that external entities are not resolved.
+	 * <p><strong>Note:</strong> setting this option to {@code true} also
+	 * automatically sets {@link #setSupportDtd} to {@code true}.
 	 */
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
+		if (processExternalEntities) {
+			setSupportDtd(true);
+		}
 	}
 
 	/**
@@ -80,13 +104,13 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		return (clazz.isAnnotationPresent(XmlRootElement.class) || clazz.isAnnotationPresent(XmlType.class)) &&
 				canRead(mediaType);
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		return (AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null && canWrite(mediaType));
 	}
 
@@ -97,7 +121,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	}
 
 	@Override
-	protected Object readFromSource(Class<?> clazz, HttpHeaders headers, Source source) throws IOException {
+	protected Object readFromSource(Class<?> clazz, HttpHeaders headers, Source source) throws Exception {
 		try {
 			source = processSource(source);
 			Unmarshaller unmarshaller = createUnmarshaller(clazz);
@@ -109,21 +133,29 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 				return jaxbElement.getValue();
 			}
 		}
+		catch (NullPointerException ex) {
+			if (!isSupportDtd()) {
+				throw new IllegalStateException("NPE while unmarshalling. " +
+						"This can happen due to the presence of DTD declarations which are disabled.", ex);
+			}
+			throw ex;
+		}
 		catch (UnmarshalException ex) {
-			throw new HttpMessageNotReadableException("Could not unmarshal to [" + clazz + "]: " + ex.getMessage(), ex);
-
+			throw ex;
 		}
 		catch (JAXBException ex) {
-			throw new HttpMessageConversionException("Could not instantiate JAXBContext: " + ex.getMessage(), ex);
+			throw new HttpMessageConversionException("Invalid JAXB setup: " + ex.getMessage(), ex);
 		}
 	}
 
+	@SuppressWarnings("deprecation")  // on JDK 9
 	protected Source processSource(Source source) {
 		if (source instanceof StreamSource) {
 			StreamSource streamSource = (StreamSource) source;
 			InputSource inputSource = new InputSource(streamSource.getInputStream());
 			try {
-				XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+				XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+				xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 				String featureName = "http://xml.org/sax/features/external-general-entities";
 				xmlReader.setFeature(featureName, isProcessExternalEntities());
 				if (!isProcessExternalEntities()) {
@@ -142,7 +174,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	}
 
 	@Override
-	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws IOException {
+	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws Exception {
 		try {
 			Class<?> clazz = ClassUtils.getUserClass(o);
 			Marshaller marshaller = createMarshaller(clazz);
@@ -150,25 +182,21 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 			marshaller.marshal(o, result);
 		}
 		catch (MarshalException ex) {
-			throw new HttpMessageNotWritableException("Could not marshal [" + o + "]: " + ex.getMessage(), ex);
+			throw ex;
 		}
 		catch (JAXBException ex) {
-			throw new HttpMessageConversionException("Could not instantiate JAXBContext: " + ex.getMessage(), ex);
+			throw new HttpMessageConversionException("Invalid JAXB setup: " + ex.getMessage(), ex);
 		}
 	}
 
-	private void setCharset(MediaType contentType, Marshaller marshaller) throws PropertyException {
-		if (contentType != null && contentType.getCharSet() != null) {
-			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharSet().name());
+	private void setCharset(@Nullable MediaType contentType, Marshaller marshaller) throws PropertyException {
+		if (contentType != null && contentType.getCharset() != null) {
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharset().name());
 		}
 	}
 
 
-	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) {
-			return new InputSource(new StringReader(""));
-		}
-	};
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
+			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 }

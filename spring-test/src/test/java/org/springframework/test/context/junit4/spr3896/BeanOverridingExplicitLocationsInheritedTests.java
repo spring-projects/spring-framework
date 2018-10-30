@@ -16,11 +16,11 @@
 
 package org.springframework.test.context.junit4.spr3896;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import org.junit.Test;
+
 import org.springframework.test.context.ContextConfiguration;
+
+import static org.junit.Assert.*;
 
 /**
  * JUnit 4 based integration test for verifying support for the

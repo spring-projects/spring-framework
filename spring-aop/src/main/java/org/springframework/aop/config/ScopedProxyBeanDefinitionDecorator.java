@@ -27,7 +27,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 
 /**
  * {@link BeanDefinitionDecorator} responsible for parsing the
- * {@code &lt;aop:scoped-proxy/&gt;} tag.
+ * {@code <aop:scoped-proxy/>} tag.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

@@ -15,16 +15,22 @@
  */
 package org.springframework.web.servlet.handler;
 
-import static org.junit.Assert.*;
+import java.util.Comparator;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
-import java.util.Comparator;
-import java.util.Map;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link MappedInterceptor} tests.
@@ -86,6 +92,35 @@ public class MappedInterceptorTests {
 
 		assertTrue(mappedInterceptor.matches("/foo/123", pathMatcher));
 		assertFalse(mappedInterceptor.matches("/foo/bar", pathMatcher));
+	}
+
+	@Test
+	public void preHandle() throws Exception {
+		HandlerInterceptor interceptor = mock(HandlerInterceptor.class);
+		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] { "/**" }, interceptor);
+		mappedInterceptor.preHandle(mock(HttpServletRequest.class), mock(HttpServletResponse.class), null);
+
+		then(interceptor).should().preHandle(any(HttpServletRequest.class), any(HttpServletResponse.class), any());
+	}
+
+	@Test
+	public void postHandle() throws Exception {
+		HandlerInterceptor interceptor = mock(HandlerInterceptor.class);
+		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] { "/**" }, interceptor);
+		mappedInterceptor.postHandle(mock(HttpServletRequest.class), mock(HttpServletResponse.class),
+				null, mock(ModelAndView.class));
+
+		then(interceptor).should().postHandle(any(), any(), any(), any());
+	}
+
+	@Test
+	public void afterCompletion() throws Exception {
+		HandlerInterceptor interceptor = mock(HandlerInterceptor.class);
+		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] { "/**" }, interceptor);
+		mappedInterceptor.afterCompletion(mock(HttpServletRequest.class), mock(HttpServletResponse.class),
+				null, mock(Exception.class));
+
+		then(interceptor).should().afterCompletion(any(), any(), any(), any());
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -32,6 +31,7 @@ import javax.jms.TextMessage;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 
@@ -45,7 +45,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rick Evans
  * @since 18.09.2004
  */
-public final class SimpleMessageConverterTests {
+public class SimpleMessageConverterTests {
 
 	@Test
 	public void testStringConversion() throws JMSException {
@@ -92,7 +92,7 @@ public final class SimpleMessageConverterTests {
 		Session session = mock(Session.class);
 		MapMessage message = mock(MapMessage.class);
 
-		Map<String, String> content = new HashMap<String, String>(2);
+		Map<String, String> content = new HashMap<>(2);
 		content.put("key1", "value1");
 		content.put("key2", "value2");
 
@@ -124,19 +124,18 @@ public final class SimpleMessageConverterTests {
 		assertEquals(content, converter.fromMessage(msg));
 	}
 
-	@Test(expected=MessageConversionException.class)
+	@Test(expected = MessageConversionException.class)
 	public void testToMessageThrowsExceptionIfGivenNullObjectToConvert() throws Exception {
 		new SimpleMessageConverter().toMessage(null, null);
 	}
 
-	@Test(expected=MessageConversionException.class)
+	@Test(expected = MessageConversionException.class)
 	public void testToMessageThrowsExceptionIfGivenIncompatibleObjectToConvert() throws Exception {
 		new SimpleMessageConverter().toMessage(new Object(), null);
 	}
 
 	@Test
 	public void testToMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
-
 		Session session = mock(Session.class);
 		ObjectMessage message = mock(ObjectMessage.class);
 
@@ -147,7 +146,6 @@ public final class SimpleMessageConverterTests {
 
 	@Test
 	public void testFromMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
-
 		Message message = mock(Message.class);
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
@@ -157,36 +155,36 @@ public final class SimpleMessageConverterTests {
 
 	@Test
 	public void testMapConversionWhereMapHasNonStringTypesForKeys() throws JMSException {
-
 		MapMessage message = mock(MapMessage.class);
-		final Session session = mock(Session.class);
+		Session session = mock(Session.class);
 		given(session.createMapMessage()).willReturn(message);
 
-		final Map<Integer, String> content = new HashMap<Integer, String>(1);
+		Map<Integer, String> content = new HashMap<>(1);
 		content.put(1, "value1");
 
-		final SimpleMessageConverter converter = new SimpleMessageConverter();
+		SimpleMessageConverter converter = new SimpleMessageConverter();
 		try {
 			converter.toMessage(content, session);
 			fail("expected MessageConversionException");
-		} catch (MessageConversionException ex) { /* expected */ }
+		}
+		catch (MessageConversionException ex) { /* expected */ }
 	}
 
 	@Test
 	public void testMapConversionWhereMapHasNNullForKey() throws JMSException {
-
 		MapMessage message = mock(MapMessage.class);
-		final Session session = mock(Session.class);
+		Session session = mock(Session.class);
 		given(session.createMapMessage()).willReturn(message);
 
-		final Map<Object, String> content = new HashMap<Object, String>(1);
+		Map<Object, String> content = new HashMap<>(1);
 		content.put(null, "value1");
 
-		final SimpleMessageConverter converter = new SimpleMessageConverter();
+		SimpleMessageConverter converter = new SimpleMessageConverter();
 		try {
 			converter.toMessage(content, session);
 			fail("expected MessageConversionException");
-		} catch (MessageConversionException ex) { /* expected */ }
+		}
+		catch (MessageConversionException ex) { /* expected */ }
 	}
 
 }

@@ -22,6 +22,7 @@ import java.beans.Introspector;
 import java.lang.reflect.Method;
 
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link BeanInfoFactory} implementation that evaluates whether bean classes have
@@ -42,6 +43,7 @@ public class ExtendedBeanInfoFactory implements BeanInfoFactory, Ordered {
 	 * Return an {@link ExtendedBeanInfo} for the given bean class, if applicable.
 	 */
 	@Override
+	@Nullable
 	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		return (supports(beanClass) ? new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass)) : null);
 	}

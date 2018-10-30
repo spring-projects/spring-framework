@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +19,33 @@ package org.springframework.oxm.jibx;
 import java.io.StringWriter;
 import javax.xml.transform.stream.StreamResult;
 
-import org.custommonkey.xmlunit.XMLUnit;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTests;
-import org.springframework.oxm.Marshaller;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
 
 /**
- * @author Arjen Poutsma
+ * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does not occur by
+ * default. The Gradle build should succeed, however.
  *
- * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does
- * not occur by default. The Gradle build should succeed, however.
+ * @author Arjen Poutsma
+ * @author Sam Brannen
  */
-public class JibxMarshallerTests extends AbstractMarshallerTests {
+public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller> {
 
 	@BeforeClass
 	public static void compilerAssumptions() {
-		Assume.group(TestGroup.CUSTOM_COMPILATION);
+		// JiBX compiler is currently not compatible with JDK 9
+		Assume.assumeTrue(System.getProperty("java.version").startsWith("1.8."));
 	}
 
+
 	@Override
-	protected Marshaller createMarshaller() throws Exception {
+	protected JibxMarshaller createMarshaller() throws Exception {
 		JibxMarshaller marshaller = new JibxMarshaller();
 		marshaller.setTargetPackage("org.springframework.oxm.jibx");
 		marshaller.afterPropertiesSet();
@@ -62,6 +61,7 @@ public class JibxMarshallerTests extends AbstractMarshallerTests {
 		return flights;
 	}
 
+
 	@Test(expected = IllegalArgumentException.class)
 	public void afterPropertiesSetNoContextPath() throws Exception {
 		JibxMarshaller marshaller = new JibxMarshaller();
@@ -70,20 +70,19 @@ public class JibxMarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void indentation() throws Exception {
-		((JibxMarshaller) marshaller).setIndent(4);
+		marshaller.setIndent(4);
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(flights, new StreamResult(writer));
-		XMLUnit.setIgnoreWhitespace(false);
 		String expected =
 				"<?xml version=\"1.0\"?>\n" + "<flights xmlns=\"http://samples.springframework.org/flight\">\n" +
 						"    <flight>\n" + "        <number>42</number>\n" + "    </flight>\n" + "</flights>";
-		assertXMLEqual(expected, writer.toString());
+		assertThat(writer.toString(), isSimilarTo(expected).ignoreWhitespace());
 	}
 
 	@Test
 	public void encodingAndStandalone() throws Exception {
-		((JibxMarshaller) marshaller).setEncoding("ISO-8859-1");
-		((JibxMarshaller) marshaller).setStandalone(Boolean.TRUE);
+		marshaller.setEncoding("ISO-8859-1");
+		marshaller.setStandalone(Boolean.TRUE);
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(flights, new StreamResult(writer));
 		assertTrue("Encoding and standalone not set",
@@ -92,8 +91,8 @@ public class JibxMarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void dtd() throws Exception {
-		((JibxMarshaller) marshaller).setDocTypeRootElementName("flights");
-		((JibxMarshaller) marshaller).setDocTypeSystemId("flights.dtd");
+		marshaller.setDocTypeRootElementName("flights");
+		marshaller.setDocTypeSystemId("flights.dtd");
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(flights, new StreamResult(writer));
 		assertTrue("doc type not written",

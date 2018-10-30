@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.util.concurrent.Executor;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
@@ -47,13 +48,19 @@ public interface AsyncConfigurer {
 	 * The {@link Executor} instance to be used when processing async
 	 * method invocations.
 	 */
-	Executor getAsyncExecutor();
+	@Nullable
+	default Executor getAsyncExecutor() {
+		return null;
+	}
 
 	/**
 	 * The {@link AsyncUncaughtExceptionHandler} instance to be used
 	 * when an exception is thrown during an asynchronous method execution
 	 * with {@code void} return type.
 	 */
-	AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler();
+	@Nullable
+	default AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+		return null;
+	}
 
 }

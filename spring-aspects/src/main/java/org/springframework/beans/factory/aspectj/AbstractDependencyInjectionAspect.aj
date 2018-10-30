@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,26 +27,18 @@ import org.aspectj.lang.annotation.control.CodeGenerationHint;
  * @since 2.5.2
  */
 public abstract aspect AbstractDependencyInjectionAspect {
-	/**
-	 * Select construction join points for objects to inject dependencies
-	 */
-	public abstract pointcut beanConstruction(Object bean);
+
+	private pointcut preConstructionCondition() :
+			leastSpecificSuperTypeConstruction() && preConstructionConfiguration();
+
+	private pointcut postConstructionCondition() :
+			mostSpecificSubTypeConstruction() && !preConstructionConfiguration();
 
 	/**
-	 * Select deserialization join points for objects to inject dependencies
+	 * Select least specific super type that is marked for DI
+	 * (so that injection occurs only once with pre-construction injection).
 	 */
-	public abstract pointcut beanDeserialization(Object bean);
-
-	/**
-	 * Select join points in a configurable bean
-	 */
-	public abstract pointcut inConfigurableBean();
-
-	/**
-	 * Select join points in beans to be configured prior to construction?
-	 * By default, use post-construction injection matching the default in the Configurable annotation.
-	 */
-	public pointcut preConstructionConfiguration() : if(false);
+	public abstract pointcut leastSpecificSuperTypeConstruction();
 
 	/**
 	 * Select the most-specific initialization join point
@@ -54,24 +46,29 @@ public abstract aspect AbstractDependencyInjectionAspect {
 	 */
 	@CodeGenerationHint(ifNameSuffix="6f1")
 	public pointcut mostSpecificSubTypeConstruction() :
-		if(thisJoinPoint.getSignature().getDeclaringType() == thisJoinPoint.getThis().getClass());
+			if (thisJoinPoint.getSignature().getDeclaringType() == thisJoinPoint.getThis().getClass());
 
 	/**
-	 * Select least specific super type that is marked for DI (so that injection occurs only once with pre-construction inejection
+	 * Select join points in beans to be configured prior to construction?
+	 * By default, use post-construction injection matching the default in the Configurable annotation.
 	 */
-	public abstract pointcut leastSpecificSuperTypeConstruction();
+	public pointcut preConstructionConfiguration() : if (false);
 
 	/**
-	 * Configure the bean
+	 * Select construction join points for objects to inject dependencies.
 	 */
-	public abstract void configureBean(Object bean);
+	public abstract pointcut beanConstruction(Object bean);
 
+	/**
+	 * Select deserialization join points for objects to inject dependencies.
+	 */
+	public abstract pointcut beanDeserialization(Object bean);
 
-	private pointcut preConstructionCondition() :
-		leastSpecificSuperTypeConstruction() && preConstructionConfiguration();
+	/**
+	 * Select join points in a configurable bean.
+	 */
+	public abstract pointcut inConfigurableBean();
 
-	private pointcut postConstructionCondition() :
-		mostSpecificSubTypeConstruction() && !preConstructionConfiguration();
 
 	/**
 	 * Pre-construction configuration.
@@ -99,5 +96,11 @@ public abstract aspect AbstractDependencyInjectionAspect {
 		beanDeserialization(bean) && inConfigurableBean() {
 		configureBean(bean);
 	}
+
+
+	/**
+	 * Configure the given bean.
+	 */
+	public abstract void configureBean(Object bean);
 
 }

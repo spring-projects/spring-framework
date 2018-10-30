@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.cache.config;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Element;
 
 /**
  * {@code NamespaceHandler} allowing for the configuration of declarative
@@ -38,10 +39,11 @@ public class CacheNamespaceHandler extends NamespaceHandlerSupport {
 
 	static final String DEFAULT_CACHE_MANAGER_BEAN_NAME = "cacheManager";
 
+
 	static String extractCacheManager(Element element) {
-		return (element.hasAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE) ? element
-				.getAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE)
-				: CacheNamespaceHandler.DEFAULT_CACHE_MANAGER_BEAN_NAME);
+		return (element.hasAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE) ?
+				element.getAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE) :
+				CacheNamespaceHandler.DEFAULT_CACHE_MANAGER_BEAN_NAME);
 	}
 
 	static BeanDefinition parseKeyGenerator(Element element, BeanDefinition def) {
@@ -52,9 +54,11 @@ public class CacheNamespaceHandler extends NamespaceHandlerSupport {
 		return def;
 	}
 
+
 	@Override
 	public void init() {
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenCacheBeanDefinitionParser());
 		registerBeanDefinitionParser("advice", new CacheAdviceParser());
 	}
+
 }

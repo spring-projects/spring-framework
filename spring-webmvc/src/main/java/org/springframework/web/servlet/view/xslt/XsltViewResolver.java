@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.web.servlet.view.xslt;
 
 import java.util.Properties;
-
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
@@ -35,23 +35,32 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
  */
 public class XsltViewResolver extends UrlBasedViewResolver {
 
+	@Nullable
 	private String sourceKey;
 
+	@Nullable
 	private URIResolver uriResolver;
 
+	@Nullable
 	private ErrorListener errorListener;
 
 	private boolean indent = true;
 
+	@Nullable
 	private Properties outputProperties;
 
 	private boolean cacheTemplates = true;
 
 
 	public XsltViewResolver() {
-		setViewClass(XsltView.class);
+		setViewClass(requiredViewClass());
 	}
 
+
+	@Override
+	protected Class<?> requiredViewClass() {
+		return XsltView.class;
+	}
 
 	/**
 	 * Set the name of the model attribute that represents the XSLT Source.
@@ -118,14 +127,11 @@ public class XsltViewResolver extends UrlBasedViewResolver {
 
 
 	@Override
-	protected Class<?> requiredViewClass() {
-		return XsltView.class;
-	}
-
-	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		XsltView view = (XsltView) super.buildView(viewName);
-		view.setSourceKey(this.sourceKey);
+		if (this.sourceKey != null) {
+			view.setSourceKey(this.sourceKey);
+		}
 		if (this.uriResolver != null) {
 			view.setUriResolver(this.uriResolver);
 		}
@@ -133,7 +139,9 @@ public class XsltViewResolver extends UrlBasedViewResolver {
 			view.setErrorListener(this.errorListener);
 		}
 		view.setIndent(this.indent);
-		view.setOutputProperties(this.outputProperties);
+		if (this.outputProperties != null) {
+			view.setOutputProperties(this.outputProperties);
+		}
 		view.setCacheTemplates(this.cacheTemplates);
 		return view;
 	}

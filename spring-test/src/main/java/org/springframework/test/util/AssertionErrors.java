@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.util;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -26,13 +28,8 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AssertionErrors {
 
-
-	private AssertionErrors() {
-	}
-
 	/**
 	 * Fails a test with the given message.
-	 *
 	 * @param message describes the reason for the failure
 	 */
 	public static void fail(String message) {
@@ -42,7 +39,6 @@ public abstract class AssertionErrors {
 	/**
 	 * Fails a test with the given message passing along expected and actual
 	 * values to be added to the message.
-	 *
 	 * <p>For example given:
 	 * <pre class="code">
 	 * assertEquals("Response header [" + name + "]", actual, expected);
@@ -51,19 +47,17 @@ public abstract class AssertionErrors {
 	 * <pre class="code">
 	 * Response header [Accept] expected:&lt;application/json&gt; but was:&lt;text/plain&gt;
 	 * </pre>
-	 *
 	 * @param message describes the value that failed the match
 	 * @param expected expected value
 	 * @param actual actual value
 	 */
-	public static void fail(String message, Object expected, Object actual) {
+	public static void fail(String message, @Nullable Object expected, @Nullable Object actual) {
 		throw new AssertionError(message + " expected:<" + expected + "> but was:<" + actual + ">");
 	}
 
 	/**
 	 * Assert the given condition is {@code true} and raise an
 	 * {@link AssertionError} if it is not.
-	 *
 	 * @param message the message
 	 * @param condition the condition to test for
 	 */
@@ -74,19 +68,35 @@ public abstract class AssertionErrors {
 	}
 
 	/**
-	 * Assert two objects are equal raise an {@link AssertionError} if not.
+	 * Assert two objects are equal and raise an {@link AssertionError} if not.
 	 * <p>For example:
 	 * <pre class="code">
-	 * assertEquals("Response header [" + name + "]", actual, expected);
+	 * assertEquals("Response header [" + name + "]", expected, actual);
 	 * </pre>
-	 *
 	 * @param message describes the value being checked
 	 * @param expected the expected value
 	 * @param actual the actual value
 	 */
-	public static void assertEquals(String message, Object expected, Object actual) {
+	public static void assertEquals(String message, @Nullable Object expected, @Nullable Object actual) {
 		if (!ObjectUtils.nullSafeEquals(expected, actual)) {
-			fail(message, expected, actual);
+			fail(message, ObjectUtils.nullSafeToString(expected), ObjectUtils.nullSafeToString(actual));
+		}
+	}
+
+	/**
+	 * Assert two objects are not equal and raise an {@link AssertionError} otherwise.
+	 * <p>For example:
+	 * <pre class="code">
+	 * assertNotEquals("Response header [" + name + "]", expected, actual);
+	 * </pre>
+	 * @param message describes the value being checked
+	 * @param expected the expected value
+	 * @param actual the actual value
+	 */
+	public static void assertNotEquals(String message, @Nullable Object expected, @Nullable Object actual) {
+		if (ObjectUtils.nullSafeEquals(expected, actual)) {
+			throw new AssertionError(message + " was not expected to be:" +
+					"<" + ObjectUtils.nullSafeToString(actual) + ">");
 		}
 	}
 

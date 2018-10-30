@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,27 +28,21 @@ public class NopInterceptor implements MethodInterceptor {
 
 	private int count;
 
-	/**
-	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(MethodInvocation)
-	 */
+
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		increment();
 		return invocation.proceed();
 	}
 
+	protected void increment() {
+		this.count++;
+	}
+
 	public int getCount() {
 		return this.count;
 	}
 
-	protected void increment() {
-		++count;
-	}
-
-	@Override
-	public int hashCode() {
-		return 0;
-	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -62,5 +55,9 @@ public class NopInterceptor implements MethodInterceptor {
 		return this.count == ((NopInterceptor) other).count;
 	}
 
+	@Override
+	public int hashCode() {
+		return NopInterceptor.class.hashCode();
+	}
 
 }

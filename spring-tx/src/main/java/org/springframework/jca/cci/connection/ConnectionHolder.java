@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ import javax.resource.cci.Connection;
 import org.springframework.transaction.support.ResourceHolderSupport;
 
 /**
- * Connection holder, wrapping a CCI Connection.
- *
- * <p>CciLocalTransactionManager binds instances of this class
- * to the thread, for a given ConnectionFactory.
+ * Resource holder wrapping a CCI {@link Connection}.
+ * {@link CciLocalTransactionManager} binds instances of this class to the thread,
+ * for a given {@link javax.resource.cci.ConnectionFactory}.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
@@ -38,9 +37,11 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	private final Connection connection;
 
+
 	public ConnectionHolder(Connection connection) {
 		this.connection = connection;
 	}
+
 
 	public Connection getConnection() {
 		return this.connection;

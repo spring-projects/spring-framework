@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,23 +213,21 @@ public class TemplateExpressionParsingTests extends AbstractExpressionTests {
 		// Just wanting to use the prefix or suffix within the template:
 		Expression ex = parser.parseExpression("hello ${3+4} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		String s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
-		assertEquals("hello 7 world",s);
+		assertEquals("hello 7 world", s);
 
 		ex = parser.parseExpression("hello ${3+4} wo${'${'}rld",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
-		assertEquals("hello 7 wo${rld",s);
+		assertEquals("hello 7 wo${rld", s);
 
 		ex = parser.parseExpression("hello ${3+4} wo}rld",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
-		assertEquals("hello 7 wo}rld",s);
+		assertEquals("hello 7 wo}rld", s);
 	}
 
 	@Test
 	public void testParsingNormalExpressionThroughTemplateParser() throws Exception {
 		Expression expr = parser.parseExpression("1+2+3");
-		assertEquals(6,expr.getValue());
-		expr = parser.parseExpression("1+2+3",null);
-		assertEquals(6,expr.getValue());
+		assertEquals(6, expr.getValue());
 	}
 
 	@Test

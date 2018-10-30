@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,21 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation which indicates that a method parameter should be bound to an HTTP cookie.
- * Supported for annotated handler methods in Servlet and Portlet environments.
  *
  * <p>The method parameter may be declared as type {@link javax.servlet.http.Cookie}
- * or as cookie value type (String, int, etc).
+ * or as cookie value type (String, int, etc.).
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see RequestMapping
  * @see RequestParam
  * @see RequestHeader
  * @see org.springframework.web.bind.annotation.RequestMapping
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
- * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
- * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
@@ -45,24 +44,33 @@ import java.lang.annotation.Target;
 public @interface CookieValue {
 
 	/**
-	 * The name of the cookie to bind to.
+	 * Alias for {@link #name}.
 	 */
+	@AliasFor("name")
 	String value() default "";
 
 	/**
-	 * Whether the header is required.
-	 * <p>Default is {@code true}, leading to an exception being thrown
-	 * in case the header is missing in the request. Switch this to
-	 * {@code false} if you prefer a {@code null} in case of the
-	 * missing header.
-	 * <p>Alternatively, provide a {@link #defaultValue}, which implicitly sets
-	 * this flag to {@code false}.
+	 * The name of the cookie to bind to.
+	 * @since 4.2
+	 */
+	@AliasFor("value")
+	String name() default "";
+
+	/**
+	 * Whether the cookie is required.
+	 * <p>Defaults to {@code true}, leading to an exception being thrown
+	 * if the cookie is missing in the request. Switch this to
+	 * {@code false} if you prefer a {@code null} value if the cookie is
+	 * not present in the request.
+	 * <p>Alternatively, provide a {@link #defaultValue}, which implicitly
+	 * sets this flag to {@code false}.
 	 */
 	boolean required() default true;
 
 	/**
-	 * The default value to use as a fallback. Supplying a default value implicitly
-	 * sets {@link #required} to {@code false}.
+	 * The default value to use as a fallback.
+	 * <p>Supplying a default value implicitly sets {@link #required} to
+	 * {@code false}.
 	 */
 	String defaultValue() default ValueConstants.DEFAULT_NONE;
 

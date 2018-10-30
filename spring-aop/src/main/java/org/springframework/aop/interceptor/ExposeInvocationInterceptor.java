@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 
 /**
  * Interceptor that exposes the current {@link org.aopalliance.intercept.MethodInvocation}
@@ -41,9 +41,9 @@ import org.springframework.core.Ordered;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
-public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, Serializable {
+public final class ExposeInvocationInterceptor implements MethodInterceptor, PriorityOrdered, Serializable {
 
-	/** Singleton instance of this class */
+	/** Singleton instance of this class. */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
 
 	/**
@@ -58,7 +58,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 	};
 
 	private static final ThreadLocal<MethodInvocation> invocation =
-			new NamedThreadLocal<MethodInvocation>("Current AOP method invocation");
+			new NamedThreadLocal<>("Current AOP method invocation");
 
 
 	/**
@@ -69,11 +69,12 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 	 */
 	public static MethodInvocation currentInvocation() throws IllegalStateException {
 		MethodInvocation mi = invocation.get();
-		if (mi == null)
+		if (mi == null) {
 			throw new IllegalStateException(
 					"No MethodInvocation found: Check that an AOP invocation is in progress, and that the " +
 					"ExposeInvocationInterceptor is upfront in the interceptor chain. Specifically, note that " +
 					"advices with order HIGHEST_PRECEDENCE will execute before ExposeInvocationInterceptor!");
+		}
 		return mi;
 	}
 
@@ -98,7 +99,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 
 	@Override
 	public int getOrder() {
-		return Ordered.HIGHEST_PRECEDENCE + 1;
+		return PriorityOrdered.HIGHEST_PRECEDENCE + 1;
 	}
 
 	/**

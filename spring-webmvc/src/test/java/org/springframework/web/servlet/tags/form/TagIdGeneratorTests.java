@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,35 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import junit.framework.TestCase;
+import java.util.stream.IntStream;
 
 import javax.servlet.jsp.PageContext;
 
+import org.junit.Test;
+
 import org.springframework.mock.web.test.MockPageContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
+ * @author Sam Brannen
  * @since 2.0
  */
-public class TagIdGeneratorTests extends TestCase {
+public class TagIdGeneratorTests {
 
-	public void testNextId() throws Exception {
-		String name = "foo";
+	@Test
+	public void nextId() {
+		// Repeat a few times just to be sure...
+		IntStream.rangeClosed(1, 5).forEach(i -> assertNextId());
+	}
+
+	private void assertNextId() {
 		PageContext pageContext = new MockPageContext();
-		assertEquals("foo1", TagIdGenerator.nextId(name, pageContext));
-		assertEquals("foo2", TagIdGenerator.nextId(name, pageContext));
-		assertEquals("foo3", TagIdGenerator.nextId(name, pageContext));
-		assertEquals("foo4", TagIdGenerator.nextId(name, pageContext));
-		assertEquals("bar1", TagIdGenerator.nextId("bar", pageContext));
-		pageContext = new MockPageContext();
-		assertEquals("foo1", TagIdGenerator.nextId(name, pageContext));
-		assertEquals("foo2", TagIdGenerator.nextId(name, pageContext));
-		assertEquals("foo3", TagIdGenerator.nextId(name, pageContext));
-		assertEquals("foo4", TagIdGenerator.nextId(name, pageContext));
+		assertEquals("foo1", TagIdGenerator.nextId("foo", pageContext));
+		assertEquals("foo2", TagIdGenerator.nextId("foo", pageContext));
+		assertEquals("foo3", TagIdGenerator.nextId("foo", pageContext));
+		assertEquals("foo4", TagIdGenerator.nextId("foo", pageContext));
 		assertEquals("bar1", TagIdGenerator.nextId("bar", pageContext));
 	}
 

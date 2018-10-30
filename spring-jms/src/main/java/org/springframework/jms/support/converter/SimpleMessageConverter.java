@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -148,11 +147,12 @@ public class SimpleMessageConverter implements MessageConverter {
 	protected MapMessage createMessageForMap(Map<?, ?> map, Session session) throws JMSException {
 		MapMessage message = session.createMapMessage();
 		for (Map.Entry<?, ?> entry : map.entrySet()) {
-			if (!(entry.getKey() instanceof String)) {
+			Object key = entry.getKey();
+			if (!(key instanceof String)) {
 				throw new MessageConversionException("Cannot convert non-String key of type [" +
-						ObjectUtils.nullSafeClassName(entry.getKey()) + "] to JMS MapMessage entry");
+						ObjectUtils.nullSafeClassName(key) + "] to JMS MapMessage entry");
 			}
-			message.setObject((String) entry.getKey(), entry.getValue());
+			message.setObject((String) key, entry.getValue());
 		}
 		return message;
 	}
@@ -200,7 +200,7 @@ public class SimpleMessageConverter implements MessageConverter {
 	 */
 	@SuppressWarnings("unchecked")
 	protected Map<String, Object> extractMapFromMessage(MapMessage message) throws JMSException {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		Enumeration<String> en = message.getMapNames();
 		while (en.hasMoreElements()) {
 			String key = en.nextElement();

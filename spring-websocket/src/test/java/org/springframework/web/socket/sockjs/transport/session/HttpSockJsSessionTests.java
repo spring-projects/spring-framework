@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,8 +30,8 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
-import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
+import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.HttpSockJsSessionTests.TestAbstractHttpSockJsSession;
 
@@ -82,7 +82,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		this.session.handleInitialRequest(this.request, this.response, this.frameFormat);
 
 		assertEquals("hhh\no", this.servletResponse.getContentAsString());
-		assertFalse(this.servletRequest.isAsyncStarted());
+		assertTrue(this.servletRequest.isAsyncStarted());
 
 		verify(this.webSocketHandler).afterConnectionEstablished(this.session);
 	}
@@ -102,7 +102,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 	}
 
 
-	static class TestAbstractHttpSockJsSession extends AbstractHttpSockJsSession {
+	static class TestAbstractHttpSockJsSession extends StreamingSockJsSession {
 
 		private IOException exceptionOnWriteFrame;
 
@@ -118,13 +118,8 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		}
 
 		@Override
-		protected boolean isStreaming() {
-			return false;
-		}
-
-		@Override
-		protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			response.getBody().write("hhh\n".getBytes());
+		protected byte[] getPrelude(ServerHttpRequest request) {
+			return "hhh\n".getBytes();
 		}
 
 		public boolean wasCacheFlushed() {

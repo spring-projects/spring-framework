@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,34 +26,35 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.junit.runners.Parameterized.Parameter;
+
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 /**
  * Base class for WebSocket integration tests.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public abstract class AbstractWebSocketIntegrationTests {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
-	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = new HashMap<Class<?>, Class<?>>();
+	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = new HashMap<>();
 
 	static {
 		upgradeStrategyConfigTypes.put(JettyWebSocketTestServer.class, JettyUpgradeStrategyConfig.class);
 		upgradeStrategyConfigTypes.put(TomcatWebSocketTestServer.class, TomcatUpgradeStrategyConfig.class);
 		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 	}
+
 
 	@Rule
 	public final TestName testName = new TestName();
@@ -64,12 +65,13 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Parameter(1)
 	public WebSocketClient webSocketClient;
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	protected AnnotationConfigWebApplicationContext wac;
 
 
 	@Before
 	public void setup() throws Exception {
-
 		logger.debug("Setting up '" + this.testName.getMethodName() + "', client=" +
 				this.webSocketClient.getClass().getSimpleName() + ", server=" +
 				this.server.getClass().getSimpleName());
@@ -77,14 +79,17 @@ public abstract class AbstractWebSocketIntegrationTests {
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(getAnnotatedConfigClasses());
 		this.wac.register(upgradeStrategyConfigTypes.get(this.server.getClass()));
-		this.wac.refresh();
 
 		if (this.webSocketClient instanceof Lifecycle) {
 			((Lifecycle) this.webSocketClient).start();
 		}
 
+		this.server.setup();
 		this.server.deployConfig(this.wac);
 		this.server.start();
+
+		this.wac.setServletContext(this.server.getServletContext());
+		this.wac.refresh();
 	}
 
 	protected abstract Class<?>[] getAnnotatedConfigClasses();
@@ -99,19 +104,23 @@ public abstract class AbstractWebSocketIntegrationTests {
 		catch (Throwable t) {
 			logger.error("Failed to stop WebSocket client", t);
 		}
-
 		try {
 			this.server.undeployConfig();
 		}
 		catch (Throwable t) {
 			logger.error("Failed to undeploy application config", t);
 		}
-
 		try {
 			this.server.stop();
 		}
 		catch (Throwable t) {
 			logger.error("Failed to stop server", t);
+		}
+		try {
+			this.wac.close();
+		}
+		catch (Throwable t) {
+			logger.error("Failed to close WebApplicationContext", t);
 		}
 	}
 
@@ -144,6 +153,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		}
 	}
 
+
 	@Configuration
 	static class TomcatUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
@@ -152,6 +162,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 			return new TomcatRequestUpgradeStrategy();
 		}
 	}
+
 
 	@Configuration
 	static class UndertowUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,16 @@ public interface TransportHandler {
 	 * Return the transport type supported by this handler.
 	 */
 	TransportType getTransportType();
+
+	/**
+	 * Check whether the type of the given session matches the transport type
+	 * of this {@code TransportHandler} where session id and the transport type
+	 * are extracted from the SockJS URL.
+	 * @return {@code true} if the session matches (and would therefore get
+	 * accepted by {@link #handleRequest}), or {@code false} otherwise
+	 * @since 4.3.4
+	 */
+	boolean checkSessionType(SockJsSession session);
 
 	/**
 	 * Handle the given request and delegate messages to the provided
