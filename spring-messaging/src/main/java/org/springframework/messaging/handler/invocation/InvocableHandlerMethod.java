@@ -20,8 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -32,7 +30,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Extension of {@link HandlerMethod} that invokes the underlying method with
@@ -163,23 +160,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return args;
 	}
 
-	@Nullable
-	private Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
-		if (!ObjectUtils.isEmpty(providedArgs)) {
-			for (Object providedArg : providedArgs) {
-				if (parameter.getParameterType().isInstance(providedArg)) {
-					return providedArg;
-				}
-			}
-		}
-		return null;
-	}
-
-	private static String formatArgumentError(MethodParameter param, String message) {
-		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
-				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
-	}
-
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
@@ -210,39 +190,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				throw new IllegalStateException(formatInvokeError("Invocation failure", args), targetException);
 			}
 		}
-	}
-
-	/**
-	 * Assert that the target bean class is an instance of the class where the given
-	 * method is declared. In some cases the actual endpoint instance at request-
-	 * processing time may be a JDK dynamic proxy (lazy initialization, prototype
-	 * beans, and others). Endpoint classes that require proxying should prefer
-	 * class-based proxy mechanisms.
-	 */
-	private void assertTargetBean(Method method, Object targetBean, Object[] args) {
-		Class<?> methodDeclaringClass = method.getDeclaringClass();
-		Class<?> targetBeanClass = targetBean.getClass();
-		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
-			String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual endpoint bean class '" +
-					targetBeanClass.getName() + "'. If the endpoint requires proxying " +
-					"(e.g. due to @Transactional), please use class-based proxying.";
-			throw new IllegalStateException(formatInvokeError(text, args));
-		}
-	}
-
-	private String formatInvokeError(String text, Object[] args) {
-
-		String formattedArgs = IntStream.range(0, args.length)
-				.mapToObj(i -> (args[i] != null ?
-						"[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
-						"[" + i + "] [null]"))
-				.collect(Collectors.joining(",\n", " ", " "));
-
-		return text + "\n" +
-				"Endpoint [" + getBeanType().getName() + "]\n" +
-				"Method [" + getBridgedMethod().toGenericString() + "] " +
-				"with argument values:\n" + formattedArgs;
 	}
 
 	MethodParameter getAsyncReturnValueType(@Nullable Object returnValue) {
