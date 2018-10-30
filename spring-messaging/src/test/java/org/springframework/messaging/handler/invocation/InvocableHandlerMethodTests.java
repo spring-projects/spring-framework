@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.method.support;
+package org.springframework.messaging.handler.invocation;
 
 import java.lang.reflect.Method;
 
@@ -22,12 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.web.bind.support.WebDataBinderFactory;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.ResolvableMethod;
+import org.springframework.messaging.Message;
+import org.springframework.util.ClassUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -39,14 +35,14 @@ import static org.junit.Assert.*;
  */
 public class InvocableHandlerMethodTests {
 
-	private NativeWebRequest request;
+	private Message<?> message;
 
 	private final HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 
 
 	@Before
-	public void setUp() throws Exception {
-		this.request = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
+	public void setUp() {
+		this.message = null;
 	}
 
 
@@ -55,7 +51,7 @@ public class InvocableHandlerMethodTests {
 		this.composite.addResolver(new StubArgumentResolver(99));
 		this.composite.addResolver(new StubArgumentResolver("value"));
 
-		Object value = getInvocable(Integer.class, String.class).invokeForRequest(request, null);
+		Object value = getInvocable("handle", Integer.class, String.class).invoke(this.message);
 
 		assertEquals(1, getStubResolver(0).getResolvedParameters().size());
 		assertEquals(1, getStubResolver(1).getResolvedParameters().size());
@@ -69,7 +65,7 @@ public class InvocableHandlerMethodTests {
 		this.composite.addResolver(new StubArgumentResolver(Integer.class));
 		this.composite.addResolver(new StubArgumentResolver(String.class));
 
-		Object returnValue = getInvocable(Integer.class, String.class).invokeForRequest(request, null);
+		Object returnValue = getInvocable("handle", Integer.class, String.class).invoke(this.message);
 
 		assertEquals(1, getStubResolver(0).getResolvedParameters().size());
 		assertEquals(1, getStubResolver(1).getResolvedParameters().size());
@@ -79,17 +75,18 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void cannotResolveArg() throws Exception {
 		try {
-			getInvocable(Integer.class, String.class).invokeForRequest(request, null);
+			getInvocable("handle", Integer.class, String.class).invoke(this.message);
 			fail("Expected exception");
 		}
-		catch (IllegalStateException ex) {
+		catch (MethodArgumentResolutionException ex) {
+			assertNotNull(ex.getMessage());
 			assertTrue(ex.getMessage().contains("Could not resolve parameter [0]"));
 		}
 	}
 
 	@Test
 	public void resolveProvidedArg() throws Exception {
-		Object value = getInvocable(Integer.class, String.class).invokeForRequest(request, null, 99, "value");
+		Object value = getInvocable("handle", Integer.class, String.class).invoke(this.message, 99, "value");
 
 		assertNotNull(value);
 		assertEquals(String.class, value.getClass());
@@ -100,7 +97,7 @@ public class InvocableHandlerMethodTests {
 	public void resolveProvidedArgFirst() throws Exception {
 		this.composite.addResolver(new StubArgumentResolver(1));
 		this.composite.addResolver(new StubArgumentResolver("value1"));
-		Object value = getInvocable(Integer.class, String.class).invokeForRequest(request, null, 2, "value2");
+		Object value = getInvocable("handle", Integer.class, String.class).invoke(this.message, 2, "value2");
 
 		assertEquals("2-value2", value);
 	}
@@ -109,7 +106,7 @@ public class InvocableHandlerMethodTests {
 	public void exceptionInResolvingArg() throws Exception {
 		this.composite.addResolver(new ExceptionRaisingArgumentResolver());
 		try {
-			getInvocable(Integer.class, String.class).invokeForRequest(request, null);
+			getInvocable("handle", Integer.class, String.class).invoke(this.message);
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
@@ -122,13 +119,13 @@ public class InvocableHandlerMethodTests {
 		this.composite.addResolver(new StubArgumentResolver(Integer.class, "__not_an_int__"));
 		this.composite.addResolver(new StubArgumentResolver("value"));
 		try {
-			getInvocable(Integer.class, String.class).invokeForRequest(request, null);
+			getInvocable("handle", Integer.class, String.class).invoke(this.message);
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
 			assertNotNull("Exception not wrapped", ex.getCause());
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-			assertTrue(ex.getMessage().contains("Controller ["));
+			assertTrue(ex.getMessage().contains("Endpoint ["));
 			assertTrue(ex.getMessage().contains("Method ["));
 			assertTrue(ex.getMessage().contains("with argument values:"));
 			assertTrue(ex.getMessage().contains("[0] [type=java.lang.String] [value=__not_an_int__]"));
@@ -140,7 +137,7 @@ public class InvocableHandlerMethodTests {
 	public void invocationTargetException() throws Exception {
 		Throwable expected = new RuntimeException("error");
 		try {
-			getInvocable(Throwable.class).invokeForRequest(this.request, null, expected);
+			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
 			fail("Expected exception");
 		}
 		catch (RuntimeException actual) {
@@ -149,7 +146,7 @@ public class InvocableHandlerMethodTests {
 
 		expected = new Error("error");
 		try {
-			getInvocable(Throwable.class).invokeForRequest(this.request, null, expected);
+			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
 			fail("Expected exception");
 		}
 		catch (Error actual) {
@@ -158,7 +155,7 @@ public class InvocableHandlerMethodTests {
 
 		expected = new Exception("error");
 		try {
-			getInvocable(Throwable.class).invokeForRequest(this.request, null, expected);
+			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
 			fail("Expected exception");
 		}
 		catch (Exception actual) {
@@ -167,7 +164,7 @@ public class InvocableHandlerMethodTests {
 
 		expected = new Throwable("error");
 		try {
-			getInvocable(Throwable.class).invokeForRequest(this.request, null, expected);
+			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
 			fail("Expected exception");
 		}
 		catch (IllegalStateException actual) {
@@ -177,11 +174,11 @@ public class InvocableHandlerMethodTests {
 		}
 	}
 
-	@Test  // SPR-13917
+	@Test  // Based on SPR-13917 (spring-web)
 	public void invocationErrorMessage() throws Exception {
 		this.composite.addResolver(new StubArgumentResolver(double.class));
 		try {
-			getInvocable(double.class).invokeForRequest(this.request, null);
+			getInvocable("handle", double.class).invoke(this.message);
 			fail();
 		}
 		catch (IllegalStateException ex) {
@@ -189,10 +186,10 @@ public class InvocableHandlerMethodTests {
 		}
 	}
 
-	private InvocableHandlerMethod getInvocable(Class<?>... argTypes) {
-		Method method = ResolvableMethod.on(Handler.class).argTypes(argTypes).resolveMethod();
+	public InvocableHandlerMethod getInvocable(String methodName, Class<?>... argTypes) {
+		Method method = ClassUtils.getMethod(Handler.class, methodName, argTypes);
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(new Handler(), method);
-		handlerMethod.setHandlerMethodArgumentResolvers(this.composite);
+		handlerMethod.setMessageMethodArgumentResolvers(this.composite);
 		return handlerMethod;
 	}
 
@@ -226,9 +223,7 @@ public class InvocableHandlerMethodTests {
 		}
 
 		@Override
-		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-				NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-
+		public Object resolveArgument(MethodParameter parameter, Message<?> message) {
 			throw new IllegalArgumentException("oops, can't read");
 		}
 	}

@@ -26,6 +26,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.WebDataBinder;
@@ -35,14 +36,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
 
 /**
- * Provides a method for invoking the handler method for a given request after resolving its
- * method argument values through registered {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
- *
- * <p>Argument resolution often requires a {@link WebDataBinder} for data binding or for type
- * conversion. Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to supply
- * a binder factory to pass to argument resolvers.
- *
- * <p>Use {@link #setHandlerMethodArgumentResolvers} to customize the list of argument resolvers.
+ * Extension of {@link HandlerMethod} that invokes the underlying method with
+ * argument values resolved from the current HTTP request through a list of
+ * {@link HandlerMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -50,10 +46,13 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
+	private static final Object[] EMPTY_ARGS = new Object[0];
+
+
 	@Nullable
 	private WebDataBinderFactory dataBinderFactory;
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
+	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
@@ -99,7 +98,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Set {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} to use to use for resolving method argument values.
 	 */
 	public void setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
-		this.argumentResolvers = argumentResolvers;
+		this.resolvers = argumentResolvers;
 	}
 
 	/**
@@ -151,37 +150,48 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	protected Object[] getMethodArgumentValues(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
+		if (ObjectUtils.isEmpty(getMethodParameters())) {
+			return EMPTY_ARGS;
+		}
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
-			args[i] = resolveProvidedArgument(parameter, providedArgs);
+			args[i] = findProvidedArgument(parameter, providedArgs);
 			if (args[i] != null) {
 				continue;
 			}
-			if (this.argumentResolvers.supportsParameter(parameter)) {
-				try {
-					args[i] = this.argumentResolvers.resolveArgument(
-							parameter, mavContainer, request, this.dataBinderFactory);
-					continue;
-				}
-				catch (Exception ex) {
-					// Leave stack trace for later, e.g. AbstractHandlerExceptionResolver
-					if (logger.isDebugEnabled()) {
-						String message = ex.getMessage();
-						if (message != null && !message.contains(parameter.getExecutable().toGenericString())) {
-							logger.debug(formatArgumentError(parameter, message));
-						}
-					}
-					throw ex;
-				}
-			}
-			if (args[i] == null) {
+			if (!this.resolvers.supportsParameter(parameter)) {
 				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
+			}
+			try {
+				args[i] = this.resolvers.resolveArgument(parameter, mavContainer, request, this.dataBinderFactory);
+			}
+			catch (Exception ex) {
+				// Leave stack trace for later, exception may actually be resolved and handled..
+				if (logger.isDebugEnabled()) {
+					String error = ex.getMessage();
+					if (error != null && !error.contains(parameter.getExecutable().toGenericString())) {
+						logger.debug(formatArgumentError(parameter, error));
+					}
+				}
+				throw ex;
 			}
 		}
 		return args;
+	}
+
+	@Nullable
+	private Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
+		if (!ObjectUtils.isEmpty(providedArgs)) {
+			for (Object providedArg : providedArgs) {
+				if (parameter.getParameterType().isInstance(providedArg)) {
+					return providedArg;
+				}
+			}
+		}
+		return null;
 	}
 
 	private static String formatArgumentError(MethodParameter param, String message) {
@@ -190,25 +200,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Attempt to resolve a method parameter from the list of provided argument values.
-	 */
-	@Nullable
-	private Object resolveProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
-		if (providedArgs == null) {
-			return null;
-		}
-		for (Object providedArg : providedArgs) {
-			if (parameter.getParameterType().isInstance(providedArg)) {
-				return providedArg;
-			}
-		}
-		return null;
-	}
-
-
-	/**
 	 * Invoke the handler method with the given argument values.
 	 */
+	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
 		try {

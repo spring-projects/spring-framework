@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.web.method.support;
+package org.springframework.messaging.handler.invocation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
-import org.springframework.web.bind.support.WebDataBinderFactory;
-import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.messaging.Message;
 
 /**
  * Stub resolver for a fixed value type and/or value.
@@ -64,9 +63,7 @@ public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-
+	public Object resolveArgument(MethodParameter parameter, Message<?> message) {
 		this.resolvedParameters.add(parameter);
 		return this.value;
 	}

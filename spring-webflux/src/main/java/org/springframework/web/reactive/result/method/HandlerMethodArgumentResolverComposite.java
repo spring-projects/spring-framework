@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler.invocation;
+package org.springframework.web.reactive.result.method;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -22,20 +22,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
-import org.springframework.messaging.Message;
+import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Resolves method parameters by delegating to a list of registered
- * {@link HandlerMethodArgumentResolver}. Previously resolved method parameters are cached
- * for faster lookups.
+ * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
+ * Previously resolved method parameters are cached for faster lookups.
  *
  * @author Rossen Stoyanchev
- * @author Juergen Hoeller
- * @since 4.0
+ * @since 5.3
  */
-public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentResolver {
+class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentResolver {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final List<HandlerMethodArgumentResolver> argumentResolvers = new LinkedList<>();
 
@@ -46,8 +52,8 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver}.
 	 */
-	public HandlerMethodArgumentResolverComposite addResolver(HandlerMethodArgumentResolver argumentResolver) {
-		this.argumentResolvers.add(argumentResolver);
+	public HandlerMethodArgumentResolverComposite addResolver(HandlerMethodArgumentResolver resolver) {
+		this.argumentResolvers.add(resolver);
 		return this;
 	}
 
@@ -66,10 +72,10 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 * Add the given {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 */
 	public HandlerMethodArgumentResolverComposite addResolvers(
-			@Nullable List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
+			@Nullable List<? extends HandlerMethodArgumentResolver> resolvers) {
 
-		if (argumentResolvers != null) {
-			this.argumentResolvers.addAll(argumentResolvers);
+		if (resolvers != null) {
+			this.argumentResolvers.addAll(resolvers);
 		}
 		return this;
 	}
@@ -83,6 +89,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 	/**
 	 * Clear the list of configured resolvers.
+	 * @since 4.3
 	 */
 	public void clear() {
 		this.argumentResolvers.clear();
@@ -100,21 +107,22 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 	/**
 	 * Iterate over registered
-	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}
-	 * and invoke the one that supports it.
+	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} and
+	 * invoke the one that supports it.
 	 * @throws IllegalStateException if no suitable
 	 * {@link HandlerMethodArgumentResolver} is found.
 	 */
 	@Override
-	@Nullable
-	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
+	public Mono<Object> resolveArgument(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
+
 		HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);
 		if (resolver == null) {
-			throw new IllegalStateException(
+			throw new IllegalArgumentException(
 					"Unsupported parameter type [" + parameter.getParameterType().getName() + "]." +
 							" supportsParameter should be called first.");
 		}
-		return resolver.resolveArgument(parameter, message);
+		return resolver.resolveArgument(parameter, bindingContext, exchange);
 	}
 
 	/**
@@ -125,9 +133,9 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	private HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
-			for (HandlerMethodArgumentResolver resolver : this.argumentResolvers) {
-				if (resolver.supportsParameter(parameter)) {
-					result = resolver;
+			for (HandlerMethodArgumentResolver methodArgumentResolver : this.argumentResolvers) {
+				if (methodArgumentResolver.supportsParameter(parameter)) {
+					result = methodArgumentResolver;
 					this.argumentResolverCache.put(parameter, result);
 					break;
 				}
