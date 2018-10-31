@@ -37,7 +37,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Previously resolved method parameters are cached for faster lookups.
  *
  * @author Rossen Stoyanchev
- * @since 5.3
+ * @since 5.1.3
  */
 class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentResolver {
 
