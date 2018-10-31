@@ -3340,7 +3340,7 @@ consists of two listings):
 ----
 ====
 
-However, the second of the two preceding examples does not couple the code to Spring.
+However, the first of the two preceding examples does not couple the code to Spring.
 
 
 [[beans-factory-lifecycle-disposablebean]]
@@ -3406,7 +3406,7 @@ The preceding definition has almost exactly the same effect as the following def
 ----
 ====
 
-However, the second of the two preceding definitions does not couple the code to Spring.
+However, the first of the two preceding definitions does not couple the code to Spring.
 
 TIP: You can assign the `destroy-method` attribute of a `<bean>` element a special
 `(inferred)` value, which instructs Spring to automatically detect a public `close` or
