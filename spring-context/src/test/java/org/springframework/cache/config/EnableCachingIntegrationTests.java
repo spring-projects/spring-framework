@@ -157,7 +157,7 @@ public class EnableCachingIntegrationTests {
 	}
 
 
-	private interface FooService {
+	interface FooService {
 
 		Object getSimple(Object key);
 
@@ -166,7 +166,7 @@ public class EnableCachingIntegrationTests {
 
 
 	@CacheConfig(cacheNames = "testCache")
-	private static class FooServiceImpl implements FooService {
+	static class FooServiceImpl implements FooService {
 
 		private final AtomicLong counter = new AtomicLong();
 

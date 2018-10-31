@@ -87,7 +87,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	}
 
 	private boolean responseHasCors(ServerHttpResponse response) {
-		return (response.getHeaders().getAccessControlAllowOrigin() != null);
+		return response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null;
 	}
 
 	/**

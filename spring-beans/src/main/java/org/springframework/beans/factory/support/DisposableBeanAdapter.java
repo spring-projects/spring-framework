@@ -115,7 +115,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			this.destroyMethod = determineDestroyMethod(destroyMethodName);
 			if (this.destroyMethod == null) {
 				if (beanDefinition.isEnforceDestroyMethod()) {
-					throw new BeanDefinitionValidationException("Couldn't find a destroy method named '" +
+					throw new BeanDefinitionValidationException("Could not find a destroy method named '" +
 							destroyMethodName + "' on bean with name '" + beanName + "'");
 				}
 			}

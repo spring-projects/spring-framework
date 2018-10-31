@@ -431,7 +431,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public String toString() {
-		return String.format("DefaultDataBuffer (r: %d, w %d, c %d)",
+		return String.format("DefaultDataBuffer (r: %d, w: %d, c: %d)",
 				this.readPosition, this.writePosition, this.capacity);
 	}
 

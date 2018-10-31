@@ -99,6 +99,7 @@ public class ClassReader {
    * necessarily start at offset 0. Use {@link #getItem} and {@link #header} to get correct
    * ClassFile element offsets within this byte array.
    */
+  // DontCheck(MemberName): can't be renamed (for backward binary compatibility).
   public final byte[] b;
 
   /**
@@ -159,7 +160,9 @@ public class ClassReader {
    * @param classFileLength the length in bytes of the ClassFile to be read.
    */
   public ClassReader(
-      final byte[] classFileBuffer, final int classFileOffset, final int classFileLength) {
+      final byte[] classFileBuffer,
+      final int classFileOffset,
+      final int classFileLength) { // NOPMD(UnusedFormalParameter) used for backward compatibility.
     this(classFileBuffer, classFileOffset, /* checkClassVersion = */ true);
   }
 
@@ -488,7 +491,7 @@ public class ClassReader {
         accessFlags |= Opcodes.ACC_SYNTHETIC;
       } else if (Constants.SOURCE_DEBUG_EXTENSION.equals(attributeName)) {
         sourceDebugExtension =
-            readUTF(currentAttributeOffset, attributeLength, new char[attributeLength]);
+            readUtf(currentAttributeOffset, attributeLength, new char[attributeLength]);
       } else if (Constants.RUNTIME_INVISIBLE_ANNOTATIONS.equals(attributeName)) {
         runtimeInvisibleAnnotationsOffset = currentAttributeOffset;
       } else if (Constants.RUNTIME_INVISIBLE_TYPE_ANNOTATIONS.equals(attributeName)) {
@@ -499,9 +502,8 @@ public class ClassReader {
         moduleMainClass = readClass(currentAttributeOffset, charBuffer);
       } else if (Constants.MODULE_PACKAGES.equals(attributeName)) {
         modulePackagesOffset = currentAttributeOffset;
-      } else if (Constants.BOOTSTRAP_METHODS.equals(attributeName)) {
-        // This attribute is read in the constructor.
-      } else {
+      } else if (!Constants.BOOTSTRAP_METHODS.equals(attributeName)) {
+        // The BootstrapMethods attribute is read in the constructor.
         Attribute attribute =
             readAttribute(
                 attributePrototypes,
@@ -530,7 +532,8 @@ public class ClassReader {
 
     // Visit the Module, ModulePackages and ModuleMainClass attributes.
     if (moduleOffset != 0) {
-      readModule(classVisitor, context, moduleOffset, modulePackagesOffset, moduleMainClass);
+      readModuleAttributes(
+          classVisitor, context, moduleOffset, modulePackagesOffset, moduleMainClass);
     }
 
     // Visit the NestHost attribute.
@@ -685,7 +688,7 @@ public class ClassReader {
   // ----------------------------------------------------------------------------------------------
 
   /**
-   * Reads the module attribute and visit it.
+   * Reads the Module, ModulePackages and ModuleMainClass attributes and visit them.
    *
    * @param classVisitor the current class visitor
    * @param context information about the class being parsed.
@@ -695,7 +698,7 @@ public class ClassReader {
    *     attribute_info's attribute_name_index and attribute_length fields), or 0.
    * @param moduleMainClass the string corresponding to the ModuleMainClass attribute, or null.
    */
-  private void readModule(
+  private void readModuleAttributes(
       final ClassVisitor classVisitor,
       final Context context,
       final int moduleOffset,
@@ -1111,7 +1114,7 @@ public class ClassReader {
             context.currentMethodAccessFlags,
             context.currentMethodName,
             context.currentMethodDescriptor,
-            signatureIndex == 0 ? null : readUTF(signatureIndex, charBuffer),
+            signatureIndex == 0 ? null : readUtf(signatureIndex, charBuffer),
             exceptions);
     if (methodVisitor == null) {
       return currentOffset;
@@ -1601,18 +1604,15 @@ public class ClassReader {
 
     // Read the 'exception_table_length' and 'exception_table' field to create a label for each
     // referenced instruction, and to make methodVisitor visit the corresponding try catch blocks.
-    {
-      int exceptionTableLength = readUnsignedShort(currentOffset);
-      currentOffset += 2;
-      while (exceptionTableLength-- > 0) {
-        Label start = createLabel(readUnsignedShort(currentOffset), labels);
-        Label end = createLabel(readUnsignedShort(currentOffset + 2), labels);
-        Label handler = createLabel(readUnsignedShort(currentOffset + 4), labels);
-        String catchType =
-            readUTF8(cpInfoOffsets[readUnsignedShort(currentOffset + 6)], charBuffer);
-        currentOffset += 8;
-        methodVisitor.visitTryCatchBlock(start, end, handler, catchType);
-      }
+    int exceptionTableLength = readUnsignedShort(currentOffset);
+    currentOffset += 2;
+    while (exceptionTableLength-- > 0) {
+      Label start = createLabel(readUnsignedShort(currentOffset), labels);
+      Label end = createLabel(readUnsignedShort(currentOffset + 2), labels);
+      Label handler = createLabel(readUnsignedShort(currentOffset + 4), labels);
+      String catchType = readUTF8(cpInfoOffsets[readUnsignedShort(currentOffset + 6)], charBuffer);
+      currentOffset += 8;
+      methodVisitor.visitTryCatchBlock(start, end, handler, catchType);
     }
 
     // Read the Code attributes to create a label for each referenced instruction (the variables
@@ -2142,11 +2142,11 @@ public class ClassReader {
             currentOffset += 4 - (currentBytecodeOffset & 3);
             // Read the instruction.
             Label defaultLabel = labels[currentBytecodeOffset + readInt(currentOffset)];
-            int nPairs = readInt(currentOffset + 4);
+            int numPairs = readInt(currentOffset + 4);
             currentOffset += 8;
-            int[] keys = new int[nPairs];
-            Label[] values = new Label[nPairs];
-            for (int i = 0; i < nPairs; ++i) {
+            int[] keys = new int[numPairs];
+            Label[] values = new Label[numPairs];
+            for (int i = 0; i < numPairs; ++i) {
               keys[i] = readInt(currentOffset);
               values[i] = labels[currentBytecodeOffset + readInt(currentOffset + 4)];
               currentOffset += 8;
@@ -2359,12 +2359,12 @@ public class ClassReader {
 
     // Visit the local variable type annotations of the RuntimeVisibleTypeAnnotations attribute.
     if (visibleTypeAnnotationOffsets != null) {
-      for (int i = 0; i < visibleTypeAnnotationOffsets.length; ++i) {
-        int targetType = readByte(visibleTypeAnnotationOffsets[i]);
+      for (int typeAnnotationOffset : visibleTypeAnnotationOffsets) {
+        int targetType = readByte(typeAnnotationOffset);
         if (targetType == TypeReference.LOCAL_VARIABLE
             || targetType == TypeReference.RESOURCE_VARIABLE) {
           // Parse the target_type, target_info and target_path fields.
-          currentOffset = readTypeAnnotationTarget(context, visibleTypeAnnotationOffsets[i]);
+          currentOffset = readTypeAnnotationTarget(context, typeAnnotationOffset);
           // Parse the type_index field.
           String annotationDescriptor = readUTF8(currentOffset, charBuffer);
           currentOffset += 2;
@@ -2387,12 +2387,12 @@ public class ClassReader {
 
     // Visit the local variable type annotations of the RuntimeInvisibleTypeAnnotations attribute.
     if (invisibleTypeAnnotationOffsets != null) {
-      for (int i = 0; i < invisibleTypeAnnotationOffsets.length; ++i) {
-        int targetType = readByte(invisibleTypeAnnotationOffsets[i]);
+      for (int typeAnnotationOffset : invisibleTypeAnnotationOffsets) {
+        int targetType = readByte(typeAnnotationOffset);
         if (targetType == TypeReference.LOCAL_VARIABLE
             || targetType == TypeReference.RESOURCE_VARIABLE) {
           // Parse the target_type, target_info and target_path fields.
-          currentOffset = readTypeAnnotationTarget(context, invisibleTypeAnnotationOffsets[i]);
+          currentOffset = readTypeAnnotationTarget(context, typeAnnotationOffset);
           // Parse the type_index field.
           String annotationDescriptor = readUTF8(currentOffset, charBuffer);
           currentOffset += 2;
@@ -2958,12 +2958,12 @@ public class ClassReader {
   private void computeImplicitFrame(final Context context) {
     String methodDescriptor = context.currentMethodDescriptor;
     Object[] locals = context.currentFrameLocalTypes;
-    int nLocal = 0;
+    int numLocal = 0;
     if ((context.currentMethodAccessFlags & Opcodes.ACC_STATIC) == 0) {
       if ("<init>".equals(context.currentMethodName)) {
-        locals[nLocal++] = Opcodes.UNINITIALIZED_THIS;
+        locals[numLocal++] = Opcodes.UNINITIALIZED_THIS;
       } else {
-        locals[nLocal++] = readClass(header + 2, context.charBuffer);
+        locals[numLocal++] = readClass(header + 2, context.charBuffer);
       }
     }
     // Parse the method descriptor, one argument type descriptor at each iteration. Start by
@@ -2977,16 +2977,16 @@ public class ClassReader {
         case 'B':
         case 'S':
         case 'I':
-          locals[nLocal++] = Opcodes.INTEGER;
+          locals[numLocal++] = Opcodes.INTEGER;
           break;
         case 'F':
-          locals[nLocal++] = Opcodes.FLOAT;
+          locals[numLocal++] = Opcodes.FLOAT;
           break;
         case 'J':
-          locals[nLocal++] = Opcodes.LONG;
+          locals[numLocal++] = Opcodes.LONG;
           break;
         case 'D':
-          locals[nLocal++] = Opcodes.DOUBLE;
+          locals[numLocal++] = Opcodes.DOUBLE;
           break;
         case '[':
           while (methodDescriptor.charAt(currentMethodDescritorOffset) == '[') {
@@ -2998,7 +2998,7 @@ public class ClassReader {
               ++currentMethodDescritorOffset;
             }
           }
-          locals[nLocal++] =
+          locals[numLocal++] =
               methodDescriptor.substring(
                   currentArgumentDescriptorStartOffset, ++currentMethodDescritorOffset);
           break;
@@ -3006,12 +3006,12 @@ public class ClassReader {
           while (methodDescriptor.charAt(currentMethodDescritorOffset) != ';') {
             ++currentMethodDescritorOffset;
           }
-          locals[nLocal++] =
+          locals[numLocal++] =
               methodDescriptor.substring(
                   currentArgumentDescriptorStartOffset + 1, currentMethodDescritorOffset++);
           break;
         default:
-          context.currentFrameLocalCount = nLocal;
+          context.currentFrameLocalCount = numLocal;
           return;
       }
     }
@@ -3178,7 +3178,11 @@ public class ClassReader {
   // Methods to parse attributes
   // ----------------------------------------------------------------------------------------------
 
-  /** @return the offset in {@link #b} of the first ClassFile's 'attributes' array field entry. */
+  /**
+   * Returns the offset in {@link #b} of the first ClassFile's 'attributes' array field entry.
+   *
+   * @return the offset in {@link #b} of the first ClassFile's 'attributes' array field entry.
+   */
   final int getFirstAttributeOffset() {
     // Skip the access_flags, this_class, super_class, and interfaces_count fields (using 2 bytes
     // each), as well as the interfaces array field (2 bytes per interface).
@@ -3280,9 +3284,9 @@ public class ClassReader {
       final char[] charBuffer,
       final int codeAttributeOffset,
       final Label[] labels) {
-    for (int i = 0; i < attributePrototypes.length; ++i) {
-      if (attributePrototypes[i].type.equals(type)) {
-        return attributePrototypes[i].read(
+    for (Attribute attributePrototype : attributePrototypes) {
+      if (attributePrototype.type.equals(type)) {
+        return attributePrototype.read(
             this, offset, length, charBuffer, codeAttributeOffset, labels);
       }
     }
@@ -3399,12 +3403,13 @@ public class ClassReader {
    *     large. It is not automatically resized.
    * @return the String corresponding to the specified CONSTANT_Utf8 entry.
    */
+  // DontCheck(AbbreviationAsWordInName): can't be renamed (for backward binary compatibility).
   public String readUTF8(final int offset, final char[] charBuffer) {
     int constantPoolEntryIndex = readUnsignedShort(offset);
     if (offset == 0 || constantPoolEntryIndex == 0) {
       return null;
     }
-    return readUTF(constantPoolEntryIndex, charBuffer);
+    return readUtf(constantPoolEntryIndex, charBuffer);
   }
 
   /**
@@ -3416,14 +3421,14 @@ public class ClassReader {
    *     large. It is not automatically resized.
    * @return the String corresponding to the specified CONSTANT_Utf8 entry.
    */
-  final String readUTF(final int constantPoolEntryIndex, final char[] charBuffer) {
+  final String readUtf(final int constantPoolEntryIndex, final char[] charBuffer) {
     String value = constantUtf8Values[constantPoolEntryIndex];
     if (value != null) {
       return value;
     }
     int cpInfoOffset = cpInfoOffsets[constantPoolEntryIndex];
     return constantUtf8Values[constantPoolEntryIndex] =
-        readUTF(cpInfoOffset + 2, readUnsignedShort(cpInfoOffset), charBuffer);
+        readUtf(cpInfoOffset + 2, readUnsignedShort(cpInfoOffset), charBuffer);
   }
 
   /**
@@ -3435,7 +3440,7 @@ public class ClassReader {
    *     large. It is not automatically resized.
    * @return the String corresponding to the specified UTF8 string.
    */
-  private String readUTF(final int utfOffset, final int utfLength, final char[] charBuffer) {
+  private String readUtf(final int utfOffset, final int utfLength, final char[] charBuffer) {
     int currentOffset = utfOffset;
     int endOffset = currentOffset + utfLength;
     int strLength = 0;

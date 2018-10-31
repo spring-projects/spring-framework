@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.IntPredicate;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -101,8 +100,8 @@ public abstract class DataBufferUtils {
 									bufferSize);
 					return Flux.generate(generator);
 				},
-				DataBufferUtils::closeChannel
-		);
+				DataBufferUtils::closeChannel)
+				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 
 	/**
@@ -140,14 +139,18 @@ public abstract class DataBufferUtils {
 		DataBuffer dataBuffer = dataBufferFactory.allocateBuffer(bufferSize);
 		ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, bufferSize);
 
-		return Flux.using(channelSupplier,
+
+		Flux<DataBuffer> result = Flux.using(channelSupplier,
 				channel -> Flux.create(sink -> {
-							CompletionHandler<Integer, DataBuffer> completionHandler =
-									new AsynchronousFileChannelReadCompletionHandler(channel,
-											sink, position, dataBufferFactory, bufferSize);
-							channel.read(byteBuffer, position, dataBuffer, completionHandler);
-						}),
+					AsynchronousFileChannelReadCompletionHandler completionHandler =
+							new AsynchronousFileChannelReadCompletionHandler(channel,
+									sink, position, dataBufferFactory, bufferSize);
+					channel.read(byteBuffer, position, dataBuffer, completionHandler);
+					sink.onDispose(completionHandler::dispose);
+				}),
 				DataBufferUtils::closeChannel);
+
+		return result.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 
 	/**
@@ -243,23 +246,12 @@ public abstract class DataBufferUtils {
 		Assert.notNull(channel, "'channel' must not be null");
 
 		Flux<DataBuffer> flux = Flux.from(source);
-		return Flux.create(sink ->
-				flux.subscribe(dataBuffer -> {
-							try {
-								ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
-								while (byteBuffer.hasRemaining()) {
-									channel.write(byteBuffer);
-								}
-								sink.next(dataBuffer);
-							}
-							catch (IOException ex) {
-								sink.next(dataBuffer);
-								sink.error(ex);
-							}
-
-						},
-						sink::error,
-						sink::complete));
+		return Flux.create(sink -> {
+			WritableByteChannelSubscriber subscriber =
+					new WritableByteChannelSubscriber(sink, channel);
+			sink.onDispose(subscriber);
+			flux.subscribe(subscriber);
+		});
 	}
 
 	/**
@@ -302,11 +294,15 @@ public abstract class DataBufferUtils {
 		Assert.isTrue(position >= 0, "'position' must be >= 0");
 
 		Flux<DataBuffer> flux = Flux.from(source);
-		return Flux.create(sink ->
-				flux.subscribe(new AsynchronousFileChannelWriteCompletionHandler(sink, channel, position)));
+		return Flux.create(sink -> {
+			AsynchronousFileChannelWriteCompletionHandler completionHandler =
+					new AsynchronousFileChannelWriteCompletionHandler(sink, channel, position);
+			sink.onDispose(completionHandler);
+			flux.subscribe(completionHandler);
+		});
 	}
 
-	private static void closeChannel(@Nullable Channel channel) {
+	static void closeChannel(@Nullable Channel channel) {
 		if (channel != null && channel.isOpen()) {
 			try {
 				channel.close();
@@ -332,14 +328,23 @@ public abstract class DataBufferUtils {
 	public static Flux<DataBuffer> takeUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
-		AtomicLong countDown = new AtomicLong(maxByteCount);
 
-		return Flux.from(publisher)
-				.map(buffer -> {
-					long count = countDown.addAndGet(-buffer.readableByteCount());
-					return count >= 0 ? buffer : buffer.slice(0, buffer.readableByteCount() + (int) count);
-				})
-				.takeUntil(buffer -> countDown.get() <= 0);
+		return Flux.defer(() -> {
+			AtomicLong countDown = new AtomicLong(maxByteCount);
+
+			return Flux.from(publisher)
+					.map(buffer -> {
+						long remainder = countDown.addAndGet(-buffer.readableByteCount());
+						if (remainder < 0) {
+							int length = buffer.readableByteCount() + (int) remainder;
+							return buffer.slice(0, length);
+						}
+						else {
+							return buffer;
+						}
+					})
+					.takeUntil(buffer -> countDown.get() <= 0);
+		}); // no doOnDiscard necessary, as this method does not drop buffers
 	}
 
 	/**
@@ -353,26 +358,28 @@ public abstract class DataBufferUtils {
 	public static Flux<DataBuffer> skipUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
-		AtomicLong byteCountDown = new AtomicLong(maxByteCount);
 
-		return Flux.from(publisher)
-				.skipUntil(buffer -> {
-					int delta = -buffer.readableByteCount();
-					if (byteCountDown.addAndGet(delta) >= 0) {
-						DataBufferUtils.release(buffer);
-						return false;
-					}
-					return true;
-				})
-				.map(buffer -> {
-					long count = byteCountDown.get();
-					if (count < 0) {
-						int skipCount = buffer.readableByteCount() + (int) count;
-						byteCountDown.set(0);
-						return buffer.slice(skipCount, buffer.readableByteCount() - skipCount);
-					}
-					return buffer;
-				});
+		return Flux.defer(() -> {
+			AtomicLong countDown = new AtomicLong(maxByteCount);
+
+			return Flux.from(publisher)
+					.skipUntil(buffer -> {
+						long remainder = countDown.addAndGet(-buffer.readableByteCount());
+						return remainder < 0;
+					})
+					.map(buffer -> {
+						long remainder = countDown.get();
+						if (remainder < 0) {
+							countDown.set(0);
+							int start = buffer.readableByteCount() + (int)remainder;
+							int length = (int) -remainder;
+							return buffer.slice(start, length);
+						}
+						else {
+							return buffer;
+						}
+					});
+		}).doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 
 	/**
@@ -391,12 +398,19 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Release the given data buffer, if it is a {@link PooledDataBuffer}.
+	 * Release the given data buffer, if it is a {@link PooledDataBuffer} and
+	 * has been {@linkplain PooledDataBuffer#isAllocated() allocated}.
 	 * @param dataBuffer the data buffer to release
 	 * @return {@code true} if the buffer was released; {@code false} otherwise.
 	 */
 	public static boolean release(@Nullable DataBuffer dataBuffer) {
-		return (dataBuffer instanceof PooledDataBuffer && ((PooledDataBuffer) dataBuffer).release());
+		if (dataBuffer instanceof PooledDataBuffer) {
+			PooledDataBuffer pooledDataBuffer = (PooledDataBuffer) dataBuffer;
+			if (pooledDataBuffer.isAllocated()) {
+				return pooledDataBuffer.release();
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -408,13 +422,16 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Return a new {@code DataBuffer} composed of the {@code dataBuffers} elements joined together.
-	 * Depending on the {@link DataBuffer} implementation, the returned buffer may be a single
-	 * buffer containing all data of the provided buffers, or it may be a true composite that
-	 * contains references to the buffers.
-	 * <p>If {@code dataBuffers} contains an error signal, then all buffers that preceded the error
-	 * will be {@linkplain #release(DataBuffer) released}, and the error is stored in the
-	 * returned {@code Mono}.
+	 * Return a new {@code DataBuffer} composed from joining together the given
+	 * {@code dataBuffers} elements. Depending on the {@link DataBuffer} type,
+	 * the returned buffer may be a single buffer containing all data of the
+	 * provided buffers, or it may be a zero-copy, composite with references to
+	 * the given buffers.
+	 * <p>If {@code dataBuffers} produces an error or if there is a cancel
+	 * signal, then all accumulated buffers will be
+	 * {@linkplain #release(DataBuffer) released}.
+	 * <p>Note that the given data buffers do <strong>not</strong> have to be
+	 * released. They will be released as part of the returned composite.
 	 * @param dataBuffers the data buffers that are to be composed
 	 * @return a buffer that is composed from the {@code dataBuffers} argument
 	 * @since 5.0.3
@@ -423,24 +440,11 @@ public abstract class DataBufferUtils {
 		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
 
 		return Flux.from(dataBuffers)
-				.onErrorResume(DataBufferUtils::exceptionDataBuffer)
 				.collectList()
 				.filter(list -> !list.isEmpty())
-				.flatMap(list -> {
-					for (int i = 0; i < list.size(); i++) {
-						DataBuffer dataBuffer = list.get(i);
-						if (dataBuffer instanceof ExceptionDataBuffer) {
-							list.subList(0, i).forEach(DataBufferUtils::release);
-							return Mono.error(((ExceptionDataBuffer) dataBuffer).throwable());
-						}
-					}
-					DataBufferFactory bufferFactory = list.get(0).factory();
-					return Mono.just(bufferFactory.join(list));
-				});
-	}
+				.map(list -> list.get(0).factory().join(list))
+				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 
-	private static Mono<DataBuffer> exceptionDataBuffer(Throwable throwable) {
-		return Mono.just(new ExceptionDataBuffer(throwable));
 	}
 
 
@@ -536,6 +540,54 @@ public abstract class DataBufferUtils {
 			release(dataBuffer);
 			this.sink.error(exc);
 		}
+
+		public void dispose() {
+			this.disposed.set(true);
+		}
+	}
+
+
+	private static class WritableByteChannelSubscriber extends BaseSubscriber<DataBuffer> {
+
+		private final FluxSink<DataBuffer> sink;
+
+		private final WritableByteChannel channel;
+
+		public WritableByteChannelSubscriber(FluxSink<DataBuffer> sink, WritableByteChannel channel) {
+			this.sink = sink;
+			this.channel = channel;
+		}
+
+		@Override
+		protected void hookOnSubscribe(Subscription subscription) {
+			request(1);
+		}
+
+		@Override
+		protected void hookOnNext(DataBuffer dataBuffer) {
+			try {
+				ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
+				while (byteBuffer.hasRemaining()) {
+					this.channel.write(byteBuffer);
+				}
+				this.sink.next(dataBuffer);
+				request(1);
+			}
+			catch (IOException ex) {
+				this.sink.next(dataBuffer);
+				this.sink.error(ex);
+			}
+		}
+
+		@Override
+		protected void hookOnError(Throwable throwable) {
+			this.sink.error(throwable);
+		}
+
+		@Override
+		protected void hookOnComplete() {
+			this.sink.complete();
+		}
 	}
 
 
@@ -626,155 +678,6 @@ public abstract class DataBufferUtils {
 			Assert.state(dataBuffer != null, "DataBuffer should not be null");
 			this.sink.next(dataBuffer);
 			this.dataBuffer.set(null);
-		}
-	}
-
-	/**
-	 * DataBuffer implementation that holds a {@link Throwable}, used in {@link #join(Publisher)}.
-	 */
-	private static final class ExceptionDataBuffer implements DataBuffer {
-
-		private final Throwable throwable;
-
-
-		public ExceptionDataBuffer(Throwable throwable) {
-			this.throwable = throwable;
-		}
-
-		public Throwable throwable() {
-			return this.throwable;
-		}
-
-		// Unsupported
-
-		@Override
-		public DataBufferFactory factory() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int indexOf(IntPredicate predicate, int fromIndex) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int lastIndexOf(IntPredicate predicate, int fromIndex) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int readableByteCount() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int writableByteCount() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int capacity() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer capacity(int capacity) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int readPosition() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer readPosition(int readPosition) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int writePosition() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer writePosition(int writePosition) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public byte getByte(int index) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public byte read() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer read(byte[] destination) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer read(byte[] destination, int offset, int length) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer write(byte b) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer write(byte[] source) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer write(byte[] source, int offset, int length) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer write(DataBuffer... buffers) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer write(ByteBuffer... buffers) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public DataBuffer slice(int index, int length) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public ByteBuffer asByteBuffer() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public ByteBuffer asByteBuffer(int index, int length) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public InputStream asInputStream() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public InputStream asInputStream(boolean releaseOnClose) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public OutputStream asOutputStream() {
-			throw new UnsupportedOperationException();
 		}
 	}
 

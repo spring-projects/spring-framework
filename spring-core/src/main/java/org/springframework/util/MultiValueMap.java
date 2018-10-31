@@ -75,7 +75,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	void setAll(Map<K, V> values);
 
 	/**
-	 * Returns the first values contained in this {@code MultiValueMap}.
+	 * Return a {@code Map} with the first values contained in this {@code MultiValueMap}.
 	 * @return a single value representation of this map
 	 */
 	Map<K, V> toSingleValueMap();

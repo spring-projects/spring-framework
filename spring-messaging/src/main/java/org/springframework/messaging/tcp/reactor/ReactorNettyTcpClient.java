@@ -49,13 +49,13 @@ import reactor.netty.tcp.TcpClient;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MonoToListenableFutureAdapter;
 import org.springframework.messaging.tcp.ReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.MonoToListenableFutureAdapter;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**

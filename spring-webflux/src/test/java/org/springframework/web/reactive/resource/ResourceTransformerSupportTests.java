@@ -106,6 +106,16 @@ public class ResourceTransformerSupportTests {
 		assertEquals("../bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
 
+	@Test
+	public void toAbsolutePath() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/resources/main.css"));
+		String absolute = this.transformer.toAbsolutePath("img/image.png", exchange);
+		assertEquals("/resources/img/image.png", absolute);
+
+		absolute = this.transformer.toAbsolutePath("/img/image.png", exchange);
+		assertEquals("/img/image.png", absolute);
+	}
+
 	private Resource getResource(String filePath) {
 		return new ClassPathResource("test/" + filePath, getClass());
 	}

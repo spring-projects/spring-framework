@@ -326,6 +326,21 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	}
 
 	/**
+	 * Determine whether the given dependency declares a qualifier annotation.
+	 * @see #isQualifier(Class)
+	 * @see Qualifier
+	 */
+	@Override
+	public boolean hasQualifier(DependencyDescriptor descriptor) {
+		for (Annotation ann : descriptor.getAnnotations()) {
+			if (isQualifier(ann.annotationType())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Determine whether the given dependency declares a value annotation.
 	 * @see Value
 	 */

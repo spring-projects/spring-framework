@@ -765,8 +765,11 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Resolve this type to a {@link java.lang.Class}, returning {@code null}
 	 * if the type cannot be resolved. This method will consider bounds of
-	 * {@link TypeVariable TypeVariables} and {@link WildcardType WildcardTypes} if direct resolution fails;
-	 * however, bounds of {@code Object.class} will be ignored.
+	 * {@link TypeVariable TypeVariables} and {@link WildcardType WildcardTypes} if
+	 * direct resolution fails; however, bounds of {@code Object.class} will be ignored.
+	 * <p>If this method returns a non-null {@code Class} and {@link #hasGenerics()}
+	 * returns {@code false}, the given type effectively wraps a plain {@code Class},
+	 * allowing for plain {@code Class} processing if desirable.
 	 * @return the resolved {@link Class}, or {@code null} if not resolvable
 	 * @see #resolve(Class)
 	 * @see #resolveGeneric(int...)
@@ -780,8 +783,8 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Resolve this type to a {@link java.lang.Class}, returning the specified
 	 * {@code fallback} if the type cannot be resolved. This method will consider bounds
-	 * of {@link TypeVariable TypeVariables} and {@link WildcardType WildcardTypes} if direct resolution fails;
-	 * however, bounds of {@code Object.class} will be ignored.
+	 * of {@link TypeVariable TypeVariables} and {@link WildcardType WildcardTypes} if
+	 * direct resolution fails; however, bounds of {@code Object.class} will be ignored.
 	 * @param fallback the fallback class to use if resolution fails
 	 * @return the resolved {@link Class} or the {@code fallback}
 	 * @see #resolve()

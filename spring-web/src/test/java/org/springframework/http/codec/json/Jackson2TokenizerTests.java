@@ -36,8 +36,8 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 
-import static java.util.Arrays.*;
-import static java.util.Collections.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 /**
  * @author Arjen Poutsma
@@ -176,6 +176,19 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 
 		// SPR-16407
 		testTokenize(asList("[1", ",2,", "3]"), asList("1", "2", "3"), true);
+	}
+
+	@Test
+	public void errorInStream() {
+		DataBuffer buffer = stringBuffer("{\"id\":1,\"name\":");
+		Flux<DataBuffer> source = Flux.just(buffer)
+				.concatWith(Flux.error(new RuntimeException()));
+
+		Flux<TokenBuffer> result = Jackson2Tokenizer.tokenize(source, this.jsonFactory, true);
+
+		StepVerifier.create(result)
+				.expectError(RuntimeException.class)
+				.verify();
 	}
 
 	@Test(expected = DecodingException.class) // SPR-16521

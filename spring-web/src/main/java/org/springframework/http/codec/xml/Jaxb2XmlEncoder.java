@@ -34,6 +34,8 @@ import org.springframework.core.codec.EncodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
@@ -77,23 +79,37 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 	@Override
 	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		if (!Hints.isLoggingSuppressed(hints)) {
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Encoding [" + formatted + "]";
+			});
+		}
+
+		boolean release = true;
+		DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
+		OutputStream outputStream = buffer.asOutputStream();
+		Class<?> clazz = ClassUtils.getUserClass(value);
+
 		try {
-			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-				logger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
-			}
-			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
-			OutputStream outputStream = buffer.asOutputStream();
-			Class<?> clazz = ClassUtils.getUserClass(value);
 			Marshaller marshaller = this.jaxbContexts.createMarshaller(clazz);
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
 			marshaller.marshal(value, outputStream);
+			release = false;
 			return Flux.just(buffer);
 		}
 		catch (MarshalException ex) {
-			return Flux.error(new EncodingException("Could not marshal " + value.getClass() + " to XML", ex));
+			return Flux.error(new EncodingException(
+					"Could not marshal " + value.getClass() + " to XML", ex));
 		}
 		catch (JAXBException ex) {
 			return Flux.error(new CodecException("Invalid JAXB configuration", ex));
+		}
+		finally {
+			if (release) {
+				DataBufferUtils.release(buffer);
+			}
 		}
 	}
 

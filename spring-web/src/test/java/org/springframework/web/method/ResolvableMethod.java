@@ -246,7 +246,7 @@ public class ResolvableMethod {
 
 
 	/**
-	 * Main entry point providing access to a {@code ResolvableMethod} builder.
+	 * Create a {@code ResolvableMethod} builder for the given handler class.
 	 */
 	public static <T> Builder<T> on(Class<T> objectClass) {
 		return new Builder<>(objectClass);
@@ -278,6 +278,16 @@ public class ResolvableMethod {
 		 */
 		public Builder<T> named(String methodName) {
 			addFilter("methodName=" + methodName, m -> m.getName().equals(methodName));
+			return this;
+		}
+
+		/**
+		 * Filter on methods with the given parameter types.
+		 */
+		public Builder<T> argTypes(Class<?>... argTypes) {
+			addFilter("argTypes=" + Arrays.toString(argTypes), m ->
+					ObjectUtils.isEmpty(argTypes) ?
+							m.getParameterTypes().length == 0 : Arrays.equals(m.getParameterTypes(), argTypes));
 			return this;
 		}
 

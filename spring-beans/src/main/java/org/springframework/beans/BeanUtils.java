@@ -122,11 +122,9 @@ public abstract class BeanUtils {
 			return instantiateClass(clazz.getDeclaredConstructor());
 		}
 		catch (NoSuchMethodException ex) {
-			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(clazz)) {
-				Constructor<T> ctor = findPrimaryConstructor(clazz);
-				if (ctor != null) {
-					return instantiateClass(ctor);
-				}
+			Constructor<T> ctor = findPrimaryConstructor(clazz);
+			if (ctor != null) {
+				return instantiateClass(ctor);
 			}
 			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
@@ -405,8 +403,7 @@ public abstract class BeanUtils {
 
 
 	/**
-	 * Retrieve the JavaBeans {@code PropertyDescriptor}s of a given
-	 * class.
+	 * Retrieve the JavaBeans {@code PropertyDescriptor}s of a given class.
 	 * @param clazz the Class to retrieve the PropertyDescriptors for
 	 * @return an array of {@code PropertyDescriptors} for the given class
 	 * @throws BeansException if PropertyDescriptor look fails

@@ -498,9 +498,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (this.applicationEventMulticaster != null) {
 			this.applicationEventMulticaster.addApplicationListener(listener);
 		}
-		else {
-			this.applicationListeners.add(listener);
-		}
+		this.applicationListeners.add(listener);
 	}
 
 	/**

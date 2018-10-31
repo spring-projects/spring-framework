@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
@@ -94,11 +95,10 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 		return this.partReader.read(elementType, inputMessage, allHints)
 				.collectMultimap(Part::name)
 				.doOnNext(map -> {
-					if (logger.isDebugEnabled()) {
-						String details = isEnableLoggingRequestDetails() ?
-								map.toString() : "parts " + map.keySet() + " (content masked)";
-						logger.debug(Hints.getLogPrefix(hints) + "Parsed " + details);
-					}
+					LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Parsed " +
+							(isEnableLoggingRequestDetails() ?
+									LogFormatUtils.formatValue(map, !traceOn) :
+									"parts " + map.keySet() + " (content masked)"));
 				})
 				.map(this::toMultiValueMap);
 	}

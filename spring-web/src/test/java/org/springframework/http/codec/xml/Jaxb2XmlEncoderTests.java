@@ -20,6 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -34,14 +37,8 @@ import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Sebastien Deleuze
@@ -92,6 +89,18 @@ public class Jaxb2XmlEncoderTests extends AbstractDataBufferAllocatingTestCase {
 					}
 				})
 				.verifyComplete();
+	}
+
+	@Test
+	public void encodeError() {
+		Flux<Pojo> source = Flux.error(RuntimeException::new);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
+				ResolvableType.forClass(Pojo.class),
+				MediaType.APPLICATION_XML, Collections.emptyMap());
+
+		StepVerifier.create(output)
+				.expectError(RuntimeException.class)
+				.verify();
 	}
 
 	@Test

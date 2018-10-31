@@ -74,15 +74,15 @@ import org.springframework.util.StringUtils;
  * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
  * if available, as a direct alternative to Spring's own {@code @Autowired}.
  *
- * <p>Only one constructor (at max) of any given bean class may carry this
- * annotation with the 'required' parameter set to {@code true},
- * indicating <i>the</i> constructor to autowire when used as a Spring bean.
- * If multiple <i>non-required</i> constructors carry the annotation, they
- * will be considered as candidates for autowiring. The constructor with
- * the greatest number of dependencies that can be satisfied by matching
- * beans in the Spring container will be chosen. If none of the candidates
- * can be satisfied, then a default constructor (if present) will be used.
- * An annotated constructor does not have to be public.
+ * <p>Only one constructor (at max) of any given bean class may declare this annotation
+ * with the 'required' parameter set to {@code true}, indicating <i>the</i> constructor
+ * to autowire when used as a Spring bean. If multiple <i>non-required</i> constructors
+ * declare the annotation, they will be considered as candidates for autowiring.
+ * The constructor with the greatest number of dependencies that can be satisfied by
+ * matching beans in the Spring container will be chosen. If none of the candidates
+ * can be satisfied, then a primary/default constructor (if present) will be used.
+ * If a class only declares a single constructor to begin with, it will always be used,
+ * even if not annotated. An annotated constructor does not have to be public.
  *
  * <p>Fields are injected right after construction of a bean, before any
  * config methods are invoked. Such a config field does not have to be public.
@@ -161,11 +161,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	/**
 	 * Set the 'autowired' annotation type, to be used on constructors, fields,
 	 * setter methods and arbitrary config methods.
-	 * <p>The default autowired annotation type is the Spring-provided
-	 * {@link Autowired} annotation, as well as {@link Value}.
+	 * <p>The default autowired annotation type is the Spring-provided {@link Autowired}
+	 * annotation, as well as {@link Value}.
 	 * <p>This setter property exists so that developers can provide their own
-	 * (non-Spring-specific) annotation type to indicate that a member is
-	 * supposed to be autowired.
+	 * (non-Spring-specific) annotation type to indicate that a member is supposed
+	 * to be autowired.
 	 */
 	public void setAutowiredAnnotationType(Class<? extends Annotation> autowiredAnnotationType) {
 		Assert.notNull(autowiredAnnotationType, "'autowiredAnnotationType' must not be null");
@@ -176,11 +176,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	/**
 	 * Set the 'autowired' annotation types, to be used on constructors, fields,
 	 * setter methods and arbitrary config methods.
-	 * <p>The default autowired annotation type is the Spring-provided
-	 * {@link Autowired} annotation, as well as {@link Value}.
+	 * <p>The default autowired annotation type is the Spring-provided {@link Autowired}
+	 * annotation, as well as {@link Value}.
 	 * <p>This setter property exists so that developers can provide their own
-	 * (non-Spring-specific) annotation types to indicate that a member is
-	 * supposed to be autowired.
+	 * (non-Spring-specific) annotation types to indicate that a member is supposed
+	 * to be autowired.
 	 */
 	public void setAutowiredAnnotationTypes(Set<Class<? extends Annotation>> autowiredAnnotationTypes) {
 		Assert.notEmpty(autowiredAnnotationTypes, "'autowiredAnnotationTypes' must not be empty");
@@ -189,8 +189,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	/**
-	 * Set the name of a parameter of the annotation that specifies
-	 * whether it is required.
+	 * Set the name of a parameter of the annotation that specifies whether it is required.
 	 * @see #setRequiredParameterValue(boolean)
 	 */
 	public void setRequiredParameterName(String requiredParameterName) {
@@ -199,9 +198,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	/**
 	 * Set the boolean value that marks a dependency as required
-	 * <p>For example if using 'required=true' (the default),
-	 * this value should be {@code true}; but if using
-	 * 'optional=false', this value should be {@code false}.
+	 * <p>For example if using 'required=true' (the default), this value should be
+	 * {@code true}; but if using 'optional=false', this value should be {@code false}.
 	 * @see #setRequiredParameterName(String)
 	 */
 	public void setRequiredParameterValue(boolean requiredParameterValue) {
@@ -709,7 +707,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					ReflectionUtils.makeAccessible(method);
 					method.invoke(bean, arguments);
 				}
-				catch (InvocationTargetException ex){
+				catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
 				}
 			}

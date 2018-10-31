@@ -248,7 +248,10 @@ public @interface Bean {
 	 * bean class itself expresses through annotations.
 	 * @see Autowire#BY_NAME
 	 * @see Autowire#BY_TYPE
+	 * @deprecated as of 5.1, since {@code @Bean} factory method argument resolution and
+	 * {@code @Autowired} processing supersede name/type-based bean property injection
 	 */
+	@Deprecated
 	Autowire autowire() default Autowire.NO;
 
 	/**

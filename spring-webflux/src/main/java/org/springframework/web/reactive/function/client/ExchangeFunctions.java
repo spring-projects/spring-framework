@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -109,29 +110,19 @@ public abstract class ExchangeFunctions {
 		}
 
 		private void logRequest(ClientRequest request) {
-			if (logger.isDebugEnabled()) {
-				String message = request.logPrefix() + "HTTP " + request.method() + " " + request.url();
-				if (logger.isTraceEnabled()) {
-					logger.trace(message + ", headers=" + formatHeaders(request.headers()));
-				}
-				else {
-					logger.debug(message);
-				}
-			}
+			LogFormatUtils.traceDebug(logger, traceOn ->
+					request.logPrefix() + "HTTP " + request.method() + " " + request.url() +
+							(traceOn ? ", headers=" + formatHeaders(request.headers()) : "")
+			);
 		}
 
 		private void logResponse(ClientHttpResponse response, String logPrefix) {
-			if (logger.isDebugEnabled()) {
+			LogFormatUtils.traceDebug(logger, traceOn -> {
 				int code = response.getRawStatusCode();
 				HttpStatus status = HttpStatus.resolve(code);
-				String message = logPrefix + "Response " + (status != null ? status : code);
-				if (logger.isTraceEnabled()) {
-					logger.trace(message + ", headers=" + formatHeaders(response.getHeaders()));
-				}
-				else {
-					logger.debug(message);
-				}
-			}
+				return logPrefix + "Response " + (status != null ? status : code) +
+						(traceOn ? ", headers=" + formatHeaders(response.getHeaders()) : "");
+			});
 		}
 
 		private String formatHeaders(HttpHeaders headers) {

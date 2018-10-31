@@ -20,22 +20,22 @@ import java.util.Map;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
  */
-public class FormHttpMessageWriterTests {
+public class FormHttpMessageWriterTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final FormHttpMessageWriter writer = new FormHttpMessageWriter();
 
@@ -75,14 +75,18 @@ public class FormHttpMessageWriterTests {
 		body.add("name 2", "value 2+1");
 		body.add("name 2", "value 2+2");
 		body.add("name 3", null);
-		MockServerHttpResponse response = new MockServerHttpResponse();
+		MockServerHttpResponse response = new MockServerHttpResponse(this.bufferFactory);
 		this.writer.write(Mono.just(body), null, MediaType.APPLICATION_FORM_URLENCODED, response, null).block();
 
-		String responseBody = response.getBodyAsString().block();
-		assertEquals("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3", responseBody);
+		String expected = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		StepVerifier.create(response.getBody())
+				.consumeNextWith(stringConsumer(
+						expected))
+				.expectComplete()
+				.verify();
 		HttpHeaders headers = response.getHeaders();
 		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", headers.getContentType().toString());
-		assertEquals(responseBody.getBytes().length, headers.getContentLength());
+		assertEquals(expected.length(), headers.getContentLength());
 	}
 
 }

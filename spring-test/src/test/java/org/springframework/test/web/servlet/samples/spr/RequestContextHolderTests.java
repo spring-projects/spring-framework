@@ -51,14 +51,11 @@ import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Integration tests for the following use cases.
@@ -191,7 +188,7 @@ public class RequestContextHolderTests {
 	}
 
 	@RestController
-	private static class SingletonController {
+	static class SingletonController {
 
 		@RequestMapping("/singletonController")
 		public void handle() {
@@ -200,7 +197,7 @@ public class RequestContextHolderTests {
 	}
 
 	@RestController
-	private static class RequestScopedController {
+	static class RequestScopedController {
 
 		@Autowired
 		private ServletRequest request;
@@ -213,7 +210,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class RequestScopedService {
+	static class RequestScopedService {
 
 		@Autowired
 		private ServletRequest request;
@@ -224,7 +221,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class SessionScopedService {
+	static class SessionScopedService {
 
 		@Autowired
 		private ServletRequest request;
@@ -236,7 +233,7 @@ public class RequestContextHolderTests {
 	}
 
 	@RestController
-	private static class ControllerWithRequestScopedService {
+	static class ControllerWithRequestScopedService {
 
 		@Autowired
 		private RequestScopedService service;
@@ -250,7 +247,7 @@ public class RequestContextHolderTests {
 	}
 
 	@RestController
-	private static class ControllerWithSessionScopedService {
+	static class ControllerWithSessionScopedService {
 
 		@Autowired
 		private SessionScopedService service;
@@ -263,7 +260,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class FilterWithSessionScopedService extends GenericFilterBean {
+	static class FilterWithSessionScopedService extends GenericFilterBean {
 
 		@Autowired
 		private SessionScopedService service;
@@ -278,7 +275,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class RequestFilter extends GenericFilterBean {
+	static class RequestFilter extends GenericFilterBean {
 
 		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -287,7 +284,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class RequestAttributesFilter extends GenericFilterBean {
+	static class RequestAttributesFilter extends GenericFilterBean {
 
 		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

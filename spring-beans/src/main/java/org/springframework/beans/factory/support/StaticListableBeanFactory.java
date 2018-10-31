@@ -35,6 +35,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartFactoryBean;
+import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
@@ -245,6 +246,10 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			public Stream<T> stream() {
 				return Arrays.stream(getBeanNamesForType(requiredType)).map(name -> (T) getBean(name));
 			}
+			@Override
+			public Stream<T> orderedStream() {
+				return stream().sorted(OrderComparator.INSTANCE);
+			}
 		};
 	}
 
@@ -427,7 +432,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	@Override
 	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
-			throws NoSuchBeanDefinitionException{
+			throws NoSuchBeanDefinitionException {
 
 		Class<?> beanType = getType(beanName);
 		return (beanType != null ? AnnotationUtils.findAnnotation(beanType, annotationType) : null);

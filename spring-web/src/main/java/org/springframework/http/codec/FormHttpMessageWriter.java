@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.lang.Nullable;
@@ -131,11 +132,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		Assert.notNull(charset, "No charset"); // should never occur
 
 		return Mono.from(inputStream).flatMap(form -> {
-			if (logger.isDebugEnabled()) {
-				String details = isEnableLoggingRequestDetails() ?
-						form.toString() : "form fields " + form.keySet() + " (content masked)";
-				logger.debug(Hints.getLogPrefix(hints) + "Writing " + details);
-			}
+			logFormData(form, hints);
 			String value = serializeForm(form, charset);
 			ByteBuffer byteBuffer = charset.encode(value);
 			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
@@ -154,6 +151,13 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		else {
 			return mediaType;
 		}
+	}
+
+	private void logFormData(MultiValueMap<String, String> form, Map<String, Object> hints) {
+		LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Writing " +
+				(isEnableLoggingRequestDetails() ?
+						LogFormatUtils.formatValue(form, !traceOn) :
+						"form fields " + form.keySet() + " (content masked)"));
 	}
 
 	protected String serializeForm(MultiValueMap<String, String> formData, Charset charset) {

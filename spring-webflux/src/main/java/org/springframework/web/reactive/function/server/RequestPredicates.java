@@ -23,12 +23,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -349,6 +351,33 @@ public abstract class RequestPredicates {
 		}
 	}
 
+	private static void restoreAttributes(ServerRequest request, Map<String, Object> attributes) {
+		request.attributes().clear();
+		request.attributes().putAll(attributes);
+	}
+
+	private static Map<String, String> mergePathVariables(Map<String, String> oldVariables,
+			Map<String, String> newVariables) {
+
+		if (!newVariables.isEmpty()) {
+			Map<String, String> mergedVariables = new LinkedHashMap<>(oldVariables);
+			mergedVariables.putAll(newVariables);
+			return mergedVariables;
+		}
+		else {
+			return oldVariables;
+		}
+	}
+
+	private static PathPattern mergePatterns(@Nullable PathPattern oldPattern, PathPattern newPattern) {
+		if (oldPattern != null) {
+			return oldPattern.combine(newPattern);
+		}
+		else {
+			return newPattern;
+		}
+
+	}
 
 	private static class HttpMethodPredicate implements RequestPredicate {
 
@@ -399,7 +428,7 @@ public abstract class RequestPredicates {
 			PathPattern.PathMatchInfo info = this.pattern.matchAndExtract(pathContainer);
 			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), info != null);
 			if (info != null) {
-				mergeTemplateVariables(request, info.getUriVariables());
+				mergeAttributes(request, info.getUriVariables(), this.pattern);
 				return true;
 			}
 			else {
@@ -407,20 +436,22 @@ public abstract class RequestPredicates {
 			}
 		}
 
+		private static void mergeAttributes(ServerRequest request, Map<String, String> variables,
+				PathPattern pattern) {
+			Map<String, String> pathVariables = mergePathVariables(request.pathVariables(), variables);
+			request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+						Collections.unmodifiableMap(pathVariables));
+
+			pattern = mergePatterns(
+					(PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
+					pattern);
+			request.attributes().put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
+		}
+
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
 			return Optional.ofNullable(this.pattern.matchStartOfPath(request.pathContainer()))
-					.map(info -> new SubPathServerRequestWrapper(request, info));
-		}
-
-		private void mergeTemplateVariables(ServerRequest request, Map<String, String> variables) {
-			if (!variables.isEmpty()) {
-				Map<String, String> oldVariables = request.pathVariables();
-				Map<String, String> mergedVariables = new LinkedHashMap<>(oldVariables);
-				mergedVariables.putAll(variables);
-				request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-						Collections.unmodifiableMap(mergedVariables));
-			}
+					.map(info -> new SubPathServerRequestWrapper(request, info, this.pattern));
 		}
 
 		@Override
@@ -518,8 +549,14 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public boolean test(ServerRequest t) {
-			return (this.left.test(t) && this.right.test(t));
+		public boolean test(ServerRequest request) {
+			Map<String, Object> oldAttributes = new HashMap<>(request.attributes());
+
+			if (this.left.test(request) && this.right.test(request)) {
+				return true;
+			}
+			restoreAttributes(request, oldAttributes);
+			return false;
 		}
 
 		@Override
@@ -533,9 +570,35 @@ public abstract class RequestPredicates {
 		}
 	}
 
+	/**
+	 * {@link RequestPredicate} that negates a delegate predicate.
+	 */
+	static class NegateRequestPredicate implements RequestPredicate {
+		private final RequestPredicate delegate;
+
+		public NegateRequestPredicate(RequestPredicate delegate) {
+			Assert.notNull(delegate, "Delegate must not be null");
+			this.delegate = delegate;
+		}
+
+		@Override
+		public boolean test(ServerRequest request) {
+			Map<String, Object> oldAttributes = new HashMap<>(request.attributes());
+			boolean result = !this.delegate.test(request);
+			if (!result) {
+				restoreAttributes(request, oldAttributes);
+			}
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return "!" + this.delegate.toString();
+		}
+	}
 
 	/**
-	 * {@link RequestPredicate} for where either {@code left} or {@code right} predicates
+	 * {@link RequestPredicate} where either {@code left} or {@code right} predicates
 	 * may match.
 	 */
 	static class OrRequestPredicate implements RequestPredicate {
@@ -552,8 +615,20 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public boolean test(ServerRequest t) {
-			return (this.left.test(t) || this.right.test(t));
+		public boolean test(ServerRequest request) {
+			Map<String, Object> oldAttributes = new HashMap<>(request.attributes());
+
+			if (this.left.test(request)) {
+				return true;
+			}
+			else {
+				restoreAttributes(request, oldAttributes);
+				if (this.right.test(request)) {
+					return true;
+				}
+			}
+			restoreAttributes(request, oldAttributes);
+			return false;
 		}
 
 		@Override
@@ -578,23 +653,29 @@ public abstract class RequestPredicates {
 
 		private final ServerRequest request;
 
-		private final PathContainer subPathContainer;
+		private final PathContainer pathContainer;
 
-		private final Map<String, String> pathVariables;
+		private final Map<String, Object> attributes;
 
-		public SubPathServerRequestWrapper(ServerRequest request, PathPattern.PathRemainingMatchInfo info) {
+		public SubPathServerRequestWrapper(ServerRequest request,
+				PathPattern.PathRemainingMatchInfo info, PathPattern pattern) {
 			this.request = request;
-			this.subPathContainer = new SubPathContainer(info.getPathRemaining());
-
-			this.pathVariables = mergePathVariables(request, info.getUriVariables());
+			this.pathContainer = new SubPathContainer(info.getPathRemaining());
+			this.attributes = mergeAttributes(request, info.getUriVariables(), pattern);
 		}
 
-		private static Map<String, String> mergePathVariables(ServerRequest request,
-				Map<String, String> pathVariables) {
+		private static Map<String, Object> mergeAttributes(ServerRequest request,
+		Map<String, String> pathVariables, PathPattern pattern) {
+			Map<String, Object> result = new ConcurrentHashMap<>(request.attributes());
 
-			Map<String, String> result = new LinkedHashMap<>(request.pathVariables());
-			result.putAll(pathVariables);
-			return Collections.unmodifiableMap(result);
+			result.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+					mergePathVariables(request.pathVariables(), pathVariables));
+
+			pattern = mergePatterns(
+					(PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
+					pattern);
+			result.put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
+			return result;
 		}
 
 		@Override
@@ -619,12 +700,12 @@ public abstract class RequestPredicates {
 
 		@Override
 		public String path() {
-			return this.subPathContainer.value();
+			return this.pathContainer.value();
 		}
 
 		@Override
 		public PathContainer pathContainer() {
-			return this.subPathContainer;
+			return this.pathContainer;
 		}
 
 		@Override
@@ -678,13 +759,8 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public Optional<Object> attribute(String name) {
-			return this.request.attribute(name);
-		}
-
-		@Override
 		public Map<String, Object> attributes() {
-			return this.request.attributes();
+			return this.attributes;
 		}
 
 		@Override
@@ -698,8 +774,11 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Map<String, String> pathVariables() {
-			return this.pathVariables;
+			return (Map<String, String>) this.attributes.getOrDefault(
+					RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap());
+
 		}
 
 		@Override

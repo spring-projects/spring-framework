@@ -1,9 +1,9 @@
 [[mvc-view]]
 = View Technologies
-[.small]#<<web-reactive.adoc#webflux-view,Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view,Same as in Spring WebFlux>>#
 
 The use of view technologies in Spring MVC is pluggable, whether you decide to
-use Thymeleaf, Groovy Markup Templates, JSPs, or other, is primarily a matter of a
+use Thymeleaf, Groovy Markup Templates, JSPs, or other technologies, is primarily a matter of a
 configuration change. This chapter covers view technologies integrated with Spring MVC.
 We assume you are already familiar with <<mvc-viewresolver>>.
 
@@ -12,18 +12,18 @@ We assume you are already familiar with <<mvc-viewresolver>>.
 
 [[mvc-view-thymeleaf]]
 == Thymeleaf
-[.small]#<<web-reactive.adoc#webflux-view-thymeleaf,Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-thymeleaf,Same as in Spring WebFlux>>#
 
-Thymeleaf is modern server-side Java template engine that emphasizes natural HTML
-templates that can be previewed in a browser by double-clicking, which is very
-helpful for independent work on UI templates, e.g. by designer, without the need for a
-running server. If you're looking to replace JSPs, Thymeleaf offers one of the most
-extensive set of features that will make such a transition easier. Thymeleaf is actively
-developed and maintained. For a more complete introduction see the
+Thymeleaf is a modern server-side Java template engine that emphasizes natural HTML
+templates that can be previewed in a browser by double-clicking, which is very helpful
+for independent work on UI templates (for example, by a designer) without the need for
+a running server. If you want to replace JSPs, Thymeleaf offers one of the most
+extensive set of features to make such a transition easier. Thymeleaf is actively
+developed and maintained. For a more complete introduction, see the
 http://www.thymeleaf.org/[Thymeleaf] project home page.
 
 The Thymeleaf integration with Spring MVC is managed by the Thymeleaf project.
-The configuration involves a few bean declarations such as
+The configuration involves a few bean declarations, such as
 `ServletContextTemplateResolver`, `SpringTemplateEngine`, and `ThymeleafViewResolver`.
 See http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more details.
 
@@ -32,20 +32,21 @@ See http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more detai
 
 [[mvc-view-freemarker]]
 == FreeMarker
-[.small]#<<web-reactive.adoc#webflux-view-freemarker,Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-freemarker,Same as in Spring WebFlux>>#
 
 http://www.freemarker.org[Apache FreeMarker] is a template engine for generating any
-kind of text output from HTML to email, and others. The Spring Framework has a built-in
+kind of text output from HTML to email and others. The Spring Framework has a built-in
 integration for using Spring MVC with FreeMarker templates.
 
 
 
 [[mvc-view-freemarker-contextconfig]]
-=== View config
-[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig,Same in Spring WebFlux>>#
+=== View Configuration
+[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig,Same as in Spring WebFlux>>#
 
-To configure FreeMarker as a view technology:
+The following example shows how to configure FreeMarker as a view technology:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -68,9 +69,11 @@ To configure FreeMarker as a view technology:
 		}
 	}
 ----
+====
 
-To configure the same in XML:
+The following example shows how to configure the same in XML:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -85,10 +88,12 @@ To configure the same in XML:
 		<mvc:template-loader-path location="/WEB-INF/freemarker"/>
 	</mvc:freemarker-configurer>
 ----
+====
 
-Or you can also declare the `FreeMarkerConfigurer` bean for full control over all
-properties:
+Alternatively, you can also declare the `FreeMarkerConfigurer` bean for full control over all
+properties, as the following example shows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -96,22 +101,25 @@ properties:
 		<property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
 	</bean>
 ----
+====
 
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
-shown above. Given the above configuration if your controller returns the view name
-"welcome" then the resolver will look for the `/WEB-INF/freemarker/welcome.ftl` template.
+shown in the preceding example. Given the preceding configuration, if your controller returns a view name
+of `welcome`, the resolver looks for the `/WEB-INF/freemarker/welcome.ftl` template.
+
 
 
 [[mvc-views-freemarker]]
-=== FreeMarker config
-[.small]#<<web-reactive.adoc#webflux-views-freemarker,Same in Spring WebFlux>>#
+=== FreeMarker Configuration
+[.small]#<<web-reactive.adoc#webflux-views-freemarker,Same as in Spring WebFlux>>#
 
-FreeMarker 'Settings' and 'SharedVariables' can be passed directly to the FreeMarker
-`Configuration` object managed by Spring by setting the appropriate bean properties on
+You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
+`Configuration` object (which is managed by Spring) by setting the appropriate bean properties on
 the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
-`java.util.Properties` object and the `freemarkerVariables` property requires a
-`java.util.Map`.
+`java.util.Properties` object, and the `freemarkerVariables` property requires a
+`java.util.Map`. The following example shows how to do so:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -126,6 +134,7 @@ the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
 
 	<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape"/>
 ----
+====
 
 See the FreeMarker documentation for details of settings and variables as they apply to
 the `Configuration` object.
@@ -133,37 +142,38 @@ the `Configuration` object.
 
 
 [[mvc-view-freemarker-forms]]
-=== Form handling
+=== Form Handling
 
-Spring provides a tag library for use in JSP's that contains, amongst others, a
-`<spring:bind/>` tag. This tag primarily enables forms to display values from form
-backing objects and to show the results of failed validations from a `Validator` in the
+Spring provides a tag library for use in JSPs that contains, among others, a
+`<spring:bind/>` element. This element primarily lets forms display values from
+form-backing objects and show the results of failed validations from a `Validator` in the
 web or business tier. Spring also has support for the same functionality in FreeMarker,
 with additional convenience macros for generating form input elements themselves.
 
 
 [[mvc-view-bind-macros]]
-==== The bind macros
+==== The Bind Macros
 
 A standard set of macros are maintained within the `spring-webmvc.jar` file for both
 languages, so they are always available to a suitably configured application.
 
-Some of the macros defined in the Spring libraries are considered internal (private) but
-no such scoping exists in the macro definitions making all macros visible to calling
+Some of the macros defined in the Spring libraries are considered internal (private), but
+no such scoping exists in the macro definitions, making all macros visible to calling
 code and user templates. The following sections concentrate only on the macros you need
-to be directly calling from within your templates. If you wish to view the macro code
-directly, the file is called `spring.ftl` in the package
-`org.springframework.web.servlet.view.freemarker`.
+to directly call from within your templates. If you wish to view the macro code
+directly, the file is called `spring.ftl` and is in the
+`org.springframework.web.servlet.view.freemarker` package.
 
 
 [[mvc-view-simple-binding]]
-==== Simple binding
+==== Simple Binding
 
-In your HTML forms (vm / ftl templates) which act as a form view for a Spring MVC
-controller, you can use code similar to the following to bind to field values and
+In your HTML forms (vm or ftl templates) that act as a form view for a Spring MVC
+controller, you can use code similar to the next example to bind to field values and
 display error messages for each input field in similar fashion to the JSP equivalent.
-Example code is shown below for the `personForm` view configured earlier:
+The following example shows the `personForm` view that was configured earlier:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -186,18 +196,19 @@ Example code is shown below for the `personForm` view configured earlier:
 		...
 	</html>
 ----
+====
 
-`<@spring.bind>` requires a 'path' argument which consists of the name of your command
-object (it will be 'command' unless you changed it in your FormController properties)
-followed by a period and the name of the field on the command object you wish to bind to.
-Nested fields can be used too such as "command.address.street". The `bind` macro assumes
+`<@spring.bind>` requires a 'path' argument, which consists of the name of your command
+object (it is 'command', unless you changed it in your `FormController` properties)
+followed by a period and the name of the field on the command object to which you wish to bind.
+You can also use nested fields, such as `command.address.street`. The `bind` macro assumes
 the default HTML escaping behavior specified by the ServletContext parameter
 `defaultHtmlEscape` in `web.xml`.
 
 The optional form of the macro called `<@spring.bindEscaped>` takes a second argument
 and explicitly specifies whether HTML escaping should be used in the status error
-messages or values. Set to true or false as required. Additional form handling macros
-simplify the use of HTML escaping and these macros should be used wherever possible.
+messages or values. You can set it to `true` or `false` as required. Additional form handling macros
+simplify the use of HTML escaping, and you should use these macros wherever possible.
 They are explained in the next section.
 
 
@@ -206,11 +217,11 @@ They are explained in the next section.
 
 Additional convenience macros for both languages simplify both binding and form
 generation (including validation error display). It is never necessary to use these
-macros to generate form input fields, and they can be mixed and matched with simple HTML
-or calls direct to the spring bind macros highlighted previously.
+macros to generate form input fields, and you can mix and match them with simple HTML
+or direct calls to the spring bind macros that we highlighted previously.
 
-The following table of available macros show the FTL definitions and the
-parameter list that each takes.
+The following table of available macros shows the FTL definitions and the
+parameter list that each takes:
 
 [[views-macros-defs-tbl]]
 .Table of macro definitions
@@ -218,107 +229,111 @@ parameter list that each takes.
 |===
 | macro | FTL definition
 
-| **message** (output a string from a resource bundle based on the code parameter)
+| `message` (output a string from a resource bundle based on the code parameter)
 | <@spring.message code/>
 
-| **messageText** (output a string from a resource bundle based on the code parameter,
+| `messageText` (output a string from a resource bundle based on the code parameter,
   falling back to the value of the default parameter)
 | <@spring.messageText code, text/>
 
-| **url** (prefix a relative URL with the application's context root)
+| `url` (prefix a relative URL with the application's context root)
 | <@spring.url relativeUrl/>
 
-| **formInput** (standard input field for gathering user input)
+| `formInput` (standard input field for gathering user input)
 | <@spring.formInput path, attributes, fieldType/>
 
-| **formHiddenInput *** (hidden input field for submitting non-user input)
+| `formHiddenInput` (hidden input field for submitting non-user input)
 | <@spring.formHiddenInput path, attributes/>
 
-| **formPasswordInput** * (standard input field for gathering passwords. Note that no
-  value will ever be populated in fields of this type)
+| `formPasswordInput` (standard input field for gathering passwords. Note that no
+  value is ever populated in fields of this type.)
 | <@spring.formPasswordInput path, attributes/>
 
-| **formTextarea** (large text field for gathering long, freeform text input)
+| `formTextarea` (large text field for gathering long, freeform text input)
 | <@spring.formTextarea path, attributes/>
 
-| **formSingleSelect** (drop down box of options allowing a single required value to be
+| `formSingleSelect` (drop down box of options that let a single required value be
   selected)
 | <@spring.formSingleSelect path, options, attributes/>
 
-| **formMultiSelect** (a list box of options allowing the user to select 0 or more values)
+| `formMultiSelect` (a list box of options that let the user select 0 or more values)
 | <@spring.formMultiSelect path, options, attributes/>
 
-| **formRadioButtons** (a set of radio buttons allowing a single selection to be made
+| `formRadioButtons` (a set of radio buttons that let a single selection be made
   from the available choices)
 | <@spring.formRadioButtons path, options separator, attributes/>
 
-| **formCheckboxes** (a set of checkboxes allowing 0 or more values to be selected)
+| `formCheckboxes` (a set of checkboxes that let 0 or more values be selected)
 | <@spring.formCheckboxes path, options, separator, attributes/>
 
-| **formCheckbox** (a single checkbox)
+| `formCheckbox` (a single checkbox)
 | <@spring.formCheckbox path, attributes/>
 
-| **showErrors** (simplify display of validation errors for the bound field)
+| `showErrors` (simplify display of validation errors for the bound field)
 | <@spring.showErrors separator, classOrStyle/>
 |===
 
-* In FTL (FreeMarker), `formHiddenInput` and `formPasswordInput` are not actually required
+* In FTL (FreeMarker), `formHiddenInput` and `formPasswordInput` are not actually required,
   as you can use the normal `formInput` macro, specifying `hidden` or `password` as the
   value for the `fieldType` parameter.
 
 The parameters to any of the above macros have consistent meanings:
 
-* path: the name of the field to bind to (ie "command.name")
-* options: a Map of all the available values that can be selected from in the input
-  field. The keys to the map represent the values that will be POSTed back from the form
+* `path`: The name of the field to bind to (ie "command.name")
+* `options`: A `Map` of all the available values that can be selected from in the input
+  field. The keys to the map represent the values that are POSTed back from the form
   and bound to the command object. Map objects stored against the keys are the labels
   displayed on the form to the user and may be different from the corresponding values
-  posted back by the form. Usually such a map is supplied as reference data by the
-  controller. Any Map implementation can be used depending on required behavior. For
-  strictly sorted maps, a `SortedMap` such as a `TreeMap` with a suitable Comparator may
-  be used and for arbitrary Maps that should return values in insertion order, use a
-  `LinkedHashMap` or a `LinkedMap` from commons-collections.
-* separator: where multiple options are available as discreet elements (radio buttons or
-  checkboxes), the sequence of characters used to separate each one in the list (ie
-  "<br>").
-* attributes: an additional string of arbitrary tags or text to be included within the
+  posted back by the form. Usually, such a map is supplied as reference data by the
+  controller. You can use any `Map` implementation, depending on required behavior. For
+  strictly sorted maps, you can use a `SortedMap` (such as a `TreeMap`) with a suitable `Comparator`
+  and, for arbitrary Maps that should return values in insertion order, use a
+  `LinkedHashMap` or a `LinkedMap` from `commons-collections`.
+* `separator`: Where multiple options are available as discreet elements (radio buttons or
+  checkboxes), the sequence of characters used to separate each one in the list (such as
+  `<br>`).
+* `attributes`: An additional string of arbitrary tags or text to be included within the
   HTML tag itself. This string is echoed literally by the macro. For example, in a
-  textarea field you may supply attributes as 'rows="5" cols="60"' or you could pass
+  `textarea` field, you may supply attributes (such as 'rows="5" cols="60"'), or you could pass
   style information such as 'style="border:1px solid silver"'.
-* classOrStyle: for the showErrors macro, the name of the CSS class that the span tag
-  wrapping each error will use. If no information is supplied (or the value is empty)
-  then the errors will be wrapped in <b></b> tags.
+* `classOrStyle`: For the `showErrors` macro, the name of the CSS class that the `span` element
+  that wraps each error uses. If no information is supplied (or the value is empty),
+  the errors are wrapped in `<b></b>` tags.
 
-Examples of the macros are outlined below some in FTL and some in VTL. Where usage
+The following sections outline examples of the macros (some in FTL and some in VTL). Where usage
 differences exist between the two languages, they are explained in the notes.
 
 [[mvc-views-form-macros-input]]
 ===== Input Fields
 
-The formInput macro takes the path parameter (command.name) and an additional attributes
-parameter which is empty in the example above. The macro, along with all other form
-generation macros, performs an implicit spring bind on the path parameter. The binding
-remains valid until a new bind occurs so the showErrors macro doesn't need to pass the
-path parameter again - it simply operates on whichever field a bind was last created for.
+The `formInput` macro takes the `path` parameter (`command.name`) and an additional `attributes`
+parameter (which is empty in the upcoming example). The macro, along with all other form
+generation macros, performs an implicit Spring bind on the path parameter. The binding
+remains valid until a new bind occurs, so the `showErrors` macro does not need to pass the
+path parameter again -- it operates on the field for which a bind was last created.
 
-The showErrors macro takes a separator parameter (the characters that will be used to
-separate multiple errors on a given field) and also accepts a second parameter, this
-time a class name or style attribute. Note that FreeMarker is able to specify default
-values for the attributes parameter.
+The `showErrors` macro takes a separator parameter (the characters that are used to
+separate multiple errors on a given field) and also accepts a second parameter -- this
+time, a class name or style attribute. Note that FreeMarker can specify default
+values for the attributes parameter. The following example shows how to use the `formInput`
+and `showWErrors` macros:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<@spring.formInput "command.name"/>
 	<@spring.showErrors "<br>"/>
 ----
+====
 
-Output is shown below of the form fragment generating the name field, and displaying a
+The next example shows the output of the form fragment, generating the name field and displaying a
 validation error after the form was submitted with no value in the field. Validation
 occurs through Spring's Validation framework.
 
-The generated HTML looks like this:
+The generated HTML resembles the following example:
 
+====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -329,31 +344,33 @@ The generated HTML looks like this:
 	<br>
 	<br>
 ----
+====
 
-The formTextarea macro works the same way as the formInput macro and accepts the same
-parameter list. Commonly, the second parameter (attributes) will be used to pass style
-information or rows and cols attributes for the textarea.
+The `formTextarea` macro works the same way as the `formInput` macro and accepts the same
+parameter list. Commonly, the second parameter (attributes) is used to pass style
+information or `rows` and `cols` attributes for the `textarea`.
 
 [[mvc-views-form-macros-select]]
 ===== Selection Fields
 
-Four selection field macros can be used to generate common UI value selection inputs in
-your HTML forms.
+You can use four selection field macros to generate common UI value selection inputs in
+your HTML forms:
 
-* formSingleSelect
-* formMultiSelect
-* formRadioButtons
-* formCheckboxes
+* `formSingleSelect`
+* `formMultiSelect`
+* `formRadioButtons`
+* `formCheckboxes`
 
-Each of the four macros accepts a Map of options containing the value for the form
-field, and the label corresponding to that value. The value and the label can be the
+Each of the four macros accepts a `Map` of options that contains the value for the form
+field and the label that corresponds to that value. The value and the label can be the
 same.
 
-An example of radio buttons in FTL is below. The form backing object specifies a default
-value of 'London' for this field and so no validation is necessary. When the form is
+The next example is for radio buttons in FTL. The form-backing object specifies a default
+value of 'London' for this field, so no validation is necessary. When the form is
 rendered, the entire list of cities to choose from is supplied as reference data in the
-model under the name 'cityMap'.
+model under the name 'cityMap'. The following listing shows the example:
 
+====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -361,14 +378,16 @@ model under the name 'cityMap'.
 	Town:
 	<@spring.formRadioButtons "command.address.town", cityMap, ""/><br><br>
 ----
+====
 
-This renders a line of radio buttons, one for each value in `cityMap` using the
-separator "". No additional attributes are supplied (the last parameter to the macro is
-missing). The cityMap uses the same String for each key-value pair in the map. The map's
-keys are what the form actually submits as POSTed request parameters, map values are the
-labels that the user sees. In the example above, given a list of three well known cities
-and a default value in the form backing object, the HTML would be
+The preceding listing renders a line of radio buttons, one for each value in `cityMap`, and uses a
+separator of `""`. No additional attributes are supplied (the last parameter to the macro is
+missing). The `cityMap` uses the same `String` for each key-value pair in the map. The map's
+keys are what the form actually submits as POSTed request parameters. The map values are the
+labels that the user sees. In the preceding example, given a list of three well known cities
+and a default value in the form backing object, the HTML resembles the following:
 
+====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -377,10 +396,12 @@ and a default value in the form backing object, the HTML would be
 	<input type="radio" name="address.town" value="Paris" checked="checked">Paris</input>
 	<input type="radio" name="address.town" value="New York">New York</input>
 ----
+====
 
-If your application expects to handle cities by internal codes for example, the map of
-codes would be created with suitable keys like the example below.
+If your application expects to handle cities by internal codes (for example), you can create the map of
+codes with suitable keys, as the following example shows:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -395,10 +416,12 @@ codes would be created with suitable keys like the example below.
 		return model;
 	}
 ----
+====
 
-The code would now produce output where the radio values are the relevant codes but the
-user still sees the more user friendly city names.
+The code now produces output where the radio values are the relevant codes, but the
+user still sees the more user-friendly city names, as follows:
 
+====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -407,34 +430,38 @@ user still sees the more user friendly city names.
 	<input type="radio" name="address.town" value="PRS" checked="checked">Paris</input>
 	<input type="radio" name="address.town" value="NYC">New York</input>
 ----
+====
 
 
 [[mvc-views-form-macros-html-escaping]]
-==== HTML escaping
+==== HTML Escaping
 
-Default usage of the form macros above will result in HTML tags that are HTML 4.01
-compliant and that use the default value for HTML escaping defined in your web.xml as
-used by Spring's bind support. In order to make the tags XHTML compliant or to override
+Default usage of the form macros described earlier results in HTML elemets that are HTML 4.01
+compliant and that use the default value for HTML escaping defined in your `web.xml` file, as
+used by Spring's bind support. To make the elements be XHTML compliant or to override
 the default HTML escaping value, you can specify two variables in your template (or in
-your model where they will be visible to your templates). The advantage of specifying
+your model, where they are visible to your templates). The advantage of specifying
 them in the templates is that they can be changed to different values later in the
 template processing to provide different behavior for different fields in your form.
 
 To switch to XHTML compliance for your tags, specify a value of `true` for a
-model/context variable named xhtmlCompliant:
+model or context variable named `xhtmlCompliant`, as the following example shows:
 
+====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<#-- for FreeMarker -->
 	<#assign xhtmlCompliant = true>
 ----
+====
 
-Any tags generated by the Spring macros will now be XHTML compliant after processing
-this directive.
+After processing
+this directive, any elements generated by the Spring macros are now XHTML compliant.
 
-In similar fashion, HTML escaping can be specified per field:
+In similar fashion, you can specify HTML escaping per field, as the following example shows:
 
+====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -447,6 +474,7 @@ In similar fashion, HTML escaping can be specified per field:
 	<#assign htmlEscape = false in spring>
 	<#-- all future fields will be bound with HTML escaping off -->
 ----
+====
 
 
 
@@ -454,23 +482,21 @@ In similar fashion, HTML escaping can be specified per field:
 [[mvc-view-groovymarkup]]
 == Groovy Markup
 
-http://groovy-lang.org/templating.html#_the_markuptemplateengine[Groovy Markup Template Engine]
-is primarily aimed at generating XML-like markup (XML, XHTML, HTML5, etc) but that can
-be used to generate any text based content. The Spring Framework has a built-in
+The http://groovy-lang.org/templating.html#_the_markuptemplateengine[Groovy Markup Template Engine]
+is primarily aimed at generating XML-like markup (XML, XHTML, HTML5, and others), but you can
+use it to generate any text-based content. The Spring Framework has a built-in
 integration for using Spring MVC with Groovy Markup.
 
-[TIP]
-====
-The Groovy Markup Template engine requires Groovy 2.3.1+.
-====
+NOTE: The Groovy Markup Template engine requires Groovy 2.3.1+.
 
 
 
 [[mvc-view-groovymarkup-configuration]]
 === Configuration
 
-To configure the Groovy Markup Template Engine:
+The following example shows how to configure the Groovy Markup Template Engine:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -493,9 +519,11 @@ To configure the Groovy Markup Template Engine:
 		}
 	}
 ----
+====
 
-To configure the same in XML:
+The following example shows how to configure the same in XML:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -508,6 +536,7 @@ To configure the same in XML:
 	<!-- Configure the Groovy Markup Template Engine... -->
 	<mvc:groovy-configurer resource-loader-path="/WEB-INF/"/>
 ----
+====
 
 
 
@@ -515,8 +544,9 @@ To configure the same in XML:
 === Example
 
 Unlike traditional template engines, Groovy Markup relies on a DSL that uses a builder
-syntax. Here is a sample template for an HTML page:
+syntax. The following example shows a sample template for an HTML page:
 
+====
 [source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -531,49 +561,50 @@ syntax. Here is a sample template for an HTML page:
 		}
 	}
 ----
+====
 
 
 
 
 [[mvc-view-script]]
 == Script Views
-[.small]#<<web-reactive.adoc#webflux-view-script,Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-script,Same as in Spring WebFlux>>#
 
 The Spring Framework has a built-in integration for using Spring MVC with any
 templating library that can run on top of the
-https://www.jcp.org/en/jsr/detail?id=223[JSR-223] Java scripting engine. Below is a list
-of templating libraries we've tested on different script engines:
+https://www.jcp.org/en/jsr/detail?id=223[JSR-223] Java scripting engine. We have tested the following
+templating libraries on different script engines:
 
-[horizontal]
-http://handlebarsjs.com/[Handlebars] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
-https://mustache.github.io/[Mustache] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
-http://facebook.github.io/react/[React] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
-http://www.embeddedjs.com/[EJS] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
-http://www.stuartellis.eu/articles/erb/[ERB] :: http://jruby.org[JRuby]
-https://docs.python.org/2/library/string.html#template-strings[String templates] :: http://www.jython.org/[Jython]
-https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] :: http://kotlinlang.org/[Kotlin]
+[%header]
+|===
+|Scripting Library |Scripting Engine
+|http://handlebarsjs.com/[Handlebars] |http://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://mustache.github.io/[Mustache] |http://openjdk.java.net/projects/nashorn/[Nashorn]
+|http://facebook.github.io/react/[React] |http://openjdk.java.net/projects/nashorn/[Nashorn]
+|http://www.embeddedjs.com/[EJS] |http://openjdk.java.net/projects/nashorn/[Nashorn]
+|http://www.stuartellis.eu/articles/erb/[ERB] |http://jruby.org[JRuby]
+|https://docs.python.org/2/library/string.html#template-strings[String templates] |http://www.jython.org/[Jython]
+|https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |http://kotlinlang.org/[Kotlin]
+|===
 
-[TIP]
-====
-The basic rule for integrating any other script engine is that it must implement the
+TIP: The basic rule for integrating any other script engine is that it must implement the
 `ScriptEngine` and `Invocable` interfaces.
-====
 
 
 
 [[mvc-view-script-dependencies]]
 === Requirements
-[.small]#<<web-reactive.adoc#webflux-view-script-dependencies,Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-script-dependencies,Same as in Spring WebFlux>>#
 
-You need to have the script engine on your classpath:
+You need to have the script engine on your classpath, the details of which vary by script engine:
 
-* http://openjdk.java.net/projects/nashorn/[Nashorn] JavaScript engine is provided with
+* The http://openjdk.java.net/projects/nashorn/[Nashorn] JavaScript engine is provided with
 Java 8+. Using the latest update release available is highly recommended.
 * http://jruby.org[JRuby] should be added as a dependency for Ruby support.
 * http://www.jython.org[Jython] should be added as a dependency for Python support.
 * `org.jetbrains.kotlin:kotlin-script-util` dependency and a `META-INF/services/javax.script.ScriptEngineFactory`
  file containing a `org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory`
- line should be added for Kotlin script support, see
+ line should be added for Kotlin script support. See
  https://github.com/sdeleuze/kotlin-script-templating[this example] for more details.
 
 You need to have the script templating library. One way to do that for Javascript is
@@ -582,13 +613,14 @@ through http://www.webjars.org/[WebJars].
 
 
 [[mvc-view-script-integrate]]
-=== Script templates
-[.small]#<<web-reactive.adoc#webflux-script-integrate,Same in Spring WebFlux>>#
+=== Script Templates
+[.small]#<<web-reactive.adoc#webflux-script-integrate,Same as in Spring WebFlux>>#
 
-Declare a `ScriptTemplateConfigurer` bean in order to specify the script engine to use,
+You can declare a `ScriptTemplateConfigurer` bean to specify the script engine to use,
 the script files to load, what function to call to render templates, and so on.
-Below is an example with Mustache templates and the Nashorn JavaScript engine:
+The following example uses Mustache templates and the Nashorn JavaScript engine:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -612,9 +644,11 @@ Below is an example with Mustache templates and the Nashorn JavaScript engine:
 		}
 	}
 ----
+====
 
-The same in XML:
+The following example shows the same arrangement in XML:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -628,9 +662,11 @@ The same in XML:
 		<mvc:script location="mustache.js"/>
 	</mvc:script-template-configurer>
 ----
+====
 
-The controller would look no different:
+The controller would look no different for the Java and XML configurations, as the following example shows:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -645,9 +681,11 @@ The controller would look no different:
 		}
 	}
 ----
+====
 
-And the Mustache template is:
+The following example shows the Mustache template:
 
+====
 [source,html,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -660,24 +698,28 @@ And the Mustache template is:
 		</body>
 	</html>
 ----
+====
 
 The render function is called with the following parameters:
 
-* `String template`: the template content
-* `Map model`: the view model
-* `RenderingContext renderingContext`: the
-  {api-spring-framework}/web/servlet/view/script/RenderingContext.html[RenderingContext]
-  that gives access to the application context, the locale, the template loader and the
-  url (since 5.0)
+* `String template`: The template content
+* `Map model`: The view model
+* `RenderingContext renderingContext`: The
+  {api-spring-framework}/web/servlet/view/script/RenderingContext.html[`RenderingContext`]
+  that gives access to the application context, the locale, the template loader, and the
+  URL (since 5.0)
 
 `Mustache.render()` is natively compatible with this signature, so you can call it directly.
 
-If your templating technology requires some customization, you may provide a script that
+If your templating technology requires some customization, you can provide a script that
 implements a custom render function. For example, http://handlebarsjs.com[Handlerbars]
-needs to compile templates before using them, and requires a
-http://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
-browser facilities not available in the server-side script engine.
+needs to compile templates before using them and requires a
+http://en.wikipedia.org/wiki/Polyfill[polyfill] to emulate some
+browser facilities that are not available in the server-side script engine.
 
+The following example shows how to do so:
+
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -701,28 +743,29 @@ browser facilities not available in the server-side script engine.
 		}
 	}
 ----
-
-[NOTE]
 ====
-Setting the `sharedEngine` property to `false` is required when using non thread-safe
-script engines with templating libraries not designed for concurrency, like Handlebars or
-React running on Nashorn for example. In that case, Java 8u60 or greater is required due
+
+NOTE: Setting the `sharedEngine` property to `false` is required when you use non-thread-safe
+script engines with templating libraries not designed for concurrency, such as Handlebars or
+React running on Nashorn. In that case, Java 8u60 or greater is required, due
 to https://bugs.openjdk.java.net/browse/JDK-8076099[this bug].
+
+`polyfill.js` defines only the `window` object needed by Handlebars to run properly, as follows:
+
 ====
-
-`polyfill.js` only defines the `window` object needed by Handlebars to run properly:
-
 [source,javascript,indent=0]
 [subs="verbatim,quotes"]
 ----
 	var window = {};
 ----
+====
 
-This basic `render.js` implementation compiles the template before using it. A production
-ready implementation should also store and reused cached templates / pre-compiled templates.
-This can be done on the script side, as well as any customization you need (managing
-template engine configuration for example).
+This basic `render.js` implementation compiles the template before using it. A production-ready
+implementation should also store any reused cached templates or pre-compiled templates.
+You can do so on the script side (and handle any customization you need -- managing
+template engine configuration, for example). The following example shows how to do so:
 
+====
 [source,javascript,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -731,9 +774,10 @@ template engine configuration for example).
 		return compiledTemplate(model);
 	}
 ----
+====
 
 Check out the Spring Framework unit tests,
-https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[java], and
+https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[Java], and
 https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/resources/org/springframework/web/servlet/view/script[resources],
 for more configuration examples.
 
@@ -741,22 +785,23 @@ for more configuration examples.
 
 
 [[mvc-view-jsp]]
-== JSP & JSTL
+== JSP and JSTL
 
 The Spring Framework has a built-in integration for using Spring MVC with JSP and JSTL.
 
 
 
 [[mvc-view-jsp-resolver]]
-=== View resolvers
+=== View Resolvers
 
-When developing with JSPs you can declare a `InternalResourceViewResolver` or a
+When developing with JSPs, you can declare a `InternalResourceViewResolver` or a
 `ResourceBundleViewResolver` bean.
 
 `ResourceBundleViewResolver` relies on a properties file to define the view names
-mapped to a class and a URL. With a `ResourceBundleViewResolver` you
-can mix different types of views using only one resolver. Here is an example:
+mapped to a class and a URL. With a `ResourceBundleViewResolver`, you
+can mix different types of views byusing only one resolver, as the following example shows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -786,6 +831,7 @@ directory so there can be no direct access by clients.
 		<property name="suffix" value=".jsp"/>
 	</bean>
 ----
+====
 
 
 
@@ -793,18 +839,18 @@ directory so there can be no direct access by clients.
 === JSPs versus JSTL
 
 When using the Java Standard Tag Library you must use a special view class, the
-`JstlView`, as JSTL needs some preparation before things such as the I18N features will
+`JstlView`, as JSTL needs some preparation before things such as the I18N features can
 work.
 
 
 
 [[mvc-view-jsp-tags]]
-=== Spring's JSP tag library
+=== Spring's JSP Tag Library
 
-Spring provides data binding of request parameters to command objects as described in
+Spring provides data binding of request parameters to command objects, as described in
 earlier chapters. To facilitate the development of JSP pages in combination with those
 data binding features, Spring provides a few tags that make things even easier. All
-Spring tags have__HTML escaping__ features to enable or disable escaping of characters.
+Spring tags have HTML escaping features to enable or disable escaping of characters.
 
 The `spring.tld` tag library descriptor (TLD) is included in the `spring-webmvc.jar`.
 For a comprehensive reference on individual tags, browse the
@@ -822,10 +868,10 @@ familiar and intuitive to use. The tag-generated HTML is HTML 4.01/XHTML 1.0 com
 
 Unlike other form/input tag libraries, Spring's form tag library is integrated with
 Spring Web MVC, giving the tags access to the command object and reference data your
-controller deals with. As you will see in the following examples, the form tags make
-JSPs easier to develop, read and maintain.
+controller deals with. As we show in the following examples, the form tags make
+JSPs easier to develop, read, and maintain.
 
-Let's go through the form tags and look at an example of how each tag is used. We have
+We go through the form tags and look at an example of how each tag is used. We have
 included generated HTML snippets where certain tags require further commentary.
 
 
@@ -838,28 +884,30 @@ called `spring-form.tld`.
 To use the tags from this library, add the following directive to the top of your JSP
 page:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 ----
-
 where `form` is the tag name prefix you want to use for the tags from this library.
+====
 
 
 [[mvc-view-jsp-formtaglib-formtag]]
-==== The form tag
+==== The Form Tag
 
-This tag renders an HTML 'form' tag and exposes a binding path to inner tags for
+This tag renders an HTML 'form' element and exposes a binding path to inner tags for
 binding. It puts the command object in the `PageContext` so that the command object can
-be accessed by inner tags. __All the other tags in this library are nested tags of the
-`form` tag__.
+be accessed by inner tags. All the other tags in this library are nested tags of the
+`form` tag.
 
-Let's assume we have a domain object called `User`. It is a JavaBean with properties
-such as `firstName` and `lastName`. We will use it as the form backing object of our
-form controller which returns `form.jsp`. Below is an example of what `form.jsp` would
+Assume that we have a domain object called `User`. It is a JavaBean with properties
+such as `firstName` and `lastName`. We can use it as the form-backing object of our
+form controller, which returns `form.jsp`. The following example shows what `form.jsp` could
 look like:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -881,13 +929,15 @@ look like:
 		</table>
 	</form:form>
 ----
+====
 
 The `firstName` and `lastName` values are retrieved from the command object placed in
 the `PageContext` by the page controller. Keep reading to see more complex examples of
 how inner tags are used with the `form` tag.
 
-The generated HTML looks like a standard form:
+The following listing shows the generated HTML, which looks like a standard form:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -909,11 +959,14 @@ The generated HTML looks like a standard form:
 		</table>
 	</form>
 ----
+====
 
-The preceding JSP assumes that the variable name of the form backing object is
-`'command'`. If you have put the form backing object into the model under another name
-(definitely a best practice), then you can bind the form to the named variable like so:
+The preceding JSP assumes that the variable name of the form-backing object is
+`command`. If you have put the form-backing object into the model under another name
+(definitely a best practice), you can bind the form to the named variable, as the
+following example shows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -935,24 +988,27 @@ The preceding JSP assumes that the variable name of the form backing object is
 		</table>
 	</form:form>
 ----
+====
 
 
 [[mvc-view-jsp-formtaglib-inputtag]]
-==== The input tag
+==== The `input` Tag
 
-This tag renders an HTML 'input' tag using the bound value and type='text' by default.
-For an example of this tag, see <<mvc-view-jsp-formtaglib-formtag>>. You may also use
-HTML5-specific types like 'email', 'tel', 'date', and others.
+This tag renders an HTML `input` element with the bound value and `type='text'` by default.
+For an example of this tag, see <<mvc-view-jsp-formtaglib-formtag>>. You can also use
+HTML5-specific types, such as `email`, `tel`, `date`, and others.
+
 
 
 [[mvc-view-jsp-formtaglib-checkboxtag]]
-==== The checkbox tag
+==== The `checkbox` Tag
 
-This tag renders an HTML 'input' tag with type 'checkbox'.
+This tag renders an HTML `input` tag with the `type` set to `checkbox`.
 
-Let's assume our `User` has preferences such as newsletter subscription and a list of
-hobbies. Below is an example of the `Preferences` class:
+Assume that our `User` has preferences such as newsletter subscription and a list of
+hobbies. The following example shows the `Preferences` class:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -987,9 +1043,11 @@ hobbies. Below is an example of the `Preferences` class:
 		}
 	}
 ----
+====
 
-The `form.jsp` would look like:
+The corresponding `form.jsp` could then resemble the following:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1021,21 +1079,23 @@ The `form.jsp` would look like:
 		</table>
 	</form:form>
 ----
+====
 
-There are 3 approaches to the `checkbox` tag which should meet all your checkbox needs.
+There are three approaches to the `checkbox` tag, which should meet all your checkbox needs.
 
-* Approach One - When the bound value is of type `java.lang.Boolean`, the
-  `input(checkbox)` is marked as 'checked' if the bound value is `true`. The `value`
+* Approach One: When the bound value is of type `java.lang.Boolean`, the
+  `input(checkbox)` is marked as `checked` if the bound value is `true`. The `value`
   attribute corresponds to the resolved value of the `setValue(Object)` value property.
-* Approach Two - When the bound value is of type `array` or `java.util.Collection`, the
-  `input(checkbox)` is marked as 'checked' if the configured `setValue(Object)` value is
+* Approach Two: When the bound value is of type `array` or `java.util.Collection`, the
+  `input(checkbox)` is marked as `checked` if the configured `setValue(Object)` value is
   present in the bound `Collection`.
-* Approach Three - For any other bound value type, the `input(checkbox)` is marked as
-  'checked' if the configured `setValue(Object)` is equal to the bound value.
+* Approach Three: For any other bound value type, the `input(checkbox)` is marked as
+  `checked` if the configured `setValue(Object)` is equal to the bound value.
 
-Note that regardless of the approach, the same HTML structure is generated. Below is an
-HTML snippet of some checkboxes:
+Note that, regardless of the approach, the same HTML structure is generated. The following
+HTML snippet defines some checkboxes:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1051,30 +1111,33 @@ HTML snippet of some checkboxes:
 		</td>
 	</tr>
 ----
+====
 
-What you might not expect to see is the additional hidden field after each checkbox.
-When a checkbox in an HTML page is __not__ checked, its value will not be sent to the
+You might not expect to see the additional hidden field after each checkbox.
+When a checkbox in an HTML page is not checked, its value is not sent to the
 server as part of the HTTP request parameters once the form is submitted, so we need a
-workaround for this quirk in HTML in order for Spring form data binding to work. The
+workaround for this quirk in HTML for Spring form data binding to work. The
 `checkbox` tag follows the existing Spring convention of including a hidden parameter
-prefixed by an underscore ("_") for each checkbox. By doing this, you are effectively
-telling Spring that "__the checkbox was visible in the form and I want my object to
-which the form data will be bound to reflect the state of the checkbox no matter what__".
+prefixed by an underscore (`_`) for each checkbox. By doing this, you are effectively
+telling Spring that "`the checkbox was visible in the form, and I want my object to
+which the form data binds to reflect the state of the checkbox, no matter what.`"
+
 
 
 [[mvc-view-jsp-formtaglib-checkboxestag]]
-==== The checkboxes tag
+==== The `checkboxes` Tag
 
-This tag renders multiple HTML 'input' tags with type 'checkbox'.
+This tag renders multiple HTML `input` tags with the `type` set to `checkbox`.
 
-Building on the example from the previous `checkbox` tag section. Sometimes you prefer
+This section build on the example from the previous `checkbox` tag section. Sometimes, you prefer
 not to have to list all the possible hobbies in your JSP page. You would rather provide
 a list at runtime of the available options and pass that in to the tag. That is the
-purpose of the `checkboxes` tag. You pass in an `Array`, a `List` or a `Map` containing
-the available options in the "items" property. Typically the bound property is a
-collection so it can hold multiple values selected by the user. Below is an example of
-the JSP using this tag:
+purpose of the `checkboxes` tag. You can pass in an `Array`, a `List`, or a `Map` that contains
+the available options in the `items` property. Typically, the bound property is a
+collection so that it can hold multiple values selected by the user. The following example
+shows a JSP that uses this tag:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1090,22 +1153,25 @@ the JSP using this tag:
 		</table>
 	</form:form>
 ----
+====
 
-This example assumes that the "interestList" is a `List` available as a model attribute
-containing strings of the values to be selected from. In the case where you use a Map,
-the map entry key will be used as the value and the map entry's value will be used as
+This example assumes that the `interestList` is a `List` available as a model attribute
+that contains strings of the values to be selected from. If you use a `Map`,
+the map entry key is used as the value, and the map entry's value is used as
 the label to be displayed. You can also use a custom object where you can provide the
-property names for the value using "itemValue" and the label using "itemLabel".
+property names for the value by using `itemValue` and the label by using `itemLabel`.
+
 
 
 [[mvc-view-jsp-formtaglib-radiobuttontag]]
-==== The radiobutton tag
+==== The `radiobutton` Tag
 
-This tag renders an HTML 'input' tag with type 'radio'.
+This tag renders an HTML `input` element with the `type` set to `radio`.
 
-A typical usage pattern will involve multiple tag instances bound to the same property
-but with different values.
+A typical usage pattern involves multiple tag instances bound to the same property
+but with different values, as the following example shows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1117,21 +1183,24 @@ but with different values.
 		</td>
 	</tr>
 ----
+====
+
 
 
 [[mvc-view-jsp-formtaglib-radiobuttonstag]]
-==== The radiobuttons tag
+==== The `radiobuttons` Tag
 
-This tag renders multiple HTML 'input' tags with type 'radio'.
+This tag renders multiple HTML `input` elements with the `type` set to `radio`.
 
-Just like the `checkboxes` tag above, you might want to pass in the available options as
-a runtime variable. For this usage you would use the `radiobuttons` tag. You pass in an
-`Array`, a `List` or a `Map` containing the available options in the "items" property.
-In the case where you use a Map, the map entry key will be used as the value and the map
-entry's value will be used as the label to be displayed. You can also use a custom
-object where you can provide the property names for the value using "itemValue" and the
-label using "itemLabel".
+As with the <<mvc-view-jsp-formtaglib-checkboxestag,`checkboxes` tag>>, you might want to pass in the available options as
+a runtime variable. For this usage, you can use the `radiobuttons` tag. You pass in an
+`Array`, a `List`, or a `Map` that contains the available options in the `items` property.
+If you use a `Map`, the map entry key is used as the value and the map
+entry's value are used as the label to be displayed. You can also use a custom
+object where you can provide the property names for the value by using `itemValue` and the
+label by using `itemLabel`, as the following example shows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1140,13 +1209,15 @@ label using "itemLabel".
 		<td><form:radiobuttons path="sex" items="${sexOptions}"/></td>
 	</tr>
 ----
+====
 
 
 [[mvc-view-jsp-formtaglib-passwordtag]]
-==== The password tag
+==== The `password` Tag
 
-This tag renders an HTML 'input' tag with type 'password' using the bound value.
+This tag renders an HTML `input` tag with the type set to `password` with the bound value.
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1157,11 +1228,13 @@ This tag renders an HTML 'input' tag with type 'password' using the bound value.
 		</td>
 	</tr>
 ----
+====
 
-Please note that by default, the password value is __not__ shown. If you do want the
-password value to be shown, then set the value of the `'showPassword'` attribute to
-true, like so.
+Note that, by default, the password value is not shown. If you do want the
+password value to be shown, you can set the value of the `showPassword` attribute to
+`true`, as the following example shows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1172,16 +1245,18 @@ true, like so.
 		</td>
 	</tr>
 ----
+====
 
 
 [[mvc-view-jsp-formtaglib-selecttag]]
-==== The select tag
+==== The `select` Tag
 
 This tag renders an HTML 'select' element. It supports data binding to the selected
 option as well as the use of nested `option` and `options` tags.
 
-Let's assume a `User` has a list of skills.
+Assume that a `User` has a list of skills. The corresponding HTML could be as follows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1190,10 +1265,12 @@ Let's assume a `User` has a list of skills.
 		<td><form:select path="skills" items="${skills}"/></td>
 	</tr>
 ----
+====
 
-If the `User's` skill were in Herbology, the HTML source of the 'Skills' row would look
-like:
+If the `User's` skill are in Herbology, the HTML source of the 'Skills' row could be
+as follows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1208,14 +1285,17 @@ like:
 		</td>
 	</tr>
 ----
+====
+
 
 
 [[mvc-view-jsp-formtaglib-optiontag]]
-==== The option tag
+==== The `option` Tag
 
-This tag renders an HTML 'option'. It sets 'selected' as appropriate based on the bound
-value.
+This tag renders an HTML `option` element. It sets `selected`, based on the bound
+value. The following HTML shows typical output for it:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1231,10 +1311,12 @@ value.
 		</td>
 	</tr>
 ----
+====
 
-If the `User's` house was in Gryffindor, the HTML source of the 'House' row would look
-like:
+If the `User's` house was in Gryffindor, the HTML source of the 'House' row would be
+as follows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1242,7 +1324,7 @@ like:
 		<td>House:</td>
 		<td>
 			<select name="house">
-				<option value="Gryffindor" selected="selected">Gryffindor</option>
+				<option value="Gryffindor" selected="selected">Gryffindor</option> <1>
 				<option value="Hufflepuff">Hufflepuff</option>
 				<option value="Ravenclaw">Ravenclaw</option>
 				<option value="Slytherin">Slytherin</option>
@@ -1250,14 +1332,18 @@ like:
 		</td>
 	</tr>
 ----
+<1> Note the addition of a `selected` attribute.
+====
+
 
 
 [[mvc-view-jsp-formtaglib-optionstag]]
-==== The options tag
+==== The `options` Tag
 
-This tag renders a list of HTML 'option' tags. It sets the 'selected' attribute as
-appropriate based on the bound value.
+This tag renders a list of HTML `option` elements. It sets the `selected` attribute,
+based on the bound value. The following HTML shows typical output for it:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1271,9 +1357,11 @@ appropriate based on the bound value.
 		</td>
 	</tr>
 ----
+====
 
-If the `User` lived in the UK, the HTML source of the 'Country' row would look like:
+If the `User` lived in the UK, the HTML source of the 'Country' row would be as follows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1283,32 +1371,36 @@ If the `User` lived in the UK, the HTML source of the 'Country' row would look l
 			<select name="country">
 				<option value="-">--Please Select</option>
 				<option value="AT">Austria</option>
-				<option value="UK" selected="selected">United Kingdom</option>
+				<option value="UK" selected="selected">United Kingdom</option> <1>
 				<option value="US">United States</option>
 			</select>
 		</td>
 	</tr>
 ----
+<1> Note the addition of a `selected` attribute.
+====
 
-As the example shows, the combined usage of an `option` tag with the `options` tag
-generates the same standard HTML, but allows you to explicitly specify a value in the
-JSP that is for display only (where it belongs) such as the default string in the
+As the preceding example shows, the combined usage of an `option` tag with the `options` tag
+generates the same standard HTML but lets you explicitly specify a value in the
+JSP that is for display only (where it belongs), such as the default string in the
 example: "-- Please Select".
 
 The `items` attribute is typically populated with a collection or array of item objects.
-`itemValue` and `itemLabel` simply refer to bean properties of those item objects, if
-specified; otherwise, the item objects themselves will be stringified. Alternatively,
-you may specify a `Map` of items, in which case the map keys are interpreted as option
-values and the map values correspond to option labels. If `itemValue` and/or `itemLabel`
-happen to be specified as well, the item value property will apply to the map key and
-the item label property will apply to the map value.
+`itemValue` and `itemLabel` refer to bean properties of those item objects, if
+specified. Otherwise, the item objects themselves are turned into strings. Alternatively,
+you can specify a `Map` of items, in which case the map keys are interpreted as option
+values and the map values correspond to option labels. If `itemValue` or `itemLabel` (or both)
+happen to be specified as well, the item value property applies to the map key, and
+the item label property applies to the map value.
+
 
 
 [[mvc-view-jsp-formtaglib-textareatag]]
-==== The textarea tag
+==== The `textarea` Tag
 
-This tag renders an HTML 'textarea'.
+This tag renders an HTML `textarea` element. The following HTML shows typical output for it:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1318,42 +1410,48 @@ This tag renders an HTML 'textarea'.
 		<td><form:errors path="notes"/></td>
 	</tr>
 ----
+====
 
 
 [[mvc-view-jsp-formtaglib-hiddeninputtag]]
-==== The hidden tag
+==== The `hidden` Tag
 
-This tag renders an HTML 'input' tag with type 'hidden' using the bound value. To submit
-an unbound hidden value, use the HTML `input` tag with type 'hidden'.
+This tag renders an HTML `input` tag with the `type` set to `hidden` with the bound value. To submit
+an unbound hidden value, use the HTML `input` tag with the `type` set to `hidden`.
+The following HTML shows typical output for it:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<form:hidden path="house"/>
-
 ----
+====
 
-If we choose to submit the 'house' value as a hidden one, the HTML would look like:
+If we choose to submit the `house` value as a hidden one, the HTML would be as follows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<input name="house" type="hidden" value="Gryffindor"/>
 
 ----
+====
 
 
 [[mvc-view-jsp-formtaglib-errorstag]]
-==== The errors tag
+==== The `errors` Tag
 
-This tag renders field errors in an HTML 'span' tag. It provides access to the errors
+This tag renders field errors in an HTML `span` element. It provides access to the errors
 created in your controller or those that were created by any validators associated with
 your controller.
 
-Let's assume we want to display all error messages for the `firstName` and `lastName`
+Assume that we want to display all error messages for the `firstName` and `lastName`
 fields once we submit the form. We have a validator for instances of the `User` class
-called `UserValidator`.
+called `UserValidator`, as the following example shows:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1369,9 +1467,11 @@ called `UserValidator`.
 		}
 	}
 ----
+====
 
-The `form.jsp` would look like:
+The `form.jsp` could be as follows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1398,10 +1498,12 @@ The `form.jsp` would look like:
 		</table>
 	</form:form>
 ----
+====
 
-If we submit a form with empty values in the `firstName` and `lastName` fields, this is
-what the HTML would look like:
+If we submit a form with empty values in the `firstName` and `lastName` fields,
+the HTML would be as follows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1428,17 +1530,19 @@ what the HTML would look like:
 		</table>
 	</form>
 ----
+====
 
-What if we want to display the entire list of errors for a given page? The example below
+What if we want to display the entire list of errors for a given page? The next example
 shows that the `errors` tag also supports some basic wildcarding functionality.
 
-* `path="{asterisk}"` - displays all errors
-* `path="lastName"` - displays all errors associated with the `lastName` field
-* if `path` is omitted - object errors only are displayed
+* `path="{asterisk}"`: Displays all errors.
+* `path="lastName"`: Displays all errors associated with the `lastName` field.
+* If `path` is omitted, only object errors are displayed.
 
-The example below will display a list of errors at the top of the page, followed by
+The following example displays a list of errors at the top of the page, followed by
 field-specific errors next to the fields:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1463,9 +1567,11 @@ field-specific errors next to the fields:
 		</table>
 	</form:form>
 ----
+====
 
-The HTML would look like:
+The HTML would be as follows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1491,6 +1597,7 @@ The HTML would look like:
 		</table>
 	</form>
 ----
+====
 
 The `spring-form.tld` tag library descriptor (TLD) is included in the `spring-webmvc.jar`.
 For a comprehensive reference on individual tags, browse the
@@ -1498,28 +1605,30 @@ For a comprehensive reference on individual tags, browse the
 or see the tag library description.
 
 
-[[mvc-rest-method-conversion]]
-==== HTTP method conversion
 
-A key principle of REST is the use of the Uniform Interface. This means that all
-resources (URLs) can be manipulated using the same four HTTP methods: GET, PUT, POST,
+[[mvc-rest-method-conversion]]
+==== HTTP Method Conversion
+
+A key principle of REST is the use of the "`Uniform Interface`". This means that all
+resources (URLs) can be manipulated by using the same four HTTP methods: GET, PUT, POST,
 and DELETE. For each method, the HTTP specification defines the exact semantics. For
 instance, a GET should always be a safe operation, meaning that is has no side effects,
 and a PUT or DELETE should be idempotent, meaning that you can repeat these operations
 over and over again, but the end result should be the same. While HTTP defines these
 four methods, HTML only supports two: GET and POST. Fortunately, there are two possible
-workarounds: you can either use JavaScript to do your PUT or DELETE, or simply do a POST
-with the 'real' method as an additional parameter (modeled as a hidden input field in an
-HTML form). This latter trick is what Spring's `HiddenHttpMethodFilter` does. This
-filter is a plain Servlet Filter and therefore it can be used in combination with any
-web framework (not just Spring MVC). Simply add this filter to your web.xml, and a POST
-with a hidden _method parameter will be converted into the corresponding HTTP method
+workarounds: you can either use JavaScript to do your PUT or DELETE, or you can do a POST
+with the "`real`" method as an additional parameter (modeled as a hidden input field in an
+HTML form). Spring's `HiddenHttpMethodFilter` uses this latter trick. This
+filter is a plain Servlet filter and, therefore, it can be used in combination with any
+web framework (not just Spring MVC). Add this filter to your web.xml, and a POST
+with a hidden `method` parameter is converted into the corresponding HTTP method
 request.
 
-To support HTTP method conversion the Spring MVC form tag was updated to support setting
-the HTTP method. For example, the following snippet taken from the updated Petclinic
-sample
+To support HTTP method conversion, the Spring MVC form tag was updated to support setting
+the HTTP method. For example, the following snippet comes from the Pet Clinic
+sample:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1527,11 +1636,13 @@ sample
 		<p class="submit"><input type="submit" value="Delete Pet"/></p>
 	</form:form>
 ----
+====
 
-This will actually perform an HTTP POST, with the 'real' DELETE method hidden behind a
-request parameter, to be picked up by the `HiddenHttpMethodFilter`, as defined in
-web.xml:
+The preceding example perform an HTTP POST, with the "`real`" DELETE method hidden behind a
+request parameter. It is picked up by the `HiddenHttpMethodFilter`, which is defined in
+web.xml, as the following example shows:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1545,9 +1656,11 @@ web.xml:
 		<servlet-name>petclinic</servlet-name>
 	</filter-mapping>
 ----
+====
 
-The corresponding `@Controller` method is shown below:
+The following example shows the corresponding `@Controller` method:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1557,17 +1670,18 @@ The corresponding `@Controller` method is shown below:
 		return "redirect:/owners/" + ownerId;
 	}
 ----
+====
 
 
 [[mvc-view-jsp-formtaglib-html5]]
-==== HTML5 tags
+==== HTML5 Tags
 
 The Spring form tag library allows entering dynamic attributes, which means you can
 enter any HTML5 specific attributes.
 
-The form input tag supports entering a type attribute other than 'text'. This is
-intended to allow rendering new HTML5 specific input types such as 'email', 'date',
-'range', and others. Note that entering type='text' is not required since 'text'
+The form `input` tag supports entering a type attribute other than `text`. This is
+intended to allow rendering new HTML5 specific input types, such as `email`, `date`,
+`range`, and others. Note that entering `type='text'` is not required, since `text`
 is the default type.
 
 
@@ -1576,14 +1690,11 @@ is the default type.
 [[mvc-view-tiles]]
 == Tiles
 
-It is possible to integrate Tiles - just as any other view technology - in web
-applications using Spring. The following describes in a broad way how to do this.
+You can integrate Tiles - just as any other view technology - in web
+applications that use Spring. This section describes, in a broad way, how to do so.
 
-[NOTE]
-====
-This section focuses on Spring's support for Tiles v3 in the
+NOTE: This section focuses on Spring's support for Tiles version 3 in the
 `org.springframework.web.servlet.view.tiles3` package.
-====
 
 
 
@@ -1599,11 +1710,12 @@ to your project.
 [[mvc-view-tiles-integrate]]
 === Configuration
 
-To be able to use Tiles, you have to configure it using files containing definitions
-(for basic information on definitions and other Tiles concepts, please have a look at
-http://tiles.apache.org[]). In Spring this is done using the `TilesConfigurer`. Have a
-look at the following piece of example ApplicationContext configuration:
+To be able to use Tiles, you have to configure it by using files that contain definitions
+(for basic information on definitions and other Tiles concepts, see
+http://tiles.apache.org[]). In Spring, this is done by using the `TilesConfigurer`.
+The following example `ApplicationContext` configuration shows how to do so:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1619,18 +1731,20 @@ look at the following piece of example ApplicationContext configuration:
 		</property>
 	</bean>
 ----
+====
 
-As you can see, there are five files containing definitions, which are all located in
-the `'WEB-INF/defs'` directory. At initialization of the `WebApplicationContext`, the
-files will be loaded and the definitions factory will be initialized. After that has
-been done, the Tiles includes in the definition files can be used as views within your
-Spring web application. To be able to use the views you have to have a `ViewResolver`
-just as with any other view technology used with Spring. Below you can find two
-possibilities, the `UrlBasedViewResolver` and the `ResourceBundleViewResolver`.
+The preceding example defines five files that contain definitions. The files are all located in
+the `WEB-INF/defs` directory. At initialization of the `WebApplicationContext`, the
+files are loaded, and the definitions factory are initialized. After that has
+been done, the Tiles included in the definition files can be used as views within your
+Spring web application. To be able to use the views, you have to have a `ViewResolver`
+as with any other view technology used with Spring. You can can use either of two
+implementations, the `UrlBasedViewResolver` and the `ResourceBundleViewResolver`.
 
-You can specify locale specific Tiles definitions by adding an underscore and then
-the locale. For example:
+You can specify locale-specific Tiles definitions by adding an underscore and then
+the locale, as the following example shows:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1643,23 +1757,23 @@ the locale. For example:
 		</property>
 	</bean>
 ----
-
-With this configuration, `tiles_fr_FR.xml` will be used for requests with the `fr_FR` locale,
-and `tiles.xml` will be used by default.
-
-[NOTE]
 ====
-Since underscores are used to indicate locales, it is recommended to avoid using
+
+With the preceding configuration, `tiles_fr_FR.xml` is used for requests with the `fr_FR` locale,
+and `tiles.xml` is used by default.
+
+NOTE: Since underscores are used to indicate locales, we recommended not using
 them otherwise in the file names for Tiles definitions.
-====
+
 
 
 [[mvc-view-tiles-url]]
-==== UrlBasedViewResolver
+==== `UrlBasedViewResolver`
 
 The `UrlBasedViewResolver` instantiates the given `viewClass` for each view it has to
-resolve.
+resolve. The following bean defines a `UrlBasedViewResolver`:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1667,14 +1781,18 @@ resolve.
 		<property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView"/>
 	</bean>
 ----
+====
 
 
 [[mvc-view-tiles-resource]]
-==== ResourceBundleViewResolver
+==== `ResourceBundleViewResolver`
 
-The `ResourceBundleViewResolver` has to be provided with a property file containing
-view names and view classes the resolver can use:
+The `ResourceBundleViewResolver` has to be provided with a property file that contains
+view names and view classes that the resolver can use. The following example shows a bean
+definition for a `ResourceBundleViewResolver` and the corresponding view names and view
+classes (taken from the Pet Clinic sample):
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1697,35 +1815,37 @@ view names and view classes the resolver can use:
 	findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 	...
 ----
+====
 
-As you can see, when using the `ResourceBundleViewResolver`, you can easily mix
+When you use the `ResourceBundleViewResolver`, you can easily mix
 different view technologies.
 
-Note that the `TilesView` class supports JSTL (the JSP Standard Tag Library) out of the
-box.
+Note that the `TilesView` class supports JSTL (the JSP Standard Tag Library).
 
 
 [[mvc-view-tiles-preparer]]
-==== SimpleSpringPreparerFactory and SpringBeanPreparerFactory
+==== `SimpleSpringPreparerFactory` and `SpringBeanPreparerFactory`
 
 As an advanced feature, Spring also supports two special Tiles `PreparerFactory`
-implementations. Check out the Tiles documentation for details on how to use
+implementations. See the Tiles documentation for details on how to use
 `ViewPreparer` references in your Tiles definition files.
 
-Specify `SimpleSpringPreparerFactory` to autowire ViewPreparer instances based on
+You can specify `SimpleSpringPreparerFactory` to autowire `ViewPreparer` instances based on
 specified preparer classes, applying Spring's container callbacks as well as applying
-configured Spring BeanPostProcessors. If Spring's context-wide annotation-config has
-been activated, annotations in ViewPreparer classes will be automatically detected and
-applied. Note that this expects preparer __classes__ in the Tiles definition files, just
-like the default `PreparerFactory` does.
+configured Spring BeanPostProcessors. If Spring's context-wide annotation configuration has
+been activated, annotations in `ViewPreparer` classes aree automatically detected and
+applied. Note that this expects preparer classes in the Tiles definition files, as
+the default `PreparerFactory` does.
 
-Specify `SpringBeanPreparerFactory` to operate on specified preparer __names__ instead
-of classes, obtaining the corresponding Spring bean from the DispatcherServlet's
-application context. The full bean creation process will be in the control of the Spring
+You can specify `SpringBeanPreparerFactory` to operate on specified preparer names (instead
+of classes), obtaining the corresponding Spring bean from the DispatcherServlet's
+application context. The full bean creation process is in the control of the Spring
 application context in this case, allowing for the use of explicit dependency injection
-configuration, scoped beans etc. Note that you need to define one Spring bean definition
-per preparer name (as used in your Tiles definitions).
+configuration, scoped beans, and so on. Note that you need to define one Spring bean definition
+for each preparer name (as used in your Tiles definitions). The following example shows
+how to define a set a `SpringBeanPreparerFactory` property on a `TilesConfigurer` bean:
 
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1746,22 +1866,24 @@ per preparer name (as used in your Tiles definitions).
 
 	</bean>
 ----
+====
 
 
 
 
 [[mvc-view-feeds]]
-== RSS, Atom
+== RSS and Atom
 
-Both `AbstractAtomFeedView` and `AbstractRssFeedView` inherit from the base class
-`AbstractFeedView` and are used to provide Atom and RSS Feed views respectfully. They
+Both `AbstractAtomFeedView` and `AbstractRssFeedView` inherit from the
+`AbstractFeedView` base class and are used to provide Atom and RSS Feed views, respectively. They
 are based on java.net's https://rome.dev.java.net[ROME] project and are located in the
 package `org.springframework.web.servlet.view.feed`.
 
 `AbstractAtomFeedView` requires you to implement the `buildFeedEntries()` method and
 optionally override the `buildFeedMetadata()` method (the default implementation is
-empty), as shown below.
+empty). The following example shows how to do so:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1781,9 +1903,11 @@ empty), as shown below.
 
 	}
 ----
+====
 
-Similar requirements apply for implementing `AbstractRssFeedView`, as shown below.
+Similar requirements apply for implementing `AbstractRssFeedView`, as the following example shows:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1802,52 +1926,54 @@ Similar requirements apply for implementing `AbstractRssFeedView`, as shown belo
 		}
 	}
 ----
+====
 
-The `buildFeedItems()` and `buildFeedEntires()` methods pass in the HTTP request in case
+The `buildFeedItems()` and `buildFeedEntries()` methods pass in the HTTP request, in case
 you need to access the Locale. The HTTP response is passed in only for the setting of
-cookies or other HTTP headers. The feed will automatically be written to the response
+cookies or other HTTP headers. The feed is automatically written to the response
 object after the method returns.
 
-For an example of creating an Atom view please refer to Alef Arendsen's Spring Team Blog
+For an example of creating an Atom view, see Alef Arendsen's Spring Team Blog
 https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-spring-s-rest-support[entry].
 
 
 
 
 [[mvc-view-document]]
-== PDF, Excel
+== PDF and Excel
+
+Spring offers ways to return output other than HTML, including PDF and Excel spreadsheets.
+This section describes how to use those features.
 
 
 
 [[mvc-view-document-intro]]
-=== Introduction to document views
+=== Introduction to Document Views
 
-Returning an HTML page isn't always the best way for the user to view the model output,
+An HTML page is not always the best way for the user to view the model output,
 and Spring makes it simple to generate a PDF document or an Excel spreadsheet
-dynamically from the model data. The document is the view and will be streamed from the
-server with the correct content type to (hopefully) enable the client PC to run their
+dynamically from the model data. The document is the view and is streamed from the
+server with the correct content type, to (hopefully) enable the client PC to run their
 spreadsheet or PDF viewer application in response.
 
 In order to use Excel views, you need to add the Apache POI library to your classpath,
-and for PDF generation preferably the OpenPDF library.
+For PDF generation, you need to add (preferably) the OpenPDF library.
 
-[NOTE]
-====
-Use the latest versions of the underlying document generation libraries if possible.
-In particular, we strongly recommend OpenPDF (e.g. OpenPDF 1.0.5) instead of the
-outdated original iText 2.1.7 since it is actively maintained and fixes an important
+NOTE: You should use the latest versions of the underlying document-generation libraries, if possible.
+In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.0.5) instead of the
+outdated original iText 2.1.7, since OpenPDF is actively maintained and fixes an important
 vulnerability for untrusted PDF content.
-====
 
 
 
 [[mvc-view-document-pdf]]
-=== PDF views
+=== PDF Views
 
 A simple PDF view for a word list could extend
 `org.springframework.web.servlet.view.document.AbstractPdfView` and implement the
-`buildPdfDocument()` method as follows:
+`buildPdfDocument()` method, as the following example shows:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1863,19 +1989,20 @@ A simple PDF view for a word list could extend
 		}
 	}
 ----
+====
 
-A controller may return such a view either from an external view definition
+A controller can return such a view either from an external view definition
 (referencing it by name) or as a `View` instance from the handler method.
 
 
 
-[[mvc-view-document-pdf]]
-=== Excel views
+[[mvc-view-document-excel]]
+=== Excel Views
 
 Since Spring Framework 4.2,
 `org.springframework.web.servlet.view.document.AbstractXlsView` is provided as a base
-class for Excel views based on POI, with specialized subclasses `AbstractXlsxView`
-and `AbstractXlsxStreamingView`, superseding the outdated `AbstractExcelView` class.
+class for Excel views. It is based on Apache POI, with specialized subclasses (`AbstractXlsxView`
+and `AbstractXlsxStreamingView`) that supersede the outdated `AbstractExcelView` class.
 
 The programming model is similar to `AbstractPdfView`, with `buildExcelDocument()`
 as the central template method and controllers being able to return such a view from
@@ -1886,74 +2013,76 @@ an external definition (by name) or as a `View` instance from the handler method
 
 [[mvc-view-jackson]]
 == Jackson
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
+
+Spring offers support for the Jackson JSON library.
 
 
 
 [[mvc-view-json-mapping]]
-=== Jackson-based JSON views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same in Spring WebFlux>>#
+=== Jackson-based JSON Views
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
 
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
-framework-specific classes) will be encoded as JSON. For cases where the contents of the
-map need to be filtered, users may specify a specific set of model attributes to encode
-via the `modelKeys` property. The `extractValueFromSingleKeyModel` property may also be
-used to have the value in single-key models extracted and serialized directly rather than
+framework-specific classes) are encoded as JSON. For cases where the contents of the
+map need to be filtered, you can specify a specific set of model attributes to encode
+by using the `modelKeys` property. You can also use the `extractValueFromSingleKeyModel` property
+to have the value in single-key models extracted and serialized directly rather than
 as a map of model attributes.
 
-JSON mapping can be customized as needed through the use of Jackson's provided
-annotations. When further control is needed, a custom `ObjectMapper` can be injected
-through the `ObjectMapper` property for cases where custom JSON
-serializers/deserializers need to be provided for specific types.
+You can customize JSON mapping as needed by using Jackson's provided
+annotations. When you need further control, you can inject a custom `ObjectMapper`
+through the `ObjectMapper` property, for cases where you need to provide custom JSON
+serializers and deserializers for specific types.
 
 
 
 [[mvc-view-xml-mapping]]
-=== Jackson-based XML views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same in Spring WebFlux>>#
+=== Jackson-based XML Views
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
 
-The `MappingJackson2XmlView` uses the
-https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension]'s `XmlMapper`
-to render the response content as XML. If the model contains multiples entries, the
-object to be serialized should be set explicitly using the `modelKey` bean property.
-If the model contains a single entry, it will be serialized automatically.
+`MappingJackson2XmlView` uses the
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension's] `XmlMapper`
+to render the response content as XML. If the model contains multiples entries, you should explicitly set the
+object to be serialized by using the `modelKey` bean property.
+If the model contains a single entry, it is serialized automatically.
 
-XML mapping can be customized as needed through the use of JAXB or Jackson's provided
-annotations. When further control is needed, a custom `XmlMapper` can be injected
-through the `ObjectMapper` property for cases where custom XML
-serializers/deserializers need to be provided for specific types.
+You can customized XML mapping as needed by using JAXB or Jackson's provided
+annotations. When you need further control, you can inject a custom `XmlMapper`
+through the `ObjectMapper` property, for cases where custom XML
+you need to provide serializers and deserializers for specific types.
 
 
 
 
 [[mvc-view-xml-marshalling]]
-== XML marshalling
+== XML Marshalling
 
-The `MarshallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`
-package to render the response content as XML. The object to be marshalled can be set
-explicitly using ``MarshallingView``'s `modelKey` bean property. Alternatively, the view
-will iterate over all model properties and marshal the first type that is supported
+The `MarshallingView` uses an XML `Marshaller` (defined in the `org.springframework.oxm`
+package) to render the response content as XML. You can explicitly set the object to be marshalled
+by using a `MarshallingView` instance's `modelKey` bean property. Alternatively, the view
+iterates over all model properties and marshals the first type that is supported
 by the `Marshaller`. For more information on the functionality in the
-`org.springframework.oxm` package refer to the chapter
+`org.springframework.oxm` package, see
 <<data-access.adoc#oxm,Marshalling XML using O/X Mappers>>.
 
 
 
 
 [[mvc-view-xslt]]
-== XSLT views
+== XSLT Views
 
 XSLT is a transformation language for XML and is popular as a view technology within web
 applications. XSLT can be a good choice as a view technology if your application
-naturally deals with XML, or if your model can easily be converted to XML. The following
+naturally deals with XML or if your model can easily be converted to XML. The following
 section shows how to produce an XML document as model data and have it transformed with
 XSLT in a Spring Web MVC application.
 
 This example is a trivial Spring application that creates a list of words in the
-`Controller` and adds them to the model map. The map is returned along with the view
+`Controller` and adds them to the model map. The map is returned, along with the view
 name of our XSLT view. See <<mvc-controller>> for details of Spring Web MVC's
-`Controller` interface. The XSLT Controller will turn the list of words into a simple XML
+`Controller` interface. The XSLT controller turns the list of words into a simple XML
 document ready for transformation.
 
 
@@ -1963,7 +2092,9 @@ document ready for transformation.
 
 Configuration is standard for a simple Spring web application: The MVC configuration
 has to define an `XsltViewResolver` bean and regular MVC annotation configuration.
+The following example shows how to do so:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1981,17 +2112,19 @@ public class WebConfig implements WebMvcConfigurer {
 	}
 }
 ----
-
-And we need a Controller that encapsulates our word generation logic.
+====
 
 
 
 [[mvc-view-xslt-controllercode]]
 === Controller
 
+We also need a Controller that encapsulates our word-generation logic.
+
 The controller logic is encapsulated in a `@Controller` class, with the
 handler method being defined as follows:
 
+====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2016,29 +2149,30 @@ handler method being defined as follows:
 		}
 	}
 ----
+====
 
-So far we've only created a DOM document and added it to the Model map. Note that you
+So far, we have only created a DOM document and added it to the Model map. Note that you
 can also load an XML file as a `Resource` and use it instead of a custom DOM document.
 
-Of course, there are software packages available that will automatically 'domify'
-an object graph, but within Spring, you have complete flexibility to create the DOM
+There are software packages available that automatically 'domify'
+an object graph, but, within Spring, you have complete flexibility to create the DOM
 from your model in any way you choose. This prevents the transformation of XML playing
-too great a part in the structure of your model data which is a danger when using tools
-to manage the domification process.
-
-Next, `XsltViewResolver` will resolve the "home" XSLT template file and merge the
-DOM document into it to generate our view.
+too great a part in the structure of your model data, which is a danger when using tools
+to manage the DOMification process.
 
 
 
 [[mvc-view-xslt-transforming]]
 === Transformation
 
-Finally, the `XsltViewResolver` will resolve the "home" XSLT template file and merge the
+Finally, the `XsltViewResolver` resolves the "`home`" XSLT template file and merges the
 DOM document into it to generate our view. As shown in the `XsltViewResolver`
-configuration, XSLT templates live in the war file in the `'WEB-INF/xsl'` directory
-and end with a `"xslt"` file extension.
+configuration, XSLT templates live in the `war` file in the `WEB-INF/xsl` directory
+and end with an `xslt` file extension.
 
+The following example shows an XSLT transform:
+
+====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2065,9 +2199,11 @@ and end with a `"xslt"` file extension.
 
 	</xsl:stylesheet>
 ----
+====
 
-This is rendered as:
+The preceding transform is rendered as the following HTML:
 
+====
 [source,html,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2086,3 +2222,4 @@ This is rendered as:
 	</body>
 </html>
 ----
+====

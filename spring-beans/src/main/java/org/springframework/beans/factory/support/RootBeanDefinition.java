@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -73,6 +74,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/** Package-visible field for caching the return type of a generically typed factory method. */
 	@Nullable
 	volatile ResolvableType factoryMethodReturnType;
+
+	/** Package-visible field for caching a unique factory method candidate for introspection. */
+	@Nullable
+	volatile Method factoryMethodToIntrospect;
 
 	/** Common lock for the four constructor fields below. */
 	final Object constructorArgumentLock = new Object();
@@ -336,6 +341,18 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Determine preferred constructors to use for default construction, if any.
+	 * Constructor arguments will be autowired if necessary.
+	 * @return one or more preferred constructors, or {@code null} if none
+	 * (in which case the regular no-arg default constructor will be called)
+	 * @since 5.1
+	 */
+	@Nullable
+	public Constructor<?>[] getPreferredConstructors() {
+		return null;
+	}
+
+	/**
 	 * Specify a factory method name that refers to a non-overloaded method.
 	 */
 	public void setUniqueFactoryMethodName(String name) {
@@ -357,10 +374,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	@Nullable
 	public Method getResolvedFactoryMethod() {
-		synchronized (this.constructorArgumentLock) {
-			Executable candidate = this.resolvedConstructorOrFactoryMethod;
-			return (candidate instanceof Method ? (Method) candidate : null);
-		}
+		return this.factoryMethodToIntrospect;
 	}
 
 	public void registerExternallyManagedConfigMember(Member configMember) {

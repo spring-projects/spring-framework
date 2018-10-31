@@ -86,8 +86,15 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		Assert.notNull(elementType, "'elementType' must not be null");
 
 		if (inputStream instanceof Mono) {
-			return ((Mono<? extends ResourceRegion>) inputStream)
-					.flatMapMany(region -> writeResourceRegion(region, bufferFactory, hints));
+			return Mono.from(inputStream)
+					.flatMapMany(region -> {
+						if (!region.getResource().isReadable()) {
+							return Flux.error(new EncodingException("Resource " +
+									region.getResource() + " is not readable"));
+						}
+
+						return writeResourceRegion(region, bufferFactory, hints);
+					});
 		}
 		else {
 			final String boundaryString = Hints.getRequiredHint(hints, BOUNDARY_STRING_HINT);
@@ -95,23 +102,29 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 			byte[] contentType =
 					(mimeType != null ? getAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0]);
 
-			Flux<DataBuffer> regions = Flux.from(inputStream).
-					concatMap(region ->
-							Flux.concat(
+			return Flux.from(inputStream).
+					concatMap(region -> {
+						if (!region.getResource().isReadable()) {
+							return Flux.error(new EncodingException("Resource " +
+									region.getResource() + " is not readable"));
+						}
+						else {
+							return Flux.concat(
 									getRegionPrefix(bufferFactory, startBoundary, contentType, region),
-									writeResourceRegion(region, bufferFactory, hints)
-							));
-			return Flux.concat(regions, getRegionSuffix(bufferFactory, boundaryString));
+									writeResourceRegion(region, bufferFactory, hints));
+						}
+					})
+					.concatWith(getRegionSuffix(bufferFactory, boundaryString));
 		}
 	}
 
 	private Flux<DataBuffer> getRegionPrefix(DataBufferFactory bufferFactory, byte[] startBoundary,
 			byte[] contentType, ResourceRegion region) {
 
-		return Flux.just(
+		return Flux.defer(() -> Flux.just(
 				bufferFactory.allocateBuffer(startBoundary.length).write(startBoundary),
 				bufferFactory.allocateBuffer(contentType.length).write(contentType),
-				bufferFactory.wrap(ByteBuffer.wrap(getContentRangeHeader(region)))
+				bufferFactory.wrap(ByteBuffer.wrap(getContentRangeHeader(region))))
 		);
 	}
 
@@ -133,7 +146,8 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 
 	private Flux<DataBuffer> getRegionSuffix(DataBufferFactory bufferFactory, String boundaryString) {
 		byte[] endBoundary = getAsciiBytes("\r\n--" + boundaryString + "--");
-		return Flux.just(bufferFactory.allocateBuffer(endBoundary.length).write(endBoundary));
+		return Flux.defer(() -> Flux.just(
+				bufferFactory.allocateBuffer(endBoundary.length).write(endBoundary)));
 	}
 
 	private byte[] getAsciiBytes(String in) {

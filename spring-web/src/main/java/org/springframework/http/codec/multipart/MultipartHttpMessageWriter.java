@@ -41,6 +41,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -225,11 +226,10 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 
 		outputMessage.getHeaders().setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params));
 
-		if (logger.isDebugEnabled()) {
-			String details = isEnableLoggingRequestDetails() ?
-					map.toString() : "parts " + map.keySet() + " (content masked)";
-			logger.debug(Hints.getLogPrefix(hints) + "Encoding " + details);
-		}
+		LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Encoding " +
+				(isEnableLoggingRequestDetails() ?
+						LogFormatUtils.formatValue(map, !traceOn) :
+						"parts " + map.keySet() + " (content masked)"));
 
 		Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())
 				.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue()))

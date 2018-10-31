@@ -52,7 +52,8 @@ public class StandardEnvironmentTests {
 	private static final Object NON_STRING_PROPERTY_NAME = new Object();
 	private static final Object NON_STRING_PROPERTY_VALUE = new Object();
 
-	private ConfigurableEnvironment environment = new StandardEnvironment();
+	private final ConfigurableEnvironment environment = new StandardEnvironment();
+
 
 	@Test
 	public void merge() {
@@ -132,12 +133,12 @@ public class StandardEnvironmentTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNullProfileArray() {
-		environment.setActiveProfiles((String[])null);
+		environment.setActiveProfiles((String[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNullProfile() {
-		environment.setActiveProfiles((String)null);
+		environment.setActiveProfiles((String) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -152,12 +153,12 @@ public class StandardEnvironmentTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfileArray() {
-		environment.setDefaultProfiles((String[])null);
+		environment.setDefaultProfiles((String[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfile() {
-		environment.setDefaultProfiles((String)null);
+		environment.setDefaultProfiles((String) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -271,12 +272,12 @@ public class StandardEnvironmentTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withNullArgumentList() {
-		environment.acceptsProfiles((String[])null);
+		environment.acceptsProfiles((String[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withNullArgument() {
-		environment.acceptsProfiles((String)null);
+		environment.acceptsProfiles((String) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -496,6 +497,7 @@ public class StandardEnvironmentTests {
 		getModifiableSystemEnvironment().remove(ALLOWED_PROPERTY_NAME);
 		getModifiableSystemEnvironment().remove(DISALLOWED_PROPERTY_NAME);
 	}
+
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, String> getModifiableSystemEnvironment() {

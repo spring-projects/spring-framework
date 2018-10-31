@@ -979,6 +979,19 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testConstructorInjectionWithPlainHashMapAsBean() {
+		RootBeanDefinition bd = new RootBeanDefinition(QualifiedMapConstructorInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		bf.registerBeanDefinition("myTestBeanMap", new RootBeanDefinition(HashMap.class));
+
+		QualifiedMapConstructorInjectionBean bean = (QualifiedMapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("myTestBeanMap"), bean.getTestBeanMap());
+		bean = (QualifiedMapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("myTestBeanMap"), bean.getTestBeanMap());
+	}
+
+	@Test
 	public void testConstructorInjectionWithTypedSetAsBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(SetConstructorInjectionBean.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1162,6 +1175,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		testBeans = bean.streamTestBeans();
 		assertEquals(1, testBeans.size());
 		assertTrue(testBeans.contains(bf.getBean("testBean")));
+		testBeans = bean.sortedTestBeans();
+		assertEquals(1, testBeans.size());
+		assertTrue(testBeans.contains(bf.getBean("testBean")));
 	}
 
 	@Test
@@ -1185,6 +1201,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertEquals(1, testBeans.size());
 		assertTrue(testBeans.contains(bf.getBean("testBean")));
 		testBeans = bean.streamTestBeans();
+		assertEquals(1, testBeans.size());
+		assertTrue(testBeans.contains(bf.getBean("testBean")));
+		testBeans = bean.sortedTestBeans();
 		assertEquals(1, testBeans.size());
 		assertTrue(testBeans.contains(bf.getBean("testBean")));
 	}
@@ -1213,6 +1232,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		testBeans = bean.forEachTestBeans();
 		assertTrue(testBeans.isEmpty());
 		testBeans = bean.streamTestBeans();
+		assertTrue(testBeans.isEmpty());
+		testBeans = bean.sortedTestBeans();
 		assertTrue(testBeans.isEmpty());
 	}
 
@@ -1249,25 +1270,31 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		List<?> testBeans = bean.iterateTestBeans();
 		assertEquals(2, testBeans.size());
-		assertTrue(testBeans.contains(bf.getBean("testBean1")));
-		assertTrue(testBeans.contains(bf.getBean("testBean2")));
+		assertSame(bf.getBean("testBean1"), testBeans.get(0));
+		assertSame(bf.getBean("testBean2"), testBeans.get(1));
 		testBeans = bean.forEachTestBeans();
 		assertEquals(2, testBeans.size());
-		assertTrue(testBeans.contains(bf.getBean("testBean1")));
-		assertTrue(testBeans.contains(bf.getBean("testBean2")));
+		assertSame(bf.getBean("testBean1"), testBeans.get(0));
+		assertSame(bf.getBean("testBean2"), testBeans.get(1));
 		testBeans = bean.streamTestBeans();
 		assertEquals(2, testBeans.size());
-		assertTrue(testBeans.contains(bf.getBean("testBean1")));
-		assertTrue(testBeans.contains(bf.getBean("testBean2")));
+		assertSame(bf.getBean("testBean1"), testBeans.get(0));
+		assertSame(bf.getBean("testBean2"), testBeans.get(1));
+		testBeans = bean.sortedTestBeans();
+		assertEquals(2, testBeans.size());
+		assertSame(bf.getBean("testBean1"), testBeans.get(0));
+		assertSame(bf.getBean("testBean2"), testBeans.get(1));
 	}
 
 	@Test
 	public void testObjectProviderInjectionWithTargetPrimary() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectProviderInjectionBean.class));
-		RootBeanDefinition tb1 = new RootBeanDefinition(TestBean.class);
+		RootBeanDefinition tb1 = new RootBeanDefinition(TestBeanFactory.class);
+		tb1.setFactoryMethodName("newTestBean1");
 		tb1.setPrimary(true);
 		bf.registerBeanDefinition("testBean1", tb1);
-		RootBeanDefinition tb2 = new RootBeanDefinition(TestBean.class);
+		RootBeanDefinition tb2 = new RootBeanDefinition(TestBeanFactory.class);
+		tb2.setFactoryMethodName("newTestBean2");
 		tb2.setLazyInit(true);
 		bf.registerBeanDefinition("testBean2", tb2);
 
@@ -1281,16 +1308,39 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		List<?> testBeans = bean.iterateTestBeans();
 		assertEquals(2, testBeans.size());
-		assertTrue(testBeans.contains(bf.getBean("testBean1")));
-		assertTrue(testBeans.contains(bf.getBean("testBean2")));
+		assertSame(bf.getBean("testBean1"), testBeans.get(0));
+		assertSame(bf.getBean("testBean2"), testBeans.get(1));
 		testBeans = bean.forEachTestBeans();
 		assertEquals(2, testBeans.size());
-		assertTrue(testBeans.contains(bf.getBean("testBean1")));
-		assertTrue(testBeans.contains(bf.getBean("testBean2")));
+		assertSame(bf.getBean("testBean1"), testBeans.get(0));
+		assertSame(bf.getBean("testBean2"), testBeans.get(1));
 		testBeans = bean.streamTestBeans();
 		assertEquals(2, testBeans.size());
-		assertTrue(testBeans.contains(bf.getBean("testBean1")));
-		assertTrue(testBeans.contains(bf.getBean("testBean2")));
+		assertSame(bf.getBean("testBean1"), testBeans.get(0));
+		assertSame(bf.getBean("testBean2"), testBeans.get(1));
+		testBeans = bean.sortedTestBeans();
+		assertEquals(2, testBeans.size());
+		assertSame(bf.getBean("testBean2"), testBeans.get(0));
+		assertSame(bf.getBean("testBean1"), testBeans.get(1));
+	}
+
+	@Test
+	public void testObjectProviderInjectionWithUnresolvedOrderedStream() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectProviderInjectionBean.class));
+		RootBeanDefinition tb1 = new RootBeanDefinition(TestBeanFactory.class);
+		tb1.setFactoryMethodName("newTestBean1");
+		tb1.setPrimary(true);
+		bf.registerBeanDefinition("testBean1", tb1);
+		RootBeanDefinition tb2 = new RootBeanDefinition(TestBeanFactory.class);
+		tb2.setFactoryMethodName("newTestBean2");
+		tb2.setLazyInit(true);
+		bf.registerBeanDefinition("testBean2", tb2);
+
+		ObjectProviderInjectionBean bean = (ObjectProviderInjectionBean) bf.getBean("annotatedBean");
+		List<?> testBeans = bean.sortedTestBeans();
+		assertEquals(2, testBeans.size());
+		assertSame(bf.getBean("testBean2"), testBeans.get(0));
+		assertSame(bf.getBean("testBean1"), testBeans.get(1));
 	}
 
 	@Test
@@ -2668,6 +2718,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class QualifiedMapConstructorInjectionBean {
+
+		private Map<String, TestBean> testBeanMap;
+
+		@Autowired
+		public QualifiedMapConstructorInjectionBean(@Qualifier("myTestBeanMap") Map<String, TestBean> testBeanMap) {
+			this.testBeanMap = testBeanMap;
+		}
+
+		public Map<String, TestBean> getTestBeanMap() {
+			return this.testBeanMap;
+		}
+	}
+
+
 	public static class SetConstructorInjectionBean {
 
 		private Set<TestBean> testBeanSet;
@@ -2833,6 +2898,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		public List<TestBean> streamTestBeans() {
 			return this.testBeanProvider.stream().collect(Collectors.toList());
+		}
+
+		public List<TestBean> sortedTestBeans() {
+			return this.testBeanProvider.orderedStream().collect(Collectors.toList());
 		}
 	}
 
@@ -3792,6 +3861,20 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		public static SelfInjectingFactoryBean create() {
 			return new SelfInjectingFactoryBean();
+		}
+	}
+
+
+	public static class TestBeanFactory {
+
+		@Order(1)
+		public static TestBean newTestBean1() {
+			return new TestBean();
+		}
+
+		@Order(0)
+		public static TestBean newTestBean2() {
+			return new TestBean();
 		}
 	}
 

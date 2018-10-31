@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,7 @@ public class SpringFactoriesLoaderTests {
 
 	@Test
 	public void loadFactoriesInCorrectOrder() {
-		List<DummyFactory> factories = SpringFactoriesLoader
-				.loadFactories(DummyFactory.class, null);
+		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(DummyFactory.class, null);
 		assertEquals(2, factories.size());
 		assertTrue(factories.get(0) instanceof MyDummyFactory1);
 		assertTrue(factories.get(1) instanceof MyDummyFactory2);
@@ -46,9 +45,9 @@ public class SpringFactoriesLoaderTests {
 	}
 
 	@Test
-	public void loadPackagePrivateFactory() throws Exception {
-		List<DummyPackagePrivateFactory> factories = SpringFactoriesLoader
-				.loadFactories(DummyPackagePrivateFactory.class, null);
+	public void loadPackagePrivateFactory() {
+		List<DummyPackagePrivateFactory> factories =
+				SpringFactoriesLoader.loadFactories(DummyPackagePrivateFactory.class, null);
 		assertEquals(1, factories.size());
 		assertTrue((factories.get(0).getClass().getModifiers() & Modifier.PUBLIC) == 0);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -64,7 +65,7 @@ public class MockFilterConfig implements FilterConfig {
 	 * Create a new MockFilterConfig.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 */
-	public MockFilterConfig(ServletContext servletContext) {
+	public MockFilterConfig(@Nullable ServletContext servletContext) {
 		this(servletContext, "");
 	}
 
@@ -73,7 +74,7 @@ public class MockFilterConfig implements FilterConfig {
 	 * @param servletContext the ServletContext that the servlet runs in
 	 * @param filterName the name of the filter
 	 */
-	public MockFilterConfig(ServletContext servletContext, String filterName) {
+	public MockFilterConfig(@Nullable ServletContext servletContext, String filterName) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.filterName = filterName;
 	}
@@ -81,12 +82,12 @@ public class MockFilterConfig implements FilterConfig {
 
 	@Override
 	public String getFilterName() {
-		return filterName;
+		return this.filterName;
 	}
 
 	@Override
 	public ServletContext getServletContext() {
-		return servletContext;
+		return this.servletContext;
 	}
 
 	public void addInitParameter(String name, String value) {

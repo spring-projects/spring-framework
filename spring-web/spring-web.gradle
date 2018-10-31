@@ -29,6 +29,7 @@ dependencies {
 	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 	optional("io.netty:netty-all")
 	optional("io.projectreactor.netty:reactor-netty")
+	optional("io.undertow:undertow-core:${undertowVersion}")
 	optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	optional("org.eclipse.jetty:jetty-server") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
@@ -36,7 +37,7 @@ dependencies {
 	optional("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
-	optional("io.undertow:undertow-core:${undertowVersion}")
+	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.1")
 	optional("com.squareup.okhttp3:okhttp:3.11.0")
 	optional("org.apache.httpcomponents:httpclient:4.5.6") {
 		exclude group: "commons-logging", module: "commons-logging"
@@ -49,7 +50,7 @@ dependencies {
 	optional("com.fasterxml.woodstox:woodstox-core:5.1.0") {  // woodstox before aalto
 		exclude group: "stax", module: "stax-api"
 	}
-	optional("com.fasterxml:aalto-xml:1.1.0")
+	optional("com.fasterxml:aalto-xml:1.1.1")
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
@@ -57,12 +58,11 @@ dependencies {
 	optional("com.google.code.gson:gson:2.8.5")
 	optional("com.google.protobuf:protobuf-java-util:3.6.1")
 	optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
-	optional("com.rometools:rome:1.11.0")
+	optional("com.rometools:rome:1.11.1")
 	optional("com.caucho:hessian:4.0.51")
 	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.1")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
 		exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
@@ -81,6 +81,6 @@ dependencies {
 	testRuntime("com.sun.mail:javax.mail:1.6.2")
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
-	testRuntime("javax.json:javax.json-api:1.1.2")
-	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.9")
+	testRuntime("javax.json:javax.json-api:1.1.3")
+	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.10")
 }

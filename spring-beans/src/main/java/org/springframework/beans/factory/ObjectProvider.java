@@ -35,6 +35,8 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 4.3
  * @param <T> the object type
+ * @see BeanFactory#getBeanProvider
+ * @see org.springframework.beans.factory.annotation.Autowired
  */
 public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 
@@ -137,8 +139,8 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	}
 
 	/**
-	 * Return an {@link Iterator} over resolved object instances.
-	 * <p>The default implementation delegates to {@link #stream()}.
+	 * Return an {@link Iterator} over all matching object instances,
+	 * without specific ordering guarantees (but typically in registration order).
 	 * @since 5.1
 	 * @see #stream()
 	 */
@@ -148,15 +150,30 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	}
 
 	/**
-	 * Return a sequential {@link Stream} over resolved object instances.
-	 * <p>The default implementation returns a stream of one element or an
-	 * empty stream if not available, resolved via {@link #getIfAvailable()}.
+	 * Return a sequential {@link Stream} over all matching object instances,
+	 * without specific ordering guarantees (but typically in registration order).
 	 * @since 5.1
 	 * @see #iterator()
+	 * @see #orderedStream()
 	 */
 	default Stream<T> stream() {
-		T instance = getIfAvailable();
-		return (instance != null ? Stream.of(instance) : Stream.empty());
+		throw new UnsupportedOperationException("Multi element access not supported");
+	}
+
+	/**
+	 * Return a sequential {@link Stream} over all matching object instances,
+	 * pre-ordered according to the factory's common order comparator.
+	 * <p>In a standard Spring application context, this will be ordered
+	 * according to {@link org.springframework.core.Ordered} conventions,
+	 * and in case of annotation-based configuration also considering the
+	 * {@link org.springframework.core.annotation.Order} annotation,
+	 * analogous to multi-element injection points of list/array type.
+	 * @since 5.1
+	 * @see #stream()
+	 * @see org.springframework.core.OrderComparator
+	 */
+	default Stream<T> orderedStream() {
+		throw new UnsupportedOperationException("Ordered element access not supported");
 	}
 
 }

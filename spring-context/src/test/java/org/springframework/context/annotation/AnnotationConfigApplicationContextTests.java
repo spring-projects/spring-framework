@@ -90,6 +90,39 @@ public class AnnotationConfigApplicationContextTests {
 		assertThat(testBean.name, equalTo("foo"));
 	}
 
+	@Test
+	public void getBeanByTypeRaisesNoSuchBeanDefinitionException() {
+		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+
+		// attempt to retrieve a bean that does not exist
+		Class<?> targetType = Pattern.class;
+		try {
+			context.getBean(targetType);
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			assertThat(ex.getMessage(), containsString(format("No qualifying bean of type '%s'", targetType.getName())));
+		}
+	}
+
+	@Test
+	public void getBeanByTypeAmbiguityRaisesException() {
+		ApplicationContext context = new AnnotationConfigApplicationContext(TwoTestBeanConfig.class);
+
+		try {
+			context.getBean(TestBean.class);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			assertThat(ex.getMessage(),
+					allOf(
+							containsString("No qualifying bean of type '" + TestBean.class.getName() + "'"),
+							containsString("tb1"),
+							containsString("tb2")
+					)
+			);
+		}
+	}
+
 	/**
 	 * Tests that Configuration classes are registered according to convention
 	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator#generateBeanName
@@ -114,6 +147,41 @@ public class AnnotationConfigApplicationContextTests {
 		// attempt to retrieve the instance by its specified name
 		ConfigWithCustomName configObject = (ConfigWithCustomName) context.getBean("customConfigBeanName");
 		assertNotNull(configObject);
+	}
+
+	@Test
+	public void autowiringIsEnabledByDefault() {
+		ApplicationContext context = new AnnotationConfigApplicationContext(AutowiredConfig.class);
+		assertThat(context.getBean(TestBean.class).name, equalTo("foo"));
+	}
+
+	@Test
+	public void nullReturningBeanPostProcessor() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(AutowiredConfig.class);
+		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
+			public Object postProcessBeforeInitialization(Object bean, String beanName) {
+				return (bean instanceof TestBean ? null : bean);
+			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				return bean;
+			}
+		});
+		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
+			public Object postProcessBeforeInitialization(Object bean, String beanName) {
+				bean.getClass().getName();
+				return bean;
+			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				bean.getClass().getName();
+				return bean;
+			}
+		});
+		context.refresh();
 	}
 
 	@Test
@@ -299,74 +367,6 @@ public class AnnotationConfigApplicationContextTests {
 		assertEquals(FactoryBean.class, context.getType("&fb"));
 	}
 
-	@Test
-	public void getBeanByTypeRaisesNoSuchBeanDefinitionException() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
-
-		// attempt to retrieve a bean that does not exist
-		Class<?> targetType = Pattern.class;
-		try {
-			context.getBean(targetType);
-			fail("Should have thrown NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			assertThat(ex.getMessage(), containsString(format("No qualifying bean of type '%s'", targetType.getName())));
-		}
-	}
-
-	@Test
-	public void getBeanByTypeAmbiguityRaisesException() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(TwoTestBeanConfig.class);
-
-		try {
-			context.getBean(TestBean.class);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			assertThat(ex.getMessage(),
-					allOf(
-						containsString("No qualifying bean of type '" + TestBean.class.getName() + "'"),
-						containsString("tb1"),
-						containsString("tb2")
-					)
-				);
-		}
-	}
-
-	@Test
-	public void autowiringIsEnabledByDefault() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(AutowiredConfig.class);
-		assertThat(context.getBean(TestBean.class).name, equalTo("foo"));
-	}
-
-	@Test
-	public void nullReturningBeanPostProcessor() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(AutowiredConfig.class);
-		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
-			@Override
-			public Object postProcessBeforeInitialization(Object bean, String beanName) {
-				return (bean instanceof TestBean ? null : bean);
-			}
-			@Override
-			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				return bean;
-			}
-		});
-		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
-			@Override
-			public Object postProcessBeforeInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
-				return bean;
-			}
-			@Override
-			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
-				return bean;
-			}
-		});
-		context.refresh();
-	}
-
 
 	@Configuration
 	static class Config {
@@ -381,14 +381,6 @@ public class AnnotationConfigApplicationContextTests {
 
 	@Configuration("customConfigBeanName")
 	static class ConfigWithCustomName {
-
-		@Bean
-		public TestBean testBean() {
-			return new TestBean();
-		}
-	}
-
-	static class ConfigMissingAnnotation {
 
 		@Bean
 		public TestBean testBean() {

@@ -43,7 +43,7 @@ import org.springframework.web.multipart.support.RequestPartServletServerHttpReq
 /**
  * Resolves the following method arguments:
  * <ul>
- * <li>Annotated with {@code @RequestPart}
+ * <li>Annotated with @{@link RequestPart}
  * <li>Of type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver} abstraction
  * <li>Of type {@code javax.servlet.http.Part} in conjunction with Servlet 3.0 multipart requests
  * </ul>

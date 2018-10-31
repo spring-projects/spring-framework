@@ -382,9 +382,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			@Override
 			public Stream<T> stream() {
-				return Arrays.stream(getBeanNamesForType(requiredType))
+				return Arrays.stream(getBeanNamesForTypedStream(requiredType))
 						.map(name -> (T) getBean(name))
 						.filter(bean -> !(bean instanceof NullBean));
+			}
+			@Override
+			public Stream<T> orderedStream() {
+				String[] beanNames = getBeanNamesForTypedStream(requiredType);
+				Map<String, T> matchingBeans = new LinkedHashMap<>(beanNames.length);
+				for (String beanName : beanNames) {
+					Object beanInstance = getBean(beanName);
+					if (!(beanInstance instanceof NullBean)) {
+						matchingBeans.put(beanName, (T) beanInstance);
+					}
+				}
+				Stream<T> stream = matchingBeans.values().stream();
+				return stream.sorted(adaptOrderComparator(matchingBeans));
 			}
 		};
 	}
@@ -409,6 +422,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return null;
+	}
+
+	private String[] getBeanNamesForTypedStream(ResolvableType requiredType) {
+		return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
 	}
 
 
@@ -440,7 +457,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public String[] getBeanNamesForType(ResolvableType type) {
-		return doGetBeanNamesForType(type, true, true);
+		Class<?> resolved = type.resolve();
+		if (resolved != null && !type.hasGenerics()) {
+			return getBeanNamesForType(resolved, true, true);
+		}
+		else {
+			return doGetBeanNamesForType(type, true, true);
+		}
 	}
 
 	@Override
@@ -642,7 +665,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
-			throws NoSuchBeanDefinitionException{
+			throws NoSuchBeanDefinitionException {
 
 		A ann = null;
 		Class<?> beanType = getType(beanName);
@@ -732,14 +755,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		String beanDefinitionName = BeanFactoryUtils.transformedBeanName(beanName);
 		resolveBeanClass(mbd, beanDefinitionName);
-		if (mbd.isFactoryMethodUnique) {
-			boolean resolve;
-			synchronized (mbd.constructorArgumentLock) {
-				resolve = (mbd.resolvedConstructorOrFactoryMethod == null);
-			}
-			if (resolve) {
-				new ConstructorResolver(this).resolveFactoryMethodIfPossible(mbd);
-			}
+		if (mbd.isFactoryMethodUnique && mbd.factoryMethodToIntrospect == null) {
+			new ConstructorResolver(this).resolveFactoryMethodIfPossible(mbd);
 		}
 		return resolver.isAutowireCandidate(
 				new BeanDefinitionHolder(mbd, beanName, getAliases(beanDefinitionName)), descriptor);
@@ -1242,29 +1259,33 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private Object resolveMultipleBeans(DependencyDescriptor descriptor, @Nullable String beanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) {
 
-		Class<?> type = descriptor.getDependencyType();
+		final Class<?> type = descriptor.getDependencyType();
 
-		if (descriptor.isStreamAccess()) {
-			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type,
-					new MultiElementDescriptor(descriptor, false));
+		if (descriptor instanceof StreamDependencyDescriptor) {
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
-			return matchingBeans.values().stream();
+			Stream<Object> stream = matchingBeans.keySet().stream()
+					.map(name -> descriptor.resolveCandidate(name, type, this))
+					.filter(bean -> !(bean instanceof NullBean));
+			if (((StreamDependencyDescriptor) descriptor).isOrdered()) {
+				stream = stream.sorted(adaptOrderComparator(matchingBeans));
+			}
+			return stream;
 		}
 		else if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
 			ResolvableType resolvableType = descriptor.getResolvableType();
-			Class<?> resolvedArrayType = resolvableType.resolve();
-			if (resolvedArrayType != null && resolvedArrayType != type) {
-				type = resolvedArrayType;
+			Class<?> resolvedArrayType = resolvableType.resolve(type);
+			if (resolvedArrayType != type) {
 				componentType = resolvableType.getComponentType().resolve();
 			}
 			if (componentType == null) {
 				return null;
 			}
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType,
-					new MultiElementDescriptor(descriptor, true));
+					new MultiElementDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1272,9 +1293,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
-			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
-			if (getDependencyComparator() != null && result instanceof Object[]) {
-				Arrays.sort((Object[]) result, adaptDependencyComparator(matchingBeans));
+			Object result = converter.convertIfNecessary(matchingBeans.values(), resolvedArrayType);
+			if (result instanceof Object[]) {
+				Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
+				if (comparator != null) {
+					Arrays.sort((Object[]) result, comparator);
+				}
 			}
 			return result;
 		}
@@ -1284,7 +1308,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, elementType,
-					new MultiElementDescriptor(descriptor, true));
+					new MultiElementDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1293,8 +1317,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
-			if (getDependencyComparator() != null && result instanceof List) {
-				((List<?>) result).sort(adaptDependencyComparator(matchingBeans));
+			if (result instanceof List) {
+				Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
+				if (comparator != null) {
+					((List<?>) result).sort(comparator);
+				}
 			}
 			return result;
 		}
@@ -1309,7 +1336,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType,
-					new MultiElementDescriptor(descriptor, true));
+					new MultiElementDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1333,7 +1360,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Nullable
-	private Comparator<Object> adaptDependencyComparator(Map<String, Object> matchingBeans) {
+	private Comparator<Object> adaptDependencyComparator(Map<String, ?> matchingBeans) {
 		Comparator<Object> comparator = getDependencyComparator();
 		if (comparator instanceof OrderComparator) {
 			return ((OrderComparator) comparator).withSourceProvider(
@@ -1344,7 +1371,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
-	private OrderComparator.OrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, Object> beans) {
+	private Comparator<Object> adaptOrderComparator(Map<String, ?> matchingBeans) {
+		Comparator<Object> dependencyComparator = getDependencyComparator();
+		OrderComparator comparator = (dependencyComparator instanceof OrderComparator ?
+				(OrderComparator) dependencyComparator : OrderComparator.INSTANCE);
+		return comparator.withSourceProvider(createFactoryAwareOrderSourceProvider(matchingBeans));
+	}
+
+	private OrderComparator.OrderSourceProvider createFactoryAwareOrderSourceProvider(Map<String, ?> beans) {
 		IdentityHashMap<Object, String> instancesToBeanNames = new IdentityHashMap<>();
 		beans.forEach((beanName, instance) -> instancesToBeanNames.put(instance, beanName));
 		return new FactoryAwareOrderSourceProvider(instancesToBeanNames);
@@ -1385,15 +1419,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				addCandidateEntry(result, candidate, descriptor, requiredType);
 			}
 		}
-		if (result.isEmpty() && !indicatesMultipleBeans(requiredType)) {
+		if (result.isEmpty()) {
+			boolean multiple = indicatesMultipleBeans(requiredType);
 			// Consider fallback matches if the first pass failed to find anything...
 			DependencyDescriptor fallbackDescriptor = descriptor.forFallbackMatch();
 			for (String candidate : candidateNames) {
-				if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, fallbackDescriptor)) {
+				if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, fallbackDescriptor) &&
+						(!multiple || getAutowireCandidateResolver().hasQualifier(descriptor))) {
 					addCandidateEntry(result, candidate, descriptor, requiredType);
 				}
 			}
-			if (result.isEmpty()) {
+			if (result.isEmpty() && !multiple) {
 				// Consider self references as a final pass...
 				// but in the case of a dependency collection, not the very same bean itself.
 				for (String candidate : candidateNames) {
@@ -1421,7 +1457,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				candidates.put(candidateName, beanInstance);
 			}
 		}
-		else if (containsSingleton(candidateName)) {
+		else if (containsSingleton(candidateName) || (descriptor instanceof StreamDependencyDescriptor &&
+				((StreamDependencyDescriptor) descriptor).isOrdered())) {
 			Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
 			candidates.put(candidateName, (beanInstance instanceof NullBean ? null : beanInstance));
 		}
@@ -1731,15 +1768,30 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
-	 * A dependency descriptor marker for multiple elements.
+	 * A dependency descriptor for a multi-element declaration with nested elements.
 	 */
-	private static class MultiElementDescriptor extends DependencyDescriptor {
+	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
 
-		public MultiElementDescriptor(DependencyDescriptor original, boolean nested) {
+		public MultiElementDescriptor(DependencyDescriptor original) {
 			super(original);
-			if (nested) {
-				increaseNestingLevel();
-			}
+		}
+	}
+
+
+	/**
+	 * A dependency descriptor marker for stream access to multiple elements.
+	 */
+	private static class StreamDependencyDescriptor extends DependencyDescriptor {
+
+		private final boolean ordered;
+
+		public StreamDependencyDescriptor(DependencyDescriptor original, boolean ordered) {
+			super(original);
+			this.ordered = ordered;
+		}
+
+		public boolean isOrdered() {
+			return this.ordered;
 		}
 	}
 
@@ -1849,25 +1901,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public Stream<Object> stream() {
-			DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
-				@Override
-				public boolean isStreamAccess() {
-					return true;
-				}
-			};
+			return resolveStream(false);
+		}
+
+		@Override
+		public Stream<Object> orderedStream() {
+			return resolveStream(true);
+		}
+
+		@SuppressWarnings("unchecked")
+		private Stream<Object> resolveStream(boolean ordered) {
+			DependencyDescriptor descriptorToUse = new StreamDependencyDescriptor(this.descriptor, ordered);
 			Object result = doResolveDependency(descriptorToUse, this.beanName, null, null);
-			if (result instanceof Stream) {
-				return (Stream<Object>) result;
-			}
-			else if (result instanceof Collection) {
-				return ((Collection<Object>) result).stream();
-			}
-			else {
-				return (result != null ? Stream.of(result) : Stream.empty());
-			}
+			Assert.state(result instanceof Stream, "Stream expected");
+			return (Stream<Object>) result;
 		}
 	}
 

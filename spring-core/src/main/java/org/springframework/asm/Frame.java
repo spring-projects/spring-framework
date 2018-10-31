@@ -224,6 +224,38 @@ class Frame {
   private int[] initializations;
 
   // -----------------------------------------------------------------------------------------------
+  // Constructor
+  // -----------------------------------------------------------------------------------------------
+
+  /**
+   * Constructs a new Frame.
+   *
+   * @param owner the basic block to which these input and output stack map frames correspond.
+   */
+  Frame(final Label owner) {
+    this.owner = owner;
+  }
+
+  /**
+   * Sets this frame to the value of the given frame.
+   *
+   * <p>WARNING: after this method is called the two frames share the same data structures. It is
+   * recommended to discard the given frame to avoid unexpected side effects.
+   *
+   * @param frame The new frame value.
+   */
+  final void copyFrom(final Frame frame) {
+    inputLocals = frame.inputLocals;
+    inputStack = frame.inputStack;
+    outputStackStart = 0;
+    outputLocals = frame.outputLocals;
+    outputStack = frame.outputStack;
+    outputStackTop = frame.outputStackTop;
+    initializationCount = frame.initializationCount;
+    initializations = frame.initializations;
+  }
+
+  // -----------------------------------------------------------------------------------------------
   // Static methods to get abstract types from other type formats
   // -----------------------------------------------------------------------------------------------
 
@@ -337,38 +369,6 @@ class Frame {
   }
 
   // -----------------------------------------------------------------------------------------------
-  // Constructor
-  // -----------------------------------------------------------------------------------------------
-
-  /**
-   * Constructs a new Frame.
-   *
-   * @param owner the basic block to which these input and output stack map frames correspond.
-   */
-  Frame(final Label owner) {
-    this.owner = owner;
-  }
-
-  /**
-   * Sets this frame to the value of the given frame.
-   *
-   * <p>WARNING: after this method is called the two frames share the same data structures. It is
-   * recommended to discard the given frame to avoid unexpected side effects.
-   *
-   * @param frame The new frame value.
-   */
-  final void copyFrom(final Frame frame) {
-    inputLocals = frame.inputLocals;
-    inputStack = frame.inputStack;
-    outputStackStart = 0;
-    outputLocals = frame.outputLocals;
-    outputStack = frame.outputStack;
-    outputStackTop = frame.outputStackTop;
-    initializationCount = frame.initializationCount;
-    initializations = frame.initializations;
-  }
-
-  // -----------------------------------------------------------------------------------------------
   // Methods related to the input frame
   // -----------------------------------------------------------------------------------------------
 
@@ -415,21 +415,21 @@ class Frame {
    * Sets the input frame from the given public API frame description.
    *
    * @param symbolTable the type table to use to lookup and store type {@link Symbol}.
-   * @param nLocal the number of local variables.
+   * @param numLocal the number of local variables.
    * @param local the local variable types, described using the same format as in {@link
    *     MethodVisitor#visitFrame}.
-   * @param nStack the number of operand stack elements.
+   * @param numStack the number of operand stack elements.
    * @param stack the operand stack types, described using the same format as in {@link
    *     MethodVisitor#visitFrame}.
    */
   final void setInputFrameFromApiFormat(
       final SymbolTable symbolTable,
-      final int nLocal,
+      final int numLocal,
       final Object[] local,
-      final int nStack,
+      final int numStack,
       final Object[] stack) {
     int inputLocalIndex = 0;
-    for (int i = 0; i < nLocal; ++i) {
+    for (int i = 0; i < numLocal; ++i) {
       inputLocals[inputLocalIndex++] = getAbstractTypeFromApiFormat(symbolTable, local[i]);
       if (local[i] == Opcodes.LONG || local[i] == Opcodes.DOUBLE) {
         inputLocals[inputLocalIndex++] = TOP;
@@ -438,15 +438,15 @@ class Frame {
     while (inputLocalIndex < inputLocals.length) {
       inputLocals[inputLocalIndex++] = TOP;
     }
-    int nStackTop = 0;
-    for (int i = 0; i < nStack; ++i) {
+    int numStackTop = 0;
+    for (int i = 0; i < numStack; ++i) {
       if (stack[i] == Opcodes.LONG || stack[i] == Opcodes.DOUBLE) {
-        ++nStackTop;
+        ++numStackTop;
       }
     }
-    inputStack = new int[nStack + nStackTop];
+    inputStack = new int[numStack + numStackTop];
     int inputStackIndex = 0;
-    for (int i = 0; i < nStack; ++i) {
+    for (int i = 0; i < numStack; ++i) {
       inputStack[inputStackIndex++] = getAbstractTypeFromApiFormat(symbolTable, stack[i]);
       if (stack[i] == Opcodes.LONG || stack[i] == Opcodes.DOUBLE) {
         inputStack[inputStackIndex++] = TOP;
@@ -1122,13 +1122,13 @@ class Frame {
     // Compute the concrete types of the local variables at the end of the basic block corresponding
     // to this frame, by resolving its abstract output types, and merge these concrete types with
     // those of the local variables in the input frame of dstFrame.
-    int nLocal = inputLocals.length;
-    int nStack = inputStack.length;
+    int numLocal = inputLocals.length;
+    int numStack = inputStack.length;
     if (dstFrame.inputLocals == null) {
-      dstFrame.inputLocals = new int[nLocal];
+      dstFrame.inputLocals = new int[numLocal];
       frameChanged = true;
     }
-    for (int i = 0; i < nLocal; ++i) {
+    for (int i = 0; i < numLocal; ++i) {
       int concreteOutputType;
       if (outputLocals != null && i < outputLocals.length) {
         int abstractOutputType = outputLocals[i];
@@ -1152,7 +1152,7 @@ class Frame {
             // By definition, a STACK_KIND type designates the concrete type of a local variable at
             // the beginning of the basic block corresponding to this frame (which is known when
             // this method is called, but was not when the abstract type was computed).
-            concreteOutputType = dim + inputStack[nStack - (abstractOutputType & VALUE_MASK)];
+            concreteOutputType = dim + inputStack[numStack - (abstractOutputType & VALUE_MASK)];
             if ((abstractOutputType & TOP_IF_LONG_OR_DOUBLE_FLAG) != 0
                 && (concreteOutputType == LONG || concreteOutputType == DOUBLE)) {
               concreteOutputType = TOP;
@@ -1181,7 +1181,7 @@ class Frame {
     // frame (and the input stack of dstFrame should be compatible, i.e. merged, with a one
     // element stack containing the caught exception type).
     if (catchTypeIndex > 0) {
-      for (int i = 0; i < nLocal; ++i) {
+      for (int i = 0; i < numLocal; ++i) {
         frameChanged |= merge(symbolTable, inputLocals[i], dstFrame.inputLocals, i);
       }
       if (dstFrame.inputStack == null) {
@@ -1195,15 +1195,15 @@ class Frame {
     // Compute the concrete types of the stack operands at the end of the basic block corresponding
     // to this frame, by resolving its abstract output types, and merge these concrete types with
     // those of the stack operands in the input frame of dstFrame.
-    int nInputStack = inputStack.length + outputStackStart;
+    int numInputStack = inputStack.length + outputStackStart;
     if (dstFrame.inputStack == null) {
-      dstFrame.inputStack = new int[nInputStack + outputStackTop];
+      dstFrame.inputStack = new int[numInputStack + outputStackTop];
       frameChanged = true;
     }
     // First, do this for the stack operands that have not been popped in the basic block
     // corresponding to this frame, and which are therefore equal to their value in the input
     // frame (except for uninitialized types, which may have been initialized).
-    for (int i = 0; i < nInputStack; ++i) {
+    for (int i = 0; i < numInputStack; ++i) {
       int concreteOutputType = inputStack[i];
       if (initializations != null) {
         concreteOutputType = getInitializedType(symbolTable, concreteOutputType);
@@ -1224,7 +1224,7 @@ class Frame {
           concreteOutputType = TOP;
         }
       } else if (kind == STACK_KIND) {
-        concreteOutputType = dim + inputStack[nStack - (abstractOutputType & VALUE_MASK)];
+        concreteOutputType = dim + inputStack[numStack - (abstractOutputType & VALUE_MASK)];
         if ((abstractOutputType & TOP_IF_LONG_OR_DOUBLE_FLAG) != 0
             && (concreteOutputType == LONG || concreteOutputType == DOUBLE)) {
           concreteOutputType = TOP;
@@ -1235,7 +1235,8 @@ class Frame {
       if (initializations != null) {
         concreteOutputType = getInitializedType(symbolTable, concreteOutputType);
       }
-      frameChanged |= merge(symbolTable, concreteOutputType, dstFrame.inputStack, nInputStack + i);
+      frameChanged |=
+          merge(symbolTable, concreteOutputType, dstFrame.inputStack, numInputStack + i);
     }
     return frameChanged;
   }
@@ -1348,38 +1349,38 @@ class Frame {
     // Compute the number of locals, ignoring TOP types that are just after a LONG or a DOUBLE, and
     // all trailing TOP types.
     int[] localTypes = inputLocals;
-    int nLocal = 0;
-    int nTrailingTop = 0;
+    int numLocal = 0;
+    int numTrailingTop = 0;
     int i = 0;
     while (i < localTypes.length) {
       int localType = localTypes[i];
       i += (localType == LONG || localType == DOUBLE) ? 2 : 1;
       if (localType == TOP) {
-        nTrailingTop++;
+        numTrailingTop++;
       } else {
-        nLocal += nTrailingTop + 1;
-        nTrailingTop = 0;
+        numLocal += numTrailingTop + 1;
+        numTrailingTop = 0;
       }
     }
     // Compute the stack size, ignoring TOP types that are just after a LONG or a DOUBLE.
     int[] stackTypes = inputStack;
-    int nStack = 0;
+    int numStack = 0;
     i = 0;
     while (i < stackTypes.length) {
       int stackType = stackTypes[i];
       i += (stackType == LONG || stackType == DOUBLE) ? 2 : 1;
-      nStack++;
+      numStack++;
     }
     // Visit the frame and its content.
-    int frameIndex = methodWriter.visitFrameStart(owner.bytecodeOffset, nLocal, nStack);
+    int frameIndex = methodWriter.visitFrameStart(owner.bytecodeOffset, numLocal, numStack);
     i = 0;
-    while (nLocal-- > 0) {
+    while (numLocal-- > 0) {
       int localType = localTypes[i];
       i += (localType == LONG || localType == DOUBLE) ? 2 : 1;
       methodWriter.visitAbstractType(frameIndex++, localType);
     }
     i = 0;
-    while (nStack-- > 0) {
+    while (numStack-- > 0) {
       int stackType = stackTypes[i];
       i += (stackType == LONG || stackType == DOUBLE) ? 2 : 1;
       methodWriter.visitAbstractType(frameIndex++, stackType);

@@ -55,6 +55,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.stereotype.Component;
@@ -1650,11 +1651,18 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class MapArgumentConfiguration {
 
+		@Autowired
+		ConfigurableEnvironment env;
+
 		Map<String, Runnable> testBeans;
 
 		@Bean(autowireCandidate = false)
-		Runnable testBean(Map<String, Runnable> testBeans) {
+		Runnable testBean(Map<String, Runnable> testBeans,
+				@Qualifier("systemProperties") Map<String, String> sysprops,
+				@Qualifier("systemEnvironment") Map<String, String> sysenv) {
 			this.testBeans = testBeans;
+			assertSame(env.getSystemProperties(), sysprops);
+			assertSame(env.getSystemEnvironment(), sysenv);
 			return () -> {};
 		}
 

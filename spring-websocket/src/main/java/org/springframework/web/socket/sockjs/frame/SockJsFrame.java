@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents a SockJS frame. Provides factory methods to create SockJS frames.
@@ -142,7 +143,9 @@ public class SockJsFrame {
 		if (result.length() > 80) {
 			result = result.substring(0, 80) + "...(truncated)";
 		}
-		return "SockJsFrame content='" + result.replace("\n", "\\n").replace("\r", "\\r") + "'";
+		result = StringUtils.replace(result, "\n", "\\n");
+		result = StringUtils.replace(result, "\r", "\\r");
+		return "SockJsFrame content='" + result + "'";
 	}
 
 

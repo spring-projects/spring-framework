@@ -239,6 +239,7 @@ public class ByteVector {
    * @param stringValue a String whose UTF8 encoded length must be less than 65536.
    * @return this byte vector.
    */
+  // DontCheck(AbbreviationAsWordInName): can't be renamed (for backward binary compatibility).
   public ByteVector putUTF8(final String stringValue) {
     int charLength = stringValue.length();
     if (charLength > 65535) {
@@ -261,7 +262,7 @@ public class ByteVector {
         currentData[currentLength++] = (byte) charValue;
       } else {
         length = currentLength;
-        return encodeUTF8(stringValue, i, 65535);
+        return encodeUtf8(stringValue, i, 65535);
       }
     }
     length = currentLength;
@@ -280,14 +281,14 @@ public class ByteVector {
    *     encoded characters.
    * @return this byte vector.
    */
-  final ByteVector encodeUTF8(final String stringValue, final int offset, final int maxByteLength) {
+  final ByteVector encodeUtf8(final String stringValue, final int offset, final int maxByteLength) {
     int charLength = stringValue.length();
     int byteLength = offset;
     for (int i = offset; i < charLength; ++i) {
       char charValue = stringValue.charAt(i);
-      if (charValue >= '\u0001' && charValue <= '\u007F') {
+      if (charValue >= 0x0001 && charValue <= 0x007F) {
         byteLength++;
-      } else if (charValue <= '\u07FF') {
+      } else if (charValue <= 0x07FF) {
         byteLength += 2;
       } else {
         byteLength += 3;
@@ -308,9 +309,9 @@ public class ByteVector {
     int currentLength = length;
     for (int i = offset; i < charLength; ++i) {
       char charValue = stringValue.charAt(i);
-      if (charValue >= '\u0001' && charValue <= '\u007F') {
+      if (charValue >= 0x0001 && charValue <= 0x007F) {
         data[currentLength++] = (byte) charValue;
-      } else if (charValue <= '\u07FF') {
+      } else if (charValue <= 0x07FF) {
         data[currentLength++] = (byte) (0xC0 | charValue >> 6 & 0x1F);
         data[currentLength++] = (byte) (0x80 | charValue & 0x3F);
       } else {

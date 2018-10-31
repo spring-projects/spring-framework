@@ -22,6 +22,8 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Mock implementation of the {@link javax.servlet.jsp.JspWriter} class.
  * Only necessary for testing applications when testing custom JSP tags.
@@ -33,6 +35,7 @@ public class MockJspWriter extends JspWriter {
 
 	private final HttpServletResponse response;
 
+	@Nullable
 	private PrintWriter targetWriter;
 
 
@@ -58,7 +61,7 @@ public class MockJspWriter extends JspWriter {
 	 * @param response the servlet response to wrap
 	 * @param targetWriter the target Writer to wrap
 	 */
-	public MockJspWriter(HttpServletResponse response, Writer targetWriter) {
+	public MockJspWriter(@Nullable HttpServletResponse response, @Nullable Writer targetWriter) {
 		super(DEFAULT_BUFFER, true);
 		this.response = (response != null ? response : new MockHttpServletResponse());
 		if (targetWriter instanceof PrintWriter) {

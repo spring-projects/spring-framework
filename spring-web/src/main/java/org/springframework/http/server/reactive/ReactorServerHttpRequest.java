@@ -123,11 +123,8 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private static HttpHeaders initHeaders(HttpServerRequest channel) {
-		HttpHeaders headers = new HttpHeaders();
-		for (String name : channel.requestHeaders().names()) {
-			headers.put(name, channel.requestHeaders().getAll(name));
-		}
-		return headers;
+		NettyHeadersAdapter headersMap = new NettyHeadersAdapter(channel.requestHeaders());
+		return new HttpHeaders(headersMap);
 	}
 
 
@@ -153,6 +150,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		return this.request.remoteAddress();
 	}
 
+	@Override
 	@Nullable
 	protected SslInfo initSslInfo() {
 		SslHandler sslHandler = ((Connection) this.request).channel().pipeline().get(SslHandler.class);

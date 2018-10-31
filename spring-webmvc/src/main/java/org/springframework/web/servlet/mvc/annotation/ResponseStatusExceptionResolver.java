@@ -81,12 +81,13 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			}
 
 			if (ex.getCause() instanceof Exception) {
-				ex = (Exception) ex.getCause();
-				return doResolveException(request, response, handler, ex);
+				return doResolveException(request, response, handler, (Exception) ex.getCause());
 			}
 		}
 		catch (Exception resolveEx) {
-			logger.warn("Failure while trying to resolve exception [" + ex.getClass().getName() + "]", resolveEx);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failure while trying to resolve exception [" + ex.getClass().getName() + "]", resolveEx);
+			}
 		}
 		return null;
 	}

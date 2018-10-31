@@ -208,7 +208,8 @@ public class HeaderAssertionTests {
 
 	private void assertMessageContains(AssertionError error, String expected) {
 		String message = error.getMessage();
-		assertTrue("Failure message should contain: " + expected, message.contains(expected));
+		assertTrue("Failure message should contain [" + expected + "], actual is [" + message + "]",
+				message.contains(expected));
 	}
 
 

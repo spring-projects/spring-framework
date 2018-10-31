@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.junit.Rule;
 import org.junit.rules.Verifier;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
@@ -66,9 +67,16 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 	}
 
 	protected DataBuffer stringBuffer(String value) {
-		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
-		buffer.write(bytes);
+		return byteBuffer(value.getBytes(StandardCharsets.UTF_8));
+	}
+
+	protected Mono<DataBuffer> deferStringBuffer(String value) {
+		return Mono.defer(() -> Mono.just(stringBuffer(value)));
+	}
+
+	protected DataBuffer byteBuffer(byte[] value) {
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(value.length);
+		buffer.write(value);
 		return buffer;
 	}
 

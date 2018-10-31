@@ -292,7 +292,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
-			String field = lowerCaseName(column.replaceAll(" ", ""));
+			String field = lowerCaseName(StringUtils.delete(column, " "));
 			PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(field) : null);
 			if (pd != null) {
 				try {

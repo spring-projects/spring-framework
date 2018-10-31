@@ -178,7 +178,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 	@Override
 	public boolean supports(Object handler) {
-		return HandlerMethod.class.equals(handler.getClass());
+		return handler instanceof HandlerMethod;
 	}
 
 	@Override

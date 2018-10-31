@@ -272,7 +272,7 @@ public abstract class ClassUtils {
 			clToUse = getDefaultClassLoader();
 		}
 		try {
-			return (clToUse != null ? clToUse.loadClass(name) : Class.forName(name));
+			return Class.forName(name, false, clToUse);
 		}
 		catch (ClassNotFoundException ex) {
 			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
@@ -280,7 +280,7 @@ public abstract class ClassUtils {
 				String innerClassName =
 						name.substring(0, lastDotIndex) + INNER_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
 				try {
-					return (clToUse != null ? clToUse.loadClass(innerClassName) : Class.forName(innerClassName));
+					return Class.forName(innerClassName, false, clToUse);
 				}
 				catch (ClassNotFoundException ex2) {
 					// Swallow - let original exception get through

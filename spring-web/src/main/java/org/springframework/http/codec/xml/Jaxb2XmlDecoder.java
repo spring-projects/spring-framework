@@ -42,6 +42,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -107,9 +108,10 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 		return splitEvents.map(events -> {
 			Object value = unmarshal(events, outputClass);
-			if (logger.isDebugEnabled()) {
-				logger.debug(Hints.getLogPrefix(hints) + "Decoded [" + value + "]");
-			}
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
+			});
 			return value;
 		});
 	}

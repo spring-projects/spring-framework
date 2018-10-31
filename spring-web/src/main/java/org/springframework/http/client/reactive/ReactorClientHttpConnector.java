@@ -41,7 +41,7 @@ import org.springframework.util.Assert;
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector {
 
-	private final static Function<HttpClient, HttpClient> defaultInitializer = HttpClient::compress;
+	private final static Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
 
 
 	private final HttpClient httpClient;
@@ -82,7 +82,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 		LoopResources resources = resourceFactory.getLoopResources();
 		Assert.notNull(provider, "No ConnectionProvider: is ReactorResourceFactory not initialized yet?");
 		Assert.notNull(resources, "No LoopResources: is ReactorResourceFactory not initialized yet?");
-		return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources)).compress();
+		return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources));
 	}
 
 	/**

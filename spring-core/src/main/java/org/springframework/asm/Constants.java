@@ -36,8 +36,6 @@ package org.springframework.asm;
  */
 final class Constants implements Opcodes {
 
-  private Constants() {}
-
   // The ClassFile attribute names, in the order they are defined in
   // https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.7-300.
 
@@ -173,4 +171,6 @@ final class Constants implements Opcodes {
   static final int ASM_IFNULL = IFNULL + ASM_IFNULL_OPCODE_DELTA;
   static final int ASM_IFNONNULL = IFNONNULL + ASM_IFNULL_OPCODE_DELTA;
   static final int ASM_GOTO_W = 220;
+
+  private Constants() {}
 }

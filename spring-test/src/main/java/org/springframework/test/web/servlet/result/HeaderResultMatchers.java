@@ -16,19 +16,17 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
@@ -127,7 +125,7 @@ public class HeaderResultMatchers {
 	}
 
 	/**
-	 * Assert the primary value of the named response header as a date String,
+	 * Assert the primary value of the named response header parsed into a date
 	 * using the preferred date format described in RFC 7231.
 	 * <p>The {@link ResultMatcher} returned by this method throws an
 	 * {@link AssertionError} if the response does not contain the specified
@@ -137,12 +135,17 @@ public class HeaderResultMatchers {
 	 */
 	public ResultMatcher dateValue(final String name, final long value) {
 		return result -> {
-			SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-			format.setTimeZone(TimeZone.getTimeZone("GMT"));
-			String formatted = format.format(new Date(value));
 			MockHttpServletResponse response = result.getResponse();
-			assertTrue("Response does not contain header '" + name + "'", response.containsHeader(name));
-			assertEquals("Response header '" + name + "'", formatted, response.getHeader(name));
+			String headerValue = response.getHeader(name);
+			assertNotNull("Response does not contain header '" + name + "'", headerValue);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setDate("expected", value);
+			headers.set("actual", headerValue);
+
+			assertEquals("Response header '" + name + "'='" + headerValue + "' " +
+							"does not match expected value '" + headers.getFirst("expected") + "'",
+					headers.getFirstDate("expected"), headers.getFirstDate("actual"));
 		};
 	}
 

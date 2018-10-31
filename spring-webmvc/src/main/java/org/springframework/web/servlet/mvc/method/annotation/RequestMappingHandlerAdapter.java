@@ -38,6 +38,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -884,10 +885,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				Object result = asyncManager.getConcurrentResult();
 				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
 				asyncManager.clearConcurrentResult();
-				if (logger.isDebugEnabled()) {
-					String formatted = AbstractMessageConverterMethodProcessor.formatValue(result);
-					logger.debug("Resume with async result [" + formatted + "]");
-				}
+				LogFormatUtils.traceDebug(logger, traceOn -> {
+					String formatted = LogFormatUtils.formatValue(result, !traceOn);
+					return "Resume with async result [" + formatted + "]";
+				});
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
 

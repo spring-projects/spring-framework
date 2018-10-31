@@ -50,6 +50,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -95,10 +96,11 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 		return Flux.create(new SynchronossPartGenerator(message, this.bufferFactory, this.streamStorageFactory))
 				.doOnNext(part -> {
-					if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-						String details = isEnableLoggingRequestDetails() ?
-								part.toString() : "parts '" + part.name() + "' (content masked)";
-						logger.debug(Hints.getLogPrefix(hints) + "Parsed " + details);
+					if (!Hints.isLoggingSuppressed(hints)) {
+						LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Parsed " +
+								(isEnableLoggingRequestDetails() ?
+										LogFormatUtils.formatValue(part, !traceOn) :
+										"parts '" + part.name() + "' (content masked)"));
 					}
 				});
 	}
@@ -136,7 +138,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 			MediaType mediaType = headers.getContentType();
 			Assert.state(mediaType != null, "No content type set");
 
-			int length = Math.toIntExact(headers.getContentLength());
+			int length = getContentLength(headers);
 			Charset charset = Optional.ofNullable(mediaType.getCharset()).orElse(StandardCharsets.UTF_8);
 			MultipartContext context = new MultipartContext(mediaType.toString(), length, charset.name());
 
@@ -174,7 +176,12 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 					listener.onError("Exception thrown while closing the parser", ex);
 				}
 			});
+		}
 
+		private int getContentLength(HttpHeaders headers) {
+			// Until this is fixed https://github.com/synchronoss/nio-multipart/issues/10
+			long length = headers.getContentLength();
+			return (int) length == length ? (int) length : -1;
 		}
 	}
 

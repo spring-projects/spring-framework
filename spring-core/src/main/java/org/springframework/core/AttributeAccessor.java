@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
 public interface AttributeAccessor {
 
 	/**
-	 * Set the attribute defined by {@code name} to the supplied	{@code value}.
+	 * Set the attribute defined by {@code name} to the supplied {@code value}.
 	 * If {@code value} is {@code null}, the attribute is {@link #removeAttribute removed}.
 	 * <p>In general, users should take care to prevent overlaps with other
 	 * metadata attributes by using fully-qualified names, perhaps using

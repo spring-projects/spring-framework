@@ -42,19 +42,19 @@ final class LogAdapter {
 		ClassLoader cl = LogAdapter.class.getClassLoader();
 		try {
 			// Try Log4j 2.x API
-			cl.loadClass("org.apache.logging.log4j.spi.ExtendedLogger");
+			Class.forName("org.apache.logging.log4j.spi.ExtendedLogger", false, cl);
 			logApi = LogApi.LOG4J;
 		}
 		catch (ClassNotFoundException ex1) {
 			try {
 				// Try SLF4J 1.7 SPI
-				cl.loadClass("org.slf4j.spi.LocationAwareLogger");
+				Class.forName("org.slf4j.spi.LocationAwareLogger", false, cl);
 				logApi = LogApi.SLF4J_LAL;
 			}
 			catch (ClassNotFoundException ex2) {
 				try {
 					// Try SLF4J 1.7 API
-					cl.loadClass("org.slf4j.Logger");
+					Class.forName("org.slf4j.Logger", false, cl);
 					logApi = LogApi.SLF4J;
 				}
 				catch (ClassNotFoundException ex3) {

@@ -220,6 +220,9 @@ public interface DataBuffer {
 	 * data buffer's content.  Data between this data buffer and the returned buffer is
 	 * shared; though changes in the returned buffer's position will not be reflected
 	 * in the reading nor writing position of this data buffer.
+	 * <p><strong>Note</strong> that this method will <strong>not</strong> call
+	 * {@link DataBufferUtils#retain(DataBuffer)} on the resulting slice: the reference
+	 * count will not be increased.
 	 * @param index the index at which to start the slice
 	 * @param length the length of the slice
 	 * @return the specified slice of this data buffer

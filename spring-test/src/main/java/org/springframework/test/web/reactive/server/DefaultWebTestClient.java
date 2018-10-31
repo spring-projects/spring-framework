@@ -300,7 +300,7 @@ class DefaultWebTestClient implements WebTestClient {
 		DefaultResponseSpec(WiretapConnector.Info wiretapInfo, ClientResponse response,
 				@Nullable String uriTemplate, Duration timeout) {
 
-			this.exchangeResult = wiretapInfo.createExchangeResult(uriTemplate);
+			this.exchangeResult = wiretapInfo.createExchangeResult(timeout, uriTemplate);
 			this.response = response;
 			this.timeout = timeout;
 		}
@@ -357,13 +357,13 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(Class<T> elementType) {
 			Flux<T> body = this.response.bodyToFlux(elementType);
-			return new FluxExchangeResult<>(this.exchangeResult, body, this.timeout);
+			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType) {
 			Flux<T> body = this.response.bodyToFlux(elementType);
-			return new FluxExchangeResult<>(this.exchangeResult, body, this.timeout);
+			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 	}
 

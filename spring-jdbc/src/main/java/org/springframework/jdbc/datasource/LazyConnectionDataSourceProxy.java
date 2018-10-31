@@ -160,16 +160,12 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		// via a Connection from the target DataSource, if possible.
 		if (this.defaultAutoCommit == null || this.defaultTransactionIsolation == null) {
 			try {
-				Connection con = obtainTargetDataSource().getConnection();
-				try {
+				try (Connection con = obtainTargetDataSource().getConnection()) {
 					checkDefaultConnectionProperties(con);
-				}
-				finally {
-					con.close();
 				}
 			}
 			catch (SQLException ex) {
-				logger.info("Could not retrieve default auto-commit and transaction isolation settings", ex);
+				logger.debug("Could not retrieve default auto-commit and transaction isolation settings", ex);
 			}
 		}
 	}
@@ -411,8 +407,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		private Connection getTargetConnection(Method operation) throws SQLException {
 			if (this.target == null) {
 				// No target Connection held -> fetch one.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Connecting to database for operation '" + operation.getName() + "'");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Connecting to database for operation '" + operation.getName() + "'");
 				}
 
 				// Fetch physical Connection from DataSource.
@@ -444,8 +440,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 			else {
 				// Target Connection already held -> return it.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Using existing database connection for operation '" + operation.getName() + "'");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Using existing database connection for operation '" + operation.getName() + "'");
 				}
 			}
 

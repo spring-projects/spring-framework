@@ -41,7 +41,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -516,16 +515,13 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] {Type.getType(propertyType)});
 			maker.add(signature, new Type[0]);
 		}
-		if (bd instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
-			if (abd.getInitMethodName() != null) {
-				Signature signature = new Signature(abd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
-				maker.add(signature, new Type[0]);
-			}
-			if (StringUtils.hasText(abd.getDestroyMethodName())) {
-				Signature signature = new Signature(abd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
-				maker.add(signature, new Type[0]);
-			}
+		if (bd.getInitMethodName() != null) {
+			Signature signature = new Signature(bd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
+			maker.add(signature, new Type[0]);
+		}
+		if (StringUtils.hasText(bd.getDestroyMethodName())) {
+			Signature signature = new Signature(bd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
+			maker.add(signature, new Type[0]);
 		}
 		return maker.create();
 	}

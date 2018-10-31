@@ -16,48 +16,85 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
-
+import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
 
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.mock;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for {@link AbstractListenerReadPublisher}
+ * Unit tests for {@link AbstractListenerReadPublisher}.
  *
  * @author Violeta Georgieva
- * @since 5.0
+ * @author Rossen Stoyanchev
  */
 public class ListenerReadPublisherTests {
 
-	@Test
-	@SuppressWarnings("unchecked")
-	public void testReceiveTwoRequestCallsWhenOnSubscribe() {
-		Subscriber<DataBuffer> subscriber = mock(Subscriber.class);
-		doAnswer(new SubscriptionAnswer()).when(subscriber).onSubscribe(isA(Subscription.class));
+	private final TestListenerReadPublisher publisher = new TestListenerReadPublisher();
 
-		TestListenerReadPublisher publisher = new TestListenerReadPublisher();
-		publisher.subscribe(subscriber);
-		publisher.onDataAvailable();
+	private final TestSubscriber subscriber = new TestSubscriber();
 
-		assertTrue(publisher.getReadCalls() == 2);
+
+	@Before
+	public void setup() {
+		this.publisher.subscribe(this.subscriber);
 	}
 
-	private static final class TestListenerReadPublisher extends AbstractListenerReadPublisher {
+
+	@Test
+	public void twoReads() {
+
+		this.subscriber.getSubscription().request(2);
+		this.publisher.onDataAvailable();
+
+		assertEquals(2, this.publisher.getReadCalls());
+	}
+
+	@Test // SPR-17410
+	public void discardDataOnError() {
+
+		this.subscriber.getSubscription().request(2);
+		this.publisher.onDataAvailable();
+		this.publisher.onError(new IllegalStateException());
+
+		assertEquals(2, this.publisher.getReadCalls());
+		assertEquals(1, this.publisher.getDiscardCalls());
+	}
+
+	@Test // SPR-17410
+	public void discardDataOnCancel() {
+
+		this.subscriber.getSubscription().request(2);
+		this.subscriber.setCancelOnNext(true);
+		this.publisher.onDataAvailable();
+
+		assertEquals(1, this.publisher.getReadCalls());
+		assertEquals(1, this.publisher.getDiscardCalls());
+	}
+
+
+	private static final class TestListenerReadPublisher extends AbstractListenerReadPublisher<DataBuffer> {
 
 		private int readCalls = 0;
 
+		private int discardCalls = 0;
+
+
 		public TestListenerReadPublisher() {
 			super("");
+		}
+
+
+		public int getReadCalls() {
+			return this.readCalls;
+		}
+
+		public int getDiscardCalls() {
+			return this.discardCalls;
 		}
 
 		@Override
@@ -66,8 +103,8 @@ public class ListenerReadPublisherTests {
 		}
 
 		@Override
-		protected DataBuffer read() throws IOException {
-			readCalls++;
+		protected DataBuffer read() {
+			this.readCalls++;
 			return mock(DataBuffer.class);
 		}
 
@@ -76,22 +113,48 @@ public class ListenerReadPublisherTests {
 			// No-op
 		}
 
-		public int getReadCalls() {
-			return this.readCalls;
+		@Override
+		protected void discardData() {
+			this.discardCalls++;
 		}
-
 	}
 
-	private static final class SubscriptionAnswer implements Answer<Subscription> {
 
-		@Override
-		public Subscription answer(InvocationOnMock invocation) throws Throwable {
-			Subscription arg = (Subscription) invocation.getArguments()[0];
-			arg.request(1);
-			arg.request(1);
-			return arg;
+	private static final class TestSubscriber implements Subscriber<DataBuffer> {
+
+		private Subscription subscription;
+
+		private boolean cancelOnNext;
+
+
+		public Subscription getSubscription() {
+			return this.subscription;
 		}
 
+		public void setCancelOnNext(boolean cancelOnNext) {
+			this.cancelOnNext = cancelOnNext;
+		}
+
+
+		@Override
+		public void onSubscribe(Subscription subscription) {
+			this.subscription = subscription;
+		}
+
+		@Override
+		public void onNext(DataBuffer dataBuffer) {
+			if (this.cancelOnNext) {
+				this.subscription.cancel();
+			}
+		}
+
+		@Override
+		public void onError(Throwable t) {
+		}
+
+		@Override
+		public void onComplete() {
+		}
 	}
 
 }

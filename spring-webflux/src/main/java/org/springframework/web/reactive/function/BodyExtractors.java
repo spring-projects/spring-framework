@@ -200,7 +200,7 @@ public abstract class BodyExtractors {
 	private static <T> Supplier<Flux<T>> skipBodyAsFlux(ReactiveHttpInputMessage message,
 			BodyExtractor.Context context) {
 
-		if (isExtractingForClient(message, context)) {
+		if (isExtractingForClient(message)) {
 			return () -> consumeAndCancel(message).thenMany(Flux.empty());
 		}
 		else {
@@ -211,7 +211,7 @@ public abstract class BodyExtractors {
 	private static <T> Supplier<Mono<T>> skipBodyAsMono(ReactiveHttpInputMessage message,
 			BodyExtractor.Context context) {
 
-		if (isExtractingForClient(message, context)) {
+		if (isExtractingForClient(message)) {
 			return () -> consumeAndCancel(message).then(Mono.empty());
 		}
 		else {
@@ -259,7 +259,7 @@ public abstract class BodyExtractors {
 		else {
 			result = Flux.error(ex);
 		}
-		return isExtractingForClient(inputMessage, context) ?
+		return isExtractingForClient(inputMessage) ?
 				consumeAndCancel(inputMessage).thenMany(result) : result;
 	}
 
@@ -279,10 +279,8 @@ public abstract class BodyExtractors {
 		return (HttpMessageReader<T>) reader;
 	}
 
-	private static boolean isExtractingForClient(ReactiveHttpInputMessage message,
-			BodyExtractor.Context context) {
-		return !context.serverResponse().isPresent()
-				&& message instanceof ClientHttpResponse;
+	private static boolean isExtractingForClient(ReactiveHttpInputMessage message) {
+		return message instanceof ClientHttpResponse;
 	}
 
 	private static Mono<Void> consumeAndCancel(ReactiveHttpInputMessage message) {

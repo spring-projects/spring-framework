@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -70,6 +68,14 @@ public abstract class RouterFunctions {
 	 */
 	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE =
 			RouterFunctions.class.getName() + ".uriTemplateVariables";
+
+	/**
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains the matching pattern, as a {@link org.springframework.web.util.pattern.PathPattern}.
+	 */
+	public static final String MATCHING_PATTERN_ATTRIBUTE =
+			RouterFunctions.class.getName() + ".matchingPattern";
+
 
 	private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER =
 			request -> ServerResponse.notFound().build();
@@ -934,25 +940,16 @@ public abstract class RouterFunctions {
 								}
 								return this.routerFunction.route(nestedRequest)
 										.doOnNext(match -> {
-											mergeTemplateVariables(serverRequest, nestedRequest.pathVariables());
+											if (nestedRequest != serverRequest) {
+												serverRequest.attributes().clear();
+												serverRequest.attributes()
+														.putAll(nestedRequest.attributes());
+											}
 										});
 							}
 					).orElseGet(Mono::empty);
 		}
 
-		@SuppressWarnings("unchecked")
-		private void mergeTemplateVariables(ServerRequest request, Map<String, String> variables) {
-			if (!variables.isEmpty()) {
-				Map<String, Object> attributes = request.attributes();
-				Map<String, String> oldVariables =
-						(Map<String, String>) request.attribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
-						.orElseGet(LinkedHashMap::new);
-				Map<String, String> mergedVariables = new LinkedHashMap<>(oldVariables);
-				mergedVariables.putAll(variables);
-				attributes.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-						Collections.unmodifiableMap(mergedVariables));
-			}
-		}
 
 		@Override
 		public void accept(Visitor visitor) {

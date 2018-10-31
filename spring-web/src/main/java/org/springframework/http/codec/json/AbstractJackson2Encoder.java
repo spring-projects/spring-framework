@@ -44,6 +44,8 @@ import org.springframework.core.codec.EncodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageEncoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -141,8 +143,11 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
 			ResolvableType elementType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
 
-		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-			logger.debug(Hints.getLogPrefix(hints) + "Encoding [" + value + "]");
+		if (!Hints.isLoggingSuppressed(hints)) {
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Encoding [" + formatted + "]";
+			});
 		}
 
 		JavaType javaType = getJavaType(elementType.getType(), null);
@@ -157,11 +162,14 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		writer = customizeWriter(writer, mimeType, elementType, hints);
 
 		DataBuffer buffer = bufferFactory.allocateBuffer();
+		boolean release = true;
 		OutputStream outputStream = buffer.asOutputStream();
 
 		try {
-			JsonGenerator generator = getObjectMapper().getFactory().createGenerator(outputStream, encoding);
+			JsonGenerator generator =
+					getObjectMapper().getFactory().createGenerator(outputStream, encoding);
 			writer.writeValue(generator, value);
+			release = false;
 		}
 		catch (InvalidDefinitionException ex) {
 			throw new CodecException("Type definition error: " + ex.getType(), ex);
@@ -170,7 +178,13 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Unexpected I/O error while writing to data buffer", ex);
+			throw new IllegalStateException("Unexpected I/O error while writing to data buffer",
+					ex);
+		}
+		finally {
+			if (release) {
+				DataBufferUtils.release(buffer);
+			}
 		}
 
 		return buffer;

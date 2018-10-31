@@ -32,12 +32,15 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code HttpMessageWriter} for {@code "text/event-stream"} responses.
@@ -135,7 +138,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				writeField("retry", retry.toMillis(), sb);
 			}
 			if (comment != null) {
-				sb.append(':').append(comment.replaceAll("\\n", "\n:")).append("\n");
+				sb.append(':').append(StringUtils.replace(comment, "\n", "\n:")).append("\n");
 			}
 			if (data != null) {
 				sb.append("data:");
@@ -143,7 +146,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 			return Flux.concat(encodeText(sb, mediaType, factory),
 					encodeData(data, valueType, mediaType, factory, hints),
-					encodeText("\n", mediaType, factory));
+					encodeText("\n", mediaType, factory))
+					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		});
 	}
 
@@ -164,7 +168,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 		if (data instanceof String) {
 			String text = (String) data;
-			return Flux.from(encodeText(text.replaceAll("\\n", "\ndata:") + "\n", mediaType, factory));
+			return Flux.from(encodeText(StringUtils.replace(text, "\n", "\ndata:") + "\n", mediaType, factory));
 		}
 
 		if (this.encoder == null) {
@@ -179,8 +183,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Mono<DataBuffer> encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
 		Assert.notNull(mediaType.getCharset(), "Expected MediaType with charset");
 		byte[] bytes = text.toString().getBytes(mediaType.getCharset());
-		DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length).write(bytes);
-		return Mono.just(buffer);
+		return Mono.defer(() ->
+				Mono.just(bufferFactory.allocateBuffer(bytes.length).write(bytes)));
 	}
 
 	@Override

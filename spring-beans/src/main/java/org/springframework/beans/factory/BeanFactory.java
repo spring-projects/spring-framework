@@ -214,15 +214,23 @@ public interface BeanFactory {
 	 * @param requiredType type the bean must match; can be an interface or superclass
 	 * @return a corresponding provider handle
 	 * @since 5.1
+	 * @see #getBeanProvider(ResolvableType)
 	 */
 	<T> ObjectProvider<T> getBeanProvider(Class<T> requiredType);
 
 	/**
 	 * Return an provider for the specified bean, allowing for lazy on-demand retrieval
 	 * of instances, including availability and uniqueness options.
-	 * @param requiredType type the bean must match; can be a generic type declaration
+	 * @param requiredType type the bean must match; can be a generic type declaration.
+	 * Note that collection types are not supported here, in contrast to reflective
+	 * injection points. For programmatically retrieving a list of beans matching a
+	 * specific type, specify the actual bean type as an argument here and subsequently
+	 * use {@link ObjectProvider#orderedStream()} or its lazy streaming/iteration options.
 	 * @return a corresponding provider handle
 	 * @since 5.1
+	 * @see ObjectProvider#iterator()
+	 * @see ObjectProvider#stream()
+	 * @see ObjectProvider#orderedStream()
 	 */
 	<T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType);
 

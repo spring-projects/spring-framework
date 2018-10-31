@@ -878,6 +878,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set the name of the initializer method.
 	 * <p>The default is {@code null} in which case there is no initializer method.
 	 */
+	@Override
 	public void setInitMethodName(@Nullable String initMethodName) {
 		this.initMethodName = initMethodName;
 	}
@@ -885,6 +886,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the name of the initializer method.
 	 */
+	@Override
 	@Nullable
 	public String getInitMethodName() {
 		return this.initMethodName;
@@ -911,6 +913,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set the name of the destroy method.
 	 * <p>The default is {@code null} in which case there is no destroy method.
 	 */
+	@Override
 	public void setDestroyMethodName(@Nullable String destroyMethodName) {
 		this.destroyMethodName = destroyMethodName;
 	}
@@ -918,6 +921,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the name of the destroy method.
 	 */
+	@Override
 	@Nullable
 	public String getDestroyMethodName() {
 		return this.destroyMethodName;
@@ -960,6 +964,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Set the role hint for this {@code BeanDefinition}.
 	 */
+	@Override
 	public void setRole(int role) {
 		this.role = role;
 	}
@@ -975,6 +980,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Set a human-readable description of this bean definition.
 	 */
+	@Override
 	public void setDescription(@Nullable String description) {
 		this.description = description;
 	}

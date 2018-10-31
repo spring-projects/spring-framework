@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
+import java.time.Duration;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -41,7 +42,7 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class WebTestClientConnectorTests {
+public class WiretapConnectorTests {
 
 	@Test
 	public void captureAndClaim() {
@@ -57,7 +58,7 @@ public class WebTestClientConnectorTests {
 		function.exchange(clientRequest).block(ofMillis(0));
 
 		WiretapConnector.Info actual = wiretapConnector.claimRequest("1");
-		ExchangeResult result = actual.createExchangeResult(null);
+		ExchangeResult result = actual.createExchangeResult(Duration.ZERO, null);
 		assertEquals(HttpMethod.GET, result.getMethod());
 		assertEquals("/test", result.getUrl().toString());
 	}

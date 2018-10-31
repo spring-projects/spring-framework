@@ -25,7 +25,7 @@ import org.hibernate.resource.beans.container.spi.BeanContainer;
 import org.hibernate.resource.beans.container.spi.ContainedBean;
 import org.hibernate.resource.beans.spi.BeanInstanceProducer;
 
-import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.lang.Nullable;
@@ -154,7 +154,7 @@ public final class SpringBeanContainer implements BeanContainer {
 				return new SpringContainedBean<>(this.beanFactory.getBean(beanType));
 			}
 		}
-		catch (BeanCreationException ex) {
+		catch (BeansException ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Falling back to Hibernate's default producer after bean creation failure for " +
 						beanType + ": " + ex);
@@ -170,14 +170,14 @@ public final class SpringBeanContainer implements BeanContainer {
 			if (lifecycleOptions.useJpaCompliantCreation()) {
 				Object bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
 				this.beanFactory.applyBeanPropertyValues(bean, name);
-				this.beanFactory.initializeBean(bean, name);
+				bean = this.beanFactory.initializeBean(bean, name);
 				return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));
 			}
 			else {
 				return new SpringContainedBean<>(this.beanFactory.getBean(name, beanType));
 			}
 		}
-		catch (BeanCreationException ex) {
+		catch (BeansException ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Falling back to Hibernate's default producer after bean creation failure for " +
 						beanType + ": " + ex);

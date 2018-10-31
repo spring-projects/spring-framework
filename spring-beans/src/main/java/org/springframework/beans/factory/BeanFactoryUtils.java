@@ -294,9 +294,9 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				parentResult.forEach((beanName, beanType) -> {
+				parentResult.forEach((beanName, beanInstance) -> {
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
-						result.put(beanName, beanType);
+						result.put(beanName, beanInstance);
 					}
 				});
 			}
@@ -343,9 +343,9 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				parentResult.forEach((beanName, beanType) -> {
+				parentResult.forEach((beanName, beanInstance) -> {
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
-						result.put(beanName, beanType);
+						result.put(beanName, beanInstance);
 					}
 				});
 			}

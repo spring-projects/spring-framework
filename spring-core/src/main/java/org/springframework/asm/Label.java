@@ -178,7 +178,7 @@ public class Label {
    *       and {@link #FORWARD_REFERENCE_HANDLE_MASK}.
    * </ul>
    *
-   * For instance, for an ifnull instruction at bytecode offset x, 'sourceInsnBytecodeOffset' is
+   * <p>For instance, for an ifnull instruction at bytecode offset x, 'sourceInsnBytecodeOffset' is
    * equal to x, and 'reference' is of type {@link #FORWARD_REFERENCE_TYPE_SHORT} with value x + 1
    * (because the ifnull instruction uses a 2 bytes bytecode offset operand stored one byte after
    * the start of the instruction itself). For the default case of a lookupswitch instruction at

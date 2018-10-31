@@ -92,8 +92,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 		CompositeByteBuf composite = this.byteBufAllocator.compositeBuffer(dataBuffers.size());
 		for (DataBuffer dataBuffer : dataBuffers) {
 			Assert.isInstanceOf(NettyDataBuffer.class, dataBuffer);
-			NettyDataBuffer nettyDataBuffer = (NettyDataBuffer) dataBuffer;
-			composite.addComponent(true, nettyDataBuffer.getNativeBuffer());
+			composite.addComponent(true, ((NettyDataBuffer) dataBuffer).getNativeBuffer());
 		}
 		return new NettyDataBuffer(composite, this);
 	}

@@ -30,7 +30,6 @@ import io.undertow.connector.ByteBufferPool;
 import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
-import io.undertow.util.HeaderValues;
 import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Flux;
 
@@ -79,11 +78,9 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private static HttpHeaders initHeaders(HttpServerExchange exchange) {
-		HttpHeaders headers = new HttpHeaders();
-		for (HeaderValues values : exchange.getRequestHeaders()) {
-			headers.put(values.getHeaderName().toString(), values);
-		}
-		return headers;
+		UndertowHeadersAdapter headersMap =
+				new UndertowHeadersAdapter(exchange.getRequestHeaders());
+		return new HttpHeaders(headersMap);
 	}
 
 	@Override
@@ -203,6 +200,10 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 			}
 		}
 
+		@Override
+		protected void discardData() {
+			// Nothing to discard since we pass data buffers on immediately..
+		}
 	}
 
 	private static class UndertowDataBuffer implements PooledDataBuffer {
@@ -214,6 +215,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		public UndertowDataBuffer(DataBuffer dataBuffer, PooledByteBuffer pooledByteBuffer) {
 			this.dataBuffer = dataBuffer;
 			this.pooledByteBuffer = pooledByteBuffer;
+		}
+
+		@Override
+		public boolean isAllocated() {
+			return this.pooledByteBuffer.isOpen();
 		}
 
 		@Override

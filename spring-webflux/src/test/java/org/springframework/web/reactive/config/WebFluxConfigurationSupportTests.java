@@ -60,6 +60,7 @@ import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
@@ -283,6 +284,15 @@ public class WebFluxConfigurationSupportTests {
 		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;
 		WebHandler webHandler = (WebHandler) urlHandlerMapping.getUrlMap().get("/images/**");
 		assertNotNull(webHandler);
+	}
+
+	@Test
+	public void resourceUrlProvider() throws Exception {
+		ApplicationContext context = loadConfig(WebFluxConfig.class);
+
+		String name = "resourceUrlProvider";
+		ResourceUrlProvider resourceUrlProvider = context.getBean(name, ResourceUrlProvider.class);
+		assertNotNull(resourceUrlProvider);
 	}
 
 
