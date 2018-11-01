@@ -18,7 +18,6 @@ package org.springframework.messaging.handler.invocation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
@@ -27,6 +26,7 @@ import org.springframework.util.ClassUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.
@@ -35,15 +35,9 @@ import static org.junit.Assert.*;
  */
 public class InvocableHandlerMethodTests {
 
-	private Message<?> message;
+	private final Message<?> message = mock(Message.class);
 
 	private final HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
-
-
-	@Before
-	public void setUp() {
-		this.message = null;
-	}
 
 
 	@Test
@@ -61,7 +55,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void resolveNullArg() throws Exception {
+	public void resolveNoArgValue() throws Exception {
 		this.composite.addResolver(new StubArgumentResolver(Integer.class));
 		this.composite.addResolver(new StubArgumentResolver(String.class));
 
@@ -135,35 +129,33 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void invocationTargetException() throws Exception {
-		Throwable expected = new RuntimeException("error");
+		Throwable expected = null;
 		try {
+			expected = new RuntimeException("error");
 			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
 			fail("Expected exception");
 		}
 		catch (RuntimeException actual) {
 			assertSame(expected, actual);
 		}
-
-		expected = new Error("error");
 		try {
+			expected = new Error("error");
 			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
 			fail("Expected exception");
 		}
 		catch (Error actual) {
 			assertSame(expected, actual);
 		}
-
-		expected = new Exception("error");
 		try {
+			expected = new Exception("error");
 			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
 			fail("Expected exception");
 		}
 		catch (Exception actual) {
 			assertSame(expected, actual);
 		}
-
-		expected = new Throwable("error");
 		try {
+			expected = new Throwable("error");
 			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
 			fail("Expected exception");
 		}

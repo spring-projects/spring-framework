@@ -65,7 +65,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void resolveNullArg() throws Exception {
+	public void resolveNoArgValue() throws Exception {
 		this.composite.addResolver(new StubArgumentResolver(Integer.class));
 		this.composite.addResolver(new StubArgumentResolver(String.class));
 

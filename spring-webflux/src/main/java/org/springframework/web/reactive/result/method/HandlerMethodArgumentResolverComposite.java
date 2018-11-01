@@ -59,7 +59,6 @@ class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentRes
 
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
-	 * @since 4.3
 	 */
 	public HandlerMethodArgumentResolverComposite addResolvers(@Nullable HandlerMethodArgumentResolver... resolvers) {
 		if (resolvers != null) {
@@ -89,7 +88,6 @@ class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentRes
 
 	/**
 	 * Clear the list of configured resolvers.
-	 * @since 4.3
 	 */
 	public void clear() {
 		this.argumentResolvers.clear();

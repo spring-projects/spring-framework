@@ -141,7 +141,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			catch (IllegalArgumentException ex) {
 				assertTargetBean(getBridgedMethod(), getBean(), args);
 				String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
-				throw new IllegalStateException(formatInvokeError(text, args), ex);
+				return Mono.error(new IllegalStateException(formatInvokeError(text, args), ex));
 			}
 			catch (InvocationTargetException ex) {
 				return Mono.error(ex.getTargetException());
@@ -213,11 +213,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 	}
 
-	private boolean isAsyncVoidReturnType(MethodParameter returnType,
-			@Nullable ReactiveAdapter reactiveAdapter) {
-
-		if (reactiveAdapter != null && reactiveAdapter.supportsEmpty()) {
-			if (reactiveAdapter.isNoValue()) {
+	private static boolean isAsyncVoidReturnType(MethodParameter returnType, @Nullable ReactiveAdapter adapter) {
+		if (adapter != null && adapter.supportsEmpty()) {
+			if (adapter.isNoValue()) {
 				return true;
 			}
 			Type parameterType = returnType.getGenericParameterType();
