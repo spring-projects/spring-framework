@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -77,6 +79,7 @@ public class EventListenerMethodProcessor
 
 	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
+	private AtomicLong listenerNumber = new AtomicLong(0);
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
@@ -167,6 +170,9 @@ public class EventListenerMethodProcessor
 				Assert.state(context != null, "No ApplicationContext set");
 				List<EventListenerFactory> factories = this.eventListenerFactories;
 				Assert.state(factories != null, "EventListenerFactory List not initialized");
+				Assert.isTrue(this.beanFactory instanceof DefaultListableBeanFactory,
+						"BeanFactory does not implement DefaultListableBeanFactory");
+				DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) this.beanFactory;
 				for (Method method : annotatedMethods.keySet()) {
 					for (EventListenerFactory factory : factories) {
 						if (factory.supportsMethod(method)) {
@@ -176,7 +182,8 @@ public class EventListenerMethodProcessor
 							if (applicationListener instanceof ApplicationListenerMethodAdapter) {
 								((ApplicationListenerMethodAdapter) applicationListener).init(context, this.evaluator);
 							}
-							context.addApplicationListener(applicationListener);
+							context.addApplicationListener(registerListenerBean(applicationListener,
+									defaultListableBeanFactory ,beanName, targetType, methodToUse));
 							break;
 						}
 					}
@@ -189,6 +196,24 @@ public class EventListenerMethodProcessor
 		}
 	}
 
+	private ApplicationListener<?> registerListenerBean(ApplicationListener<?> listener,
+														DefaultListableBeanFactory defaultListableBeanFactory ,
+														String beanName, Class<?> type, Method method) {
+		BeanDefinitionBuilder bd  = BeanDefinitionBuilder.genericBeanDefinition(listener.getClass());
+		String listenerName = getListenerBeanName(method);
+		bd.addConstructorArgValue(beanName);
+		bd.addConstructorArgValue(type);
+		bd.addConstructorArgValue(method);
+		AbstractBeanDefinition definition = bd.getBeanDefinition();
+		definition.setInstanceSupplier(()->listener);
+		defaultListableBeanFactory.registerBeanDefinition(listenerName,definition);
+		defaultListableBeanFactory.registerDependentBean(beanName,listenerName);
+		return defaultListableBeanFactory.getBean(listenerName,ApplicationListener.class);
+	}
+
+	private String getListenerBeanName(Method method) {
+		return method.toString() + listenerNumber.incrementAndGet();
+	}
 	/**
 	 * Determine whether the given class is an {@code org.springframework}
 	 * bean class that is not annotated as a user or test {@link Component}...
