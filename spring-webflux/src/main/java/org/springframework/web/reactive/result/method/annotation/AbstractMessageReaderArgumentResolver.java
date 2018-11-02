@@ -127,13 +127,13 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 	/**
 	 * Read the body from a method argument with {@link HttpMessageReader}.
-	 * @param bodyParam the {@link MethodParameter} to read
-	 * @param actualParam the actual {@link MethodParameter} to read; could be different
-	 * from {@code bodyParameter} when processing {@code HttpEntity} for example
+	 * @param bodyParam represents the element type for the body
+	 * @param actualParam the actual method argument type; possibly different
+	 * from {@code bodyParam}, e.g. for an {@code HttpEntity} argument
 	 * @param isBodyRequired true if the body is required
 	 * @param bindingContext the binding context to use
 	 * @param exchange the current exchange
-	 * @return the body
+	 * @return a Mono with the value to use for the method argument
 	 * @since 5.0.2
 	 */
 	protected Mono<Object> readBody(MethodParameter bodyParam, @Nullable MethodParameter actualParam,
@@ -151,6 +151,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 		MediaType contentType = request.getHeaders().getContentType();
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
+		Object[] hints = extractValidationHints(bodyParam);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(exchange.getLogPrefix() + (contentType != null ?
@@ -170,7 +171,6 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 					if (isBodyRequired) {
 						flux = flux.switchIfEmpty(Flux.error(() -> handleMissingBody(bodyParam)));
 					}
-					Object[] hints = extractValidationHints(bodyParam);
 					if (hints != null) {
 						flux = flux.doOnNext(target ->
 								validate(target, hints, bodyParam, bindingContext, exchange));
@@ -187,7 +187,6 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 					if (isBodyRequired) {
 						mono = mono.switchIfEmpty(Mono.error(() -> handleMissingBody(bodyParam)));
 					}
-					Object[] hints = extractValidationHints(bodyParam);
 					if (hints != null) {
 						mono = mono.doOnNext(target ->
 								validate(target, hints, bodyParam, bindingContext, exchange));

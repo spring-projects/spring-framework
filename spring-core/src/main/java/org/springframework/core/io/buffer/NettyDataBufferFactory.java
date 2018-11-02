@@ -83,6 +83,15 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	}
 
 	/**
+	 * Wrap the given Netty {@link ByteBuf} in a {@code NettyDataBuffer}.
+	 * @param byteBuf the Netty byte buffer to wrap
+	 * @return the wrapped buffer
+	 */
+	public NettyDataBuffer wrap(ByteBuf byteBuf) {
+		return new NettyDataBuffer(byteBuf, this);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 * <p>This implementation uses Netty's {@link CompositeByteBuf}.
 	 */
@@ -95,15 +104,6 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 			composite.addComponent(true, ((NettyDataBuffer) dataBuffer).getNativeBuffer());
 		}
 		return new NettyDataBuffer(composite, this);
-	}
-
-	/**
-	 * Wrap the given Netty {@link ByteBuf} in a {@code NettyDataBuffer}.
-	 * @param byteBuf the Netty byte buffer to wrap
-	 * @return the wrapped buffer
-	 */
-	public NettyDataBuffer wrap(ByteBuf byteBuf) {
-		return new NettyDataBuffer(byteBuf, this);
 	}
 
 	/**
