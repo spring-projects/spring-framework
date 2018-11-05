@@ -213,7 +213,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	private boolean webApplicationContextInjected = false;
 
 	/** Flag used to detect whether onRefresh has already been called */
-	private boolean refreshEventReceived = false;
+	private volatile boolean refreshEventReceived = false;
+
+	/** Monitor for synchronized onRefresh execution */
+	private final Object onRefreshMonitor = new Object();
 
 
 	/**
@@ -490,8 +493,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	@Override
 	protected final void initServletBean() throws ServletException {
 		getServletContext().log("Initializing Spring FrameworkServlet '" + getServletName() + "'");
-		if (this.logger.isInfoEnabled()) {
-			this.logger.info("FrameworkServlet '" + getServletName() + "': initialization started");
+		if (logger.isInfoEnabled()) {
+			logger.info("FrameworkServlet '" + getServletName() + "': initialization started");
 		}
 		long startTime = System.currentTimeMillis();
 
@@ -500,13 +503,13 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			initFrameworkServlet();
 		}
 		catch (ServletException | RuntimeException ex) {
-			this.logger.error("Context initialization failed", ex);
+			logger.error("Context initialization failed", ex);
 			throw ex;
 		}
 
-		if (this.logger.isInfoEnabled()) {
+		if (logger.isInfoEnabled()) {
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			this.logger.info("FrameworkServlet '" + getServletName() + "': initialization completed in " +
+			logger.info("FrameworkServlet '" + getServletName() + "': initialization completed in " +
 					elapsedTime + " ms");
 		}
 	}
@@ -558,7 +561,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// Either the context is not a ConfigurableApplicationContext with refresh
 			// support or the context injected at construction time had already been
 			// refreshed -> trigger initial onRefresh manually here.
-			onRefresh(wac);
+			synchronized (this.onRefreshMonitor) {
+				onRefresh(wac);
+			}
 		}
 
 		if (this.publishContext) {
@@ -808,7 +813,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		this.refreshEventReceived = true;
-		onRefresh(event.getApplicationContext());
+		synchronized (this.onRefreshMonitor) {
+			onRefresh(event.getApplicationContext());
+		}
 	}
 
 	/**
