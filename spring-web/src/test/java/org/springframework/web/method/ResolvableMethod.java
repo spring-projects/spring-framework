@@ -277,17 +277,18 @@ public class ResolvableMethod {
 		 * Filter on methods with the given name.
 		 */
 		public Builder<T> named(String methodName) {
-			addFilter("methodName=" + methodName, m -> m.getName().equals(methodName));
+			addFilter("methodName=" + methodName, method -> method.getName().equals(methodName));
 			return this;
 		}
 
 		/**
 		 * Filter on methods with the given parameter types.
+		 * @since 5.1
 		 */
 		public Builder<T> argTypes(Class<?>... argTypes) {
-			addFilter("argTypes=" + Arrays.toString(argTypes), m ->
-					ObjectUtils.isEmpty(argTypes) ?
-							m.getParameterTypes().length == 0 : Arrays.equals(m.getParameterTypes(), argTypes));
+			addFilter("argTypes=" + Arrays.toString(argTypes), method ->
+					ObjectUtils.isEmpty(argTypes) ? method.getParameterCount() == 0 :
+							Arrays.equals(method.getParameterTypes(), argTypes));
 			return this;
 		}
 
