@@ -1084,8 +1084,17 @@ following class definition:
 	}
 ----
 
-When the above POJO is defined as a bean in a Spring IoC container, the bean instance
-can be made transactional by adding merely __one__ line of XML configuration:
+Used at the class level as above, the annotation indicates a default for all methods
+of the declaring class (as well as its subclasses). Alternatively, each method can
+get annotated individually. Note that a class-level annotation does not apply to
+ancestor classes up the class hierarchy; in such a scenario, methods need to be
+locally redeclared in order to participate in a subclass-level annotation.
+
+When a POJO class such as the one above is defined as a bean in a Spring context,
+you can make the bean instance transactional through an `@EnableTransactionManagement`
+annotation in a `@Configuration` class. See the javadoc for full details.
+
+In XML configuration, the `<tx:annotation-driven/>` tag provides similar convenience:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1109,6 +1118,7 @@ can be made transactional by adding merely __one__ line of XML configuration:
 
 		<!-- enable the configuration of transactional behavior based on annotations -->
 		__<tx:annotation-driven transaction-manager="txManager"/>__<!-- a PlatformTransactionManager is still required -->
+
 		<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 			<!-- (this dependency is defined somewhere else) -->
 			<property name="dataSource" ref="dataSource"/>
@@ -1128,13 +1138,6 @@ dependency-inject has any other name, then you have to use the `transaction-mana
 attribute explicitly, as in the preceding example.
 ====
 
-[NOTE]
-====
-The `@EnableTransactionManagement` annotation provides equivalent support if you are
-using Java based configuration. Simply add the annotation to a `@Configuration` class.
-See the javadocs for full details.
-====
-
 .Method visibility and @Transactional
 ****
 When using proxies, you should apply the `@Transactional` annotation only to methods
@@ -1144,20 +1147,20 @@ method does not exhibit the configured transactional settings. Consider the use 
 AspectJ (see below) if you need to annotate non-public methods.
 ****
 
-You can place the `@Transactional` annotation before an interface definition, a method
+You can apply the `@Transactional` annotation to an interface definition, a method
 on an interface, a class definition, or a __public__ method on a class. However, the
 mere presence of the `@Transactional` annotation is not enough to activate the
-transactional behavior. The `@Transactional` annotation is simply metadata that can be
-consumed by some runtime infrastructure that is `@Transactional`-aware and that can use
-the metadata to configure the appropriate beans with transactional behavior. In the
-preceding example, the `<tx:annotation-driven/>` element __switches on__ the
+transactional behavior. The `@Transactional` annotation is simply metadata that can
+be consumed by some runtime infrastructure that is `@Transactional`-aware and that
+can use the metadata to configure the appropriate beans with transactional behavior.
+In the preceding example, the `<tx:annotation-driven/>` element __switches on__ the
 transactional behavior.
 
 [TIP]
 ====
 Spring recommends that you only annotate concrete classes (and methods of concrete
-classes) with the `@Transactional` annotation, as opposed to annotating interfaces. You
-certainly can place the `@Transactional` annotation on an interface (or an interface
+classes) with the `@Transactional` annotation, as opposed to annotating interfaces.
+You certainly can place the `@Transactional` annotation on an interface (or an interface
 method), but this works only as you would expect it to if you are using interface-based
 proxies. The fact that Java annotations are __not inherited from interfaces__ means that
 if you are using class-based proxies ( `proxy-target-class="true"`) or the weaving-based
@@ -2364,6 +2367,7 @@ class, providing SQL and any necessary parameters. The same is true for the
 The `JdbcTemplate` can be used within a DAO implementation through direct instantiation
 with a `DataSource` reference, or be configured in a Spring IoC container and given to
 DAOs as a bean reference.
+
 [NOTE]
 ====
 The `DataSource` should always be configured as a bean in the Spring IoC container. In
@@ -2375,7 +2379,6 @@ All SQL issued by this class is logged at the `DEBUG` level under the category
 corresponding to the fully qualified class name of the template instance (typically
 `JdbcTemplate`, but it may be different if you are using a custom subclass of the
 `JdbcTemplate` class).
-
 
 [[jdbc-JdbcTemplate-examples]]
 ===== Examples of JdbcTemplate class usage
