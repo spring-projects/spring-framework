@@ -48,14 +48,21 @@ import org.springframework.lang.Nullable;
 public abstract class ReflectionUtils {
 
 	/**
-	 * Naming prefix for CGLIB-renamed methods.
-	 * @see #isCglibRenamedMethod
+	 * Pre-built MethodFilter that matches all non-bridge methods.
+	 * @since 3.0
+	 * @deprecated as of 5.0.11, in favor of a custom {@link MethodFilter}
 	 */
-	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
+	@Deprecated
+	public static final MethodFilter NON_BRIDGED_METHODS =
+			(method -> !method.isBridge());
 
-	private static final Method[] NO_METHODS = {};
-
-	private static final Field[] NO_FIELDS = {};
+	/**
+	 * Pre-built MethodFilter that matches all non-bridge non-synthetic methods
+	 * which are not declared on {@code java.lang.Object}.
+	 * @since 3.0.5
+	 */
+	public static final MethodFilter USER_DECLARED_METHODS =
+			(method -> (!method.isBridge() && !method.isSynthetic() && method.getDeclaringClass() != Object.class));
 
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
@@ -65,18 +72,14 @@ public abstract class ReflectionUtils {
 
 
 	/**
-	 * Pre-built MethodFilter that matches all non-bridge methods.
+	 * Naming prefix for CGLIB-renamed methods.
+	 * @see #isCglibRenamedMethod
 	 */
-	public static final MethodFilter NON_BRIDGED_METHODS =
-			(method -> !method.isBridge());
+	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
 
+	private static final Method[] NO_METHODS = {};
 
-	/**
-	 * Pre-built MethodFilter that matches all non-bridge non-synthetic methods
-	 * which are not declared on {@code java.lang.Object}.
-	 */
-	public static final MethodFilter USER_DECLARED_METHODS =
-			(method -> (!method.isBridge() && !method.isSynthetic() && method.getDeclaringClass() != Object.class));
+	private static final Field[] NO_FIELDS = {};
 
 
 	/**
@@ -870,6 +873,5 @@ public abstract class ReflectionUtils {
 		 */
 		boolean matches(Field field);
 	}
-
 
 }
