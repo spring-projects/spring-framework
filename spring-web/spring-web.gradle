@@ -60,7 +60,7 @@ dependencies {
 	optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
 	optional("com.rometools:rome:1.11.1")
 	optional("com.caucho:hessian:4.0.51")
-	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
+	optional("org.codehaus.groovy:groovy:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("io.projectreactor:reactor-test")

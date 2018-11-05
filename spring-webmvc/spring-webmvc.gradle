@@ -39,7 +39,7 @@ dependencies {
 		exclude group: "org.springframework", module: "spring-web"
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 	}
-	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
+	optional("org.codehaus.groovy:groovy-templates:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	optional("org.reactivestreams:reactive-streams")
