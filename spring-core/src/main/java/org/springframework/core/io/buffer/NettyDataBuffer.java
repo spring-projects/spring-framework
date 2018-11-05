@@ -19,7 +19,6 @@ package org.springframework.core.io.buffer;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.function.IntPredicate;
 
 import io.netty.buffer.ByteBuf;

@@ -379,11 +379,11 @@ moving from local to global transactions or vice versa.
 [[tx-resource-synchronization]]
 === Synchronizing Resources with Transactions
 
-How to create different transaction managers and how they are
-linked to related resources that need to be synchronized to transactions (for example
-`DataSourceTransactionManager` to a JDBC `DataSource`, `HibernateTransactionManager` to
-a Hibernate `SessionFactory`, and so forth) should now be clear. This section describes how the application
-code (directly or indirectly, by using a persistence API such as JDBC, Hibernate, or JPA)
+How to create different transaction managers and how they are linked to related resources
+that need to be synchronized to transactions (for example `DataSourceTransactionManager`
+to a JDBC `DataSource`, `HibernateTransactionManager` to a Hibernate `SessionFactory`,
+and so forth) should now be clear. This section describes how the application code
+(directly or indirectly, by using a persistence API such as JDBC, Hibernate, or JPA)
 ensures that these resources are created, reused, and cleaned up properly. The section
 also discusses how transaction synchronization is (optionally) triggered through the
 relevant `PlatformTransactionManager`.
@@ -530,16 +530,16 @@ on unchecked exceptions), it is often useful to customize this behavior.
 
 It is not sufficient merely to tell you to annotate your classes with the
 `@Transactional` annotation, add `@EnableTransactionManagement` to your configuration,
-and expect you to understand how it all works. To provide a deeper understanding, this section explains the inner
-workings of the Spring Framework's declarative transaction infrastructure in the event
-of transaction-related issues.
+and expect you to understand how it all works. To provide a deeper understanding,
+this section explains the inner workings of the Spring Framework's declarative
+transaction infrastructure in the event of transaction-related issues.
 
 The most important concepts to grasp with regard to the Spring Framework's declarative
 transaction support are that this support is enabled
-<<core.adoc#aop-understanding-aop-proxies,via AOP proxies>> and that the transactional advice
-is driven by metadata (currently XML- or annotation-based). The combination of AOP
-with transactional metadata yields an AOP proxy that uses a `TransactionInterceptor` in
-conjunction with an appropriate `PlatformTransactionManager` implementation to drive
+<<core.adoc#aop-understanding-aop-proxies,via AOP proxies>> and that the transactional
+advice is driven by metadata (currently XML- or annotation-based). The combination of
+AOP with transactional metadata yields an AOP proxy that uses a `TransactionInterceptor`
+in conjunction with an appropriate `PlatformTransactionManager` implementation to drive
 transactions around method invocations.
 
 NOTE: Spring AOP is covered in <<core.adoc#aop, the AOP section>>.
@@ -1073,13 +1073,13 @@ source code puts the declarations much closer to the affected code. There is not
 danger of undue coupling, because code that is meant to be used transactionally is
 almost always deployed that way anyway.
 
-NOTE: The standard `javax.transaction.Transactional` annotation is also supported as a drop-in
-replacement to Spring's own annotation. Please refer to JTA 1.2 documentation for more
-details.
+NOTE: The standard `javax.transaction.Transactional` annotation is also supported as a
+drop-in replacement to Spring's own annotation. Please refer to JTA 1.2 documentation
+for more details.
 
 The ease-of-use afforded by the use of the `@Transactional` annotation is best
-illustrated with an example, which is explained in the text that follows. Consider the
-following class definition:
+illustrated with an example, which is explained in the text that follows.
+Consider the following class definition:
 
 ====
 [source,java,indent=0]
@@ -1154,8 +1154,8 @@ for full details.
 When you use proxies, you should apply the `@Transactional` annotation only to methods
 with public visibility. If you do annotate protected, private or package-visible
 methods with the `@Transactional` annotation, no error is raised, but the annotated
-method does not exhibit the configured transactional settings. If you need to annotate non-public methods, consider using
-AspectJ (described later).
+method does not exhibit the configured transactional settings. If you need to annotate
+non-public methods, consider using AspectJ (described later).
 ****
 
 You can place the `@Transactional` annotation before an interface definition, a method
@@ -1167,9 +1167,9 @@ the metadata to configure the appropriate beans with transactional behavior. In 
 preceding example, the `<tx:annotation-driven/>` element switches on the
 transactional behavior.
 
-TIP: The Spring team recommends that you annotate only concrete classes (and methods of concrete
-classes) with the `@Transactional` annotation, as opposed to annotating interfaces. You
-certainly can place the `@Transactional` annotation on an interface (or an interface
+TIP: The Spring team recommends that you annotate only concrete classes (and methods of
+concrete classes) with the `@Transactional` annotation, as opposed to annotating interfaces.
+You certainly can place the `@Transactional` annotation on an interface (or an interface
 method), but this works only as you would expect it to if you use interface-based
 proxies. The fact that Java annotations are not inherited from interfaces means that,
 if you use class-based proxies (`proxy-target-class="true"`) or the weaving-based
@@ -1177,18 +1177,17 @@ aspect (`mode="aspectj"`), the transaction settings are not recognized by the
 proxying and weaving infrastructure, and the object is not wrapped in a
 transactional proxy, which would be decidedly bad.
 
-NOTE: In proxy mode (which is the default), only external method calls coming in through the
-proxy are intercepted. This means that self-invocation (in effect, a method within the
-target object calling another method of the target object) does not lead to an actual
+NOTE: In proxy mode (which is the default), only external method calls coming in through
+the proxy are intercepted. This means that self-invocation (in effect, a method within
+the target object calling another method of the target object) does not lead to an actual
 transaction at runtime even if the invoked method is marked with `@Transactional`. Also,
 the proxy must be fully initialized to provide the expected behavior, so you should not
 rely on this feature in your initialization code (that is, `@PostConstruct`).
 
-Consider using of AspectJ mode (see the `mode` attribute in the following table) if you expect
-self-invocations to be wrapped with transactions as well. In this case, there no
-proxy in the first place. Instead, the target class is woven (that is, its
-byte code is modified) to turn `@Transactional` into runtime behavior on
-any kind of method.
+Consider using of AspectJ mode (see the `mode` attribute in the following table) if you
+expect self-invocations to be wrapped with transactions as well. In this case, there no
+proxy in the first place. Instead, the target class is woven (that is, its byte code is
+modified) to turn `@Transactional` into runtime behavior on any kind of method.
 
 [[tx-annotation-driven-settings]]
 .Annotation driven transaction settings
@@ -1232,9 +1231,9 @@ any kind of method.
   No specified ordering means that the AOP subsystem determines the order of the advice.
 |===
 
-NOTE: The default advice mode for processing `@Transactional` annotations is `proxy`, which
-allows for interception of calls through the proxy only. Local calls within the same
-class cannot get intercepted that way. For a more advanced mode of interception,
+NOTE: The default advice mode for processing `@Transactional` annotations is `proxy`,
+which allows for interception of calls through the proxy only. Local calls within the
+same class cannot get intercepted that way. For a more advanced mode of interception,
 consider switching to `aspectj` mode in combination with compile-time or load-time weaving.
 
 NOTE: The `proxy-target-class` attribute controls what type of transactional proxies are
@@ -1245,9 +1244,9 @@ interface-based proxies are created. (See <<aop-proxying>> for a discussion of t
 different proxy types.)
 
 NOTE: `@EnableTransactionManagement` and `<tx:annotation-driven/>` looks for
-`@Transactional` only on beans in the same application context in which they are defined. This
-means that, if you put annotation-driven configuration in a `WebApplicationContext` for
-a `DispatcherServlet`, it checks for `@Transactional` beans only in your controllers
+`@Transactional` only on beans in the same application context in which they are defined.
+This means that, if you put annotation-driven configuration in a `WebApplicationContext`
+for a `DispatcherServlet`, it checks for `@Transactional` beans only in your controllers
 and not your services. See <<web.adoc#mvc-servlet, MVC>> for more information.
 
 The most derived location takes precedence when evaluating the transactional settings
@@ -1279,10 +1278,10 @@ precedence over the transactional settings defined at the class level.
 [[transaction-declarative-attransactional-settings]]
 ===== `@Transactional` Settings
 
-The `@Transactional` annotation is metadata that specifies that an interface, class, or
-method must have transactional semantics (for example, "`start a brand new read-only
-transaction when this method is invoked, suspending any existing transaction`"). The
-default `@Transactional` settings are as follows:
+The `@Transactional` annotation is metadata that specifies that an interface, class,
+or method must have transactional semantics (for example, "`start a brand new read-only
+transaction when this method is invoked, suspending any existing transaction`").
+The default `@Transactional` settings are as follows:
 
 * The propagation setting is `PROPAGATION_REQUIRED.`
 * The isolation level is `ISOLATION_DEFAULT.`
@@ -1291,8 +1290,8 @@ default `@Transactional` settings are as follows:
   system, or to none if timeouts are not supported.
 * Any `RuntimeException` triggers rollback, and any checked `Exception` does not.
 
-You can change these default settings. The following table summarizes the various properties of the `@Transactional`
-annotation:
+You can change these default settings. The following table summarizes the various
+properties of the `@Transactional` annotation:
 
 [[tx-attransactional-properties]]
 .@Transactional Settings
@@ -1350,10 +1349,10 @@ name of the transaction would be: `com.example.BusinessService.handlePayment`.
 Most Spring applications need only a single transaction manager, but there may be
 situations where you want multiple independent transaction managers in a single
 application. You can use the `value` attribute of the `@Transactional` annotation to
-optionally specify the identity of the `PlatformTransactionManager` to be used. This can
-either be the bean name or the qualifier value of the transaction manager bean. For
-example, using the qualifier notation, you can combine the following Java code with the
-following transaction manager bean declarations in the application context:
+optionally specify the identity of the `PlatformTransactionManager` to be used.
+This can either be the bean name or the qualifier value of the transaction manager bean.
+For example, using the qualifier notation, you can combine the following Java code with
+the following transaction manager bean declarations in the application context:
 
 ====
 [source,java,indent=0]
@@ -1390,18 +1389,18 @@ The following listing shows the bean declarations:
 ----
 ====
 
-In this case, the two methods on `TransactionalService` run under separate
-transaction managers, differentiated by the `order` and `account` qualifiers. The
-default `<tx:annotation-driven>` target bean name, `transactionManager`, is still
-used if no specifically qualified `PlatformTransactionManager` bean is found.
+In this case, the two methods on `TransactionalService` run under separate transaction
+managers, differentiated by the `order` and `account` qualifiers. The default
+`<tx:annotation-driven>` target bean name, `transactionManager`, is still used if no
+specifically qualified `PlatformTransactionManager` bean is found.
 
 [[tx-custom-attributes]]
 ===== Custom Shortcut Annotations
 
-If you find you repeatedly use the same attributes with `@Transactional` on many
-different methods, <<core.adoc#beans-meta-annotations,Spring's meta-annotation support>> lets
-you define custom shortcut annotations for your specific use cases. For example, consider
-the following annotation definitions:
+If you find you repeatedly use the same attributes with `@Transactional` on many different
+methods, <<core.adoc#beans-meta-annotations,Spring's meta-annotation support>> lets you
+define custom shortcut annotations for your specific use cases. For example, consider the
+following annotation definitions:
 
 ====
 [source,java,indent=0]
@@ -1702,10 +1701,10 @@ You can configure additional aspects in similar fashion.
 [[transaction-declarative-aspectj]]
 ==== Using `@Transactional` with AspectJ
 
-You can also use the Spring Framework's `@Transactional` support outside of a
-Spring container by means of an AspectJ aspect. To do so, first annotate your
-classes (and optionally your classes' methods) with the `@Transactional` annotation, and
-then link (weave) your application with the
+You can also use the Spring Framework's `@Transactional` support outside of a Spring
+container by means of an AspectJ aspect. To do so, first annotate your classes
+(and optionally your classes' methods) with the `@Transactional` annotation,
+and then link (weave) your application with the
 `org.springframework.transaction.aspectj.AnnotationTransactionAspect` defined in the
 `spring-aspects.jar` file. You must also configure The aspect with a transaction
 manager. You can use the Spring Framework's IoC container to take care of
@@ -5533,9 +5532,9 @@ these annotated methods. The following example shows how to do so:
 ----
 ====
 
-In the container, you need to set up the `PlatformTransactionManager`
-implementation (as a bean) and a `<tx:annotation-driven/>` entry,
-opting into `@Transactional` processing at runtime. The following example shows how to do so:
+In the container, you need to set up the `PlatformTransactionManager` implementation
+(as a bean) and a `<tx:annotation-driven/>` entry, opting into `@Transactional`
+processing at runtime. The following example shows how to do so:
 
 ====
 [source,xml,indent=0]
