@@ -47,8 +47,8 @@ ext {
 	junitVintageVersion  = "4.12.3"
 	kotlinVersion        = "1.2.51"
 	log4jVersion         = "2.11.1"
-	nettyVersion         = "4.1.30.Final"
-	reactorVersion       = "Bismuth-BUILD-SNAPSHOT"
+	nettyVersion         = "4.1.31.Final"
+	reactorVersion       = "Bismuth-SR13"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
 	rxjava2Version       = "2.1.17"
@@ -152,7 +152,6 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
-		maven { url "https://repo.spring.io/snapshot" }	// Reactor Bismuth snapshots (towards SR13)
 	}
 
 	dependencies {
