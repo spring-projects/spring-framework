@@ -3413,7 +3413,7 @@ The following table summarizes these registration behaviors:
   previous instance).
 |===
 
-The values in the preceding table are defined as enums on the `RegistrationPolicy` class. 
+The values in the preceding table are defined as enums on the `RegistrationPolicy` class.
 If you want to change the default registration behavior, you need to set the value of the
 `registrationPolicy` property on your `MBeanExporter` definition to one of those
 values.
