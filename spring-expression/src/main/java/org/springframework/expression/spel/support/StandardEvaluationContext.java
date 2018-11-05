@@ -194,7 +194,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	@Override
 	public TypeConverter getTypeConverter() {
 		if (this.typeConverter == null) {
-			 this.typeConverter = new StandardTypeConverter();
+			this.typeConverter = new StandardTypeConverter();
 		}
 		return this.typeConverter;
 	}
@@ -224,7 +224,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.variables.put(name, value);
 	}
 
-	public void setVariables(Map<String,Object> variables) {
+	public void setVariables(Map<String, Object> variables) {
 		this.variables.putAll(variables);
 	}
 
