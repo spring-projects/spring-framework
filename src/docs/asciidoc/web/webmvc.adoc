@@ -3266,7 +3266,7 @@ response body through message conversion (versus view resolution or template ren
 
 On startup, the infrastructure classes for `@RequestMapping` and `@ExceptionHandler` methods
 detect Spring beans of type `@ControllerAdvice` and then apply their methods at runtime.
-Global `@ExceptionHandler` methods (from an `@ControllerAdvice`) are applied _after_ local
+Global `@ExceptionHandler` methods (from a `@ControllerAdvice`) are applied _after_ local
 ones (from the `@Controller`). By contrast, global `@ModelAttribute` and `@InitBinder`
 methods are applied _before_ local ones.
 

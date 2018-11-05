@@ -3054,41 +3054,41 @@ container and once through the aspect.
 [[aop-configurable-testing]]
 ==== Unit Testing `@Configurable` Objects
 
-One of the goals of the `@Configurable` support is to enable independent unit testing of
-domain objects without the difficulties associated with hard-coded lookups. If
-`@Configurable` types have not been woven by AspectJ, the annotation has no affect
-during unit testing. You can set mock or stub property references in the
-object under test and proceed as normal. If `@Configurable` types have been woven by
-AspectJ, you can still unit test outside of the container as normal, but you
-see a warning message each time that you construct an `@Configurable` object indicating
-that it has not been configured by Spring.
+One of the goals of the `@Configurable` support is to enable independent unit testing
+of domain objects without the difficulties associated with hard-coded lookups.
+If `@Configurable` types have not been woven by AspectJ, the annotation has no affect
+during unit testing. You can set mock or stub property references in the object under
+test and proceed as normal. If `@Configurable` types have been woven by AspectJ,
+you can still unit test outside of the container as normal, but you see a warning
+message each time that you construct a `@Configurable` object indicating that it has
+not been configured by Spring.
 
 
 [[aop-configurable-container]]
 ==== Working with Multiple Application Contexts
 
-The `AnnotationBeanConfigurerAspect` that is used to implement the `@Configurable` support is an
-AspectJ singleton aspect. The scope of a singleton aspect is the same as the scope of
-`static` members: There is one aspect instance per classloader that
-defines the type. This means that, if you define multiple application contexts within the
-same classloader hierarchy, you need to consider where to define the
-`@EnableSpringConfigured` bean and where to place `spring-aspects.jar` on the classpath.
+The `AnnotationBeanConfigurerAspect` that is used to implement the `@Configurable` support
+is an AspectJ singleton aspect. The scope of a singleton aspect is the same as the scope
+of `static` members: There is one aspect instance per classloader that defines the type.
+This means that, if you define multiple application contexts within the same classloader
+hierarchy, you need to consider where to define the `@EnableSpringConfigured` bean and
+where to place `spring-aspects.jar` on the classpath.
 
-Consider a typical Spring web application configuration that has a shared parent application context
-that defines common business services, everything needed to support those services, and one child
-application context for each servlet (which contains definitions particular to that servlet). All
-of these contexts co-exist within the same classloader hierarchy, and so the
-`AnnotationBeanConfigurerAspect` can hold a reference to only one of them. In this case,
-we recommend defining the `@EnableSpringConfigured` bean in the shared (parent)
-application context. This defines the services that you are likely to want to inject
-into domain objects. A consequence is that you cannot configure domain objects with
-references to beans defined in the child (servlet-specific) contexts by using the
+Consider a typical Spring web application configuration that has a shared parent application
+context that defines common business services, everything needed to support those services,
+and one child application context for each servlet (which contains definitions particular
+to that servlet). All of these contexts co-exist within the same classloader hierarchy,
+and so the `AnnotationBeanConfigurerAspect` can hold a reference to only one of them.
+In this case, we recommend defining the `@EnableSpringConfigured` bean in the shared
+(parent) application context. This defines the services that you are likely to want to
+inject into domain objects. A consequence is that you cannot configure domain objects
+with references to beans defined in the child (servlet-specific) contexts by using the
 @Configurable mechanism (which is probably not something you want to do anyway).
 
 When deploying multiple web applications within the same container, ensure that each
-web application loads the types in `spring-aspects.jar` by using its own classloader (for
-example, by placing `spring-aspects.jar` in `'WEB-INF/lib'`). If `spring-aspects.jar` is
-added only to the container-wide classpath (and hence loaded by the shared parent
+web application loads the types in `spring-aspects.jar` by using its own classloader
+(for example, by placing `spring-aspects.jar` in `'WEB-INF/lib'`). If `spring-aspects.jar`
+is added only to the container-wide classpath (and hence loaded by the shared parent
 classloader), all web applications share the same aspect instance (which is probably
 not what you want).
 
