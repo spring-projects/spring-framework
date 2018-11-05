@@ -547,7 +547,7 @@ The table below lists the available `HandlerExceptionResolver` implementations:
   codes based on the value in the annotation.
 
 | `ExceptionHandlerExceptionResolver`
-| Resolves exceptions by invoking an `@ExceptionHandler` method in an `@Controller` or an
+| Resolves exceptions by invoking an `@ExceptionHandler` method in an `@Controller` or a
   `@ControllerAdvice` class. See <<mvc-ann-exceptionhandler,@ExceptionHandler methods>>.
 |===
 
@@ -2660,7 +2660,7 @@ to the model:
 ===== Jackson JSONP
 
 In order to enable http://en.wikipedia.org/wiki/JSONP[JSONP] support for `@ResponseBody`
-and `ResponseEntity` methods, declare an `@ControllerAdvice` bean that extends
+and `ResponseEntity` methods, declare a `@ControllerAdvice` bean that extends
 `AbstractJsonpResponseBodyAdvice` as shown below where the constructor argument indicates
 the JSONP query parameter name(s):
 

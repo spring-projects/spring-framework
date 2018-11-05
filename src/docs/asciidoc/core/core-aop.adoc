@@ -2890,13 +2890,13 @@ container and once through the aspect.
 [[aop-configurable-testing]]
 ==== Unit testing @Configurable objects
 
-One of the goals of the `@Configurable` support is to enable independent unit testing of
-domain objects without the difficulties associated with hard-coded lookups. If
-`@Configurable` types have not been woven by AspectJ then the annotation has no affect
+One of the goals of the `@Configurable` support is to enable independent unit testing
+of domain objects without the difficulties associated with hard-coded lookups.
+If `@Configurable` types have not been woven by AspectJ, the annotation has no affect
 during unit testing, and you can simply set mock or stub property references in the
 object under test and proceed as normal. If `@Configurable` types __have__ been woven by
 AspectJ then you can still unit test outside of the container as normal, but you will
-see a warning message each time that you construct an `@Configurable` object indicating
+see a warning message each time that you construct a `@Configurable` object indicating
 that it has not been configured by Spring.
 
 
