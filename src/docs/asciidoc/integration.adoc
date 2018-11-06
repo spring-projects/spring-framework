@@ -6681,10 +6681,11 @@ in combination with a custom pointcut.
 ==== Executor Qualification with `@Async`
 
 By default, when specifying `@Async` on a method, the executor that is used is the
-one supplied to the "`annotation-driven`" element, as described earlier. However, you can use the `value`
-attribute of the `@Async` annotation when you need to indicate that an
-executor other than the default should be used when executing a given method.
-The following example shows how to do so:
+one <<scheduling-enable-annotation-support,configured when enabling async support>>, i.e.
+the "`annotation-driven`" element if you are using XML or your `AsyncConfigurer`
+implementation, if any. However, you can use the `value` attribute of the `@Async`
+annotation when you need to indicate that an executor other than the default should be
+used when executing a given method. The following example shows how to do so:
 
 ====
 [source,java,indent=0]
