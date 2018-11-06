@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Dimitrios Liapis
  */
 public class MediaTypeTests {
 
@@ -141,6 +142,56 @@ public class MediaTypeTests {
 		mediaTypes = MediaType.parseMediaTypes("");
 		assertNotNull("No media types returned", mediaTypes);
 		assertEquals("Invalid amount of media types", 0, mediaTypes.size());
+	}
+
+	// SPR-17459
+	@Test
+	public void parseMediaTypesWithOddNumberOfDoubleQuotedCommas() {
+		String s = "foo/bar;param=\",\"";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 1, mediaTypes.size());
+		assertEquals("Comma should be part of the media type", s, mediaTypes.get(0).toString());
+	}
+
+	// SPR-17459
+	@Test
+	public void parseMediaTypesWithEvenNumberOfDoubleQuotedCommas() {
+		String s = "foo/bar;param=\"s,a,\"";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 1, mediaTypes.size());
+		assertEquals("Comma should be part of the media type", s, mediaTypes.get(0).toString());
+	}
+
+	// SPR-17459
+	@Test
+	public void parseMediaTypesWithAndWithoutDoubleQuotedCommas() {
+		String s = "foo/bar;param=\"s,\", text/x-c";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 2, mediaTypes.size());
+		assertEquals("Comma should be part of the media type", "foo/bar;param=\"s,\"", mediaTypes.get(0).toString());
+	}
+
+	// SPR-17459
+	@Test
+	public void parseMediaTypesIgnoreEscapedDoubleQuoteWithinDoubleQuotes() {
+		String s = "foo/bar;param=\"a\\\"b,c\"";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 1, mediaTypes.size());
+		assertEquals("Escaped quote within quotes should be ignored when considering comma tokenization", s, mediaTypes.get(0).toString());
+	}
+
+	// SPR-17459
+	@Test
+	public void parseMediaTypesIgnoreEscapedBackslash() {
+		String s = "foo/bar;param=\"\\\\\"";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 1, mediaTypes.size());
+		assertEquals("Escaped quote within quotes should be ignored when considering comma tokenization", s, mediaTypes.get(0).toString());
+
+		s = "foo/bar;param=\"\\,\\\"";
+		mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 1, mediaTypes.size());
+		assertEquals("Escaped quote within quotes should be ignored when considering comma tokenization", s, mediaTypes.get(0).toString());
 	}
 
 	@Test

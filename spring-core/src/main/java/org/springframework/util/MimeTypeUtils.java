@@ -37,6 +37,7 @@ import org.springframework.util.MimeType.SpecificityComparator;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Dimitrios Liapis
  * @since 4.0
  */
 public abstract class MimeTypeUtils {
@@ -257,12 +258,24 @@ public abstract class MimeTypeUtils {
 		if (!StringUtils.hasLength(mimeTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = StringUtils.tokenizeToStringArray(mimeTypes, ",");
-		List<MimeType> result = new ArrayList<>(tokens.length);
-		for (String token : tokens) {
-			result.add(parseMimeType(token));
+		boolean isQuoted = false;
+		int nextBeginIndex = 0;
+		List<MimeType> tokens = new ArrayList<>();
+		for(int i = 0; i < mimeTypes.length() - 1; i++) {
+			//tokenizing on commas that are not within double quotes
+			if(mimeTypes.charAt(i) == ',' && !isQuoted) {
+				tokens.add(parseMimeType(mimeTypes.substring(nextBeginIndex,i)));
+				nextBeginIndex = i + 1;
+			//ignoring escaped double quote within double quotes
+			} else if(isQuoted && mimeTypes.charAt(i) == '"' && mimeTypes.charAt(i-1) == '\\') {
+				continue;
+			} else if(mimeTypes.charAt(i) == '"') {
+				isQuoted = !isQuoted;
+			}
 		}
-		return result;
+		//either the last part of the tokenization or the original string
+		tokens.add(parseMimeType(mimeTypes.substring(nextBeginIndex)));
+		return tokens;
 	}
 
 	/**
