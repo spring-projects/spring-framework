@@ -21,8 +21,9 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
-import org.springframework.util.ClassUtils;
+import org.springframework.messaging.handler.ResolvableMethod;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -37,15 +38,15 @@ public class InvocableHandlerMethodTests {
 
 	private final Message<?> message = mock(Message.class);
 
-	private final HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
+	private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
 
 	@Test
 	public void resolveArg() throws Exception {
-		this.composite.addResolver(new StubArgumentResolver(99));
-		this.composite.addResolver(new StubArgumentResolver("value"));
-
-		Object value = getInvocable("handle", Integer.class, String.class).invoke(this.message);
+		this.resolvers.addResolver(new StubArgumentResolver(99));
+		this.resolvers.addResolver(new StubArgumentResolver("value"));
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		Object value = invoke(new Handler(), method);
 
 		assertEquals(1, getStubResolver(0).getResolvedParameters().size());
 		assertEquals(1, getStubResolver(1).getResolvedParameters().size());
@@ -56,20 +57,21 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void resolveNoArgValue() throws Exception {
-		this.composite.addResolver(new StubArgumentResolver(Integer.class));
-		this.composite.addResolver(new StubArgumentResolver(String.class));
-
-		Object returnValue = getInvocable("handle", Integer.class, String.class).invoke(this.message);
+		this.resolvers.addResolver(new StubArgumentResolver(Integer.class));
+		this.resolvers.addResolver(new StubArgumentResolver(String.class));
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		Object value = invoke(new Handler(), method);
 
 		assertEquals(1, getStubResolver(0).getResolvedParameters().size());
 		assertEquals(1, getStubResolver(1).getResolvedParameters().size());
-		assertEquals("null-null", returnValue);
+		assertEquals("null-null", value);
 	}
 
 	@Test
 	public void cannotResolveArg() throws Exception {
 		try {
-			getInvocable("handle", Integer.class, String.class).invoke(this.message);
+			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+			invoke(new Handler(), method);
 			fail("Expected exception");
 		}
 		catch (MethodArgumentResolutionException ex) {
@@ -80,7 +82,8 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void resolveProvidedArg() throws Exception {
-		Object value = getInvocable("handle", Integer.class, String.class).invoke(this.message, 99, "value");
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		Object value = invoke(new Handler(), method, 99, "value");
 
 		assertNotNull(value);
 		assertEquals(String.class, value.getClass());
@@ -89,18 +92,20 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void resolveProvidedArgFirst() throws Exception {
-		this.composite.addResolver(new StubArgumentResolver(1));
-		this.composite.addResolver(new StubArgumentResolver("value1"));
-		Object value = getInvocable("handle", Integer.class, String.class).invoke(this.message, 2, "value2");
+		this.resolvers.addResolver(new StubArgumentResolver(1));
+		this.resolvers.addResolver(new StubArgumentResolver("value1"));
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		Object value = invoke(new Handler(), method, 2, "value2");
 
 		assertEquals("2-value2", value);
 	}
 
 	@Test
 	public void exceptionInResolvingArg() throws Exception {
-		this.composite.addResolver(new ExceptionRaisingArgumentResolver());
+		this.resolvers.addResolver(new ExceptionRaisingArgumentResolver());
 		try {
-			getInvocable("handle", Integer.class, String.class).invoke(this.message);
+			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+			invoke(new Handler(), method);
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
@@ -110,10 +115,11 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void illegalArgumentException() throws Exception {
-		this.composite.addResolver(new StubArgumentResolver(Integer.class, "__not_an_int__"));
-		this.composite.addResolver(new StubArgumentResolver("value"));
+		this.resolvers.addResolver(new StubArgumentResolver(Integer.class, "__not_an_int__"));
+		this.resolvers.addResolver(new StubArgumentResolver("value"));
 		try {
-			getInvocable("handle", Integer.class, String.class).invoke(this.message);
+			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+			invoke(new Handler(), method);
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
@@ -129,10 +135,12 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void invocationTargetException() throws Exception {
+		Handler handler = new Handler();
+		Method method = ResolvableMethod.on(Handler.class).argTypes(Throwable.class).resolveMethod();
 		Throwable expected = null;
 		try {
 			expected = new RuntimeException("error");
-			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
+			invoke(handler, method, expected);
 			fail("Expected exception");
 		}
 		catch (RuntimeException actual) {
@@ -140,7 +148,7 @@ public class InvocableHandlerMethodTests {
 		}
 		try {
 			expected = new Error("error");
-			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
+			invoke(handler, method, expected);
 			fail("Expected exception");
 		}
 		catch (Error actual) {
@@ -148,15 +156,15 @@ public class InvocableHandlerMethodTests {
 		}
 		try {
 			expected = new Exception("error");
-			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
+			invoke(handler, method, expected);
 			fail("Expected exception");
 		}
 		catch (Exception actual) {
 			assertSame(expected, actual);
 		}
 		try {
-			expected = new Throwable("error");
-			getInvocable("handleWithException", Throwable.class).invoke(this.message, expected);
+			expected = new Throwable("error", expected);
+			invoke(handler, method, expected);
 			fail("Expected exception");
 		}
 		catch (IllegalStateException actual) {
@@ -168,9 +176,10 @@ public class InvocableHandlerMethodTests {
 
 	@Test  // Based on SPR-13917 (spring-web)
 	public void invocationErrorMessage() throws Exception {
-		this.composite.addResolver(new StubArgumentResolver(double.class));
+		this.resolvers.addResolver(new StubArgumentResolver(double.class));
 		try {
-			getInvocable("handle", double.class).invoke(this.message);
+			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0.0)).method();
+			invoke(new Handler(), method);
 			fail();
 		}
 		catch (IllegalStateException ex) {
@@ -178,15 +187,15 @@ public class InvocableHandlerMethodTests {
 		}
 	}
 
-	public InvocableHandlerMethod getInvocable(String methodName, Class<?>... argTypes) {
-		Method method = ClassUtils.getMethod(Handler.class, methodName, argTypes);
-		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(new Handler(), method);
-		handlerMethod.setMessageMethodArgumentResolvers(this.composite);
-		return handlerMethod;
+	@Nullable
+	private Object invoke(Object handler, Method method, Object... providedArgs) throws Exception {
+		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(handler, method);
+		handlerMethod.setMessageMethodArgumentResolvers(this.resolvers);
+		return handlerMethod.invoke(this.message, providedArgs);
 	}
 
 	private StubArgumentResolver getStubResolver(int index) {
-		return (StubArgumentResolver) this.composite.getResolvers().get(index);
+		return (StubArgumentResolver) this.resolvers.getResolvers().get(index);
 	}
 
 

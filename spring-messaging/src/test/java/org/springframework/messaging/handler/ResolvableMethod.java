@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.method;
+package org.springframework.messaging.handler;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -186,7 +186,6 @@ public class ResolvableMethod {
 
 	/**
 	 * Filter on method arguments with annotation.
-	 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 	 */
 	@SafeVarargs
 	public final ArgResolver annot(Predicate<MethodParameter>... filter) {
@@ -299,7 +298,6 @@ public class ResolvableMethod {
 
 		/**
 		 * Filter on annotated methods.
-		 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
 		public final Builder<T> annot(Predicate<Method>... filters) {
@@ -310,7 +308,6 @@ public class ResolvableMethod {
 		/**
 		 * Filter on methods annotated with the given annotation type.
 		 * @see #annot(Predicate[])
-		 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
 		public final Builder<T> annotPresent(Class<? extends Annotation>... annotationTypes) {
@@ -527,7 +524,6 @@ public class ResolvableMethod {
 
 		/**
 		 * Filter on method arguments with annotations.
-		 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
 		public final ArgResolver annot(Predicate<MethodParameter>... filters) {
@@ -539,7 +535,6 @@ public class ResolvableMethod {
 		 * Filter on method arguments that have the given annotations.
 		 * @param annotationTypes the annotation types
 		 * @see #annot(Predicate[])
-		 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
 		public final ArgResolver annotPresent(Class<? extends Annotation>... annotationTypes) {
