@@ -552,12 +552,58 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = StringUtils.tokenizeToStringArray(mediaTypes, ",");
+		String[] tokens = isAnyCommaDoubleQuotedInString(mediaTypes) ?
+				tokenizeOnCommasIgnoringDoubleQuotedCommas(mediaTypes) :
+				StringUtils.tokenizeToStringArray(mediaTypes, ",");
 		List<MediaType> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMediaType(token));
 		}
 		return result;
+	}
+
+	private static String[] tokenizeOnCommasIgnoringDoubleQuotedCommas(String string) {
+		List<Integer> indices = indicesOfNonDoubleQuotedCommasInString(string);
+		int beginIndex = 0;
+		ArrayList<String> tokens = new ArrayList<>(indices.size()+1);
+		for(int commaIndex : indices) {
+			tokens.add(string.substring(beginIndex, commaIndex));
+			beginIndex = commaIndex + 1;
+		}
+		//either 0 indices or the last part of the tokenization
+		tokens.add(string.substring(beginIndex));
+		return tokens.toArray(new String[0]);
+	}
+
+	private static List<Integer> indicesOfNonDoubleQuotedCommasInString(String string) {
+		boolean isQuoted = false;
+		int totalCommaOccurences = string.length() - string.replace(",", "").length();
+		if(totalCommaOccurences == 0) {
+			return Collections.emptyList();
+		}
+		List<Integer> indicesOfNonDoubleQuotedCommas = new ArrayList<>(totalCommaOccurences);
+		for(int i=0; i < string.length(); i++) {
+			char currentStringChar = string.charAt(i);
+			if(currentStringChar == ',' && !isQuoted) {
+				indicesOfNonDoubleQuotedCommas.add(i);
+			} else if(currentStringChar == '"') {
+				isQuoted = !isQuoted;
+			}
+		}
+		return indicesOfNonDoubleQuotedCommas;
+	}
+
+	private static boolean isAnyCommaDoubleQuotedInString(String string) {
+		boolean isQuoted = false;
+		for(int i=0; i<string.length(); i++) {
+			char currentStringChar = string.charAt(i);
+			if(currentStringChar == ',') {
+				return isQuoted;
+			} else if(currentStringChar == '"') {
+				isQuoted = !isQuoted;
+			}
+		}
+		return false;
 	}
 
 	/**

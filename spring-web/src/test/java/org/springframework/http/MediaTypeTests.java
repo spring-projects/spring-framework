@@ -144,6 +144,30 @@ public class MediaTypeTests {
 	}
 
 	@Test
+	public void parseMediaTypesWithOddNumberOfDoubleQuotedCommas() {
+		String s = "foo/bar;param=\",\"";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 1, mediaTypes.size());
+		assertEquals("Comma should be part of the media type", s, mediaTypes.get(0).toString());
+	}
+
+	@Test
+	public void parseMediaTypesWithEvenNumberOfDoubleQuotedCommas() {
+		String s = "foo/bar;param=\"s,a,\"";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 1, mediaTypes.size());
+		assertEquals("Comma should be part of the media type", s, mediaTypes.get(0).toString());
+	}
+
+	@Test
+	public void parseMediaTypesWithAndWithoutDoubleQuotedCommas() {
+		String s = "foo/bar;param=\"s,\", text/x-c";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 2, mediaTypes.size());
+		assertEquals("Comma should be part of the media type", "foo/bar;param=\"s,\"", mediaTypes.get(0).toString());
+	}
+
+	@Test
 	public void compareTo() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audio = new MediaType("audio");
