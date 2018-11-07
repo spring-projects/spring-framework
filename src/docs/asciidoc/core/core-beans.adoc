@@ -8129,7 +8129,7 @@ profile expressions:
 
 * `!`: A logical "`not`" of the profile
 * `&`: A logical "`and`" of the profiles
-* `|`_ A logical "`or`" of the profiles
+* `|`: A logical "`or`" of the profiles
 
 NOTE: You cannot mix the `&` and `|` operators without using parentheses. For example,
 `production & us-east | eu-central` is not a valid expression. It must be expressed as
