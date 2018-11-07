@@ -552,12 +552,21 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = StringUtils.tokenizeToStringArray(mediaTypes, ",");
-		List<MediaType> result = new ArrayList<>(tokens.length);
-		for (String token : tokens) {
-			result.add(parseMediaType(token));
+		boolean isQuoted = false;
+		int nextBeginIndex = 0;
+		List<MediaType> tokens = new ArrayList<>();
+		for(int i = 0; i < mediaTypes.length() - 1; i++) {
+			if(mediaTypes.charAt(i) == ',' && !isQuoted) {
+				tokens.add(parseMediaType(mediaTypes.substring(nextBeginIndex,i)));
+				nextBeginIndex = i + 1;
+			} else if(mediaTypes.charAt(i) == '"') {
+				isQuoted = !isQuoted;
+			}
 		}
-		return result;
+		//either the last part of the tokenization or the original string
+		//itself if not found any commas that are not double quoted.
+		tokens.add(parseMediaType(mediaTypes.substring(nextBeginIndex)));
+		return tokens;
 	}
 
 	/**

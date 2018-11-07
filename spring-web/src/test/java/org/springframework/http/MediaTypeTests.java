@@ -143,6 +143,7 @@ public class MediaTypeTests {
 		assertEquals("Invalid amount of media types", 0, mediaTypes.size());
 	}
 
+	// SPR-17459
 	@Test
 	public void parseMediaTypesWithOddNumberOfDoubleQuotedCommas() {
 		String s = "foo/bar;param=\",\"";
@@ -151,6 +152,7 @@ public class MediaTypeTests {
 		assertEquals("Comma should be part of the media type", s, mediaTypes.get(0).toString());
 	}
 
+	// SPR-17459
 	@Test
 	public void parseMediaTypesWithEvenNumberOfDoubleQuotedCommas() {
 		String s = "foo/bar;param=\"s,a,\"";
@@ -159,6 +161,7 @@ public class MediaTypeTests {
 		assertEquals("Comma should be part of the media type", s, mediaTypes.get(0).toString());
 	}
 
+	// SPR-17459
 	@Test
 	public void parseMediaTypesWithAndWithoutDoubleQuotedCommas() {
 		String s = "foo/bar;param=\"s,\", text/x-c";
