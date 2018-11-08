@@ -101,6 +101,7 @@ public class XmlValidationModeDetector {
 					isDtdValidated = true;
 					break;
 				}
+				// 读取到<开始符, 验证模式一定会在开始符号之前
 				if (hasOpeningTag(content)) {
 					// End of meaningful data...
 					break;

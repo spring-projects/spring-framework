@@ -98,6 +98,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		this.readerContext = readerContext;
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
+		//XXX 开始真正解析
 		doRegisterBeanDefinitions(root);
 	}
 
@@ -125,10 +126,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * Register each bean definition within the given root {@code <beans/>} element.
 	 */
 	protected void doRegisterBeanDefinitions(Element root) {
+	    // 处理profile属性
 		String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 		if (StringUtils.hasText(profileSpec)) {
 			String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
 					profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+			// 环境变量中包含配置profile值时, 才进行加载
 			if (!getEnvironment().acceptsProfiles(specifiedProfiles)) {
 				return;
 			}
@@ -140,11 +143,14 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// the new (child) delegate with a reference to the parent for fallback purposes,
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
+        // 专门处理解析
 		BeanDefinitionParserDelegate parent = this.delegate;
 		this.delegate = createDelegate(this.readerContext, root, parent);
 
+		// 解析前处理, 留给子类实现(模版方法设计模式, 子类自由处理)
 		preProcessXml(root);
 		parseBeanDefinitions(root, this.delegate);
+		// 解析后处理,留给子类实现
 		postProcessXml(root);
 
 		this.delegate = parent;
@@ -181,9 +187,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				if (node instanceof Element) {
 					Element ele = (Element) node;
 					if (delegate.isDefaultNamespace(ele)) {
+					    // 对bean的处理
+                        // <bean id="beanName" class="" />  手动注入
 						parseDefaultElement(ele, delegate);
-					}
-					else {
+					} else {
+                        // 对bean的处理
+                        // <tx:annotation-driven>  注解驱动注入
 						delegate.parseCustomElement(ele);
 					}
 				}
@@ -195,17 +204,21 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
+	    // import
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);
 		}
+		// alias
 		else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
 			processAliasRegistration(ele);
 		}
+		// bean 最复杂最重要
 		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			processBeanDefinition(ele, delegate);
 		}
+		// beans
 		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
-			// recurse
+			// recurse 递归解析
 			doRegisterBeanDefinitions(ele);
 		}
 	}
