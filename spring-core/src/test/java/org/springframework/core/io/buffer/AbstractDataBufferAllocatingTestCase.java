@@ -17,6 +17,8 @@
 package org.springframework.core.io.buffer;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -36,7 +38,11 @@ import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import static org.junit.Assert.*;
 
 /**
+ * Base class for tests that read or write data buffers with a rule to check
+ * that allocated buffers have been released.
+ *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
 public abstract class AbstractDataBufferAllocatingTestCase {
@@ -60,6 +66,7 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 
 	@Rule
 	public final Verifier leakDetector = new LeakDetector();
+
 
 	protected DataBuffer createDataBuffer(int capacity) {
 		return this.bufferFactory.allocateBuffer(capacity);
@@ -85,30 +92,45 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 		};
 	}
 
+	/**
+	 * Wait until allocations are at 0, or the given duration elapses.
+	 */
+	protected void waitForDataBufferRelease(Duration duration) throws InterruptedException {
+		Instant start = Instant.now();
+		while (Instant.now().isBefore(start.plus(duration))) {
+			try {
+				verifyAllocations();
+				break;
+			}
+			catch (AssertionError ex) {
+				// ignore;
+			}
+			Thread.sleep(50);
+		}
+	}
 
-	private class LeakDetector extends Verifier {
-
-		@Override
-		protected void verify() throws Throwable {
-			if (bufferFactory instanceof NettyDataBufferFactory) {
-				ByteBufAllocator byteBufAllocator =
-						((NettyDataBufferFactory) bufferFactory).getByteBufAllocator();
-				if (byteBufAllocator instanceof PooledByteBufAllocator) {
-					PooledByteBufAllocator pooledByteBufAllocator =
-							(PooledByteBufAllocator) byteBufAllocator;
-					PooledByteBufAllocatorMetric metric = pooledByteBufAllocator.metric();
-					long allocations = calculateAllocations(metric.directArenas()) +
-							calculateAllocations(metric.heapArenas());
-					assertTrue("ByteBuf leak detected: " + allocations +
-							" allocations were not released", allocations == 0);
-				}
+	private void verifyAllocations() {
+		if (this.bufferFactory instanceof NettyDataBufferFactory) {
+			ByteBufAllocator allocator = ((NettyDataBufferFactory) this.bufferFactory).getByteBufAllocator();
+			if (allocator instanceof PooledByteBufAllocator) {
+				PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
+				long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
+				assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
 			}
 		}
+	}
 
-		private long calculateAllocations(List<PoolArenaMetric> metrics) {
-			return metrics.stream().mapToLong(PoolArenaMetric::numActiveAllocations).sum();
+	private static long getAllocations(List<PoolArenaMetric> metrics) {
+		return metrics.stream().mapToLong(PoolArenaMetric::numActiveAllocations).sum();
+	}
+
+
+	protected class LeakDetector extends Verifier {
+
+		@Override
+		public void verify() {
+			AbstractDataBufferAllocatingTestCase.this.verifyAllocations();
 		}
-
 	}
 
 }

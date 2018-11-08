@@ -433,12 +433,22 @@ class DefaultWebClient implements WebClient {
 		private <T extends Publisher<?>> T bodyToPublisher(ClientResponse response,
 				T bodyPublisher, Function<Mono<? extends Throwable>, T> errorFunction) {
 
-			return this.statusHandlers.stream()
-					.filter(statusHandler -> statusHandler.test(response.statusCode()))
-					.findFirst()
-					.map(statusHandler -> statusHandler.apply(response))
-					.map(errorFunction::apply)
-					.orElse(bodyPublisher);
+			for (StatusHandler handler : this.statusHandlers) {
+				if (handler.test(response.statusCode())) {
+					Mono<? extends Throwable> exMono = handler.apply(response);
+					exMono = exMono.flatMap(ex -> drainBody(response, ex));
+					exMono = exMono.onErrorResume(ex -> drainBody(response, ex));
+					return errorFunction.apply(exMono);
+				}
+			}
+			return bodyPublisher;
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T> Mono<T> drainBody(ClientResponse response, Throwable ex) {
+			// Ensure the body is drained, even if the StatusHandler didn't consume it,
+			// but ignore errors in case it did consume it.
+			return (Mono<T>) response.bodyToMono(Void.class).onErrorMap(ex2 -> ex).thenReturn(ex);
 		}
 
 		private static Mono<WebClientResponseException> createResponseException(ClientResponse response) {

@@ -17,6 +17,7 @@
 package org.springframework.http.client.reactive;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import reactor.core.publisher.Flux;
 import reactor.ipc.netty.http.client.HttpClientResponse;
@@ -26,6 +27,7 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -43,6 +45,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpClientResponse response;
 
+	private final AtomicBoolean bodyConsumed = new AtomicBoolean();
+
 
 	public ReactorClientHttpResponse(HttpClientResponse response) {
 		this.response = response;
@@ -53,6 +57,13 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return response.receive()
+				.doOnSubscribe(s ->
+						// WebClient's onStatus handling tries to drain the body, which may
+						// have also been done by application code in the onStatus callback.
+						// That relies on the 2nd subscriber being rejected but FluxReceive
+						// isn't consistent in doing so and may hang without completion.
+						Assert.state(this.bodyConsumed.compareAndSet(false, true),
+								"The client response body can only be consumed once."))
 				.map(buf -> {
 					buf.retain();
 					return dataBufferFactory.wrap(buf);

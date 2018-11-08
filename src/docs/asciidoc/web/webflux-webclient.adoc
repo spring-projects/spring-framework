@@ -71,6 +71,10 @@ By default, responses with 4xx or 5xx status codes result in an error of type
 			.bodyToMono(Person.class);
 ----
 
+When `onStatus` is used, if the response is expected to have content, then the `onStatus`
+callback should consume it. If not, the content will be automatically drained to ensure
+resources are released.
+
 
 
 
