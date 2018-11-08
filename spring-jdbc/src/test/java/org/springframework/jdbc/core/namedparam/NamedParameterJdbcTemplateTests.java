@@ -418,12 +418,10 @@ public class NamedParameterJdbcTemplateTests {
 
 		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
+		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
 
-		JdbcTemplate template = new JdbcTemplate(dataSource, false);
-		namedParameterTemplate = new NamedParameterJdbcTemplate(template);
-		assertSame(template, namedParameterTemplate.getJdbcTemplate());
-
-		int[] actualRowsAffected = namedParameterTemplate.batchUpdate("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
+		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
+				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
@@ -436,6 +434,17 @@ public class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
+	public void testBatchUpdateWithEmptyMap() throws Exception {
+		@SuppressWarnings("unchecked")
+		final Map<String, Integer>[] ids = new Map[0];
+		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+
+		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
+				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
+		assertTrue("executed 0 updates", actualRowsAffected.length == 0);
+	}
+
+	@Test
 	public void testBatchUpdateWithSqlParameterSource() throws Exception {
 		SqlParameterSource[] ids = new SqlParameterSource[2];
 		ids[0] = new MapSqlParameterSource("id", 100);
@@ -444,12 +453,10 @@ public class NamedParameterJdbcTemplateTests {
 
 		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
+		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
 
-		JdbcTemplate template = new JdbcTemplate(dataSource, false);
-		namedParameterTemplate = new NamedParameterJdbcTemplate(template);
-		assertSame(template, namedParameterTemplate.getJdbcTemplate());
-
-		int[] actualRowsAffected = namedParameterTemplate.batchUpdate("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
+		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
+				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
@@ -470,12 +477,10 @@ public class NamedParameterJdbcTemplateTests {
 
 		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
+		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
 
-		JdbcTemplate template = new JdbcTemplate(dataSource, false);
-		namedParameterTemplate = new NamedParameterJdbcTemplate(template);
-		assertSame(template, namedParameterTemplate.getJdbcTemplate());
-
-		int[] actualRowsAffected = namedParameterTemplate.batchUpdate("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
+		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
+				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
