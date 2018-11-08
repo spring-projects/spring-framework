@@ -595,6 +595,9 @@ public interface WebClient {
 		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
 		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
 		 * applies
+		 * <p><strong>NOTE:</strong> if the response is expected to have content,
+		 * the exceptionFunction should consume it. If not, the content will be
+		 * automatically drained to ensure resources are released.
 		 * @param exceptionFunction the function that returns the exception
 		 * @return this builder
 		 */

@@ -17,6 +17,7 @@
 package org.springframework.http.client.reactive;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.netty.buffer.ByteBufAllocator;
 import reactor.core.publisher.Flux;
@@ -28,6 +29,7 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -47,6 +49,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final NettyInbound inbound;
 
+	private final AtomicBoolean bodyConsumed = new AtomicBoolean();
+
 
 	public ReactorClientHttpResponse(HttpClientResponse response, NettyInbound inbound, ByteBufAllocator alloc) {
 		this.response = response;
@@ -58,6 +62,10 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return this.inbound.receive()
+				.doOnSubscribe(s ->
+						// See https://github.com/reactor/reactor-netty/issues/503
+						Assert.state(this.bodyConsumed.compareAndSet(false, true),
+								"The client response body can only be consumed once."))
 				.map(byteBuf -> {
 					byteBuf.retain();
 					return this.bufferFactory.wrap(byteBuf);

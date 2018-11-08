@@ -294,6 +294,10 @@ as the following example shows:
 ----
 ====
 
+When `onStatus` is used, if the response is expected to have content, then the `onStatus`
+callback should consume it. If not, the content will be automatically drained to ensure
+resources are released.
+
 
 
 
