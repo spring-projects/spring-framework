@@ -224,16 +224,15 @@ public abstract class BodyExtractors {
 
 		Flux<T> result;
 		if (message.getHeaders().getContentType() == null) {
-			// Maybe it's okay, if there is no content..
-			result = message.getBody().map(o -> {
+			// Maybe it's okay there is no content type, if there is no content..
+			result = message.getBody().map(buffer -> {
+				DataBufferUtils.release(buffer);
 				throw ex;
 			});
 		}
 		else {
-			result = Flux.error(ex);
-		}
-		if (message instanceof ClientHttpResponse) {
-			result = consumeAndCancel(message).thenMany(result);
+			result = message instanceof ClientHttpResponse ?
+					consumeAndCancel(message).thenMany(Flux.error(ex)) : Flux.error(ex);
 		}
 		return result;
 	}

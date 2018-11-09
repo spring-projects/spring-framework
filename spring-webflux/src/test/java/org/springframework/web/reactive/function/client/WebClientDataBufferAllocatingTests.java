@@ -16,6 +16,7 @@
 package org.springframework.web.reactive.function.client;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.function.Function;
 
 import io.netty.buffer.ByteBufAllocator;
@@ -28,12 +29,14 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorResourceFactory;
+import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 
 import static org.junit.Assert.*;
 
@@ -103,6 +106,21 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 		assertEquals(1, this.server.getRequestCount());
 	}
 
+	@Test // SPR-17482
+	public void bodyToMonoVoidWithoutContentType() {
+
+		this.server.enqueue(new MockResponse()
+				.setResponseCode(HttpStatus.ACCEPTED.value())
+				.setChunkedBody("{\"foo\" : \"123\",  \"baz\" : \"456\", \"baz\" : \"456\"}", 5));
+
+		Mono<Map<String, String>> mono = this.webClient.get()
+				.uri("/sample").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {});
+
+		StepVerifier.create(mono).expectError(UnsupportedMediaTypeException.class).verify(Duration.ofSeconds(3));
+		assertEquals(1, this.server.getRequestCount());
+	}
 
 	@Test
 	public void onStatusWithBodyNotConsumed() {
