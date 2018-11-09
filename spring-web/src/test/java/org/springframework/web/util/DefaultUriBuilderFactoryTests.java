@@ -35,7 +35,14 @@ public class DefaultUriBuilderFactoryTests {
 	@Test
 	public void defaultSettings() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-		URI uri = factory.uriString("/foo").pathSegment("{id}").build("a/b");
+		URI uri = factory.uriString("/foo/{id}").build("a/b");
+		assertEquals("/foo/a%2Fb", uri.toString());
+	}
+
+	@Test // SPR-17465
+	public void defaultSettingsWithBuilder() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		URI uri = factory.builder().path("/foo/{id}").build("a/b");
 		assertEquals("/foo/a%2Fb", uri.toString());
 	}
 
