@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.lang.Nullable;
@@ -32,8 +31,7 @@ import org.springframework.lang.Nullable;
  * @since 2.0.3
  * @see org.springframework.scheduling.concurrent.CustomizableThreadFactory
  */
-@SuppressWarnings("serial")
-public class CustomizableThreadCreator implements Serializable {
+public class CustomizableThreadCreator {
 
 	private String threadNamePrefix;
 
