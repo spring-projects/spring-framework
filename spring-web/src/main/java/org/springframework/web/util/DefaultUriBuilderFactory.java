@@ -228,16 +228,14 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		private UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
-
-			if (StringUtils.isEmpty(uriTemplate)) {
-				return baseUri != null ? baseUri.cloneBuilder() : UriComponentsBuilder.newInstance();
-			}
-
 			UriComponentsBuilder result;
-			if (baseUri != null) {
-				UriComponentsBuilder uricBuilder = UriComponentsBuilder.fromUriString(uriTemplate);
-				UriComponents uric = uricBuilder.build();
-				result = uric.getHost() == null ? baseUri.cloneBuilder().uriComponents(uric) : uricBuilder;
+			if (StringUtils.isEmpty(uriTemplate)) {
+				result = baseUri != null ? baseUri.cloneBuilder() : UriComponentsBuilder.newInstance();
+			}
+			else if (baseUri != null) {
+				UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uriTemplate);
+				UriComponents uri = builder.build();
+				result = uri.getHost() == null ? baseUri.cloneBuilder().uriComponents(uri) : builder;
 			}
 			else {
 				result = UriComponentsBuilder.fromUriString(uriTemplate);

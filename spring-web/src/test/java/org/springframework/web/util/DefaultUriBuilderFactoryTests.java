@@ -35,7 +35,7 @@ public class DefaultUriBuilderFactoryTests {
 	@Test
 	public void defaultSettings() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-		URI uri = factory.uriString("/foo").pathSegment("{id}").build("a/b");
+		URI uri = factory.uriString("/foo/{id}").build("a/b");
 		assertEquals("/foo/a%2Fb", uri.toString());
 	}
 
@@ -124,6 +124,14 @@ public class DefaultUriBuilderFactoryTests {
 
 		assertEquals(expected, uriBuilder.build(id).toString());
 		assertEquals(expected, uriBuilder.build(singletonMap("id", id)).toString());
+	}
+
+	@Test
+	public void encodingTemplateAndValuesSpr17465() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VALUES);
+		URI uri = factory.builder().path("/foo/{id}").build("a/b");
+		assertEquals("/foo/a%2Fb", uri.toString());
 	}
 
 	@Test
