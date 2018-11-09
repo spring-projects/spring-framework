@@ -36,6 +36,7 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Dimitrios Liapis
  */
 public class MimeTypeTests {
 
@@ -274,6 +275,33 @@ public class MimeTypeTests {
 		mimeTypes = MimeTypeUtils.parseMimeTypes(null);
 		assertNotNull("No mime types returned", mimeTypes);
 		assertEquals("Invalid amount of mime types", 0, mimeTypes.size());
+	}
+
+	// SPR-17459
+	@Test
+	public void parseMimeTypesWithOddNumberOfDoubleQuotedCommas() {
+		String s = "foo/bar;param=\",\"";
+		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes(s);
+		assertEquals("Invalid amount of mime types", 1, mimeTypes.size());
+		assertEquals("Comma should be part of the mime type", s, mimeTypes.get(0).toString());
+	}
+
+	// SPR-17459
+	@Test
+	public void parseMimeTypesWithEvenNumberOfDoubleQuotedCommas() {
+		String s = "foo/bar;param=\"s,a,\"";
+		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes(s);
+		assertEquals("Invalid amount of mime types", 1, mimeTypes.size());
+		assertEquals("Comma should be part of the mime type", s, mimeTypes.get(0).toString());
+	}
+
+	// SPR-17459
+	@Test
+	public void parseMimeTypesWithAndWithoutDoubleQuotedCommas() {
+		String s = "foo/bar;param=\"s,\", text/x-c";
+		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes(s);
+		assertEquals("Invalid amount of mime types", 2, mimeTypes.size());
+		assertEquals("Comma should be part of the mime type", "foo/bar;param=\"s,\"", mimeTypes.get(0).toString());
 	}
 
 	@Test

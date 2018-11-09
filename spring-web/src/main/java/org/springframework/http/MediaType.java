@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
+ * @author Dimitrios Liapis
  * @since 3.0
  * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
@@ -564,7 +565,6 @@ public class MediaType extends MimeType implements Serializable {
 			}
 		}
 		//either the last part of the tokenization or the original string
-		//itself if not found any commas that are not double quoted.
 		tokens.add(parseMediaType(mediaTypes.substring(nextBeginIndex)));
 		return tokens;
 	}
