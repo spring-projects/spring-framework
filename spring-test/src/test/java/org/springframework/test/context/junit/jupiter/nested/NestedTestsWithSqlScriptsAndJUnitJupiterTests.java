@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * {@link Transactional @Transactional} in a JUnit Jupiter environment.
  *
  * @author Sam Brannen
- * @since 5.1.2
+ * @since 5.1.3
  */
 @SpringJUnitConfig(PopulatedSchemaDatabaseConfig.class)
 @Transactional
