@@ -21,7 +21,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.test.context.cache.ClassLevelDirtiesContextTests;
 import org.springframework.test.context.cache.SpringRunnerContextCacheTests;
-import org.springframework.test.context.jdbc.RequiresNewTransactionSqlScriptsTests;
+import org.springframework.test.context.jdbc.IsolatedTransactionModeSqlScriptsTests;
 import org.springframework.test.context.junit4.annotation.AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.annotation.BeanOverridingDefaultConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.annotation.BeanOverridingExplicitConfigClassesInheritedTests;
@@ -111,7 +111,7 @@ StandardJUnit4FeaturesTests.class,//
 	BeforeAndAfterTransactionAnnotationTests.class,//
 	TimedTransactionalSpringRunnerTests.class,//
 	ProgrammaticTxMgmtTests.class,//
-	RequiresNewTransactionSqlScriptsTests.class,//
+	IsolatedTransactionModeSqlScriptsTests.class,//
 	HibernateSessionFlushingTests.class //
 })
 public class SpringJUnit4TestSuite {

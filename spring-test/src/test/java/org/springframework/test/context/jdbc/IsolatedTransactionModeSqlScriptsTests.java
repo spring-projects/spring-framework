@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,14 @@ import static org.junit.Assert.*;
 
 /**
  * Transactional integration tests that verify commit semantics for
- * {@link SqlConfig#requireNewTransaction}.
+ * {@link SqlConfig#transactionMode} and {@link TransactionMode#ISOLATED}.
  *
  * @author Sam Brannen
  * @since 4.1
  */
 @ContextConfiguration(classes = PopulatedSchemaDatabaseConfig.class)
 @DirtiesContext
-public class RequiresNewTransactionSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class IsolatedTransactionModeSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@BeforeTransaction
 	public void beforeTransaction() {
