@@ -266,7 +266,7 @@ public abstract class MimeTypeUtils {
 			if(mimeTypes.charAt(i) == ',' && !isQuoted) {
 				tokens.add(parseMimeType(mimeTypes.substring(nextBeginIndex,i)));
 				nextBeginIndex = i + 1;
-				//ignoring escaped double quote within double quotes
+			//ignoring escaped double quote within double quotes
 			} else if(isQuoted && mimeTypes.charAt(i) == '"' && mimeTypes.charAt(i-1) == '\\') {
 				continue;
 			} else if(mimeTypes.charAt(i) == '"') {
