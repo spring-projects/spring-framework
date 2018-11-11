@@ -262,9 +262,13 @@ public abstract class MimeTypeUtils {
 		int nextBeginIndex = 0;
 		List<MimeType> tokens = new ArrayList<>();
 		for(int i = 0; i < mimeTypes.length() - 1; i++) {
+			//tokenizing on commas that are not within double quotes
 			if(mimeTypes.charAt(i) == ',' && !isQuoted) {
 				tokens.add(parseMimeType(mimeTypes.substring(nextBeginIndex,i)));
 				nextBeginIndex = i + 1;
+				//ignoring escaped double quote within double quotes
+			} else if(isQuoted && mimeTypes.charAt(i) == '"' && i > 0 && mimeTypes.charAt(i-1) == '\\') {
+				continue;
 			} else if(mimeTypes.charAt(i) == '"') {
 				isQuoted = !isQuoted;
 			}

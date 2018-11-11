@@ -171,6 +171,15 @@ public class MediaTypeTests {
 		assertEquals("Comma should be part of the media type", "foo/bar;param=\"s,\"", mediaTypes.get(0).toString());
 	}
 
+	// SPR-17459
+	@Test
+	public void parseMediaTypesIgnoreEscapedDoubleQuoteWithinDoubleQuotes() {
+		String s = "foo/bar;param=\"a\\\"b,c\"";
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
+		assertEquals("Invalid amount of media types", 1, mediaTypes.size());
+		assertEquals("Escaped quote within quotes should be ignored when considering comma tokenization", s, mediaTypes.get(0).toString());
+	}
+
 	@Test
 	public void compareTo() {
 		MediaType audioBasic = new MediaType("audio", "basic");

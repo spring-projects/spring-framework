@@ -557,9 +557,13 @@ public class MediaType extends MimeType implements Serializable {
 		int nextBeginIndex = 0;
 		List<MediaType> tokens = new ArrayList<>();
 		for(int i = 0; i < mediaTypes.length() - 1; i++) {
+			//tokenizing on commas that are not within double quotes
 			if(mediaTypes.charAt(i) == ',' && !isQuoted) {
-				tokens.add(parseMediaType(mediaTypes.substring(nextBeginIndex,i)));
+				tokens.add(parseMediaType(mediaTypes.substring(nextBeginIndex, i)));
 				nextBeginIndex = i + 1;
+			//ignoring escaped double quote within double quotes
+			} else if(isQuoted && mediaTypes.charAt(i) == '"' && i > 0 && mediaTypes.charAt(i-1) == '\\') {
+				continue;
 			} else if(mediaTypes.charAt(i) == '"') {
 				isQuoted = !isQuoted;
 			}
