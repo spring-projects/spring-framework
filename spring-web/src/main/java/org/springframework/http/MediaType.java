@@ -562,7 +562,7 @@ public class MediaType extends MimeType implements Serializable {
 				tokens.add(parseMediaType(mediaTypes.substring(nextBeginIndex, i)));
 				nextBeginIndex = i + 1;
 			//ignoring escaped double quote within double quotes
-			} else if(isQuoted && mediaTypes.charAt(i) == '"' && i > 0 && mediaTypes.charAt(i-1) == '\\') {
+			} else if(isQuoted && mediaTypes.charAt(i) == '"' && mediaTypes.charAt(i-1) == '\\') {
 				continue;
 			} else if(mediaTypes.charAt(i) == '"') {
 				isQuoted = !isQuoted;
