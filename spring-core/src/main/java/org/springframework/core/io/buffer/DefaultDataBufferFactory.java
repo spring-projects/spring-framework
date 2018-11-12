@@ -98,7 +98,7 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
-	public DataBuffer wrap(byte[] bytes) {
+	public DefaultDataBuffer wrap(byte[] bytes) {
 		ByteBuffer wrapper = ByteBuffer.wrap(bytes);
 		return DefaultDataBuffer.fromFilledByteBuffer(this, wrapper);
 	}
@@ -109,16 +109,14 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 	 * in {@code dataBuffers}.
 	 */
 	@Override
-	public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
+	public DefaultDataBuffer join(List<? extends DataBuffer> dataBuffers) {
 		Assert.notEmpty(dataBuffers, "'dataBuffers' must not be empty");
 
 		int capacity = dataBuffers.stream()
 				.mapToInt(DataBuffer::readableByteCount)
 				.sum();
-		DefaultDataBuffer dataBuffer = allocateBuffer(capacity);
-		DataBuffer result = dataBuffers.stream()
-				.map(o -> (DataBuffer) o)
-				.reduce(dataBuffer, DataBuffer::write);
+		DefaultDataBuffer result = allocateBuffer(capacity);
+		dataBuffers.forEach(result::write);
 		dataBuffers.forEach(DataBufferUtils::release);
 		return result;
 	}

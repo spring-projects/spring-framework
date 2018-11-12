@@ -82,14 +82,12 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 	}
 
 	private Charset getCharset(@Nullable MimeType mimeType) {
-		Charset charset;
 		if (mimeType != null && mimeType.getCharset() != null) {
-			charset = mimeType.getCharset();
+			return mimeType.getCharset();
 		}
 		else {
-			charset = DEFAULT_CHARSET;
+			return DEFAULT_CHARSET;
 		}
-		return charset;
 	}
 
 
