@@ -105,8 +105,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
-		Class<?> rawClass = elementType.getRawClass();
-		if (rawClass == null || !MultiValueMap.class.isAssignableFrom(rawClass)) {
+		if (!MultiValueMap.class.isAssignableFrom(elementType.toClass())) {
 			return false;
 		}
 		if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) {

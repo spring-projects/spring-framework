@@ -45,7 +45,6 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 
-
 	public DataBufferDecoder() {
 		super(MimeTypeUtils.ALL);
 	}
@@ -53,9 +52,8 @@ public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		return (super.canDecode(elementType, mimeType) &&
-				clazz != null && DataBuffer.class.isAssignableFrom(clazz));
+		return (DataBuffer.class.isAssignableFrom(elementType.toClass()) &&
+				super.canDecode(elementType, mimeType));
 	}
 
 	@Override

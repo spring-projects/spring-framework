@@ -93,14 +93,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 	private boolean isServerSentEvent(ResolvableType elementType) {
-		Class<?> rawClass = elementType.getRawClass();
-		return (rawClass != null && ServerSentEvent.class.isAssignableFrom(rawClass));
+		return ServerSentEvent.class.isAssignableFrom(elementType.toClass());
 	}
 
 
 	@Override
-	public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage message,
-			Map<String, Object> hints) {
+	public Flux<Object> read(
+			ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
 		boolean shouldWrap = isServerSentEvent(elementType);
 		ResolvableType valueType = (shouldWrap ? elementType.getGeneric() : elementType);
@@ -170,13 +169,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 	@Override
-	public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
-			Map<String, Object> hints) {
+	public Mono<Object> readMono(
+			ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
 		// We're ahead of String + "*/*"
 		// Let's see if we can aggregate the output (lest we time out)...
 
-		if (String.class.equals(elementType.getRawClass())) {
+		if (elementType.resolve() == String.class) {
 			Flux<DataBuffer> body = message.getBody();
 			return stringDecoder.decodeToMono(body, elementType, null, null).cast(Object.class);
 		}

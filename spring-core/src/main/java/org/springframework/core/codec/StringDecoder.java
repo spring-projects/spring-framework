@@ -64,7 +64,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	public static final List<String> DEFAULT_DELIMITERS = Arrays.asList("\r\n", "\n");
 
 	private static final List<byte[]> DEFAULT_DELIMITER_BYTES = DEFAULT_DELIMITERS.stream()
-			.map(s -> s.getBytes(StandardCharsets.UTF_8))
+			.map(str -> str.getBytes(StandardCharsets.UTF_8))
 			.collect(Collectors.toList());
 
 
@@ -83,8 +83,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return (super.canDecode(elementType, mimeType) &&
-				String.class.equals(elementType.getRawClass()));
+		return (elementType.resolve() == String.class && super.canDecode(elementType, mimeType));
 	}
 
 	@Override

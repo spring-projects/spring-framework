@@ -148,8 +148,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			if (declaredEventType.isAssignableFrom(eventType)) {
 				return true;
 			}
-			Class<?> eventClass = eventType.getRawClass();
-			if (eventClass != null && PayloadApplicationEvent.class.isAssignableFrom(eventClass)) {
+			if (PayloadApplicationEvent.class.isAssignableFrom(eventType.toClass())) {
 				ResolvableType payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
 				if (declaredEventType.isAssignableFrom(payloadType)) {
 					return true;
@@ -202,8 +201,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (this.method.getParameterCount() == 0) {
 			return new Object[0];
 		}
-		Class<?> eventClass = declaredEventType.getRawClass();
-		if ((eventClass == null || !ApplicationEvent.class.isAssignableFrom(eventClass)) &&
+		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.toClass()) &&
 				event instanceof PayloadApplicationEvent) {
 			return new Object[] {((PayloadApplicationEvent) event).getPayload()};
 		}
@@ -358,12 +356,12 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			}
 		}
 		for (ResolvableType declaredEventType : this.declaredEventTypes) {
-			Class<?> eventClass = declaredEventType.getRawClass();
-			if ((eventClass == null || !ApplicationEvent.class.isAssignableFrom(eventClass)) &&
+			Class<?> eventClass = declaredEventType.toClass();
+			if (!ApplicationEvent.class.isAssignableFrom(eventClass) &&
 					payloadType != null && declaredEventType.isAssignableFrom(payloadType)) {
 				return declaredEventType;
 			}
-			if (eventClass != null && eventClass.isInstance(event)) {
+			if (eventClass.isInstance(event)) {
 				return declaredEventType;
 			}
 		}

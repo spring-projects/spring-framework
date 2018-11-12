@@ -113,8 +113,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Flux<Publisher<DataBuffer>> encode(Publisher<?> input, ResolvableType elementType,
 			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
-		Class<?> elementClass = elementType.getRawClass();
-		ResolvableType valueType = (elementClass != null && ServerSentEvent.class.isAssignableFrom(elementClass) ?
+		ResolvableType valueType = (ServerSentEvent.class.isAssignableFrom(elementType.toClass()) ?
 				elementType.getGeneric() : elementType);
 
 		return Flux.from(input).map(element -> {

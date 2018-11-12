@@ -29,7 +29,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -42,7 +41,6 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 
-
 	public ResourceDecoder() {
 		super(MimeTypeUtils.ALL);
 	}
@@ -50,8 +48,8 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		return clazz != null && Resource.class.isAssignableFrom(clazz) && super.canDecode(elementType, mimeType);
+		return (Resource.class.isAssignableFrom(elementType.toClass()) &&
+				super.canDecode(elementType, mimeType));
 	}
 
 	@Override
@@ -69,14 +67,12 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 		dataBuffer.read(bytes);
 		DataBufferUtils.release(dataBuffer);
 
-		Class<?> clazz = elementType.getRawClass();
-		Assert.state(clazz != null, "No resource class");
-
 		if (logger.isDebugEnabled()) {
 			logger.debug(Hints.getLogPrefix(hints) + "Read " + bytes.length + " bytes");
 		}
 
-		if (InputStreamResource.class == clazz) {
+		Class<?> clazz = elementType.toClass();
+		if (clazz == InputStreamResource.class) {
 			return new InputStreamResource(new ByteArrayInputStream(bytes));
 		}
 		else if (Resource.class.isAssignableFrom(clazz)) {

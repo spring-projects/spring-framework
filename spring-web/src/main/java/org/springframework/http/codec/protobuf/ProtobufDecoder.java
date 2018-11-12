@@ -168,12 +168,10 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 		private int messageBytesToRead;
 
-
 		public MessageDecoderFunction(ResolvableType elementType, int maxMessageSize) {
 			this.elementType = elementType;
 			this.maxMessageSize = maxMessageSize;
 		}
-
 
 		@Override
 		public Iterable<? extends Message> apply(DataBuffer input) {
@@ -186,13 +184,13 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 					if (this.output == null) {
 						int firstByte = input.read();
 						if (firstByte == -1) {
-							throw new DecodingException("Can't parse message size");
+							throw new DecodingException("Cannot parse message size");
 						}
 						this.messageBytesToRead = CodedInputStream.readRawVarint32(firstByte, input.asInputStream());
 						if (this.messageBytesToRead > this.maxMessageSize) {
 							throw new DecodingException(
 									"The number of bytes to read parsed in the incoming stream (" +
-											this.messageBytesToRead + ") exceeds the configured limit (" + this.maxMessageSize + ")");
+									this.messageBytesToRead + ") exceeds the configured limit (" + this.maxMessageSize + ")");
 						}
 						this.output = input.factory().allocateBuffer(this.messageBytesToRead);
 					}

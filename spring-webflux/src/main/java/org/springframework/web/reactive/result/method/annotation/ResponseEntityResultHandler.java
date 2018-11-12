@@ -94,9 +94,9 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 	@Nullable
 	private static Class<?> resolveReturnValueType(HandlerResult result) {
-		Class<?> valueType = result.getReturnType().getRawClass();
+		Class<?> valueType = result.getReturnType().toClass();
 		Object value = result.getReturnValue();
-		if ((valueType == null || valueType.equals(Object.class)) && value != null) {
+		if (valueType == Object.class && value != null) {
 			valueType = value.getClass();
 		}
 		return valueType;

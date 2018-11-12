@@ -158,9 +158,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 
 		if (attribute == null) {
-			Class<?> attributeClass = attributeType.getRawClass();
-			Assert.state(attributeClass != null, "No attribute class");
-			return createAttribute(attributeName, attributeClass, context, exchange);
+			return createAttribute(attributeName, attributeType.toClass(), context, exchange);
 		}
 
 		ReactiveAdapter adapterFrom = getAdapterRegistry().getAdapter(null, attribute);
