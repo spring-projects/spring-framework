@@ -18,21 +18,19 @@ package org.springframework.http.codec.xml;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.codec.AbstractEncoderTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
@@ -44,10 +42,11 @@ import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  */
-public class Jaxb2XmlEncoderTests extends AbstractDataBufferAllocatingTestCase {
+public class Jaxb2XmlEncoderTests extends AbstractEncoderTestCase<Object, Jaxb2XmlEncoder> {
 
-	private final Jaxb2XmlEncoder encoder = new Jaxb2XmlEncoder();
-
+	public Jaxb2XmlEncoderTests() {
+		super(new Jaxb2XmlEncoder(), Pojo.class);
+	}
 
 	@Test
 	public void canEncode() {
@@ -69,60 +68,22 @@ public class Jaxb2XmlEncoderTests extends AbstractDataBufferAllocatingTestCase {
 		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
-	@Test
-	public void encode() {
-		Mono<Pojo> source = Mono.just(new Pojo("foofoo", "barbar"));
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
-				ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_XML, Collections.emptyMap());
-
-		StepVerifier.create(output)
-				.consumeNextWith(dataBuffer -> {
-					try {
-						String s = DataBufferTestUtils
-								.dumpString(dataBuffer, StandardCharsets.UTF_8);
-						assertThat(s, isSimilarTo("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
-								"<pojo><bar>barbar</bar><foo>foofoo</foo></pojo>"));
-					}
-					finally {
-						DataBufferUtils.release(dataBuffer);
-					}
-				})
-				.verifyComplete();
+	@Override
+	protected Flux<Object> input() {
+		return Flux.just(new Container());
 	}
 
-	@Test
-	public void encodeError() {
-		Flux<Pojo> source = Flux.error(RuntimeException::new);
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
-				ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_XML, Collections.emptyMap());
-
-		StepVerifier.create(output)
-				.expectError(RuntimeException.class)
-				.verify();
-	}
-
-	@Test
-	public void encodeElementsWithCommonType() {
-		Mono<Container> source = Mono.just(new Container());
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
-				ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_XML, Collections.emptyMap());
-
-		StepVerifier.create(output)
-				.consumeNextWith(dataBuffer -> {
-					try {
-						String s = DataBufferTestUtils
-								.dumpString(dataBuffer, StandardCharsets.UTF_8);
-						assertThat(s, isSimilarTo("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
-								"<container><foo><name>name1</name></foo><bar><title>title1</title></bar></container>"));
-					}
-					finally {
-						DataBufferUtils.release(dataBuffer);
-					}
+	@Override
+	protected Stream<Consumer<DataBuffer>> outputConsumers() {
+		return Stream.<Consumer<DataBuffer>>builder()
+				.add(dataBuffer -> {
+					String s = DataBufferTestUtils
+							.dumpString(dataBuffer, StandardCharsets.UTF_8);
+					assertThat(s,
+							isSimilarTo("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+									"<container><foo><name>name1</name></foo><bar><title>title1</title></bar></container>"));
 				})
-				.verifyComplete();
+				.build();
 	}
 
 

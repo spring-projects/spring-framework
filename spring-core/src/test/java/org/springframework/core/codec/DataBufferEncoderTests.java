@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package org.springframework.core.codec;
 
-import java.nio.ByteBuffer;
-import java.util.Collections;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
@@ -33,9 +32,35 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class DataBufferEncoderTests extends AbstractDataBufferAllocatingTestCase {
+public class DataBufferEncoderTests extends AbstractEncoderTestCase<DataBuffer, DataBufferEncoder> {
 
-	private final DataBufferEncoder encoder = new DataBufferEncoder();
+	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
+
+	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
+
+	public DataBufferEncoderTests() {
+		super(new DataBufferEncoder(), DataBuffer.class);
+	}
+
+	@Override
+	protected Flux<DataBuffer> input() {
+//		DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+		return Flux.just(this.fooBytes, this.barBytes)
+				.map(bytes -> {
+					DataBuffer dataBuffer = bufferFactory.allocateBuffer(bytes.length);
+					dataBuffer.write(bytes);
+					return dataBuffer;
+				});
+	}
+
+	@Override
+	protected Stream<Consumer<DataBuffer>> outputConsumers() {
+		return Stream.<Consumer<DataBuffer>>builder()
+				.add(resultConsumer(this.fooBytes))
+				.add(resultConsumer(this.barBytes))
+				.build();
+
+	}
 
 	@Test
 	public void canEncode() {
@@ -48,21 +73,6 @@ public class DataBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 
 		// SPR-15464
 		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
-	}
-
-	@Test
-	public void encode() {
-		DataBuffer fooBuffer = stringBuffer("foo");
-		DataBuffer barBuffer = stringBuffer("bar");
-		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
-
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
-				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
-				null, Collections.emptyMap());
-
-		assertSame(source, output);
-
-		release(fooBuffer, barBuffer);
 	}
 
 }
