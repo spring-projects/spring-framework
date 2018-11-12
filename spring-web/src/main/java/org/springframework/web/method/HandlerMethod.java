@@ -494,7 +494,7 @@ public class HandlerMethod {
 								}
 							}
 							if (!existingType) {
-								merged.add(paramAnn);
+								merged.add(adaptAnnotation(paramAnn));
 							}
 						}
 						anns = merged.toArray(new Annotation[0]);
