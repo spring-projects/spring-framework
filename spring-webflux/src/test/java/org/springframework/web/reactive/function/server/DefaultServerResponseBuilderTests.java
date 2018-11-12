@@ -62,6 +62,7 @@ public class DefaultServerResponseBuilderTests {
 		}
 	};
 
+
 	@Test
 	public void from() {
 		ServerResponse other = ServerResponse.ok().header("foo", "bar").build().block();
@@ -382,6 +383,5 @@ public class DefaultServerResponseBuilderTests {
 				.expectError(IllegalStateException.class)
 				.verify();
 	}
-
 
 }

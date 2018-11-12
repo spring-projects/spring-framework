@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,15 +43,10 @@ import static org.mockito.Mockito.*;
  */
 public class ServerRequestWrapperTests {
 
-	private ServerRequest mockRequest;
+	private final ServerRequest mockRequest = mock(ServerRequest.class);
 
-	private ServerRequestWrapper wrapper;
+	private final ServerRequestWrapper wrapper = new ServerRequestWrapper(mockRequest);
 
-	@Before
-	public void createWrapper() {
-		mockRequest = mock(ServerRequest.class);
-		wrapper = new ServerRequestWrapper(mockRequest);
-	}
 
 	@Test
 	public void request() {

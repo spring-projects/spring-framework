@@ -106,8 +106,7 @@ public interface ClientRequest {
 	String logPrefix();
 
 	/**
-	 * Writes this request to the given {@link ClientHttpRequest}.
-	 *
+	 * Write this request to the given {@link ClientHttpRequest}.
 	 * @param request the client http request to write to
 	 * @param strategies the strategies to use when writing
 	 * @return {@code Mono<Void>} to indicate when writing is complete

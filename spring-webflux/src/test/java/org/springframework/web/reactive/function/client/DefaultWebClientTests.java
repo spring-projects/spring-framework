@@ -39,6 +39,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link DefaultWebClient}.
+ *
  * @author Rossen Stoyanchev
  */
 public class DefaultWebClientTests {

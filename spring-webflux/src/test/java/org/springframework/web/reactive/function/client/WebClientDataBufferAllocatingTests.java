@@ -42,6 +42,7 @@ import static org.junit.Assert.*;
 
 /**
  * WebClient integration tests focusing on data buffer management.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTestCase {

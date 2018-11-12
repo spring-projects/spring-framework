@@ -38,6 +38,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ExchangeFilterFunctions}.
+ *
  * @author Arjen Poutsma
  */
 public class ExchangeFilterFunctionsTests {

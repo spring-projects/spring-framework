@@ -43,9 +43,8 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.util.pattern.PathPattern;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
-import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * Tests the use of {@link HandlerFunction} and {@link RouterFunction} in a
@@ -134,7 +133,6 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			return new AttributesHandler();
 		}
 
-
 		@Bean
 		public RouterFunction<EntityResponse<Person>> monoRouterFunction(PersonHandler personHandler) {
 			return route(RequestPredicates.GET("/mono"), personHandler::mono);
@@ -150,7 +148,6 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			return nest(RequestPredicates.GET("/attributes"),
 					route(RequestPredicates.GET("/{foo}"), attributesHandler::attributes));
 		}
-
 	}
 
 
@@ -167,16 +164,15 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			return ServerResponse.ok().body(
 					fromPublisher(Flux.just(person1, person2), Person.class));
 		}
-
 	}
+
 
 	private static class AttributesHandler {
 
 		@SuppressWarnings("unchecked")
 		public Mono<ServerResponse> attributes(ServerRequest request) {
 			assertTrue(request.attributes().containsKey(RouterFunctions.REQUEST_ATTRIBUTE));
-			assertTrue(request.attributes()
-					.containsKey(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
+			assertTrue(request.attributes().containsKey(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
 
 			Map<String, String> pathVariables =
 					(Map<String, String>) request.attributes().get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
@@ -203,8 +199,8 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 			return ServerResponse.ok().build();
 		}
-
 	}
+
 
 	@Controller
 	public static class PersonController {
@@ -215,6 +211,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			return Mono.just(new Person("John"));
 		}
 	}
+
 
 	private static class Person {
 

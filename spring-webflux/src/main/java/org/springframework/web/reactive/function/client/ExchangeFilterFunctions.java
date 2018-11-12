@@ -116,9 +116,9 @@ public abstract class ExchangeFilterFunctions {
 	@Deprecated
 	public static ExchangeFilterFunction basicAuthentication() {
 		return (request, next) -> {
-			Credentials cred = (Credentials) request
-					.attribute(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE).orElse(null);
-			if (cred != null) {
+			Object attr = request.attributes().get(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE);
+			if (attr instanceof Credentials) {
+				Credentials cred = (Credentials) attr;
 				return next.exchange(ClientRequest.from(request)
 						.headers(headers -> headers.setBasicAuth(cred.username, cred.password))
 						.build());
