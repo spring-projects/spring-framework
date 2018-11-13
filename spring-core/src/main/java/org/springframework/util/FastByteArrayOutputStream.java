@@ -367,7 +367,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 			else {
 				if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
 					this.totalBytesRead++;
-					return this.currentBuffer[this.nextIndexInCurrentBuffer++];
+					return this.currentBuffer[this.nextIndexInCurrentBuffer++] & 0xFF;
 				}
 				else {
 					if (this.buffersIterator.hasNext()) {

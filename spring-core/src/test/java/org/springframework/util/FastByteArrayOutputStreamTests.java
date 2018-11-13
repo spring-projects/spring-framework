@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -135,6 +136,15 @@ public class FastByteArrayOutputStreamTests {
 		assertEquals(inputStream.read(), this.helloBytes[1]);
 		assertEquals(inputStream.read(), this.helloBytes[2]);
 		assertEquals(inputStream.read(), this.helloBytes[3]);
+	}
+
+	@Test
+	public void getInputStreamReadBytePromotion() throws Exception {
+		byte[] bytes = new byte[] { -1 };
+		this.os.write(bytes);
+		InputStream inputStream = this.os.getInputStream();
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		assertEquals(bais.read(), inputStream.read());
 	}
 
 	@Test
