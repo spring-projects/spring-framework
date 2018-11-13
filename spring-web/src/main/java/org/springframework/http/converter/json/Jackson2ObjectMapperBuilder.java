@@ -19,7 +19,6 @@ package org.springframework.http.converter.json;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -105,15 +104,15 @@ public class Jackson2ObjectMapperBuilder {
 
 	private final Log logger = HttpLogging.forLogName(getClass());
 
-	private final Map<Class<?>, Class<?>> mixIns = new HashMap<>();
+	private final Map<Class<?>, Class<?>> mixIns = new LinkedHashMap<>();
 
 	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<>();
 
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<>();
 
-	private final Map<PropertyAccessor, JsonAutoDetect.Visibility> visibilities = new HashMap<>();
+	private final Map<PropertyAccessor, JsonAutoDetect.Visibility> visibilities = new LinkedHashMap<>();
 
-	private final Map<Object, Boolean> features = new HashMap<>();
+	private final Map<Object, Boolean> features = new LinkedHashMap<>();
 
 	private boolean createXmlMapper = false;
 
