@@ -313,6 +313,20 @@ public class MimeTypeTests {
 		assertEquals("Escaped quote within quotes should be ignored when considering comma tokenization", s, mimeTypes.get(0).toString());
 	}
 
+	// SPR-17459
+	@Test
+	public void parseMimeTypesIgnoreEscapedBackslash() {
+		String s = "foo/bar;param=\"\\\\\"";
+		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes(s);
+		assertEquals("Invalid amount of mime types", 1, mimeTypes.size());
+		assertEquals("Escaped backslash should be ignored when considering comma tokenization", s, mimeTypes.get(0).toString());
+
+		s = "foo/bar;param=\"\\,\\\"";
+		mimeTypes = MimeTypeUtils.parseMimeTypes(s);
+		assertEquals("Invalid amount of mime types", 1, mimeTypes.size());
+		assertEquals("Escaped backslash should be ignored when considering comma tokenization", s, mimeTypes.get(0).toString());
+	}
+
 	@Test
 	public void compareTo() {
 		MimeType audioBasic = new MimeType("audio", "basic");
