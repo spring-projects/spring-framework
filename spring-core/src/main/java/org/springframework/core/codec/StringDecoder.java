@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
@@ -35,6 +37,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -63,20 +66,18 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	/** The default delimiter strings to use, i.e. {@code \r\n} and {@code \n}. */
 	public static final List<String> DEFAULT_DELIMITERS = Arrays.asList("\r\n", "\n");
 
-	private static final List<byte[]> DEFAULT_DELIMITER_BYTES = DEFAULT_DELIMITERS.stream()
-			.map(str -> str.getBytes(StandardCharsets.UTF_8))
-			.collect(Collectors.toList());
 
-
-	@Nullable
 	private final List<String> delimiters;
 
 	private final boolean stripDelimiter;
 
+	private final ConcurrentMap<Charset, List<byte[]>> delimitersCache = new ConcurrentHashMap<>();
 
-	private StringDecoder(@Nullable List<String> delimiters, boolean stripDelimiter, MimeType... mimeTypes) {
+
+	private StringDecoder(List<String> delimiters, boolean stripDelimiter, MimeType... mimeTypes) {
 		super(mimeTypes);
-		this.delimiters = delimiters != null ? new ArrayList<>(delimiters) : null;
+		Assert.notEmpty(delimiters, "'delimiters' must not be empty");
+		this.delimiters = new ArrayList<>(delimiters);
 		this.stripDelimiter = stripDelimiter;
 	}
 
@@ -90,9 +91,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		List<byte[]> delimiterBytes = this.delimiters != null ?
-				this.delimiters.stream().map(s -> s.getBytes(getCharset(mimeType))).collect(Collectors.toList()) :
-				DEFAULT_DELIMITER_BYTES;
+		List<byte[]> delimiterBytes = getDelimiterBytes(mimeType);
 
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream)
 				.flatMapIterable(dataBuffer -> splitOnDelimiter(dataBuffer, delimiterBytes))
@@ -101,6 +100,13 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 
 		return super.decode(inputFlux, elementType, mimeType, hints);
+	}
+
+	private List<byte[]> getDelimiterBytes(@Nullable MimeType mimeType) {
+		return this.delimitersCache.computeIfAbsent(getCharset(mimeType),
+				charset -> this.delimiters.stream()
+						.map(s -> s.getBytes(charset))
+						.collect(Collectors.toList()));
 	}
 
 	/**
@@ -234,17 +240,16 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * Create a {@code StringDecoder} for {@code "text/plain"}.
 	 */
 	public static StringDecoder textPlainOnly() {
-		return textPlainOnly(null, true);
+		return textPlainOnly(DEFAULT_DELIMITERS, true);
 	}
 
 	/**
 	 * Create a {@code StringDecoder} for {@code "text/plain"}.
-	 * @param delimiters delimiter strings to use to split the input stream, if
-	 * {@code null} by default {@link #DEFAULT_DELIMITERS} is used.
+	 * @param delimiters delimiter strings to use to split the input stream
 	 * @param stripDelimiter whether to remove delimiters from the resulting
 	 * input strings.
 	 */
-	public static StringDecoder textPlainOnly(@Nullable List<String> delimiters, boolean stripDelimiter) {
+	public static StringDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
 		return new StringDecoder(delimiters, stripDelimiter, new MimeType("text", "plain", DEFAULT_CHARSET));
 	}
 
@@ -263,17 +268,16 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * Create a {@code StringDecoder} that supports all MIME types.
 	 */
 	public static StringDecoder allMimeTypes() {
-		return allMimeTypes(null, true);
+		return allMimeTypes(DEFAULT_DELIMITERS, true);
 	}
 
 	/**
 	 * Create a {@code StringDecoder} that supports all MIME types.
-	 * @param delimiters delimiter strings to use to split the input stream, if
-	 * {@code null} by default {@link #DEFAULT_DELIMITERS} is used.
+	 * @param delimiters delimiter strings to use to split the input stream
 	 * @param stripDelimiter whether to remove delimiters from the resulting
 	 * input strings.
 	 */
-	public static StringDecoder allMimeTypes(@Nullable List<String> delimiters, boolean stripDelimiter) {
+	public static StringDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
 		return new StringDecoder(delimiters, stripDelimiter,
 				new MimeType("text", "plain", DEFAULT_CHARSET), MimeTypeUtils.ALL);
 	}

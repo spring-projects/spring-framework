@@ -16,7 +16,7 @@
 
 package org.springframework.core.codec;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,8 +29,11 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
+import static java.nio.charset.StandardCharsets.UTF_16BE;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
 
 /**
@@ -69,22 +72,43 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void decodeMultibyteCharacter() {
-		String s = "üéø";
-		Flux<DataBuffer> source = toSingleByteDataBuffers(s);
+		String u = "ü";
+		String e = "é";
+		String o = "ø";
+		String s = String.format("%s\n%s\n%s", u, e, o);
+		Flux<DataBuffer> source = toDataBuffers(s, 1, UTF_8);
 
 		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class),
 				null, Collections.emptyMap());
 		StepVerifier.create(output)
-				.expectNext(s)
+				.expectNext(u, e, o)
 				.verifyComplete();
 	}
 
-	private Flux<DataBuffer> toSingleByteDataBuffers(String s) {
-		byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+	@Test
+	public void decodeMultibyteCharacterUtf16() {
+		String u = "ü";
+		String e = "é";
+		String o = "ø";
+		String s = String.format("%s\n%s\n%s", u, e, o);
+		Flux<DataBuffer> source = toDataBuffers(s, 2, UTF_16BE);
+
+		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain;charset=utf-16be");
+		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class),
+				mimeType, Collections.emptyMap());
+		StepVerifier.create(output)
+				.expectNext(u, e, o)
+				.verifyComplete();
+	}
+
+	private Flux<DataBuffer> toDataBuffers(String s, int length, Charset charset) {
+		byte[] bytes = s.getBytes(charset);
 
 		List<DataBuffer> dataBuffers = new ArrayList<>();
-		for (byte b : bytes) {
-			dataBuffers.add(this.bufferFactory.wrap(new byte[]{b}));
+		for (int i = 0; i < bytes.length; i += length) {
+			DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(length);
+			dataBuffer.write(bytes, i, length);
+			dataBuffers.add(dataBuffer);
 		}
 		return Flux.fromIterable(dataBuffers);
 	}
