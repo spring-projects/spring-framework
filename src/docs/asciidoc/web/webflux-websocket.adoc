@@ -5,9 +5,8 @@
 This part of the reference documentation covers support for reactive-stack WebSocket
 messaging.
 
-
-
 include::websocket-intro.adoc[leveloffset=+1]
+
 
 
 
@@ -202,6 +201,22 @@ class ExampleHandler implements WebSocketHandler {
 <2> Send outgoing messages.
 <3> Join the streams and return a `Mono<Void>` that completes when either stream ends.
 ====
+
+
+
+[[webflux-websocket-databuffer]]
+=== `DataBuffer`
+
+`DataBuffer` is the representation for a byte buffer in WebFlux. The Spring Core part of
+the reference has more on that in the section on
+<<core#databuffers,Data Buffers and Codecs>>. The key point to understand is that on some
+servers like Netty, byte buffers are pooled and reference counted, and must be released
+when consumed to avoid memory leaks.
+
+When running on Netty, applications must use `DataBufferUtils.retain(dataBuffer)` if they
+wish to hold on input data buffers in order to ensure they are not released, and
+subsequently use `DataBufferUtils.release(dataBuffer)` when the buffers are consumed.
+
 
 
 

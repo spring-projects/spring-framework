@@ -353,7 +353,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	@Override
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
 		if (batchArgs.length <= 0) {
-			return new int[] {0};
+			return new int[0];
 		}
 		ParsedSql parsedSql = getParsedSql(sql);
 		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, batchArgs[0], null);

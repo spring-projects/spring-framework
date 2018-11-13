@@ -19,7 +19,6 @@ package org.springframework.core.io.support;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -139,9 +138,10 @@ public final class SpringFactoriesLoader {
 				UrlResource resource = new UrlResource(url);
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
 				for (Map.Entry<?, ?> entry : properties.entrySet()) {
-					List<String> factoryClassNames = Arrays.asList(
-							StringUtils.commaDelimitedListToStringArray((String) entry.getValue()));
-					result.addAll((String) entry.getKey(), factoryClassNames);
+					String factoryClassName = ((String) entry.getKey()).trim();
+					for (String factoryName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
+						result.add(factoryClassName, factoryName.trim());
+					}
 				}
 			}
 			cache.put(classLoader, result);

@@ -7,6 +7,7 @@ describes how to do so.
 
 
 
+
 [[mvc-cors-intro]]
 == Introduction
 [.small]#<<web-reactive.adoc#webflux-cors-intro,Same as in Spring WebFlux>>#
@@ -20,6 +21,7 @@ Cross-Origin Resource Sharing (CORS) is a http://www.w3.org/TR/cors/[W3C specifi
 implemented by http://caniuse.com/#feat=cors[most browsers] that lets you specify
 what kind of cross-domain requests are authorized, rather than using less secure and less
 powerful workarounds based on IFRAME or JSONP.
+
 
 
 
@@ -69,6 +71,7 @@ To learn more from the source or make advanced customizations, check the code be
 * `CorsProcessor`, `DefaultCorsProcessor`
 * `AbstractHandlerMapping`
 ====
+
 
 
 
@@ -167,6 +170,7 @@ public class AccountController {
 
 
 
+
 [[mvc-cors-global]]
 == Global Configuration
 [.small]#<<web-reactive.adoc#webflux-cors-global,Same as in Spring WebFlux>>#
@@ -188,7 +192,6 @@ that exposes sensitive user-specific information (such as cookies and CSRF token
 should only be used where appropriate.
 
 `maxAge` is set to 30 minutes.
-
 
 
 
@@ -250,6 +253,7 @@ as the following example shows:
 </mvc:cors>
 ----
 ====
+
 
 
 

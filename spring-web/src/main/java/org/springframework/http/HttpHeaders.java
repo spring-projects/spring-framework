@@ -1017,9 +1017,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the value of the required {@code Host} header.
-	 * <p>If the header value does not contain a port, the returned
-	 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
+	 * Return the value of the {@code Host} header, if available.
+	 * <p>If the header value does not contain a port, the
+	 * {@linkplain InetSocketAddress#getPort() port} in the returned address will
+	 * be {@code 0}.
 	 * @since 5.0
 	 */
 	@Nullable

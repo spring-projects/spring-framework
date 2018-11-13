@@ -32,6 +32,8 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -111,8 +113,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Flux<Publisher<DataBuffer>> encode(Publisher<?> input, ResolvableType elementType,
 			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
-		Class<?> elementClass = elementType.getRawClass();
-		ResolvableType valueType = (elementClass != null && ServerSentEvent.class.isAssignableFrom(elementClass) ?
+		ResolvableType valueType = (ServerSentEvent.class.isAssignableFrom(elementType.toClass()) ?
 				elementType.getGeneric() : elementType);
 
 		return Flux.from(input).map(element -> {
@@ -144,7 +145,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 			return Flux.concat(encodeText(sb, mediaType, factory),
 					encodeData(data, valueType, mediaType, factory, hints),
-					encodeText("\n", mediaType, factory));
+					encodeText("\n", mediaType, factory))
+					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		});
 	}
 
@@ -180,8 +182,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Mono<DataBuffer> encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
 		Assert.notNull(mediaType.getCharset(), "Expected MediaType with charset");
 		byte[] bytes = text.toString().getBytes(mediaType.getCharset());
-		DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length).write(bytes);
-		return Mono.just(buffer);
+		return Mono.defer(() ->
+				Mono.just(bufferFactory.allocateBuffer(bytes.length).write(bytes)));
 	}
 
 	@Override

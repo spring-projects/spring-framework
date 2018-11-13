@@ -101,20 +101,18 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 
 	/**
 	 * Get a {@code ReactiveAdapter} for the top-level return value type.
-	 * @return the matching adapter or {@code null}
+	 * @return the matching adapter, or {@code null} if none
 	 */
 	@Nullable
 	protected ReactiveAdapter getAdapter(HandlerResult result) {
-		Class<?> returnType = result.getReturnType().getRawClass();
-		return getAdapterRegistry().getAdapter(returnType, result.getReturnValue());
+		return getAdapterRegistry().getAdapter(result.getReturnType().resolve(), result.getReturnValue());
 	}
 
 	/**
-	 * Select the best media type for the current request through a content
-	 * negotiation algorithm.
+	 * Select the best media type for the current request through a content negotiation algorithm.
 	 * @param exchange the current request
 	 * @param producibleTypesSupplier the media types that can be produced for the current request
-	 * @return the selected media type or {@code null}
+	 * @return the selected media type, or {@code null} if none
 	 */
 	@Nullable
 	protected MediaType selectMediaType(ServerWebExchange exchange,

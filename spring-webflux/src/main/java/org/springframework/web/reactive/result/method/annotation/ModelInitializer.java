@@ -120,7 +120,7 @@ class ModelInitializer {
 		Object value = handlerResult.getReturnValue();
 		if (value != null) {
 			ResolvableType type = handlerResult.getReturnType();
-			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(type.getRawClass(), value);
+			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(type.resolve(), value);
 			if (isAsyncVoidType(type, adapter)) {
 				return Mono.from(adapter.toPublisher(value));
 			}
@@ -131,7 +131,7 @@ class ModelInitializer {
 	}
 
 	private boolean isAsyncVoidType(ResolvableType type, @Nullable  ReactiveAdapter adapter) {
-		return adapter != null && (adapter.isNoValue() || type.resolveGeneric() == Void.class);
+		return (adapter != null && (adapter.isNoValue() || type.resolveGeneric() == Void.class));
 	}
 
 	private String getAttributeName(MethodParameter param) {

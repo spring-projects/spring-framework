@@ -378,10 +378,13 @@ class DefaultWebClient implements WebClient {
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
+
 		DefaultResponseSpec(Mono<ClientResponse> responseMono) {
 			this.responseMono = responseMono;
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
+
+
 
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
@@ -396,57 +399,56 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public <T> Mono<T> bodyToMono(Class<T> bodyType) {
-			// Use bodyToMono (vs BodyExtractors) to ensure proper handling of Void.class...
-			return this.responseMono.flatMap(
-					response -> bodyToPublisher(response, response.bodyToMono(bodyType),
-							this::monoThrowableToMono));
+			return this.responseMono.flatMap(response -> handleBody(response,
+					response.bodyToMono(bodyType), mono -> mono.flatMap(Mono::error)));
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
-			return this.responseMono.flatMap(
-					response -> bodyToPublisher(response, response.bodyToMono(typeReference),
-							this::monoThrowableToMono));
-		}
-
-		private <T> Mono<T> monoThrowableToMono(Mono<? extends Throwable> mono) {
-			return mono.flatMap(Mono::error);
+		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> bodyType) {
+			return this.responseMono.flatMap(response ->
+					handleBody(response, response.bodyToMono(bodyType), mono -> mono.flatMap(Mono::error)));
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public <T> Flux<T> bodyToFlux(Class<T> elementType) {
-			return this.responseMono.flatMapMany(
-					response -> bodyToPublisher(response, response.bodyToFlux(elementType),
-							this::monoThrowableToFlux));
+			return this.responseMono.flatMapMany(response ->
+					handleBody(response, response.bodyToFlux(elementType), mono -> mono.flatMapMany(Flux::error)));
 		}
 
 		@Override
-		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
-			return this.responseMono.flatMapMany(
-					response -> bodyToPublisher(response, response.bodyToFlux(typeReference),
-							this::monoThrowableToFlux));
+		@SuppressWarnings("unchecked")
+		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementType) {
+			return this.responseMono.flatMapMany(response -> handleBody(response,
+					response.bodyToFlux(elementType), mono -> mono.flatMapMany(Flux::error)));
 		}
 
-		private <T> Flux<T> monoThrowableToFlux(Mono<? extends Throwable> mono) {
-			return mono.flatMapMany(Flux::error);
-		}
-
-		private <T extends Publisher<?>> T bodyToPublisher(ClientResponse response,
+		private <T extends Publisher<?>> T handleBody(ClientResponse response,
 				T bodyPublisher, Function<Mono<? extends Throwable>, T> errorFunction) {
+
 			if (HttpStatus.resolve(response.rawStatusCode()) != null) {
-				return this.statusHandlers.stream()
-						.filter(statusHandler -> statusHandler.test(response.statusCode()))
-						.findFirst()
-						.map(statusHandler -> statusHandler.apply(response))
-						.map(errorFunction::apply)
-						.orElse(bodyPublisher);
+				for (StatusHandler handler : this.statusHandlers) {
+					if (handler.test(response.statusCode())) {
+						Mono<? extends Throwable> exMono = handler.apply(response);
+						exMono = exMono.flatMap(ex -> drainBody(response, ex));
+						exMono = exMono.onErrorResume(ex -> drainBody(response, ex));
+						return errorFunction.apply(exMono);
+					}
+				}
+				return bodyPublisher;
 			}
 			else {
 				return errorFunction.apply(createResponseException(response));
 			}
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T> Mono<T> drainBody(ClientResponse response, Throwable ex) {
+			// Ensure the body is drained, even if the StatusHandler didn't consume it,
+			// but ignore errors in case it did consume it.
+			return (Mono<T>) response.bodyToMono(Void.class).onErrorMap(ex2 -> ex).thenReturn(ex);
 		}
 
 		private static Mono<WebClientResponseException> createResponseException(ClientResponse response) {
@@ -487,6 +489,7 @@ class DefaultWebClient implements WebClient {
 
 			private final Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction;
 
+
 			public StatusHandler(Predicate<HttpStatus> predicate,
 					Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
@@ -495,6 +498,7 @@ class DefaultWebClient implements WebClient {
 				this.predicate = predicate;
 				this.exceptionFunction = exceptionFunction;
 			}
+
 
 			public boolean test(HttpStatus status) {
 				return this.predicate.test(status);

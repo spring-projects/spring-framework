@@ -72,8 +72,8 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		if (this.warnLogger != null && this.warnLogger.isWarnEnabled()) {
 			this.warnLogger.warn(logPrefix + formatError(ex, exchange.getRequest()), ex);
 		}
-		else if (logger.isWarnEnabled()) {
-			logger.warn(logPrefix + formatError(ex, exchange.getRequest()));
+		else if (logger.isDebugEnabled()) {
+			logger.debug(logPrefix + formatError(ex, exchange.getRequest()));
 		}
 
 		return exchange.getResponse().setComplete();

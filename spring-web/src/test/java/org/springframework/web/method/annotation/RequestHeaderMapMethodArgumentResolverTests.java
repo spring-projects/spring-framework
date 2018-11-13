@@ -60,7 +60,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		resolver = new RequestHeaderMapMethodArgumentResolver();
 
 		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, HttpHeaders.class, Map.class);

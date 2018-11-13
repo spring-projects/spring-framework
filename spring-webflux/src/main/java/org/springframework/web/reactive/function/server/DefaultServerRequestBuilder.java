@@ -140,7 +140,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder body(Flux<DataBuffer> body) {
-		Assert.notNull(body, "'body' must not be null");
+		Assert.notNull(body, "Body must not be null");
 		releaseBody();
 		this.body = body;
 		return this;
@@ -148,7 +148,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder body(String body) {
-		Assert.notNull(body, "'body' must not be null");
+		Assert.notNull(body, "Body must not be null");
 		releaseBody();
 		DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 		this.body = Flux.just(body).
@@ -165,7 +165,6 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder attribute(String name, Object value) {
-		Assert.notNull(name, "'name' must not be null");
 		this.attributes.put(name, value);
 		return this;
 	}

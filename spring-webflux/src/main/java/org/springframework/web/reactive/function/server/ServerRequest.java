@@ -187,13 +187,7 @@ public interface ServerRequest {
 	 * @return the attribute value
 	 */
 	default Optional<Object> attribute(String name) {
-		Map<String, Object> attributes = attributes();
-		if (attributes.containsKey(name)) {
-			return Optional.of(attributes.get(name));
-		}
-		else {
-			return Optional.empty();
-		}
+		return Optional.ofNullable(attributes().get(name));
 	}
 
 	/**
@@ -350,7 +344,7 @@ public interface ServerRequest {
 		Optional<MediaType> contentType();
 
 		/**
-		 * Get the value of the required {@code Host} header.
+		 * Get the value of the {@code Host} header, if available.
 		 * <p>If the header value does not contain a port, the
 		 * {@linkplain InetSocketAddress#getPort() port} in the returned address will
 		 * be {@code 0}.

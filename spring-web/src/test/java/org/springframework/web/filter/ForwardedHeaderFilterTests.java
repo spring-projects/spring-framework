@@ -17,7 +17,9 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Enumeration;
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -306,6 +308,28 @@ public class ForwardedHeaderFilterTests {
 		assertNull(actual.getHeader(X_FORWARDED_HOST));
 		assertNull(actual.getHeader(X_FORWARDED_PORT));
 		assertEquals("bar", actual.getHeader("foo"));
+	}
+
+	@Test // SPR-16983
+	public void forwardedRequestWithServletForward() throws Exception {
+		this.request.setRequestURI("/foo");
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "www.mycompany.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+
+		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		HttpServletRequest wrappedRequest = (HttpServletRequest) this.filterChain.getRequest();
+
+		this.request.setDispatcherType(DispatcherType.FORWARD);
+		this.request.setRequestURI("/bar");
+		this.filterChain.reset();
+
+		this.filter.doFilter(wrappedRequest, new MockHttpServletResponse(), this.filterChain);
+		HttpServletRequest actual = (HttpServletRequest) this.filterChain.getRequest();
+
+		assertNotNull(actual);
+		assertEquals("/bar", actual.getRequestURI());
+		assertEquals("https://www.mycompany.com/bar", actual.getRequestURL().toString());
 	}
 
 	@Test

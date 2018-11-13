@@ -209,7 +209,6 @@ public class RouterFunctionBuilderTests {
 		StepVerifier.create(barResponseMono)
 				.expectNext(500)
 				.verifyComplete();
-
 	}
 
 }

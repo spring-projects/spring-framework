@@ -176,8 +176,9 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeError() {
 		DataBuffer fooBuffer = stringBuffer("foo\n");
+		DataBuffer barBuffer = stringBuffer("bar");
 		Flux<DataBuffer> source =
-				Flux.just(fooBuffer).concatWith(Flux.error(new RuntimeException()));
+				Flux.just(fooBuffer, barBuffer).concatWith(Flux.error(new RuntimeException()));
 
 		Flux<String> output = this.decoder.decode(source,
 				ResolvableType.forClass(String.class), null, Collections.emptyMap());

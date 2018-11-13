@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,8 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 		return HandlerStrategies.builder()
 				.viewResolver(new DummyViewResolver())
 				.build();
-
 	}
+
 
 	@Test
 	public void normal() {
@@ -109,6 +109,7 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 		return result;
 	}
 
+
 	private static class RenderingResponseHandler {
 
 		public Mono<RenderingResponse> render(ServerRequest request) {
@@ -116,7 +117,6 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 					.modelAttribute("bar", "baz")
 					.build();
 		}
-
 	}
 
 	private static class DummyViewResolver implements ViewResolver {

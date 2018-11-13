@@ -31,7 +31,8 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Resolves method parameters by delegating to a list of registered {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
+ * Resolves method parameters by delegating to a list of registered
+ * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
  * Previously resolved method parameters are cached for faster lookups.
  *
  * @author Rossen Stoyanchev
@@ -62,9 +63,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 */
 	public HandlerMethodArgumentResolverComposite addResolvers(@Nullable HandlerMethodArgumentResolver... resolvers) {
 		if (resolvers != null) {
-			for (HandlerMethodArgumentResolver resolver : resolvers) {
-				this.argumentResolvers.add(resolver);
-			}
+			Collections.addAll(this.argumentResolvers, resolvers);
 		}
 		return this;
 	}
@@ -76,9 +75,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 			@Nullable List<? extends HandlerMethodArgumentResolver> resolvers) {
 
 		if (resolvers != null) {
-			for (HandlerMethodArgumentResolver resolver : resolvers) {
-				this.argumentResolvers.add(resolver);
-			}
+			this.argumentResolvers.addAll(resolvers);
 		}
 		return this;
 	}
@@ -100,17 +97,20 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 
 	/**
-	 * Whether the given {@linkplain MethodParameter method parameter} is supported by any registered
-	 * {@link HandlerMethodArgumentResolver}.
+	 * Whether the given {@linkplain MethodParameter method parameter} is
+	 * supported by any registered {@link HandlerMethodArgumentResolver}.
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return (getArgumentResolver(parameter) != null);
+		return getArgumentResolver(parameter) != null;
 	}
 
 	/**
-	 * Iterate over registered {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} and invoke the one that supports it.
-	 * @throws IllegalStateException if no suitable {@link HandlerMethodArgumentResolver} is found.
+	 * Iterate over registered
+	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} and
+	 * invoke the one that supports it.
+	 * @throws IllegalStateException if no suitable
+	 * {@link HandlerMethodArgumentResolver} is found.
 	 */
 	@Override
 	@Nullable
@@ -119,13 +119,16 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 		HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);
 		if (resolver == null) {
-			throw new IllegalArgumentException("Unknown parameter type [" + parameter.getParameterType().getName() + "]");
+			throw new IllegalArgumentException(
+					"Unsupported parameter type [" + parameter.getParameterType().getName() + "]." +
+							" supportsParameter should be called first.");
 		}
 		return resolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 	}
 
 	/**
-	 * Find a registered {@link HandlerMethodArgumentResolver} that supports the given method parameter.
+	 * Find a registered {@link HandlerMethodArgumentResolver} that supports
+	 * the given method parameter.
 	 */
 	@Nullable
 	private HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {

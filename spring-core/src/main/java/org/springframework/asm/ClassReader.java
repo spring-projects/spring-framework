@@ -2437,6 +2437,11 @@ public class ClassReader {
    * @return a non null Label, which must be equal to labels[bytecodeOffset].
    */
   protected Label readLabel(final int bytecodeOffset, final Label[] labels) {
+    // SPRING PATCH: leniently handle offset mismatch
+    if (bytecodeOffset >= labels.length) {
+      return new Label();
+    }
+    // END OF PATCH
     if (labels[bytecodeOffset] == null) {
       labels[bytecodeOffset] = new Label();
     }

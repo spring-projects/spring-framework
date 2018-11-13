@@ -5,6 +5,7 @@ This section describes options for client-side access to REST endpoints.
 
 
 
+
 [[webmvc-resttemplate]]
 == `RestTemplate`
 
@@ -18,6 +19,7 @@ scenarios. The `RestTemplate` will be deprecated in a future version and will no
 major new features added going forward.
 
 See <<integration.adoc#rest-client-access,REST Endpoints>> for details.
+
 
 
 

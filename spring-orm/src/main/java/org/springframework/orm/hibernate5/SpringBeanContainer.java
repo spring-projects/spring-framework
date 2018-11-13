@@ -25,7 +25,7 @@ import org.hibernate.resource.beans.container.spi.BeanContainer;
 import org.hibernate.resource.beans.container.spi.ContainedBean;
 import org.hibernate.resource.beans.spi.BeanInstanceProducer;
 
-import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.lang.Nullable;
@@ -154,7 +154,7 @@ public final class SpringBeanContainer implements BeanContainer {
 				return new SpringContainedBean<>(this.beanFactory.getBean(beanType));
 			}
 		}
-		catch (BeanCreationException ex) {
+		catch (BeansException ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Falling back to Hibernate's default producer after bean creation failure for " +
 						beanType + ": " + ex);
@@ -177,7 +177,7 @@ public final class SpringBeanContainer implements BeanContainer {
 				return new SpringContainedBean<>(this.beanFactory.getBean(name, beanType));
 			}
 		}
-		catch (BeanCreationException ex) {
+		catch (BeansException ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Falling back to Hibernate's default producer after bean creation failure for " +
 						beanType + ": " + ex);

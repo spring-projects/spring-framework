@@ -27,6 +27,7 @@ NOTE: Libraries like Reactor or Spring Data provide null-safe APIs that use this
 
 
 
+
 == Use cases
 
 In addition to providing an explicit declaration for Spring Framework API nullability,
@@ -37,6 +38,9 @@ at runtime.
 They are also used to make Spring API null-safe in Kotlin projects, since Kotlin natively
 supports https://kotlinlang.org/docs/reference/null-safety.html[null-safety]. More details
 are available in the <<languages#kotlin-null-safety,Kotlin support documentation>>.
+
+
+
 
 == JSR 305 meta-annotations
 

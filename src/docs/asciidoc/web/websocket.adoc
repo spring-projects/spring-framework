@@ -7,9 +7,8 @@ This part of the reference documentation covers support for Servlet stack, WebSo
 messaging that includes raw WebSocket interactions, WebSocket emulation through SockJS, and
 publish-subscribe messaging through STOMP as a sub-protocol over WebSocket.
 
-
-
 include::websocket-intro.adoc[leveloffset=+1]
+
 
 
 
@@ -478,6 +477,7 @@ The following example shows the XML configuration equivalent of the preceding ex
 
 
 
+
 [[websocket-fallback]]
 == SockJS Fallback
 
@@ -846,7 +846,8 @@ jettyHttpClient.setExecutor(new QueuedThreadPool(1000));
 ----
 ====
 
-The following example shows the server-side SockJS-related properties (see Javadoc for details) that you should also consider customizing:
+The following example shows the server-side SockJS-related properties (see javadoc for details)
+that you should also consider customizing:
 
 ====
 [source,java,indent=0]
@@ -871,6 +872,7 @@ The following example shows the server-side SockJS-related properties (see Javad
 <3> Set the `disconnectDelay` property to 30 property seconds (the default is five seconds
 -- `5 * 1000`).
 ====
+
 
 
 
@@ -1263,7 +1265,6 @@ methods, as described in the following topics:
 * <<websocket-stomp-exception-handler>>
 
 
-
 [[websocket-stomp-message-mapping]]
 ==== `@MessageMapping`
 
@@ -1526,15 +1527,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 === External Broker
 
 The simple broker is great for getting started but supports only a subset of
-STOMP commands (it does not support acks, receipts, and some other features), relies on a simple
-message-sending loop, and is not suitable for clustering. As an alternative, you can upgrade your applications
-to use a full-featured message broker.
+STOMP commands (it does not support acks, receipts, and some other features),
+relies on a simple message-sending loop, and is not suitable for clustering.
+As an alternative, you can upgrade your applications to use a full-featured
+message broker.
 
 See the STOMP documentation for your message broker of choice (such as
 http://www.rabbitmq.com/stomp.html[RabbitMQ],
 http://activemq.apache.org/stomp.html[ActiveMQ], and others), install the broker,
-and run it with STOMP support enabled. Then you can enable the STOMP broker relay (instead of the simple broker) in the
-Spring configuration.
+and run it with STOMP support enabled. Then you can enable the STOMP broker relay
+(instead of the simple broker) in the Spring configuration.
 
 The following example configuration enables a full-featured broker:
 
@@ -1600,8 +1602,7 @@ dependencies to your project for TCP connection management.
 
 Furthermore, application components (such as HTTP request handling methods,
 business services, and others) can also send messages to the broker relay, as described
-in <<websocket-stomp-handle-send>>, to broadcast messages to
-subscribed WebSocket clients.
+in <<websocket-stomp-handle-send>>, to broadcast messages to subscribed WebSocket clients.
 
 In effect, the broker relay enables robust and scalable message broadcasting.
 
@@ -1612,10 +1613,10 @@ In effect, the broker relay enables robust and scalable message broadcasting.
 
 A STOMP broker relay maintains a single "`system`" TCP connection to the broker.
 This connection is used for messages originating from the server-side application
-only, not for receiving messages. You can configure the STOMP credentials (that is, the STOMP frame `login` and `passcode` headers)
-for this connection. This
-is exposed in both the XML namespace and Java configuration as the
-`systemLogin` and `systemPasscode` properties with default values of `guest` and `guest`.
+only, not for receiving messages. You can configure the STOMP credentials (that is,
+the STOMP frame `login` and `passcode` headers) for this connection. This is exposed
+in both the XML namespace and Java configuration as the `systemLogin` and
+`systemPasscode` properties with default values of `guest` and `guest`.
 
 The STOMP broker relay also creates a separate TCP connection for every connected
 WebSocket client. You can configure the STOMP credentials that are used for all TCP
@@ -2397,8 +2398,8 @@ In fact, if the capacity is left at its default value of Integer.MAX_VALUE,
 the thread pool never increases beyond the core pool size, since
 all additional tasks are queued.
 
-See the Javadoc of `ThreadPoolExecutor` to learn how these
-properties work and understand the various queuing strategies.
+See the javadoc of `ThreadPoolExecutor` to learn how these properties work and
+understand the various queuing strategies.
 ====
 
 On the `clientOutboundChannel` side, it is all about sending messages to WebSocket
@@ -2419,9 +2420,8 @@ messages to a client.
 The general idea is that, at any given time, only a single thread can be used
 to send to a client. All additional messages, meanwhile, get buffered, and you
 can use these properties to decide how long sending a message is allowed to
-take and how much data can be buffered in the meantime. See the
-Javadoc and documentation of the XML schema for this configuration for
-important additional details.
+take and how much data can be buffered in the meantime. See the javadoc and
+documentation of the XML schema for important additional details.
 
 The following example shows a possible configuration:
 

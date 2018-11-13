@@ -19,7 +19,6 @@ package org.springframework.core.io.buffer;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.function.IntPredicate;
 
 import io.netty.buffer.ByteBuf;
@@ -179,15 +178,18 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 		if (buffers.length > 0) {
 			if (hasNettyDataBuffers(buffers)) {
-				ByteBuf[] nativeBuffers = Arrays.stream(buffers)
-						.map(b -> ((NettyDataBuffer) b).getNativeBuffer())
-						.toArray(ByteBuf[]::new);
+				ByteBuf[] nativeBuffers = new ByteBuf[buffers.length];
+				for (int i = 0 ; i < buffers.length; i++) {
+					nativeBuffers[i] = ((NettyDataBuffer) buffers[i]).getNativeBuffer();
+				}
 				write(nativeBuffers);
 			}
 			else {
-				ByteBuffer[] byteBuffers =
-						Arrays.stream(buffers).map(DataBuffer::asByteBuffer)
-								.toArray(ByteBuffer[]::new);
+				ByteBuffer[] byteBuffers = new ByteBuffer[buffers.length];
+				for (int i = 0 ; i < buffers.length; i++) {
+					byteBuffers[i] = buffers[i].asByteBuffer();
+
+				}
 				write(byteBuffers);
 			}
 		}

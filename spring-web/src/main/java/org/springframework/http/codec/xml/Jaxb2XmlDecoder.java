@@ -84,9 +84,9 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		if (super.canDecode(elementType, mimeType)) {
-			Class<?> outputClass = elementType.getRawClass();
-			return (outputClass != null && (outputClass.isAnnotationPresent(XmlRootElement.class) ||
-					outputClass.isAnnotationPresent(XmlType.class)));
+			Class<?> outputClass = elementType.toClass();
+			return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
+					outputClass.isAnnotationPresent(XmlType.class));
 		}
 		else {
 			return false;
@@ -97,12 +97,10 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Class<?> outputClass = elementType.getRawClass();
-		Assert.state(outputClass != null, "Unresolvable output class");
-
 		Flux<XMLEvent> xmlEventFlux = this.xmlEventDecoder.decode(
 				inputStream, ResolvableType.forClass(XMLEvent.class), mimeType, hints);
 
+		Class<?> outputClass = elementType.toClass();
 		QName typeName = toQName(outputClass);
 		Flux<List<XMLEvent>> splitEvents = split(xmlEventFlux, typeName);
 
@@ -119,6 +117,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		return decode(inputStream, elementType, mimeType, hints).singleOrEmpty();
 	}
 

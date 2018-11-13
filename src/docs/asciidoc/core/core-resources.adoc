@@ -14,6 +14,7 @@ Spring. It includes the following topics:
 
 
 
+
 [[resources-introduction]]
 == Introduction
 
@@ -25,6 +26,7 @@ resource that needs to be obtained from the classpath or relative to a
 prefixes (similar to existing handlers for prefixes such as `http:`), this is generally
 quite complicated, and the `URL` interface still lacks some desirable functionality,
 such as a method to check for the existence of the resource being pointed to.
+
 
 
 
@@ -114,6 +116,7 @@ wrapped `URL` to do its work.
 
 
 
+
 [[resources-implementations]]
 == Built-in Resource Implementations
 
@@ -163,18 +166,18 @@ to the filesystem. To address this, the various `Resource` implementations alway
 resolution as a `java.net.URL`.
 
 A `ClassPathResource` is created by Java code by explicitly using the `ClassPathResource`
-constructor but is often created implicitly when you call an API method that
-takes a `String` argument meant to represent a path. For the latter case, a
-JavaBeans `PropertyEditor` recognizes the special prefix, `classpath:`, on the string
-path and creates a `ClassPathResource` in that case.
+constructor but is often created implicitly when you call an API method that takes a
+`String` argument meant to represent a path. For the latter case, a JavaBeans
+`PropertyEditor` recognizes the special prefix, `classpath:`, on the string path and
+creates a `ClassPathResource` in that case.
 
 
 
 [[resources-implementations-filesystemresource]]
 === `FileSystemResource`
 
-This is a `Resource` implementation for `java.io.File` handles. It supports
-resolution as a `File` and as a `URL`.
+This is a `Resource` implementation for `java.io.File` and `java.nio.file.Path` handles.
+It supports resolution as a `File` and as a `URL`.
 
 
 
@@ -316,6 +319,7 @@ The following table summarizes the strategy for converting `String` objects to `
 
 
 
+
 [[resources-resourceloaderaware]]
 == The `ResourceLoaderAware` interface
 
@@ -357,6 +361,7 @@ autowiring features. In that case, the `ResourceLoader` is autowired into a fiel
 constructor argument, or method parameter that expects the `ResourceLoader` type as
 long as the field, constructor, or method in question carries the `@Autowired`
 annotation. For more information, see <<beans-autowired-annotation>>.
+
 
 
 
@@ -408,6 +413,7 @@ The following two examples show how to force a `ClassPathResource` and a
 	<property name="template" value="file:///some/resource/path/myTemplate.txt"/>
 ----
 ====
+
 
 
 
@@ -470,7 +476,6 @@ Using `FileSystemXmlApplicationContext` loads the bean definitions from the clas
 unprefixed paths are still treated as filesystem paths.
 
 
-
 [[resources-app-ctx-classpathxml]]
 ==== Constructing `ClassPathXmlApplicationContext` Instances -- Shortcuts
 
@@ -506,8 +511,8 @@ files named `services.xml` and `daos.xml` (which are on the classpath) can be in
 ----
 ====
 
-See the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`ClassPathXmlApplicationContext` Javadoc] for details
-on the various constructors.
+See the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`ClassPathXmlApplicationContext`]
+javadoc for details on the various constructors.
 
 
 
@@ -530,7 +535,6 @@ constructors (or when you use the `PathMatcher` utility class hierarchy directly
 resolved at construction time. It has nothing to do with the `Resource` type itself.
 You cannot use the `classpath*:` prefix to construct an actual `Resource`, as
 a resource points to just one resource at a time.
-
 
 
 [[resources-app-ctx-ant-patterns-in-paths]]
@@ -561,26 +565,23 @@ the wildcards.
 [[resources-app-ctx-portability]]
 ===== Implications on Portability
 
-If the specified path is already a file URL (either implicitly because
-the base `ResourceLoader` is a filesystem one or explicitly), wildcarding is guaranteed to work in
-a completely portable fashion.
+If the specified path is already a file URL (either implicitly because the base
+`ResourceLoader` is a filesystem one or explicitly), wildcarding is guaranteed to
+work in a completely portable fashion.
 
 If the specified path is a classpath location, the resolver must obtain the last
-non-wildcard path segment URL by making a `Classloader.getResource()` call. Since this is just
-a node of the path (not the file at the end), it is actually undefined (in the
-`ClassLoader` Javadoc) exactly what sort of a URL is returned in this case. In
-practice, it is always a `java.io.File` representing the directory (where the classpath
-resource resolves to a filesystem location) or a jar URL of some sort w(here the
-classpath resource resolves to a jar location). Still, there is a portability concern on
-this operation.
+non-wildcard path segment URL by making a `Classloader.getResource()` call. Since this
+is just a node of the path (not the file at the end), it is actually undefined (in the
+`ClassLoader` javadoc) exactly what sort of a URL is returned in this case. In practice,
+it is always a `java.io.File` representing the directory (where the classpath resource
+resolves to a filesystem location) or a jar URL of some sort (where the classpath resource
+resolves to a jar location). Still, there is a portability concern on this operation.
 
 If a jar URL is obtained for the last non-wildcard segment, the resolver must be able to
 get a `java.net.JarURLConnection` from it or manually parse the jar URL, to be able to
-walk the contents of the jar and resolve the wildcard. This does work in most
-environments but fails in others, and we strongly recommend that the wildcard
-resolution of resources coming from jars be thoroughly tested in your specific
-environment before you rely on it.
-
+walk the contents of the jar and resolve the wildcard. This does work in most environments
+but fails in others, and we strongly recommend that the wildcard resolution of resources
+coming from jars be thoroughly tested in your specific environment before you rely on it.
 
 
 [[resources-classpath-wildcards]]
@@ -621,7 +622,6 @@ class loader hierarchy and then, off each resource, the same `PathMatcher` resol
 strategy described earlier is used for the wildcard subpath.
 
 
-
 [[resources-wildcards-in-path-other-stuff]]
 ==== Other Notes Relating to Wildcards
 
@@ -640,10 +640,10 @@ as well, but this is not guaranteed to lead to portable behavior.
 [NOTE]
 ====
 The scanning of classpath packages requires the presence of corresponding directory
-entries in the classpath. When you build JARs with Ant, do not
-activate the files-only switch of the JAR task. Also, classpath directories may not
-get exposed based on security policies in some environments -- for example, stand-alone applications on
-JDK 1.7.0_45 and higher (which requires 'Trusted-Library' to be set up in your manifests. See
+entries in the classpath. When you build JARs with Ant, do not activate the files-only
+switch of the JAR task. Also, classpath directories may not get exposed based on security
+policies in some environments -- for example, stand-alone applications on JDK 1.7.0_45
+and higher (which requires 'Trusted-Library' to be set up in your manifests. See
 http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
 
 On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.

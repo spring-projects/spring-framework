@@ -46,10 +46,7 @@ import org.springframework.util.MimeType;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
@@ -227,6 +224,18 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		ResolvableType elementType = forClass(Pojo.class);
 		Flux<Object> flux = new Jackson2JsonDecoder(new ObjectMapper()).decode(source, elementType, null, emptyMap());
 		StepVerifier.create(flux).verifyErrorMatches(ex -> ex instanceof DecodingException);
+	}
+
+	@Test
+	public void error() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foofoo\": \"foofoo\", \"barbar\":"))
+				.concatWith(Flux.error(new RuntimeException()));
+		ResolvableType elementType = forClass(Pojo.class);
+		Flux<Object> flux = new Jackson2JsonDecoder(new ObjectMapper()).decode(source, elementType, null, emptyMap());
+
+		StepVerifier.create(flux)
+				.expectError(RuntimeException.class)
+				.verify();
 	}
 
 	@Test

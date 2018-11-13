@@ -75,12 +75,12 @@ public class WebClientIntegrationTests {
 
 	@Parameterized.Parameters(name = "webClient [{0}]")
 	public static Object[][] arguments() {
-
 		return new Object[][] {
 				{new JettyClientHttpConnector()},
 				{new ReactorClientHttpConnector()}
 		};
 	}
+
 
 	@Before
 	public void setup() {

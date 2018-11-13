@@ -1,4 +1,3 @@
-
 [[web-uricomponents]]
 = UriComponents
 [.small]#Spring MVC and Spring WebFlux#

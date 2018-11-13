@@ -39,6 +39,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link DefaultWebClient}.
+ *
  * @author Rossen Stoyanchev
  */
 public class DefaultWebClientTests {
@@ -62,7 +63,6 @@ public class DefaultWebClientTests {
 
 	@Test
 	public void basic() {
-
 		this.builder.build().get().uri("/path").exchange();
 
 		ClientRequest request = verifyAndGetRequest();
@@ -73,7 +73,6 @@ public class DefaultWebClientTests {
 
 	@Test
 	public void uriBuilder() {
-
 		this.builder.build().get()
 				.uri(builder -> builder.path("/path").queryParam("q", "12").build())
 				.exchange();
@@ -85,7 +84,6 @@ public class DefaultWebClientTests {
 
 	@Test
 	public void uriBuilderWithPathOverride() {
-
 		this.builder.build().get()
 				.uri(builder -> builder.replacePath("/path").build())
 				.exchange();
@@ -97,7 +95,6 @@ public class DefaultWebClientTests {
 
 	@Test
 	public void requestHeaderAndCookie() {
-
 		this.builder.build().get().uri("/path").accept(MediaType.APPLICATION_JSON)
 				.cookies(cookies -> cookies.add("id", "123"))	// SPR-16178
 				.exchange();
@@ -110,7 +107,6 @@ public class DefaultWebClientTests {
 
 	@Test
 	public void defaultHeaderAndCookie() {
-
 		WebClient client = this.builder
 				.defaultHeader("Accept", "application/json").defaultCookie("id", "123")
 				.build();
@@ -125,7 +121,6 @@ public class DefaultWebClientTests {
 
 	@Test
 	public void defaultHeaderAndCookieOverrides() {
-
 		WebClient client = this.builder
 				.defaultHeader("Accept", "application/json")
 				.defaultCookie("id", "123")
@@ -141,7 +136,6 @@ public class DefaultWebClientTests {
 
 	@Test
 	public void defaultRequest() {
-
 		ThreadLocal<String> context = new NamedThreadLocal<>("foo");
 
 		Map<String, Object> actual = new HashMap<>();
@@ -176,7 +170,6 @@ public class DefaultWebClientTests {
 
 	@Test
 	public void mutateDoesCopy() {
-
 		// First, build the clients
 
 		WebClient.Builder builder = WebClient.builder()
@@ -216,8 +209,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void attributes() {
-
+	public void withStringAttribute() {
 		Map<String, Object> actual = new HashMap<>();
 		ExchangeFilterFunction filter = (request, next) -> {
 			actual.putAll(request.attributes());
@@ -230,11 +222,32 @@ public class DefaultWebClientTests {
 				.exchange();
 
 		assertEquals("bar", actual.get("foo"));
+
+		ClientRequest request = verifyAndGetRequest();
+		assertEquals("bar", request.attribute("foo").get());
+	}
+
+	@Test
+	public void withNullAttribute() {
+		Map<String, Object> actual = new HashMap<>();
+		ExchangeFilterFunction filter = (request, next) -> {
+			actual.putAll(request.attributes());
+			return next.exchange(request);
+		};
+
+		this.builder.filter(filter).build()
+				.get().uri("/path")
+				.attribute("foo", null)
+				.exchange();
+
+		assertNull(actual.get("foo"));
+
+		ClientRequest request = verifyAndGetRequest();
+		assertFalse(request.attribute("foo").isPresent());
 	}
 
 	@Test
 	public void apply() {
-
 		WebClient client = this.builder
 				.apply(builder -> builder
 						.defaultHeader("Accept", "application/json")

@@ -1093,8 +1093,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			ResolvableType requiredType, @Nullable Object[] args, boolean nonUniqueAsNull) throws BeansException {
 
 		Assert.notNull(requiredType, "Required type must not be null");
-		Class<?> clazz = requiredType.getRawClass();
-		Assert.notNull(clazz, "Required type must have a raw Class");
 		String[] candidateNames = getBeanNamesForType(requiredType);
 
 		if (candidateNames.length > 1) {
@@ -1111,7 +1109,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (candidateNames.length == 1) {
 			String beanName = candidateNames[0];
-			return new NamedBeanHolder<>(beanName, (T) getBean(beanName, clazz, args));
+			return new NamedBeanHolder<>(beanName, (T) getBean(beanName, requiredType.toClass(), args));
 		}
 		else if (candidateNames.length > 1) {
 			Map<String, Object> candidates = new LinkedHashMap<>(candidateNames.length);
@@ -1124,14 +1122,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					candidates.put(beanName, getType(beanName));
 				}
 			}
-			String candidateName = determinePrimaryCandidate(candidates, clazz);
+			String candidateName = determinePrimaryCandidate(candidates, requiredType.toClass());
 			if (candidateName == null) {
-				candidateName = determineHighestPriorityCandidate(candidates, clazz);
+				candidateName = determineHighestPriorityCandidate(candidates, requiredType.toClass());
 			}
 			if (candidateName != null) {
 				Object beanInstance = candidates.get(candidateName);
 				if (beanInstance == null || beanInstance instanceof Class) {
-					beanInstance = getBean(candidateName, clazz, args);
+					beanInstance = getBean(candidateName, requiredType.toClass(), args);
 				}
 				return new NamedBeanHolder<>(candidateName, (T) beanInstance);
 			}

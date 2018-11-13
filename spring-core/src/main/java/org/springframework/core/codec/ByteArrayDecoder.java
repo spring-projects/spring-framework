@@ -34,7 +34,6 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class ByteArrayDecoder extends AbstractDataBufferDecoder<byte[]> {
 
-
 	public ByteArrayDecoder() {
 		super(MimeTypeUtils.ALL);
 	}
@@ -42,8 +41,7 @@ public class ByteArrayDecoder extends AbstractDataBufferDecoder<byte[]> {
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		return (super.canDecode(elementType, mimeType) && byte[].class == clazz);
+		return (elementType.resolve() == byte[].class && super.canDecode(elementType, mimeType));
 	}
 
 	@Override

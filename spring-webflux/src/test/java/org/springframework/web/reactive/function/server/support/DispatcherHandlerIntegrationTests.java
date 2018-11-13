@@ -35,8 +35,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma
@@ -44,6 +44,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
+
 
 	@Override
 	protected HttpHandler createHttpHandler() {
@@ -53,6 +54,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac)).build();
 	}
+
 
 	@Test
 	public void nested() {
@@ -83,14 +85,12 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 	}
 
+
 	static class Handler {
 
 		public Mono<ServerResponse> handle(ServerRequest request) {
 			return ServerResponse.ok().build();
 		}
 	}
-
-
-
 
 }
