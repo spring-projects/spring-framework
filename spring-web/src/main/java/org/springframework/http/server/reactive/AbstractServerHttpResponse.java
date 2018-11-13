@@ -106,7 +106,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	@Nullable
 	public HttpStatus getStatusCode() {
-		return (this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null);
+		return this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null;
 	}
 
 	/**
