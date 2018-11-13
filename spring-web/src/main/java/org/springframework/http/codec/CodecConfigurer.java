@@ -128,6 +128,22 @@ public interface CodecConfigurer {
 		void protobufEncoder(Encoder<?> encoder);
 
 		/**
+		 * Override the default JAXB2 {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 5.1.3
+		 * @see org.springframework.http.codec.xml.Jaxb2XmlDecoder
+		 */
+		void jaxb2Decoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default JABX2 {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 5.1.3
+		 * @see org.springframework.http.codec.xml.Jaxb2XmlEncoder
+		 */
+		void jaxb2Encoder(Encoder<?> encoder);
+
+		/**
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.
 		 * Both may contain sensitive information.
 		 * <p>By default set to {@code false} so that request details are not shown.

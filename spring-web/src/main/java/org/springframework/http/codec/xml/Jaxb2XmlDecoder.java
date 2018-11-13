@@ -75,9 +75,29 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 	private final JaxbContextContainer jaxbContexts = new JaxbContextContainer();
 
+	private Function<Unmarshaller, Unmarshaller> unmarshallerProcessor = Function.identity();
+
 
 	public Jaxb2XmlDecoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+	}
+
+
+	/**
+	 * Configure a processor function to customize Unmarshaller instances.
+	 * @param processor the function to use
+	 * @since 5.1.3
+	 */
+	public void setUnmarshallerProcessor(Function<Unmarshaller, Unmarshaller> processor) {
+		this.unmarshallerProcessor = this.unmarshallerProcessor.andThen(processor);
+	}
+
+	/**
+	 * Return the configured processor for customizing Unmarshaller instances.
+	 * @since 5.1.3
+	 */
+	public Function<Unmarshaller, Unmarshaller> getUnmarshallerProcessor() {
+		return this.unmarshallerProcessor;
 	}
 
 
@@ -123,7 +143,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 	private Object unmarshal(List<XMLEvent> events, Class<?> outputClass) {
 		try {
-			Unmarshaller unmarshaller = this.jaxbContexts.createUnmarshaller(outputClass);
+			Unmarshaller unmarshaller = initUnmarshaller(outputClass);
 			XMLEventReader eventReader = StaxUtils.createXMLEventReader(events);
 			if (outputClass.isAnnotationPresent(XmlRootElement.class)) {
 				return unmarshaller.unmarshal(eventReader);
@@ -139,6 +159,11 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		catch (JAXBException ex) {
 			throw new CodecException("Invalid JAXB configuration", ex);
 		}
+	}
+
+	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws JAXBException {
+		Unmarshaller unmarshaller = this.jaxbContexts.createUnmarshaller(outputClass);
+		return this.unmarshallerProcessor.apply(unmarshaller);
 	}
 
 	/**

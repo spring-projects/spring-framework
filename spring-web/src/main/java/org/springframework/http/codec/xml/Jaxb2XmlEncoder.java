@@ -19,6 +19,7 @@ package org.springframework.http.codec.xml;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.function.Function;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.MarshalException;
 import javax.xml.bind.Marshaller;
@@ -57,9 +58,29 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 
 	private final JaxbContextContainer jaxbContexts = new JaxbContextContainer();
 
+	private Function<Marshaller, Marshaller> marshallerProcessor = Function.identity();
+
 
 	public Jaxb2XmlEncoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+	}
+
+
+	/**
+	 * Configure a processor function to customize Marshaller instances.
+	 * @param processor the function to use
+	 * @since 5.1.3
+	 */
+	public void setMarshallerProcessor(Function<Marshaller, Marshaller> processor) {
+		this.marshallerProcessor = this.marshallerProcessor.andThen(processor);
+	}
+
+	/**
+	 * Return the configured processor for customizing Marshaller instances.
+	 * @since 5.1.3
+	 */
+	public Function<Marshaller, Marshaller> getMarshallerProcessor() {
+		return this.marshallerProcessor;
 	}
 
 
@@ -92,8 +113,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 		Class<?> clazz = ClassUtils.getUserClass(value);
 
 		try {
-			Marshaller marshaller = this.jaxbContexts.createMarshaller(clazz);
-			marshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
+			Marshaller marshaller = initMarshaller(clazz);
 			marshaller.marshal(value, outputStream);
 			release = false;
 			return Flux.just(buffer);
@@ -110,6 +130,13 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 				DataBufferUtils.release(buffer);
 			}
 		}
+	}
+
+	private Marshaller initMarshaller(Class<?> clazz) throws JAXBException {
+		Marshaller marshaller = this.jaxbContexts.createMarshaller(clazz);
+		marshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
+		marshaller = this.marshallerProcessor.apply(marshaller);
+		return marshaller;
 	}
 
 }

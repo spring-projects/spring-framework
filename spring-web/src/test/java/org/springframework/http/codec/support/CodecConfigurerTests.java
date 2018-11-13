@@ -244,57 +244,28 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void jackson2DecoderOverride() {
-		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
-		this.configurer.defaultCodecs().jackson2JsonDecoder(decoder);
+	public void encoderDecoderOverrides() {
+		Jackson2JsonDecoder jacksonDecoder = new Jackson2JsonDecoder();
+		Jackson2JsonEncoder jacksonEncoder = new Jackson2JsonEncoder();
+		ProtobufDecoder protobufDecoder = new ProtobufDecoder(ExtensionRegistry.newInstance());
+		ProtobufEncoder protobufEncoder = new ProtobufEncoder();
+		Jaxb2XmlEncoder jaxb2Encoder = new Jaxb2XmlEncoder();
+		Jaxb2XmlDecoder jaxb2Decoder = new Jaxb2XmlDecoder();
 
-		assertSame(decoder, this.configurer.getReaders().stream()
-				.filter(writer -> writer instanceof DecoderHttpMessageReader)
-				.map(writer -> ((DecoderHttpMessageReader<?>) writer).getDecoder())
-				.filter(e -> Jackson2JsonDecoder.class.equals(e.getClass()))
-				.findFirst()
-				.filter(e -> e == decoder).orElse(null));
+		this.configurer.defaultCodecs().jackson2JsonDecoder(jacksonDecoder);
+		this.configurer.defaultCodecs().jackson2JsonEncoder(jacksonEncoder);
+		this.configurer.defaultCodecs().protobufDecoder(protobufDecoder);
+		this.configurer.defaultCodecs().protobufEncoder(protobufEncoder);
+		this.configurer.defaultCodecs().jaxb2Decoder(jaxb2Decoder);
+		this.configurer.defaultCodecs().jaxb2Encoder(jaxb2Encoder);
+
+		assertDecoderInstance(jacksonDecoder);
+		assertDecoderInstance(protobufDecoder);
+		assertDecoderInstance(jaxb2Decoder);
+		assertEncoderInstance(jacksonEncoder);
+		assertEncoderInstance(protobufEncoder);
+		assertEncoderInstance(jaxb2Encoder);
 	}
-
-	@Test
-	public void jackson2EncoderOverride() {
-		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
-		this.configurer.defaultCodecs().jackson2JsonEncoder(encoder);
-
-		assertSame(encoder, this.configurer.getWriters().stream()
-				.filter(writer -> writer instanceof EncoderHttpMessageWriter)
-				.map(writer -> ((EncoderHttpMessageWriter<?>) writer).getEncoder())
-				.filter(e -> Jackson2JsonEncoder.class.equals(e.getClass()))
-				.findFirst()
-				.filter(e -> e == encoder).orElse(null));
-	}
-
-	@Test
-	public void protobufDecoderOverride() {
-		ProtobufDecoder decoder = new ProtobufDecoder(ExtensionRegistry.newInstance());
-		this.configurer.defaultCodecs().protobufDecoder(decoder);
-
-		assertSame(decoder, this.configurer.getReaders().stream()
-				.filter(writer -> writer instanceof DecoderHttpMessageReader)
-				.map(writer -> ((DecoderHttpMessageReader<?>) writer).getDecoder())
-				.filter(e -> ProtobufDecoder.class.equals(e.getClass()))
-				.findFirst()
-				.filter(e -> e == decoder).orElse(null));
-	}
-
-	@Test
-	public void protobufEncoderOverride() {
-		ProtobufEncoder encoder = new ProtobufEncoder();
-		this.configurer.defaultCodecs().protobufEncoder(encoder);
-
-		assertSame(encoder, this.configurer.getWriters().stream()
-				.filter(writer -> writer instanceof EncoderHttpMessageWriter)
-				.map(writer -> ((EncoderHttpMessageWriter<?>) writer).getEncoder())
-				.filter(e -> ProtobufEncoder.class.equals(e.getClass()))
-				.findFirst()
-				.filter(e -> e == encoder).orElse(null));
-	}
-
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = readers.get(this.index.getAndIncrement());
@@ -320,6 +291,23 @@ public class CodecConfigurerTests {
 		assertEquals(!textOnly, encoder.canEncode(ResolvableType.forClass(String.class), MediaType.TEXT_EVENT_STREAM));
 	}
 
+	private void assertDecoderInstance(Decoder<?> decoder) {
+		assertSame(decoder, this.configurer.getReaders().stream()
+				.filter(writer -> writer instanceof DecoderHttpMessageReader)
+				.map(writer -> ((DecoderHttpMessageReader<?>) writer).getDecoder())
+				.filter(e -> decoder.getClass().equals(e.getClass()))
+				.findFirst()
+				.filter(e -> e == decoder).orElse(null));
+	}
+
+	private void assertEncoderInstance(Encoder<?> encoder) {
+		assertSame(encoder, this.configurer.getWriters().stream()
+				.filter(writer -> writer instanceof EncoderHttpMessageWriter)
+				.map(writer -> ((EncoderHttpMessageWriter<?>) writer).getEncoder())
+				.filter(e -> encoder.getClass().equals(e.getClass()))
+				.findFirst()
+				.filter(e -> e == encoder).orElse(null));
+	}
 
 
 	private static class TestCodecConfigurer extends BaseCodecConfigurer {
