@@ -19,6 +19,7 @@ package org.springframework.web.reactive;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,15 +82,19 @@ public class DispatcherHandlerErrorTests {
 	@Test
 	public void noHandler() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/does-not-exist"));
-		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
+		Mono<Void> mono = this.dispatcherHandler.handle(exchange);
 
-		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> {
-					assertThat(error, instanceOf(ResponseStatusException.class));
-					assertThat(error.getMessage(),
-							is("404 NOT_FOUND \"No matching handler\""));
+		StepVerifier.create(mono)
+				.consumeErrorWith(ex -> {
+					assertThat(ex, instanceOf(ResponseStatusException.class));
+					assertThat(ex.getMessage(), is("404 NOT_FOUND \"No matching handler\""));
 				})
 				.verify();
+
+		// SPR-17475
+		AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
+		StepVerifier.create(mono).consumeErrorWith(exceptionRef::set).verify();
+		StepVerifier.create(mono).consumeErrorWith(ex -> assertNotSame(exceptionRef.get(), ex)).verify();
 	}
 
 	@Test

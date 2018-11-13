@@ -142,14 +142,21 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
 		if (this.handlerMappings == null) {
-			return Mono.error(HANDLER_NOT_FOUND_EXCEPTION);
+			return createNotFoundError();
 		}
 		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
-				.switchIfEmpty(Mono.error(HANDLER_NOT_FOUND_EXCEPTION))
+				.switchIfEmpty(createNotFoundError())
 				.flatMap(handler -> invokeHandler(exchange, handler))
 				.flatMap(result -> handleResult(exchange, result));
+	}
+
+	private <R> Mono<R> createNotFoundError() {
+		return Mono.defer(() -> {
+			Exception ex = new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
+			return Mono.error(ex);
+		});
 	}
 
 	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {

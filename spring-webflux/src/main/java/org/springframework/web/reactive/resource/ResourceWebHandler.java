@@ -88,8 +88,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private static final Set<HttpMethod> SUPPORTED_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
-	private static final Exception NOT_FOUND_EXCEPTION = new ResponseStatusException(HttpStatus.NOT_FOUND);
-
 	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
 
 
@@ -324,7 +322,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		return getResource(exchange)
 				.switchIfEmpty(Mono.defer(() -> {
 					logger.debug(exchange.getLogPrefix() + "Resource not found");
-					return Mono.error(NOT_FOUND_EXCEPTION);
+					return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND));
 				}))
 				.flatMap(resource -> {
 					try {
