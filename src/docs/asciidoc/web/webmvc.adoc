@@ -578,7 +578,7 @@ exceptions, for `@ResponseStatus` annotated exceptions, and for support of
 
 If an exception remains unresolved by any `HandlerExceptionResolver` and is, therefore,
 left to propagate or if the response status is set to an error status (that is, 4xx, 5xx),
-Servlet containers ca render a default error page in HTML. To customize the default
+Servlet containers can render a default error page in HTML. To customize the default
 error page of the container, you can declare an error page mapping in `web.xml`.
 The following example shows how to do so:
 
@@ -4046,7 +4046,7 @@ as the following example shows:
 ----
 
 <1> Application-specific calculation.
-<2> The esponse has been set to 304 (NOT_MODIFIED) -- no further processing.
+<2> The response has been set to 304 (NOT_MODIFIED) -- no further processing.
 <3> Continue with the request processing.
 ====
 
