@@ -44,7 +44,6 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
- * @author Dimitrios Liapis
  * @since 3.0
  * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
@@ -543,7 +542,7 @@ public class MediaType extends MimeType implements Serializable {
 	}
 
 	/**
-	 * Parse the given comma-separated string into a list of {@code MediaType} objects.
+	 * Parse the comma-separated string into a list of {@code MediaType} objects.
 	 * <p>This method can be used to parse an Accept or Content-Type header.
 	 * @param mediaTypes the string to parse
 	 * @return the list of media types
@@ -553,24 +552,8 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
-		boolean isQuoted = false;
-		int nextBeginIndex = 0;
-		List<MediaType> tokens = new ArrayList<>();
-		for(int i = 0; i < mediaTypes.length() - 1; i++) {
-			//tokenizing on commas that are not within double quotes
-			if(mediaTypes.charAt(i) == ',' && !isQuoted) {
-				tokens.add(parseMediaType(mediaTypes.substring(nextBeginIndex, i)));
-				nextBeginIndex = i + 1;
-			//ignoring escaped double quote within double quotes
-			} else if(isQuoted && mediaTypes.charAt(i) == '"' && mediaTypes.charAt(i-1) == '\\') {
-				continue;
-			} else if(mediaTypes.charAt(i) == '"') {
-				isQuoted = !isQuoted;
-			}
-		}
-		//either the last part of the tokenization or the original string
-		tokens.add(parseMediaType(mediaTypes.substring(nextBeginIndex)));
-		return tokens;
+		return MimeTypeUtils.tokenize(mediaTypes).stream()
+				.map(MediaType::parseMediaType).collect(Collectors.toList());
 	}
 
 	/**
