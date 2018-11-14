@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType.SpecificityComparator;
@@ -37,6 +38,7 @@ import org.springframework.util.MimeType.SpecificityComparator;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Dimitrios Liapis
  * @since 4.0
  */
 public abstract class MimeTypeUtils {
@@ -248,21 +250,54 @@ public abstract class MimeTypeUtils {
 	}
 
 	/**
-	 * Parse the given, comma-separated string into a list of {@code MimeType} objects.
+	 * Parse the comma-separated string into a list of {@code MimeType} objects.
 	 * @param mimeTypes the string to parse
 	 * @return the list of mime types
-	 * @throws IllegalArgumentException if the string cannot be parsed
+	 * @throws InvalidMimeTypeException if the string cannot be parsed
 	 */
 	public static List<MimeType> parseMimeTypes(String mimeTypes) {
 		if (!StringUtils.hasLength(mimeTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = StringUtils.tokenizeToStringArray(mimeTypes, ",");
-		List<MimeType> result = new ArrayList<>(tokens.length);
-		for (String token : tokens) {
-			result.add(parseMimeType(token));
+		return tokenize(mimeTypes).stream()
+				.map(MimeTypeUtils::parseMimeType).collect(Collectors.toList());
+	}
+
+	/**
+	 * Tokenize the given comma-separated string of {@code MimeType} objects
+	 * into a {@code List<String>}. Unlike simple tokenization by ",", this
+	 * method takes into account quoted parameters.
+	 * @param mimeTypes the string to tokenize
+	 * @return the list of tokens
+	 * @since 5.1.3
+	 */
+	public static List<String> tokenize(String mimeTypes) {
+		if (!StringUtils.hasLength(mimeTypes)) {
+			return Collections.emptyList();
 		}
-		return result;
+		List<String> tokens = new ArrayList<>();
+		boolean inQuotes = false;
+		int startIndex = 0;
+		int i = 0;
+		while (i < mimeTypes.length()) {
+			switch (mimeTypes.charAt(i)) {
+				case '"':
+					inQuotes = !inQuotes;
+					break;
+				case ',':
+					if (!inQuotes) {
+						tokens.add(mimeTypes.substring(startIndex, i));
+						startIndex = i + 1;
+					}
+					break;
+				case '\\':
+					i++;
+					break;
+			}
+			i++;
+		}
+		tokens.add(mimeTypes.substring(startIndex));
+		return tokens;
 	}
 
 	/**
