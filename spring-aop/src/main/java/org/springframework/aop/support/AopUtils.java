@@ -196,7 +196,7 @@ public abstract class AopUtils {
 		Class<?>[] interfaces = targetClass.getInterfaces();
 		for (Class<?> itf : interfaces) {
 			Method mostSpecificMethod = getMostSpecificMethod(method, itf);
-			if (mostSpecificMethod != method)
+			if (!method.equals(mostSpecificMethod))
 				return mostSpecificMethod;
 		}
 		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, specificTargetClass);
