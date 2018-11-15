@@ -193,6 +193,12 @@ public abstract class AopUtils {
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
 		Class<?> specificTargetClass = (targetClass != null ? ClassUtils.getUserClass(targetClass) : null);
+		Class<?>[] interfaces = targetClass.getInterfaces();
+		for (Class<?> itf : interfaces) {
+			Method mostSpecificMethod = getMostSpecificMethod(method, itf);
+			if (mostSpecificMethod != method)
+				return mostSpecificMethod;
+		}
 		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, specificTargetClass);
 		// If we are dealing with method with generic parameters, find the original method.
 		return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
