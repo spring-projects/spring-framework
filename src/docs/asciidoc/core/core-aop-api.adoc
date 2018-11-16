@@ -1309,7 +1309,7 @@ infrastructure, which enables modification of any bean definition as the contain
 
 In this model, you set up some special bean definitions in your XML bean definition file
 to configure the auto-proxy infrastructure. This lets you declare the targets
-eligible for auto-proxying. You neet not use `ProxyFactoryBean`.
+eligible for auto-proxying. You need not use `ProxyFactoryBean`.
 
 There are two ways to do this:
 
@@ -1526,7 +1526,7 @@ pooling API.
 
 NOTE: Commons Pool 1.5+ is also supported but is deprecated as of Spring Framework 4.2.
 
-The following listig shows an example configuration:
+The following listing shows an example configuration:
 
 ====
 [source,xml,indent=0]

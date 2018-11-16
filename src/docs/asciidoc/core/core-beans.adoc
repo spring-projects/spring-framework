@@ -6991,7 +6991,7 @@ implementation type, it is safer to declare the most specific return type possib
 A `@Bean`-annotated method can have an arbitrary number of parameters that describe the
 dependencies required to build that bean. For instance, if our `TransferService`
 requires an `AccountRepository`, we can materialize that dependency with a method
-parameter, as the followig example shows:
+parameter, as the following example shows:
 
 ====
 [source,java,indent=0]

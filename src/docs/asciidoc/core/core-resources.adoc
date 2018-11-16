@@ -462,7 +462,7 @@ the current working directory).
 
 Note that the use of the special classpath prefix or a standard URL prefix on the
 location path overrides the default type of `Resource` created to load the
-definition. Consider the folowing example:
+definition. Consider the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -711,7 +711,7 @@ In practice, this means the following examples are equivalent:
 ----
 ====
 
-The following exmaples are also equivalent (even though it would make sense for them to be different, as one
+The following examples are also equivalent (even though it would make sense for them to be different, as one
 case is relative and the other absolute):
 
 ====

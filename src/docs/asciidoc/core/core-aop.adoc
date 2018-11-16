@@ -1940,7 +1940,7 @@ the return value should be passed, as the following example shows:
 
 The `doAccessCheck` method must declare a parameter named `retVal`. The type of this
 parameter constrains matching in the same way as described for `@AfterReturning`. For
-example, you can decleare the method signature as follows:
+example, you can declare the method signature as follows:
 
 ====
 [source,java,indent=0]
@@ -2219,7 +2219,7 @@ Consider the following driver script:
 ----
 ====
 
-With such a Boot class, we would get output similar to the folloiwng on standard output:
+With such a Boot class, we would get output similar to the following on standard output:
 
 ====
 [literal]
@@ -3386,7 +3386,7 @@ file, and the Spring configuration) are in place, we can create the following dr
 We have one last thing to do. The introduction to this section did say that one could
 switch on LTW selectively on a per-`ClassLoader` basis with Spring, and this is true.
 However, for this example, we use a Java agent (supplied with Spring)
-to switch on the LTW. We use the folloiwng command to run the `Main` class shown earlier:
+to switch on the LTW. We use the following command to run the `Main` class shown earlier:
 
 ====
 [literal]

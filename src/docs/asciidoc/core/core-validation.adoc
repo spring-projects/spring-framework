@@ -262,7 +262,7 @@ the `BeanWrapper` directly. If you use only the `DataBinder` and the `BeanFactor
 and their default implementations, you should skip ahead to the <<beans-beans-conversion,section about
 `PropertyEditors`>>.)
 
-The following two example classess use the `BeanWrapper` to get and set
+The following two example classes use the `BeanWrapper` to get and set
 properties:
 
 ====

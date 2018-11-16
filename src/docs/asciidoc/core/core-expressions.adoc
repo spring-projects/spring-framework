@@ -1082,7 +1082,7 @@ following example shows how to use variables:
 The `#this` variable is always defined and refers to the current evaluation object
 (against which unqualified references are resolved). The `#root` variable is always
 defined and refers to the root context object. Although `#this` may vary as components of
-an expression are evaluated, `#root` always refers to the root. The followig examples
+an expression are evaluated, `#root` always refers to the root. The following examples
 show how to use the `#this` and `#root` variables:
 
 ====
@@ -1271,7 +1271,7 @@ The following example shows how to use the Elvis operator:
 ----
 ====
 
-The following listing ahows A more complex example:
+The following listing shows A more complex example:
 
 ====
 [source,java,indent=0]

@@ -1079,7 +1079,7 @@ issue, switch to another HTTP client library.
 ===== URIs
 
 Many of the `RestTemplate` methods accept a URI template and URI template variables,
-either as a `String` variable argumet, or as `Map<String,String>`.
+either as a `String` variable argument, or as `Map<String,String>`.
 
 The following example uses a `String` variable argument:
 
@@ -2044,7 +2044,7 @@ these callback methods.
 [[jms-receiving]]
 === Receiving a Message
 
-This describes how to recieve messages with JMS in Spring.
+This describes how to receive messages with JMS in Spring.
 
 
 [[jms-receiving-sync]]
@@ -2241,7 +2241,7 @@ The next example shows another MDP that can handle only receiving JMS
 defaults to `handleMessage`), but it is configurable (as you can see later in this section). Notice
 also how the `receive(..)` method is strongly typed to receive and respond only to JMS
 `TextMessage` messages.
-The following listing shows the definition of the `TextMessageDelegage` interface:
+The following listing shows the definition of the `TextMessageDelegate` interface:
 
 ====
 [source,java,indent=0]
@@ -2627,7 +2627,7 @@ and programmatically register only your endpoints through `JmsListenerConfigurer
 ==== Annotated Endpoint Method Signature
 
 So far, we have been injecting a simple `String` in our endpoint, but it can actually
-have a very flexible method signature. In the follwoing example, we rewrite it to inject the `Order` with
+have a very flexible method signature. In the following example, we rewrite it to inject the `Order` with
 a custom header:
 
 ====
@@ -5364,7 +5364,7 @@ could resemble the following example in non-managed mode:
 ====
 
 In managed mode (that is, in a Java EE environment), the configuration could resemble
-the followig example:
+the following example:
 
 ====
 [source,xml,indent=0]
@@ -6062,7 +6062,7 @@ to create a `MimeMessage`, as the following example shows:
 ==== Sending Attachments and Inline Resources
 
 Multipart email messages allow for both attachments and inline resources. Examples of
-inline resources includee an image or a stylesheet that you want to use in your message but
+inline resources include an image or a stylesheet that you want to use in your message but
 that you do not want displayed as an attachment.
 
 [[mail-javamail-mime-attachments-attachment]]
@@ -6139,7 +6139,7 @@ is okay in the context of the aforementioned examples, where the intent was to s
 the very basics of the API.
 
 In your typical enterprise application, though, developers often do not create the content
-of email messagess by using the previously shown approach for a number of reasons:
+of email messages by using the previously shown approach for a number of reasons:
 
 * Creating HTML-based email content in Java code is tedious and error prone.
 * There is no clear separation between display logic and business logic.
@@ -8251,7 +8251,7 @@ The following example shows how to do so:
 ----
 ====
 
-The `CompositeCacheManager` in the preceding chains multiple `CacheManager` istancess and,
+The `CompositeCacheManager` in the preceding chains multiple `CacheManager` instances and,
 through the `fallbackToNoOpCache` flag, adds a no-op cache for all the
 definitions not handled by the configured cache managers. That is, every cache
 definition not found in either `jdkCache` or `gemfireCache` (configured earlier in the example) is

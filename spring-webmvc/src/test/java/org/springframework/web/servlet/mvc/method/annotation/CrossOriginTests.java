@@ -338,23 +338,23 @@ public class CrossOriginTests {
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-header", headers = "header1=a")
-		public void ambigousHeader1a() {
+		public void ambiguousHeader1a() {
 		}
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-header", headers = "header1=b")
-		public void ambigousHeader1b() {
+		public void ambiguousHeader1b() {
 		}
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-produces", produces = "application/xml")
-		public String ambigousProducesXml() {
+		public String ambiguousProducesXml() {
 			return "<a></a>";
 		}
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-produces", produces = "application/json")
-		public String ambigousProducesJson() {
+		public String ambiguousProducesJson() {
 			return "{}";
 		}
 
