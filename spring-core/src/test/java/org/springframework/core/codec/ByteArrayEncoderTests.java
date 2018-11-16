@@ -17,14 +17,11 @@
 package org.springframework.core.codec;
 
 import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
@@ -32,30 +29,18 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  */
-public class ByteArrayEncoderTests extends AbstractEncoderTestCase<byte[], ByteArrayEncoder> {
+public class ByteArrayEncoderTests extends AbstractEncoderTestCase<ByteArrayEncoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
 	public ByteArrayEncoderTests() {
-		super(new ByteArrayEncoder(), byte[].class);
+		super(new ByteArrayEncoder());
 	}
+
 
 	@Override
-	protected Flux<byte[]> input() {
-		return Flux.just(this.fooBytes,
-				this.barBytes);
-	}
-
-	@Override
-	protected Stream<Consumer<DataBuffer>> outputConsumers() {
-		return Stream.<Consumer<DataBuffer>>builder()
-				.add(resultConsumer(this.fooBytes))
-				.add(resultConsumer(this.barBytes))
-				.build();
-	}
-
 	@Test
 	public void canEncode() {
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(byte[].class),
@@ -69,4 +54,13 @@ public class ByteArrayEncoderTests extends AbstractEncoderTestCase<byte[], ByteA
 		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
+	@Override
+	public void encode() {
+		Flux<byte[]> input = Flux.just(this.fooBytes, this.barBytes);
+
+		testEncodeAll(input, byte[].class, step -> step
+				.consumeNextWith(expectBytes(this.fooBytes))
+				.consumeNextWith(expectBytes(this.barBytes))
+				.verifyComplete());
+	}
 }

@@ -18,14 +18,11 @@ package org.springframework.core.codec;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
@@ -33,30 +30,17 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferEncoderTests extends AbstractEncoderTestCase<ByteBuffer, ByteBufferEncoder> {
+public class ByteBufferEncoderTests extends AbstractEncoderTestCase<ByteBufferEncoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
 	public ByteBufferEncoderTests() {
-		super(new ByteBufferEncoder(), ByteBuffer.class);
+		super(new ByteBufferEncoder());
 	}
 
 	@Override
-	protected Flux<ByteBuffer> input() {
-		return Flux.just(this.fooBytes, this.barBytes)
-				.map(ByteBuffer::wrap);
-	}
-
-	@Override
-	protected Stream<Consumer<DataBuffer>> outputConsumers() {
-		return Stream.<Consumer<DataBuffer>>builder()
-				.add(resultConsumer(this.fooBytes))
-				.add(resultConsumer(this.barBytes))
-				.build();
-	}
-
 	@Test
 	public void canEncode() {
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class),
@@ -70,5 +54,17 @@ public class ByteBufferEncoderTests extends AbstractEncoderTestCase<ByteBuffer, 
 		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
+	@Override
+	@Test
+	public void encode() {
+		Flux<ByteBuffer> input = Flux.just(this.fooBytes, this.barBytes)
+				.map(ByteBuffer::wrap);
 
+		testEncodeAll(input, ByteBuffer.class, step -> step
+				.consumeNextWith(expectBytes(this.fooBytes))
+				.consumeNextWith(expectBytes(this.barBytes))
+				.verifyComplete());
+
+
+	}
 }

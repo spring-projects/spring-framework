@@ -16,38 +16,39 @@
 
 package org.springframework.http.codec.xml;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractEncoderTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
+import static org.springframework.core.io.buffer.DataBufferUtils.release;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  */
-public class Jaxb2XmlEncoderTests extends AbstractEncoderTestCase<Object, Jaxb2XmlEncoder> {
+public class Jaxb2XmlEncoderTests extends AbstractEncoderTestCase<Jaxb2XmlEncoder> {
 
 	public Jaxb2XmlEncoderTests() {
-		super(new Jaxb2XmlEncoder(), Pojo.class);
+		super(new Jaxb2XmlEncoder());
 	}
 
+	@Override
 	@Test
 	public void canEncode() {
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
@@ -69,23 +70,46 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTestCase<Object, Jaxb2X
 	}
 
 	@Override
-	protected Flux<Object> input() {
-		return Flux.just(new Container());
+	@Test
+	public void encode() {
+		Mono<Pojo> input = Mono.just(new Pojo("foofoo", "barbar"));
+
+		testEncode(input, Pojo.class, step -> step
+				.consumeNextWith(
+						expectXml("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+								"<pojo><bar>barbar</bar><foo>foofoo</foo></pojo>"))
+				.verifyComplete());
 	}
 
-	@Override
-	protected Stream<Consumer<DataBuffer>> outputConsumers() {
-		return Stream.<Consumer<DataBuffer>>builder()
-				.add(dataBuffer -> {
-					String s = DataBufferTestUtils
-							.dumpString(dataBuffer, StandardCharsets.UTF_8);
-					assertThat(s,
-							isSimilarTo("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
-									"<container><foo><name>name1</name></foo><bar><title>title1</title></bar></container>"));
-				})
-				.build();
+	@Test
+	public void encodeError() {
+		Flux<Pojo> input = Flux.error(RuntimeException::new);
+
+		testEncode(input, Pojo.class, step -> step
+				.expectError(RuntimeException.class)
+				.verify());
 	}
 
+	@Test
+	public void encodeElementsWithCommonType() {
+		Mono<Container> input = Mono.just(new Container());
+
+		testEncode(input, Pojo.class, step -> step
+				.consumeNextWith(
+						expectXml("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+								"<container><foo><name>name1</name></foo><bar><title>title1</title></bar></container>"))
+				.verifyComplete());
+	}
+
+	protected Consumer<DataBuffer> expectXml(String expected) {
+		return dataBuffer -> {
+			byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
+			dataBuffer.read(resultBytes);
+			release(dataBuffer);
+			String actual = new String(resultBytes, UTF_8);
+			assertThat(actual, isSimilarTo(expected));
+		};
+	}
 
 	public static class Model {}
 

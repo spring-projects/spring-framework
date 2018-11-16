@@ -16,14 +16,9 @@
 
 package org.springframework.core.codec;
 
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
@@ -32,31 +27,19 @@ import static org.junit.Assert.*;
  * @author Sebastien Deleuze
  */
 public class CharSequenceEncoderTests
-		extends AbstractEncoderTestCase<CharSequence, CharSequenceEncoder> {
+		extends AbstractEncoderTestCase<CharSequenceEncoder> {
 
 	private final String foo = "foo";
 
 	private final String bar = "bar";
 
 	public CharSequenceEncoderTests() {
-		super(CharSequenceEncoder.textPlainOnly(), CharSequence.class);
+		super(CharSequenceEncoder.textPlainOnly());
 	}
+
 
 	@Override
-	protected Flux<CharSequence> input() {
-		return Flux.just(this.foo, this.bar);
-	}
-
-	@Override
-	protected Stream<Consumer<DataBuffer>> outputConsumers() {
-		return Stream.<Consumer<DataBuffer>>builder()
-				.add(resultConsumer(this.foo))
-				.add(resultConsumer(this.bar))
-				.build();
-	}
-
-	@Test
-	public void canWrite() {
+	public void canEncode() throws Exception {
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(String.class),
 				MimeTypeUtils.TEXT_PLAIN));
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuilder.class),
@@ -71,4 +54,17 @@ public class CharSequenceEncoderTests
 		// SPR-15464
 		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
+
+	@Override
+	public void encode() {
+		Flux<CharSequence> input = Flux.just(this.foo, this.bar);
+
+		testEncodeAll(input, CharSequence.class, step -> step
+				.consumeNextWith(expectString(this.foo))
+				.consumeNextWith(expectString(this.bar))
+				.verifyComplete());
+
+
+	}
+
 }
