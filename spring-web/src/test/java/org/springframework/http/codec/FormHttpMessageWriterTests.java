@@ -16,14 +16,19 @@
 
 package org.springframework.http.codec;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -35,7 +40,7 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class FormHttpMessageWriterTests extends AbstractDataBufferAllocatingTestCase {
+public class FormHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
 
 	private final FormHttpMessageWriter writer = new FormHttpMessageWriter();
 
@@ -88,5 +93,15 @@ public class FormHttpMessageWriterTests extends AbstractDataBufferAllocatingTest
 		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", headers.getContentType().toString());
 		assertEquals(expected.length(), headers.getContentLength());
 	}
+
+	private Consumer<DataBuffer> stringConsumer(String expected) {
+		return dataBuffer -> {
+			String value =
+					DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
+			DataBufferUtils.release(dataBuffer);
+			assertEquals(expected, value);
+		};
+	}
+
 
 }

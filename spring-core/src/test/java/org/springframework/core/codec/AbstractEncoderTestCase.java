@@ -20,17 +20,16 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.junit.After;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -46,13 +45,8 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  */
 @SuppressWarnings("ProtectedField")
-public abstract class AbstractEncoderTestCase<T, E extends Encoder<T>> {
-
-	/**
-	 * The data buffer factory used by the encoder.
-	 */
-	protected final DataBufferFactory bufferFactory =
-			new LeakAwareDataBufferFactory();
+public abstract class AbstractEncoderTestCase<T, E extends Encoder<T>> extends
+		AbstractLeakCheckingTestCase {
 
 	/**
 	 * The encoder to test.
@@ -108,15 +102,6 @@ public abstract class AbstractEncoderTestCase<T, E extends Encoder<T>> {
 		this.elementType = elementType;
 		this.mimeType = mimeType;
 		this.hints = hints;
-	}
-
-	/**
-	 * Checks whether any of the data buffers created by {@link #bufferFactory} have not been
-	 * released, throwing an assertion error if so.
-	 */
-	@After
-	public final void checkForLeaks() {
-		((LeakAwareDataBufferFactory) this.bufferFactory).checkForLeaks();
 	}
 
 	/**

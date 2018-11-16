@@ -26,28 +26,13 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of the {@code DataBufferFactory} interface that keep track of memory leaks.
- * Useful for unit tests that handle data buffers. Simply call {@link #checkForLeaks()} in
- * a JUnit {@link After} method, and any buffers have not been released will result in an
+ * Useful for unit tests that handle data buffers. Simply inherit from
+ * {@link AbstractLeakCheckingTestCase} or call {@link #checkForLeaks()} in
+ * a JUnit {@link After} method yourself, and any buffers have not been released will result in an
  * {@link AssertionError}.
- * <pre class="code">
- * public class MyUnitTest {
  *
- * 	private final LeakAwareDataBufferFactory bufferFactory =
- * 	  new LeakAwareDataBufferFactory();
- *
- *  &#064;Test
- * 	public void doSomethingWithBufferFactory() {
- * 		...
- * 	}
- *
- * 	&#064;After
- * 	public void checkForLeaks() {
- * 		bufferFactory.checkForLeaks();
- * 	}
- *
- * }
- * </pre>
  * @author Arjen Poutsma
+ * @see LeakAwareDataBufferFactory
  */
 public class LeakAwareDataBufferFactory implements DataBufferFactory {
 

@@ -124,15 +124,15 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 					try {
 						Message.Builder builder = getMessageBuilder(elementType.toClass());
 						builder.mergeFrom(CodedInputStream.newInstance(dataBuffer.asByteBuffer()), this.extensionRegistry);
-						Message message = builder.build();
-						DataBufferUtils.release(dataBuffer);
-						return message;
+						return builder.build();
 					}
 					catch (IOException ex) {
 						throw new DecodingException("I/O error while parsing input stream", ex);
 					}
 					catch (Exception ex) {
 						throw new DecodingException("Could not read Protobuf message: " + ex.getMessage(), ex);
+					} finally {
+						DataBufferUtils.release(dataBuffer);
 					}
 				}
 		);

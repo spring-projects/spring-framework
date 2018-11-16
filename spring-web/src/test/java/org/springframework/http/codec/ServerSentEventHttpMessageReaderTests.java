@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 
@@ -25,7 +26,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -38,7 +39,7 @@ import static org.junit.Assert.*;
  *
  * @author Sebastien Deleuze
  */
-public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAllocatingTestCase {
+public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTestCase {
 
 	private ServerSentEventHttpMessageReader messageReader =
 			new ServerSentEventHttpMessageReader(new Jackson2JsonDecoder());
@@ -187,5 +188,13 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 				.expectError()
 				.verify();
 	}
+
+	private DataBuffer stringBuffer(String value) {
+		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+		buffer.write(bytes);
+		return buffer;
+	}
+
 
 }

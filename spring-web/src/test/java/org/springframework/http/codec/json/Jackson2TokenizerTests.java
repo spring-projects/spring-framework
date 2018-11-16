@@ -18,6 +18,7 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -33,7 +34,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.DecodingException;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 
 import static java.util.Arrays.asList;
@@ -43,7 +44,7 @@ import static java.util.Collections.singletonList;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase {
+public class Jackson2TokenizerTests extends AbstractLeakCheckingTestCase {
 
 	private ObjectMapper objectMapper;
 
@@ -191,11 +192,14 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				.verify();
 	}
 
-	@Test(expected = DecodingException.class) // SPR-16521
+	@Test // SPR-16521
 	public void jsonEOFExceptionIsWrappedAsDecodingError() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"status\": \"noClosingQuote}"));
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, false);
-		tokens.blockLast();
+
+		StepVerifier.create(tokens)
+				.expectError(DecodingException.class)
+				.verify();
 	}
 
 
@@ -221,6 +225,14 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 		expected.forEach(s -> builder.assertNext(new JSONAssertConsumer(s)));
 		builder.verifyComplete();
 	}
+
+	private DataBuffer stringBuffer(String value) {
+		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+		buffer.write(bytes);
+		return buffer;
+	}
+
 
 
 	private static class JSONAssertConsumer implements Consumer<String> {
