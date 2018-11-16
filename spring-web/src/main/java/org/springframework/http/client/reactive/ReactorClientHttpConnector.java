@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import io.netty.buffer.UnpooledByteBufAllocator;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClient;
 import reactor.ipc.netty.http.client.HttpClientOptions;
@@ -27,6 +28,7 @@ import reactor.ipc.netty.http.client.HttpClientRequest;
 import reactor.ipc.netty.http.client.HttpClientResponse;
 import reactor.ipc.netty.options.ClientOptions;
 
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpMethod;
 
 /**
@@ -37,6 +39,11 @@ import org.springframework.http.HttpMethod;
  * @see reactor.ipc.netty.http.client.HttpClient
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector {
+
+	// 5.0.x only: no buffer pooling
+	static final NettyDataBufferFactory BUFFER_FACTORY =
+			new NettyDataBufferFactory(new UnpooledByteBufAllocator(false));
+
 
 	private final HttpClient httpClient;
 

@@ -167,7 +167,12 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.request.receive().retain().map(this.bufferFactory::wrap);
+		// 5.0.x only: do not retain, make a copy..
+		return this.request.receive().map(byteBuf -> {
+			byte[] data = new byte[byteBuf.readableBytes()];
+			byteBuf.readBytes(data);
+			return bufferFactory.wrap(data);
+		});
 	}
 
 	@SuppressWarnings("unchecked")

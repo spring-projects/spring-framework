@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 import reactor.ipc.netty.http.client.HttpClientResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -41,8 +40,6 @@ import org.springframework.util.MultiValueMap;
  */
 class ReactorClientHttpResponse implements ClientHttpResponse {
 
-	private final NettyDataBufferFactory dataBufferFactory;
-
 	private final HttpClientResponse response;
 
 	private final AtomicBoolean bodyConsumed = new AtomicBoolean();
@@ -50,7 +47,6 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	public ReactorClientHttpResponse(HttpClientResponse response) {
 		this.response = response;
-		this.dataBufferFactory = new NettyDataBufferFactory(response.channel().alloc());
 	}
 
 
@@ -64,9 +60,11 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 						// isn't consistent in doing so and may hang without completion.
 						Assert.state(this.bodyConsumed.compareAndSet(false, true),
 								"The client response body can only be consumed once."))
-				.map(buf -> {
-					buf.retain();
-					return dataBufferFactory.wrap(buf);
+				.map(byteBuf -> {
+					// 5.0.x only: do not retain, make a copy..
+					byte[] data = new byte[byteBuf.readableBytes()];
+					byteBuf.readBytes(data);
+					return ReactorClientHttpConnector.BUFFER_FACTORY.wrap(data);
 				});
 	}
 

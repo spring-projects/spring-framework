@@ -48,21 +48,18 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 
 	private final HttpClientRequest httpRequest;
 
-	private final NettyDataBufferFactory bufferFactory;
-
 
 	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri,
 			HttpClientRequest httpRequest) {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.httpRequest = httpRequest.failOnClientError(false).failOnServerError(false);
-		this.bufferFactory = new NettyDataBufferFactory(httpRequest.alloc());
 	}
 
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		return this.bufferFactory;
+		return ReactorClientHttpConnector.BUFFER_FACTORY;
 	}
 
 	@Override
