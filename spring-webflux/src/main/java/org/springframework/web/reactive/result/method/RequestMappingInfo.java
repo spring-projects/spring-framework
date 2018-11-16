@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -307,24 +308,28 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("{");
-		builder.append(this.patternsCondition);
 		if (!this.methodsCondition.isEmpty()) {
-			builder.append(",methods=").append(this.methodsCondition);
+			Set<RequestMethod> httpMethods = this.methodsCondition.getMethods();
+			builder.append(httpMethods.size() == 1 ? httpMethods.iterator().next() : httpMethods);
+		}
+		if (!this.patternsCondition.isEmpty()) {
+			Set<PathPattern> patterns = this.patternsCondition.getPatterns();
+			builder.append(" ").append(patterns.size() == 1 ? patterns.iterator().next() : patterns);
 		}
 		if (!this.paramsCondition.isEmpty()) {
-			builder.append(",params=").append(this.paramsCondition);
+			builder.append(", params ").append(this.paramsCondition);
 		}
 		if (!this.headersCondition.isEmpty()) {
-			builder.append(",headers=").append(this.headersCondition);
+			builder.append(", headers ").append(this.headersCondition);
 		}
 		if (!this.consumesCondition.isEmpty()) {
-			builder.append(",consumes=").append(this.consumesCondition);
+			builder.append(", consumes ").append(this.consumesCondition);
 		}
 		if (!this.producesCondition.isEmpty()) {
-			builder.append(",produces=").append(this.producesCondition);
+			builder.append(", produces ").append(this.producesCondition);
 		}
 		if (!this.customConditionHolder.isEmpty()) {
-			builder.append(",custom=").append(this.customConditionHolder);
+			builder.append(", and ").append(this.customConditionHolder);
 		}
 		builder.append('}');
 		return builder.toString();
