@@ -18,6 +18,7 @@ package org.springframework.http.codec.protobuf;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,25 +43,28 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MimeType;
 
 /**
- * A {@code Decoder} that reads {@link com.google.protobuf.Message}s
- * using <a href="https://developers.google.com/protocol-buffers/">Google Protocol Buffers</a>.
+ * A {@code Decoder} that reads {@link com.google.protobuf.Message}s using
+ * <a href="https://developers.google.com/protocol-buffers/">Google Protocol Buffers</a>.
  *
  * <p>Flux deserialized via
  * {@link #decode(Publisher, ResolvableType, MimeType, Map)} are expected to use
- * <a href="https://developers.google.com/protocol-buffers/docs/techniques?hl=en#streaming">delimited Protobuf messages</a>
- * with the size of each message specified before the message itself. Single values deserialized
- * via {@link #decodeToMono(Publisher, ResolvableType, MimeType, Map)} are expected to use
- * regular Protobuf message format (without the size prepended before the message).
+ * <a href="https://developers.google.com/protocol-buffers/docs/techniques?hl=en#streaming">
+ * delimited Protobuf messages</a> with the size of each message specified before
+ * the message itself. Single values deserialized via
+ * {@link #decodeToMono(Publisher, ResolvableType, MimeType, Map)} are expected
+ * to use regular Protobuf message format (without the size prepended before
+ * the message).
  *
- * <p>Notice that default instance of Protobuf message produces empty byte array, so
- * {@code Mono.just(Msg.getDefaultInstance())} sent over the network will be deserialized
- * as an empty {@link Mono}.
+ * <p>Notice that default instance of Protobuf message produces empty byte
+ * array, so {@code Mono.just(Msg.getDefaultInstance())} sent over the network
+ * will be deserialized as an empty {@link Mono}.
  *
- * <p>To generate {@code Message} Java classes, you need to install the {@code protoc} binary.
+ * <p>To generate {@code Message} Java classes, you need to install the
+ * {@code protoc} binary.
  *
  * <p>This decoder requires Protobuf 3 or higher, and supports
- * {@code "application/x-protobuf"} and {@code "application/octet-stream"} with the official
- * {@code "com.google.protobuf:protobuf-java"} library.
+ * {@code "application/x-protobuf"} and {@code "application/octet-stream"} with
+ * the official {@code "com.google.protobuf:protobuf-java"} library.
  *
  * @author Sébastien Deleuze
  * @since 5.1
@@ -68,9 +72,7 @@ import org.springframework.util.MimeType;
  */
 public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Message> {
 
-	/**
-	 * The default max size for aggregating messages.
-	 */
+	/** The default max size for aggregating messages. */
 	protected static final int DEFAULT_MESSAGE_MAX_SIZE = 64 * 1024;
 
 	private static final ConcurrentMap<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
@@ -123,7 +125,8 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		return DataBufferUtils.join(inputStream).map(dataBuffer -> {
 					try {
 						Message.Builder builder = getMessageBuilder(elementType.toClass());
-						builder.mergeFrom(CodedInputStream.newInstance(dataBuffer.asByteBuffer()), this.extensionRegistry);
+						ByteBuffer buffer = dataBuffer.asByteBuffer();
+						builder.mergeFrom(CodedInputStream.newInstance(buffer), this.extensionRegistry);
 						return builder.build();
 					}
 					catch (IOException ex) {
@@ -131,7 +134,8 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 					}
 					catch (Exception ex) {
 						throw new DecodingException("Could not read Protobuf message: " + ex.getMessage(), ex);
-					} finally {
+					}
+					finally {
 						DataBufferUtils.release(dataBuffer);
 					}
 				}
@@ -168,10 +172,12 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 		private int messageBytesToRead;
 
+
 		public MessageDecoderFunction(ResolvableType elementType, int maxMessageSize) {
 			this.elementType = elementType;
 			this.maxMessageSize = maxMessageSize;
 		}
+
 
 		@Override
 		public Iterable<? extends Message> apply(DataBuffer input) {
@@ -189,8 +195,9 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						this.messageBytesToRead = CodedInputStream.readRawVarint32(firstByte, input.asInputStream());
 						if (this.messageBytesToRead > this.maxMessageSize) {
 							throw new DecodingException(
-									"The number of bytes to read parsed in the incoming stream (" +
-									this.messageBytesToRead + ") exceeds the configured limit (" + this.maxMessageSize + ")");
+									"The number of bytes to read from the incoming stream " +
+											"(" + this.messageBytesToRead + ") exceeds " +
+											"the configured limit (" + this.maxMessageSize + ")");
 						}
 						this.output = input.factory().allocateBuffer(this.messageBytesToRead);
 					}
@@ -206,7 +213,8 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 					if (this.messageBytesToRead == 0) {
 						Message.Builder builder = getMessageBuilder(this.elementType.toClass());
-						builder.mergeFrom(CodedInputStream.newInstance(this.output.asByteBuffer()), extensionRegistry);
+						ByteBuffer buffer = this.output.asByteBuffer();
+						builder.mergeFrom(CodedInputStream.newInstance(buffer), extensionRegistry);
 						messages.add(builder.build());
 						DataBufferUtils.release(this.output);
 						this.output = null;
