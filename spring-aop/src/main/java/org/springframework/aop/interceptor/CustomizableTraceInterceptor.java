@@ -79,7 +79,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
 	 * The {@code $[targetClassName]} placeholder.
-	 * Replaced with the fully-qualifed name of the {@code Class}
+	 * Replaced with the fully-qualified name of the {@code Class}
 	 * of the method invocation target.
 	 */
 	public static final String PLACEHOLDER_TARGET_CLASS_NAME = "$[targetClassName]";

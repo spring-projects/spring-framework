@@ -795,7 +795,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		 * <dt>For advised methods:</dt>
 		 * <dd>If the target is static and the advice chain is frozen then a
 		 * FixedChainStaticTargetInterceptor specific to the method is used to
-		 * invoke the advice chain. Otherwise a DyanmicAdvisedInterceptor is
+		 * invoke the advice chain. Otherwise a DynamicAdvisedInterceptor is
 		 * used.</dd>
 		 * <dt>For non-advised methods:</dt>
 		 * <dd>Where it can be determined that the method will not return {@code this}

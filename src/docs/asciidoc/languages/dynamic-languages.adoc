@@ -717,7 +717,7 @@ The following example shows the BeanShell "`implementation`" (we use the term lo
 ----
 ====
 
-The following exxample shows the Spring XML that defines an "`instance`" of the above "`class`" (again,
+The following example shows the Spring XML that defines an "`instance`" of the above "`class`" (again,
 we use these terms very loosely here):
 
 ====

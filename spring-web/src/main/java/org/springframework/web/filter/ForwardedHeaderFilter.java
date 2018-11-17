@@ -364,16 +364,16 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			if (this.requestUri == null) {
 				return this.delegate.get().getRequestURI();
 			}
-			recalculatePathsIfNecesary();
+			recalculatePathsIfNecessary();
 			return this.requestUri;
 		}
 
 		public StringBuffer getRequestUrl() {
-			recalculatePathsIfNecesary();
+			recalculatePathsIfNecessary();
 			return new StringBuffer(this.requestUrl);
 		}
 
-		private void recalculatePathsIfNecesary() {
+		private void recalculatePathsIfNecessary() {
 			if (!this.actualRequestUri.equals(this.delegate.get().getRequestURI())) {
 				// Underlying path change (e.g. Servlet FORWARD).
 				this.actualRequestUri = this.delegate.get().getRequestURI();

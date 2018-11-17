@@ -97,7 +97,7 @@ composite buffers, if that's supported by the underlying byte buffer API.
 [[codecs]]
 == Codecs
 
-The `org.springframework.core.codec` package provides the following stragy interfaces:
+The `org.springframework.core.codec` package provides the following strategy interfaces:
 
 * `Encoder` to encode `Publisher<T>` into a stream of data buffers.
 * `Decoder` to decode `Publisher<DataBuffer>` into a stream of higher level objects.
