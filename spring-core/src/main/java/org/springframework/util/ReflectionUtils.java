@@ -697,7 +697,7 @@ public abstract class ReflectionUtils {
 			for (Method ifcMethod : ifc.getMethods()) {
 				if (!Modifier.isAbstract(ifcMethod.getModifiers())) {
 					if (result == null) {
-						result = new LinkedList<>();
+						result = new ArrayList<>();
 					}
 					result.add(ifcMethod);
 				}
