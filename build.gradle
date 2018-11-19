@@ -30,10 +30,10 @@ ext {
 
 	aspectjVersion       = "1.9.2"
 	freemarkerVersion    = "2.3.28"
-	groovyVersion        = "2.5.3"
+	groovyVersion        = "2.5.4"
 	hsqldbVersion        = "2.4.1"
 	jackson2Version      = "2.9.7"
-	jettyVersion         = "9.4.12.v20180830"
+	jettyVersion         = "9.4.14.v20181114"
 	junit5Version        = "5.3.1"
 	kotlinVersion        = "1.2.71"
 	log4jVersion         = "2.11.1"
@@ -44,7 +44,7 @@ ext {
 	rxjava2Version       = "2.2.3"
 	slf4jVersion         = "1.7.25"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
-	tomcatVersion        = "9.0.12"
+	tomcatVersion        = "9.0.13"
 	undertowVersion      = "2.0.15.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"

@@ -40,7 +40,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	optional("com.google.protobuf:protobuf-java-util:3.6.1")
-	testCompile("javax.xml.bind:jaxb-api:2.3.0")
+	testCompile("javax.xml.bind:jaxb-api:2.3.1")
 	testCompile("com.fasterxml:aalto-xml:1.1.1")
 	testCompile("org.hibernate:hibernate-validator:6.0.13.Final")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
@@ -51,7 +51,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
 	testCompile("org.eclipse.jetty:jetty-reactive-httpclient:1.0.1")
-	testCompile("com.squareup.okhttp3:mockwebserver:3.11.0")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.12.0")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
