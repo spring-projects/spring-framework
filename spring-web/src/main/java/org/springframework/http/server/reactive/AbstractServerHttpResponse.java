@@ -45,6 +45,7 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 5.0
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
@@ -173,13 +174,21 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return new ChannelSendOperator<>(body,
-				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)));
+				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)))
+				.doOnError(t -> removeContentLength());
 	}
 
 	@Override
 	public final Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		return new ChannelSendOperator<>(body,
-				writePublisher -> doCommit(() -> writeAndFlushWithInternal(writePublisher)));
+				writePublisher -> doCommit(() -> writeAndFlushWithInternal(writePublisher)))
+				.doOnError(t -> removeContentLength());
+	}
+
+	private void removeContentLength() {
+		if (!this.isCommitted()) {
+			this.getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
+		}
 	}
 
 	@Override
