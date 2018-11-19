@@ -127,7 +127,7 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 	private void assertNickName(MBeanAttributeInfo attr) {
 		assertNotNull("Nick Name should not be null", attr);
 		assertTrue("Nick Name should be writable", attr.isWritable());
-		assertTrue("Nick Name should be readab;e", attr.isReadable());
+		assertTrue("Nick Name should be readable", attr.isReadable());
 	}
 
 }

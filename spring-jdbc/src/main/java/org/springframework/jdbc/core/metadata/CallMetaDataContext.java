@@ -172,7 +172,7 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Secify the name of the schema.
+	 * Specify the name of the schema.
 	 */
 	public void setSchemaName(@Nullable String schemaName) {
 		this.schemaName = schemaName;
@@ -625,7 +625,7 @@ public class CallMetaDataContext {
 		String schemaNameToUse;
 
 		// For Oracle where catalogs are not supported we need to reverse the schema name
-		// and the catalog name since the cataog is used for the package name
+		// and the catalog name since the catalog is used for the package name
 		if (this.metaDataProvider.isSupportsSchemasInProcedureCalls() &&
 				!this.metaDataProvider.isSupportsCatalogsInProcedureCalls()) {
 			schemaNameToUse = this.metaDataProvider.catalogNameToUse(getCatalogName());

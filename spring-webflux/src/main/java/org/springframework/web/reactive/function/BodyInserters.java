@@ -158,10 +158,10 @@ public abstract class BodyInserters {
 
 		Assert.notNull(eventsPublisher, "Publisher must not be null");
 		return (serverResponse, context) -> {
-			ResolvableType elmentType = SSE_TYPE;
+			ResolvableType elementType = SSE_TYPE;
 			MediaType mediaType = MediaType.TEXT_EVENT_STREAM;
-			HttpMessageWriter<ServerSentEvent<T>> writer = findWriter(context, elmentType, mediaType);
-			return write(eventsPublisher, elmentType, mediaType, serverResponse, context, writer);
+			HttpMessageWriter<ServerSentEvent<T>> writer = findWriter(context, elementType, mediaType);
+			return write(eventsPublisher, elementType, mediaType, serverResponse, context, writer);
 		};
 	}
 

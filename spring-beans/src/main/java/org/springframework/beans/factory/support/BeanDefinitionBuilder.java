@@ -278,7 +278,7 @@ public final class BeanDefinitionBuilder {
 	}
 
 	/**
-	 * Set the depency check mode for this definition.
+	 * Set the dependency check mode for this definition.
 	 */
 	public BeanDefinitionBuilder setDependencyCheck(int dependencyCheck) {
 		this.beanDefinition.setDependencyCheck(dependencyCheck);

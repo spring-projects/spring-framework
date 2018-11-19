@@ -391,7 +391,7 @@ be configured with a simple string for that resource, as the following example s
 ----
 ====
 
-Note that the resource path has no prefix. Consequetly, because the application context itself is
+Note that the resource path has no prefix. Consequently, because the application context itself is
 going to be used as the `ResourceLoader`, the resource itself is loaded through a
 `ClassPathResource`, a `FileSystemResource`, or a `ServletContextResource`,
 depending on the exact type of the context.

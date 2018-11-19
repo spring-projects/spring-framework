@@ -128,7 +128,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	}
 
 	/**
-	 * Invoked when flusing is possible, either in the same thread after a check
+	 * Invoked when flushing is possible, either in the same thread after a check
 	 * via {@link #isWritePossible()}, or as a callback from the underlying
 	 * container.
 	 */

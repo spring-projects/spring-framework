@@ -195,7 +195,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void compareToMultipleExpressionsAndMultipeAcceptHeaderValues() {
+	public void compareToMultipleExpressionsAndMultipleAcceptHeaderValues() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/*", "text/plain");
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/*", "application/xml");
 

@@ -57,7 +57,7 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 	 * replaced by the {@link BeanFactory} that creates it (c.f. the
 	 * {@link BeanFactoryAware} contract). So only use this constructor if you
 	 * are using this class outside the context of a Spring IoC container.
-	 * @param beanFactory the bean factory to be used to lookup {@link javax.jms.Destination Destinatiosn}
+	 * @param beanFactory the bean factory to be used to lookup {@link javax.jms.Destination Destination}
 	 */
 	public BeanFactoryDestinationResolver(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory is required");

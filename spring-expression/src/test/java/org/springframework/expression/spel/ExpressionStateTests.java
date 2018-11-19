@@ -83,7 +83,7 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testNoVariableInteference() {
+	public void testNoVariableInterference() {
 		ExpressionState state = getState();
 		TypedValue typedValue = state.lookupVariable("foo");
 		assertEquals(TypedValue.NULL, typedValue);

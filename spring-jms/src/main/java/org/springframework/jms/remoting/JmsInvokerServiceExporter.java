@@ -153,7 +153,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @param session the JMS session to use
 	 * @param result the invocation result
 	 * @return the message response to send
-	 * @throws javax.jms.JMSException if creating the messsage failed
+	 * @throws javax.jms.JMSException if creating the message failed
 	 */
 	protected Message createResponseMessage(Message request, Session session, RemoteInvocationResult result)
 			throws JMSException {

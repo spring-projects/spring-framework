@@ -60,8 +60,8 @@ public class Person {
 		return balance;
 	}
 
-	public void setBalance(BigDecimal balanace) {
-		this.balance = balanace;
+	public void setBalance(BigDecimal balance) {
+		this.balance = balance;
 	}
 
 }

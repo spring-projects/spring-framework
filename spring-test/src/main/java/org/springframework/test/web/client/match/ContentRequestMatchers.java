@@ -106,7 +106,7 @@ public class ContentRequestMatchers {
 	}
 
 	/**
-	 * Get the body of the request as a UTF-8 string and appply the given {@link Matcher}.
+	 * Get the body of the request as a UTF-8 string and apply the given {@link Matcher}.
 	 */
 	public RequestMatcher string(final Matcher<? super String> matcher) {
 		return request -> {

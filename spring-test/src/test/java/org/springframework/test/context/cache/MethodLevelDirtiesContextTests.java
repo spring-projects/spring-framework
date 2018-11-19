@@ -88,7 +88,7 @@ public class MethodLevelDirtiesContextTests {
 	@Test
 	@DirtiesContext
 	// test## prefix required for @FixMethodOrder.
-	public void test03_dirtyContextAferTestMethod() throws Exception {
+	public void test03_dirtyContextAfterTestMethod() throws Exception {
 		performAssertions(2);
 	}
 

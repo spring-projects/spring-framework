@@ -52,7 +52,7 @@ public class ProfileValueUtilsTests {
 	}
 
 	private void assertClassIsDisabled(Class<?> testClass) throws Exception {
-		assertFalse("Test class [" + testClass + "] should be disbled.",
+		assertFalse("Test class [" + testClass + "] should be disabled.",
 			ProfileValueUtils.isTestEnabledInThisEnvironment(testClass));
 	}
 

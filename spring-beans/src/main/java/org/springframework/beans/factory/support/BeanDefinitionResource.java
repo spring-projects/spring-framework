@@ -39,7 +39,7 @@ class BeanDefinitionResource extends AbstractResource {
 
 	/**
 	 * Create a new BeanDefinitionResource.
-	 * @param beanDefinition the BeanDefinition objectto wrap
+	 * @param beanDefinition the BeanDefinition object to wrap
 	 */
 	public BeanDefinitionResource(BeanDefinition beanDefinition) {
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");

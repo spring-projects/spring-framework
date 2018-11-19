@@ -109,7 +109,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 
 	/**
 	 * Initialize FreeMarkerConfigurationFactory's Configuration
-	 * if not overridden by a preconfigured FreeMarker Configuation.
+	 * if not overridden by a preconfigured FreeMarker Configuration.
 	 * <p>Sets up a ClassTemplateLoader to use for loading Spring macros.
 	 * @see #createConfiguration
 	 * @see #setConfiguration

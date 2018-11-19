@@ -272,7 +272,7 @@ public class JmsTemplateTests {
 	}
 
 	/**
-	 * Test seding to a destination using the method
+	 * Test sending to a destination using the method
 	 * send(String d, MessageCreator messageCreator)
 	 */
 	@Test

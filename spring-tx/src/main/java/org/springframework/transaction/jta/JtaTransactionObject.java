@@ -45,7 +45,7 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	/**
 	 * Create a new JtaTransactionObject for the given JTA UserTransaction.
 	 * @param userTransaction the JTA UserTransaction for the current transaction
-	 * (either a shared object or retrieved through a fresh per-transaction lookuip)
+	 * (either a shared object or retrieved through a fresh per-transaction lookup)
 	 */
 	public JtaTransactionObject(UserTransaction userTransaction) {
 		this.userTransaction = userTransaction;

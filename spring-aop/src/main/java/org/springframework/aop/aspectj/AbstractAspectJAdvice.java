@@ -63,7 +63,7 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedenceInformation, Serializable {
 
 	/**
-	 * Key used in ReflectiveMethodInvocation userAtributes map for the current joinpoint.
+	 * Key used in ReflectiveMethodInvocation userAttributes map for the current joinpoint.
 	 */
 	protected static final String JOIN_POINT_KEY = JoinPoint.class.getName();
 

@@ -30,7 +30,7 @@ import static org.mockito.BDDMockito.*;
 public class JmsDestinationAccessorTests {
 
 	@Test
-	public void testChokesIfDestinationResolverIsetToNullExplcitly() throws Exception {
+	public void testChokesIfDestinationResolverIsetToNullExplicitly() throws Exception {
 		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
 
 		try {

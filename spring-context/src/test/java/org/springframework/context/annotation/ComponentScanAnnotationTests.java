@@ -33,7 +33,7 @@ public class ComponentScanAnnotationTests {
 
 	@Test
 	public void noop() {
-		// no-op; the @ComponentScan-annotated MyConfig class below simply excercises
+		// no-op; the @ComponentScan-annotated MyConfig class below simply exercises
 		// available attributes of the annotation.
 	}
 }

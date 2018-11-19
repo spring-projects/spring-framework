@@ -133,7 +133,7 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 
 	/**
 	 * Return the time to live for this object in milliseconds.
-	 * @return number of millseconds until expiration
+	 * @return number of milliseconds until expiration
 	 * @throws TransactionTimedOutException if the deadline has already been reached
 	 */
 	public long getTimeToLiveInMillis() throws TransactionTimedOutException{
