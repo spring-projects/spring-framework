@@ -335,7 +335,7 @@ public class Enhancer extends AbstractClassGenerator {
 	}
 
 	/**
-	 * Set whether methods called from within the proxy's constructor
+	 * Set whether methods called from within the proxy's constructer
 	 * will be intercepted. The default value is true. Unintercepted methods
 	 * will call the method of the proxy's base class, if it exists.
 	 * @param interceptDuringConstruction whether to intercept methods called from the constructor

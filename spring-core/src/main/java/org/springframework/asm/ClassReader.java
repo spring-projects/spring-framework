@@ -524,7 +524,7 @@ public class ClassReader {
     classVisitor.visit(
         readInt(cpInfoOffsets[1] - 7), accessFlags, thisClass, signature, superClass, interfaces);
 
-    // Visit the SourceFile and SourceDebugExtension attributes.
+    // Visit the SourceFile and SourceDebugExtenstion attributes.
     if ((parsingOptions & SKIP_DEBUG) == 0
         && (sourceFile != null || sourceDebugExtension != null)) {
       classVisitor.visitSource(sourceFile, sourceDebugExtension);
@@ -2973,10 +2973,10 @@ public class ClassReader {
     }
     // Parse the method descriptor, one argument type descriptor at each iteration. Start by
     // skipping the first method descriptor character, which is always '('.
-    int currentMethodDescriptorOffset = 1;
+    int currentMethodDescritorOffset = 1;
     while (true) {
-      int currentArgumentDescriptorStartOffset = currentMethodDescriptorOffset;
-      switch (methodDescriptor.charAt(currentMethodDescriptorOffset++)) {
+      int currentArgumentDescriptorStartOffset = currentMethodDescritorOffset;
+      switch (methodDescriptor.charAt(currentMethodDescritorOffset++)) {
         case 'Z':
         case 'C':
         case 'B':
@@ -2994,26 +2994,26 @@ public class ClassReader {
           locals[numLocal++] = Opcodes.DOUBLE;
           break;
         case '[':
-          while (methodDescriptor.charAt(currentMethodDescriptorOffset) == '[') {
-            ++currentMethodDescriptorOffset;
+          while (methodDescriptor.charAt(currentMethodDescritorOffset) == '[') {
+            ++currentMethodDescritorOffset;
           }
-          if (methodDescriptor.charAt(currentMethodDescriptorOffset) == 'L') {
-            ++currentMethodDescriptorOffset;
-            while (methodDescriptor.charAt(currentMethodDescriptorOffset) != ';') {
-              ++currentMethodDescriptorOffset;
+          if (methodDescriptor.charAt(currentMethodDescritorOffset) == 'L') {
+            ++currentMethodDescritorOffset;
+            while (methodDescriptor.charAt(currentMethodDescritorOffset) != ';') {
+              ++currentMethodDescritorOffset;
             }
           }
           locals[numLocal++] =
               methodDescriptor.substring(
-                  currentArgumentDescriptorStartOffset, ++currentMethodDescriptorOffset);
+                  currentArgumentDescriptorStartOffset, ++currentMethodDescritorOffset);
           break;
         case 'L':
-          while (methodDescriptor.charAt(currentMethodDescriptorOffset) != ';') {
-            ++currentMethodDescriptorOffset;
+          while (methodDescriptor.charAt(currentMethodDescritorOffset) != ';') {
+            ++currentMethodDescritorOffset;
           }
           locals[numLocal++] =
               methodDescriptor.substring(
-                  currentArgumentDescriptorStartOffset + 1, currentMethodDescriptorOffset++);
+                  currentArgumentDescriptorStartOffset + 1, currentMethodDescritorOffset++);
           break;
         default:
           context.currentFrameLocalCount = numLocal;
