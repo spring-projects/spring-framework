@@ -44,11 +44,14 @@ class LeakAwareDataBuffer implements PooledDataBuffer {
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 		this.delegate = delegate;
 		this.dataBufferFactory = dataBufferFactory;
-		this.leakError = createLeakError();
+		this.leakError = createLeakError(delegate);
 	}
 
-	private static AssertionError createLeakError() {
-		AssertionError result = new AssertionError("Leak detected in test case");
+	private static AssertionError createLeakError(DataBuffer delegate) {
+		String message = String.format("DataBuffer leak detected: {%s} has not been released.%n" +
+				"Stack trace of buffer allocation statement follows:",
+				delegate);
+		AssertionError result = new AssertionError(message);
 		// remove first four irrelevant stack trace elements
 		StackTraceElement[] oldTrace = result.getStackTrace();
 		StackTraceElement[] newTrace = new StackTraceElement[oldTrace.length - 4];

@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 
 import org.springframework.util.Assert;
@@ -74,17 +75,18 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
-	public LeakAwareDataBuffer allocateBuffer() {
-		LeakAwareDataBuffer dataBuffer =
-				new LeakAwareDataBuffer(this.delegate.allocateBuffer(), this);
-		this.created.add(dataBuffer);
-		return dataBuffer;
+	public DataBuffer allocateBuffer() {
+		return allocateBufferInternal(this.delegate.allocateBuffer());
 	}
 
 	@Override
-	public LeakAwareDataBuffer allocateBuffer(int initialCapacity) {
-		LeakAwareDataBuffer dataBuffer =
-				new LeakAwareDataBuffer(this.delegate.allocateBuffer(initialCapacity), this);
+	public DataBuffer allocateBuffer(int initialCapacity) {
+		return allocateBufferInternal(this.delegate.allocateBuffer(initialCapacity));
+	}
+
+	@NotNull
+	private DataBuffer allocateBufferInternal(DataBuffer delegateBuffer) {
+		LeakAwareDataBuffer dataBuffer = new LeakAwareDataBuffer(delegateBuffer, this);
 		this.created.add(dataBuffer);
 		return dataBuffer;
 	}
