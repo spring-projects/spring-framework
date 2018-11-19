@@ -114,7 +114,7 @@ public class HtmlUtilsTests {
 		assertEquals("'&Prime;' should be decoded to uni-code character 8243",
 				"" + (char) 8243, HtmlUtils.htmlUnescape("&Prime;"));
 
-		assertEquals("A not supported named reference leads should be ingnored",
+		assertEquals("A not supported named reference leads should be ignored",
 				"&prIme;", HtmlUtils.htmlUnescape("&prIme;"));
 
 		assertEquals("An empty reference '&;' should be survive the decoding",

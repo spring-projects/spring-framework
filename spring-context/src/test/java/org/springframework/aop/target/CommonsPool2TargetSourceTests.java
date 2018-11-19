@@ -161,7 +161,7 @@ public class CommonsPool2TargetSourceTests {
 			// desired
 		}
 
-		// lets now release an object and try to accquire a new one
+		// lets now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);
 		pooledInstances[9] = targetSource.getTarget();
 
@@ -194,7 +194,7 @@ public class CommonsPool2TargetSourceTests {
 			// desired
 		}
 
-		// lets now release an object and try to accquire a new one
+		// lets now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);
 		pooledInstances[9] = targetSource.getTarget();
 

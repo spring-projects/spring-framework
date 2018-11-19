@@ -270,7 +270,7 @@ public class BaseViewTests {
 	}
 
 	@Test
-	public void attributeCSVParsingIgoresTrailingComma() {
+	public void attributeCSVParsingIgnoresTrailingComma() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("foo=[de],");
 		assertEquals(1, v.getStaticAttributes().size());

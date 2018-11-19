@@ -103,7 +103,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * Perform the actual JNDI lookup for this locator's target resource.
 	 * @return the located target object
 	 * @throws NamingException if the JNDI lookup failed or if the
-	 * located JNDI object is not assigable to the expected type
+	 * located JNDI object is not assignable to the expected type
 	 * @see #setJndiName
 	 * @see #setExpectedType
 	 * @see #lookup(String, Class)

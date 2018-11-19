@@ -58,7 +58,7 @@ public class InternetAddressEditorTests {
 	}
 
 	@Test
-	public void simpleGoodAddess() {
+	public void simpleGoodAddress() {
 		editor.setAsText(SIMPLE);
 		assertEquals("Simple email address failed", SIMPLE, editor.getAsText());
 	}

@@ -355,7 +355,7 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	private static class NoDefaultConstructorActiveProfilesResolver implements ActiveProfilesResolver {
 
 		@SuppressWarnings("unused")
-		NoDefaultConstructorActiveProfilesResolver(Object agument) {
+		NoDefaultConstructorActiveProfilesResolver(Object argument) {
 		}
 
 		@Override

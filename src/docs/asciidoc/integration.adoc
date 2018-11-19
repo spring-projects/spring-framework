@@ -980,7 +980,7 @@ The Spring Framework provides two choices for making calls to REST endpoints:
 * <<rest-resttemplate>>: The original Spring REST client with a synchronous, template
 method API.
 * <<web-reactive.adoc#webflux-client,WebClient>>: a non-blocking, reactive alternative
-that supports both synchrnous and asynchronous as well as streaming scenarios.
+that supports both synchronous and asynchronous as well as streaming scenarios.
 
 NOTE: As of 5.0, the non-blocking, reactive `WebClient` offers a modern alternative to the
 `RestTemplate` with efficient support for both synchronous and asynchronous as well as streaming
@@ -5094,7 +5094,7 @@ record to be filled by the JCA connector when the response is received. This rec
 then returned to the caller of the template.
 
 This property holds an implementation of the <<cci-record-creator,`RecordCreator` interface>>, to be used for
-that purpose. You must directly specity the `outputRecordCreator` property on
+that purpose. You must directly specify the `outputRecordCreator` property on
 the `CciTemplate`. The following example shows how to do so:
 
 ====

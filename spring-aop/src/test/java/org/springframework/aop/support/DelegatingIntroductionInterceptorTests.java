@@ -157,7 +157,7 @@ public class DelegatingIntroductionInterceptorTests {
 		TimeStamped ts = (TimeStamped) pf.getProxy();
 
 		assertThat(ts, instanceOf(TimeStamped.class));
-		// Shoulnd't proxy framework interfaces
+		// Shouldn't proxy framework interfaces
 		assertTrue(!(ts instanceof MethodInterceptor));
 		assertTrue(!(ts instanceof IntroductionInterceptor));
 

@@ -38,7 +38,7 @@ public interface MessageSourceAware extends Aware {
 	 * <p>Invoked after population of normal bean properties but before an init
 	 * callback like InitializingBean's afterPropertiesSet or a custom init-method.
 	 * Invoked before ApplicationContextAware's setApplicationContext.
-	 * @param messageSource message sourceto be used by this object
+	 * @param messageSource message source to be used by this object
 	 */
 	void setMessageSource(MessageSource messageSource);
 

@@ -46,7 +46,7 @@ public class JmsGatewaySupportTests {
 		gateway.afterPropertiesSet();
 		assertEquals("Correct ConnectionFactory", mockConnectionFactory, gateway.getConnectionFactory());
 		assertEquals("Correct JmsTemplate", mockConnectionFactory, gateway.getJmsTemplate().getConnectionFactory());
-		assertEquals("initGatway called", 1, test.size());
+		assertEquals("initGateway called", 1, test.size());
 	}
 
 	@Test

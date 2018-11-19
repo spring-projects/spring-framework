@@ -44,7 +44,7 @@ public class ScriptUtilsIntegrationTests extends AbstractDatabaseInitializationT
 	}
 
 	@Test
-	public void executeSqlScriptContainingMuliLineComments() throws SQLException {
+	public void executeSqlScriptContainingMultiLineComments() throws SQLException {
 		executeSqlScript(db.getConnection(), resource("test-data-with-multi-line-comments.sql"));
 		assertUsersDatabaseCreated("Hoeller", "Brannen");
 	}

@@ -27,7 +27,7 @@ import javax.management.Notification;
  * implementing the {@link NotificationPublisherAware} interface. After a particular
  * managed resource instance is registered with the {@link javax.management.MBeanServer},
  * Spring will inject a {@code NotificationPublisher} instance into it if that
- * resource implements the {@link NotificationPublisherAware} inteface.
+ * resource implements the {@link NotificationPublisherAware} interface.
  *
  * <p>Each managed resource instance will have a distinct instance of a
  * {@code NotificationPublisher} implementation. This instance will keep

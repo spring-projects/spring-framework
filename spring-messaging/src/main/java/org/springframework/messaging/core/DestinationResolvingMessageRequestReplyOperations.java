@@ -38,7 +38,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * Resolve the given destination name to a destination and send the given message,
 	 * receive a reply and return it.
 	 * @param destinationName the name of the target destination
-	 * @param requestMessage the mesage to send
+	 * @param requestMessage the message to send
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */

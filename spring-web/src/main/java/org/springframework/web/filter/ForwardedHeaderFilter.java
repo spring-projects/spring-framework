@@ -308,7 +308,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		 * Constructor with required information.
 		 * @param delegateRequest supplier for the current
 		 * {@link HttpServletRequestWrapper#getRequest() delegate request} which
-		 * may change during a forward (e.g. Tocat.
+		 * may change during a forward (e.g. Tomcat.
 		 * @param pathHelper the path helper instance
 		 * @param baseUrl the host, scheme, and port based on forwarded headers
 		 */

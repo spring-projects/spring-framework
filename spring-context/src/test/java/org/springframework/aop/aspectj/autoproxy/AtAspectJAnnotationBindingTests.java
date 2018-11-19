@@ -59,7 +59,7 @@ public class AtAspectJAnnotationBindingTests {
 	}
 
 	@Test
-	public void testPointcutEvaulatedAgainstArray() {
+	public void testPointcutEvaluatedAgainstArray() {
 		ctx.getBean("arrayFactoryBean");
 	}
 

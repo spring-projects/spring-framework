@@ -23,7 +23,7 @@ import javax.management.ObjectName;
  * accessed by application developers during application runtime.
  *
  * <p>This interface should be used to export application resources to JMX using Spring's
- * management interface generation capabilties and, optionally, it's {@link ObjectName}
+ * management interface generation capabilities and, optionally, it's {@link ObjectName}
  * generation capabilities.
  *
  * @author Rob Harrop

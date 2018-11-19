@@ -79,7 +79,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void valueEqualsWithMultipeValues() {
+	public void valueEqualsWithMultipleValues() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		headers.add("foo", "baz");

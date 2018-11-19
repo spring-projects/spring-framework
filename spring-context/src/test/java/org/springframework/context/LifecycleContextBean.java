@@ -41,7 +41,7 @@ public class LifecycleContextBean extends LifecycleBean implements ApplicationCo
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (this.owningContext == null)
-			throw new RuntimeException("Factory didn't call setAppliationContext before afterPropertiesSet on lifecycle bean");
+			throw new RuntimeException("Factory didn't call setApplicationContext before afterPropertiesSet on lifecycle bean");
 	}
 
 	@Override

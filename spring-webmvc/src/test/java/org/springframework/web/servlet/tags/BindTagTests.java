@@ -919,7 +919,7 @@ public class BindTagTests extends AbstractTagTests {
 		transform.setParent(message);
 		try {
 			transform.doStartTag();
-			fail("Tag can be executed outside BindTag and inside messagtag");
+			fail("Tag can be executed outside BindTag and inside messagetag");
 		}
 		catch (JspException e) {
 			// this is ok!

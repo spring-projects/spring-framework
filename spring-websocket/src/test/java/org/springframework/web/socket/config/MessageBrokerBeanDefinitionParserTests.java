@@ -452,7 +452,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		for (Class<? extends  MessageHandler> subscriberType : subscriberTypes) {
 			MessageHandler subscriber = this.appContext.getBean(subscriberType);
-			assertNotNull("No subsription for " + subscriberType, subscriber);
+			assertNotNull("No subscription for " + subscriberType, subscriber);
 			assertTrue(channel.hasSubscription(subscriber));
 		}
 
