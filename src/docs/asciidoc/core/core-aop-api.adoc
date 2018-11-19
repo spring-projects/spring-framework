@@ -293,7 +293,7 @@ state. They merely act on the method and arguments.
 Per-instance advice is appropriate for introductions, to support mixins. In this case,
 the advice adds state to the proxied object.
 
-Ypou can use a mix of shared and per-instance advice in the same AOP proxy.
+You can use a mix of shared and per-instance advice in the same AOP proxy.
 
 
 

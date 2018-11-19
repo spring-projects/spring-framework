@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,15 +65,15 @@ public class AspectJTypeFilterTests {
 		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassImplementingSomeInterface",
 				"java.lang.Object+");
 
-		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplemnentingSomeInterface",
+		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplementingSomeInterface",
 				"org.springframework.core.type.AspectJTypeFilterTests.SomeInterface+");
-		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplemnentingSomeInterface",
+		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplementingSomeInterface",
 				"org.springframework.core.type.AspectJTypeFilterTests.SomeClassExtendingSomeClass+");
-		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplemnentingSomeInterface",
+		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplementingSomeInterface",
 				"org.springframework.core.type.AspectJTypeFilterTests.SomeClass+");
-		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplemnentingSomeInterface",
+		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplementingSomeInterface",
 				"*+");
-		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplemnentingSomeInterface",
+		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplementingSomeInterface",
 				"java.lang.Object+");
 	}
 
@@ -100,7 +100,7 @@ public class AspectJTypeFilterTests {
 	}
 
 	@Test
-	public void annotationPatternNoMathces() throws Exception {
+	public void annotationPatternNoMatches() throws Exception {
 		assertNoMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassAnnotatedWithComponent",
 				"@org.springframework.stereotype.Repository *..*");
 	}
@@ -109,11 +109,11 @@ public class AspectJTypeFilterTests {
 	public void compositionPatternMatches() throws Exception {
 		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClass",
 				"!*..SomeOtherClass");
-		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplemnentingSomeInterface",
+		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplementingSomeInterface",
 				"org.springframework.core.type.AspectJTypeFilterTests.SomeInterface+ " +
 						"&& org.springframework.core.type.AspectJTypeFilterTests.SomeClass+ " +
 						"&& org.springframework.core.type.AspectJTypeFilterTests.SomeClassExtendingSomeClass+");
-		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplemnentingSomeInterface",
+		assertMatch("org.springframework.core.type.AspectJTypeFilterTests$SomeClassExtendingSomeClassExtendingSomeClassAndImplementingSomeInterface",
 				"org.springframework.core.type.AspectJTypeFilterTests.SomeInterface+ " +
 						"|| org.springframework.core.type.AspectJTypeFilterTests.SomeClass+ " +
 						"|| org.springframework.core.type.AspectJTypeFilterTests.SomeClassExtendingSomeClass+");
@@ -158,7 +158,7 @@ public class AspectJTypeFilterTests {
 	static class SomeClassImplementingSomeInterface implements SomeInterface {
 	}
 
-	static class SomeClassExtendingSomeClassExtendingSomeClassAndImplemnentingSomeInterface
+	static class SomeClassExtendingSomeClassExtendingSomeClassAndImplementingSomeInterface
 			extends SomeClassExtendingSomeClass implements SomeInterface {
 	}
 

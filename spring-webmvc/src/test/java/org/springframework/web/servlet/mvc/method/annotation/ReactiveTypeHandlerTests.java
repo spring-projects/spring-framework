@@ -193,9 +193,9 @@ public class ReactiveTypeHandlerTests {
 		testSseResponse(false);
 	}
 
-	private void testSseResponse(boolean expectSseEimtter) throws Exception {
+	private void testSseResponse(boolean expectSseEmitter) throws Exception {
 		ResponseBodyEmitter emitter = handleValue(Flux.empty(), Flux.class, forClass(String.class));
-		assertEquals(expectSseEimtter, emitter instanceof SseEmitter);
+		assertEquals(expectSseEmitter, emitter instanceof SseEmitter);
 		resetRequest();
 	}
 

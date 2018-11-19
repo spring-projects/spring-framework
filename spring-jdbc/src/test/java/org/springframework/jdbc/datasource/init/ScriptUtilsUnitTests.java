@@ -149,7 +149,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test  // SPR-9531
-	public void readAndSplitScriptContainingMuliLineComments() throws Exception {
+	public void readAndSplitScriptContainingMultiLineComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-comments.sql");
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);

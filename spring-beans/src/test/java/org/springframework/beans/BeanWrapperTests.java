@@ -89,7 +89,7 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		catch (PropertyBatchUpdateException ex) {
 			assertTrue("Must contain 2 exceptions", ex.getExceptionCount() == 2);
 			// Test validly set property matches
-			assertTrue("Vaid set property must stick", target.getName().equals(newName));
+			assertTrue("Valid set property must stick", target.getName().equals(newName));
 			assertTrue("Invalid set property must retain old value", target.getAge() == 0);
 			assertTrue("New value of dodgy setter must be available through exception",
 					ex.getPropertyAccessException("touchy").getPropertyChangeEvent().getNewValue().equals(invalidTouchy));

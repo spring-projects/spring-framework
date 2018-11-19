@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,7 +195,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void compareToMultipleExpressionsAndMultipeAcceptHeaderValues() {
+	public void compareToMultipleExpressionsAndMultipleAcceptHeaderValues() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/*", "text/plain");
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/*", "application/xml");
 

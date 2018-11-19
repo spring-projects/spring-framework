@@ -138,7 +138,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * last.
  *
  * <p>In certain situations, it may not be possible or practical to tightly control
- * property source ordering when using {@code @ProperySource} annotations. For example,
+ * property source ordering when using {@code @PropertySource} annotations. For example,
  * if the {@code @Configuration} classes above were registered via component-scanning,
  * the ordering is difficult to predict. In such cases - and if overriding is important -
  * it is recommended that the user fall back to using the programmatic PropertySource API.

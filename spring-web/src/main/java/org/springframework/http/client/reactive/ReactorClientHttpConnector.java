@@ -67,7 +67,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	 * {@link reactor.netty.http.HttpResources}, which is recommended since
 	 * fixed, shared resources are favored for event loop concurrency. However,
 	 * consider declaring a {@link ReactorResourceFactory} bean with
-	 * {@code globaResources=true} in order to ensure the Reactor Netty global
+	 * {@code globalResources=true} in order to ensure the Reactor Netty global
 	 * resources are shut down when the Spring ApplicationContext is closed.
 	 * @param factory the resource factory to obtain the resources from
 	 * @param mapper a mapper for further initialization of the created client
