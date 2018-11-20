@@ -1574,7 +1574,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			// Lenient fallback: dummy factory in case of original factory not found...
-			return new DefaultListableBeanFactory();
+			DefaultListableBeanFactory dummyFactory = new DefaultListableBeanFactory();
+			dummyFactory.serializationId = this.id;
+			return dummyFactory;
 		}
 	}
 
