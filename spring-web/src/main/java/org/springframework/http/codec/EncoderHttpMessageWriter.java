@@ -105,14 +105,12 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		if (inputStream instanceof Mono) {
 			HttpHeaders headers = message.getHeaders();
-			if (!headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
-				return Mono.from(body)
-						.defaultIfEmpty(message.bufferFactory().wrap(new byte[0]))
-						.flatMap(buffer -> {
-							headers.setContentLength(buffer.readableByteCount());
-							return message.writeWith(Mono.just(buffer));
-						});
-			}
+			return Mono.from(body)
+					.defaultIfEmpty(message.bufferFactory().wrap(new byte[0]))
+					.flatMap(buffer -> {
+						headers.setContentLength(buffer.readableByteCount());
+						return message.writeWith(Mono.just(buffer));
+					});
 		}
 
 		return (isStreamingMediaType(contentType) ?
