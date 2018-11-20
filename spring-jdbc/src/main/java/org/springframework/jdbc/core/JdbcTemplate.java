@@ -982,8 +982,41 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException {
-		return BatchUpdateUtils.executeBatchUpdate(sql, batchArgs, argTypes, this);
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, final int[] argTypes) throws DataAccessException {
+		if (batchArgs.isEmpty()) {
+			return new int[0];
+		}
+
+		return batchUpdate(
+				sql,
+				new BatchPreparedStatementSetter() {
+					@Override
+					public void setValues(PreparedStatement ps, int i) throws SQLException {
+						Object[] values = batchArgs.get(i);
+						int colIndex = 0;
+						for (Object value : values) {
+							colIndex++;
+							if (value instanceof SqlParameterValue) {
+								SqlParameterValue paramValue = (SqlParameterValue) value;
+								StatementCreatorUtils.setParameterValue(ps, colIndex, paramValue, paramValue.getValue());
+							}
+							else {
+								int colType;
+								if (argTypes.length < colIndex) {
+									colType = SqlTypeValue.TYPE_UNKNOWN;
+								}
+								else {
+									colType = argTypes[colIndex - 1];
+								}
+								StatementCreatorUtils.setParameterValue(ps, colIndex, colType, value);
+							}
+						}
+					}
+					@Override
+					public int getBatchSize() {
+						return batchArgs.size();
+					}
+				});
 	}
 
 	@Override
@@ -996,11 +1029,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		int[][] result = execute(sql, (PreparedStatementCallback<int[][]>) ps -> {
 			List<int[]> rowsAffected = new ArrayList<>();
 			try {
-				boolean batchSupported = true;
-				if (!JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
-					batchSupported = false;
-					logger.debug("JDBC Driver does not support Batch updates; resorting to single statement execution");
-				}
+				boolean batchSupported = JdbcUtils.supportsBatchUpdates(ps.getConnection());
 				int n = 0;
 				for (T obj : batchArgs) {
 					pss.setValues(ps, obj);
@@ -1037,6 +1066,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Assert.state(result != null, "No result array");
 		return result;
 	}
+
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with callable statements
