@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -214,7 +215,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.headers(this.headers)
 				.status(this.statusCode)
 				.build()
-				.map(entityResponse -> entityResponse);
+				.map(Function.identity());
 	}
 
 	@Override
@@ -229,7 +230,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.headers(this.headers)
 				.status(this.statusCode)
 				.build()
-				.map(entityResponse -> entityResponse);
+				.map(Function.identity());
 	}
 
 	@Override
@@ -243,7 +244,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.headers(this.headers)
 				.status(this.statusCode)
 				.build()
-				.map(entityResponse -> entityResponse);
+				.map(Function.identity());
 	}
 
 	@Override
@@ -259,7 +260,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.status(this.statusCode)
 				.modelAttributes(modelAttributes)
 				.build()
-				.map(renderingResponse -> renderingResponse);
+				.map(Function.identity());
 	}
 
 	@Override
@@ -269,7 +270,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.status(this.statusCode)
 				.modelAttributes(model)
 				.build()
-				.map(renderingResponse -> renderingResponse);
+				.map(Function.identity());
 	}
 
 
