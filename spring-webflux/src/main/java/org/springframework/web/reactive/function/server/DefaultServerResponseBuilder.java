@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -255,7 +256,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.cookies(cookies -> cookies.addAll(this.cookies))
 				.hints(hints -> hints.putAll(this.hints))
 				.build()
-				.map(entityResponse -> entityResponse);
+				.map(Function.identity());
 	}
 
 	@Override
@@ -278,7 +279,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(modelAttributes)
 				.build()
-				.map(renderingResponse -> renderingResponse);
+				.map(Function.identity());
 	}
 
 	@Override
@@ -289,7 +290,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(model)
 				.build()
-				.map(renderingResponse -> renderingResponse);
+				.map(Function.identity());
 	}
 
 
