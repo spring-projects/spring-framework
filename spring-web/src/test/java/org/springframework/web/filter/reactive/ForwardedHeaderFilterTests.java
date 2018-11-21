@@ -23,6 +23,7 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
@@ -111,6 +112,18 @@ public class ForwardedHeaderFilterTests {
 
 		URI uri = this.filterChain.uri;
 		assertEquals(new URI("http://example.com/prefix/path"), uri);
+	}
+
+	@Test // SPR-17525
+	public void shouldNotDoubleEncode() throws Exception {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+				.method(HttpMethod.GET, new URI ("http://example.com/a%20b?q=a%2Bb"))
+				.header("Forwarded", "host=84.198.58.199;proto=https"));
+
+		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
+
+		URI uri = this.filterChain.uri;
+		assertEquals(new URI("https://84.198.58.199/a%20b?q=a%2Bb"), uri);
 	}
 
 

@@ -84,7 +84,7 @@ public class ForwardedHeaderFilter implements WebFilter {
 			return chain.filter(withoutForwardHeaders);
 		}
 		else {
-			URI uri = UriComponentsBuilder.fromHttpRequest(exchange.getRequest()).build().toUri();
+			URI uri = UriComponentsBuilder.fromHttpRequest(exchange.getRequest()).build(true).toUri();
 			String prefix = getForwardedPrefix(exchange.getRequest().getHeaders());
 
 			ServerWebExchange withChangedUri = exchange.mutate()
