@@ -411,6 +411,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 			exposePathWithinMapping(this.bestMatchingPattern, this.pathWithinMapping, request);
+			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
 			request.setAttribute(INTROSPECT_TYPE_LEVEL_MAPPING, supportsTypeLevelMappings());
 			return true;
 		}
