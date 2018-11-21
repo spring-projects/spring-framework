@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -35,6 +36,12 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * <p>Alternatively if {@link #setRemoveOnly removeOnly} is set to "true",
  * then "Forwarded" and "X-Forwarded-*" headers are only removed, and not used.
+ *
+ * <p>An instance of this class is typically declared as a bean with the name
+ * "forwardedHeaderTransformer" and detected by
+ * {@link WebHttpHandlerBuilder#applicationContext(ApplicationContext)}, or it
+ * can also be registered directly via
+ * {@link WebHttpHandlerBuilder#forwardedHeaderTransformer(ForwardedHeaderTransformer)}.
  *
  * @author Rossen Stoyanchev
  * @since 5.1
@@ -85,7 +92,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 		if (hasForwardedHeaders(request)) {
 			ServerHttpRequest.Builder builder = request.mutate();
 			if (!this.removeOnly) {
-				URI uri = UriComponentsBuilder.fromHttpRequest(request).build().toUri();
+				URI uri = UriComponentsBuilder.fromHttpRequest(request).build(true).toUri();
 				builder.uri(uri);
 				String prefix = getForwardedPrefix(request);
 				if (prefix != null) {
