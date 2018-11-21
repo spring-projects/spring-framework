@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 
@@ -79,8 +80,10 @@ public class HandlerMethodMappingTests {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
 
-		HandlerMethod result = this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", key);
+		HandlerMethod result = this.mapping.getHandlerInternal(request);
 		assertEquals(method1, result.getMethod());
+		assertEquals(result, request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
 	}
 
 	@Test
@@ -88,8 +91,10 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping("/fo*", this.handler, this.method1);
 		this.mapping.registerMapping("/f*", this.handler, this.method2);
 
-		HandlerMethod result = this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		HandlerMethod result = this.mapping.getHandlerInternal(request);
 		assertEquals(method1, result.getMethod());
+		assertEquals(result, request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
 	}
 
 	@Test(expected = IllegalStateException.class)
