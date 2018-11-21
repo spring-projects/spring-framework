@@ -1641,10 +1641,10 @@ to receive notifications when the "`system`" connection to the broker is lost an
 re-established. For example, a Stock Quote service that broadcasts stock quotes can
 stop trying to send messages when there is no active "`system`" connection.
 
-By default, the STOMP broker relay always connects (and reconnects as needed if
-connectivity is lost) to the same host and port. If you wish to supply multiple addresses,
+By default, the STOMP broker relay always connects, and reconnects as needed if
+connectivity is lost, to the same host and port. If you wish to supply multiple addresses,
 on each attempt to connect, you can configure a supplier of addresses, instead of a
-fixed host and port. The following example shows how to do so:
+fixed host and port. The following example shows how to do that:
 
 ====
 [source,java,indent=0]
@@ -1663,14 +1663,9 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 	}
 
 	private ReactorNettyTcpClient<byte[]> createTcpClient() {
-
-		Consumer<ClientOptions.Builder<?>> builderConsumer = builder -> {
-			builder.connectAddress(()-> {
-				// Select address to connect to ...
-			});
-		};
-
-		return new ReactorNettyTcpClient<>(builderConsumer, new StompReactorNettyCodec());
+		return new ReactorNettyTcpClient<>(
+				client -> client.addressSupplier(() -> ... ),
+				new StompReactorNettyCodec());
 	}
 }
 ----

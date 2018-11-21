@@ -110,19 +110,41 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 		this.loopResources = LoopResources.create("tcp-client-loop");
 		this.poolResources = ConnectionProvider.elastic("tcp-client-pool");
+		this.codec = codec;
 
 		this.tcpClient = TcpClient.create(this.poolResources)
 				.host(host).port(port)
 				.runOn(this.loopResources, false)
 				.doOnConnected(conn -> this.channelGroup.add(conn.channel()));
+	}
 
+	/**
+	 * A variant of {@link #ReactorNettyTcpClient(String, int, ReactorNettyCodec)}
+	 * that still manages the lifecycle of the {@link TcpClient} and underlying
+	 * resources, but allows for direct configuration of other properties of the
+	 * client through a {@code Function<TcpClient, TcpClient>}.
+	 * @param clientConfigurer the configurer function
+	 * @param codec for encoding and decoding the input/output byte streams
+	 * @since 5.1.3
+	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec
+	 */
+	public ReactorNettyTcpClient(Function<TcpClient, TcpClient> clientConfigurer, ReactorNettyCodec<P> codec) {
+		Assert.notNull(codec, "ReactorNettyCodec is required");
+
+		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
+		this.loopResources = LoopResources.create("tcp-client-loop");
+		this.poolResources = ConnectionProvider.elastic("tcp-client-pool");
 		this.codec = codec;
+
+		this.tcpClient = clientConfigurer.apply(TcpClient
+				.create(this.poolResources)
+				.runOn(this.loopResources, false)
+				.doOnConnected(conn -> this.channelGroup.add(conn.channel())));
 	}
 
 	/**
 	 * Constructor with an externally created {@link TcpClient} instance whose
 	 * lifecycle is expected to be managed externally.
-	 *
 	 * @param tcpClient the TcpClient instance to use
 	 * @param codec for encoding and decoding the input/output byte streams
 	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec
