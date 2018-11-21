@@ -120,8 +120,9 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueSync
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServerWebInputException {
-		throw new ServerWebInputException("Missing matrix variable '" + name +
-				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
+		String paramInfo = parameter.getNestedParameterType().getSimpleName();
+		throw new ServerWebInputException("Missing matrix variable '" + name + "' " +
+				"for method parameter of type " + paramInfo, parameter);
 	}
 
 

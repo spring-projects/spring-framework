@@ -218,8 +218,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 				new ServerWebInputException("Failed to read HTTP message", parameter, ex) : ex);
 	}
 
-	private ServerWebInputException handleMissingBody(MethodParameter param) {
-		return new ServerWebInputException("Request body is missing: " + param.getExecutable().toGenericString());
+	private ServerWebInputException handleMissingBody(MethodParameter parameter) {
+		String paramInfo = parameter.getExecutable().toGenericString();
+		return new ServerWebInputException("Request body is missing: " + paramInfo, parameter);
 	}
 
 	/**
