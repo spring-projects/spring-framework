@@ -149,6 +149,10 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 				this.metadataReaderCache.clear();
 			}
 		}
+		else if (this.metadataReaderCache != null) {
+			// Shared resource cache -> reset to local cache.
+			setCacheLimit(DEFAULT_CACHE_LIMIT);
+		}
 	}
 
 
@@ -159,6 +163,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 		public LocalResourceCache(int cacheLimit) {
 			super(cacheLimit, 0.75f, true);
+			this.cacheLimit = cacheLimit;
 		}
 
 		public void setCacheLimit(int cacheLimit) {
