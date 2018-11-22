@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,34 @@
 
 package org.springframework.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 /**
- * Test suite for {@link FastByteArrayOutputStream}
+ * Test suite for {@link FastByteArrayOutputStream}.
+ *
  * @author Craig Andrews
  */
 public class FastByteArrayOutputStreamTests {
 
 	private static final int INITIAL_CAPACITY = 256;
 
-	private FastByteArrayOutputStream os;
+	private final FastByteArrayOutputStream os = new FastByteArrayOutputStream(INITIAL_CAPACITY);;
 
-	private byte[] helloBytes;
-
-
-	@Before
-	public void setUp() throws Exception {
-		this.os = new FastByteArrayOutputStream(INITIAL_CAPACITY);
-		this.helloBytes = "Hello World".getBytes("UTF-8");
-	}
+	private final byte[] helloBytes = "Hello World".getBytes(StandardCharsets.UTF_8);;
 
 
 	@Test
 	public void size() throws Exception {
 		this.os.write(this.helloBytes);
-		assertEquals(this.os.size(), this.helloBytes.length);
+		assertEquals(this.helloBytes.length, this.os.size());
 	}
 
 	@Test
@@ -124,17 +119,26 @@ public class FastByteArrayOutputStreamTests {
 	@Test
 	public void getInputStreamAvailable() throws Exception {
 		this.os.write(this.helloBytes);
-		assertEquals(this.os.getInputStream().available(), this.helloBytes.length);
+		assertEquals(this.helloBytes.length, this.os.getInputStream().available());
 	}
 
 	@Test
 	public void getInputStreamRead() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
-		assertEquals(inputStream.read(), this.helloBytes[0]);
-		assertEquals(inputStream.read(), this.helloBytes[1]);
-		assertEquals(inputStream.read(), this.helloBytes[2]);
-		assertEquals(inputStream.read(), this.helloBytes[3]);
+		assertEquals(this.helloBytes[0], inputStream.read());
+		assertEquals(this.helloBytes[1], inputStream.read());
+		assertEquals(this.helloBytes[2], inputStream.read());
+		assertEquals(this.helloBytes[3], inputStream.read());
+	}
+
+	@Test
+	public void getInputStreamReadBytePromotion() throws Exception {
+		byte[] bytes = new byte[] { -1 };
+		this.os.write(bytes);
+		InputStream inputStream = this.os.getInputStream();
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		assertEquals(bais.read(), inputStream.read());
 	}
 
 	@Test
@@ -166,9 +170,9 @@ public class FastByteArrayOutputStreamTests {
 	public void getInputStreamSkip() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
-		assertEquals(inputStream.read(), this.helloBytes[0]);
-		assertEquals(inputStream.skip(1), 1);
-		assertEquals(inputStream.read(), this.helloBytes[2]);
+		assertEquals(this.helloBytes[0], inputStream.read());
+		assertEquals(1, inputStream.skip(1));
+		assertEquals(this.helloBytes[2], inputStream.read());
 		assertEquals(this.helloBytes.length - 3, inputStream.available());
 	}
 
@@ -176,7 +180,7 @@ public class FastByteArrayOutputStreamTests {
 	public void getInputStreamSkipAll() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
-		assertEquals(inputStream.skip(1000), this.helloBytes.length);
+		assertEquals(this.helloBytes.length, inputStream.skip(1000));
 		assertEquals(0, inputStream.available());
 	}
 
@@ -187,8 +191,7 @@ public class FastByteArrayOutputStreamTests {
 		InputStream inputStream = this.os.getInputStream();
 		DigestUtils.appendMd5DigestAsHex(inputStream, builder);
 		builder.append("\"");
-		String actual = builder.toString();
-		assertEquals("\"0b10a8db164e0754105b7a99be72e3fe5\"", actual);
+		assertEquals("\"0b10a8db164e0754105b7a99be72e3fe5\"", builder.toString());
 	}
 
 	@Test
@@ -201,8 +204,7 @@ public class FastByteArrayOutputStreamTests {
 		InputStream inputStream = this.os.getInputStream();
 		DigestUtils.appendMd5DigestAsHex(inputStream, builder);
 		builder.append("\"");
-		String actual = builder.toString();
-		assertEquals("\"06225ca1e4533354c516e74512065331d\"", actual);
+		assertEquals("\"06225ca1e4533354c516e74512065331d\"", builder.toString());
 	}
 
 
