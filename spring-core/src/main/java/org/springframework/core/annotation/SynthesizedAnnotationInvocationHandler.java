@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,10 +70,10 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		if (ReflectionUtils.isToStringMethod(method)) {
 			return annotationToString();
 		}
-		if (AnnotationUtils.isAnnotationTypeMethod(method)) {
+		if (InternalAnnotationUtils.isAnnotationTypeMethod(method)) {
 			return annotationType();
 		}
-		if (!AnnotationUtils.isAttributeMethod(method)) {
+		if (!InternalAnnotationUtils.isAttributeMethod(method)) {
 			throw new AnnotationConfigurationException(String.format(
 					"Method [%s] is unsupported for synthesized annotation type [%s]", method, annotationType()));
 		}
@@ -97,10 +97,10 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 			// Synthesize nested annotations before returning them.
 			if (value instanceof Annotation) {
-				value = AnnotationUtils.synthesizeAnnotation((Annotation) value, this.attributeExtractor.getAnnotatedElement());
+				value = InternalAnnotationUtils.synthesizeAnnotation((Annotation) value, this.attributeExtractor.getAnnotatedElement());
 			}
 			else if (value instanceof Annotation[]) {
-				value = AnnotationUtils.synthesizeAnnotationArray((Annotation[]) value, this.attributeExtractor.getAnnotatedElement());
+				value = InternalAnnotationUtils.synthesizeAnnotationArray((Annotation[]) value, this.attributeExtractor.getAnnotatedElement());
 			}
 
 			this.valueCache.put(attributeName, value);
@@ -161,7 +161,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 			return false;
 		}
 
-		for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotationType())) {
+		for (Method attributeMethod : InternalAnnotationUtils.getAttributeMethods(annotationType())) {
 			Object thisValue = getAttributeValue(attributeMethod);
 			Object otherValue = ReflectionUtils.invokeMethod(attributeMethod, other);
 			if (!ObjectUtils.nullSafeEquals(thisValue, otherValue)) {
@@ -178,7 +178,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 	private int annotationHashCode() {
 		int result = 0;
 
-		for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotationType())) {
+		for (Method attributeMethod : InternalAnnotationUtils.getAttributeMethods(annotationType())) {
 			Object value = getAttributeValue(attributeMethod);
 			int hashCode;
 			if (value.getClass().isArray()) {
@@ -236,7 +236,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 	private String annotationToString() {
 		StringBuilder sb = new StringBuilder("@").append(annotationType().getName()).append("(");
 
-		Iterator<Method> iterator = AnnotationUtils.getAttributeMethods(annotationType()).iterator();
+		Iterator<Method> iterator = InternalAnnotationUtils.getAttributeMethods(annotationType()).iterator();
 		while (iterator.hasNext()) {
 			Method attributeMethod = iterator.next();
 			sb.append(attributeMethod.getName());
