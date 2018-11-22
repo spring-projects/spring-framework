@@ -709,7 +709,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
 	 */
 	@Nullable
-	protected TransactionManager findTransactionManager(UserTransaction ut) {
+	protected TransactionManager findTransactionManager(@Nullable UserTransaction ut) {
 		if (ut instanceof TransactionManager) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("JTA UserTransaction object [" + ut + "] implements TransactionManager");

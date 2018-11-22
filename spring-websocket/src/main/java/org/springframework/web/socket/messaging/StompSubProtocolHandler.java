@@ -417,7 +417,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		else if (StompCommand.CONNECTED.equals(command)) {
 			this.stats.incrementConnectedCount();
 			accessor = afterStompSessionConnected(message, accessor, session);
-			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(command)) {
+			if (this.eventPublisher != null) {
 				try {
 					SimpAttributes simpAttributes = new SimpAttributes(session.getId(), session.getAttributes());
 					SimpAttributesContextHolder.setAttributes(simpAttributes);

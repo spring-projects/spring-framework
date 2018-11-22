@@ -640,12 +640,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				return true;
 			}
 		}
-		if (path.contains("..")) {
-			path = StringUtils.cleanPath(path);
-			if (path.contains("../")) {
-				logger.warn("Invalid Path contains \"../\" after call to StringUtils#cleanPath.");
-				return true;
-			}
+		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
+			logger.warn("Invalid Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
+			return true;
 		}
 		return false;
 	}

@@ -211,7 +211,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Set the column names of the auto-generated keys.
 	 * @see java.sql.Connection#prepareStatement(String, String[])
 	 */
-	public void setGeneratedKeysColumnNames(String... names) {
+	public void setGeneratedKeysColumnNames(@Nullable String... names) {
 		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException(
 					"The column names for the generated keys must be set before the operation is compiled");
@@ -230,7 +230,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Set the SQL executed by this operation.
 	 */
-	public void setSql(String sql) {
+	public void setSql(@Nullable String sql) {
 		this.sql = sql;
 	}
 

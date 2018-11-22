@@ -50,6 +50,7 @@ public class SessionHolder extends EntityManagerHolder {
 
 
 	public SessionHolder(Session session) {
+		// Check below is always true against Hibernate >= 5.2 but not against 5.0/5.1 at runtime
 		super(EntityManager.class.isInstance(session) ? session : null);
 		this.session = session;
 	}
