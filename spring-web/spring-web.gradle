@@ -81,6 +81,6 @@ dependencies {
 	testRuntime("com.sun.mail:javax.mail:1.6.2")
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
-	testRuntime("javax.json:javax.json-api:1.1.3")
+	testRuntime("javax.json:javax.json-api:1.1.4")
 	testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.10")
 }
