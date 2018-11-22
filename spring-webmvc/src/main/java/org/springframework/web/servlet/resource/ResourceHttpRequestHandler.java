@@ -657,7 +657,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Invalid Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
+				logger.trace("Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
 			}
 			return true;
 		}

@@ -102,8 +102,8 @@ public class ObjectUtilsTests {
 		assertTrue(isEmpty(new Object[0]));
 		assertTrue(isEmpty(new Integer[0]));
 
-		assertFalse(isEmpty(new int[] { 42 }));
-		assertFalse(isEmpty(new Integer[] { 42 }));
+		assertFalse(isEmpty(new int[] {42}));
+		assertFalse(isEmpty(new Integer[] {42}));
 	}
 
 	@Test
