@@ -113,11 +113,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 				return true;
 			}
 		}
-		if (path.contains("")) {
-			path = StringUtils.cleanPath(path);
-			if (path.contains("../")) {
-				return true;
-			}
+		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
+			return true;
 		}
 		return false;
 	}
