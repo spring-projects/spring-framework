@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 		// we have to rig the attributeAliasesCache in AnnotationUtils so that the tests
 		// consistently fail in case enrichAndValidateAttributes() is buggy.
 		// Otherwise, these tests would intermittently pass even for an invalid implementation.
-		Field cacheField = AnnotationUtils.class.getDeclaredField("attributeAliasesCache");
+		Field cacheField = InternalAnnotationUtils.class.getDeclaredField("attributeAliasesCache");
 		cacheField.setAccessible(true);
 		Map<Class<? extends Annotation>, MultiValueMap<String, String>> attributeAliasesCache =
 				(Map<Class<? extends Annotation>, MultiValueMap<String, String>>) cacheField.get(null);

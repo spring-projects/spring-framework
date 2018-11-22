@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -732,19 +732,19 @@ public class AnnotationUtilsTests {
 	public void getAttributeOverrideNameFromWrongTargetAnnotation() throws Exception {
 		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
 		assertThat("xmlConfigFile is not an alias for @Component.",
-				getAttributeOverrideName(attribute, Component.class), is(nullValue()));
+				InternalAnnotationUtils.getAttributeOverrideName(attribute, Component.class), is(nullValue()));
 	}
 
 	@Test
 	public void getAttributeOverrideNameForNonAliasedAttribute() throws Exception {
 		Method nonAliasedAttribute = ImplicitAliasesContextConfig.class.getDeclaredMethod("nonAliasedAttribute");
-		assertThat(getAttributeOverrideName(nonAliasedAttribute, ContextConfig.class), is(nullValue()));
+		assertThat(InternalAnnotationUtils.getAttributeOverrideName(nonAliasedAttribute, ContextConfig.class), is(nullValue()));
 	}
 
 	@Test
 	public void getAttributeOverrideNameFromAliasedComposedAnnotation() throws Exception {
 		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
-		assertEquals("location", getAttributeOverrideName(attribute, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(attribute, ContextConfig.class));
 	}
 
 	@Test
@@ -757,17 +757,17 @@ public class AnnotationUtilsTests {
 		Method location3 = ImplicitAliasesContextConfig.class.getDeclaredMethod("location3");
 
 		// Meta-annotation attribute overrides
-		assertEquals("location", getAttributeOverrideName(xmlFile, ContextConfig.class));
-		assertEquals("location", getAttributeOverrideName(groovyScript, ContextConfig.class));
-		assertEquals("location", getAttributeOverrideName(value, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(xmlFile, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(groovyScript, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(value, ContextConfig.class));
 
 		// Implicit aliases
-		assertThat(getAttributeAliasNames(xmlFile), containsInAnyOrder("value", "groovyScript", "location1", "location2", "location3"));
-		assertThat(getAttributeAliasNames(groovyScript), containsInAnyOrder("value", "xmlFile", "location1", "location2", "location3"));
-		assertThat(getAttributeAliasNames(value), containsInAnyOrder("xmlFile", "groovyScript", "location1", "location2", "location3"));
-		assertThat(getAttributeAliasNames(location1), containsInAnyOrder("xmlFile", "groovyScript", "value", "location2", "location3"));
-		assertThat(getAttributeAliasNames(location2), containsInAnyOrder("xmlFile", "groovyScript", "value", "location1", "location3"));
-		assertThat(getAttributeAliasNames(location3), containsInAnyOrder("xmlFile", "groovyScript", "value", "location1", "location2"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(xmlFile), containsInAnyOrder("value", "groovyScript", "location1", "location2", "location3"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(groovyScript), containsInAnyOrder("value", "xmlFile", "location1", "location2", "location3"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(value), containsInAnyOrder("xmlFile", "groovyScript", "location1", "location2", "location3"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(location1), containsInAnyOrder("xmlFile", "groovyScript", "value", "location2", "location3"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(location2), containsInAnyOrder("xmlFile", "groovyScript", "value", "location1", "location3"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(location3), containsInAnyOrder("xmlFile", "groovyScript", "value", "location1", "location2"));
 	}
 
 	@Test
@@ -776,12 +776,12 @@ public class AnnotationUtilsTests {
 		Method groovyScript = ImplicitAliasesForAliasPairContextConfig.class.getDeclaredMethod("groovyScript");
 
 		// Meta-annotation attribute overrides
-		assertEquals("location", getAttributeOverrideName(xmlFile, ContextConfig.class));
-		assertEquals("value", getAttributeOverrideName(groovyScript, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(xmlFile, ContextConfig.class));
+		assertEquals("value", InternalAnnotationUtils.getAttributeOverrideName(groovyScript, ContextConfig.class));
 
 		// Implicit aliases
-		assertThat(getAttributeAliasNames(xmlFile), containsInAnyOrder("groovyScript"));
-		assertThat(getAttributeAliasNames(groovyScript), containsInAnyOrder("xmlFile"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(xmlFile), containsInAnyOrder("groovyScript"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(groovyScript), containsInAnyOrder("xmlFile"));
 	}
 
 	@Test
@@ -793,14 +793,14 @@ public class AnnotationUtilsTests {
 		Method xmlFile = ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class.getDeclaredMethod("xmlFile");
 
 		// Meta-annotation attribute overrides
-		assertEquals("value", getAttributeOverrideName(value, ContextConfig.class));
-		assertEquals("location", getAttributeOverrideName(location, ContextConfig.class));
-		assertEquals("location", getAttributeOverrideName(xmlFile, ContextConfig.class));
+		assertEquals("value", InternalAnnotationUtils.getAttributeOverrideName(value, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(location, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(xmlFile, ContextConfig.class));
 
 		// Implicit aliases
-		assertThat(getAttributeAliasNames(value), containsInAnyOrder("location", "xmlFile"));
-		assertThat(getAttributeAliasNames(location), containsInAnyOrder("value", "xmlFile"));
-		assertThat(getAttributeAliasNames(xmlFile), containsInAnyOrder("value", "location"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(value), containsInAnyOrder("location", "xmlFile"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(location), containsInAnyOrder("value", "xmlFile"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(xmlFile), containsInAnyOrder("value", "location"));
 	}
 
 	@Test
@@ -809,16 +809,16 @@ public class AnnotationUtilsTests {
 		Method groovy = TransitiveImplicitAliasesContextConfig.class.getDeclaredMethod("groovy");
 
 		// Explicit meta-annotation attribute overrides
-		assertEquals("xmlFile", getAttributeOverrideName(xml, ImplicitAliasesContextConfig.class));
-		assertEquals("groovyScript", getAttributeOverrideName(groovy, ImplicitAliasesContextConfig.class));
+		assertEquals("xmlFile", InternalAnnotationUtils.getAttributeOverrideName(xml, ImplicitAliasesContextConfig.class));
+		assertEquals("groovyScript", InternalAnnotationUtils.getAttributeOverrideName(groovy, ImplicitAliasesContextConfig.class));
 
 		// Transitive meta-annotation attribute overrides
-		assertEquals("location", getAttributeOverrideName(xml, ContextConfig.class));
-		assertEquals("location", getAttributeOverrideName(groovy, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(xml, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(groovy, ContextConfig.class));
 
 		// Transitive implicit aliases
-		assertThat(getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
-		assertThat(getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
 	}
 
 	@Test
@@ -827,12 +827,12 @@ public class AnnotationUtilsTests {
 		Method groovy = TransitiveImplicitAliasesForAliasPairContextConfig.class.getDeclaredMethod("groovy");
 
 		// Explicit meta-annotation attribute overrides
-		assertEquals("xmlFile", getAttributeOverrideName(xml, ImplicitAliasesForAliasPairContextConfig.class));
-		assertEquals("groovyScript", getAttributeOverrideName(groovy, ImplicitAliasesForAliasPairContextConfig.class));
+		assertEquals("xmlFile", InternalAnnotationUtils.getAttributeOverrideName(xml, ImplicitAliasesForAliasPairContextConfig.class));
+		assertEquals("groovyScript", InternalAnnotationUtils.getAttributeOverrideName(groovy, ImplicitAliasesForAliasPairContextConfig.class));
 
 		// Transitive implicit aliases
-		assertThat(getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
-		assertThat(getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
 	}
 
 	@Test
@@ -843,23 +843,23 @@ public class AnnotationUtilsTests {
 		Method groovy = TransitiveImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class.getDeclaredMethod("groovy");
 
 		// Meta-annotation attribute overrides
-		assertEquals("location", getAttributeOverrideName(xml, ContextConfig.class));
-		assertEquals("location", getAttributeOverrideName(groovy, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(xml, ContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(groovy, ContextConfig.class));
 
 		// Explicit meta-annotation attribute overrides
-		assertEquals("xmlFile", getAttributeOverrideName(xml, ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class));
-		assertEquals("location", getAttributeOverrideName(groovy, ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class));
+		assertEquals("xmlFile", InternalAnnotationUtils.getAttributeOverrideName(xml, ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class));
+		assertEquals("location", InternalAnnotationUtils.getAttributeOverrideName(groovy, ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class));
 
 		// Transitive implicit aliases
-		assertThat(getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
-		assertThat(getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
+		assertThat(InternalAnnotationUtils.getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
 	}
 
 	@Test
 	public void synthesizeAnnotationWithoutAttributeAliases() throws Exception {
 		Component component = WebController.class.getAnnotation(Component.class);
 		assertNotNull(component);
-		Component synthesizedComponent = synthesizeAnnotation(component);
+		Component synthesizedComponent = InternalAnnotationUtils.synthesizeAnnotation(component);
 		assertNotNull(synthesizedComponent);
 		assertSame(component, synthesizedComponent);
 		assertEquals("value attribute: ", "webController", synthesizedComponent.value());
@@ -870,9 +870,9 @@ public class AnnotationUtilsTests {
 		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
 		WebMapping webMapping = method.getAnnotation(WebMapping.class);
 		assertNotNull(webMapping);
-		WebMapping synthesizedWebMapping = synthesizeAnnotation(webMapping);
+		WebMapping synthesizedWebMapping = InternalAnnotationUtils.synthesizeAnnotation(webMapping);
 		assertNotSame(webMapping, synthesizedWebMapping);
-		WebMapping synthesizedAgainWebMapping = synthesizeAnnotation(synthesizedWebMapping);
+		WebMapping synthesizedAgainWebMapping = InternalAnnotationUtils.synthesizeAnnotation(synthesizedWebMapping);
 		assertThat(synthesizedAgainWebMapping, instanceOf(SynthesizedAnnotation.class));
 		assertSame(synthesizedWebMapping, synthesizedAgainWebMapping);
 
@@ -888,7 +888,7 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(startsWith("@AliasFor declaration on attribute 'foo' in annotation"));
 		exception.expectMessage(containsString(AliasForWithMissingAttributeDeclaration.class.getName()));
 		exception.expectMessage(containsString("points to itself"));
-		synthesizeAnnotation(annotation);
+		InternalAnnotationUtils.synthesizeAnnotation(annotation);
 	}
 
 	@Test
@@ -898,7 +898,7 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(startsWith("In @AliasFor declared on attribute 'foo' in annotation"));
 		exception.expectMessage(containsString(AliasForWithDuplicateAttributeDeclaration.class.getName()));
 		exception.expectMessage(containsString("attribute 'attribute' and its alias 'value' are present with values of [baz] and [bar]"));
-		synthesizeAnnotation(annotation);
+		InternalAnnotationUtils.synthesizeAnnotation(annotation);
 	}
 
 	@Test
@@ -908,7 +908,7 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(startsWith("Attribute 'foo' in"));
 		exception.expectMessage(containsString(AliasForNonexistentAttribute.class.getName()));
 		exception.expectMessage(containsString("is declared as an @AliasFor nonexistent attribute 'bar'"));
-		synthesizeAnnotation(annotation);
+		InternalAnnotationUtils.synthesizeAnnotation(annotation);
 	}
 
 	@Test
@@ -919,7 +919,7 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(startsWith("Attribute 'bar' in"));
 		exception.expectMessage(containsString(AliasForWithoutMirroredAliasFor.class.getName()));
 		exception.expectMessage(containsString("@AliasFor [foo]"));
-		synthesizeAnnotation(annotation);
+		InternalAnnotationUtils.synthesizeAnnotation(annotation);
 	}
 
 	@Test
@@ -931,7 +931,7 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(containsString(AliasForWithMirroredAliasForWrongAttribute.class.getName()));
 		exception.expectMessage(either(containsString("must be declared as an @AliasFor [foo], not [quux]")).
 				or(containsString("is declared as an @AliasFor nonexistent attribute 'quux'")));
-		synthesizeAnnotation(annotation);
+		InternalAnnotationUtils.synthesizeAnnotation(annotation);
 	}
 
 	@Test
@@ -944,7 +944,7 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(containsString("attribute 'foo'"));
 		exception.expectMessage(containsString("attribute 'bar'"));
 		exception.expectMessage(containsString("same return type"));
-		synthesizeAnnotation(annotation);
+		InternalAnnotationUtils.synthesizeAnnotation(annotation);
 	}
 
 	@Test
@@ -957,7 +957,7 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(containsString("attribute 'foo' in annotation"));
 		exception.expectMessage(containsString("attribute 'bar' in annotation"));
 		exception.expectMessage(containsString("default values"));
-		synthesizeAnnotation(annotation);
+		InternalAnnotationUtils.synthesizeAnnotation(annotation);
 	}
 
 	@Test
@@ -970,7 +970,7 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(containsString("attribute 'foo' in annotation"));
 		exception.expectMessage(containsString("attribute 'bar' in annotation"));
 		exception.expectMessage(containsString("same default value"));
-		synthesizeAnnotation(annotation);
+		InternalAnnotationUtils.synthesizeAnnotation(annotation);
 	}
 
 	@Test
@@ -983,7 +983,7 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(containsString("declares an alias for attribute 'location' in meta-annotation"));
 		exception.expectMessage(containsString(ContextConfig.class.getName()));
 		exception.expectMessage(containsString("not meta-present"));
-		synthesizeAnnotation(annotation);
+		InternalAnnotationUtils.synthesizeAnnotation(annotation);
 	}
 
 	@Test
@@ -992,7 +992,7 @@ public class AnnotationUtilsTests {
 		WebMapping webMapping = method.getAnnotation(WebMapping.class);
 		assertNotNull(webMapping);
 
-		WebMapping synthesizedWebMapping1 = synthesizeAnnotation(webMapping);
+		WebMapping synthesizedWebMapping1 = InternalAnnotationUtils.synthesizeAnnotation(webMapping);
 		assertThat(synthesizedWebMapping1, instanceOf(SynthesizedAnnotation.class));
 		assertNotSame(webMapping, synthesizedWebMapping1);
 
@@ -1000,7 +1000,7 @@ public class AnnotationUtilsTests {
 		assertArrayEquals("aliased path attribute: ", asArray("/test"), synthesizedWebMapping1.path());
 		assertArrayEquals("actual value attribute: ", asArray("/test"), synthesizedWebMapping1.value());
 
-		WebMapping synthesizedWebMapping2 = synthesizeAnnotation(webMapping);
+		WebMapping synthesizedWebMapping2 = InternalAnnotationUtils.synthesizeAnnotation(webMapping);
 		assertThat(synthesizedWebMapping2, instanceOf(SynthesizedAnnotation.class));
 		assertNotSame(webMapping, synthesizedWebMapping2);
 
@@ -1021,7 +1021,7 @@ public class AnnotationUtilsTests {
 		ImplicitAliasesContextConfig config = clazz.getAnnotation(ImplicitAliasesContextConfig.class);
 		assertNotNull(config);
 
-		ImplicitAliasesContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		ImplicitAliasesContextConfig synthesizedConfig = InternalAnnotationUtils.synthesizeAnnotation(config);
 		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
 
 		assertEquals("value: ", expected, synthesizedConfig.value());
@@ -1047,7 +1047,7 @@ public class AnnotationUtilsTests {
 				ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class);
 		assertNotNull(config);
 
-		ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig synthesizedConfig = InternalAnnotationUtils.synthesizeAnnotation(config);
 		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
 
 		assertEquals("value: ", expected, synthesizedConfig.value());
@@ -1061,7 +1061,7 @@ public class AnnotationUtilsTests {
 		ImplicitAliasesForAliasPairContextConfig config = clazz.getAnnotation(ImplicitAliasesForAliasPairContextConfig.class);
 		assertNotNull(config);
 
-		ImplicitAliasesForAliasPairContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		ImplicitAliasesForAliasPairContextConfig synthesizedConfig = InternalAnnotationUtils.synthesizeAnnotation(config);
 		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
 
 		assertEquals("xmlFile: ", "test.xml", synthesizedConfig.xmlFile());
@@ -1074,7 +1074,7 @@ public class AnnotationUtilsTests {
 		TransitiveImplicitAliasesContextConfig config = clazz.getAnnotation(TransitiveImplicitAliasesContextConfig.class);
 		assertNotNull(config);
 
-		TransitiveImplicitAliasesContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		TransitiveImplicitAliasesContextConfig synthesizedConfig = InternalAnnotationUtils.synthesizeAnnotation(config);
 		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
 
 		assertEquals("xml: ", "test.xml", synthesizedConfig.xml());
@@ -1087,7 +1087,7 @@ public class AnnotationUtilsTests {
 		TransitiveImplicitAliasesForAliasPairContextConfig config = clazz.getAnnotation(TransitiveImplicitAliasesForAliasPairContextConfig.class);
 		assertNotNull(config);
 
-		TransitiveImplicitAliasesForAliasPairContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		TransitiveImplicitAliasesForAliasPairContextConfig synthesizedConfig = InternalAnnotationUtils.synthesizeAnnotation(config);
 		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
 
 		assertEquals("xml: ", "test.xml", synthesizedConfig.xml());
@@ -1241,7 +1241,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasesWithDifferentValues() throws Exception {
-		ContextConfig contextConfig = synthesizeAnnotation(ContextConfigMismatch.class.getAnnotation(ContextConfig.class));
+		ContextConfig contextConfig = InternalAnnotationUtils.synthesizeAnnotation(ContextConfigMismatch.class.getAnnotation(ContextConfig.class));
 		exception.expect(AnnotationConfigurationException.class);
 		getValue(contextConfig);
 	}
@@ -1357,9 +1357,9 @@ public class AnnotationUtilsTests {
 		WebMapping webMappingWithPathAndValue = methodWithPathAndValue.getAnnotation(WebMapping.class);
 		assertNotNull(webMappingWithPathAndValue);
 
-		WebMapping synthesizedWebMapping1 = synthesizeAnnotation(webMappingWithAliases);
+		WebMapping synthesizedWebMapping1 = InternalAnnotationUtils.synthesizeAnnotation(webMappingWithAliases);
 		assertNotNull(synthesizedWebMapping1);
-		WebMapping synthesizedWebMapping2 = synthesizeAnnotation(webMappingWithAliases);
+		WebMapping synthesizedWebMapping2 = InternalAnnotationUtils.synthesizeAnnotation(webMappingWithAliases);
 		assertNotNull(synthesizedWebMapping2);
 
 		assertThat(webMappingWithAliases.toString(), is(not(synthesizedWebMapping1.toString())));
@@ -1388,9 +1388,9 @@ public class AnnotationUtilsTests {
 		WebMapping webMappingWithPathAndValue = methodWithPathAndValue.getAnnotation(WebMapping.class);
 		assertNotNull(webMappingWithPathAndValue);
 
-		WebMapping synthesizedWebMapping1 = synthesizeAnnotation(webMappingWithAliases);
+		WebMapping synthesizedWebMapping1 = InternalAnnotationUtils.synthesizeAnnotation(webMappingWithAliases);
 		assertNotNull(synthesizedWebMapping1);
-		WebMapping synthesizedWebMapping2 = synthesizeAnnotation(webMappingWithAliases);
+		WebMapping synthesizedWebMapping2 = InternalAnnotationUtils.synthesizeAnnotation(webMappingWithAliases);
 		assertNotNull(synthesizedWebMapping2);
 
 		// Equality amongst standard annotations
@@ -1426,9 +1426,9 @@ public class AnnotationUtilsTests {
 		WebMapping webMappingWithPathAndValue = methodWithPathAndValue.getAnnotation(WebMapping.class);
 		assertNotNull(webMappingWithPathAndValue);
 
-		WebMapping synthesizedWebMapping1 = synthesizeAnnotation(webMappingWithAliases);
+		WebMapping synthesizedWebMapping1 = InternalAnnotationUtils.synthesizeAnnotation(webMappingWithAliases);
 		assertNotNull(synthesizedWebMapping1);
-		WebMapping synthesizedWebMapping2 = synthesizeAnnotation(webMappingWithAliases);
+		WebMapping synthesizedWebMapping2 = InternalAnnotationUtils.synthesizeAnnotation(webMappingWithAliases);
 		assertNotNull(synthesizedWebMapping2);
 
 		// Equality amongst standard annotations
@@ -1470,7 +1470,7 @@ public class AnnotationUtilsTests {
 
 		Annotation annotation = clazz.getAnnotation(annotationType);
 		assertNotNull(annotation);
-		Annotation synthesizedAnnotation = synthesizeAnnotation(annotation);
+		Annotation synthesizedAnnotation = InternalAnnotationUtils.synthesizeAnnotation(annotation);
 		assertNotSame(annotation, synthesizedAnnotation);
 
 		assertNotNull(synthesizedAnnotation);
@@ -1485,7 +1485,7 @@ public class AnnotationUtilsTests {
 
 		Hierarchy hierarchy = ConfigHierarchyTestCase.class.getAnnotation(Hierarchy.class);
 		assertNotNull(hierarchy);
-		Hierarchy synthesizedHierarchy = synthesizeAnnotation(hierarchy);
+		Hierarchy synthesizedHierarchy = InternalAnnotationUtils.synthesizeAnnotation(hierarchy);
 		assertNotSame(hierarchy, synthesizedHierarchy);
 		assertThat(synthesizedHierarchy, instanceOf(SynthesizedAnnotation.class));
 
@@ -1507,7 +1507,7 @@ public class AnnotationUtilsTests {
 
 		Hierarchy hierarchy = ConfigHierarchyTestCase.class.getAnnotation(Hierarchy.class);
 		assertNotNull(hierarchy);
-		Hierarchy synthesizedHierarchy = synthesizeAnnotation(hierarchy);
+		Hierarchy synthesizedHierarchy = InternalAnnotationUtils.synthesizeAnnotation(hierarchy);
 		assertThat(synthesizedHierarchy, instanceOf(SynthesizedAnnotation.class));
 
 		ContextConfig contextConfig = SimpleConfigTestCase.class.getAnnotation(ContextConfig.class);
@@ -1530,7 +1530,7 @@ public class AnnotationUtilsTests {
 	public void synthesizeAnnotationWithArrayOfChars() throws Exception {
 		CharsContainer charsContainer = GroupOfCharsClass.class.getAnnotation(CharsContainer.class);
 		assertNotNull(charsContainer);
-		CharsContainer synthesizedCharsContainer = synthesizeAnnotation(charsContainer);
+		CharsContainer synthesizedCharsContainer = InternalAnnotationUtils.synthesizeAnnotation(charsContainer);
 		assertThat(synthesizedCharsContainer, instanceOf(SynthesizedAnnotation.class));
 
 		char[] chars = synthesizedCharsContainer.chars();
@@ -1546,9 +1546,9 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void interfaceWithAnnotatedMethods() {
-		assertTrue(AnnotationUtils.getAnnotatedMethodsInBaseType(NonAnnotatedInterface.class).isEmpty());
-		assertFalse(AnnotationUtils.getAnnotatedMethodsInBaseType(AnnotatedInterface.class).isEmpty());
-		assertTrue(AnnotationUtils.getAnnotatedMethodsInBaseType(NullableAnnotatedInterface.class).isEmpty());
+		assertTrue(InternalAnnotationUtils.getAnnotatedMethodsInBaseType(NonAnnotatedInterface.class).isEmpty());
+		assertFalse(InternalAnnotationUtils.getAnnotatedMethodsInBaseType(AnnotatedInterface.class).isEmpty());
+		assertTrue(InternalAnnotationUtils.getAnnotatedMethodsInBaseType(NullableAnnotatedInterface.class).isEmpty());
 	}
 
 
