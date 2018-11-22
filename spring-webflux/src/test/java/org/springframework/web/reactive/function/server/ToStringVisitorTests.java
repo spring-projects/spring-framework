@@ -23,14 +23,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
-import static org.springframework.web.reactive.function.server.RequestPredicates.contentType;
-import static org.springframework.web.reactive.function.server.RequestPredicates.method;
-import static org.springframework.web.reactive.function.server.RequestPredicates.methods;
-import static org.springframework.web.reactive.function.server.RequestPredicates.path;
-import static org.springframework.web.reactive.function.server.RequestPredicates.pathExtension;
-import static org.springframework.web.reactive.function.server.RequestPredicates.queryParam;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma
@@ -50,7 +44,7 @@ public class ToStringVisitorTests {
 
 		ToStringVisitor visitor = new ToStringVisitor();
 		routerFunction.accept(visitor);
-		String result =  visitor.toString();
+		String result = visitor.toString();
 
 		String expected = "/foo => {\n" +
 				" /bar => {\n" +
@@ -90,6 +84,7 @@ public class ToStringVisitorTests {
 
 		assertEquals(expected, result);
 	}
+
 
 	private static class SimpleHandlerFunction implements HandlerFunction<ServerResponse> {
 

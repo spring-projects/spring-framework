@@ -26,15 +26,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 
 /**
- * Implementation of {@link RouterFunctions.Visitor} that creates a formatted string representation
- * of router functions.
+ * Implementation of {@link RouterFunctions.Visitor} that creates a formatted
+ * string representation of router functions.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
 class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visitor {
-
-	private static final String NEW_LINE = System.getProperty("line.separator", "\\n");
 
 	private final StringBuilder builder = new StringBuilder();
 
@@ -43,14 +41,14 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	@Nullable
 	private String infix;
 
+
 	// RouterFunctions.Visitor
 
 	@Override
 	public void startNested(RequestPredicate predicate) {
 		indent();
 		predicate.accept(this);
-		this.builder.append(" => {");
-		this.builder.append(NEW_LINE);
+		this.builder.append(" => {\n");
 		this.indent++;
 	}
 
@@ -58,8 +56,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	public void endNested(RequestPredicate predicate) {
 		this.indent--;
 		indent();
-		this.builder.append('}');
-		this.builder.append(NEW_LINE);
+		this.builder.append("}\n");
 	}
 
 	@Override
@@ -67,15 +64,13 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 		indent();
 		predicate.accept(this);
 		this.builder.append(" -> ");
-		this.builder.append(handlerFunction);
-		this.builder.append(NEW_LINE);
+		this.builder.append(handlerFunction).append('\n');
 	}
 
 	@Override
 	public void resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
 		indent();
-		this.builder.append(lookupFunction);
-		this.builder.append(NEW_LINE);
+		this.builder.append(lookupFunction).append('\n');
 	}
 
 	@Override
@@ -89,6 +84,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 			this.builder.append(' ');
 		}
 	}
+
 
 	// RequestPredicates.Visitor
 
@@ -178,9 +174,10 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	@Override
 	public String toString() {
 		String result = this.builder.toString();
-		if (result.endsWith(NEW_LINE)) {
-			result = result.substring(0, result.length() - NEW_LINE.length());
+		if (result.endsWith("\n")) {
+			result = result.substring(0, result.length() - 1);
 		}
 		return result;
 	}
+
 }
