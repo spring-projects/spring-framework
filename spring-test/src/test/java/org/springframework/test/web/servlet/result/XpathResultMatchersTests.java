@@ -49,6 +49,16 @@ public class XpathResultMatchersTests {
 	}
 
 	@Test
+	public void nodeList() throws Exception {
+		new XpathResultMatchers("/foo/bar", null).nodeList(Matchers.notNullValue()).match(getStubMvcResult());
+	}
+
+	@Test(expected = AssertionError.class)
+	public void nodeListNoMatch() throws Exception {
+		new XpathResultMatchers("/foo/bar", null).nodeList(Matchers.nullValue()).match(getStubMvcResult());
+	}
+
+	@Test
 	public void exists() throws Exception {
 		new XpathResultMatchers("/foo/bar", null).exists().match(getStubMvcResult());
 	}
