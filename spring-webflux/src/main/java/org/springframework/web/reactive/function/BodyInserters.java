@@ -186,16 +186,14 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@link FormInserter} that writes the given {@code MultiValueMap}
+	 * Return a {@link FormInserter} to write the given {@code MultiValueMap}
 	 * as URL-encoded form data. The returned inserter allows for additional
 	 * entries to be added via {@link FormInserter#with(String, Object)}.
-	 *
 	 * <p>Note that you can also use the {@code syncBody(Object)} method in the
 	 * request builders of both the {@code WebClient} and {@code WebTestClient}.
 	 * In that case the setting of the request content type is also not required,
 	 * just be sure the map contains String values only or otherwise it would be
 	 * interpreted as a multipart request.
-	 *
 	 * @param formData the form data to write to the output message
 	 * @return the inserter that allows adding more form data
 	 */
@@ -204,7 +202,7 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@link FormInserter} that writes the given key-value pair as
+	 * Return a {@link FormInserter} to write the given key-value pair as
 	 * URL-encoded form data. The returned inserter allows for additional
 	 * entries to be added via {@link FormInserter#with(String, Object)}.
 	 * @param name the key to add to the form
@@ -218,7 +216,7 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@link MultipartInserter} that writes the given
+	 * Return a {@link MultipartInserter} to write the given
 	 * {@code MultiValueMap} as multipart data. Values in the map can be an
 	 * Object or an {@link HttpEntity}.
 	 * <p>Note that you can also build the multipart data externally with
@@ -234,7 +232,7 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@link MultipartInserter} that writes the given parts,
+	 * Return a {@link MultipartInserter} to write the given parts,
 	 * as multipart data. Values in the map can be an Object or an
 	 * {@link HttpEntity}.
 	 * <p>Note that you can also build the multipart data externally with
@@ -251,7 +249,7 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@link MultipartInserter} that writes the given asynchronous parts,
+	 * Return a {@link MultipartInserter} to write the given asynchronous parts,
 	 * as multipart data.
 	 * <p>Note that you can also build the multipart data externally with
 	 * {@link MultipartBodyBuilder}, and pass the resulting map directly to the
@@ -286,11 +284,10 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@code BodyInserter} that writes the given
-	 * {@code Publisher<DataBuffer>} to the body.
+	 * Inserter to write the given {@code Publisher<DataBuffer>} to the body.
 	 * @param publisher the data buffer publisher to write
 	 * @param <T> the type of the publisher
-	 * @return a {@code BodyInserter} that writes directly to the body
+	 * @return the inserter to write directly to the body
 	 * @see ReactiveHttpOutputMessage#writeWith(Publisher)
 	 */
 	public static <T extends Publisher<DataBuffer>> BodyInserter<T, ReactiveHttpOutputMessage> fromDataBuffers(

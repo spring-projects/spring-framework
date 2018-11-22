@@ -80,7 +80,7 @@ public interface ServerWebExchange {
 	@SuppressWarnings("unchecked")
 	default <T> T getRequiredAttribute(String name) {
 		T value = getAttribute(name);
-		Assert.notNull(value, () -> "Required attribute '" + name + "' is missing.");
+		Assert.notNull(value, () -> "Required attribute '" + name + "' is missing");
 		return value;
 	}
 
@@ -114,7 +114,6 @@ public interface ServerWebExchange {
 	/**
 	 * Return the form data from the body of the request if the Content-Type is
 	 * {@code "application/x-www-form-urlencoded"} or an empty map otherwise.
-	 *
 	 * <p><strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
@@ -124,7 +123,6 @@ public interface ServerWebExchange {
 	/**
 	 * Return the parts of a multipart request if the Content-Type is
 	 * {@code "multipart/form-data"} or an empty map otherwise.
-	 *
 	 * <p><strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
@@ -140,8 +138,7 @@ public interface ServerWebExchange {
 	/**
 	 * Return the {@link ApplicationContext} associated with the web application,
 	 * if it was initialized with one via
-	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
-	 * WebHttpHandlerBuilder#applicationContext}.
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)}.
 	 * @since 5.0.3
 	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)
 	 */

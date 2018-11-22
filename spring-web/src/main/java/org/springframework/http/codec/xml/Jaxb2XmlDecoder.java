@@ -110,6 +110,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		return decode(inputStream, elementType, mimeType, hints).singleOrEmpty();
 	}
 
