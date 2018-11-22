@@ -494,18 +494,24 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 */
 	protected boolean isInvalidPath(String path) {
 		if (path.contains("WEB-INF") || path.contains("META-INF")) {
-			logger.warn("Path with \"WEB-INF\" or \"META-INF\": [" + path + "]");
+			if (logger.isWarnEnabled()) {
+				logger.warn("Path with \"WEB-INF\" or \"META-INF\": [" + path + "]");
+			}
 			return true;
 		}
 		if (path.contains(":/")) {
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
-				logger.warn("Path represents URL or has \"url:\" prefix: [" + path + "]");
+				if (logger.isWarnEnabled()) {
+					logger.warn("Path represents URL or has \"url:\" prefix: [" + path + "]");
+				}
 				return true;
 			}
 		}
 		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
-			logger.warn("Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
+			if (logger.isWarnEnabled()) {
+				logger.warn("Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
+			}
 			return true;
 		}
 		return false;
