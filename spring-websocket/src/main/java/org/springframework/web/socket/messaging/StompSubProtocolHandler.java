@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -435,7 +435,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		else if (StompCommand.CONNECTED.equals(command)) {
 			this.stats.incrementConnectedCount();
 			accessor = afterStompSessionConnected(message, accessor, session);
-			if (this.eventPublisher != null && StompCommand.CONNECTED.equals(command)) {
+			if (this.eventPublisher != null) {
 				try {
 					SimpAttributes simpAttributes = new SimpAttributes(session.getId(), session.getAttributes());
 					SimpAttributesContextHolder.setAttributes(simpAttributes);

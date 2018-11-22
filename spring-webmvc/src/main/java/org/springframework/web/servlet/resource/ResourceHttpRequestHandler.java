@@ -641,22 +641,25 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	protected boolean isInvalidPath(String path) {
 		if (path.contains("WEB-INF") || path.contains("META-INF")) {
-			logger.trace("Path contains \"WEB-INF\" or \"META-INF\".");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Path with \"WEB-INF\" or \"META-INF\": [" + path + "]");
+			}
 			return true;
 		}
 		if (path.contains(":/")) {
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
-				logger.trace("Path represents URL or has \"url:\" prefix.");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Path represents URL or has \"url:\" prefix: [" + path + "]");
+				}
 				return true;
 			}
 		}
-		if (path.contains("..")) {
-			path = StringUtils.cleanPath(path);
-			if (path.contains("../")) {
-				logger.trace("Path contains \"../\" after call to StringUtils#cleanPath.");
-				return true;
+		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
 			}
+			return true;
 		}
 		return false;
 	}

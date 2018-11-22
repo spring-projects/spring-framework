@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,10 @@ import org.springframework.util.ObjectUtils;
  * Decorator for a standard {@link BeanInfo} object, e.g. as created by
  * {@link Introspector#getBeanInfo(Class)}, designed to discover and register static
  * and/or non-void returning setter methods. For example:
+ *
  * <pre class="code">
  * public class Bean {
+ *
  *     private Foo foo;
  *
  *     public Foo getFoo() {
@@ -56,6 +58,7 @@ import org.springframework.util.ObjectUtils;
  *         return this;
  *     }
  * }</pre>
+ *
  * The standard JavaBeans {@code Introspector} will discover the {@code getFoo} read
  * method, but will bypass the {@code #setFoo(Foo)} write method, because its non-void
  * returning signature does not comply with the JavaBeans specification.
@@ -68,6 +71,7 @@ import org.springframework.util.ObjectUtils;
  * indexed properties</a> are fully supported.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see #ExtendedBeanInfo(BeanInfo)
  * @see ExtendedBeanInfoFactory

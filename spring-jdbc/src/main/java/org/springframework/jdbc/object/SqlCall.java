@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,30 +39,29 @@ import org.springframework.jdbc.core.SqlParameter;
 public abstract class SqlCall extends RdbmsOperation {
 
 	/**
-	 * Object enabling us to create CallableStatementCreators
-	 * efficiently, based on this class's declared parameters.
-	 */
-	private CallableStatementCreatorFactory callableStatementFactory;
-
-	/**
 	 * Flag used to indicate that this call is for a function and to
 	 * use the {? = call get_invoice_count(?)} syntax.
 	 */
 	private boolean function = false;
 
 	/**
-	 * Flag used to indicate that the sql for this call should be used exactly as it is
-	 * defined.  No need to add the escape syntax and parameter place holders.
+	 * Flag used to indicate that the sql for this call should be used exactly as
+	 * it is defined. No need to add the escape syntax and parameter place holders.
 	 */
 	private boolean sqlReadyForUse = false;
 
 	/**
 	 * Call string as defined in java.sql.CallableStatement.
-	 * String of form {call add_invoice(?, ?, ?)}
-	 * or {? = call get_invoice_count(?)} if isFunction is set to true
-	 * Updated after each parameter is added.
+	 * String of form {call add_invoice(?, ?, ?)} or {? = call get_invoice_count(?)}
+	 * if isFunction is set to true. Updated after each parameter is added.
 	 */
 	private String callString;
+
+	/**
+	 * Object enabling us to create CallableStatementCreators
+	 * efficiently, based on this class's declared parameters.
+	 */
+	private CallableStatementCreatorFactory callableStatementFactory;
 
 
 	/**
@@ -79,8 +78,8 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Create a new SqlCall object with SQL, but without parameters.
 	 * Must add parameters or settle with none.
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
+	 * @param ds the DataSource to obtain connections from
+	 * @param sql the SQL to execute
 	 */
 	public SqlCall(DataSource ds, String sql) {
 		setDataSource(ds);
@@ -99,7 +98,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Return whether this call is for a function.
 	 */
 	public boolean isFunction() {
-		return function;
+		return this.function;
 	}
 
 	/**
@@ -113,7 +112,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Return whether the SQL can be used as is.
 	 */
 	public boolean isSqlReadyForUse() {
-		return sqlReadyForUse;
+		return this.sqlReadyForUse;
 	}
 
 

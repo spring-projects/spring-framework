@@ -65,7 +65,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	public static final int DEFAULT_CACHE_LIMIT = 1024;
 
 	/** Static evaluation context to reuse */
-	private static EvaluationContext messageEvalContext =
+	private static final EvaluationContext messageEvalContext =
 			SimpleEvaluationContext.forPropertyAccessors(new SimpMessageHeaderPropertyAccessor()).build();
 
 
@@ -128,7 +128,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	 * @since 4.2
 	 */
 	public void setSelectorHeaderName(String selectorHeaderName) {
-		this.selectorHeaderName = StringUtils.hasText(selectorHeaderName) ? selectorHeaderName : null;
+		this.selectorHeaderName = (StringUtils.hasText(selectorHeaderName) ? selectorHeaderName : null);
 	}
 
 	/**

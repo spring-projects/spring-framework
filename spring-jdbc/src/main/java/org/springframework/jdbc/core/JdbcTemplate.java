@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1018,11 +1018,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			public int[][] doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				List<int[]> rowsAffected = new ArrayList<int[]>();
 				try {
-					boolean batchSupported = true;
-					if (!JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
-						batchSupported = false;
-						logger.warn("JDBC Driver does not support Batch updates; resorting to single statement execution");
-					}
+					boolean batchSupported = JdbcUtils.supportsBatchUpdates(ps.getConnection());
 					int n = 0;
 					for (T obj : batchArgs) {
 						pss.setValues(ps, obj);

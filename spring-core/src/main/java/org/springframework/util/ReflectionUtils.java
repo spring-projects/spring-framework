@@ -25,7 +25,6 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -635,7 +634,7 @@ public abstract class ReflectionUtils {
 			for (Method ifcMethod : ifc.getMethods()) {
 				if (!Modifier.isAbstract(ifcMethod.getModifiers())) {
 					if (result == null) {
-						result = new LinkedList<Method>();
+						result = new ArrayList<Method>();
 					}
 					result.add(ifcMethod);
 				}
