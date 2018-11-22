@@ -76,13 +76,7 @@ public interface ClientRequest {
 	 * @return the attribute value
 	 */
 	default Optional<Object> attribute(String name) {
-		Map<String, Object> attributes = attributes();
-		if (attributes.containsKey(name)) {
-			return Optional.of(attributes.get(name));
-		}
-		else {
-			return Optional.empty();
-		}
+		return Optional.ofNullable(attributes().get(name));
 	}
 
 	/**
@@ -91,8 +85,7 @@ public interface ClientRequest {
 	Map<String, Object> attributes();
 
 	/**
-	 * Writes this request to the given {@link ClientHttpRequest}.
-	 *
+	 * Write this request to the given {@link ClientHttpRequest}.
 	 * @param request the client http request to write to
 	 * @param strategies the strategies to use when writing
 	 * @return {@code Mono<Void>} to indicate when writing is complete
