@@ -43,7 +43,11 @@ import org.springframework.util.FileCopyUtils;
 public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	/**
-	 * Delegates to {@link #hasError(HttpStatus)} with the response status code.
+	 * Delegates to {@link #hasError(HttpStatus)} (for a standard status enum value) or
+	 * {@link #hasError(int)} (for an unknown status code) with the response status code.
+	 * @see ClientHttpResponse#getRawStatusCode()
+	 * @see #hasError(HttpStatus)
+	 * @see #hasError(int)
 	 */
 	@Override
 	public boolean hasError(ClientHttpResponse response) throws IOException {
@@ -53,7 +57,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 				return hasError(statusCode);
 			}
 		}
-		return false;
+		return hasError(rawStatusCode);
 	}
 
 	/**
@@ -62,13 +66,31 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
 	 * {@link HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
 	 * Can be overridden in subclasses.
-	 * @param statusCode the HTTP status code
-	 * @return {@code true} if the response has an error; {@code false} otherwise
-	 * @see #getHttpStatusCode(ClientHttpResponse)
+	 * @param statusCode the HTTP status code as enum value
+	 * @return {@code true} if the response indicates an error; {@code false} otherwise
+	 * @see HttpStatus#is4xxClientError()
+	 * @see HttpStatus#is5xxServerError()
 	 */
 	protected boolean hasError(HttpStatus statusCode) {
-		return (statusCode.series() == HttpStatus.Series.CLIENT_ERROR ||
-				statusCode.series() == HttpStatus.Series.SERVER_ERROR);
+		return (statusCode.is4xxClientError() || statusCode.is5xxServerError());
+	}
+
+	/**
+	 * Template method called from {@link #hasError(ClientHttpResponse)}.
+	 * <p>The default implementation checks if the given status code is
+	 * {@code HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
+	 * {@code HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
+	 * Can be overridden in subclasses.
+	 * @param unknownStatusCode the HTTP status code as raw value
+	 * @return {@code true} if the response indicates an error; {@code false} otherwise
+	 * @since 4.3.21
+	 * @see HttpStatus.Series#CLIENT_ERROR
+	 * @see HttpStatus.Series#SERVER_ERROR
+	 */
+	protected boolean hasError(int unknownStatusCode) {
+		int seriesCode = unknownStatusCode / 100;
+		return (seriesCode == HttpStatus.Series.CLIENT_ERROR.value() ||
+				seriesCode == HttpStatus.Series.SERVER_ERROR.value());
 	}
 
 	/**
@@ -92,7 +114,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 						response.getHeaders(), getResponseBody(response), getCharset(response));
 		}
 	}
-
 
 	/**
 	 * Determine the HTTP status of the given response.
