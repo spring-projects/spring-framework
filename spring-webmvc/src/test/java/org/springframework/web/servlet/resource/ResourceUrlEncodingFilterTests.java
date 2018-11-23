@@ -173,4 +173,30 @@ public class ResourceUrlEncodingFilterTests {
 		});
 	}
 
+	@Test // SPR-17535
+	public void encodeURLWitFragment() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.setContextPath("/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilter(request, response, (req, res) -> {
+			req.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.urlProvider);
+			String result = ((HttpServletResponse) res).encodeURL("/resources/bar.css#something");
+			assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css#something", result);
+		});
+	}
+
+	@Test // SPR-13374 and SPR-17535 combined
+	public void encodeURLWitFragmentAndRequestParams() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.setContextPath("/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilter(request, response, (req, res) -> {
+			req.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.urlProvider);
+			String result = ((HttpServletResponse) res).encodeURL("/resources/bar.css?foo=bar&url=http://example.org#something");
+			assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=http://example.org#something", result);
+		});
+	}
+
 }
