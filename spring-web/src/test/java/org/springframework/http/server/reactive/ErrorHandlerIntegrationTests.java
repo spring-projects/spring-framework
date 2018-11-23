@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,22 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
  * @author Arjen Poutsma
  */
 public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private ErrorHandler handler = new ErrorHandler();
+	private final ErrorHandler handler = new ErrorHandler();
+
 
 	@Override
 	protected HttpHandler createHttpHandler() {
 		return handler;
 	}
+
 
 	@Test
 	public void responseBodyError() throws Exception {
@@ -83,6 +85,7 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
+
 	private static class ErrorHandler implements HttpHandler {
 
 		@Override
@@ -100,6 +103,7 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 			}
 		}
 	}
+
 
 	private static final ResponseErrorHandler NO_OP_ERROR_HANDLER = new ResponseErrorHandler() {
 

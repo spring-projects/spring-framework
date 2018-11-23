@@ -41,9 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests with {@code @CrossOrigin} and {@code @RequestMapping}
@@ -105,7 +103,7 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 		ResponseEntity<String> entity = performGet("/default", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
-		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
+		assertFalse(entity.getHeaders().getAccessControlAllowCredentials());
 		assertEquals("default", entity.getBody());
 	}
 
@@ -116,7 +114,7 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals(1800, entity.getHeaders().getAccessControlMaxAge());
-		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
+		assertFalse(entity.getHeaders().getAccessControlAllowCredentials());
 	}
 
 	@Test
@@ -133,7 +131,7 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 		ResponseEntity<String> entity = performGet("/customized", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
-		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
+		assertFalse(entity.getHeaders().getAccessControlAllowCredentials());
 		assertEquals(-1, entity.getHeaders().getAccessControlMaxAge());
 		assertEquals("customized", entity.getBody());
 	}
@@ -152,7 +150,7 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 				entity.getHeaders().getAccessControlAllowHeaders().toArray());
 		assertArrayEquals(new String[] {"header3", "header4"},
 				entity.getHeaders().getAccessControlExposeHeaders().toArray());
-		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
+		assertFalse(entity.getHeaders().getAccessControlAllowCredentials());
 		assertEquals(123, entity.getHeaders().getAccessControlMaxAge());
 	}
 
@@ -177,19 +175,19 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 		ResponseEntity<String> entity = performGet("/foo", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
-		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
+		assertFalse(entity.getHeaders().getAccessControlAllowCredentials());
 		assertEquals("foo", entity.getBody());
 
 		entity = performGet("/bar", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
-		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
+		assertFalse(entity.getHeaders().getAccessControlAllowCredentials());
 		assertEquals("bar", entity.getBody());
 
 		entity = performGet("/baz", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
-		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
+		assertTrue(entity.getHeaders().getAccessControlAllowCredentials());
 		assertEquals("baz", entity.getBody());
 	}
 
@@ -205,7 +203,7 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 				entity.getHeaders().getAccessControlAllowMethods().toArray());
 		assertArrayEquals(new String[] {"header1"},
 				entity.getHeaders().getAccessControlAllowHeaders().toArray());
-		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
+		assertTrue(entity.getHeaders().getAccessControlAllowCredentials());
 	}
 
 	@Test
@@ -217,7 +215,7 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
 		assertArrayEquals(new HttpMethod[] {HttpMethod.GET},
 				entity.getHeaders().getAccessControlAllowMethods().toArray());
-		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
+		assertTrue(entity.getHeaders().getAccessControlAllowCredentials());
 	}
 
 
@@ -227,6 +225,7 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class WebConfig {
 	}
+
 
 	@RestController @SuppressWarnings("unused")
 	private static class MethodLevelController {
@@ -254,23 +253,23 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-header", headers = "header1=a")
-		public void ambigousHeader1a() {
+		public void ambiguousHeader1a() {
 		}
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-header", headers = "header1=b")
-		public void ambigousHeader1b() {
+		public void ambiguousHeader1b() {
 		}
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-produces", produces = "application/xml")
-		public String ambigousProducesXml() {
+		public String ambiguousProducesXml() {
 			return "<a></a>";
 		}
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-produces", produces = "application/json")
-		public String ambigousProducesJson() {
+		public String ambiguousProducesJson() {
 			return "{}";
 		}
 
@@ -298,6 +297,7 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 			return "placeholder";
 		}
 	}
+
 
 	@RestController
 	@CrossOrigin(allowCredentials = "false")

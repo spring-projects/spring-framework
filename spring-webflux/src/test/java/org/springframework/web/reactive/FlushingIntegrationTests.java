@@ -123,7 +123,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			String path = request.getURI().getPath();
 			if (path.endsWith("write-and-flush")) {
-				Flux<Publisher<DataBuffer>> responseBody = interval(Duration.ofMillis(50), 2)
+				Flux<Publisher<DataBuffer>> responseBody = testInterval(Duration.ofMillis(50), 2)
 						.map(l -> toDataBuffer("data" + l + "\n", response.bufferFactory()))
 						.map(Flux::just);
 				return response.writeAndFlushWith(responseBody.concatWith(Flux.never()));

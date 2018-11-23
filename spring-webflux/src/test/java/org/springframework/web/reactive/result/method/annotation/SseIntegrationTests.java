@@ -57,13 +57,13 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	private WebClient webClient;
 
 
+
 	@Override
 	@Before
 	public void setup() throws Exception {
 		super.setup();
 		this.webClient = WebClient.create("http://localhost:" + this.port + "/sse");
 	}
-
 
 	@Override
 	protected HttpHandler createHttpHandler() {
@@ -177,7 +177,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@RequestMapping("/sse")
 	static class SseController {
 
-		private static final Flux<Long> INTERVAL = interval(Duration.ofMillis(100), 50);
+		private static final Flux<Long> INTERVAL = testInterval(Duration.ofMillis(100), 50);
 
 		private MonoProcessor<Void> cancellation = MonoProcessor.create();
 

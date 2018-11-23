@@ -73,8 +73,8 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		doTest("/mono-error", "Recovered from error: Argument");
 	}
 
-	@Test // SPR-16051
-	public void exceptionAfterSeveralItems() throws Exception {
+	@Test  // SPR-16051
+	public void exceptionAfterSeveralItems() {
 		try {
 			performGet("/SPR-16051", new HttpHeaders(), String.class).getBody();
 			fail();

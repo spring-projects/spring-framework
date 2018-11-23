@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URI;
@@ -31,9 +32,7 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.springframework.http.RequestEntity.get;
-import static org.springframework.http.RequestEntity.options;
-import static org.springframework.http.RequestEntity.post;
+import static org.springframework.http.RequestEntity.*;
 
 /**
  * Base class for integration tests with {@code @RequestMapping methods}.
