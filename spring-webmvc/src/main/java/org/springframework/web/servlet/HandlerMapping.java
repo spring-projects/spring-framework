@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.lang.Nullable;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Interface to be implemented by objects that define a mapping between
@@ -114,6 +114,8 @@ public interface HandlerMapping {
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
 
 	/**
+     * 获得请求对应的处理器和拦截器们
+     *
 	 * Return a handler and any interceptors for this request. The choice may be made
 	 * on request URL, session state, or any factor the implementing class chooses.
 	 * <p>The returned HandlerExecutionChain contains a handler Object, rather than

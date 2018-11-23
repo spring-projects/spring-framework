@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Locale;
+import org.springframework.lang.Nullable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
+import java.util.Locale;
 
 /**
  * Interface for web-based locale resolution strategies that allows for
@@ -53,6 +53,8 @@ import org.springframework.lang.Nullable;
 public interface LocaleResolver {
 
 	/**
+     * 从请求中，解析出要使用的语言。例如，请求头的 "Accept-Language"
+     *
 	 * Resolve the current locale via the given request.
 	 * Can return a default locale as fallback in any case.
 	 * @param request the request to resolve the locale for
@@ -61,6 +63,8 @@ public interface LocaleResolver {
 	Locale resolveLocale(HttpServletRequest request);
 
 	/**
+     * 设置请求所使用的语言
+     *
 	 * Set the current locale to the given one.
 	 * @param request the request to be used for locale modification
 	 * @param response the response to be used for locale modification

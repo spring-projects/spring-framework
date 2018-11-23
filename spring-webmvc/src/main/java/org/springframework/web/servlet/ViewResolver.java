@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Locale;
-
 import org.springframework.lang.Nullable;
+
+import java.util.Locale;
 
 /**
  * Interface to be implemented by objects that can resolve views by name.
@@ -38,6 +38,8 @@ import org.springframework.lang.Nullable;
 public interface ViewResolver {
 
 	/**
+     * 根据视图名和国际化，获得最终的 View 对象
+     *
 	 * Resolve the given view by name.
 	 * <p>Note: To allow for ViewResolver chaining, a ViewResolver should
 	 * return {@code null} if a view with the given name is not defined in it.

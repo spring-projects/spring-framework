@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet;
 
+import org.springframework.lang.Nullable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
 
 /**
  * MVC framework SPI, allowing parameterization of the core MVC workflow.
@@ -50,6 +50,8 @@ import org.springframework.lang.Nullable;
 public interface HandlerAdapter {
 
 	/**
+     * 是否支持该处理器
+     *
 	 * Given a handler instance, return whether or not this {@code HandlerAdapter}
 	 * can support it. Typical HandlerAdapters will base the decision on the handler
 	 * type. HandlerAdapters will usually only support one handler type each.
@@ -63,6 +65,8 @@ public interface HandlerAdapter {
 	boolean supports(Object handler);
 
 	/**
+     * 执行处理器，返回 ModelAndView 结果
+     *
 	 * Use the given handler to handle this request.
 	 * The workflow that is required may vary widely.
 	 * @param request current HTTP request
@@ -78,6 +82,10 @@ public interface HandlerAdapter {
 	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
 
 	/**
+     * 返回请求的最新更新时间。
+     *
+     * 如果不支持该操作，则返回 -1 即可
+     *
 	 * Same contract as for HttpServlet's {@code getLastModified} method.
 	 * Can simply return -1 if there's no support in the handler class.
 	 * @param request current HTTP request
