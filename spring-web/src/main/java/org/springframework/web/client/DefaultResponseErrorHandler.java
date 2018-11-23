@@ -48,8 +48,9 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@Override
 	public boolean hasError(ClientHttpResponse response) throws IOException {
-		HttpStatus statusCode = HttpStatus.resolve(response.getRawStatusCode());
-		return (statusCode != null && hasError(statusCode));
+		int rawStatusCode = response.getRawStatusCode();
+		HttpStatus statusCode = HttpStatus.resolve(rawStatusCode);
+		return (statusCode != null ? hasError(statusCode) : hasError(rawStatusCode));
 	}
 
 	/**
@@ -58,12 +59,27 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@code HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
 	 * {@code HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
 	 * Can be overridden in subclasses.
-	 * @param statusCode the HTTP status code
+	 * @param statusCode the HTTP status code as enum value
 	 * @return {@code true} if the response has an error; {@code false} otherwise
 	 */
 	protected boolean hasError(HttpStatus statusCode) {
 		return (statusCode.series() == HttpStatus.Series.CLIENT_ERROR ||
 				statusCode.series() == HttpStatus.Series.SERVER_ERROR);
+	}
+
+	/**
+	 * Template method called from {@link #hasError(ClientHttpResponse)}.
+	 * <p>The default implementation checks if the given status code is
+	 * {@code HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
+	 * {@code HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
+	 * Can be overridden in subclasses.
+	 * @param unknownStatusCode the HTTP status code as raw value
+	 * @return {@code true} if the response has an error; {@code false} otherwise
+	 * @since 4.3.21
+	 */
+	protected boolean hasError(int unknownStatusCode) {
+		HttpStatus.Series series = HttpStatus.Series.resolve(unknownStatusCode);
+		return (series == HttpStatus.Series.CLIENT_ERROR || series == HttpStatus.Series.SERVER_ERROR);
 	}
 
 	/**
