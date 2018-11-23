@@ -18,6 +18,7 @@ package org.springframework.test.context.junit;
 
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.platform.suite.api.ExcludeTags;
+import org.junit.platform.suite.api.IncludeClassNamePatterns;
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectPackages;
 import org.junit.platform.suite.api.UseTechnicalNames;
@@ -48,6 +49,7 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitPlatform.class)
 @IncludeEngines("junit-jupiter")
 @SelectPackages("org.springframework.test.context.junit.jupiter")
+@IncludeClassNamePatterns(".*Tests$")
 @ExcludeTags("failing-test-case")
 @UseTechnicalNames
 public class SpringJUnitJupiterTestSuite {
