@@ -32,7 +32,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.engine.Constants.*;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.*;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.*;
 
@@ -55,8 +54,8 @@ class ParallelExecutionSpringExtensionTests {
 		launcher.registerTestExecutionListeners(listener);
 
 		LauncherDiscoveryRequest request = request()//
-				.configurationParameter(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true")//
-				.configurationParameter(PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME, "10")//
+				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
+				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
 				.selectors(selectClass(TestCase.class))//
 				.build();
 
