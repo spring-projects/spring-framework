@@ -28,6 +28,9 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.*;
 
+/**
+ * @author Sebastien Deleuze
+ */
 public class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Override
@@ -58,4 +61,5 @@ public class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegr
 			return Mono.empty();
 		}
 	}
+
 }

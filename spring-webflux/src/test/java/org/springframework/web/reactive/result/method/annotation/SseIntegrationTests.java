@@ -81,6 +81,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		};
 	}
 
+
 	@Override
 	@Before
 	public void setup() throws Exception {
@@ -91,7 +92,6 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.baseUrl("http://localhost:" + this.port + "/sse")
 				.build();
 	}
-
 
 	@Override
 	protected HttpHandler createHttpHandler() {

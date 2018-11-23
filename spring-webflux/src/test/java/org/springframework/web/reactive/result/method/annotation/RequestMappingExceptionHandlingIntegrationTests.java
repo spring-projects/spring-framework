@@ -76,7 +76,7 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		doTest("/mono-error", "Recovered from error: Argument");
 	}
 
-	@Test // SPR-16051
+	@Test  // SPR-16051
 	public void exceptionAfterSeveralItems() {
 		try {
 			performGet("/SPR-16051", new HttpHeaders(), String.class).getBody();
@@ -89,7 +89,7 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		}
 	}
 
-	@Test // SPR-16318
+	@Test  // SPR-16318
 	public void exceptionFromMethodWithProducesCondition() throws Exception {
 		try {
 			HttpHeaders headers = new HttpHeaders();
@@ -178,7 +178,9 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		}
 	}
 
+
 	@SuppressWarnings("serial")
-	private static class Spr16318Exception extends Exception {}
+	private static class Spr16318Exception extends Exception {
+	}
 
 }
