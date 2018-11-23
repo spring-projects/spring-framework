@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -436,49 +436,61 @@ public enum HttpStatus {
 	}
 
 	/**
+	 * Return the HTTP status series of this status code.
+	 * @see HttpStatus.Series
+	 */
+	public Series series() {
+		return Series.valueOf(this);
+	}
+
+	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#INFORMATIONAL}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
 	 */
 	public boolean is1xxInformational() {
-		return Series.INFORMATIONAL.equals(series());
+		return (series() == Series.INFORMATIONAL);
 	}
 
 	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#SUCCESSFUL}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
 	 */
 	public boolean is2xxSuccessful() {
-		return Series.SUCCESSFUL.equals(series());
+		return (series() == Series.SUCCESSFUL);
 	}
 
 	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#REDIRECTION}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
 	 */
 	public boolean is3xxRedirection() {
-		return Series.REDIRECTION.equals(series());
+		return (series() == Series.REDIRECTION);
 	}
-
 
 	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
 	 */
 	public boolean is4xxClientError() {
-		return Series.CLIENT_ERROR.equals(series());
+		return (series() == Series.CLIENT_ERROR);
 	}
 
 	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
 	 */
 	public boolean is5xxServerError() {
-		return Series.SERVER_ERROR.equals(series());
+		return (series() == Series.SERVER_ERROR);
 	}
 
 	/**
@@ -486,17 +498,12 @@ public enum HttpStatus {
 	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
 	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @since 5.0
+	 * @see #is4xxClientError()
+	 * @see #is5xxServerError()
 	 */
 	public boolean isError() {
-		return is4xxClientError() || is5xxServerError();
-	}
-
-	/**
-	 * Returns the HTTP status series of this status code.
-	 * @see HttpStatus.Series
-	 */
-	public Series series() {
-		return Series.valueOf(this);
+		return (is4xxClientError() || is5xxServerError());
 	}
 
 	/**
@@ -521,7 +528,6 @@ public enum HttpStatus {
 		}
 		return status;
 	}
-
 
 	/**
 	 * Resolve the given status code to an {@code HttpStatus}, if possible.
@@ -565,18 +571,30 @@ public enum HttpStatus {
 			return this.value;
 		}
 
-		public static Series valueOf(int status) {
-			int seriesCode = status / 100;
+		/**
+		 * Return the enum constant of this type with the corresponding series.
+		 * @param status a standard HTTP status enum value
+		 * @return the enum constant of this type with the corresponding series
+		 * @throws IllegalArgumentException if this enum has no corresponding constant
+		 */
+		public static Series valueOf(HttpStatus status) {
+			return valueOf(status.value);
+		}
+
+		/**
+		 * Return the enum constant of this type with the corresponding series.
+		 * @param statusCode the HTTP status code (potentially non-standard)
+		 * @return the enum constant of this type with the corresponding series
+		 * @throws IllegalArgumentException if this enum has no corresponding constant
+		 */
+		public static Series valueOf(int statusCode) {
+			int seriesCode = statusCode / 100;
 			for (Series series : values()) {
 				if (series.value == seriesCode) {
 					return series;
 				}
 			}
-			throw new IllegalArgumentException("No matching constant for [" + status + "]");
-		}
-
-		public static Series valueOf(HttpStatus status) {
-			return valueOf(status.value);
+			throw new IllegalArgumentException("No matching constant for [" + statusCode + "]");
 		}
 	}
 
