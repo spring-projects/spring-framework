@@ -115,7 +115,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				return null;
 			}
 			if (this.indexLookupPath != null && url.startsWith(this.prefixLookupPath)) {
-				int suffixIndex = getQueryParamsIndex(url);
+				int suffixIndex = getEndPathIndex(url);
 				String suffix = url.substring(suffixIndex);
 				String lookupPath = url.substring(this.indexLookupPath, suffixIndex);
 				lookupPath = this.resourceUrlProvider.getForLookupPath(lookupPath);
@@ -126,9 +126,17 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 			return null;
 		}
 
-		private int getQueryParamsIndex(String url) {
-			int index = url.indexOf('?');
-			return (index > 0 ? index : url.length());
+		private int getEndPathIndex(String lookupPath) {
+			int suffixIndex = lookupPath.length();
+			int queryIndex = lookupPath.indexOf('?');
+			if (queryIndex > 0) {
+				suffixIndex = queryIndex;
+			}
+			int hashIndex = lookupPath.indexOf('#');
+			if (hashIndex > 0) {
+				suffixIndex = Math.min(suffixIndex, hashIndex);
+			}
+			return suffixIndex;
 		}
 	}
 
