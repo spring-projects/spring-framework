@@ -1013,14 +1013,14 @@ public class DispatcherServlet extends FrameworkServlet {
 			Exception dispatchException = null;
 
 			try {
-			    // TODO 芋艿
+			    // TODO 芋艿 检查是否是上传请求。如果是，则封装成 MultipartHttpServletRequest 对象
 				processedRequest = checkMultipart(request);
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
-                // 获得请求对应的 HandlerExecutionChain 对象 TODO
+                // 获得请求对应的 HandlerExecutionChain 对象 TODO 芋艿
 				mappedHandler = getHandler(processedRequest);
-				if (mappedHandler == null) { // TODO 芋艿，不存在
+				if (mappedHandler == null) { // 如果获取不到，则根据配置抛出异常或返回 404 错误。
 					noHandlerFound(processedRequest, response);
 					return;
 				}
@@ -1066,13 +1066,13 @@ public class DispatcherServlet extends FrameworkServlet {
 				dispatchException = new NestedServletException("Handler dispatch failed", err); // 记录异常
 			}
 
-			// TODO 芋艿 处理结果
+			// 处理正常和异常的请求调用结果。
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		} catch (Exception ex) {
-		    // TODO 芋艿
+		    // 已完成 拦截器 TODO 芋艿
 			triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
 		} catch (Throwable err) {
-		    // TODO 芋艿
+		    // 已完成 拦截器 TODO 芋艿
 			triggerAfterCompletion(processedRequest, response, mappedHandler,
 					new NestedServletException("Handler processing failed", err));
 		} finally {
@@ -1092,11 +1092,15 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+     * 当无视图的情况下，设置默认视图
+     *
 	 * Do we need view name translation?
 	 */
 	private void applyDefaultViewName(HttpServletRequest request, @Nullable ModelAndView mv) throws Exception {
-		if (mv != null && !mv.hasView()) {
+		if (mv != null && !mv.hasView()) { // 无视图
+		    // 获得默认视图
 			String defaultViewName = getDefaultViewName(request);
+			// 设置默认视图
 			if (defaultViewName != null) {
 				mv.setViewName(defaultViewName);
 			}
@@ -1104,45 +1108,53 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+     * 处理正常和异常的请求调用结果。
+     *
 	 * Handle the result of handler selection and handler invocation, which is
 	 * either a ModelAndView or an Exception to be resolved to a ModelAndView.
 	 */
 	private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
 			@Nullable HandlerExecutionChain mappedHandler, @Nullable ModelAndView mv,
 			@Nullable Exception exception) throws Exception {
-
+	    // 标记，是否是生成的 ModelAndView 对象
 		boolean errorView = false;
 
+		// 如果是否异常的结果
 		if (exception != null) {
+		    // 情况一，从 ModelAndViewDefiningException 中获得 ModelAndView 对象
 			if (exception instanceof ModelAndViewDefiningException) {
 				logger.debug("ModelAndViewDefiningException encountered", exception);
 				mv = ((ModelAndViewDefiningException) exception).getModelAndView();
-			}
-			else {
+            // 情况二，处理异常，生成 ModelAndView 对象
+			} else {
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
 				mv = processHandlerException(request, response, handler, exception);
+				// 标记 errorView
 				errorView = (mv != null);
 			}
 		}
 
 		// Did the handler return a view to render?
 		if (mv != null && !mv.wasCleared()) {
+		    // 渲染页面
 			render(mv, request, response);
+			// 清理请求中的错误消息属性
 			if (errorView) {
 				WebUtils.clearErrorRequestAttributes(request);
 			}
-		}
-		else {
+		} else {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No view rendering, null ModelAndView returned.");
 			}
 		}
 
+		// TODO 芋艿
 		if (WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
 			// Concurrent handling started during a forward
 			return;
 		}
 
+		// TODO 芋艿 已完成处理 拦截器
 		if (mappedHandler != null) {
 			mappedHandler.triggerAfterCompletion(request, response, null);
 		}
@@ -1233,6 +1245,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+     * 获得请求对应的是 HandlerExecutionChain 对象，它包含处理器( `handler` )和拦截器们( HandlerInterceptor 数组 )
+     *
 	 * Return the HandlerExecutionChain for this request.
 	 * <p>Tries all handler mappings in order.
 	 * @param request current HTTP request
@@ -1241,8 +1255,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		if (this.handlerMappings != null) {
+		    // 遍历 HandlerMapping 数组
 			for (HandlerMapping mapping : this.handlerMappings) {
+			    // 获得请求对应的 HandlerExecutionChain 对象
 				HandlerExecutionChain handler = mapping.getHandler(request);
+				// 获得到，则返回
 				if (handler != null) {
 					return handler;
 				}
@@ -1252,6 +1269,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+     * 根据配置抛出异常或返回 404 错误
+     *
 	 * No handler found -> set appropriate HTTP response status.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -1264,8 +1283,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (this.throwExceptionIfNoHandlerFound) {
 			throw new NoHandlerFoundException(request.getMethod(), getRequestUri(request),
 					new ServletServerHttpRequest(request).getHeaders());
-		}
-		else {
+		} else {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		}
 	}
@@ -1277,12 +1295,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
 		if (this.handlerAdapters != null) {
+		    // 遍历 HandlerAdapter 数组
 			for (HandlerAdapter adapter : this.handlerAdapters) {
+			    // 判断是否支持当前处理器
 				if (adapter.supports(handler)) {
+				    // 如果支持，则返回
 					return adapter;
 				}
 			}
 		}
+		// 没找到对应的 HandlerAdapter 对象，抛出 ServletException 异常
 		throw new ServletException("No adapter for handler [" + handler +
 				"]: The DispatcherServlet configuration needs to include a HandlerAdapter that supports this handler");
 	}
@@ -1300,46 +1322,57 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Nullable
 	protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
 			@Nullable Object handler, Exception ex) throws Exception {
-
 		// Success and error responses may use different content types
+        // 移除 PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE 属性
 		request.removeAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 
 		// Check registered HandlerExceptionResolvers...
+        // 遍历 HandlerExceptionResolver 数组，解析异常，生成 ModelAndView 对象
 		ModelAndView exMv = null;
 		if (this.handlerExceptionResolvers != null) {
+		    // 遍历 HandlerExceptionResolver 数组
 			for (HandlerExceptionResolver resolver : this.handlerExceptionResolvers) {
-				exMv = resolver.resolveException(request, response, handler, ex);
+				// 解析异常，生成 ModelAndView 对象
+			    exMv = resolver.resolveException(request, response, handler, ex);
+			    // 生成成功，结束循环
 				if (exMv != null) {
 					break;
 				}
 			}
 		}
+		// 情况一，生成了 ModelAndView 对象，进行返回
 		if (exMv != null) {
+		    // ModelAndView 对象为空，则返回 null
 			if (exMv.isEmpty()) {
-				request.setAttribute(EXCEPTION_ATTRIBUTE, ex);
+				request.setAttribute(EXCEPTION_ATTRIBUTE, ex); // 记录异常到 request 中
 				return null;
 			}
 			// We might still need view name translation for a plain error model...
+            //
 			if (!exMv.hasView()) {
 				String defaultViewName = getDefaultViewName(request);
 				if (defaultViewName != null) {
 					exMv.setViewName(defaultViewName);
 				}
 			}
+			// 打印日志
 			if (logger.isTraceEnabled()) {
 				logger.trace("Using resolved error view: " + exMv, ex);
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using resolved error view: " + exMv);
 			}
+			// 设置请求中的错误消息属性
 			WebUtils.exposeErrorRequestAttributes(request, ex, getServletName());
 			return exMv;
 		}
-
+		// 情况二，未生成 ModelAndView 对象，则抛出异常
 		throw ex;
 	}
 
 	/**
+     * 渲染 ModelAndView
+     *
 	 * Render the given ModelAndView.
 	 * <p>This is the last stage in handling a request. It may involve resolving the view by name.
 	 * @param mv the ModelAndView to render
@@ -1350,40 +1383,46 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// Determine locale for request and apply it to the response.
-		Locale locale =
-				(this.localeResolver != null ? this.localeResolver.resolveLocale(request) : request.getLocale());
+        // TODO 芋艿 从 request 中获得 Locale 对象，并设置到 response 中
+		Locale locale = (this.localeResolver != null ? this.localeResolver.resolveLocale(request) : request.getLocale());
 		response.setLocale(locale);
 
+		// 获得 View 对象
 		View view;
 		String viewName = mv.getViewName();
+		// 情况一，使用 viewName 获得 View 对象
 		if (viewName != null) {
 			// We need to resolve the view name.
+            // 使用 viewName 获得 View 对象
 			view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
-			if (view == null) {
+			if (view == null) { // 获取不到，抛出 ServletException 异常
 				throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
 						"' in servlet with name '" + getServletName() + "'");
 			}
-		}
-		else {
+        // 情况二，直接使用 ModelAndView 对象的 View 对象
+		} else {
 			// No need to lookup: the ModelAndView object contains the actual View object.
+            // 直接使用 ModelAndView 对象的 View 对象
 			view = mv.getView();
-			if (view == null) {
+			if (view == null) { // 获取不到，抛出 ServletException 异常
 				throw new ServletException("ModelAndView [" + mv + "] neither contains a view name nor a " +
 						"View object in servlet with name '" + getServletName() + "'");
 			}
 		}
 
 		// Delegate to the View object for rendering.
+        // 打印日志
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view [" + view + "] ");
 		}
 		try {
+		    // 设置响应的状态码
 			if (mv.getStatus() != null) {
 				response.setStatus(mv.getStatus().value());
 			}
+			// 渲染页面
 			view.render(mv.getModelInternal(), request, response);
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Error rendering view [" + view + "]", ex);
 			}
@@ -1399,6 +1438,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Nullable
 	protected String getDefaultViewName(HttpServletRequest request) throws Exception {
+	    // 从请求中，获得视图
 		return (this.viewNameTranslator != null ? this.viewNameTranslator.getViewName(request) : null);
 	}
 
@@ -1419,21 +1459,23 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Nullable
 	protected View resolveViewName(String viewName, @Nullable Map<String, Object> model,
 			Locale locale, HttpServletRequest request) throws Exception {
-
 		if (this.viewResolvers != null) {
+		    // 遍历 ViewResolver 数组
 			for (ViewResolver viewResolver : this.viewResolvers) {
+			    // 根据 viewName + locale 参数，解析出 View 对象
 				View view = viewResolver.resolveViewName(viewName, locale);
+				// 解析成功，直接返回 View 对象
 				if (view != null) {
 					return view;
 				}
 			}
 		}
+		// 返回空
 		return null;
 	}
 
 	private void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response,
 			@Nullable HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
-
 		if (mappedHandler != null) {
 			mappedHandler.triggerAfterCompletion(request, response, ex);
 		}
