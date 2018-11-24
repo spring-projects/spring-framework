@@ -213,7 +213,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * Handle incoming WebSocket messages from clients.
 	 */
 	public void handleMessageFromClient(WebSocketSession session,
-			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
+			WebSocketMessage<?> webSocketMessage, MessageChannel inboundChannel) {
 
 		List<Message<byte[]>> messages;
 		try {
@@ -262,7 +262,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				headerAccessor.setSessionAttributes(session.getAttributes());
 				headerAccessor.setUser(getUser(session));
 				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
-				if (!detectImmutableMessageInterceptor(outputChannel)) {
+				if (!detectImmutableMessageInterceptor(inboundChannel)) {
 					headerAccessor.setImmutable();
 				}
 
@@ -281,7 +281,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 				try {
 					SimpAttributesContextHolder.setAttributesFromMessage(message);
-					boolean sent = outputChannel.send(message);
+					boolean sent = inboundChannel.send(message);
 
 					if (sent) {
 						if (isConnect) {
