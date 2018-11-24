@@ -33,7 +33,7 @@ dependencies {
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 	}
-	optional("org.apache.httpcomponents:httpclient:4.5.5") {
+	optional("org.apache.httpcomponents:httpclient:4.5.6") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -48,7 +48,7 @@ dependencies {
 	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-	testCompile("com.squareup.okhttp3:mockwebserver:3.10.0")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.12.0")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
