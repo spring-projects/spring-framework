@@ -516,6 +516,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						Class<?> classToMatch = typeToMatch.resolve();
 						return (classToMatch == null || classToMatch.isInstance(beanInstance));
 					}
+					else if (mbd.targetType == null) {
+						ResolvableType resolvableType = mbd.factoryMethodReturnType;
+						if (resolvableType != null) {
+							return typeToMatch.isAssignableFrom(resolvableType);
+						}
+					}
 				}
 			}
 			return false;
