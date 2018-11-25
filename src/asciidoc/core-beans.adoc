@@ -545,21 +545,21 @@ XML-based configuration metadata, you can use the `<alias/>` element to accompli
 	<alias name="fromName" alias="toName"/>
 ----
 
-In this case, a bean in the same container which is named `fromName`, may also,
+In this case, a bean (in the same container) named `fromName` may also,
 after the use of this alias definition, be referred to as `toName`.
 
-For example, the configuration metadata for subsystem A may refer to a DataSource via
-the name `subsystemA-dataSource`. The configuration metadata for subsystem B may refer to
-a DataSource via the name `subsystemB-dataSource`. When composing the main application
-that uses both these subsystems the main application refers to the DataSource via the
-name `myApp-dataSource`. To have all three names refer to the same object you add to the
-MyApp configuration metadata the following aliases definitions:
+For example, the configuration metadata for subsystem A may refer to a DataSource by the
+name of `subsystemA-dataSource`. The configuration metadata for subsystem B may refer to
+a DataSource by the name of `subsystemB-dataSource`. When composing the main application
+that uses both these subsystems, the main application refers to the DataSource by the
+name of `myApp-dataSource`. To have all three names refer to the same object, you can
+add the following alias definitions to the configuration metadata:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<alias name="subsystemA-dataSource" alias="subsystemB-dataSource"/>
-	<alias name="subsystemA-dataSource" alias="myApp-dataSource" />
+	<alias name="myApp-dataSource" alias="subsystemA-dataSource"/>
+	<alias name="myApp-dataSource" alias="subsystemB-dataSource"/>
 ----
 
 Now each component and the main application can refer to the dataSource through a name
@@ -6762,7 +6762,7 @@ annotation accepts a String array for this purpose.
 	@Configuration
 	public class AppConfig {
 
-		@Bean(name = { "dataSource", "subsystemA-dataSource", "subsystemB-dataSource" })
+		@Bean({"dataSource", "subsystemA-dataSource", "subsystemB-dataSource"})
 		public DataSource dataSource() {
 			// instantiate, configure and return DataSource bean...
 		}
