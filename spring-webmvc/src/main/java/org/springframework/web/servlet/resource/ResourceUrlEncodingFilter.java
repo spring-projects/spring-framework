@@ -126,17 +126,16 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 			return null;
 		}
 
-		private int getEndPathIndex(String lookupPath) {
-			int suffixIndex = lookupPath.length();
-			int queryIndex = lookupPath.indexOf('?');
-			if (queryIndex > 0) {
-				suffixIndex = queryIndex;
+		private int getEndPathIndex(String path) {
+			int end = path.indexOf('?');
+			int fragmentIndex = path.indexOf('#');
+			if (fragmentIndex != -1 && (end == -1 || fragmentIndex < end)) {
+				end = fragmentIndex;
 			}
-			int hashIndex = lookupPath.indexOf('#');
-			if (hashIndex > 0) {
-				suffixIndex = Math.min(suffixIndex, hashIndex);
+			if (end == -1) {
+				end = path.length();
 			}
-			return suffixIndex;
+			return end;
 		}
 	}
 
