@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.handler;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Additional interface that a {@link HandlerMapping} can implement to expose
@@ -33,6 +33,8 @@ import org.springframework.web.servlet.HandlerMapping;
 public interface MatchableHandlerMapping extends HandlerMapping {
 
 	/**
+     * 判断请求和指定 `pattern` 路径是否匹配的接口方法
+     *
 	 * Determine whether the given request matches the request criteria.
 	 * @param request the current request
 	 * @param pattern the pattern to match

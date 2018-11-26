@@ -16,25 +16,18 @@
 
 package org.springframework.web.reactive.result.method;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
-import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
-import org.springframework.web.reactive.result.condition.HeadersRequestCondition;
-import org.springframework.web.reactive.result.condition.ParamsRequestCondition;
-import org.springframework.web.reactive.result.condition.PatternsRequestCondition;
-import org.springframework.web.reactive.result.condition.ProducesRequestCondition;
-import org.springframework.web.reactive.result.condition.RequestCondition;
-import org.springframework.web.reactive.result.condition.RequestConditionHolder;
-import org.springframework.web.reactive.result.condition.RequestMethodsRequestCondition;
+import org.springframework.web.reactive.result.condition.*;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Request mapping information. Encapsulates the following request mapping conditions:
@@ -201,7 +194,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			return this.name;
 		}
 		else {
-			return (other.name != null ? other.name : null);
+			return other.name;
 		}
 	}
 
@@ -212,7 +205,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * the current request, sorted with best matching patterns on top.
 	 * @return a new instance in case all conditions match; or {@code null} otherwise
 	 */
-	@Override
+	@SuppressWarnings("Duplicates")
+    @Override
 	@Nullable
 	public RequestMappingInfo getMatchingCondition(ServerWebExchange exchange) {
 		RequestMethodsRequestCondition methods = this.methodsCondition.getMatchingCondition(exchange);

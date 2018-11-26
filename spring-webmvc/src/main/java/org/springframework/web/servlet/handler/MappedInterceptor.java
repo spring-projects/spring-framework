@@ -16,15 +16,15 @@
 
 package org.springframework.web.servlet.handler;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Contains and delegates calls to a {@link HandlerInterceptor} along with
@@ -44,17 +44,26 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public final class MappedInterceptor implements HandlerInterceptor {
 
+    /**
+     * 匹配的路径
+     */
 	@Nullable
 	private final String[] includePatterns;
-
+    /**
+     * 不匹配的路径
+     */
 	@Nullable
 	private final String[] excludePatterns;
+    /**
+     * 路径匹配器
+     */
+    @Nullable
+    private PathMatcher pathMatcher;
 
+    /**
+     * HandlerInterceptor 拦截器对象
+     */
 	private final HandlerInterceptor interceptor;
-
-	@Nullable
-	private PathMatcher pathMatcher;
-
 
 	/**
 	 * Create a new MappedInterceptor instance.
@@ -145,18 +154,21 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 */
 	public boolean matches(String lookupPath, PathMatcher pathMatcher) {
 		PathMatcher pathMatcherToUse = (this.pathMatcher != null ? this.pathMatcher : pathMatcher);
+		// 先排重
 		if (!ObjectUtils.isEmpty(this.excludePatterns)) {
 			for (String pattern : this.excludePatterns) {
-				if (pathMatcherToUse.match(pattern, lookupPath)) {
+				if (pathMatcherToUse.match(pattern, lookupPath)) { // 匹配
 					return false;
 				}
 			}
 		}
+		// 特殊，如果包含为空，则默认就是包含
 		if (ObjectUtils.isEmpty(this.includePatterns)) {
 			return true;
 		}
-		for (String pattern : this.includePatterns) {
-			if (pathMatcherToUse.match(pattern, lookupPath)) {
+        // 后包含
+        for (String pattern : this.includePatterns) {
+			if (pathMatcherToUse.match(pattern, lookupPath)) { // 匹配
 				return true;
 			}
 		}
@@ -166,21 +178,18 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-
 		return this.interceptor.preHandle(request, response, handler);
 	}
 
 	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 			@Nullable ModelAndView modelAndView) throws Exception {
-
 		this.interceptor.postHandle(request, response, handler, modelAndView);
 	}
 
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
 			@Nullable Exception ex) throws Exception {
-
 		this.interceptor.afterCompletion(request, response, handler, ex);
 	}
 
