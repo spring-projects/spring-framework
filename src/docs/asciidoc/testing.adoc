@@ -443,7 +443,6 @@ classes can be component classes, and so on.
 The following example shows a `@ContextConfiguration` annotation that refers to an XML
 file:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -453,11 +452,10 @@ file:
 	}
 ----
 <1> Referring to an XML file.
-====
+
 
 The following example shows a `@ContextConfiguration` annotation that refers to a class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -467,13 +465,12 @@ The following example shows a `@ContextConfiguration` annotation that refers to 
 	}
 ----
 <1> Referring to a class.
-====
+
 
 As an alternative or in addition to declaring resource locations or annotated classes,
 you can use `@ContextConfiguration` to declare `ApplicationContextInitializer` classes.
 The following example shows such a case:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -483,7 +480,7 @@ The following example shows such a case:
 	}
 ----
 <1> Declaring an initializer class.
-====
+
 
 You can optionally use `@ContextConfiguration` to declare the `ContextLoader` strategy as
 well. Note, however, that you typically do not need to explicitly configure the loader,
@@ -492,7 +489,6 @@ annotated `classes`.
 
 The following example uses both a location and a loader:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -502,7 +498,7 @@ The following example uses both a location and a loader:
 	}
 ----
 <1> Configuring both a location and a custom loader.
-====
+
 
 NOTE: `@ContextConfiguration` provides support for inheriting resource locations or
 configuration classes as well as context initializers that are declared by superclasses.
@@ -524,7 +520,6 @@ resource base path). The resource base path is used behind the scenes to create 
 
 The following example shows how to use the `@WebAppConfiguration` annotation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -535,14 +530,13 @@ The following example shows how to use the `@WebAppConfiguration` annotation:
 	}
 ----
 <1> The `@WebAppConfiguration` annotation.
-====
+
 
 To override the default, you can specify a different base resource path by using the
 implicit `value` attribute. Both `classpath:` and `file:` resource prefixes are
 supported. If no resource prefix is supplied, the path is assumed to be a file system
 resource. The following example shows how to specify a classpath resource:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -553,7 +547,7 @@ resource. The following example shows how to specify a classpath resource:
 	}
 ----
 <1> Specifying a classpath resource.
-====
+
 
 Note that `@WebAppConfiguration` must be used in conjunction with
 `@ContextConfiguration`, either within a single test class or within a test class
@@ -571,7 +565,6 @@ defines a level in the context hierarchy. The following examples demonstrate the
 `@ContextHierarchy` within a single test class (`@ContextHierarchy` can also be used
 within a test class hierarchy):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -596,7 +589,6 @@ within a test class hierarchy):
 		// class body...
 	}
 ----
-====
 
 If you need to merge or override the configuration for a given level of the context
 hierarchy within a test class hierarchy, you must explicitly name that level by supplying
@@ -614,7 +606,6 @@ integration test.
 
 The following example indicates that the `dev` profile should be active:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -625,12 +616,11 @@ The following example indicates that the `dev` profile should be active:
 	}
 ----
 <1> Indicate that the `dev` profile should be active.
-====
+
 
 The following example indicates that both the `dev` and the `integration` profiles should
 be active:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -641,7 +631,7 @@ be active:
 	}
 ----
 <1> Indicate that the `dev` and `integration` profiles should be active.
-====
+
 
 NOTE: `@ActiveProfiles` provides support for inheriting active bean definition profiles
 declared by superclasses by default. You can also resolve active bean definition profiles
@@ -670,7 +660,6 @@ properties loaded from resource locations.
 
 The following example demonstrates how to declare a properties file from the classpath:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -681,11 +670,10 @@ The following example demonstrates how to declare a properties file from the cla
 	}
 ----
 <1> Get properties from `test.properties` in the root of the classpath.
-====
+
 
 The following example demonstrates how to declare inlined properties:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -696,7 +684,7 @@ The following example demonstrates how to declare inlined properties:
 	}
 ----
 <1> Declare `timezone` and `port` properties.
-====
+
 
 [[spring-testing-annotation-dirtiescontext]]
 ===== `@DirtiesContext`
@@ -720,7 +708,6 @@ configuration scenarios:
 * Before the current test class, when declared on a class with class mode set to
 `BEFORE_CLASS`.
 +
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -730,12 +717,11 @@ configuration scenarios:
 	}
 ----
 <1> Dirty the context before the current test class.
-====
+
 
 * After the current test class, when declared on a class with class mode set to
 `AFTER_CLASS` (i.e., the default class mode).
 +
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -745,12 +731,11 @@ configuration scenarios:
 	}
 ----
 <1> Dirty the context after the current test class.
-====
+
 
 * Before each test method in the current test class, when declared on a class with class
 mode set to `BEFORE_EACH_TEST_METHOD.`
 +
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -760,12 +745,11 @@ mode set to `BEFORE_EACH_TEST_METHOD.`
 	}
 ----
 <1> Dirty the context before each test method.
-====
+
 
 * After each test method in the current test class, when declared on a class with class
 mode set to `AFTER_EACH_TEST_METHOD.`
 +
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -775,12 +759,11 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 	}
 ----
 <1> Dirty the context after each test method.
-====
+
 
 * Before the current test, when declared on a method with the method mode set to
 `BEFORE_METHOD`.
 +
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -791,12 +774,11 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 	}
 ----
 <1> Dirty the context before the current test method.
-====
+
 
 * After the current test, when declared on a method with the method mode set to
 `AFTER_METHOD` (i.e., the default method mode).
 +
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -807,7 +789,7 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 	}
 ----
 <1> Dirty the context after the current test method.
-====
+
 
 If you use `@DirtiesContext` in a test whose context is configured as part of a context
 hierarchy with `@ContextHierarchy`, you can use the `hierarchyMode` flag to control how
@@ -819,7 +801,6 @@ context are removed from the context cache and closed. If the exhaustive algorit
 overkill for a particular use case, you can specify the simpler current level algorithm,
 as the following example shows.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -841,7 +822,7 @@ as the following example shows.
 	}
 ----
 <1> Use the current-level algorithm.
-====
+
 
 For further details regarding the `EXHAUSTIVE` and `CURRENT_LEVEL` algorithms, see the
 {api-spring-framework}/test/annotation/DirtiesContext.HierarchyMode.html[`DirtiesContext.HierarchyMode`]
@@ -857,7 +838,6 @@ javadoc.
 
 The following example shows how to register two `TestExecutionListener` implementations:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -868,7 +848,7 @@ The following example shows how to register two `TestExecutionListener` implemen
 	}
 ----
 <1> Register two `TestExecutionListener` implementations.
-====
+
 
 By default, `@TestExecutionListeners` supports inherited listeners. See the
 {api-spring-framework}/test/context/TestExecutionListeners.html[javadoc]
@@ -885,7 +865,6 @@ annotation.
 
 The following example shows how to use the `@Commit` annotation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -896,7 +875,7 @@ The following example shows how to use the `@Commit` annotation:
 	}
 ----
 <1> Commit the result of the test to the database.
-====
+
 
 [[spring-testing-annotation-rollback]]
 ===== `@Rollback`
@@ -915,7 +894,6 @@ method, potentially overriding class-level `@Rollback` or `@Commit` semantics.
 The following example causes a test method's result to not be rolled back (that is, the
 result is committed to the database):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -926,7 +904,7 @@ result is committed to the database):
 	}
 ----
 <1> Do not roll back the result.
-====
+
 
 [[spring-testing-annotation-beforetransaction]]
 ===== `@BeforeTransaction`
@@ -939,7 +917,6 @@ transaction by using Spring's `@Transactional` annotation. As of Spring Framewor
 
 The following example shows how to use the `@BeforeTransaction` annotation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -949,7 +926,7 @@ The following example shows how to use the `@BeforeTransaction` annotation:
 	}
 ----
 <1> Run this method before a transaction.
-====
+
 
 [[spring-testing-annotation-aftertransaction]]
 ===== `@AfterTransaction`
@@ -960,7 +937,6 @@ transaction by using Spring's `@Transactional` annotation. As of Spring Framewor
 `@AfterTransaction` methods are not required to be `public` and may be declared on Java
 8-based interface default methods.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -970,7 +946,7 @@ transaction by using Spring's `@Transactional` annotation. As of Spring Framewor
 	}
 ----
 <1> Run this method after a transaction.
-====
+
 
 [[spring-testing-annotation-sql]]
 ===== `@Sql`
@@ -979,7 +955,6 @@ transaction by using Spring's `@Transactional` annotation. As of Spring Framewor
 against a given database during integration tests. The following example shows how to use
 it:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -990,7 +965,7 @@ it:
 	}
 ----
 <1> Run two scripts for this test.
-====
+
 
 See <<testcontext-executing-sql-declaratively>> for further details.
 
@@ -1000,7 +975,6 @@ See <<testcontext-executing-sql-declaratively>> for further details.
 `@SqlConfig` defines metadata that is used to determine how to parse and run SQL scripts
 configured with the `@Sql` annotation. The following example shows how to use it:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1014,7 +988,7 @@ configured with the `@Sql` annotation. The following example shows how to use it
 	}
 ----
 <1> Set the comment prefix and the separator in SQL scripts.
-====
+
 
 [[spring-testing-annotation-sqlgroup]]
 ===== `@SqlGroup`
@@ -1025,7 +999,6 @@ in conjunction with Java 8's support for repeatable annotations, where `@Sql` ca
 declared several times on the same class or method, implicitly generating this container
 annotation. The following example shows how to declare an SQL group:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1039,7 +1012,6 @@ annotation. The following example shows how to declare an SQL group:
 	}
 ----
 <1> Declare a group of SQL scripts.
-====
 
 
 [[integration-testing-annotations-standard]]
@@ -1106,7 +1078,6 @@ means the test is implicitly enabled. This is analogous to the semantics of JUni
 
 The following example shows a test that has an `@IfProfileValue` annotation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1117,13 +1088,12 @@ The following example shows a test that has an `@IfProfileValue` annotation:
 	}
 ----
 <1> Run this test only when the Java vendor is "Oracle Corporation".
-====
+
 
 Alternatively, you can configure `@IfProfileValue` with a list of `values` (with `OR`
 semantics) to achieve TestNG-like support for test groups in a JUnit 4 environment.
 Consider the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1134,7 +1104,7 @@ Consider the following example:
 	}
 ----
 <1> Run this test for unit tests and integration tests.
-====
+
 
 [[integration-testing-annotations-junit4-profilevaluesourceconfiguration]]
 ===== `@ProfileValueSourceConfiguration`
@@ -1145,7 +1115,6 @@ of `ProfileValueSource` to use when retrieving profile values configured through
 test, `SystemProfileValueSource` is used by default. The following example shows how to
 use `@ProfileValueSourceConfiguration`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1155,7 +1124,7 @@ use `@ProfileValueSourceConfiguration`:
 	}
 ----
 <1> Use a custom profile value source.
-====
+
 
 [[integration-testing-annotations-junit4-timed]]
 ===== `@Timed`
@@ -1168,7 +1137,6 @@ The time period includes running the test method itself, any repetitions of the 
 `@Repeat`), as well as any setting up or tearing down of the test fixture. The following
 example shows how to use it:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1178,7 +1146,7 @@ example shows how to use it:
 	}
 ----
 <1> Set the time period for the test to one second.
-====
+
 
 Spring's `@Timed` annotation has different semantics than JUnit 4's `@Test(timeout=...)`
 support. Specifically, due to the manner in which JUnit 4 handles test execution timeouts
@@ -1197,7 +1165,6 @@ The scope of execution to be repeated includes execution of the test method itse
 well as any setting up or tearing down of the test fixture. The following example shows
 how to use the `@Repeat` annotation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1208,7 +1175,7 @@ how to use the `@Repeat` annotation:
 	}
 ----
 <1> Repeat this test ten times.
-====
+
 
 
 [[integration-testing-annotations-junit-jupiter]]
@@ -1236,7 +1203,6 @@ classes may be declared with the `value` attribute in `@SpringJUnitConfig`.
 The following example shows how to use the `@SpringJUnitConfig` annotation to specify a
 configuration class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1246,12 +1212,11 @@ configuration class:
 	}
 ----
 <1> Specify the configuration class.
-====
+
 
 The following example shows how to use the `@SpringJUnitConfig` annotation to specify the
 location of a configuration file:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1261,7 +1226,7 @@ location of a configuration file:
 	}
 ----
 <1> Specify the location of a configuration file.
-====
+
 
 See <<testcontext-ctx-management>> as well as the javadoc for
 {api-spring-framework}/test/context/junit/jupiter/SpringJUnitConfig.html[`@SpringJUnitConfig`]
@@ -1283,7 +1248,6 @@ attribute from `@WebAppConfiguration` only by using the `resourcePath` attribute
 The following example shows how to use the `@SpringJUnitWebConfig` annotation to specify
 a configuration class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1293,12 +1257,11 @@ a configuration class:
 	}
 ----
 <1> Specify the configuration class.
-====
+
 
 The following example shows how to use the `@SpringJUnitWebConfig` annotation to specify a
 the location of a configuration file:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1308,7 +1271,7 @@ the location of a configuration file:
 	}
 ----
 <1> Specify the location of a configuration file.
-====
+
 
 See <<testcontext-ctx-management>> as well as the javadoc for
 {api-spring-framework}/test/context/junit/jupiter/web/SpringJUnitWebConfig.html[`@SpringJUnitWebConfig`],
@@ -1341,7 +1304,6 @@ equivalent to `@Disabled` and `@EnabledIf("true")` is logically meaningless.
 You can use `@EnabledIf` as a meta-annotation to create custom composed annotations. For
 example, you can create a custom `@EnabledOnMac` annotation as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1353,7 +1315,6 @@ example, you can create a custom `@EnabledOnMac` annotation as follows:
 	)
 	public @interface EnabledOnMac {}
 ----
-====
 
 [[integration-testing-annotations-junit-jupiter-disabledif]]
 ===== `@DisabledIf`
@@ -1380,7 +1341,6 @@ equivalent to `@Disabled` and `@DisabledIf("false")` is logically meaningless.
 You can use `@DisabledIf` as a meta-annotation to create custom composed annotations. For
 example, you can create a custom `@DisabledOnMac` annotation as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1392,7 +1352,6 @@ example, you can create a custom `@DisabledOnMac` annotation as follows:
 	)
 	public @interface DisabledOnMac {}
 ----
-====
 
 
 [[integration-testing-annotations-meta]]
@@ -1432,7 +1391,6 @@ You can use each of the following as a meta-annotation in conjunction with the
 
 Consider the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1448,13 +1406,11 @@ Consider the following example:
 	@Transactional
 	public class UserRepositoryTests { }
 ----
-====
 
 If we discover that we are repeating the preceding configuration across our JUnit 4-based
 test suite, we can reduce the duplication by introducing a custom composed annotation
 that centralizes the common test configuration for Spring, as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1465,12 +1421,10 @@ that centralizes the common test configuration for Spring, as follows:
 	@Transactional
 	public @interface TransactionalDevTestConfig { }
 ----
-====
 
 Then we can use our custom `@TransactionalDevTestConfig` annotation to simplify the
 configuration of individual JUnit 4 based test classes, as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1482,13 +1436,11 @@ configuration of individual JUnit 4 based test classes, as follows:
 	@TransactionalDevTestConfig
 	public class UserRepositoryTests { }
 ----
-====
 
 If we write tests that use JUnit Jupiter, we can reduce code duplication even further,
 since annotations in JUnit 5 can also be used as meta-annotations. Consider the following
 example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1504,14 +1456,12 @@ example:
 	@Transactional
 	class UserRepositoryTests { }
 ----
-====
 
 If we discover that we are repeating the preceding configuration across our JUnit
 Jupiter-based test suite, we can reduce the duplication by introducing a custom composed
 annotation that centralizes the common test configuration for Spring and JUnit Jupiter,
 as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1523,12 +1473,10 @@ as follows:
 	@Transactional
 	public @interface TransactionalDevTestConfig { }
 ----
-====
 
 Then we can use our custom `@TransactionalDevTestConfig` annotation to simplify the
 configuration of individual JUnit Jupiter based test classes, as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1538,7 +1486,6 @@ configuration of individual JUnit Jupiter based test classes, as follows:
 	@TransactionalDevTestConfig
 	class UserRepositoryTests { }
 ----
-====
 
 Since JUnit Jupiter supports the use of `@Test`, `@RepeatedTest`, `ParameterizedTest`,
 and others as meta-annotations, you can also create custom composed annotations at the
@@ -1547,7 +1494,6 @@ the `@Test` and `@Tag` annotations from JUnit Jupiter with the `@Transactional`
 annotation from Spring, we could create an `@TransactionalIntegrationTest` annotation, as
 follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1558,12 +1504,10 @@ follows:
 	@Test // org.junit.jupiter.api.Test
 	public @interface TransactionalIntegrationTest { }
 ----
-====
 
 Then we can use our custom `@TransactionalIntegrationTest` annotation to simplify the
 configuration of individual JUnit Jupiter based test methods, as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1573,7 +1517,6 @@ configuration of individual JUnit Jupiter based test methods, as follows:
 	@TransactionalIntegrationTest
 	void deleteOrder() { }
 ----
-====
 
 For further details, see the
 https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
@@ -1786,7 +1729,6 @@ default listeners are not registered. In most common testing scenarios, this eff
 forces the developer to manually declare all default listeners in addition to any custom
 listeners. The following listing demonstrates this style of configuration:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1804,7 +1746,6 @@ listeners. The following listing demonstrates this style of configuration:
 		// class body...
 	}
 ----
-====
 
 The challenge with this approach is that it requires that the developer know exactly
 which listeners are registered by default. Moreover, the set of default listeners can
@@ -1832,7 +1773,6 @@ configures its `order` value (for example, `500`) to be less than the order of t
 defaults in front of the `ServletTestExecutionListener`, and the previous example could
 be replaced with the following:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1845,7 +1785,6 @@ be replaced with the following:
 		// class body...
 	}
 ----
-====
 
 
 [[testcontext-ctx-management]]
@@ -1866,7 +1805,6 @@ As an alternative to implementing the `ApplicationContextAware` interface, you c
 the application context for your test class through the `@Autowired` annotation on either
 a field or setter method, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1881,12 +1819,11 @@ a field or setter method, as the following example shows:
 	}
 ----
 <1> Injecting the `ApplicationContext`.
-====
+
 
 Similarly, if your test is configured to load a `WebApplicationContext`, you can inject
 the web application context into your test, as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1903,7 +1840,7 @@ the web application context into your test, as follows:
 ----
 <1> Configuring the `WebApplicationContext`.
 <2> Injecting the `WebApplicationContext`.
-====
+
 
 Dependency injection by using `@Autowired` is provided by the
 `DependencyInjectionTestExecutionListener`, which is configured by default (see
@@ -1949,7 +1886,6 @@ is treated as an absolute classpath location (for example, `/org/example/config.
 path that represents a resource URL (i.e., a path prefixed with `classpath:`, `file:`,
 `http:`, etc.) is used _as is_.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1962,7 +1898,7 @@ path that represents a resource URL (i.e., a path prefixed with `classpath:`, `f
 	}
 ----
 <1> Setting the locations attribute to a list of XML files.
-====
+
 
 `@ContextConfiguration` supports an alias for the `locations` attribute through the
 standard Java `value` attribute. Thus, if you do not need to declare additional
@@ -1970,7 +1906,6 @@ attributes in `@ContextConfiguration`, you can omit the declaration of the `loca
 attribute name and declare the resource locations by using the shorthand format
 demonstrated in the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1981,7 +1916,7 @@ demonstrated in the following example:
 	}
 ----
 <1> Specifying XML files without using the `location` attribute.
-====
+
 
 If you omit both the `locations` and the `value` attributes from the
 `@ContextConfiguration` annotation, the TestContext framework tries to detect a default
@@ -1991,7 +1926,6 @@ class. If your class is named `com.example.MyTest`, `GenericXmlContextLoader` lo
 application context from `"classpath:com/example/MyTest-context.xml"`. The following
 example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2006,7 +1940,7 @@ example shows how to do so:
 	}
 ----
 <1> Loading configuration from the default location.
-====
+
 
 [[testcontext-ctx-management-groovy]]
 ===== Context Configuration with Groovy Scripts
@@ -2024,7 +1958,6 @@ TestContext Framework is enabled automatically if Groovy is on the classpath.
 
 The following example shows how to specify Groovy configuration files:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2037,7 +1970,7 @@ The following example shows how to specify Groovy configuration files:
 	}
 ----
 <1> Specifying the location of Groovy configuration files.
-====
+
 
 If you omit both the `locations` and `value` attributes from the `@ContextConfiguration`
 annotation, the TestContext framework tries to detect a default Groovy script.
@@ -2047,7 +1980,6 @@ detect a default location based on the name of the test class. If your class is 
 `"classpath:com/example/MyTestContext.groovy"`. The following example shows how to use
 the default:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2062,7 +1994,7 @@ the default:
 	}
 ----
 <1> Loading configuration from the default location.
-====
+
 
 .Declaring XML configuration and Groovy scripts simultaneously
 [TIP]
@@ -2075,7 +2007,6 @@ configured resource location ends with `.xml`, it is loaded by using an
 
 The following listing shows how to combine both in an integration test:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2087,7 +2018,6 @@ The following listing shows how to combine both in an integration test:
 		// class body...
 	}
 ----
-====
 =====
 
 [[testcontext-ctx-management-javaconfig]]
@@ -2098,7 +2028,6 @@ To load an `ApplicationContext` for your tests by using annotated classes (see
 class with `@ContextConfiguration` and configure the `classes` attribute with an array
 that contains references to annotated classes. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2110,7 +2039,7 @@ that contains references to annotated classes. The following example shows how t
 	}
 ----
 <1> Specifying annotated classes.
-====
+
 
 .Annotated Classes
 [TIP]
@@ -2141,7 +2070,6 @@ example, the `OrderServiceTest` class declares a `static` nested configuration c
 named `Config` that is automatically used to load the `ApplicationContext` for the test
 class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2174,7 +2102,7 @@ class:
 	}
 ----
 <1> Loading configuration information from the nested class.
-====
+
 
 [[testcontext-ctx-management-mixed-config]]
 ===== Mixing XML, Groovy Scripts, and Annotated Classes
@@ -2224,7 +2152,6 @@ order in which the initializers are invoked depends on whether they implement Sp
 `Ordered` interface or are annotated with Spring's `@Order` annotation or the standard
 `@Priority` annotation. The following example shows how to use initializers:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2239,7 +2166,7 @@ order in which the initializers are invoked depends on whether they implement Sp
 	}
 ----
 <1> Specifying configuration by using a configuration class and an initializer.
-====
+
 
 You can also omit the declaration of XML configuration files, Groovy scripts, or
 annotated classes in `@ContextConfiguration` entirely and instead declare only
@@ -2247,7 +2174,6 @@ annotated classes in `@ContextConfiguration` entirely and instead declare only
 in the context -- for example, by programmatically loading bean definitions from XML
 files or configuration classes. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2260,7 +2186,7 @@ files or configuration classes. The following example shows how to do so:
 	}
 ----
 <1> Specifying configuration by using only an initializer.
-====
+
 
 [[testcontext-ctx-management-inheritance]]
 ===== Context Configuration Inheritance
@@ -2287,7 +2213,6 @@ Beans defined in `extended-config.xml` can, therefore, override (that is, replac
 defined in `base-config.xml`. The following example shows how one class can extend
 another and use both its own configuration file and the superclass's configuration file:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2308,7 +2233,7 @@ another and use both its own configuration file and the superclass's configurati
 ----
 <1> Configuration file defined in the superclass.
 <2> Configuration file defined in the subclass.
-====
+
 
 Similarly, in the next example, which uses annotated classes, the `ApplicationContext`
 for `ExtendedTest` is loaded from the `BaseConfig` and `ExtendedConfig` classes, in that
@@ -2316,7 +2241,6 @@ order. Beans defined in `ExtendedConfig` can, therefore, override (that is, repl
 those defined in `BaseConfig`. The following example shows how one class can extend
 another and use both its own configuration class and the superclass's configuration class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2335,7 +2259,7 @@ another and use both its own configuration class and the superclass's configurat
 ----
 <1> Configuration class defined in the superclass.
 <2> Configuration class defined in the subclass.
-====
+
 
 In the next example, which uses context initializers, the `ApplicationContext` for
 `ExtendedTest` is initialized by using `BaseInitializer` and `ExtendedInitializer`. Note,
@@ -2344,7 +2268,6 @@ implement Spring's `Ordered` interface or are annotated with Spring's `@Order` a
 or the standard `@Priority` annotation. The following example shows how one class can
 extend another and use both its own initializer and the superclass's initializer:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2364,7 +2287,7 @@ extend another and use both its own initializer and the superclass's initializer
 ----
 <1> Initializer defined in the superclass.
 <2> Initializer defined in the subclass.
-====
+
 
 [[testcontext-ctx-management-env-profiles]]
 ===== Context Configuration with Environment Profiles
@@ -2382,7 +2305,6 @@ the older `ContextLoader` SPI.
 
 Consider two examples with XML configuration and `@Configuration` classes:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2450,7 +2372,6 @@ Consider two examples with XML configuration and `@Configuration` classes:
 		}
 	}
 ----
-====
 
 When `TransferServiceTest` is run, its `ApplicationContext` is loaded from the
 `app-config.xml` configuration file in the root of the classpath. If you inspect
@@ -2474,7 +2395,6 @@ but define an in-memory data source as a default when neither of these is active
 The following code listings demonstrate how to implement the same configuration and
 integration test with `@Configuration` classes instead of XML:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2574,7 +2494,6 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
-====
 
 In this variation, we have split the XML configuration into four independent
 `@Configuration` classes:
@@ -2600,7 +2519,6 @@ automatically inherit the `@ActiveProfiles` configuration from the base class. I
 following example, the declaration of `@ActiveProfiles` (as well as other annotations)
 has been moved to an abstract superclass, `AbstractIntegrationTest`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2634,12 +2552,10 @@ has been moved to an abstract superclass, `AbstractIntegrationTest`:
 		}
 	}
 ----
-====
 
 `@ActiveProfiles` also supports an `inheritProfiles` attribute that can be used to
 disable the inheritance of active profiles, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2651,7 +2567,6 @@ disable the inheritance of active profiles, as the following example shows:
 		// test body
 	}
 ----
-====
 
 [[testcontext-ctx-management-env-profiles-ActiveProfilesResolver]]
 Furthermore, it is sometimes necessary to resolve active profiles for tests
@@ -2670,7 +2585,6 @@ attribute of `@ActiveProfiles`. For further information, see the corresponding
 The following example demonstrates how to implement and register a custom
 `OperatingSystemActiveProfilesResolver`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2700,7 +2614,6 @@ The following example demonstrates how to implement and register a custom
 		}
 	}
 ----
-====
 
 [[testcontext-ctx-management-property-sources]]
 ===== Context Configuration with Test Property Sources
@@ -2744,7 +2657,6 @@ loaded by using the specified resource protocol. Resource location wildcards (su
 
 The following example uses a test properties file:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2755,7 +2667,7 @@ The following example uses a test properties file:
 	}
 ----
 <1> Specifying a properties file with an absolute path.
-====
+
 
 You can configure inlined properties in the form of key-value pairs by using the
 `properties` attribute of `@TestPropertySource`, as shown in the next example. All
@@ -2771,7 +2683,6 @@ a Java properties file:
 
 The following example sets two inlined properties:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2782,7 +2693,7 @@ The following example sets two inlined properties:
 	}
 ----
 <1> Setting two properties by using two variations of the key-value syntax.
-====
+
 
 ====== Default Properties File Detection
 
@@ -2809,7 +2720,6 @@ entries for the `timezone` and `port` properties those are overridden by the inl
 properties declared by using the `properties` attribute. The following example shows how
 to specify properties both in a file and inline:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2822,7 +2732,6 @@ to specify properties both in a file and inline:
 		// class body...
 	}
 ----
-====
 
 ====== Inheriting and Overriding Test Property Sources
 
@@ -2847,7 +2756,6 @@ for `ExtendedTest` is loaded by using the `base.properties` and `extended.proper
 files as test property source locations. The following example shows how to define
 properties in both a subclass and its superclass by using `properties` files:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2863,14 +2771,12 @@ properties in both a subclass and its superclass by using `properties` files:
 		// ...
 	}
 ----
-====
 
 In the next example, the `ApplicationContext` for `BaseTest` is loaded by using only the
 inlined `key1` property. In contrast, the `ApplicationContext` for `ExtendedTest` is
 loaded by using the inlined `key1` and `key2` properties. The following example shows how
 to define properties in both a subclass and its superclass by using inline properties:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2886,7 +2792,6 @@ to define properties in both a subclass and its superclass by using inline prope
 		// ...
 	}
 ----
-====
 
 [[testcontext-ctx-management-web]]
 ===== Loading a `WebApplicationContext`
@@ -2921,7 +2826,6 @@ loading a `WebApplicationContext`. The following example shows the TestContext
 framework's support for convention over configuration:
 
 .Conventions
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2938,7 +2842,6 @@ framework's support for convention over configuration:
 		//...
 	}
 ----
-====
 
 If you annotate a test class with `@WebAppConfiguration` without specifying a resource
 base path, the resource path effectively defaults to `file:src/main/webapp`. Similarly,
@@ -2951,7 +2854,6 @@ The following example shows how to explicitly declare a resource base path with
 `@WebAppConfiguration` and an XML resource location with `@ContextConfiguration`:
 
 .Default resource semantics
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2967,7 +2869,6 @@ The following example shows how to explicitly declare a resource base path with
 		//...
 	}
 ----
-====
 
 The important thing to note here is the different semantics for paths with these two
 annotations. By default, `@WebAppConfiguration` resource paths are file system based,
@@ -2977,7 +2878,6 @@ The following example shows that we can override the default resource semantics 
 annotations by specifying a Spring resource prefix:
 
 .Explicit resource semantics
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2993,7 +2893,6 @@ annotations by specifying a Spring resource prefix:
 		//...
 	}
 ----
-====
 
 Contrast the comments in this example with the previous example.
 
@@ -3017,7 +2916,6 @@ mocks can be autowired into your test instance. Note that the `WebApplicationCon
 managed per test method by the `ServletTestExecutionListener`.
 
 .Injecting mocks
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3046,7 +2944,6 @@ managed per test method by the `ServletTestExecutionListener`.
 		//...
 	}
 ----
-====
 --
 
 [[testcontext-ctx-management-caching]]
@@ -3165,7 +3062,6 @@ one for the root `WebApplicationContext` (loaded by using the `TestAppConfig`
 that is autowired into the test instance is the one for the child context (that is, the
 lowest context in the hierarchy). The following listing shows this configuration scenario:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3183,7 +3079,6 @@ lowest context in the hierarchy). The following listing shows this configuration
 		// ...
 	}
 ----
-====
 --
 
 
@@ -3202,7 +3097,6 @@ based on the configuration in `AbstractWebTests` is set as the parent context fo
 the contexts loaded for the concrete subclasses. The following listing shows this
 configuration scenario:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3217,7 +3111,6 @@ configuration scenario:
 	@ContextHierarchy(@ContextConfiguration("/spring/rest-ws-config.xml")
 	public class RestWebServiceTests extends AbstractWebTests {}
 ----
-====
 --
 
 
@@ -3235,7 +3128,6 @@ application context loaded from `/app-config.xml` is set as the parent context f
 contexts loaded from `/user-config.xml` and `{"/user-config.xml", "/order-config.xml"}`.
 The following listing shows this configuration scenario:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3251,7 +3143,6 @@ The following listing shows this configuration scenario:
 	)
 	public class ExtendedTests extends BaseTests {}
 ----
-====
 --
 
 .Class hierarchy with overridden context hierarchy configuration
@@ -3263,7 +3154,6 @@ application context for `ExtendedTests` is loaded only from `/test-user-config.x
 has its parent set to the context loaded from `/app-config.xml`. The following listing
 shows this configuration scenario:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3282,7 +3172,6 @@ shows this configuration scenario:
 	))
 	public class ExtendedTests extends BaseTests {}
 ----
-====
 
 .Dirtying a context within a context hierarchy
 NOTE: If you use `@DirtiesContext` in a test whose context is configured as part of a
@@ -3346,7 +3235,6 @@ properly imported through an `import static` declaration that is not shown in th
 The first code listing shows a JUnit 4 based implementation of the test class that uses
 `@Autowired` for field injection:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3366,12 +3254,10 @@ The first code listing shows a JUnit 4 based implementation of the test class th
 		}
 	}
 ----
-====
 
 Alternatively, you can configure the class to use `@Autowired` for setter injection, as
 follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3395,13 +3281,11 @@ follows:
 		}
 	}
 ----
-====
 
 The preceding code listings use the same XML context file referenced by the
 `@ContextConfiguration` annotation (that is, `repository-config.xml`). The following
 shows this configuration:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3422,7 +3306,6 @@ shows this configuration:
 
 	</beans>
 ----
-====
 
 [NOTE]
 =====
@@ -3433,7 +3316,6 @@ such a case, you can override the setter method and use the `@Qualifier` annotat
 indicate a specific target bean, as follows (but make sure to delegate to the overridden
 method in the superclass as well):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3447,7 +3329,6 @@ method in the superclass as well):
 
 	// ...
 ----
-====
 
 The specified qualifier value indicates the specific `DataSource` bean to inject,
 narrowing the set of type matches to a specific bean. Its value is matched against
@@ -3480,7 +3361,6 @@ configure these request parameters through the mock managed by the TestContext f
 The following listing shows the configuration for this use case:
 
 .Request-scoped bean configuration
-====
 [source,xml,indent=0]
 ----
 	<beans>
@@ -3497,7 +3377,6 @@ The following listing shows the configuration for this use case:
 
 	</beans>
 ----
-====
 
 In `RequestScopedBeanTests`, we inject both the `UserService` (that is, the subject under
 test) and the `MockHttpServletRequest` into our test instance. Within our
@@ -3509,7 +3388,6 @@ set parameters). We can then perform assertions against the results based on the
 inputs for the username and password. The following listing shows how to do so:
 
 .Request-scoped bean test
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3531,7 +3409,6 @@ inputs for the username and password. The following listing shows how to do so:
 		}
 	}
 ----
-====
 
 The following code snippet is similar to the one we saw earlier for a request-scoped
 bean. However, this time, the `userService` bean has a dependency on a session-scoped
@@ -3541,7 +3418,6 @@ need to configure a theme in the mock session managed by the TestContext framewo
 following example shows how to do so:
 
 .Session-scoped bean configuration
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3558,7 +3434,6 @@ following example shows how to do so:
 
 	</beans>
 ----
-====
 
 In `SessionScopedBeanTests`, we inject the `UserService` and the `MockHttpSession` into
 our test instance. Within our `sessionScope()` test method, we set up our test fixture by
@@ -3569,7 +3444,6 @@ the user service has access to the session-scoped `userPreferences` for the curr
 configured theme. The following example shows how to do so:
 
 .Session-scoped bean test
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3590,7 +3464,6 @@ configured theme. The following example shows how to do so:
 		}
 	}
 ----
-====
 
 
 [[testcontext-tx]]
@@ -3660,7 +3533,6 @@ are preconfigured for transactional support at the class level.
 The following example demonstrates a common scenario for writing an integration test for
 a Hibernate-based `UserRepository`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3704,7 +3576,6 @@ a Hibernate-based `UserRepository`:
 		}
 	}
 ----
-====
 
 As explained in <<testcontext-tx-rollback-and-commit-behavior>>, there is no need to
 clean up the database after the `createUser()` method runs, since any changes made to the
@@ -3733,7 +3604,6 @@ The following example demonstrates some of the features of `TestTransaction`. Se
 javadoc for {api-spring-framework}/test/context/transaction/TestTransaction.html[`TestTransaction`]
 for further details.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3764,7 +3634,6 @@ for further details.
 		}
 	}
 ----
-====
 
 [[testcontext-tx-before-and-after-tx]]
 ===== Running Code Outside of a Transaction
@@ -3810,7 +3679,6 @@ Transaction management for `@Sql`>> contains an additional example that uses `@S
 declarative SQL script execution with default transaction rollback semantics. The
 following example shows the relevant annotations in bold:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3849,10 +3717,10 @@ following example shows the relevant annotations in bold:
 
 	}
 ----
-====
 
 [[testcontext-tx-false-positives]]
 .Avoid false positives when testing ORM code
+
 [NOTE]
 =====
 When you test application code that manipulates the state of a Hibernate session or JPA
@@ -3864,7 +3732,6 @@ of work. In the following Hibernate-based example test case, one method demonstr
 false positive, and the other method correctly exposes the results of flushing the
 session:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3891,11 +3758,9 @@ session:
 
 	// ...
 ----
-====
 
 The following example shows matching methods for JPA:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3922,7 +3787,6 @@ The following example shows matching methods for JPA:
 
 	// ...
 ----
-====
 =====
 
 
@@ -3974,7 +3838,6 @@ to execute the populator against a `javax.sql.DataSource`. The following example
 specifies SQL scripts for a test schema and test data, sets the statement separator to
 `@@`, and executes the scripts against a `DataSource`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3989,7 +3852,6 @@ specifies SQL scripts for a test schema and test data, sets the statement separa
 		// execute code that uses the test schema and data
 	}
 ----
-====
 
 Note that `ResourceDatabasePopulator` internally delegates to `ScriptUtils` for parsing
 and running SQL scripts. Similarly, the `executeSqlScript(..)` methods in
@@ -4021,7 +3883,6 @@ the specified resource protocol.
 The following example shows how to use `@Sql` at the class level and at the method level
 within a JUnit Jupiter based integration test class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4041,7 +3902,6 @@ within a JUnit Jupiter based integration test class:
 		}
 	}
 ----
-====
 
 ====== Default Script Detection
 
@@ -4066,7 +3926,6 @@ Java 8, you can use `@Sql` as a repeatable annotation. Otherwise, you can use th
 
 The following example shows how to use `@Sql` as a repeatable annotation with Java 8:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4077,7 +3936,6 @@ The following example shows how to use `@Sql` as a repeatable annotation with Ja
 		// execute code that uses the test schema and test data
 	}
 ----
-====
 
 In the scenario presented in the preceding example, the `test-schema.sql` script uses a
 different syntax for single-line comments.
@@ -4086,7 +3944,6 @@ The following example is identical to the preceding example, except that the `@S
 declarations are grouped together within `@SqlGroup`, for compatibility with Java 6 and
 Java 7.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4099,7 +3956,6 @@ Java 7.
 		// execute code that uses the test schema and test data
 	}
 ----
-====
 
 ====== Script Execution Phases
 
@@ -4108,7 +3964,6 @@ you need to run a particular set of scripts after the test method (for example, 
 up database state), you can use the `executionPhase` attribute in `@Sql`, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4127,7 +3982,6 @@ following example shows:
 		// to the database outside of the test's transaction
 	}
 ----
-====
 
 Note that `ISOLATED` and `AFTER_TEST_METHOD` are statically imported from
 `Sql.TransactionMode` and `Sql.ExecutionPhase`, respectively.
@@ -4184,7 +4038,6 @@ reference manual, the javadoc for
 provide detailed information, and the following example shows a typical testing scenario
 that uses JUnit Jupiter and transactional tests with `@Sql`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4217,7 +4070,6 @@ that uses JUnit Jupiter and transactional tests with `@Sql`:
 		}
 	}
 ----
-====
 
 Note that there is no need to clean up the database after the `usersTest()` method is
 run, since any changes made to the database (either within the test method or within the
@@ -4295,7 +4147,6 @@ alternative runner (such as JUnit 4's `Parameterized` runner) or third-party run
 The following code listing shows the minimal requirements for configuring a test class to
 run with the custom Spring `Runner`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4309,7 +4160,6 @@ run with the custom Spring `Runner`:
 		}
 	}
 ----
-====
 
 In the preceding example, `@TestExecutionListeners` is configured with an empty list, to
 disable the default listeners, which otherwise would require an `ApplicationContext` to
@@ -4337,7 +4187,6 @@ To support the full functionality of the TestContext framework, you must combine
 `SpringClassRule` with a `SpringMethodRule`. The following example shows the proper way
 to declare these rules in an integration test:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4357,7 +4206,6 @@ to declare these rules in an integration test:
 		}
 	}
 ----
-====
 
 [[testcontext-support-classes-junit4]]
 ===== JUnit 4 Support Classes
@@ -4422,7 +4270,6 @@ TestNG:
 The following code listing shows how to configure a test class to use the
 `SpringExtension` in conjunction with `@ContextConfiguration`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4438,7 +4285,6 @@ The following code listing shows how to configure a test class to use the
 		}
 	}
 ----
-====
 
 Since you can also use annotations in JUnit 5 as meta-annotations, Spring provides the
 `@SpringJUnitConfig` and `@SpringJUnitWebConfig` composed annotations to simplify the
@@ -4447,7 +4293,6 @@ configuration of the test `ApplicationContext` and JUnit Jupiter.
 The following example uses `@SpringJUnitConfig` to reduce the amount of configuration
 used in the previous example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4462,12 +4307,10 @@ used in the previous example:
 		}
 	}
 ----
-====
 
 Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 `WebApplicationContext` for use with JUnit Jupiter:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4482,7 +4325,6 @@ Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 		}
 	}
 ----
-====
 
 See the documentation for `@SpringJUnitConfig` and `@SpringJUnitWebConfig` in
 <<integration-testing-annotations-junit-jupiter>> for further details.
@@ -4538,7 +4380,6 @@ In the following example, Spring injects the `OrderService` bean from the
 `ApplicationContext` loaded from `TestConfig.class` into the
 `OrderServiceIntegrationTests` constructor.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4555,7 +4396,6 @@ In the following example, Spring injects the `OrderService` bean from the
 		// tests that use the injected OrderService
 	}
 ----
-====
 
 Note that this feature lets test dependencies be `final` and therefore immutable.
 
@@ -4570,7 +4410,6 @@ parameter with the corresponding bean from the test's `ApplicationContext`.
 In the following example, Spring injects the `OrderService` from the `ApplicationContext`
 loaded from `TestConfig.class` into the `deleteOrder()` test method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4583,7 +4422,6 @@ loaded from `TestConfig.class` into the `deleteOrder()` test method:
 		}
 	}
 ----
-====
 
 Due to the robustness of the `ParameterResolver` support in JUnit Jupiter, you can also
 have multiple dependencies injected into a single method, not only from Spring but also
@@ -4592,7 +4430,6 @@ from JUnit Jupiter itself or other third-party extensions.
 The following example shows how to have both Spring and JUnit Jupiter inject dependencies
 into the `placeOrderRepeatedly()` test method simultaneously.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4608,7 +4445,6 @@ into the `placeOrderRepeatedly()` test method simultaneously.
 		}
 	}
 ----
-====
 
 Note that the use of `@RepeatedTest` from JUnit Jupiter lets the test method gain access
 to the `RepetitionInfo`.
@@ -4696,7 +4532,6 @@ most part, everything should work as it does at runtime with a few notable excep
 explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>. The following JUnit
 Jupiter-based example uses Spring MVC Test:
 
-====
 [source,java,indent=0]
 ----
 	import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -4722,7 +4557,6 @@ Jupiter-based example uses Spring MVC Test:
 		}
 	}
 ----
-====
 
 The preceding test relies on the `WebApplicationContext` support of the TestContext
 framework to load Spring configuration from an XML configuration file located in the same
@@ -4758,7 +4592,6 @@ Spring MVC configuration through the TestContext framework, which loads the Spri
 configuration and injects a `WebApplicationContext` into the test to use to build a
 `MockMvc` instance. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4781,14 +4614,12 @@ configuration and injects a `WebApplicationContext` into the test to use to buil
 
 	}
 ----
-====
 
 Your second option is to manually create a controller instance without loading Spring
 configuration. Instead, basic default configuration, roughly comparable to that of the
 MVC JavaConfig or the MVC namespace, is automatically created. You can customize it to a
 degree. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4805,7 +4636,6 @@ degree. The following example shows how to do so:
 
 	}
 ----
-====
 
 Which setup option should you use?
 
@@ -4816,7 +4646,6 @@ test suite. Furthermore, you can inject mock services into controllers through S
 configuration to remain focused on testing the web layer. The following example declares
 a mock service with Mockito:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4824,12 +4653,10 @@ a mock service with Mockito:
 		<constructor-arg value="org.example.AccountService"/>
 	</bean>
 ----
-====
 
 You can then inject the mock service into the test to set up and verify your
 expectations, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4850,7 +4677,6 @@ expectations, as the following example shows:
 
 	}
 ----
-====
 
 The `standaloneSetup`, on the other hand, is a little closer to a unit test. It tests one
 controller at a time. You can manually inject the controller with mock dependencies, and
@@ -4873,7 +4699,6 @@ some common and very useful features. For example, you can declare an `Accept` h
 all requests and expect a status of 200 as well as a `Content-Type` header in all
 responses, as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4885,14 +4710,12 @@ MockMvc mockMvc = standaloneSetup(new MusicController())
 		.alwaysExpect(content().contentType("application/json;charset=UTF-8"))
 		.build();
 ----
-====
 
 In addition, third-party frameworks (and applications) can pre-package setup
 instructions, such as those in a `MockMvcConfigurer`. The Spring Framework has one such
 built-in implementation that helps to save and re-use the HTTP session across requests.
 You can use it as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4904,7 +4727,6 @@ You can use it as follows:
 
 	// Use mockMvc to perform requests...
 ----
-====
 
 See the javadoc for
 {api-spring-framework}/test/web/servlet/setup/ConfigurableMockMvcBuilder.html[`ConfigurableMockMvcBuilder`]
@@ -4915,46 +4737,38 @@ for a list of all MockMvc builder features or use the IDE to explore the availab
 
 You can perform requests that use any HTTP method, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(post("/hotels/{id}", 42).accept(MediaType.APPLICATION_JSON));
 ----
-====
 
 You can also perform file upload requests that internally use
 `MockMultipartHttpServletRequest` so that there is no actual parsing of a multipart
 request. Rather, you have to set it up to be similar to the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(multipart("/doc").file("a1", "ABC".getBytes("UTF-8")));
 ----
-====
 
 You can specify query parameters in URI template style, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/hotels?thing={thing}", "somewhere"));
 ----
-====
 
 You can also add Servlet request parameters that represent either query or form
 parameters, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/hotels").param("thing", "somewhere"));
 ----
-====
 
 If application code relies on Servlet request parameters and does not check the query
 string explicitly (as is most often the case), it does not matter which option you use.
@@ -4967,19 +4781,16 @@ request URI. If you must test with the full request URI, be sure to set the `con
 and `servletPath` accordingly so that request mappings work, as the following example
 shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/app/main/hotels/{id}").contextPath("/app").servletPath("/main"))
 ----
-====
 
 In the preceding example, it would be cumbersome to set the `contextPath` and
 `servletPath` with every performed request. Instead, you can set up default request
 properties, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4995,7 +4806,6 @@ properties, as the following example shows:
 				.accept(MediaType.APPLICATION_JSON)).build();
 		}
 ----
-====
 
 The preceding properties affect every request performed through the `MockMvc` instance.
 If the same property is also specified on a given request, it overrides the default
@@ -5008,13 +4818,11 @@ they must be specified on every request.
 You can define expectations by appending one or more `.andExpect(..)` calls after
 performing a request, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());
 ----
-====
 
 `MockMvcResultMatchers.*` provides a number of expectations, some of which are further
 nested with more detailed expectations.
@@ -5031,7 +4839,6 @@ inspect Servlet specific aspects, such as request and session attributes.
 
 The following test asserts that binding or validation failed:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5039,13 +4846,11 @@ The following test asserts that binding or validation failed:
 		.andExpect(status().isOk())
 		.andExpect(model().attributeHasErrors("person"));
 ----
-====
 
 Many times, when writing tests, it is useful to dump the results of the performed
 request. You can do so as follows, where `print()` is a static import from
 `MockMvcResultHandlers`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5054,7 +4859,6 @@ request. You can do so as follows, where `print()` is a static import from
 		.andExpect(status().isOk())
 		.andExpect(model().attributeHasErrors("person"));
 ----
-====
 
 As long as request processing does not cause an unhandled exception, the `print()` method
 prints all the available result data to `System.out`. Spring Framework 4.2 introduced a
@@ -5069,19 +4873,16 @@ In some cases, you may want to get direct access to the result and verify someth
 cannot be verified otherwise. This can be achieved by appending `.andReturn()` after all
 other expectations, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	MvcResult mvcResult = mockMvc.perform(post("/persons")).andExpect(status().isOk()).andReturn();
 	// ...
 ----
-====
 
 If all tests repeat the same expectations, you can set up common expectations once when
 building the `MockMvc` instance, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5090,7 +4891,6 @@ building the `MockMvc` instance, as the following example shows:
 		.alwaysExpect(content().contentType("application/json;charset=UTF-8"))
 		.build()
 ----
-====
 
 Note that common expectations are always applied and cannot be overridden without
 creating a separate `MockMvc` instance.
@@ -5099,20 +4899,17 @@ When a JSON response content contains hypermedia links created with
 https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], you can verify the
 resulting links by using JsonPath expressions, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/people").accept(MediaType.APPLICATION_JSON))
 		.andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("http://localhost:8080/people"));
 ----
-====
 
 When XML response content contains hypermedia links created with
 https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], you can verify the
 resulting links by using XPath expressions:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5120,7 +4917,6 @@ resulting links by using XPath expressions:
 	mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
 		.andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));
 ----
-====
 
 [[spring-mvc-test-server-filters]]
 ===== Filter Registrations
@@ -5128,13 +4924,11 @@ resulting links by using XPath expressions:
 When setting up a `MockMvc` instance, you can register one or more Servlet `Filter`
 instances, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	mockMvc = standaloneSetup(new PersonController()).addFilters(new CharacterEncodingFilter()).build();
 ----
-====
 
 Registered filters are invoked through the `MockFilterChain` from `spring-test`, and the
 last filter delegates to the `DispatcherServlet`.
@@ -5226,7 +5020,6 @@ supports paging through all messages. How would you go about testing it?
 
 With Spring MVC Test, we can easily test if we are able to create a `Message`, as follows:
 
-====
 [source,java,indent=0]
 ----
 	MockHttpServletRequestBuilder createMessage = post("/messages/")
@@ -5237,12 +5030,10 @@ With Spring MVC Test, we can easily test if we are able to create a `Message`, a
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/messages/123"));
 ----
-====
 
 What if we want to test the form view that lets us create the message? For example,
 assume our form looks like the following snippet:
 
-====
 [source,xml,indent=0]
 ----
 	<form id="messageForm" action="/messages/" method="post">
@@ -5259,26 +5050,22 @@ assume our form looks like the following snippet:
 		</div>
 	</form>
 ----
-====
 
 How do we ensure that our form produce the correct request to create a new message? A
 naive attempt might resemble the following:
 
-====
 [source,java,indent=0]
 ----
 	mockMvc.perform(get("/messages/form"))
 			.andExpect(xpath("//input[@name='summary']").exists())
 			.andExpect(xpath("//textarea[@name='text']").exists());
 ----
-====
 
 This test has some obvious drawbacks. If we update our controller to use the parameter
 `message` instead of `text`, our form test continues to pass, even though the HTML form
 is out of synch with the controller. To resolve this we can combine our two tests, as
 follows:
 
-====
 [[spring-mvc-test-server-htmlunit-mock-mvc-test]]
 [source,java,indent=0]
 ----
@@ -5296,7 +5083,6 @@ follows:
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/messages/123"));
 ----
-====
 
 This would reduce the risk of our test incorrectly passing, but there are still some
 problems:
@@ -5383,7 +5169,6 @@ First, make sure that you have included a test dependency on
 We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by using the
 `MockMvcWebClientBuilder`, as follows:
 
-====
 [source,java,indent=0]
 ----
 	@Autowired
@@ -5398,7 +5183,6 @@ We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by usi
 				.build();
 	}
 ----
-====
 
 NOTE: This is a simple example of using `MockMvcWebClientBuilder`. For advanced usage,
 see <<spring-mvc-test-server-htmlunit-mah-advanced-builder>>.
@@ -5415,12 +5199,10 @@ Now we can use HtmlUnit as we normally would but without the need to deploy our
 application to a Servlet container. For example, we can request the view to create a
 message with the following:
 
-====
 [source,java,indent=0]
 ----
 	HtmlPage createMsgFormPage = webClient.getPage("http://localhost/messages/form");
 ----
-====
 
 NOTE: The default context path is `""`. Alternatively, we can specify the context path,
 as described in <<spring-mvc-test-server-htmlunit-mah-advanced-builder>>.
@@ -5428,7 +5210,6 @@ as described in <<spring-mvc-test-server-htmlunit-mah-advanced-builder>>.
 Once we have a reference to the `HtmlPage`, we can then fill out the form and submit it
 to create a message, as the following example shows:
 
-====
 [source,java,indent=0]
 ----
 	HtmlForm form = createMsgFormPage.getHtmlElementById("messageForm");
@@ -5439,12 +5220,10 @@ to create a message, as the following example shows:
 	HtmlSubmitInput submit = form.getOneHtmlElementByAttribute("input", "type", "submit");
 	HtmlPage newMessagePage = submit.click();
 ----
-====
 
 Finally, we can verify that a new message was created successfully. The following
 assertions use the http://joel-costigliola.github.io/assertj/[AssertJ] library:
 
-====
 [source,java,indent=0]
 ----
 	assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123");
@@ -5455,7 +5234,6 @@ assertions use the http://joel-costigliola.github.io/assertj/[AssertJ] library:
 	String text = newMessagePage.getHtmlElementById("text").getTextContent();
 	assertThat(text).isEqualTo("In case you didn't know, Spring Rocks!");
 ----
-====
 
 The preceding code improves on our
 <<spring-mvc-test-server-htmlunit-mock-mvc-test,MockMvc test>> in a number of ways.
@@ -5477,7 +5255,6 @@ In the examples so far, we have used `MockMvcWebClientBuilder` in the simplest w
 possible, by building a `WebClient` based on the `WebApplicationContext` loaded for us by
 the Spring TestContext Framework. This approach is repeated in the following example:
 
-====
 [source,java,indent=0]
 ----
 	@Autowired
@@ -5492,11 +5269,9 @@ the Spring TestContext Framework. This approach is repeated in the following exa
 				.build();
 	}
 ----
-====
 
 We can also specify additional configuration options, as the following example shows:
 
-====
 [source,java,indent=0]
 ----
 	WebClient webClient;
@@ -5514,12 +5289,10 @@ We can also specify additional configuration options, as the following example s
 			.build();
 	}
 ----
-====
 
 As an alternative, we can perform the exact same setup by configuring the `MockMvc`
 instance separately and supplying it to the `MockMvcWebClientBuilder`, as follows:
 
-====
 [source,java,indent=0]
 ----
 	MockMvc mockMvc = MockMvcBuilders
@@ -5536,7 +5309,6 @@ instance separately and supplying it to the `MockMvcWebClientBuilder`, as follow
 			.useMockMvcForHosts("example.com","example.org")
 			.build();
 ----
-====
 
 This is more verbose, but, by building the `WebClient` with a `MockMvc` instance, we have
 the full power of MockMvc at our fingertips.
@@ -5572,19 +5344,16 @@ afterwards.
 If one of the fields were named "`summary`", we might have something that resembles the
 following repeated in multiple places within our tests:
 
-====
 [source,java,indent=0]
 ----
 	HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
 	summaryInput.setValueAttribute(summary);
 ----
-====
 
 So what happens if we change the `id` to `smmry`? Doing so would force us to update all
 of our tests to incorporate this change. This violates the DRY principle, so we should
 ideally extract this code into its own method, as follows:
 
-====
 [source,java,indent=0]
 ----
 	public HtmlPage createMessage(HtmlPage currentPage, String summary, String text) {
@@ -5597,14 +5366,12 @@ ideally extract this code into its own method, as follows:
 		summaryInput.setValueAttribute(summary);
 	}
 ----
-====
 
 Doing so ensures that we do not have to update all of our tests if we change the UI.
 
 We might even take this a step further and place this logic within an `Object` that
 represents the `HtmlPage` we are currently on, as the following example shows:
 
-====
 [source,java,indent=0]
 ----
 	public class CreateMessagePage {
@@ -5639,7 +5406,6 @@ represents the `HtmlPage` we are currently on, as the following example shows:
 		}
 	}
 ----
-====
 
 Formerly, this pattern was known as the
 https://github.com/SeleniumHQ/selenium/wiki/PageObjects[Page Object Pattern]. While we
@@ -5655,7 +5421,6 @@ includes a test dependency on `org.seleniumhq.selenium:selenium-htmlunit-driver`
 We can easily create a Selenium WebDriver that integrates with MockMvc by using the
 `MockMvcHtmlUnitDriverBuilder` as the following example shows:
 
-====
 [source,java,indent=0]
 ----
 	@Autowired
@@ -5670,7 +5435,6 @@ We can easily create a Selenium WebDriver that integrates with MockMvc by using 
 				.build();
 }
 ----
-====
 
 NOTE: This is a simple example of using `MockMvcHtmlUnitDriverBuilder`. For more advanced
 usage, see <<spring-mvc-test-server-htmlunit-webdriver-advanced-builder>>.
@@ -5687,22 +5451,18 @@ Now we can use WebDriver as we normally would but without the need to deploy our
 application to a Servlet container. For example, we can request the view to create a
 message with the following:
 
-====
 [source,java,indent=0]
 ----
 	CreateMessagePage page = CreateMessagePage.to(driver);
 ----
-====
 
 We can then fill out the form and submit it to create a message, as follows:
 
-====
 [source,java,indent=0]
 ----
 	ViewMessagePage viewMessagePage =
 			page.createMessage(ViewMessagePage.class, expectedSummary, expectedText);
 ----
-====
 
 This improves on the design of our <<spring-mvc-test-server-htmlunit-mah-usage,HtmlUnit
 test>> by leveraging the Page Object Pattern. As we mentioned in
@@ -5710,7 +5470,6 @@ test>> by leveraging the Page Object Pattern. As we mentioned in
 with HtmlUnit, but it is much easier with WebDriver. Consider the following
 `CreateMessagePage` implementation:
 
-====
 [source,java,indent=0]
 ----
 	public class CreateMessagePage
@@ -5760,23 +5519,20 @@ by the `id` or `name` of the element within the HTML page.
 https://github.com/SeleniumHQ/selenium/wiki/PageFactory#making-the-example-work-using-annotations[`@FindBy` annotation]
 to override the default lookup behavior. Our example shows how to use the `@FindBy`
 annotation to look up our submit button with a `css` selector (*input[type=submit]*).
-====
+
 
 Finally, we can verify that a new message was created successfully. The following
 assertions use the http://joel-costigliola.github.io/assertj/[AssertJ] assertion library:
 
-====
 [source,java,indent=0]
 ----
 	assertThat(viewMessagePage.getMessage()).isEqualTo(expectedMessage);
 	assertThat(viewMessagePage.getSuccess()).isEqualTo("Successfully created a new message");
 ----
-====
 
 We can see that our `ViewMessagePage` lets us interact with our custom domain model. For
 example, it exposes a method that returns a `Message` object:
 
-====
 [source,java,indent=0]
 ----
 	public Message getMessage() throws ParseException {
@@ -5788,14 +5544,12 @@ example, it exposes a method that returns a `Message` object:
 		return message;
 	}
 ----
-====
 
 We can then use the rich domain objects in our assertions.
 
 Lastly, we must not forget to close the `WebDriver` instance when the test is complete,
 as follows:
 
-====
 [source,java,indent=0]
 ----
 	@After
@@ -5805,7 +5559,6 @@ as follows:
 		}
 	}
 ----
-====
 
 For additional information on using WebDriver, see the Selenium
 https://github.com/SeleniumHQ/selenium/wiki/Getting-Started[WebDriver documentation].
@@ -5817,7 +5570,6 @@ In the examples so far, we have used `MockMvcHtmlUnitDriverBuilder` in the simpl
 possible, by building a `WebDriver` based on the `WebApplicationContext` loaded for us by
 the Spring TestContext Framework. This approach is repeated here, as follows:
 
-====
 [source,java,indent=0]
 ----
 	@Autowired
@@ -5832,11 +5584,9 @@ the Spring TestContext Framework. This approach is repeated here, as follows:
 				.build();
 	}
 ----
-====
 
 We can also specify additional configuration options, as follows:
 
-====
 [source,java,indent=0]
 ----
 	WebDriver driver;
@@ -5854,12 +5604,10 @@ We can also specify additional configuration options, as follows:
 				.build();
 }
 ----
-====
 
 As an alternative, we can perform the exact same setup by configuring the `MockMvc`
 instance separately and supplying it to the `MockMvcHtmlUnitDriverBuilder`, as follows:
 
-====
 [source,java,indent=0]
 ----
 	MockMvc mockMvc = MockMvcBuilders
@@ -5876,7 +5624,6 @@ instance separately and supplying it to the `MockMvcHtmlUnitDriverBuilder`, as f
 			.useMockMvcForHosts("example.com","example.org")
 			.build();
 ----
-====
 
 This is more verbose, but, by building the `WebDriver` with a `MockMvc` instance, we have
 the full power of MockMvc at our fingertips.
@@ -5904,7 +5651,6 @@ boilerplate code for us.
 We can easily initialize a Geb `Browser` with a Selenium WebDriver that uses MockMvc, as
 follows:
 
-====
 [source,groovy]
 ----
 def setup() {
@@ -5913,7 +5659,6 @@ def setup() {
 		.build()
 }
 ----
-====
 
 NOTE: This is a simple example of using `MockMvcHtmlUnitDriverBuilder`. For more advanced
 usage, see <<spring-mvc-test-server-htmlunit-webdriver-advanced-builder>>.
@@ -5930,16 +5675,13 @@ Now we can use Geb as we normally would but without the need to deploy our appli
 a Servlet container. For example, we can request the view to create a message with the
 following:
 
-====
 [source,groovy]
 ----
 to CreateMessagePage
 ----
-====
 
 We can then fill out the form and submit it to create a message, as follows:
 
-====
 [source,groovy]
 ----
 when:
@@ -5947,7 +5689,6 @@ form.summary = expectedSummary
 form.text = expectedMessage
 submit.click(ViewMessagePage)
 ----
-====
 
 Any unrecognized method calls or property accesses or references that are not found are
 forwarded to the current page object. This removes a lot of the boilerplate code we
@@ -5959,7 +5700,6 @@ Pattern. As mentioned previously, we can use the Page Object Pattern with HtmlUn
 WebDriver, but it is even easier with Geb. Consider our new Groovy-based
 `CreateMessagePage` implementation:
 
-====
 [source,groovy]
 ----
 class CreateMessagePage extends Page {
@@ -5972,31 +5712,26 @@ class CreateMessagePage extends Page {
 	}
 }
 ----
-====
 
 Our `CreateMessagePage` extends `Page`. We do not go over the details of `Page`, but, in
 summary, it contains common functionality for all of our pages. We define a URL in which
 this page can be found. This lets us navigate to the page, as follows:
 
-====
 [source,groovy]
 ----
 to CreateMessagePage
 ----
-====
 
 We also have an `at` closure that determines if we are at the specified page. It should
 return `true` if we are on the correct page. This is why we can assert that we are on the
 correct page, as follows:
 
-====
 [source,groovy]
 ----
 then:
 at CreateMessagePage
 errors.contains('This field is required.')
 ----
-====
 
 NOTE: We use an assertion in the closure so that we can determine where things went wrong
 if we were at the wrong page.
@@ -6008,7 +5743,6 @@ API] to select the content in which we are interested.
 
 Finally, we can verify that a new message was created successfully, as follows:
 
-====
 [source,groovy]
 ----
 then:
@@ -6019,7 +5753,6 @@ date
 summary == expectedSummary
 message == expectedMessage
 ----
-====
 
 For further details on how to get the most out of Geb, see
 http://www.gebish.org/manual/current/[The Book of Geb] user's manual.
@@ -6033,7 +5766,6 @@ idea is to declare expected requests and to provide "`stub`" responses so that y
 focus on testing the code in isolation (that is, without running a server). The following
 example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6046,7 +5778,6 @@ example shows how to do so:
 
 	mockServer.verify();
 ----
-====
 
 In the preceding example, `MockRestServiceServer` (the central class for client-side REST
 tests) configures the `RestTemplate` with a custom `ClientHttpRequestFactory` that
@@ -6062,20 +5793,17 @@ can set the `ignoreExpectOrder` option when building the server, in which case a
 expectations are checked (in order) to find a match for a given request. That means
 requests are allowed to come in any order. The following example uses `ignoreExpectOrder`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder(true).build();
 ----
-====
 
 Even with unordered requests by default, each request is allowed to execute once only.
 The `expect` method provides an overloaded variant that accepts an `ExpectedCount`
 argument that specifies a count range (for example, `once`, `manyTimes`, `max`, `min`,
 `between`, and so on). The following example uses `times`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6089,7 +5817,6 @@ argument that specifies a count range (for example, `once`, `manyTimes`, `max`, 
 
 	mockServer.verify();
 ----
-====
 
 Note that, when `ignoreExpectOrder` is not set (the default), and, therefore, requests
 are expected in order of declaration, then that order applies only to the first of any
@@ -6103,7 +5830,6 @@ As an alternative to all of the above, the client-side test support also provide
 bind it to a `MockMvc` instance. That allows processing requests using actual server-side
 logic but without running a server. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6112,7 +5838,6 @@ logic but without running a server. The following example shows how to do so:
 
 	// Test code that uses the above RestTemplate ...
 ----
-====
 
 [[spring-mvc-test-client-static-imports]]
 ===== Static Imports
@@ -6144,7 +5869,6 @@ https://github.com/spring-projects/spring-petclinic[GitHub], shows several featu
 the Spring TestContext Framework in a JUnit 4 environment. Most test functionality is
 included in the `AbstractClinicTests`, for which a partial listing follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6185,7 +5909,7 @@ method to easily verify the number of rows in a given table, thus verifying corr
 behavior of the application code being tested. This allows for stronger tests and
 lessens dependency on the exact test data. For example, you can add additional rows in
 the database without breaking tests.
-====
+
 
 Like many integration tests that use a database, most of the tests in
 `AbstractClinicTests` depend on a minimum amount of data already being in the database
@@ -6210,7 +5934,6 @@ inherited locations) and `HibernateClinicTests-context.xml`, with
 `AbstractClinicTests-context.xml`. The following listing shows the definition of the
 `HibernateClinicTests` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6218,7 +5941,7 @@ inherited locations) and `HibernateClinicTests-context.xml`, with
 	public class HibernateClinicTests extends AbstractClinicTests { }
 ----
 <1> Load the application context from `AbstractClinicTests-context.xml` and `HibernateClinicTests-context.xml`.
-====
+
 
 In a large-scale application, the Spring configuration is often split across multiple
 files. Consequently, configuration locations are typically specified in a common base

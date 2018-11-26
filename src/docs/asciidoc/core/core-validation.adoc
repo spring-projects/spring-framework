@@ -53,7 +53,6 @@ validators can report validation failures to the `Errors` object.
 
 Consider the following example of a small data object:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -65,7 +64,6 @@ Consider the following example of a small data object:
 		// the usual getters and setters...
 	}
 ----
-====
 
 The next example provides validation behavior for the `Person` class by implementing the
 following two methods of the `org.springframework.validation.Validator` interface:
@@ -78,7 +76,6 @@ Implementing a `Validator` is fairly straightforward, especially when you know o
 `ValidationUtils` helper class that the Spring Framework also provides. The following
 example implements `Validator` for `Person` instances:
 
-====
 [source,java,indent=0]
 [subs="verbatim"]
 ----
@@ -102,7 +99,6 @@ example implements `Validator` for `Person` instances:
 		}
 	}
 ----
-====
 
 The `static` `rejectIfEmpty(..)` method on the `ValidationUtils` class is used to
 reject the `name` property if it is `null` or the empty string. Have a look at the
@@ -120,7 +116,6 @@ within the `AddressValidator` class without resorting to copy-and-paste, you can
 dependency-inject or instantiate an `AddressValidator` within your `CustomerValidator`,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -160,7 +155,6 @@ as the following example shows:
 		}
 	}
 ----
-====
 
 Validation errors are reported to the `Errors` object passed to the validator. In the case
 of Spring Web MVC, you can use the `<spring:bind/>` tag to inspect the error messages, but
@@ -265,7 +259,6 @@ and their default implementations, you should skip ahead to the <<beans-beans-co
 The following two example classes use the `BeanWrapper` to get and set
 properties:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -318,12 +311,10 @@ properties:
 		}
 	}
 ----
-====
 
 The following code snippets show some examples of how to retrieve and manipulate some of
 the properties of instantiated `Companies` and `Employees`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -342,7 +333,6 @@ the properties of instantiated `Companies` and `Employees`:
 	// retrieving the salary of the managingDirector through the company
 	Float salary = (Float) company.getPropertyValue("managingDirector.salary");
 ----
-====
 
 
 
@@ -453,7 +443,6 @@ name as that class, with `Editor` appended. For example, one could have the foll
 class and package structure, which would be sufficient for the `SomethingEditor` class to be
 recognized and used as the `PropertyEditor` for `Something`-typed properties.
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -463,7 +452,6 @@ com
       Something
       SomethingEditor // the PropertyEditor for the Something class
 ----
-====
 
 Note that you can also use the standard `BeanInfo` JavaBeans mechanism here as well
 (described to some extent
@@ -472,7 +460,6 @@ here]). The following example use the `BeanInfo` mechanism to
 explicitly register one or more `PropertyEditor` instances with the properties of an
 associated class:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -482,12 +469,10 @@ com
       Something
       SomethingBeanInfo // the BeanInfo for the Something class
 ----
-====
 
 The following Java source code for the referenced `SomethingBeanInfo` class
 associates a `CustomNumberEditor` with the `age` property of the `Something` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -509,7 +494,6 @@ associates a `CustomNumberEditor` with the `age` property of the `Something` cla
 		}
 	}
 ----
-====
 
 
 [[beans-beans-conversion-customeditor-registration]]
@@ -549,7 +533,6 @@ support for additional `PropertyEditor` instances to an `ApplicationContext`.
 Consider the following example, which defines a user class called `ExoticType` and another class called `DependsOnExoticType`, which needs
 `ExoticType` set as a property:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -573,13 +556,11 @@ Consider the following example, which defines a user class called `ExoticType` a
 		}
 	}
 ----
-====
 
 When things are properly set up, we want to be able to assign the type property as a
 string, which a `PropertyEditor` converts into an actual
 `ExoticType` instance. The following bean definition shows how to set up this relationship:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -587,11 +568,9 @@ string, which a `PropertyEditor` converts into an actual
 		<property name="type" value="aNameForExoticType"/>
 	</bean>
 ----
-====
 
 The `PropertyEditor` implementation could look similar to the following:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -605,12 +584,10 @@ The `PropertyEditor` implementation could look similar to the following:
 		}
 	}
 ----
-====
 
 Finally, the following example shows how to use `CustomEditorConfigurer` to register the new `PropertyEditor` with the
 `ApplicationContext`, which will then be able to use it as needed:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -622,7 +599,6 @@ Finally, the following example shows how to use `CustomEditorConfigurer` to regi
 		</property>
 	</bean>
 ----
-====
 
 [[beans-beans-conversion-customeditor-registration-per]]
 ===== Using `PropertyEditorRegistrar`
@@ -643,7 +619,6 @@ instances for each bean creation attempt.
 
 The following example shows how to create your own `PropertyEditorRegistrar` implementation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -660,7 +635,6 @@ The following example shows how to create your own `PropertyEditorRegistrar` imp
 		}
 	}
 ----
-====
 
 See also the `org.springframework.beans.support.ResourceEditorRegistrar` for an example
 `PropertyEditorRegistrar` implementation. Notice how in its implementation of the
@@ -669,7 +643,6 @@ See also the `org.springframework.beans.support.ResourceEditorRegistrar` for an 
 The next example shows how to configure a `CustomEditorConfigurer` and inject an instance of our
 `CustomPropertyEditorRegistrar` into it:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -684,7 +657,6 @@ The next example shows how to configure a `CustomEditorConfigurer` and inject an
 	<bean id="customPropertyEditorRegistrar"
 		class="com.foo.editors.spring.CustomPropertyEditorRegistrar"/>
 ----
-====
 
 Finally (and in a bit of a departure from the focus of this chapter for those of you
 using <<web.adoc#mvc,Spring's MVC web framework>>), using `PropertyEditorRegistrars` in
@@ -692,7 +664,6 @@ conjunction with data-binding `Controllers` (such as `SimpleFormController`) can
 convenient. The following example uses a `PropertyEditorRegistrar` in the
 implementation of an `initBinder(..)` method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -712,7 +683,6 @@ implementation of an `initBinder(..)` method:
 		// other methods to do with registering a User
 	}
 ----
-====
 
 This style of `PropertyEditor` registration can lead to concise code (the implementation
 of `initBinder(..)` is only one line long) and lets common `PropertyEditor`
@@ -740,7 +710,6 @@ application where type conversion is needed.
 The SPI to implement type conversion logic is simple and strongly typed, as the following
 interface definition shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -751,7 +720,6 @@ interface definition shows:
 		T convert(S source);
 	}
 ----
-====
 
 To create your own converter, implement the `Converter` interface and parameterize `S`
 as the type you are converting from and `T` as the type you are converting to. You can also transparently apply such a
@@ -768,7 +736,6 @@ Several converter implementations are provided in the `core.convert.support` pac
 a convenience. These include converters from strings to numbers and other common types.
 The following listing shows the `StringToInteger` class, which is a typical `Converter` implementation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -781,7 +748,6 @@ The following listing shows the `StringToInteger` class, which is a typical `Con
 		}
 	}
 ----
-====
 
 
 
@@ -792,7 +758,6 @@ When you need to centralize the conversion logic for an entire class hierarchy
 (for example, when converting from `String` to `Enum` objects), you can implement
 `ConverterFactory`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -803,7 +768,6 @@ When you need to centralize the conversion logic for an entire class hierarchy
 		<T extends R> Converter<S, T> getConverter(Class<T> targetType);
 	}
 ----
-====
 
 Parameterize S to be the type you are converting from and R to be the base type defining
 the __range__ of classes you can convert to. Then implement `getConverter(Class<T>)`,
@@ -811,7 +775,6 @@ where T is a subclass of R.
 
 Consider the `StringToEnumConverterFactory` as an example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -837,7 +800,6 @@ Consider the `StringToEnumConverterFactory` as an example:
 		}
 	}
 ----
-====
 
 
 
@@ -852,7 +814,6 @@ context that you can use when you implement your conversion logic. Such context 
 type conversion be driven by a field annotation or by generic information declared on a
 field signature. The following listing shows the interface definition of `GenericConverter`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -865,7 +826,6 @@ field signature. The following listing shows the interface definition of `Generi
 		Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 	}
 ----
-====
 
 To implement a `GenericConverter`, have `getConvertibleTypes()` return the supported
 source->target type pairs. Then implement `convert(Object, TypeDescriptor,
@@ -894,7 +854,6 @@ on the target field, or you might want to run a `Converter` only if a specific m
 `ConditionalGenericConverter` is the union of the `GenericConverter` and
 `ConditionalConverter` interfaces that lets you define such custom matching criteria:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -906,7 +865,6 @@ on the target field, or you might want to run a `Converter` only if a specific m
 	public interface ConditionalGenericConverter extends GenericConverter, ConditionalConverter {
 	}
 ----
-====
 
 A good example of a `ConditionalGenericConverter` is an `EntityConverter` that converts
 between a persistent entity identifier and an entity reference. Such an `EntityConverter`
@@ -922,7 +880,6 @@ might match only if the target entity type declares a static finder method (for 
 `ConversionService` defines a unified API for executing type conversion logic at
 runtime. Converters are often executed behind the following facade interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -940,7 +897,6 @@ runtime. Converters are often executed behind the following facade interface:
 
 	}
 ----
-====
 
 Most `ConversionService` implementations also implement `ConverterRegistry`, which
 provides an SPI for registering converters. Internally, a `ConversionService`
@@ -969,21 +925,18 @@ system is used.
 To register a default `ConversionService` with Spring, add the following bean definition
 with an `id` of `conversionService`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="conversionService"
 		class="org.springframework.context.support.ConversionServiceFactoryBean"/>
 ----
-====
 
 A default `ConversionService` can convert between strings, numbers, enums, collections,
 maps, and other common types. To supplement or override the default converters with your
 own custom converters, set the `converters` property. Property values can implement
 any of the `Converter`, `ConverterFactory`, or `GenericConverter` interfaces.
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -996,7 +949,6 @@ any of the `Converter`, `ConverterFactory`, or `GenericConverter` interfaces.
 		</property>
 	</bean>
 ----
-====
 
 It is also common to use a `ConversionService` within a Spring MVC application. See
 <<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring MVC chapter.
@@ -1013,7 +965,6 @@ In certain situations, you may wish to apply formatting during conversion. See
 To work with a `ConversionService` instance programmatically, you can inject a reference to
 it like you would for any other bean. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1030,7 +981,6 @@ it like you would for any other bean. The following example shows how to do so:
 		}
 	}
 ----
-====
 
 For most use cases, you can use the `convert` method that specifies the `targetType`, but it
 does not work with more complex types, such as a collection of a parameterized element.
@@ -1040,7 +990,6 @@ you need to provide a formal definition of the source and target types.
 Fortunately, `TypeDescriptor` provides various options to make doing so straightforward,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1051,7 +1000,6 @@ as the following example shows:
 		TypeDescriptor.forObject(input), // List<Integer> type descriptor
 		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)));
 ----
-====
 
 Note that `DefaultConversionService` automatically registers converters that are
 appropriate for most environments. This includes collection converters, scalar
@@ -1100,7 +1048,6 @@ provides a unified type conversion API for both SPIs.
 The `Formatter` SPI to implement field formatting logic is simple and strongly typed. The
 following listing shows the `Formatter` interface definition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1109,12 +1056,10 @@ following listing shows the `Formatter` interface definition:
 	public interface Formatter<T> extends Printer<T>, Parser<T> {
 	}
 ----
-====
 
 `Formatter` extends from the `Printer` and `Parser` building-block interfaces. The
 following listing shows the definitions of those two interfaces:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1134,7 +1079,6 @@ following listing shows the definitions of those two interfaces:
 		T parse(String clientValue, Locale locale) throws ParseException;
 	}
 ----
-====
 
 To create your own `Formatter`, implement the `Formatter` interface shown earlier.
 Parameterize `T` to be the type of object you wish to format -- for example,
@@ -1153,7 +1097,6 @@ formatting support based on the http://joda-time.sourceforge.net[Joda-Time libra
 
 The following `DateFormatter` is an example `Formatter` implementation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1188,7 +1131,6 @@ The following `DateFormatter` is an example `Formatter` implementation:
 		}
 	}
 ----
-====
 
 The Spring team welcomes community-driven `Formatter` contributionsSee
 https://jira.spring.io/browse/SPR[jira.spring.io] to contribute.
@@ -1202,7 +1144,6 @@ Field formatting can be configured by field type or annotation. To bind
 an annotation to a `Formatter`, implement `AnnotationFormatterFactory`. The following
 listing shows the definition of the `AnnotationFormatterFactory` interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1217,7 +1158,6 @@ listing shows the definition of the `AnnotationFormatterFactory` interface:
 		Parser<?> getParser(A annotation, Class<?> fieldType);
 	}
 ----
-====
 
 To create an implementation:
 . Parameterize A to be the field `annotationType` with which you wish to associate
@@ -1230,7 +1170,6 @@ The following example `AnnotationFormatterFactory` implementation binds the `@Nu
 annotation to a formatter to let a number style or pattern be
 specified:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1267,12 +1206,10 @@ specified:
 		}
 	}
 ----
-====
 
 To trigger formatting, you can annotate fields with @NumberFormat, as the following
 example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1282,7 +1219,6 @@ example shows:
 		private BigDecimal decimal;
 	}
 ----
-====
 
 
 
@@ -1297,7 +1233,6 @@ package. You can use `@NumberFormat` to format `Number` fields such as `Double` 
 The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
 (yyyy-MM-dd):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1307,7 +1242,6 @@ The following example uses `@DateTimeFormat` to format a `java.util.Date` as an 
 		private Date date;
 	}
 ----
-====
 
 
 
@@ -1323,7 +1257,6 @@ for use with Spring's `DataBinder` and the Spring Expression Language (SpEL).
 
 The following listing shows the `FormatterRegistry` SPI:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1340,7 +1273,6 @@ The following listing shows the `FormatterRegistry` SPI:
 		void addFormatterForAnnotation(AnnotationFormatterFactory<?, ?> factory);
 	}
 ----
-====
 
 As shown in the preceding listing, you can register formatters by field type or by annotation.
 
@@ -1358,7 +1290,6 @@ these rules once, and they are applied whenever formatting is needed.
 `FormatterRegistrar` is an SPI for registering formatters and converters through the
 FormatterRegistry. The following listing shows its interface definition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1369,7 +1300,6 @@ FormatterRegistry. The following listing shows its interface definition:
 		void registerFormatters(FormatterRegistry registry);
 	}
 ----
-====
 
 A `FormatterRegistrar` is useful when registering multiple related converters and
 formatters for a given formatting category, such as date formatting. It can also be
@@ -1404,7 +1334,6 @@ you use the Joda-Time library.
 For example, the following Java configuration registers a global `yyyyMMdd`
 format (this example does not depend on the Joda-Time library):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1429,13 +1358,11 @@ format (this example does not depend on the Joda-Time library):
 		}
 	}
 ----
-====
 
 If you prefer XML-based configuration, you can use a
 `FormattingConversionServiceFactoryBean`. The following example shows how to do so (this time using Joda
 Time):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1467,7 +1394,6 @@ Time):
 		</bean>
 	</beans>
 ----
-====
 
 NOTE: Joda-Time provides separate distinct types to represent `date`, `time`, and `date-time`
 values. The `dateFormatter`, `timeFormatter`, and `dateTimeFormatter` properties of the
@@ -1504,7 +1430,6 @@ constraints. You can also define your own custom constraints.
 
 Consider the following example, which shows a simple `PersonForm` model with two properties:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1513,12 +1438,10 @@ Consider the following example, which shows a simple `PersonForm` model with two
 		private int age;
 	}
 ----
-====
 
 JSR-303 lets you define declarative validation constraints against such properties, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1532,7 +1455,6 @@ following example shows:
 		private int age;
 	}
 ----
-====
 
 When a JSR-303 Validator validates an instance of this class, these constraints
 are enforced.
@@ -1556,14 +1478,12 @@ wherever validation is needed in your application.
 You can use the `LocalValidatorFactoryBean` to configure a default Validator as a Spring bean,
 as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="validator"
 		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
 ----
-====
 
 The basic configuration in the preceding example triggers bean validation to initialize by using its
 default bootstrap mechanism. A JSR-303 or JSR-349 provider, such as the Hibernate Validator,
@@ -1581,7 +1501,6 @@ these interfaces into beans that need to invoke validation logic.
 You can inject a reference to `javax.validation.Validator` if you prefer to work with the Bean
 Validation API directly, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1593,12 +1512,10 @@ Validation API directly, as the following example shows:
 		@Autowired
 		private Validator validator;
 ----
-====
 
 You can inject a reference to `org.springframework.validation.Validator` if your bean requires
 the Spring Validation API, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1611,7 +1528,6 @@ the Spring Validation API, as the following example shows:
 		private Validator validator;
 	}
 ----
-====
 
 
 [[validation-beanvalidation-spring-constraints]]
@@ -1636,7 +1552,6 @@ that uses Spring to create `ConstraintValidator` instances. This lets your custo
 The following example shows a custom `@Constraint` declaration followed by an associated
 `ConstraintValidator` implementation that uses Spring for dependency injection:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1660,7 +1575,6 @@ The following example shows a custom `@Constraint` declaration followed by an as
 		...
 	}
 ----
-====
 
 As the preceding example shows, a `ConstraintValidator` implementation can have its dependencies
 `@Autowired` as any other Spring bean.
@@ -1673,13 +1587,11 @@ You can integrate the method validation feature supported by Bean Validation 1.1
 extension, also by Hibernate Validator 4.3) into a Spring context
 through a `MethodValidationPostProcessor` bean definition, as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
 ----
-====
 
 To be eligible for Spring-driven method validation, all target classes need to be annotated with
 Spring's `@Validated` annotation. (Optionally, you can also declare the validation groups to use.)
@@ -1708,7 +1620,6 @@ configured, you can invoke the `Validator` by calling `binder.validate()`. Any v
 The following example shows how to use a `DataBinder` programmatically to invoke validation
 logic after binding to a target object:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1725,7 +1636,6 @@ logic after binding to a target object:
 	// get BindingResult that includes any validation errors
 	BindingResult results = binder.getBindingResult();
 ----
-====
 
 You can also configure a `DataBinder` with multiple `Validator` instances through
 `dataBinder.addValidators` and `dataBinder.replaceValidators`. This is useful when

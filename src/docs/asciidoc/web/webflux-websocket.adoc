@@ -26,7 +26,6 @@ server-side applications that handle WebSocket messages.
 To create a WebSocket server, you can first create a `WebSocketHandler`.
 The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -41,11 +40,9 @@ The following example shows how to do so:
 		}
 	}
 ----
-====
 
 Then you can map it to a URL and add a `WebSocketHandlerAdapter`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -69,7 +66,6 @@ Then you can map it to a URL and add a `WebSocketHandlerAdapter`, as the followi
 		}
 	}
 ----
-====
 
 
 
@@ -110,7 +106,6 @@ receives a cancellation signal.
 The most basic implementation of a handler is one that handles the inbound stream. The
 following example shows such an implementation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -133,7 +128,7 @@ class ExampleHandler implements WebSocketHandler {
 <2> Do something with each message.
 <3> Perform nested asynchronous operations that use the message content.
 <4> Return a `Mono<Void>` that completes when receiving completes.
-====
+
 
 TIP: For nested, asynchronous operations, you may need to call `message.retain()` on underlying
 servers that use pooled data buffers (for example, Netty). Otherwise, the data buffer may be
@@ -142,7 +137,6 @@ released before you have had a chance to read the data. For more background, see
 
 The following implementation combines the inbound and outbound streams:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -167,12 +161,11 @@ class ExampleHandler implements WebSocketHandler {
 <1> Handle the inbound message stream.
 <2> Create the outbound message, producing a combined flow.
 <3> Return a `Mono<Void>` that does not complete while we continue to receive.
-====
+
 
 Inbound and outbound streams can be independent and be joined only for completion,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -200,7 +193,6 @@ class ExampleHandler implements WebSocketHandler {
 <1> Handle inbound message stream.
 <2> Send outgoing messages.
 <3> Join the streams and return a `Mono<Void>` that completes when either stream ends.
-====
 
 
 
@@ -243,7 +235,6 @@ The `RequestUpgradeStrategy` for each server exposes WebSocket-related configura
 options available for the underlying WebSocket engine. The following example sets
 WebSocket options when running on Tomcat:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -263,7 +254,6 @@ WebSocket options when running on Tomcat:
 		}
 	}
 ----
-====
 
 Check the upgrade strategy for your server to see what options are available. Currently,
 only Tomcat and Jetty expose such options.
@@ -296,7 +286,6 @@ API to suspend receiving messages for back pressure.
 To start a WebSocket session, you can create an instance of the client and use its `execute`
 methods:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -308,7 +297,6 @@ client.execute(url, session ->
 				.doOnNext(System.out::println)
 				.then());
 ----
-====
 
 Some clients, such as Jetty, implement `Lifecycle` and need to be stopped and started
 before you can use them. All clients have constructor options related to configuration

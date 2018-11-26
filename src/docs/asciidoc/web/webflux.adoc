@@ -377,7 +377,6 @@ https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spr
 
 The code snippets below show using the `HttpHandler` adapters with each server API:
 
-====
 *Reactor Netty*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -433,13 +432,13 @@ server.addConnector(connector);
 server.start();
 ----
 
+
 *Servlet 3.1+ Container*
 
 To deploy as a WAR to any Servlet 3.1+ container, you can extend and include
 {api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[`AbstractReactiveWebInitializer`]
 in the WAR. That class wraps an `HttpHandler` with `ServletHttpHandlerAdapter` and registers
 that as a `Servlet`.
-====
 
 
 
@@ -525,13 +524,11 @@ Spring ApplicationContext, or that can be registered directly with it:
 
 `ServerWebExchange` exposes the following method for access to form data:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 Mono<MultiValueMap<String, String>> getFormData();
 ----
-====
 
 The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse form data
 (`application/x-www-form-urlencoded`) into a `MultiValueMap`. By default,
@@ -545,13 +542,11 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 
 `ServerWebExchange` exposes the following method for access to multipart data:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 Mono<MultiValueMap<String, Part>> getMultipartData();
 ----
-====
 
 The `DefaultServerWebExchange` uses the configured
 `HttpMessageReader<MultiValueMap<String, Part>>` to parse `multipart/form-data` content
@@ -832,7 +827,6 @@ headers are masked by default and you must explicitly enable their logging in fu
 
 The followig example shows how to do so for server-side requests:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -846,11 +840,9 @@ class MyConfig implements WebFluxConfigurer {
 	}
 }
 ----
-====
 
 The following example shows how to do so for client-side requests:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -861,7 +853,6 @@ WebClient webClient = WebClient.builder()
 		.exchangeStrategies(ExchangeStrategies.builder().codecs(consumer).build())
 		.build();
 ----
-====
 
 
 
@@ -893,14 +884,12 @@ Spring configuration in a WebFlux application typically contains:
 The configuration is given to `WebHttpHandlerBuilder` to build the processing chain,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 ApplicationContext context = ...
 HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context);
 ----
-====
 
 The resulting `HttpHandler` is ready for use with a
 <<webflux-httphandler,server adapter>>.
@@ -1128,7 +1117,6 @@ do not have to extend base classes nor implement specific interfaces.
 
 The following listing shows a basic example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1141,7 +1129,6 @@ The following listing shows a basic example:
 		}
 	}
 ----
-====
 
 In the preceding example, the method returns a `String` to be written to the response body.
 
@@ -1160,7 +1147,6 @@ a web component.
 To enable auto-detection of such `@Controller` beans, you can add component scanning to
 your Java configuration, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1172,7 +1158,7 @@ your Java configuration, as the following example shows:
 	}
 ----
 <1> Scan the `org.example.web` package.
-====
+
 
 `@RestController` is a <<core.adoc#beans-meta-annotations,composed annotation>> that is
 itself meta-annotated with `@Controller` and `@ResponseBody`, indicating a controller whose
@@ -1205,7 +1191,6 @@ using `@RequestMapping`, which, by default, matches to all HTTP methods. At the 
 
 The following example uses type and method level mappings:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1225,7 +1210,6 @@ The following example uses type and method level mappings:
 		}
 	}
 ----
-====
 
 
 [[webflux-ann-requestmapping-uri-templates]]
@@ -1241,7 +1225,6 @@ You can map requests by using glob patterns and wildcards:
 You can also declare URI variables and access their values with `@PathVariable`,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1250,11 +1233,9 @@ as the following example shows:
 		// ...
 	}
 ----
-====
 
 You can declare URI variables at the class and method levels, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1270,7 +1251,7 @@ public class OwnerController {
 ----
 <1> Class-level URI mapping.
 <2> Method-level URI mapping.
-====
+
 
 URI variables are automatically converted to the appropriate type or a `TypeMismatchException`
 is raised. Simple types (`int`, `long`, `Date`, and so on) are supported by default and you can
@@ -1289,7 +1270,6 @@ The syntax `{varName:regex}` declares a URI variable with a regular expression t
 syntax: `{varName:regex}`. For example, given a URL of `/spring-web-3.0.5 .jar`, the following method
 extracts the name, version, and file extension:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1298,7 +1278,6 @@ extracts the name, version, and file extension:
 		// ...
 	}
 ----
-====
 
 URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
 through `PropertyPlaceHolderConfigurer` against local, system, environment, and other property
@@ -1337,7 +1316,6 @@ sorted last instead. If two patterns are both catch-all, the longer is chosen.
 You can narrow the request mapping based on the `Content-Type` of the request,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1346,7 +1324,6 @@ as the following example shows:
 		// ...
 	}
 ----
-====
 
 The consumes attribute also supports negation expressions -- for example, `!text/plain` means any
 content type other than `text/plain`.
@@ -1366,7 +1343,6 @@ TIP: `MediaType` provides constants for commonly used media types -- for example
 You can narrow the request mapping based on the `Accept` request header and the list of
 content types that a controller method produces, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1376,7 +1352,6 @@ content types that a controller method produces, as the following example shows:
 		// ...
 	}
 ----
-====
 
 The media type can specify a character set. Negated expressions are supported -- for example,
 `!text/plain` means any content type other than `text/plain`.
@@ -1402,7 +1377,6 @@ You can narrow request mappings based on query parameter conditions. You can tes
 presence of a query parameter (`myParam`), for its absence (`!myParam`), or for a
 specific value (`myParam=myValue`). The following examples tests for a parameter with a value:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1412,11 +1386,10 @@ specific value (`myParam=myValue`). The following examples tests for a parameter
 	}
 ----
 <1> Check that `myParam` equals `myValue`.
-====
+
 
 You can also use the same with request header conditions, as the follwing example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1426,7 +1399,7 @@ You can also use the same with request header conditions, as the follwing exampl
 	}
 ----
 <1> Check that `myHeader` equals `myValue`.
-====
+
 
 
 [[webflux-ann-requestmapping-head-options]]
@@ -1479,7 +1452,6 @@ You can programmatically register Handler methods, which can be used for dynamic
 registrations or for advanced cases, such as different instances of the same handler
 under different URLs. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1504,7 +1476,6 @@ public class MyConfig {
 <2> Prepare the request mapping metadata.
 <3> Get the handler method.
 <4> Add the registration.
-====
 
 
 
@@ -1745,7 +1716,6 @@ to mask variable content. That said, if you want to access matrix variables from
 controller method, you need to add a URI variable to the path segment where matrix
 variables are expected. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1758,13 +1728,11 @@ variables are expected. The following example shows how to do so:
 		// q == 11
 	}
 ----
-====
 
 Given that all path segments can contain matrix variables, you may sometimes need to
 disambiguate which path variable the matrix variable is expected to be in,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1779,12 +1747,10 @@ as the following example shows:
 		// q2 == 22
 	}
 ----
-====
 
 You can define a matrix variable may be defined as optional and specify a default value
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1796,11 +1762,9 @@ as the following example shows:
 		// q == 1
 	}
 ----
-====
 
 To get all matrix variables, use a `MultiValueMap`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1815,7 +1779,6 @@ To get all matrix variables, use a `MultiValueMap`, as the following example sho
 		// petMatrixVars: ["q" : 22, "s" : 23]
 	}
 ----
-====
 
 
 [[webflux-ann-requestparam]]
@@ -1825,7 +1788,6 @@ To get all matrix variables, use a `MultiValueMap`, as the following example sho
 You can use the `@RequestParam` annotation to bind query parameters to a method argument in a
 controller. The following code snippet shows the usage:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1847,7 +1809,7 @@ controller. The following code snippet shows the usage:
 	}
 ----
 <1> Using `@RequestParam`.
-====
+
 
 TIP: The Servlet API "`request parameter`" concept conflates query parameters, form
 data, and multiparts into one. However, in WebFlux, each is accessed individually through
@@ -1882,7 +1844,6 @@ controller.
 
 The following example shows a request with headers:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -1893,11 +1854,9 @@ Accept-Encoding         gzip,deflate
 Accept-Charset          ISO-8859-1,utf-8;q=0.7,*;q=0.7
 Keep-Alive              300
 ----
-====
 
 The following example gets the value of the `Accept-Encoding` and `Keep-Alive` headers:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1910,7 +1869,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 ----
 <1> Get the value of the `Accept-Encoging` header.
 <2> Get the value of the `Keep-Alive` header.
-====
+
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
@@ -1934,17 +1893,14 @@ in a controller.
 
 The following example shows a request with a cookie:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 JSESSIONID=415A4AC178C59DACE0B2C9CA727CDD84
 ----
-====
 
 The following code sample demonstrates how to get the cookie value:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1954,7 +1910,7 @@ The following code sample demonstrates how to get the cookie value:
 	}
 ----
 <1> Get the cookie value.
-====
+
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
@@ -1970,7 +1926,6 @@ the values of query parameters and form fields whose names match to field names.
 referred to as data binding, and it saves you from having to deal with parsing and
 converting individual query parameters and form fields. The following example binds an instance of `Pet`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1978,7 +1933,7 @@ converting individual query parameters and form fields. The following example bi
 	public String processSubmit(@ModelAttribute Pet pet) { } <1>
 ----
 <1> Bind an instance of `Pet`.
-====
+
 
 The `Pet` instance in the preceding example is resolved as follows:
 
@@ -2000,7 +1955,6 @@ Data binding can result in errors. By default, a `WebExchangeBindException` is r
 to check for such errors in the controller method, you can add a `BindingResult` argument
 immediately next to the `@ModelAttribute`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2013,14 +1967,13 @@ immediately next to the `@ModelAttribute`, as the following example shows:
 	}
 ----
 <1> Adding a `BindingResult`.
-====
+
 
 You can automatically apply validation after data binding by adding the
 `javax.validation.Valid` annotation or Spring's `@Validated` annotation (see also
 <<core.adoc#validation-beanvalidation, Bean validation>> and
 <<core.adoc#validation, Spring validation>>). The following example uses the `@Valid` annotation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2033,7 +1986,7 @@ You can automatically apply validation after data binding by adding the
 	}
 ----
 <1> Using `@Valid` on a model attribute argument.
-====
+
 
 Spring WebFlux, unlike Spring MVC, supports reactive types in the model -- for example,
 `Mono<Account>` or `io.reactivex.Single<Account>`. You can declare a `@ModelAttribute` argument
@@ -2043,7 +1996,6 @@ argument, you must declare the `@ModelAttribute` argument before it without a re
 type wrapper, as shown earlier. Alternatively, you can handle any errors through the
 reactive type, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2058,7 +2010,6 @@ reactive type, as the following example shows:
 			});
 	}
 ----
-====
 
 Note that use of `@ModelAttribute` is optional -- for example, to set its attributes.
 By default, any argument that is not a simple value type( as determined by
@@ -2079,7 +2030,6 @@ requests to access.
 
 Consider the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2090,14 +2040,13 @@ Consider the following example:
 	}
 ----
 <1> Using the `@SessionAttributes` annotation.
-====
+
 
 On the first request, when a model attribute with the name, `pet`, is added to the model,
 it is automatically promoted to and saved in the `WebSession`. It remains there until
 another controller method uses a `SessionStatus` method argument to clear the storage,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2120,7 +2069,7 @@ as the following example shows:
 ----
 <1> Using the `@SessionAttributes` annotation.
 <2> Using a `SessionStatus` variable.
-====
+
 
 
 [[webflux-ann-sessionattribute]]
@@ -2131,7 +2080,6 @@ If you need access to pre-existing session attributes that are managed globally
 (that is, outside the controller -- for example, by a filter) and may or may not be present,
 you can use the `@SessionAttribute` annotation on a method parameter, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2141,7 +2089,7 @@ you can use the `@SessionAttribute` annotation on a method parameter, as the fol
 	}
 ----
 <1> Using `@SessionAttribute`.
-====
+
 
 For use cases that require adding or removing session attributes, consider injecting
 `WebSession` into the controller method.
@@ -2152,14 +2100,13 @@ workflow, consider using `SessionAttributes`, as described in
 
 
 [[webflux-ann-requestattrib]]
-==== `@RequestAttribute`
 [.small]#<<web.adoc#mvc-ann-requestattrib,Same as in Spring MVC>>#
+
 
 Similarly to `@SessionAttribute`, you can use the `@RequestAttribute` annotation to
 access pre-existing request attributes created earlier (for example, by a `WebFilter`),
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2169,7 +2116,7 @@ as the following example shows:
 	}
 ----
 <1> Using `@RequestAttribute`.
-====
+
 
 
 [[webflux-multipart-forms]]
@@ -2181,7 +2128,6 @@ content. The best way to handle a file upload form (for example, from a browser)
 is through data binding to a <<webflux-ann-modelattrib-method-args,command object>>,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2205,12 +2151,10 @@ public class FileUploadController {
 
 }
 ----
-====
 
 You can also submit multipart requests from non-browser clients in a RESTful service
 scenario. The following example uses a file along with JSON:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -2231,11 +2175,9 @@ Content-Type: text/xml
 Content-Transfer-Encoding: 8bit
 ... File Data ...
 ----
-====
 
 You can access individual parts with `@RequestPart`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2247,12 +2189,11 @@ You can access individual parts with `@RequestPart`, as the following example sh
 ----
 <1> Using `@RequestPart` to get the metadata.
 <2> Using `@RequestPart` to get the file.
-====
+
 
 To deserialize the raw part content (for example, to JSON -- similar to `@RequestBody`),
 you can declare a concrete target `Object`, instead of `Part`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2262,7 +2203,7 @@ you can declare a concrete target `Object`, instead of `Part`, as the following 
 	}
 ----
 <1> Using `@RequestPart` to get the metadata.
-====
+
 
 You can use `@RequestPart` combination with `javax.validation.Valid` or Spring's
 `@Validated` annotation, which causes Standard Bean Validation to be applied.
@@ -2270,7 +2211,6 @@ By default, validation errors cause a `WebExchangeBindException`, which is turne
 into a 400 (`BAD_REQUEST`) response. Alternatively, you can handle validation errors locally
 within the controller through an `Errors` or `BindingResult` argument, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2282,12 +2222,11 @@ public String handle(@Valid @RequestPart("meta-data") MetaData metadata, <1>
 ----
 <1> Using a `@Valid` annotation.
 <2> Using a `BindingResult` argument.
-====
+
 
 To access all multipart data as a `MultiValueMap`, you can use `@RequestBody`,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2297,12 +2236,11 @@ as the following example shows:
 	}
 ----
 <1> Using `@RequestBody`.
-====
+
 
 To access multipart data sequentially, in streaming fashion, you can use `@RequestBody` with
 `Flux<Part>` instead, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2312,7 +2250,7 @@ To access multipart data sequentially, in streaming fashion, you can use `@Reque
 	}
 ----
 <1> Using `@RequestBody`.
-====
+
 
 
 [[webflux-ann-requestbody]]
@@ -2323,7 +2261,6 @@ You can use the `@RequestBody` annotation to have the request body read and dese
 `Object` through an <<webflux-codecs,HttpMessageReader>>.
 The following example uses a `@RequestBody` argument:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2332,13 +2269,11 @@ The following example uses a `@RequestBody` argument:
 		// ...
 	}
 ----
-====
 
 Unlike Spring MVC, in WebFlux, the `@RequestBody` method argument supports reactive types
 and fully non-blocking reading and (client-to-server) streaming. The following example
 uses a `Mono`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2347,7 +2282,6 @@ uses a `Mono`:
 		// ...
 	}
 ----
-====
 
 You can use the <<webflux-config-message-codecs>> option of the <<webflux-config>> to
 configure or customize message readers.
@@ -2359,7 +2293,6 @@ into a 400 (`BAD_REQUEST`) response. Alternatively, you can handle validation er
 within the controller through an `Errors` or a `BindingResult` argument. The following
 example uses a `BindingResult` argument`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2368,7 +2301,6 @@ example uses a `BindingResult` argument`:
 		// ...
 	}
 ----
-====
 
 
 [[webflux-ann-httpentity]]
@@ -2379,7 +2311,6 @@ example uses a `BindingResult` argument`:
 container object that exposes request headers and the body. The following example uses an
 `HttpEntity`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2388,7 +2319,6 @@ container object that exposes request headers and the body. The following exampl
 		// ...
 	}
 ----
-====
 
 
 [[webflux-ann-responsebody]]
@@ -2398,7 +2328,6 @@ container object that exposes request headers and the body. The following exampl
 You can use the `@ResponseBody` annotation on a method to have the return serialized to the
 response body through an <<webflux-codecs,HttpMessageWriter>>. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2408,7 +2337,6 @@ response body through an <<webflux-codecs,HttpMessageWriter>>. The following exa
 		// ...
 	}
 ----
-====
 
 `@ResponseBody` is also supported at the class level, in which case it is inherited by
 all controller methods. This is the effect of `@RestController`, which is nothing more
@@ -2432,7 +2360,6 @@ configure or customize message writing.
 
 `ResponseEntity` is like <<webflux-ann-responsebody>> but with status and headers. For example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2443,7 +2370,6 @@ configure or customize message writing.
 		return ResponseEntity.ok().eTag(etag).build(body);
 	}
 ----
-====
 
 WebFlux supports using a single value <<webflux-reactive-libraries,reactive type>> to
 produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types
@@ -2465,7 +2391,6 @@ which allows rendering only a subset of all fields in an `Object`. To use it wit
 `@ResponseBody` or `ResponseEntity` controller methods, you can use Jackson's
 `@JsonView` annotation to activate a serialization view class, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2506,7 +2431,6 @@ which allows rendering only a subset of all fields in an `Object`. To use it wit
 		}
 	}
 ----
-====
 
 NOTE: `@JsonView` allows an array of view classes but you can only specify only one per
 controller method. Use a composite interface if you need to activate multiple views.
@@ -2538,7 +2462,6 @@ related to the request body).
 
 The following example uses a `@ModelAttribute` method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2548,11 +2471,9 @@ The following example uses a `@ModelAttribute` method:
 		// add more ...
 	}
 ----
-====
 
 The following example adds one attribute only:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2561,7 +2482,6 @@ The following example adds one attribute only:
 		return accountRepository.findAccount(number);
 	}
 ----
-====
 
 NOTE: When a name is not explicitly specified, a default name is chosen based on the type,
 as explained in the javadoc for {api-spring-framework}/core/Conventions.html[`Conventions`].
@@ -2574,7 +2494,6 @@ attributes can be transparently resolved (and the model updated) to their actual
 at the time of `@RequestMapping` invocation, provided a `@ModelAttribute` argument is
 declared without a wrapper, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2589,7 +2508,6 @@ declared without a wrapper, as the following example shows:
 		// ...
 	}
 ----
-====
 
 In addition, any model attributes that have a reactive type wrapper are resolved to their
 actual values (and the model updated) just prior to view rendering.
@@ -2601,7 +2519,6 @@ controllers, unless the return value is a `String` that would otherwise be inter
 as a view name. `@ModelAttribute` can also help to customize the model attribute name,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2612,7 +2529,6 @@ as the following example shows:
 		return account;
 	}
 ----
-====
 
 
 
@@ -2638,7 +2554,6 @@ do, except for `@ModelAttribute` (command object) arguments. Typically, they are
 with a `WebDataBinder` argument, for registrations, and a `void` return value.
 The following example uses the `@InitBinder` annotation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2656,13 +2571,12 @@ The following example uses the `@InitBinder` annotation:
 	}
 ----
 <1> Using the `@InitBinder` annotation.
-====
+
 
 Alternatively, when using a `Formatter`-based setup through a shared
 `FormattingConversionService`, you could re-use the same approach and register
 controller-specific `Formatter` instances, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2678,7 +2592,7 @@ controller-specific `Formatter` instances, as the following example shows:
 	}
 ----
 <1> Adding a custom formatter (a `DateFormatter`, in this case).
-====
+
 
 
 
@@ -2690,7 +2604,6 @@ controller-specific `Formatter` instances, as the following example shows:
 `@ExceptionHandler` methods to handle exceptions from controller methods. The following
 example includes such a handler method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2706,7 +2619,7 @@ example includes such a handler method:
 	}
 ----
 <1> Declaring an `@ExceptionHandler`:
-====
+
 
 The exception can match against a top-level exception being propagated (that is, a direct
 `IOException` being thrown) or against the immediate cause within a top-level wrapper exception
@@ -2770,7 +2683,6 @@ By default `@ControllerAdvice` methods apply to every request (that is, all cont
 you can narrow that down to a subset of controllers through attributes on the annotation,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2786,7 +2698,6 @@ as the following example shows:
 	@ControllerAdvice(assignableTypes = {ControllerInterface.class, AbstractController.class})
 	public class ExampleAdvice3 {}
 ----
-====
 
 The preceding selectors are evaluated at runtime and may negatively impact
 performance if you use them extensively. See the
@@ -2860,7 +2771,6 @@ While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all 
 directives for the `Cache-Control` response header, the `CacheControl` type takes a
 use case-oriented approach that focuses on the common scenarios, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2875,7 +2785,6 @@ use case-oriented approach that focuses on the common scenarios, as the followin
 	// "Cache-Control: max-age=864000, public, no-transform"
 	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
 ----
-====
 
 
 
@@ -2888,7 +2797,6 @@ Controllers can add explicit support for HTTP caching. We recommend doing so, si
 against conditional request headers. A controller can add an `ETag` and `Cache-Control`
 settings to a `ResponseEntity`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2905,7 +2813,6 @@ settings to a `ResponseEntity`, as the following example shows:
 				.body(book);
 	}
 ----
-====
 
 The preceding example sends a 304 (NOT_MODIFIED) response with an empty body if the comparison
 to the conditional request headers indicates the content has not changed. Otherwise, the
@@ -2914,7 +2821,6 @@ to the conditional request headers indicates the content has not changed. Otherw
 You can also make the check against conditional request headers in the controller,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2935,7 +2841,7 @@ as the following example shows:
 <1> Application-specific calculation.
 <2> Response has been set to 304 (NOT_MODIFIED). No further processing.
 <3> Continue with request processing.
-====
+
 
 There are three variants for checking conditional requests against `eTag` values, `lastModified`
 values, or both. For conditional `GET` and `HEAD` requests, you can set the response to
@@ -2976,7 +2882,6 @@ gain full control over the configuration through the
 
 You can use the `@EnableWebFlux` annotation in your Java config, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2985,7 +2890,6 @@ You can use the `@EnableWebFlux` annotation in your Java config, as the followin
 	public class WebConfig {
 	}
 ----
-====
 
 The preceding example registers a number of Spring WebFlux
 <<mvc-webflux-special-bean-types,infrastructure beans>> and adapts to dependencies
@@ -3000,7 +2904,6 @@ available on the classpath -- for JSON, XML, and others.
 In your Java configuration, you can implement the `WebFluxConfigurer` interface,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3012,7 +2915,6 @@ as the following example shows:
 
 	}
 ----
-====
 
 
 
@@ -3026,7 +2928,6 @@ formatting library is also installed if Joda-Time is present on the classpath.
 
 The following example shows how to register custom formatters and converters:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3041,7 +2942,6 @@ The following example shows how to register custom formatters and converters:
 
 	}
 ----
-====
 
 NOTE: See <<core.adoc#format-FormatterRegistrar-SPI,`FormatterRegistrar` SPI>>
 and the `FormattingConversionServiceFactoryBean` for more information on when to use `FormatterRegistrar` implementations.
@@ -3060,7 +2960,6 @@ as a global <<core.adoc#validator,validator>> for use with `@Valid` and `Validat
 In your Java configuration, you can customize the global `Validator` instance,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3075,12 +2974,10 @@ as the following example shows:
 
 	}
 ----
-====
 
 Note that you can also register `Validator` implementations locally,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3094,7 +2991,6 @@ as the following example shows:
 
 	}
 ----
-====
 
 TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
 mark it with `@Primary` in order to avoid conflict with the one declared in the MVC config.
@@ -3111,7 +3007,6 @@ can also enable a query parameter-based strategy.
 
 The following example shows how to customize the requested content type resolution:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3125,7 +3020,6 @@ The following example shows how to customize the requested content type resoluti
 		}
 	}
 ----
-====
 
 
 
@@ -3135,7 +3029,6 @@ The following example shows how to customize the requested content type resoluti
 
 The following example shows how to customize how the request and response body are read and written:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3149,7 +3042,6 @@ The following example shows how to customize how the request and response body a
 		}
 	}
 ----
-====
 
 `ServerCodecConfigurer` provides a set of default readers and writers. You can use it to add
 more readers and writers, customize the default ones, or replace the default ones completely.
@@ -3176,7 +3068,6 @@ It also automatically registers the following well-known modules if they are det
 
 The following example shows how to configure view resolution:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3190,13 +3081,11 @@ The following example shows how to configure view resolution:
 		}
 	}
 ----
-====
 
 The `ViewResolverRegistry` has shortcuts for view technologies with which the Spring Framework
 integrates. The following example uses FreeMarker (which also requires configuring the
 underlying FreeMarker view technology):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3220,11 +3109,9 @@ underlying FreeMarker view technology):
 		}
 	}
 ----
-====
 
 You can also plug in any `ViewResolver` implementation, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3240,14 +3127,12 @@ You can also plug in any `ViewResolver` implementation, as the following example
 		}
 	}
 ----
-====
 
 To support <<webflux-multiple-representations>> and rendering other formats
 through view resolution (besides HTML), you can configure one or more default views based
 on the `HttpMessageWriterView` implementation, which accepts any of the available
 <<webflux-codecs>> from `spring-web`. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3267,7 +3152,6 @@ on the `HttpMessageWriterView` implementation, which accepts any of the availabl
 		// ...
 	}
 ----
-====
 
 See <<webflux-view>> for more on the view technologies that are integrated with Spring WebFlux.
 
@@ -3287,7 +3171,6 @@ and a reduction in HTTP requests made by the browser. The `Last-Modified` header
 evaluated and, if present, a `304` status code is returned. The following list shows
 the example:
 
-====
 [source,java,indent=0]
 [subs="verbatim"]
 ----
@@ -3304,7 +3187,6 @@ the example:
 
 	}
 ----
-====
 
 // TODO: See also <<webflux-caching-static-resources, HTTP caching support for static resources>>.
 
@@ -3320,7 +3202,6 @@ JavaScript resources used with a module loader).
 
 The following example shows how to use `VersionResourceResolver` in your Java configuration:
 
-====
 [source,java,indent=0]
 [subs="verbatim"]
 ----
@@ -3338,7 +3219,6 @@ The following example shows how to use `VersionResourceResolver` in your Java co
 
 	}
 ----
-====
 
 You can use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
 transformers (for example, to insert versions). The WebFlux configuration provides a `ResourceUrlProvider`
@@ -3369,7 +3249,6 @@ You can customize options related to path matching. For details on the individua
 {api-spring-framework}/web/reactive/config/PathMatchConfigurer.html[`PathMatchConfigurer`] javadoc.
 The following example shows how to use `PathMatchConfigurer`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3388,7 +3267,6 @@ The following example shows how to use `PathMatchConfigurer`:
 
 	}
 ----
-====
 
 [TIP]
 ====
@@ -3419,7 +3297,6 @@ For advanced mode, you can remove `@EnableWebFlux` and extend directly from
 `DelegatingWebFluxConfiguration` instead of implementing `WebFluxConfigurer`,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3430,7 +3307,6 @@ as the following example shows:
 
 	}
 ----
-====
 
 You can keep existing methods in `WebConfig`, but you can now also override bean declarations
 from the base class and still have any number of other `WebMvcConfigurer` implementations on

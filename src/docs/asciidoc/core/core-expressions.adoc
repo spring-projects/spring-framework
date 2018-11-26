@@ -65,7 +65,6 @@ The complete language reference can be found in
 The following code introduces the SpEL API to evaluate the literal string expression,
 `Hello World`.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -74,7 +73,7 @@ The following code introduces the SpEL API to evaluate the literal string expres
 	String message = (String) exp.getValue();
 ----
 <1> The value of the message variable is `'Hello World'`.
-====
+
 
 The SpEL classes and interfaces you are most likely to use are located in the
 `org.springframework.expression` package and its sub-packages, such as `spel.support`.
@@ -91,7 +90,6 @@ and calling constructors.
 
 In the following example of method invocation, we call the `concat` method on the string literal:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -100,11 +98,10 @@ In the following example of method invocation, we call the `concat` method on th
 	String message = (String) exp.getValue();
 ----
 <1> The value of `message` is now 'Hello World!'.
-====
+
 
 The following example of calling a JavaBean property calls the `String` property `Bytes`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -115,13 +112,12 @@ The following example of calling a JavaBean property calls the `String` property
 	byte[] bytes = (byte[]) exp.getValue();
 ----
 <1> This line converts the literal to a byte array.
-====
+
 
 SpEL also supports nested properties by using standard dot notation (such as
 `prop1.prop2.prop3`) and the setting of property values. Public fields may also be accessed.
 The following example shows how to use dot notation to get the length of a literal:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -132,12 +128,11 @@ The following example shows how to use dot notation to get the length of a liter
 	int length = (Integer) exp.getValue();
 ----
 <1> `'Hello World'.bytes.length` gives the length of the literal.
-====
+
 
 The String's constructor can be called instead of using a string literal, as the following
 example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -146,7 +141,7 @@ example shows:
 	String message = exp.getValue(String.class);
 ----
 <1> Construct a new `String` from the literal and make it be upper case.
-====
+
 
 Note the use of the generic method: `public <T> T getValue(Class<T> desiredResultType)`.
 Using this method removes the need to cast the value of the expression to the desired
@@ -158,7 +153,6 @@ against a specific object instance (called the root object). The following examp
 how to retrieve the `name` property from an instance of the `Inventor` class or
 create a boolean condition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -180,7 +174,6 @@ create a boolean condition:
 	// result == true
 ----
 <1> Parse `name` as an expression.
-====
 
 
 
@@ -228,7 +221,6 @@ to set a `List` property. The type of the property is actually `List<Boolean>`. 
 recognizes that the elements of the list need to be converted to `Boolean` before
 being placed in it. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -248,7 +240,6 @@ being placed in it. The following example shows how to do so:
 	// b is false
 	Boolean b = simple.booleanList.get(0);
 ----
-====
 
 
 
@@ -265,7 +256,6 @@ and specifying an index that is beyond the end of the current size of the array 
 list, you can automatically grow the array or list to accommodate that index. The following
 example demonstrates how to automatically grow the list:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -289,7 +279,6 @@ example demonstrates how to automatically grow the list:
 	// demo.list will now be a real collection of 4 entries
 	// Each entry is a new empty String
 ----
-====
 
 
 
@@ -317,11 +306,9 @@ on repeated evaluations.
 
 Consider the following basic expression:
 
-====
 ----
 someArray[0].someProperty.someOtherProperty < 0.1
 ----
-====
 
 Because the preceding expression involves array access, some property de-referencing,
 and numeric operations, the performance gain can be very noticeable. In an example
@@ -361,7 +348,6 @@ since part of the expression may be running twice.
 After selecting a mode, use the `SpelParserConfiguration` to configure the parser. The
 following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -376,7 +362,6 @@ following example shows how to do so:
 
 	Object payload = expr.getValue(message);
 ----
-====
 
 When you specify the compiler mode, you can also specify a classloader (passing null is allowed).
 Compiled expressions are defined in a child classloader created under any that is supplied.
@@ -425,7 +410,6 @@ form `#{ <expression string> }`.
 A property or constructor argument value can be set by using expressions, as the following
 example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -435,12 +419,10 @@ example shows:
 		<!-- other properties -->
 	</bean>
 ----
-====
 
 The `systemProperties` variable is predefined, so you can use it in your expressions, as
 the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -450,14 +432,12 @@ the following example shows:
 		<!-- other properties -->
 	</bean>
 ----
-====
 
 Note that you do not have to prefix the predefined variable with the `#`
 symbol in this context.
 
 You can also refer to other bean properties by name, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -473,7 +453,6 @@ You can also refer to other bean properties by name, as the following example sh
 		<!-- other properties -->
 	</bean>
 ----
-====
 
 
 
@@ -485,7 +464,6 @@ parameters.
 
 The following example sets the default value of a field variable:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -504,11 +482,9 @@ The following example sets the default value of a field variable:
 
 	}
 ----
-====
 
 The following example shows the equivalent but on a property setter method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -527,12 +503,10 @@ The following example shows the equivalent but on a property setter method:
 
 	}
 ----
-====
 
 Autowired methods and constructors can also use the `@Value` annotation, as the following
 examples show:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -571,7 +545,6 @@ examples show:
 		// ...
 	}
 ----
-====
 
 
 
@@ -611,7 +584,6 @@ The following listing shows simple usage of literals. Typically, they are not us
 in isolation like this but, rather, as part of a more complex expression -- for example,
 using a literal on one side of a logical comparison operator.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -629,7 +601,6 @@ using a literal on one side of a logical comparison operator.
 
 	Object nullValue = parser.parseExpression("null").getValue();
 ----
-====
 
 Numbers support the use of the negative sign, exponential notation, and decimal points.
 By default, real numbers are parsed by using Double.parseDouble().
@@ -645,7 +616,6 @@ data listed in the <<expressions-example-classes,Classes used in the examples>> 
 To navigate "`down`" and get Tesla's year of birth and Pupin's city of birth, we use the following
 expressions:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -654,13 +624,11 @@ expressions:
 
 	String city = (String) parser.parseExpression("placeOfBirth.City").getValue(context);
 ----
-====
 
 Case insensitivity is allowed for the first letter of property names. The contents of
 arrays and lists are obtained by using square bracket notation, as the following example
 shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -684,13 +652,11 @@ shows:
 	String invention = parser.parseExpression("Members[0].Inventions[6]").getValue(
 			context, ieee, String.class);
 ----
-====
 
 The contents of maps are obtained by specifying the literal key value within the
 brackets. In the following example, because keys for the `Officers` map are strings, we can specify
 string literals:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -707,7 +673,6 @@ string literals:
 	parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
 			societyContext, "Croatia");
 ----
-====
 
 
 
@@ -716,7 +681,6 @@ string literals:
 
 You can directly express lists in an expression by using `{}` notation.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -725,7 +689,6 @@ You can directly express lists in an expression by using `{}` notation.
 
 	List listOfLists = (List) parser.parseExpression("{{'a','b'},{'x','y'}}").getValue(context);
 ----
-====
 
 `{}` by itself means an empty list. For performance reasons, if the list is itself
 entirely composed of fixed literals,  a constant list is created to represent the
@@ -739,7 +702,6 @@ expression (rather than building a new list on each evaluation).
 You can also directly express maps in an expression by using `{key:value}` notation. The
 following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -748,7 +710,6 @@ following example shows how to do so:
 
 	Map mapOfMaps = (Map) parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context);
 ----
-====
 
 `{:}` by itself means an empty map. For performance reasons, if the map is itself composed
 of fixed literals or other nested constant structures (lists or maps), a constant map is created
@@ -763,7 +724,6 @@ is optional. The examples above do not use quoted keys.
 You can build arrays by using the familiar Java syntax, optionally supplying an initializer
 to have the array populated at construction time. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -775,7 +735,6 @@ to have the array populated at construction time. The following example shows ho
 	// Multi dimensional array
 	int[][] numbers3 = (int[][]) parser.parseExpression("new int[4][5]").getValue(context);
 ----
-====
 
 You cannot currently supply an initializer when you construct
 multi-dimensional array.
@@ -789,7 +748,6 @@ You can invoke methods by using typical Java programming syntax. You can also in
 on literals. Variable arguments are also supported. The following examples show how to
 invoke methods:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -800,7 +758,6 @@ invoke methods:
 	boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
 			societyContext, Boolean.class);
 ----
-====
 
 
 
@@ -822,7 +779,6 @@ The relational operators (equal, not equal, less than, less than or equal, great
 and greater than or equal) are supported by using standard operator notation. The
 following listing shows a few examples of operators:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -835,7 +791,6 @@ following listing shows a few examples of operators:
 	// evaluates to true
 	boolean trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean.class);
 ----
-====
 
 [NOTE]
 ====
@@ -851,7 +806,6 @@ in favor of comparisons against zero (for example, `X > 0` or `X < 0`).
 In addition to the standard relational operators, SpEL supports the `instanceof` and regular
 expression-based `matches` operator. The following listing shows examples of both:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -867,7 +821,6 @@ expression-based `matches` operator. The following listing shows examples of bot
 	boolean falseValue = parser.parseExpression(
 			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 ----
-====
 
 CAUTION: Be careful with primitive types, as they are immediately boxed up to the wrapper type,
 so `1 instanceof T(int)` evaluates to `false` while `1 instanceof T(Integer)`
@@ -901,7 +854,6 @@ SpEL supports the following logical operators:
 
 The following example shows how to use the logical operators
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -932,7 +884,6 @@ The following example shows how to use the logical operators
 	String expression = "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
 	boolean falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 ----
-====
 
 
 [[expressions-operators-mathematical]]
@@ -943,7 +894,6 @@ and division operators only on numbers. You can also use
 the modulus (%) and exponential power (^) operators. Standard operator precedence is enforced. The
 following example shows the mathematical operators in use:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -976,7 +926,6 @@ following example shows the mathematical operators in use:
 	// Operator precedence
 	int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class);  // -21
 ----
-====
 
 
 [[expressions-assignment]]
@@ -986,7 +935,6 @@ To setting a property, use the assignment operator (`=`). This is typically
 done within a call to `setValue` but can also be done inside a call to `getValue`. The
 following listing shows both ways to use the assignment operator:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -999,7 +947,6 @@ following listing shows both ways to use the assignment operator:
 	String aleks = parser.parseExpression(
 			"Name = 'Aleksandar Seovic'").getValue(context, inventor, String.class);
 ----
-====
 
 
 
@@ -1014,7 +961,6 @@ type). Static methods are invoked by using this operator as well. The
 fully qualified, but all other type references must be. The following example shows how
 to use the `T` operator:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1026,7 +972,6 @@ to use the `T` operator:
 			"T(java.math.RoundingMode).CEILING < T(java.math.RoundingMode).FLOOR")
 			.getValue(Boolean.class);
 ----
-====
 
 
 
@@ -1037,7 +982,6 @@ You can invoke constructors by using the `new` operator. You should use the full
 for all but the primitive types (`int`, `float`, and so on) and String. The following
 example shows how to use the `new` operator to invoke constructors:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1050,7 +994,6 @@ example shows how to use the `new` operator to invoke constructors:
 			"Members.add(new org.spring.samples.spel.inventor.Inventor(
 				'Albert Einstein', 'German'))").getValue(societyContext);
 ----
-====
 
 
 
@@ -1061,7 +1004,6 @@ You can reference variables in the expression by using the `#variableName` synta
 are set by using the `setVariable` method on `EvaluationContext` implementations. The
 following example shows how to use variables:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1073,7 +1015,6 @@ following example shows how to use variables:
 	parser.parseExpression("Name = #newName").getValue(context, tesla);
 	System.out.println(tesla.getName())  // "Mike Tesla"
 ----
-====
 
 
 [[expressions-this-root]]
@@ -1085,7 +1026,6 @@ defined and refers to the root context object. Although `#this` may vary as comp
 an expression are evaluated, `#root` always refers to the root. The following examples
 show how to use the `#this` and `#root` variables:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1103,7 +1043,6 @@ show how to use the `#this` and `#root` variables:
 	List<Integer> primesGreaterThanTen = (List<Integer>) parser.parseExpression(
 			"#primes.?[#this>10]").getValue(context);
 ----
-====
 
 
 
@@ -1114,7 +1053,6 @@ You can extend SpEL by registering user-defined functions that can be called wit
 expression string. The function is registered through the `EvaluationContext`. The
 following example shows how to register a user-defined function:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1123,11 +1061,9 @@ following example shows how to register a user-defined function:
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 	context.setVariable("myFunction", method);
 ----
-====
 
 For example, consider the following utility method that reverses a string:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1142,11 +1078,9 @@ For example, consider the following utility method that reverses a string:
 		}
 	}
 ----
-====
 
 You can then register and use the preceding method, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1159,7 +1093,6 @@ You can then register and use the preceding method, as the following example sho
 	String helloWorldReversed = parser.parseExpression(
 			"#reverseString('hello')").getValue(context, String.class);
 ----
-====
 
 
 
@@ -1170,7 +1103,6 @@ If the evaluation context has been configured with a bean resolver, you can
 look up beans from an expression by using the `@` symbol. The following example shows how
 to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1181,12 +1113,10 @@ to do so:
 	// This will end up calling resolve(context,"something") on MyBeanResolver during evaluation
 	Object bean = parser.parseExpression("@something").getValue(context);
 ----
-====
 
 To access a factory bean itself, you should instead prefix the bean name with an `&` symbol.
 The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1197,7 +1127,6 @@ The following example shows how to do so:
 	// This will end up calling resolve(context,"&foo") on MyBeanResolver during evaluation
 	Object bean = parser.parseExpression("&foo").getValue(context);
 ----
-====
 
 
 
@@ -1207,19 +1136,16 @@ The following example shows how to do so:
 You can use the ternary operator for performing if-then-else conditional logic inside
 the expression. The following listing shows a minimal example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	String falseString = parser.parseExpression(
 			"false ? 'trueExp' : 'falseExp'").getValue(String.class);
 ----
-====
 
 In this case, the boolean `false` results in returning the string value `'falseExp'`. A more
 realistic example follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1233,7 +1159,6 @@ realistic example follows:
 			.getValue(societyContext, String.class);
 	// queryResultString = "Nikola Tesla is a member of the IEEE Society"
 ----
-====
 
 See the next section on the Elvis operator for an even shorter syntax for the
 ternary operator.
@@ -1248,19 +1173,16 @@ http://www.groovy-lang.org/operators.html#_elvis_operator[Groovy] language.
 With the ternary operator syntax, you usually have to repeat a variable twice, as the
 following example shows:
 
-====
 [source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	String name = "Elvis Presley";
 	String displayName = (name != null ? name : "Unknown");
 ----
-====
 
 Instead, you can use the Elvis operator (named for the resemblance to Elvis' hair style).
 The following example shows how to use the Elvis operator:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1269,11 +1191,9 @@ The following example shows how to use the Elvis operator:
 	String name = parser.parseExpression("name?:'Unknown'").getValue(String.class);
 	System.out.println(name);  // 'Unknown'
 ----
-====
 
 The following listing shows A more complex example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1288,14 +1208,12 @@ The following listing shows A more complex example:
 	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
 	System.out.println(name);  // Elvis Presley
 ----
-====
 
 [NOTE]
 =====
 You can use the Elvis operator to apply default values in expressions. The folloiwng
 example shows how to use the Elvis operator in a `@Value` expression:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1303,9 +1221,7 @@ example shows how to use the Elvis operator in a `@Value` expression:
 ----
 
 This will inject a system property `pop3.port` if it is defined or 25 if not.
-====
 =====
-
 
 
 [[expressions-operator-safe-navigation]]
@@ -1318,7 +1234,6 @@ it is not null before accessing methods or properties of the object. To avoid th
 safe navigation operator returns null instead of throwing an exception. The following
 example shows how to use the safe navigation operator:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1335,7 +1250,6 @@ example shows how to use the safe navigation operator:
 	city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
 	System.out.println(city);  // null - does not throw NullPointerException!!!
 ----
-====
 
 
 
@@ -1349,14 +1263,12 @@ Selection uses a syntax of `.?[selectionExpression]`. It filters the collection 
 returns a new collection that contain a subset of the original elements. For example,
 selection lets us easily get a list of Serbian inventors, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	List<Inventor> list = (List<Inventor>) parser.parseExpression(
 			"Members.?[Nationality == 'Serbian']").getValue(societyContext);
 ----
-====
 
 Selection is possible upon both lists and maps. For a list, the selection
 criteria is evaluated against each individual list element. Against a map, the
@@ -1367,13 +1279,11 @@ the selection.
 The following expression returns a new map that consists of those elements of the original map
 where the entry value is less than 27:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	Map newMap = parser.parseExpression("map.?[value<27]").getValue();
 ----
-====
 
 In addition to returning all the selected elements, you can retrieve only the
 first or the last value. To obtain the first entry matching the selection, the syntax is
@@ -1391,14 +1301,12 @@ example, suppose we have a list of inventors but want the list of
 cities where they were born. Effectively, we want to evaluate 'placeOfBirth.city' for
 every entry in the inventor list. The following example uses projection to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// returns ['Smiljan', 'Idvor' ]
 	List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]");
 ----
-====
 
 You can also use a map to drive projection and, in this case, the projection expression is
 evaluated against each entry in the map (represented as a Java `Map.Entry`). The result
@@ -1415,7 +1323,6 @@ Each evaluation block is delimited with prefix and suffix characters that you ca
 define. A common choice is to use `#{ }` as the delimiters, as the following example
 shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1425,7 +1332,6 @@ shows:
 
 	// evaluates to "random number is 0.7038186818312008"
 ----
-====
 
 The string is evaluated by concatenating the literal text `'random number is '` with the
 result of evaluating the expression inside the `#{ }` delimiter (in this case, the result
@@ -1434,7 +1340,6 @@ is of the type `ParserContext`. The `ParserContext` interface is used to influen
 the expression is parsed in order to support the expression templating functionality.
 The definition of `TemplateParserContext` follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1453,7 +1358,6 @@ The definition of `TemplateParserContext` follows:
 		}
 	}
 ----
-====
 
 
 
@@ -1464,7 +1368,6 @@ The definition of `TemplateParserContext` follows:
 This section lists the classes used in the examples throughout this chapter.
 
 .Inventor.java
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1538,10 +1441,8 @@ This section lists the classes used in the examples throughout this chapter.
 		}
 	}
 ----
-====
 
 .PlaceOfBirth.java
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1579,10 +1480,8 @@ This section lists the classes used in the examples throughout this chapter.
 
 	}
 ----
-====
 
 .Society.java
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1627,4 +1526,3 @@ This section lists the classes used in the examples throughout this chapter.
 
 	}
 ----
-====
