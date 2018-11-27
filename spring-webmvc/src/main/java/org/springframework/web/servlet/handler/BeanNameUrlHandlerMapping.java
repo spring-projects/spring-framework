@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.handler;
 
+import org.springframework.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.util.StringUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerMapping}
@@ -56,15 +56,18 @@ public class BeanNameUrlHandlerMapping extends AbstractDetectingUrlHandlerMappin
 	@Override
 	protected String[] determineUrlsForHandler(String beanName) {
 		List<String> urls = new ArrayList<>();
+		// 如果是以 / 开头，添加到 urls
 		if (beanName.startsWith("/")) {
 			urls.add(beanName);
 		}
+		// 获得 beanName 的别名们，如果以 / 开头，则添加到 urls
 		String[] aliases = obtainApplicationContext().getAliases(beanName);
 		for (String alias : aliases) {
 			if (alias.startsWith("/")) {
 				urls.add(alias);
 			}
 		}
+		// 返回
 		return StringUtils.toStringArray(urls);
 	}
 

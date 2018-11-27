@@ -16,22 +16,14 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UrlPathHelper;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -42,18 +34,35 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
+    /**
+     * 路径集合
+     */
 	private final Set<String> patterns;
 
+    /**
+     * URL 路径工具类
+     */
 	private final UrlPathHelper pathHelper;
 
+    /**
+     * 路径匹配器
+     */
 	private final PathMatcher pathMatcher;
 
+    /**
+     * 使用前置匹配
+     */
 	private final boolean useSuffixPatternMatch;
 
+    /**
+     * 使用后置的 / 匹配
+     */
 	private final boolean useTrailingSlashMatch;
 
+    /**
+     * 后缀拓展集合
+     */
 	private final List<String> fileExtensions = new ArrayList<>();
-
 
 	/**
 	 * Creates a new instance with the given URL patterns.
@@ -75,7 +84,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	public PatternsRequestCondition(String[] patterns, @Nullable UrlPathHelper urlPathHelper,
 			@Nullable PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch) {
-
 		this(Arrays.asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch, null);
 	}
 
@@ -92,7 +100,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	public PatternsRequestCondition(String[] patterns, @Nullable UrlPathHelper urlPathHelper,
 			@Nullable PathMatcher pathMatcher, boolean useSuffixPatternMatch,
 			boolean useTrailingSlashMatch, @Nullable List<String> fileExtensions) {
-
 		this(Arrays.asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch,
 				useTrailingSlashMatch, fileExtensions);
 	}
@@ -104,16 +111,17 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			@Nullable PathMatcher pathMatcher, boolean useSuffixPatternMatch,
 			boolean useTrailingSlashMatch, @Nullable List<String> fileExtensions) {
 
-		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
+		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns)); // 保证前缀都有 / 。如果没有，则进行补充
 		this.pathHelper = (urlPathHelper != null ? urlPathHelper : new UrlPathHelper());
 		this.pathMatcher = (pathMatcher != null ? pathMatcher : new AntPathMatcher());
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 
+		// 初始化 fileExtensions 属性
 		if (fileExtensions != null) {
 			for (String fileExtension : fileExtensions) {
 				if (fileExtension.charAt(0) != '.') {
-					fileExtension = "." + fileExtension;
+					fileExtension = "." + fileExtension; // 补充前缀 .
 				}
 				this.fileExtensions.add(fileExtension);
 			}
@@ -198,11 +206,16 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	@Override
 	@Nullable
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (this.patterns.isEmpty()) {
+		// 不存在路径，直接返回自己，说明匹配成功
+	    if (this.patterns.isEmpty()) {
 			return this;
 		}
+        // 获得请求的路径
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+	    // 执行匹配
 		List<String> matches = getMatchingPatterns(lookupPath);
+		// 如果匹配成功，则创建 PatternsRequestCondition 对象
+        // 如果匹配失败，则返回 null
 		return (!matches.isEmpty() ?
 				new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher,
 						this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions) : null);
@@ -219,12 +232,15 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	public List<String> getMatchingPatterns(String lookupPath) {
 		List<String> matches = new ArrayList<>();
+		// 遍历 patterns 数组，逐个匹配
 		for (String pattern : this.patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
+			// 匹配成功，添加到 matches 中
 			if (match != null) {
 				matches.add(match);
 			}
 		}
+		// 如果匹配数量超过 1 个，则进行排序
 		if (matches.size() > 1) {
 			matches.sort(this.pathMatcher.getPatternComparator(lookupPath));
 		}
@@ -233,27 +249,32 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	@Nullable
 	private String getMatchingPattern(String pattern, String lookupPath) {
-		if (pattern.equals(lookupPath)) {
+		// 相等，直接返回
+	    if (pattern.equals(lookupPath)) {
 			return pattern;
 		}
+		// 前置匹配
 		if (this.useSuffixPatternMatch) {
+	        // 有文件后缀的匹配
 			if (!this.fileExtensions.isEmpty() && lookupPath.indexOf('.') != -1) {
 				for (String extension : this.fileExtensions) {
 					if (this.pathMatcher.match(pattern + extension, lookupPath)) {
 						return pattern + extension;
 					}
 				}
-			}
-			else {
+            // 无文件后缀的匹配
+			} else {
 				boolean hasSuffix = pattern.indexOf('.') != -1;
 				if (!hasSuffix && this.pathMatcher.match(pattern + ".*", lookupPath)) {
 					return pattern + ".*";
 				}
 			}
 		}
+		// 默认匹配
 		if (this.pathMatcher.match(pattern, lookupPath)) {
 			return pattern;
 		}
+		// 后置斜杆匹配
 		if (this.useTrailingSlashMatch) {
 			if (!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath)) {
 				return pattern +"/";
@@ -273,25 +294,32 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * contain only patterns that match the request and are sorted with
 	 * the best matches on top.
 	 */
-	@Override
+	@SuppressWarnings("Duplicates")
+    @Override
 	public int compareTo(PatternsRequestCondition other, HttpServletRequest request) {
+	    // 获得请求的路径
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+		// 获得路径 Comparator 比较器
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
+		// 获得当前和 other 的迭代器
 		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
+		// 逐个迭代，直到有一个不相等
 		while (iterator.hasNext() && iteratorOther.hasNext()) {
 			int result = patternComparator.compare(iterator.next(), iteratorOther.next());
 			if (result != 0) {
 				return result;
 			}
 		}
+		// 注意，这里的逻辑是，按照升序
+		// 如果当前还有新的，选择当前
 		if (iterator.hasNext()) {
 			return -1;
-		}
-		else if (iteratorOther.hasNext()) {
+        // 如果 other 还有新的，选择 other
+		} else if (iteratorOther.hasNext()) {
 			return 1;
-		}
-		else {
+        // 相等
+		} else {
 			return 0;
 		}
 	}

@@ -451,7 +451,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 		// Bean name or resolved handler?
         // 如果找到的处理器是 String 类型，则从容器中找到 String 对应的 Bean 类型作为处理器。
-        // TODO 芋艿，什么情况？？？
 		if (handler instanceof String) {
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
