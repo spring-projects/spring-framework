@@ -16,9 +16,6 @@
 
 package org.springframework.web.method.annotation;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
@@ -29,6 +26,9 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Resolves {@link Map} method arguments annotated with an @{@link RequestParam}
@@ -61,7 +61,10 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 
 		Class<?> paramType = parameter.getParameterType();
 
+		// 获得请求的参数集合
 		Map<String, String[]> parameterMap = webRequest.getParameterMap();
+
+		// MultiValueMap 类型的处理
 		if (MultiValueMap.class.isAssignableFrom(paramType)) {
 			MultiValueMap<String, String> result = new LinkedMultiValueMap<>(parameterMap.size());
 			parameterMap.forEach((key, values) -> {
@@ -70,8 +73,8 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 				}
 			});
 			return result;
-		}
-		else {
+        // 普通 Map 类型的处理
+		} else {
 			Map<String, String> result = new LinkedHashMap<>(parameterMap.size());
 			parameterMap.forEach((key, values) -> {
 				if (values.length > 0) {

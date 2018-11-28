@@ -16,15 +16,15 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Abstract base class for {@link HandlerAdapter} implementations that support
@@ -37,12 +37,12 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-
 	public AbstractHandlerMethodAdapter() {
 		// no restriction of HTTP methods by default
+        // 调用 WebContentGenerator 类的构造方法
+        // 参数 restrictDefaultSupportedMethods 参数为 false ，表示不需要严格校验 HttpMethod
 		super(false);
 	}
-
 
 	/**
 	 * Specify the order value for this HandlerAdapter bean.
@@ -57,7 +57,6 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	public int getOrder() {
 		return this.order;
 	}
-
 
 	/**
 	 * This implementation expects the handler to be an {@link HandlerMethod}.
@@ -83,7 +82,6 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	@Nullable
 	public final ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-
 		return handleInternal(request, response, (HandlerMethod) handler);
 	}
 

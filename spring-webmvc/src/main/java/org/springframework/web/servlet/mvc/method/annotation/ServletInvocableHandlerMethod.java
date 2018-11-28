@@ -16,13 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.concurrent.Callable;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpStatus;
@@ -40,6 +33,13 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.NestedServletException;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.concurrent.Callable;
 
 /**
  * Extends {@link InvocableHandlerMethod} with the ability to handle return
@@ -61,9 +61,11 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	private static final Method CALLABLE_METHOD = ClassUtils.getMethod(Callable.class, "call");
 
+    /**
+     * 返回结果处理器
+     */
 	@Nullable
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
-
 
 	/**
 	 * Creates an instance from the given handler and method.
@@ -78,7 +80,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	public ServletInvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
 	}
-
 
 	/**
 	 * Register {@link HandlerMethodReturnValueHandler} instances to use to
@@ -98,28 +99,30 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	public void invokeAndHandle(ServletWebRequest webRequest, ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
-
+	    // 执行调用
 		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
+		// 设置响应状态码
 		setResponseStatus(webRequest);
 
-		if (returnValue == null) {
+		// 设置 ModelAndViewContainer 为请求已处理，返回
+		if (returnValue == null) { // 返回 null
 			if (isRequestNotModified(webRequest) || getResponseStatus() != null || mavContainer.isRequestHandled()) {
 				mavContainer.setRequestHandled(true);
 				return;
 			}
-		}
-		else if (StringUtils.hasText(getResponseStatusReason())) {
+		} else if (StringUtils.hasText(getResponseStatusReason())) { // 有 responseStatusReason
 			mavContainer.setRequestHandled(true);
 			return;
 		}
 
+		// 设置 ModelAndViewContainer 为请求未处理
 		mavContainer.setRequestHandled(false);
 		Assert.state(this.returnValueHandlers != null, "No return value handlers");
+		// 处理器返回值
 		try {
 			this.returnValueHandlers.handleReturnValue(
 					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatErrorForReturnValue(returnValue), ex);
 			}
@@ -131,23 +134,26 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Set the response status according to the {@link ResponseStatus} annotation.
 	 */
 	private void setResponseStatus(ServletWebRequest webRequest) throws IOException {
-		HttpStatus status = getResponseStatus();
-		if (status == null) {
+		// 获得状态码。
+        // 此处，想要非空，需要通过 @ResponseStatus 注解方法
+	    HttpStatus status = getResponseStatus();
+		if (status == null) { // 若为空，则返回
 			return;
 		}
 
+		// 设置响应的状态码
 		HttpServletResponse response = webRequest.getResponse();
 		if (response != null) {
 			String reason = getResponseStatusReason();
-			if (StringUtils.hasText(reason)) {
+			if (StringUtils.hasText(reason)) { // 有 reason ，则设置 status + reason
 				response.sendError(status.value(), reason);
-			}
-			else {
+			} else { // 无 reason ，则仅设置 status
 				response.setStatus(status.value());
 			}
 		}
 
 		// To be picked up by RedirectView
+        // 为了 RedirectView ，所以进行设置
 		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, status);
 	}
 

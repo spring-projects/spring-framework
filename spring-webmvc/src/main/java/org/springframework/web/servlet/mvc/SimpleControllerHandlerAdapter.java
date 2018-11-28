@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Adapter to use the plain {@link Controller} workflow interface with
@@ -41,6 +41,7 @@ public class SimpleControllerHandlerAdapter implements HandlerAdapter {
 
 	@Override
 	public boolean supports(Object handler) {
+	    // 判断是 Controller 类型
 		return (handler instanceof Controller);
 	}
 
@@ -48,12 +49,13 @@ public class SimpleControllerHandlerAdapter implements HandlerAdapter {
 	@Nullable
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-
+	    // Controller 类型的调用
 		return ((Controller) handler).handleRequest(request, response);
 	}
 
 	@Override
 	public long getLastModified(HttpServletRequest request, Object handler) {
+	    // 处理器实现了 LastModified 接口的情况下
 		if (handler instanceof LastModified) {
 			return ((LastModified) handler).getLastModified(request);
 		}
