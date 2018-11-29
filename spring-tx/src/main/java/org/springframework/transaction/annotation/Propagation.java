@@ -62,7 +62,7 @@ public enum Propagation {
 	 * on all transaction managers. This in particular applies to
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
 	 * which requires the {@code javax.transaction.TransactionManager} to be
-	 * made available it to it (which is server-specific in standard Java EE).
+	 * made available to it (which is server-specific in standard Java EE).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */
 	REQUIRES_NEW(TransactionDefinition.PROPAGATION_REQUIRES_NEW),
@@ -74,7 +74,7 @@ public enum Propagation {
 	 * on all transaction managers. This in particular applies to
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
 	 * which requires the {@code javax.transaction.TransactionManager} to be
-	 * made available it to it (which is server-specific in standard Java EE).
+	 * made available to it (which is server-specific in standard Java EE).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */
 	NOT_SUPPORTED(TransactionDefinition.PROPAGATION_NOT_SUPPORTED),
