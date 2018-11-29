@@ -25,7 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
- * Exception for errors that fit response status 416 (unsupported media type).
+ * Exception for errors that fit response status 415 (unsupported media type).
  *
  * @author Rossen Stoyanchev
  * @since 5.0
