@@ -30,6 +30,7 @@ import java.nio.charset.Charset;
 
 import org.springframework.lang.Nullable;
 
+
 /**
  * Simple utility methods for dealing with streams. The copy methods of this class are
  * similar to those defined in {@link FileCopyUtils} except that all affected streams are
@@ -89,6 +90,12 @@ public abstract class StreamUtils {
 		while ((bytesRead = reader.read(buffer)) != -1) {
 			out.append(buffer, 0, bytesRead);
 		}
+		try{ 
+			in.close();
+		} catch(Exception e) {
+		
+		}
+		
 		return out.toString();
 	}
 
