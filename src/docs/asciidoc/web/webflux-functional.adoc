@@ -252,6 +252,47 @@ found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not F
 
 
 
+[[webflux-fn-handler-validation]]
+=== Validation
+
+A functional endpoint can use Spring's <<core.adoc#validation,validation facilities>> to
+apply validation to the request body. For example, given a custom Spring
+<<core.adoc#validation,Validator>> implementation for a `Person`:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public class PersonHandler {
+
+	private final Validator validator = new PersonValidator(); // <1>
+
+	// ...
+
+	public Mono<ServerResponse> createPerson(ServerRequest request) {
+		Mono<Person> person = request.bodyToMono(Person.class).doOnNext(this::validate); <2>
+		return ok().build(repository.savePerson(person));
+	}
+
+	private void validate(Person person) {
+		Errors errors = new BeanPropertyBindingResult(body, "person");
+		validator.validate(body, errors);
+		if (errors.hasErrors) {
+			throw new ServerWebInputException(errors.toString()); <3>
+		}
+	}
+
+----
+<1> Create `Validator` instance.
+<2> Apply validation.
+<3> Raise exception for a 400 response.
+====
+
+Handlers can also use the standard bean validation API (JSR-303) by creating and injecting
+a global `Validator` instance based on `LocalValidatorFactoryBean`.
+See <<core.adoc#validation-beanvalidation,Spring Validation>>.
+
+
 
 [[webflux-fn-router-functions]]
 == `RouterFunction`
