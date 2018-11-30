@@ -144,6 +144,11 @@ public abstract class StreamUtils {
 			byteCount += bytesRead;
 		}
 		out.flush();
+		try{
+			in.close();
+		}catch(Exception e) {
+		
+		}
 		return byteCount;
 	}
 
