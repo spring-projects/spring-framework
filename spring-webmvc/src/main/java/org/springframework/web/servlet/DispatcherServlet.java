@@ -1031,7 +1031,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
-                // 获得请求对应的 HandlerExecutionChain 对象 TODO 芋艿
+                // 获得请求对应的 HandlerExecutionChain 对象
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) { // 如果获取不到，则根据配置抛出异常或返回 404 错误。
 					noHandlerFound(processedRequest, response);
@@ -1039,7 +1039,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Determine handler adapter for the current request.
-                // 获得当前 handler 对应的 HandlerAdapter 对象 TODO
+                // 获得当前 handler 对应的 HandlerAdapter 对象
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.
@@ -1053,7 +1053,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
-				// TODO 芋艿 前置处理 拦截器
+				// 前置处理 拦截器
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
@@ -1069,7 +1069,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 				// TODO 芋艿 视图
 				applyDefaultViewName(processedRequest, mv);
-				// TODO 芋艿 后置处理 拦截器
+				// 后置处理 拦截器
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			} catch (Exception ex) {
 				dispatchException = ex; // 记录异常
@@ -1082,10 +1082,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			// 处理正常和异常的请求调用结果。
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		} catch (Exception ex) {
-		    // 已完成 拦截器 TODO 芋艿
+		    // 已完成 拦截器
 			triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
 		} catch (Throwable err) {
-		    // 已完成 拦截器 TODO 芋艿
+		    // 已完成 拦截器
 			triggerAfterCompletion(processedRequest, response, mappedHandler,
 					new NestedServletException("Handler processing failed", err));
 		} finally {
@@ -1167,7 +1167,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			return;
 		}
 
-		// TODO 芋艿 已完成处理 拦截器
+		// 已完成处理 拦截器
 		if (mappedHandler != null) {
 			mappedHandler.triggerAfterCompletion(request, response, null);
 		}
