@@ -16,14 +16,8 @@
 
 package org.springframework.web.servlet.mvc.support;
 
-import java.io.IOException;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.Ordered;
@@ -51,6 +45,11 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * The default implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver}
@@ -161,7 +160,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		setOrder(Ordered.LOWEST_PRECEDENCE);
 	}
 
-
 	@Override
 	@Nullable
 	protected ModelAndView doResolveException(
@@ -171,64 +169,49 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			if (ex instanceof HttpRequestMethodNotSupportedException) {
 				return handleHttpRequestMethodNotSupported(
 						(HttpRequestMethodNotSupportedException) ex, request, response, handler);
-			}
-			else if (ex instanceof HttpMediaTypeNotSupportedException) {
+			} else if (ex instanceof HttpMediaTypeNotSupportedException) {
 				return handleHttpMediaTypeNotSupported(
 						(HttpMediaTypeNotSupportedException) ex, request, response, handler);
-			}
-			else if (ex instanceof HttpMediaTypeNotAcceptableException) {
+			} else if (ex instanceof HttpMediaTypeNotAcceptableException) {
 				return handleHttpMediaTypeNotAcceptable(
 						(HttpMediaTypeNotAcceptableException) ex, request, response, handler);
-			}
-			else if (ex instanceof MissingPathVariableException) {
+			} else if (ex instanceof MissingPathVariableException) {
 				return handleMissingPathVariable(
 						(MissingPathVariableException) ex, request, response, handler);
-			}
-			else if (ex instanceof MissingServletRequestParameterException) {
+			} else if (ex instanceof MissingServletRequestParameterException) {
 				return handleMissingServletRequestParameter(
 						(MissingServletRequestParameterException) ex, request, response, handler);
-			}
-			else if (ex instanceof ServletRequestBindingException) {
+			} else if (ex instanceof ServletRequestBindingException) {
 				return handleServletRequestBindingException(
 						(ServletRequestBindingException) ex, request, response, handler);
-			}
-			else if (ex instanceof ConversionNotSupportedException) {
+			} else if (ex instanceof ConversionNotSupportedException) {
 				return handleConversionNotSupported(
 						(ConversionNotSupportedException) ex, request, response, handler);
-			}
-			else if (ex instanceof TypeMismatchException) {
+			} else if (ex instanceof TypeMismatchException) {
 				return handleTypeMismatch(
 						(TypeMismatchException) ex, request, response, handler);
-			}
-			else if (ex instanceof HttpMessageNotReadableException) {
+			} else if (ex instanceof HttpMessageNotReadableException) {
 				return handleHttpMessageNotReadable(
 						(HttpMessageNotReadableException) ex, request, response, handler);
-			}
-			else if (ex instanceof HttpMessageNotWritableException) {
+			} else if (ex instanceof HttpMessageNotWritableException) {
 				return handleHttpMessageNotWritable(
 						(HttpMessageNotWritableException) ex, request, response, handler);
-			}
-			else if (ex instanceof MethodArgumentNotValidException) {
+			} else if (ex instanceof MethodArgumentNotValidException) {
 				return handleMethodArgumentNotValidException(
 						(MethodArgumentNotValidException) ex, request, response, handler);
-			}
-			else if (ex instanceof MissingServletRequestPartException) {
+			} else if (ex instanceof MissingServletRequestPartException) {
 				return handleMissingServletRequestPartException(
 						(MissingServletRequestPartException) ex, request, response, handler);
-			}
-			else if (ex instanceof BindException) {
+			} else if (ex instanceof BindException) {
 				return handleBindException((BindException) ex, request, response, handler);
-			}
-			else if (ex instanceof NoHandlerFoundException) {
+			} else if (ex instanceof NoHandlerFoundException) {
 				return handleNoHandlerFoundException(
 						(NoHandlerFoundException) ex, request, response, handler);
-			}
-			else if (ex instanceof AsyncRequestTimeoutException) {
+			} else if (ex instanceof AsyncRequestTimeoutException) {
 				return handleAsyncRequestTimeoutException(
 						(AsyncRequestTimeoutException) ex, request, response, handler);
 			}
-		}
-		catch (Exception handlerEx) {
+		} catch (Exception handlerEx) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Failure while trying to resolve exception [" + ex.getClass().getName() + "]", handlerEx);
 			}

@@ -16,17 +16,16 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
 
 /**
  * Abstract base class for {@link HandlerExceptionResolver} implementations.
@@ -44,23 +43,33 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
-
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+    /**
+     * 顺序，优先级最低
+     */
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+    /**
+     * 匹配的处理器对象的集合
+     */
 	@Nullable
 	private Set<?> mappedHandlers;
 
+    /**
+     * 匹配的处理器类型的数组
+     */
 	@Nullable
 	private Class<?>[] mappedHandlerClasses;
 
 	@Nullable
 	private Log warnLogger;
 
+    /**
+     * 防止响应缓存
+     */
 	private boolean preventResponseCaching = false;
-
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -119,7 +128,6 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		this.preventResponseCaching = preventResponseCaching;
 	}
 
-
 	/**
 	 * Check whether this resolver is supposed to apply (i.e. if the supplied handler
 	 * matches any of the configured {@linkplain #setMappedHandlers handlers} or
@@ -130,21 +138,26 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	@Nullable
 	public ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
-
+	    // 判断是否可以应用
 		if (shouldApplyTo(request, handler)) {
+		    // 阻止缓存
 			prepareResponse(ex, response);
+			// 执行解析异常，返回 ModelAndView 对象
 			ModelAndView result = doResolveException(request, response, handler, ex);
+			// 如果 ModelAndView 对象非空，则进行返回
 			if (result != null) {
 				// Print warn message when warn logger is not enabled...
 				if (logger.isWarnEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
 					logger.warn("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
 				}
+				// 打印异常日志
 				// warnLogger with full stack trace (requires explicit config)
 				logException(ex, request);
 			}
+			// 返回 ModelAndView 对象
 			return result;
-		}
-		else {
+        // 不可应用，直接返回 null
+		} else {
 			return null;
 		}
 	}
@@ -164,9 +177,11 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 */
 	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
 		if (handler != null) {
+		    // 如果 mappedHandlers 包含 handler 对象，则返回 true
 			if (this.mappedHandlers != null && this.mappedHandlers.contains(handler)) {
 				return true;
 			}
+			// 如果 mappedHandlerClasses 包含 handler 的类型，则返回 true
 			if (this.mappedHandlerClasses != null) {
 				for (Class<?> handlerClass : this.mappedHandlerClasses) {
 					if (handlerClass.isInstance(handler)) {
@@ -176,6 +191,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			}
 		}
 		// Else only apply if there are no explicit handler mappings.
+        // 如果 mappedHandlers 和 mappedHandlerClasses 都为空，说明直接匹配
 		return (this.mappedHandlers == null && this.mappedHandlerClasses == null);
 	}
 
@@ -228,7 +244,6 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	protected void preventCaching(HttpServletResponse response) {
 		response.addHeader(HEADER_CACHE_CONTROL, "no-store");
 	}
-
 
 	/**
 	 * Actually resolve the given exception that got thrown during handler execution,

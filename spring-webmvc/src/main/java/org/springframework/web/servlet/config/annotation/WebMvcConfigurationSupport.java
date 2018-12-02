@@ -868,12 +868,18 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerExceptionResolver handlerExceptionResolver() {
+	    // 创建 HandlerExceptionResolver 数组
 		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
+		// 添加配置的 HandlerExceptionResolver 到 exceptionResolvers 中
 		configureHandlerExceptionResolvers(exceptionResolvers);
+		// 如果 exceptionResolvers 为空，添加默认 HandlerExceptionResolver 数组
 		if (exceptionResolvers.isEmpty()) {
 			addDefaultHandlerExceptionResolvers(exceptionResolvers);
 		}
+		// 子类定义的 HandlerExceptionResolver 数组，到 exceptionResolvers 中
 		extendHandlerExceptionResolvers(exceptionResolvers);
+
+		// 创建 HandlerExceptionResolverComposite 数组
 		HandlerExceptionResolverComposite composite = new HandlerExceptionResolverComposite();
 		composite.setOrder(0);
 		composite.setExceptionResolvers(exceptionResolvers);
@@ -915,7 +921,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * </ul>
 	 */
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-		ExceptionHandlerExceptionResolver exceptionHandlerResolver = createExceptionHandlerExceptionResolver();
+		// 创建 ExceptionHandlerExceptionResolver 对象
+	    ExceptionHandlerExceptionResolver exceptionHandlerResolver = createExceptionHandlerExceptionResolver();
 		exceptionHandlerResolver.setContentNegotiationManager(mvcContentNegotiationManager());
 		exceptionHandlerResolver.setMessageConverters(getMessageConverters());
 		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
@@ -930,10 +937,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerResolver.afterPropertiesSet();
 		exceptionResolvers.add(exceptionHandlerResolver);
 
+		// 创建 ResponseStatusExceptionResolver 对象
 		ResponseStatusExceptionResolver responseStatusResolver = new ResponseStatusExceptionResolver();
 		responseStatusResolver.setMessageSource(this.applicationContext);
 		exceptionResolvers.add(responseStatusResolver);
 
+		// 创建 DefaultHandlerExceptionResolver 对象
 		exceptionResolvers.add(new DefaultHandlerExceptionResolver());
 	}
 

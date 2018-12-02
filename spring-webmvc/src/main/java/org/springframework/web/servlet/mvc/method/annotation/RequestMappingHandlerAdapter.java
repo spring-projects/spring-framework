@@ -988,17 +988,23 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@Nullable
 	private ModelAndView getModelAndView(ModelAndViewContainer mavContainer,
 			ModelFactory modelFactory, NativeWebRequest webRequest) throws Exception {
-
+	    // TODO 1017 ModelFactory
 		modelFactory.updateModel(webRequest, mavContainer);
+
+        // 情况一，如果 mavContainer 已处理，则返回“空”的 ModelAndView 对象。
 		if (mavContainer.isRequestHandled()) {
 			return null;
 		}
-		ModelMap model = mavContainer.getModel();
-		ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, mavContainer.getStatus());
+
+		// 情况二，如果 mavContainer 未处，则基于 `mavContainer` 生成 ModelAndView 对象
+        ModelMap model = mavContainer.getModel();
+        // 创建 ModelAndView 对象，并设置相关属性
+        ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, mavContainer.getStatus());
 		if (!mavContainer.isViewReference()) {
 			mav.setView((View) mavContainer.getView());
 		}
-		if (model instanceof RedirectAttributes) {
+        // TODO 1004 flashMapManager
+        if (model instanceof RedirectAttributes) {
 			Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 			if (request != null) {

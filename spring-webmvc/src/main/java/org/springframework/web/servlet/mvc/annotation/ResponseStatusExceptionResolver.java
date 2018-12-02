@@ -16,10 +16,6 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -30,6 +26,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * A {@link org.springframework.web.servlet.HandlerExceptionResolver
@@ -58,34 +58,33 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	@Nullable
 	private MessageSource messageSource;
 
-
 	@Override
 	public void setMessageSource(MessageSource messageSource) {
 		this.messageSource = messageSource;
 	}
 
-
 	@Override
 	@Nullable
 	protected ModelAndView doResolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
-
 		try {
+		    // 情况一，如果异常是 ResponseStatusException 类型，进行解析并设置到响应
 			if (ex instanceof ResponseStatusException) {
 				return resolveResponseStatusException((ResponseStatusException) ex, request, response, handler);
 			}
 
+			// 情况二，如果有 @ResponseStatus 注解，进行解析并设置到响应
 			ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
 			if (status != null) {
 				return resolveResponseStatus(status, request, response, handler, ex);
 			}
 
+			// 情况三，使用异常的 cause 在走一次情况一、情况二的逻辑。
 			if (ex.getCause() instanceof Exception) {
 				ex = (Exception) ex.getCause();
 				return doResolveException(request, response, handler, ex);
 			}
-		}
-		catch (Exception resolveEx) {
+		} catch (Exception resolveEx) {
 			logger.warn("Failure while trying to resolve exception [" + ex.getClass().getName() + "]", resolveEx);
 		}
 		return null;
@@ -144,16 +143,20 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView applyStatusAndReason(int statusCode, @Nullable String reason, HttpServletResponse response)
 			throws IOException {
-
+	    // 情况一，如果无错误提示，则响应只设置状态码
 		if (!StringUtils.hasLength(reason)) {
 			response.sendError(statusCode);
-		}
-		else {
+        // 情况二，如果有错误信息，则响应设置状态码 + 错误提示
+		} else {
+		    // 进一步解析错误提示，如果有 messageSource 的情况下
 			String resolvedReason = (this.messageSource != null ?
 					this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale()) :
 					reason);
+			// 设置
 			response.sendError(statusCode, resolvedReason);
 		}
+
+		// 创建“空” ModelAndView 对象，并返回
 		return new ModelAndView();
 	}
 
