@@ -16,25 +16,6 @@
 
 package org.springframework.web.multipart.support;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import javax.mail.internet.MimeUtility;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -44,6 +25,14 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.mail.internet.MimeUtility;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Spring MultipartHttpServletRequest adapter, wrapping a Servlet 3.0 HttpServletRequest
@@ -57,9 +46,11 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
+    /**
+     * 普通参数名的集合
+     */
 	@Nullable
 	private Set<String> multipartParameterNames;
-
 
 	/**
 	 * Create a new StandardMultipartHttpServletRequest wrapper for the given request,
@@ -81,36 +72,41 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	 */
 	public StandardMultipartHttpServletRequest(HttpServletRequest request, boolean lazyParsing)
 			throws MultipartException {
-
 		super(request);
+		// 如果不延迟加载，则解析请求
 		if (!lazyParsing) {
 			parseRequest(request);
 		}
 	}
-
 
 	private void parseRequest(HttpServletRequest request) {
 		try {
 			Collection<Part> parts = request.getParts();
 			this.multipartParameterNames = new LinkedHashSet<>(parts.size());
 			MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<>(parts.size());
+
+			// 遍历 parts 数组
 			for (Part part : parts) {
+			    // 获得 CONTENT_DISPOSITION 头的值
 				String headerValue = part.getHeader(HttpHeaders.CONTENT_DISPOSITION);
+				// 获得 ContentDisposition 对象
 				ContentDisposition disposition = ContentDisposition.parse(headerValue);
+				// 获得文件名
 				String filename = disposition.getFilename();
+				// 情况一，文件名非空，说明是文件参数，则创建 StandardMultipartFile 对象，添加到 files 中
 				if (filename != null) {
 					if (filename.startsWith("=?") && filename.endsWith("?=")) {
 						filename = MimeDelegate.decode(filename);
 					}
 					files.add(part.getName(), new StandardMultipartFile(part, filename));
-				}
-				else {
+                // 情况二，文件名为空，说明是普通参数，则添加 part.name 到 multipartParameterNames 中
+				} else {
 					this.multipartParameterNames.add(part.getName());
 				}
 			}
+			// 设置到 multipartFiles 属性
 			setMultipartFiles(files);
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			handleParseFailure(ex);
 		}
 	}
@@ -269,7 +265,6 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			FileCopyUtils.copy(this.part.getInputStream(), Files.newOutputStream(dest));
 		}
 	}
-
 
 	/**
 	 * Inner class to avoid a hard dependency on the JavaMail API.

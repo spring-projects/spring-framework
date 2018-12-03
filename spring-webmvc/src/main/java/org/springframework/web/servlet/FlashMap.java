@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet;
 
-import java.util.HashMap;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.HashMap;
 
 /**
  * A FlashMap provides a way for one request to store attributes intended for
@@ -55,7 +55,6 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	private final MultiValueMap<String, String> targetRequestParams = new LinkedMultiValueMap<>(4);
 
 	private long expirationTime = -1;
-
 
 	/**
 	 * Provide a URL path to help identify the target request for this FlashMap.

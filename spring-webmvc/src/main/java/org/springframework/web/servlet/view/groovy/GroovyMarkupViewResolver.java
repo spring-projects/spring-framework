@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.view.groovy;
 
-import java.util.Locale;
-
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
+
+import java.util.Locale;
 
 /**
  * Convenience subclass of @link AbstractTemplateViewResolver} that supports

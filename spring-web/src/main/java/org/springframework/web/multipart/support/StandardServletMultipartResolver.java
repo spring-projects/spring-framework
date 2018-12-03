@@ -16,15 +16,14 @@
 
 package org.springframework.web.multipart.support;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 /**
  * Standard implementation of the {@link MultipartResolver} interface,
@@ -60,8 +59,10 @@ import org.springframework.web.multipart.MultipartResolver;
  */
 public class StandardServletMultipartResolver implements MultipartResolver {
 
+    /**
+     * 是否延迟解析
+     */
 	private boolean resolveLazily = false;
-
 
 	/**
 	 * Set whether to resolve the multipart request lazily at the time of
@@ -75,7 +76,6 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 	public void setResolveLazily(boolean resolveLazily) {
 		this.resolveLazily = resolveLazily;
 	}
-
 
 	@Override
 	public boolean isMultipart(HttpServletRequest request) {
@@ -94,13 +94,13 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 			// To be on the safe side: explicitly delete the parts,
 			// but only actual file parts (for Resin compatibility)
 			try {
+			    // 删除临时的 Part 们
 				for (Part part : request.getParts()) {
 					if (request.getFile(part.getName()) != null) {
 						part.delete();
 					}
 				}
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				LogFactory.getLog(getClass()).warn("Failed to perform cleanup of multipart items", ex);
 			}
 		}

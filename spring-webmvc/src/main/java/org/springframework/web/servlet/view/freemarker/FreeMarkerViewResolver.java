@@ -61,7 +61,6 @@ public class FreeMarkerViewResolver extends AbstractTemplateViewResolver {
 		setSuffix(suffix);
 	}
 
-
 	/**
 	 * Requires {@link FreeMarkerView}.
 	 */
