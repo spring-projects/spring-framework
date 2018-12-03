@@ -110,8 +110,8 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	}
 
 	/**
-	 * Splits the given data buffer on delimiter boundaries. The returned Flux contains a
-	 * {@link #END_FRAME} buffer after each delimiter.
+	 * Split the given data buffer on delimiter boundaries.
+	 * The returned Flux contains an {@link #END_FRAME} buffer after each delimiter.
 	 */
 	private List<DataBuffer> splitOnDelimiter(DataBuffer dataBuffer, List<byte[]> delimiterBytes) {
 		List<DataBuffer> frames = new ArrayList<>();
@@ -180,15 +180,14 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	}
 
 	/**
-	 * Checks whether the given buffer is {@link #END_FRAME}.
+	 * Check whether the given buffer is {@link #END_FRAME}.
 	 */
 	private static boolean isEndFrame(DataBuffer dataBuffer) {
 		return dataBuffer == END_FRAME;
 	}
 
 	/**
-	 * Joins the given list of buffers into a single buffer, also removing
-	 * the (inserted) {@link #END_FRAME}.
+	 * Join the given list of buffers into a single buffer.
 	 */
 	private static DataBuffer joinUntilEndFrame(List<DataBuffer> dataBuffers) {
 		if (!dataBuffers.isEmpty()) {
@@ -229,7 +228,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * Create a {@code StringDecoder} for {@code "text/plain"}.
 	 * @param ignored ignored
 	 * @deprecated as of Spring 5.0.4, in favor of {@link #textPlainOnly()} or
-	 * {@link #textPlainOnly(List, boolean)}.
+	 * {@link #textPlainOnly(List, boolean)}
 	 */
 	@Deprecated
 	public static StringDecoder textPlainOnly(boolean ignored) {
@@ -247,7 +246,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * Create a {@code StringDecoder} for {@code "text/plain"}.
 	 * @param delimiters delimiter strings to use to split the input stream
 	 * @param stripDelimiter whether to remove delimiters from the resulting
-	 * input strings.
+	 * input strings
 	 */
 	public static StringDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
 		return new StringDecoder(delimiters, stripDelimiter, new MimeType("text", "plain", DEFAULT_CHARSET));
@@ -257,7 +256,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * Create a {@code StringDecoder} that supports all MIME types.
 	 * @param ignored ignored
 	 * @deprecated as of Spring 5.0.4, in favor of {@link #allMimeTypes()} or
-	 * {@link #allMimeTypes(List, boolean)}.
+	 * {@link #allMimeTypes(List, boolean)}
 	 */
 	@Deprecated
 	public static StringDecoder allMimeTypes(boolean ignored) {
@@ -275,7 +274,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * Create a {@code StringDecoder} that supports all MIME types.
 	 * @param delimiters delimiter strings to use to split the input stream
 	 * @param stripDelimiter whether to remove delimiters from the resulting
-	 * input strings.
+	 * input strings
 	 */
 	public static StringDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
 		return new StringDecoder(delimiters, stripDelimiter,
