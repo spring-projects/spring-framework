@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.activation.FileTypeMap;
+import javax.mail.Address;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
@@ -459,7 +460,8 @@ public class JavaMailSenderImpl implements JavaMailSender {
 						// Preserve explicitly specified message id...
 						mimeMessage.setHeader(HEADER_MESSAGE_ID, messageId);
 					}
-					transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
+					Address[] addresses = mimeMessage.getAllRecipients();
+					transport.sendMessage(mimeMessage, (addresses != null ? addresses : new Address[0]));
 				}
 				catch (Exception ex) {
 					Object original = (originalMessages != null ? originalMessages[i] : mimeMessage);
