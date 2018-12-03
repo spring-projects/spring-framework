@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 
-
 	public DataBufferDecoder() {
 		super(MimeTypeUtils.ALL);
 	}
@@ -48,7 +47,7 @@ public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
-		return (super.canDecode(elementType, mimeType) && clazz != null && DataBuffer.class.isAssignableFrom(clazz));
+		return (clazz != null && DataBuffer.class.isAssignableFrom(clazz) && super.canDecode(elementType, mimeType));
 	}
 
 	@Override
