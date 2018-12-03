@@ -185,9 +185,9 @@ configure(allprojects) { project ->
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/2.10.4",
 		"http://quartz-scheduler.org/api/2.2.1/",
-		"http://fasterxml.github.io/jackson-core/javadoc/2.8/",
-		"http://fasterxml.github.io/jackson-databind/javadoc/2.8/",
-		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.8/",
+		"http://fasterxml.github.io/jackson-core/javadoc/2.9/",
+		"http://fasterxml.github.io/jackson-databind/javadoc/2.9/",
+		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.9/",
 		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/"
 	] as String[]
 }
@@ -276,7 +276,7 @@ configure(rootProject) {
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.hibernate:hibernate-core:5.1.17.Final")
+		testCompile("org.hibernate:hibernate-core:5.1.16.Final")
 	}
 
 	artifacts {
