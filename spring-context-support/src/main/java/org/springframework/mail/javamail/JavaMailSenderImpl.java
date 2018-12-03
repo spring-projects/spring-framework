@@ -459,7 +459,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 						// Preserve explicitly specified message id...
 						mimeMessage.setHeader(HEADER_MESSAGE_ID, messageId);
 					}
-					Assert.notNull(mimeMessage.getAllRecipients(), "At least one recipient is required");
+					Assert.notNull(mimeMessage.getAllRecipients(), "Atleast one recipient is required");
 					transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
 				}
 				catch (Exception ex) {
