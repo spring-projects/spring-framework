@@ -145,7 +145,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Create a new HibernateTransactionManager instance.
-	 * @param sessionFactory SessionFactory to manage transactions for
+	 * @param sessionFactory the SessionFactory to manage transactions for
 	 */
 	public HibernateTransactionManager(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -199,7 +199,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * unwrapped to extract its target DataSource.
 	 * @see #setAutodetectDataSource
 	 * @see TransactionAwareDataSourceProxy
-	 * @see DataSourceUtils
+	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
