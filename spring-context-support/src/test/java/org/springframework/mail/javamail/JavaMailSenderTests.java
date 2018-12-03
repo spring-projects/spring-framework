@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public class JavaMailSenderTests {
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
+
 	@Test
 	public void javaMailSenderWithSimpleMessage() throws MessagingException, IOException {
 		MockJavaMailSender sender = new MockJavaMailSender();
@@ -105,7 +106,8 @@ public class JavaMailSenderTests {
 		assertEquals("my text", sentMessage.getContent());
 	}
 
-	public void testJavaMailSenderWithSimpleMessages() throws MessagingException, IOException {
+	@Test
+	public void javaMailSenderWithSimpleMessages() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -133,7 +135,8 @@ public class JavaMailSenderTests {
 		assertEquals("she@mail.org", ((InternetAddress) tos2.get(0)).getAddress());
 	}
 
-	public void testJavaMailSenderWithMimeMessage() throws MessagingException {
+	@Test
+	public void javaMailSenderWithMimeMessage() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -180,7 +183,7 @@ public class JavaMailSenderTests {
 		sender.setUsername("username");
 		sender.setPassword("password");
 
-		final List<Message> messages = new ArrayList<Message>();
+		final List<Message> messages = new ArrayList<>();
 
 		MimeMessagePreparator preparator = new MimeMessagePreparator() {
 			@Override
@@ -206,7 +209,7 @@ public class JavaMailSenderTests {
 		sender.setUsername("username");
 		sender.setPassword("password");
 
-		final List<Message> messages = new ArrayList<Message>();
+		final List<Message> messages = new ArrayList<>();
 
 		MimeMessagePreparator preparator1 = new MimeMessagePreparator() {
 			@Override
@@ -394,7 +397,7 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void failedMailServerConnect() throws Exception {
+	public void failedMailServerConnect() {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost(null);
 		sender.setUsername("username");
@@ -415,7 +418,7 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void failedMailServerClose() throws Exception {
+	public void failedMailServerClose() {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("");
 		sender.setUsername("username");
@@ -434,7 +437,7 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void failedSimpleMessage() throws Exception {
+	public void failedSimpleMessage() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -466,7 +469,7 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void fFailedMimeMessage() throws Exception {
+	public void failedMimeMessage() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -498,14 +501,14 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void testConnection() throws Exception {
+	public void testConnection() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.testConnection();
 	}
 
 	@Test
-	public void testConnectionWithFailure() throws Exception {
+	public void testConnectionWithFailure() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost(null);
 
@@ -533,7 +536,7 @@ public class JavaMailSenderTests {
 		private String connectedUsername = null;
 		private String connectedPassword = null;
 		private boolean closeCalled = false;
-		private List<Message> sentMessages = new ArrayList<Message>();
+		private List<Message> sentMessages = new ArrayList<>();
 
 		private MockTransport(Session session, URLName urlName) {
 			super(session, urlName);
@@ -592,7 +595,8 @@ public class JavaMailSenderTests {
 			if ("fail".equals(message.getSubject())) {
 				throw new MessagingException("failed");
 			}
-			if (!ObjectUtils.nullSafeEquals(addresses, message.getAllRecipients())) {
+			if (addresses == null || (message.getAllRecipients() == null ? addresses.length > 0 :
+					!ObjectUtils.nullSafeEquals(addresses, message.getAllRecipients()))) {
 				throw new MessagingException("addresses not correct");
 			}
 			if (message.getSentDate() == null) {
