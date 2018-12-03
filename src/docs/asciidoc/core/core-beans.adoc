@@ -3958,10 +3958,10 @@ integration interfaces.
 === Customizing Beans by Using a `BeanPostProcessor`
 
 The `BeanPostProcessor` interface defines callback methods that you can implement to
-provide your own (or override the container's default) instantiation logic,
-dependency-resolution logic, and so forth. If you want to implement some custom logic
-after the Spring container finishes instantiating, configuring, and initializing a bean,
-you can plug in one or more `BeanPostProcessor` implementations.
+provide your own (or override the container's default) instantiation logic, dependency
+resolution logic, and so forth. If you want to implement some custom logic after the
+Spring container finishes instantiating, configuring, and initializing a bean, you can
+plug in one or more custom `BeanPostProcessor` implementations.
 
 You can configure multiple `BeanPostProcessor` instances, and you can control the order
 in which these `BeanPostProcessor` instances execute by setting the `order` property.
@@ -3975,13 +3975,13 @@ registration of `BeanPostProcessor` instances>>.
 
 [NOTE]
 ====
-`BeanPostProcessor` instances operate on bean (or object) instances. That is, the
-Spring IoC container instantiates a bean instance and then `BeanPostProcessor` instances do
-their work.
+`BeanPostProcessor` instances operate on bean (or object) instances. That is,
+the Spring IoC container instantiates a bean instance and then `BeanPostProcessor`
+instances do their work.
 
 `BeanPostProcessor` instances are scoped per-container. This is relevant only if you
-use container hierarchies. If you define a `BeanPostProcessor` in one container, it
-post-processes only the beans in that container. In other words, beans that are
+use container hierarchies. If you define a `BeanPostProcessor` in one container,
+it post-processes only the beans in that container. In other words, beans that are
 defined in one container are not post-processed by a `BeanPostProcessor` defined in
 another container, even if both containers are part of the same hierarchy.
 
@@ -3994,12 +3994,12 @@ The `org.springframework.beans.factory.config.BeanPostProcessor` interface consi
 exactly two callback methods. When such a class is registered as a post-processor with
 the container, for each bean instance that is created by the container, the
 post-processor gets a callback from the container both before container
-initialization methods (such as `InitializingBean.afterPropertiesSet()`, after any
+initialization methods (such as `InitializingBean.afterPropertiesSet()` or any
 declared `init` method) are called, and after any bean initialization callbacks.
 The post-processor can take any action with the bean instance, including ignoring the
-callback completely. A bean post-processor typically checks for callback interfaces, or it
-may wrap a bean with a proxy. Some Spring AOP infrastructure classes are implemented as
-bean post-processors in order to provide proxy-wrapping logic.
+callback completely. A bean post-processor typically checks for callback interfaces,
+or it may wrap a bean with a proxy. Some Spring AOP infrastructure classes are
+implemented as bean post-processors in order to provide proxy-wrapping logic.
 
 An `ApplicationContext` automatically detects any beans that are defined in the
 configuration metadata that implements the `BeanPostProcessor` interface. The
@@ -4018,27 +4018,27 @@ initialization of other beans in the context, this early type detection is criti
 [[beans-factory-programmatically-registering-beanpostprocessors]]
 .Programmatically registering `BeanPostProcessor` instances
 NOTE: While the recommended approach for `BeanPostProcessor` registration is through
-`ApplicationContext` auto-detection (as described earlier), you can
-register them programmatically against a `ConfigurableBeanFactory` by using the
-`addBeanPostProcessor` method. This can be useful when you need to evaluate conditional
-logic before registration or even for copying bean post processors across contexts in a
-hierarchy. Note, however, that `BeanPostProcessor` instances added programmatically do not
-respect the `Ordered` interface. Here, it is the order of registration that
-dictates the order of execution. Note also that `BeanPostProcessor` instances registered
-programmatically are always processed before those registered through auto-detection,
-regardless of any explicit ordering.
+`ApplicationContext` auto-detection (as described earlier), you can register them
+programmatically against a `ConfigurableBeanFactory` by using the `addBeanPostProcessor`
+method. This can be useful when you need to evaluate conditional logic before
+registration or even for copying bean post processors across contexts in a hierarchy.
+Note, however, that `BeanPostProcessor` instances added programmatically do not respect
+the `Ordered` interface. Here, it is the order of registration that dictates the order
+of execution. Note also that `BeanPostProcessor` instances registered programmatically
+are always processed before those registered through auto-detection, regardless of any
+explicit ordering.
 
 .`BeanPostProcessor` instances and AOP auto-proxying
 [NOTE]
 ====
 Classes that implement the `BeanPostProcessor` interface are special and are treated
-differently by the container. All `BeanPostProcessor` instances and beans that they directly reference
-are instantiated on startup, as part of the special startup phase of the
-`ApplicationContext`. Next, all `BeanPostProcessor` instances are registered in a sorted fashion
-and applied to all further beans in the container. Because AOP auto-proxying is
-implemented as a `BeanPostProcessor` itself, neither `BeanPostProcessor` instances nor the beans
-they directly reference are eligible for auto-proxying and, thus, do not have aspects
-woven into them.
+differently by the container. All `BeanPostProcessor` instances and beans that they
+directly reference are instantiated on startup, as part of the special startup phase
+of the `ApplicationContext`. Next, all `BeanPostProcessor` instances are registere
+in a sorted fashion and applied to all further beans in the container. Because AOP
+auto-proxying is implemented as a `BeanPostProcessor` itself, neither `BeanPostProcessor`
+instances nor the beans they directly reference are eligible for auto-proxying and,
+thus, do not have aspects woven into them.
 
 For any such bean, you should see an informational log message: `Bean someBean is not
 eligible for getting processed by all BeanPostProcessor interfaces (for example: not
