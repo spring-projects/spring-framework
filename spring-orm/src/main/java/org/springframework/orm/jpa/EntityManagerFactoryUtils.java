@@ -268,7 +268,6 @@ public abstract class EntityManagerFactoryUtils {
 
 		// Use same EntityManager for further JPA operations within the transaction.
 		// Thread-bound object will get removed by synchronization at transaction completion.
-		logger.debug("Registering transaction synchronization for JPA EntityManager");
 		emHolder = new EntityManagerHolder(em);
 		if (synchronizedWithTransaction) {
 			Object transactionData = prepareTransaction(em, emf);
@@ -415,7 +414,6 @@ public abstract class EntityManagerFactoryUtils {
 	 */
 	public static void closeEntityManager(@Nullable EntityManager em) {
 		if (em != null) {
-			logger.debug("Closing JPA EntityManager");
 			try {
 				if (em.isOpen()) {
 					em.close();
