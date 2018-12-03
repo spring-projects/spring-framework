@@ -26,8 +26,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * Sample tests demonstrating live server integration tests.
@@ -43,11 +43,9 @@ public class HttpServerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
-
+	public void start() throws Exception {
 		HttpHandler httpHandler = RouterFunctions.toHttpHandler(
-				route(GET("/test"), request ->
-						ServerResponse.ok().syncBody("It works!")));
+				route(GET("/test"), request -> ServerResponse.ok().syncBody("It works!")));
 
 		this.server = new ReactorHttpServer();
 		this.server.setHandler(httpHandler);
@@ -60,7 +58,7 @@ public class HttpServerTests {
 	}
 
 	@After
-	public void tearDown() {
+	public void stop() {
 		this.server.stop();
 	}
 
