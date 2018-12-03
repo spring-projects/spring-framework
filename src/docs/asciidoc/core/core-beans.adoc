@@ -4034,7 +4034,7 @@ explicit ordering.
 Classes that implement the `BeanPostProcessor` interface are special and are treated
 differently by the container. All `BeanPostProcessor` instances and beans that they
 directly reference are instantiated on startup, as part of the special startup phase
-of the `ApplicationContext`. Next, all `BeanPostProcessor` instances are registere
+of the `ApplicationContext`. Next, all `BeanPostProcessor` instances are registered
 in a sorted fashion and applied to all further beans in the container. Because AOP
 auto-proxying is implemented as a `BeanPostProcessor` itself, neither `BeanPostProcessor`
 instances nor the beans they directly reference are eligible for auto-proxying and,
