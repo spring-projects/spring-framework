@@ -3744,7 +3744,7 @@ The `BeanPostProcessor` interface defines __callback methods__ that you can impl
 provide your own (or override the container's default) instantiation logic,
 dependency-resolution logic, and so forth. If you want to implement some custom logic
 after the Spring container finishes instantiating, configuring, and initializing a bean,
-you can plug in one or more `BeanPostProcessor` implementations.
+you can plug in one or more custom `BeanPostProcessor` implementations.
 
 You can configure multiple `BeanPostProcessor` instances, and you can control the order
 in which these ``BeanPostProcessor``s execute by setting the `order` property. You can
@@ -3776,7 +3776,7 @@ The `org.springframework.beans.factory.config.BeanPostProcessor` interface consi
 exactly two callback methods. When such a class is registered as a post-processor with
 the container, for each bean instance that is created by the container, the
 post-processor gets a callback from the container both __before__ container
-initialization methods (such as InitializingBean's __afterPropertiesSet()__ and any
+initialization methods (such as InitializingBean's __afterPropertiesSet()__ or any
 declared init method) are called as well as __after__ any bean initialization callbacks.
 The post-processor can take any action with the bean instance, including ignoring the
 callback completely. A bean post-processor typically checks for callback interfaces or
