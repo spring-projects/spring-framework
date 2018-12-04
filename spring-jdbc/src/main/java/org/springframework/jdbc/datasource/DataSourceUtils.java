@@ -115,21 +115,28 @@ public abstract class DataSourceUtils {
 		Connection con = fetchConnection(dataSource);
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			// Use same Connection for further JDBC actions within the transaction.
-			// Thread-bound object will get removed by synchronization at transaction completion.
-			ConnectionHolder holderToUse = conHolder;
-			if (holderToUse == null) {
-				holderToUse = new ConnectionHolder(con);
+			try {
+				// Use same Connection for further JDBC actions within the transaction.
+				// Thread-bound object will get removed by synchronization at transaction completion.
+				ConnectionHolder holderToUse = conHolder;
+				if (holderToUse == null) {
+					holderToUse = new ConnectionHolder(con);
+				}
+				else {
+					holderToUse.setConnection(con);
+				}
+				holderToUse.requested();
+				TransactionSynchronizationManager.registerSynchronization(
+						new ConnectionSynchronization(holderToUse, dataSource));
+				holderToUse.setSynchronizedWithTransaction(true);
+				if (holderToUse != conHolder) {
+					TransactionSynchronizationManager.bindResource(dataSource, holderToUse);
+				}
 			}
-			else {
-				holderToUse.setConnection(con);
-			}
-			holderToUse.requested();
-			TransactionSynchronizationManager.registerSynchronization(
-					new ConnectionSynchronization(holderToUse, dataSource));
-			holderToUse.setSynchronizedWithTransaction(true);
-			if (holderToUse != conHolder) {
-				TransactionSynchronizationManager.bindResource(dataSource, holderToUse);
+			catch (RuntimeException ex) {
+				// Unexpected exception from external delegation call -> close Connection and rethrow.
+				releaseConnection(con, dataSource);
+				throw ex;
 			}
 		}
 
