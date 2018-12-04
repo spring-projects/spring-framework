@@ -308,6 +308,7 @@ public class MockHttpServletRequestTests {
 		List<Locale> actual = Collections.list(request.getLocales());
 		assertEquals(Arrays.asList(Locale.forLanguageTag("fr-ch"), Locale.forLanguageTag("fr"),
 				Locale.forLanguageTag("en"), Locale.forLanguageTag("de")), actual);
+		assertEquals(headerValue, request.getHeader("Accept-Language"));
 	}
 
 	@Test
@@ -500,25 +501,25 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
-	public void httpHeaderRfcFormatedDate() {
+	public void httpHeaderRfcFormattedDate() {
 		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "Tue, 21 Jul 2015 10:00:00 GMT");
 		assertEquals(1437472800000L, request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderFirstVariantFormatedDate() {
+	public void httpHeaderFirstVariantFormattedDate() {
 		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "Tue, 21-Jul-15 10:00:00 GMT");
 		assertEquals(1437472800000L, request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
 	@Test
-	public void httpHeaderSecondVariantFormatedDate() {
+	public void httpHeaderSecondVariantFormattedDate() {
 		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "Tue Jul 21 10:00:00 2015");
 		assertEquals(1437472800000L, request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void httpHeaderFormatedDateError() {
+	public void httpHeaderFormattedDateError() {
 		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "This is not a date");
 		request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
 	}

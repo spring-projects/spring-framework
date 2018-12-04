@@ -969,12 +969,14 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			try {
 				HttpHeaders headers = new HttpHeaders();
 				headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
-				setPreferredLocales(headers.getAcceptLanguageAsLocales());
+				List<Locale> locales = headers.getAcceptLanguageAsLocales();
+				this.locales.clear();
+				this.locales.addAll(locales);
 			}
 			catch (IllegalArgumentException ex) {
-				// Invalid Accept-Language format -> store plain header instead
-				doAddHeaderValue(name, value, true);
+				// Invalid Accept-Language format -> just store plain header
 			}
+			doAddHeaderValue(name, value, true);
 		}
 		else {
 			doAddHeaderValue(name, value, false);
