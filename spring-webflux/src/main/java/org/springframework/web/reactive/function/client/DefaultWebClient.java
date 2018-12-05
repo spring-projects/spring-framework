@@ -447,8 +447,9 @@ class DefaultWebClient implements WebClient {
 		@SuppressWarnings("unchecked")
 		private <T> Mono<T> drainBody(ClientResponse response, Throwable ex) {
 			// Ensure the body is drained, even if the StatusHandler didn't consume it,
-			// but ignore errors in case it did consume it.
-			return (Mono<T>) response.bodyToMono(Void.class).onErrorMap(ex2 -> ex).thenReturn(ex);
+			// but ignore exception, in case the handler did consume.
+			return (Mono<T>) response.bodyToMono(Void.class)
+					.onErrorResume(ex2 -> Mono.empty()).thenReturn(ex);
 		}
 
 		private static Mono<WebClientResponseException> createResponseException(ClientResponse response) {
