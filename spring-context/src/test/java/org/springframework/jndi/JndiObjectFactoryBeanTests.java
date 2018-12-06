@@ -396,7 +396,7 @@ public class JndiObjectFactoryBeanTests {
 			fail("Should have thrown NamingException");
 		}
 		catch (NamingException ex) {
-			assertTrue(ex.getMessage().indexOf("org.springframework.tests.sample.beans.DerivedTestBean") != -1);
+			assertTrue(ex.getMessage().contains("org.springframework.tests.sample.beans.DerivedTestBean"));
 		}
 	}
 

@@ -463,8 +463,8 @@ public class HttpInvokerTests {
 		ITestBean proxy = (ITestBean) pfb.getObject();
 
 		// shouldn't go through to remote service
-		assertTrue(proxy.toString().indexOf("HTTP invoker") != -1);
-		assertTrue(proxy.toString().indexOf(serviceUrl) != -1);
+		assertTrue(proxy.toString().contains("HTTP invoker"));
+		assertTrue(proxy.toString().contains(serviceUrl));
 		assertEquals(proxy.hashCode(), proxy.hashCode());
 		assertTrue(proxy.equals(proxy));
 
