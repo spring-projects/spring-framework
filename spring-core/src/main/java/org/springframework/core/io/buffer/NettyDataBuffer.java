@@ -42,7 +42,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 
 	/**
-	 * Creates a new {@code NettyDataBuffer} based on the given {@code ByteBuff}.
+	 * Create a new {@code NettyDataBuffer} based on the given {@code ByteBuff}.
 	 * @param byteBuf the buffer to base this buffer on
 	 */
 	NettyDataBuffer(ByteBuf byteBuf, NettyDataBufferFactory dataBufferFactory) {
@@ -279,7 +279,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public boolean equals(Object other) {
-		return  (this == other || (other instanceof NettyDataBuffer &&
+		return (this == other || (other instanceof NettyDataBuffer &&
 				this.byteBuf.equals(((NettyDataBuffer) other).byteBuf)));
 	}
 
