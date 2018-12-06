@@ -366,18 +366,20 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * {@code Last-Modified} header.
 		 * @param lastModified the last modified date
 		 * @return this builder
+		 * @since 5.1.4
 		 * @see HttpHeaders#setLastModified(long)
 		 */
-		B lastModified(ZonedDateTime lastModified);
+		B lastModified(Instant lastModified);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the
 		 * {@code Last-Modified} header.
 		 * @param lastModified the last modified date
 		 * @return this builder
+		 * @since 5.1.4
 		 * @see HttpHeaders#setLastModified(long)
 		 */
-		B lastModified(Instant lastModified);
+		B lastModified(ZonedDateTime lastModified);
 
 		/**
 		 * Set the location of a resource, as specified by the {@code Location} header.
@@ -516,13 +518,13 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder lastModified(ZonedDateTime date) {
+		public BodyBuilder lastModified(Instant date) {
 			this.headers.setLastModified(date);
 			return this;
 		}
 
 		@Override
-		public BodyBuilder lastModified(Instant date) {
+		public BodyBuilder lastModified(ZonedDateTime date) {
 			this.headers.setLastModified(date);
 			return this;
 		}

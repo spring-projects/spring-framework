@@ -158,8 +158,14 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
+	public ServerResponse.BodyBuilder lastModified(Instant lastModified) {
+		this.headers.setLastModified(lastModified);
+		return this;
+	}
+
+	@Override
 	public ServerResponse.BodyBuilder lastModified(ZonedDateTime lastModified) {
-		this.headers.setZonedDateTime(HttpHeaders.LAST_MODIFIED, lastModified);
+		this.headers.setLastModified(lastModified);
 		return this;
 	}
 
