@@ -1146,6 +1146,22 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Set the time the resource was last changed, as specified by the
+	 * {@code Last-Modified} header.
+	 */
+	public void setLastModified(Instant lastModified) {
+		setInstant(LAST_MODIFIED, lastModified);
+	}
+
+	/**
+	 * Set the time the resource was last changed, as specified by the
+	 * {@code Last-Modified} header.
+	 */
+	public void setLastModified(ZonedDateTime lastModified) {
+		setZonedDateTime(LAST_MODIFIED, lastModified);
+	}
+
+	/**
 	 * Return the time the resource was last changed, as specified by the
 	 * {@code Last-Modified} header.
 	 * <p>The date is returned as the number of milliseconds since
@@ -1264,6 +1280,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setZonedDateTime(String headerName, ZonedDateTime date) {
 		set(headerName, DATE_FORMATTERS[0].format(date));
+	}
+
+	/**
+	 * Set the given date under the given header name after formatting it as a string
+	 * using the RFC-1123 date-time formatter. The equivalent of
+	 * {@link #set(String, String)} but for date headers.
+	 */
+	public void setInstant(String headerName, Instant date) {
+		setZonedDateTime(headerName, ZonedDateTime.ofInstant(date, GMT));
 	}
 
 	/**

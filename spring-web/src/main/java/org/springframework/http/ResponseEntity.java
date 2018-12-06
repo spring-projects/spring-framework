@@ -17,6 +17,8 @@
 package org.springframework.http;
 
 import java.net.URI;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -360,6 +362,24 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		B lastModified(long lastModified);
 
 		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @see HttpHeaders#setLastModified(long)
+		 */
+		B lastModified(ZonedDateTime lastModified);
+
+		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @see HttpHeaders#setLastModified(long)
+		 */
+		B lastModified(Instant lastModified);
+
+		/**
 		 * Set the location of a resource, as specified by the {@code Location} header.
 		 * @param location the location
 		 * @return this builder
@@ -491,6 +511,18 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder lastModified(long date) {
+			this.headers.setLastModified(date);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder lastModified(ZonedDateTime date) {
+			this.headers.setLastModified(date);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder lastModified(Instant date) {
 			this.headers.setLastModified(date);
 			return this;
 		}
