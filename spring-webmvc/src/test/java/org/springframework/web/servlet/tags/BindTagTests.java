@@ -561,7 +561,7 @@ public class BindTagTests extends AbstractTagTests {
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		assertEquals("doctor", status.getExpression());
 		assertTrue(status.getValue() instanceof NestedTestBean);
-		assertTrue(status.getDisplayValue().indexOf("juergen&amp;eva") != -1);
+		assertTrue(status.getDisplayValue().contains("juergen&amp;eva"));
 	}
 
 	@Test
