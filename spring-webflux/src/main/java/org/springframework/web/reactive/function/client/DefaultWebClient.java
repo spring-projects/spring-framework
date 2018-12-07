@@ -392,7 +392,7 @@ class DefaultWebClient implements WebClient {
 
 				@Override
 				public HttpHeaders getHeaders() {
-					return headers;
+					return this.headers;
 				}
 			};
 		}
