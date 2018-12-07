@@ -27,9 +27,11 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -39,6 +41,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -139,7 +142,6 @@ class DefaultWebClient implements WebClient {
 		return methodInternal(httpMethod);
 	}
 
-	@SuppressWarnings("unchecked")
 	private RequestBodyUriSpec methodInternal(HttpMethod httpMethod) {
 		return new DefaultRequestBodyUriSpec(httpMethod);
 	}
@@ -364,7 +366,35 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public ResponseSpec retrieve() {
-			return new DefaultResponseSpec(exchange());
+			return new DefaultResponseSpec(exchange(), this::createRequest);
+		}
+
+		private HttpRequest createRequest() {
+			return new HttpRequest() {
+
+				private HttpHeaders headers = initHeaders();
+
+
+				@Override
+				public HttpMethod getMethod() {
+					return httpMethod;
+				}
+
+				@Override
+				public String getMethodValue() {
+					return httpMethod.name();
+				}
+
+				@Override
+				public URI getURI() {
+					return uri;
+				}
+
+				@Override
+				public HttpHeaders getHeaders() {
+					return headers;
+				}
+			};
 		}
 	}
 
@@ -376,11 +406,15 @@ class DefaultWebClient implements WebClient {
 
 		private final Mono<ClientResponse> responseMono;
 
+		private final Supplier<HttpRequest> requestSupplier;
+
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
 
-		DefaultResponseSpec(Mono<ClientResponse> responseMono) {
+		DefaultResponseSpec(Mono<ClientResponse> responseMono,
+				Supplier<HttpRequest> requestSupplier) {
 			this.responseMono = responseMono;
+			this.requestSupplier = requestSupplier;
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
 
@@ -393,7 +427,8 @@ class DefaultWebClient implements WebClient {
 			if (this.statusHandlers.size() == 1 && this.statusHandlers.get(0) == DEFAULT_STATUS_HANDLER) {
 				this.statusHandlers.clear();
 			}
-			this.statusHandlers.add(new StatusHandler(statusPredicate, exceptionFunction));
+			this.statusHandlers.add(new StatusHandler(statusPredicate,
+					(clientResponse, request) -> exceptionFunction.apply(clientResponse)));
 
 			return this;
 		}
@@ -405,21 +440,18 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> bodyType) {
 			return this.responseMono.flatMap(response ->
 					handleBody(response, response.bodyToMono(bodyType), mono -> mono.flatMap(Mono::error)));
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public <T> Flux<T> bodyToFlux(Class<T> elementType) {
 			return this.responseMono.flatMapMany(response ->
 					handleBody(response, response.bodyToFlux(elementType), mono -> mono.flatMapMany(Flux::error)));
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementType) {
 			return this.responseMono.flatMapMany(response -> handleBody(response,
 					response.bodyToFlux(elementType), mono -> mono.flatMapMany(Flux::error)));
@@ -431,7 +463,8 @@ class DefaultWebClient implements WebClient {
 			if (HttpStatus.resolve(response.rawStatusCode()) != null) {
 				for (StatusHandler handler : this.statusHandlers) {
 					if (handler.test(response.statusCode())) {
-						Mono<? extends Throwable> exMono = handler.apply(response);
+						HttpRequest request = this.requestSupplier.get();
+						Mono<? extends Throwable> exMono = handler.apply(response, request);
 						exMono = exMono.flatMap(ex -> drainBody(response, ex));
 						exMono = exMono.onErrorResume(ex -> drainBody(response, ex));
 						return errorFunction.apply(exMono);
@@ -440,7 +473,8 @@ class DefaultWebClient implements WebClient {
 				return bodyPublisher;
 			}
 			else {
-				return errorFunction.apply(createResponseException(response));
+				return errorFunction.apply(createResponseException(response,
+						this.requestSupplier.get()));
 			}
 		}
 
@@ -452,7 +486,8 @@ class DefaultWebClient implements WebClient {
 					.onErrorResume(ex2 -> Mono.empty()).thenReturn(ex);
 		}
 
-		private static Mono<WebClientResponseException> createResponseException(ClientResponse response) {
+		private static Mono<WebClientResponseException> createResponseException(ClientResponse response,
+				HttpRequest request) {
 			return DataBufferUtils.join(response.body(BodyExtractors.toDataBuffers()))
 					.map(dataBuffer -> {
 						byte[] bytes = new byte[dataBuffer.readableByteCount()];
@@ -471,14 +506,16 @@ class DefaultWebClient implements WebClient {
 									response.statusCode().getReasonPhrase(),
 									response.headers().asHttpHeaders(),
 									bodyBytes,
-									charset);
+									charset,
+									request);
 						}
 						else {
 							return new UnknownHttpStatusCodeException(
 									response.rawStatusCode(),
 									response.headers().asHttpHeaders(),
 									bodyBytes,
-									charset);
+									charset,
+									request);
 						}
 					});
 		}
@@ -488,11 +525,11 @@ class DefaultWebClient implements WebClient {
 
 			private final Predicate<HttpStatus> predicate;
 
-			private final Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction;
+			private final BiFunction<ClientResponse, HttpRequest, Mono<? extends Throwable>> exceptionFunction;
 
 
 			public StatusHandler(Predicate<HttpStatus> predicate,
-					Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+					BiFunction<ClientResponse, HttpRequest, Mono<? extends Throwable>> exceptionFunction) {
 
 				Assert.notNull(predicate, "Predicate must not be null");
 				Assert.notNull(exceptionFunction, "Function must not be null");
@@ -505,8 +542,8 @@ class DefaultWebClient implements WebClient {
 				return this.predicate.test(status);
 			}
 
-			public Mono<? extends Throwable> apply(ClientResponse response) {
-				return this.exceptionFunction.apply(response);
+			public Mono<? extends Throwable> apply(ClientResponse response, HttpRequest request) {
+				return this.exceptionFunction.apply(response, request);
 			}
 		}
 	}

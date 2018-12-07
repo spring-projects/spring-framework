@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
@@ -45,6 +46,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -494,8 +497,9 @@ public class WebClientIntegrationTests {
 		prepareResponse(response -> response.setResponseCode(500)
 				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
 
+		String path = "/greeting?name=Spring";
 		Mono<String> result = this.webClient.get()
-				.uri("/greeting?name=Spring")
+				.uri(path)
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -509,13 +513,18 @@ public class WebClientIntegrationTests {
 							ex.getStatusText());
 					assertEquals(MediaType.TEXT_PLAIN, ex.getHeaders().getContentType());
 					assertEquals(errorMessage, ex.getResponseBodyAsString());
+
+					HttpRequest request = ex.getRequest();
+					assertEquals(HttpMethod.GET, request.getMethod());
+					assertEquals(URI.create(this.server.url(path).toString()), request.getURI());
+					assertNotNull(request.getHeaders());
 				})
 				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
 		expectRequest(request -> {
 			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
-			assertEquals("/greeting?name=Spring", request.getPath());
+			assertEquals(path, request.getPath());
 		});
 	}
 
