@@ -6268,7 +6268,7 @@ of large applications by creating a static list of candidates at compilation tim
 mode, all modules that are target of component scan must use this mechanism.
 
 NOTE: Your existing `@ComponentScan` or `<context:component-scan` directives must stay as
-is to request the context to scan candidates in certain packages. when the
+is to request the context to scan candidates in certain packages. When the
 `ApplicationContext` detects such an index, it automatically uses it rather than scanning
 the classpath.
 
