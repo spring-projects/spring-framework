@@ -76,7 +76,7 @@ public abstract class ValidationUtils {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking validator [" + validator + "]");
 		}
-		if (!validator.supports(target.getClass())) {
+		if (target != null && !validator.supports(target.getClass())) {
 			throw new IllegalArgumentException(
 					"Validator [" + validator.getClass() + "] does not support [" + target.getClass() + "]");
 		}
