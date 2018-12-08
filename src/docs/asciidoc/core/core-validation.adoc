@@ -30,7 +30,7 @@ chapter.
 
 .JSR-303/JSR-349 Bean Validation
 ****
-As of version 4.0, Spring Frameworksupports Bean Validation 1.0 (JSR-303) and Bean Validation 1.1
+As of version 4.0, Spring Framework supports Bean Validation 1.0 (JSR-303) and Bean Validation 1.1
 (JSR-349) for setup support and adapting them to Spring's `Validator` interface.
 
 An application can choose to enable Bean Validation once globally, as described in
