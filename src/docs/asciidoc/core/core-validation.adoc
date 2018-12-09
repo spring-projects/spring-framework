@@ -810,7 +810,7 @@ Parameterize S to be the type you are converting from and R to be the base type 
 the __range__ of classes you can convert to. Then implement getConverter(Class<T>),
 where T is a subclass of R.
 
-Consider the `StringToEnum` `ConverterFactory` as an example:
+Consider the `StringToEnumConverterFactory` as an example:
 
 ====
 [source,java,indent=0]
@@ -1221,6 +1221,7 @@ listing shows the definition of the `AnnotationFormatterFactory` interface:
 ====
 
 To create an implementation:
+
 . Parameterize A to be the field `annotationType` with which you wish to associate
 formatting  logic -- for example `org.springframework.format.annotation.DateTimeFormat`.
 . Have `getFieldTypes()` return the types of fields on which the annotation can be used.
@@ -1291,7 +1292,7 @@ example shows:
 ==== Format Annotation API
 
 A portable format annotation API exists in the `org.springframework.format.annotation`
-package. You can use `@NumberFormat` to format java.lang.Number fields and `@DateTimeFormat` to
+package. You can use `@NumberFormat` to format `java.lang.Number` fields and `@DateTimeFormat` to
 format `java.util.Date`, `java.util.Calendar`, `java.util.Long`, or Joda-Time fields.
 
 The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
@@ -1592,6 +1593,7 @@ Validation API directly, as the following example shows:
 
 		@Autowired
 		private Validator validator;
+	}
 ----
 ====
 
@@ -1618,6 +1620,7 @@ the Spring Validation API, as the following example shows:
 ==== Configuring Custom Constraints
 
 Each bean validation constraint consists of two parts:
+
 * A `@Constraint` annotation
 that declares the constraint and its configurable properties.
 * An implementation
