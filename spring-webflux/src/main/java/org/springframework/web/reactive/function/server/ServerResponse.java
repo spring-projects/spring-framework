@@ -412,9 +412,9 @@ public interface ServerResponse {
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.
 		 * The model attributes are mapped under a
 		 * {@linkplain org.springframework.core.Conventions#getVariableName generated name}.
-		 * <p><emphasis>Note: Empty {@link Collection Collections} are not added to
+		 * <p><em>Note: Empty {@link Collection Collections} are not added to
 		 * the model when using this method because we cannot correctly determine
-		 * the true convention name.</emphasis>
+		 * the true convention name.</em>
 		 * @param name the name of the template to be rendered
 		 * @param modelAttributes the modelAttributes used to render the template
 		 * @return the built response

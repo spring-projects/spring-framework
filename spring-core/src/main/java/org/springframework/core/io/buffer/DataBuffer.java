@@ -25,10 +25,10 @@ import java.util.function.IntPredicate;
  * Basic abstraction over byte buffers.
  *
  * <p>{@code DataBuffer}s has a separate {@linkplain #readPosition() read} and
- * {@linkplain #writePosition() write} position, as opposed to {@code ByteBuffer}'s single
- * {@linkplain ByteBuffer#position() position}. As such, the {@code DataBuffer} does not require
- * a {@linkplain ByteBuffer#flip() flip} to read after writing. In general, the following invariant
- * holds for the read and write positions, and the capacity:
+ * {@linkplain #writePosition() write} position, as opposed to {@code ByteBuffer}'s
+ * single {@linkplain ByteBuffer#position() position}. As such, the {@code DataBuffer}
+ * does not require a {@linkplain ByteBuffer#flip() flip} to read after writing. In general,
+ * the following invariant holds for the read and write positions, and the capacity:
  *
  * <blockquote>
  *     <tt>0</tt> <tt>&lt;=</tt>
@@ -41,8 +41,8 @@ import java.util.function.IntPredicate;
  * similar to {@code StringBuilder}.
  *
  * <p>The main purpose of the {@code DataBuffer} abstraction is to provide a convenient wrapper
- * around {@link ByteBuffer} that is similar to Netty's {@link io.netty.buffer.ByteBuf}, but that
- * can also be used on non-Netty platforms (i.e. Servlet).
+ * around {@link ByteBuffer} which is similar to Netty's {@link io.netty.buffer.ByteBuf} but
+ * can also be used on non-Netty platforms (i.e. Servlet containers).
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -236,8 +236,8 @@ public interface DataBuffer {
 	ByteBuffer asByteBuffer();
 
 	/**
-	 * Expose a subsequence of this buffer's bytes as a {@link ByteBuffer}. Data between this
-	 * {@code DataBuffer} and the returned {@code ByteBuffer} is shared; though
+	 * Expose a subsequence of this buffer's bytes as a {@link ByteBuffer}. Data between
+	 * this {@code DataBuffer} and the returned {@code ByteBuffer} is shared; though
 	 * changes in the returned buffer's {@linkplain ByteBuffer#position() position}
 	 * will not be reflected in the reading nor writing position of this data buffer.
 	 * @param index the index at which to start the byte buffer
@@ -250,8 +250,8 @@ public interface DataBuffer {
 	/**
 	 * Expose this buffer's data as an {@link InputStream}. Both data and read position are
 	 * shared between the returned stream and this data buffer. The underlying buffer will
-	 * <strong>not</strong> be {@linkplain DataBufferUtils#release(DataBuffer) released} when the
-	 * input stream is {@linkplain InputStream#close() closed}.
+	 * <strong>not</strong> be {@linkplain DataBufferUtils#release(DataBuffer) released}
+	 * when the input stream is {@linkplain InputStream#close() closed}.
 	 * @return this data buffer as an input stream
 	 * @see #asInputStream(boolean)
 	 */

@@ -449,7 +449,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.0
 	 */
 	public void setAcceptLanguage(List<Locale.LanguageRange> languages) {
-		Assert.notNull(languages, "'languages' must not be null");
+		Assert.notNull(languages, "LanguageRange List must not be null");
 		DecimalFormat decimal = new DecimalFormat("0.0", DECIMAL_FORMAT_SYMBOLS);
 		List<String> values = languages.stream()
 				.map(range ->
@@ -762,7 +762,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see #getContentDisposition()
 	 */
 	public void setContentDispositionFormData(String name, @Nullable String filename) {
-		Assert.notNull(name, "'name' must not be null");
+		Assert.notNull(name, "Name must not be null");
 		ContentDisposition.Builder disposition = ContentDisposition.builder("form-data").name(name);
 		if (filename != null) {
 			disposition.filename(filename);
@@ -849,8 +849,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setContentType(@Nullable MediaType mediaType) {
 		if (mediaType != null) {
-			Assert.isTrue(!mediaType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
-			Assert.isTrue(!mediaType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
+			Assert.isTrue(!mediaType.isWildcardType(), "Content-Type cannot contain wildcard type '*'");
+			Assert.isTrue(!mediaType.isWildcardSubtype(), "Content-Type cannot contain wildcard subtype '*'");
 			set(CONTENT_TYPE, mediaType.toString());
 		}
 		else {
@@ -1222,13 +1222,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		set(headerName, formatDate(date));
 	}
 
-	// Package private: also used in ResponseCookie..
-	static String formatDate(long date) {
-		Instant instant = Instant.ofEpochMilli(date);
-		ZonedDateTime time = ZonedDateTime.ofInstant(instant, GMT);
-		return DATE_FORMATTERS[0].format(time);
-	}
-
 	/**
 	 * Parse the first header value for the given header name as a date,
 	 * return -1 if there is no value, or raise {@link IllegalArgumentException}
@@ -1330,10 +1323,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			List<String> result = new ArrayList<>();
 			for (String value : values) {
 				if (value != null) {
-					String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-					for (String token : tokens) {
-						result.add(token);
-					}
+					Collections.addAll(result, StringUtils.tokenizeToStringArray(value, ","));
 				}
 			}
 			return result;
@@ -1392,7 +1382,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	protected String toCommaDelimitedString(List<String> headerValues) {
 		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> it = headerValues.iterator(); it.hasNext(); ) {
+		for (Iterator<String> it = headerValues.iterator(); it.hasNext();) {
 			String val = it.next();
 			builder.append(val);
 			if (it.hasNext()) {
@@ -1563,6 +1553,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
 		Assert.notNull(headers, "HttpHeaders must not be null");
 		return (headers.readOnly ? headers : new HttpHeaders(headers, true));
+	}
+
+	// Package-private: used in ResponseCookie
+	static String formatDate(long date) {
+		Instant instant = Instant.ofEpochMilli(date);
+		ZonedDateTime time = ZonedDateTime.ofInstant(instant, GMT);
+		return DATE_FORMATTERS[0].format(time);
 	}
 
 }

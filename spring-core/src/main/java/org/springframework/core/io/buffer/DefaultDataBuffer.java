@@ -294,10 +294,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	@Override
 	public DefaultDataBuffer write(DataBuffer... buffers) {
 		if (!ObjectUtils.isEmpty(buffers)) {
-			ByteBuffer[] byteBuffers =
-					Arrays.stream(buffers).map(DataBuffer::asByteBuffer)
-							.toArray(ByteBuffer[]::new);
-			write(byteBuffers);
+			write(Arrays.stream(buffers).map(DataBuffer::asByteBuffer).toArray(ByteBuffer[]::new));
 		}
 		return this;
 	}
@@ -381,6 +378,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	/**
+	 * Calculate the capacity of the buffer.
 	 * @see io.netty.buffer.AbstractByteBufAllocator#calculateNewCapacity(int, int)
 	 */
 	private int calculateCapacity(int neededCapacity) {
@@ -430,7 +428,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public String toString() {
-		return String.format("DefaultDataBuffer (r: %d, w %d, c %d)",
+		return String.format("DefaultDataBuffer (r: %d, w: %d, c: %d)",
 				this.readPosition, this.writePosition, this.capacity);
 	}
 

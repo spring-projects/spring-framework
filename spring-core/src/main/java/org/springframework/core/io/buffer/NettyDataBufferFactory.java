@@ -42,7 +42,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 
 
 	/**
-	 * Creates a new {@code NettyDataBufferFactory} based on the given factory.
+	 * Create a new {@code NettyDataBufferFactory} based on the given factory.
 	 * @param byteBufAllocator the factory to use
 	 * @see io.netty.buffer.PooledByteBufAllocator
 	 * @see io.netty.buffer.UnpooledByteBufAllocator
@@ -51,6 +51,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 		Assert.notNull(byteBufAllocator, "ByteBufAllocator must not be null");
 		this.byteBufAllocator = byteBufAllocator;
 	}
+
 
 	/**
 	 * Return the {@code ByteBufAllocator} used by this factory.
@@ -133,4 +134,5 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	public String toString() {
 		return "NettyDataBufferFactory (" + this.byteBufAllocator + ")";
 	}
+
 }

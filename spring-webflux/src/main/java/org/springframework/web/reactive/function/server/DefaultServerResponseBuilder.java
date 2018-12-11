@@ -272,6 +272,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 
+	/**
+	 * Abstract base class for {@link ServerResponse} implementations.
+	 */
 	abstract static class AbstractServerResponse implements ServerResponse {
 
 		private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);

@@ -359,11 +359,9 @@ public abstract class DataBufferUtils {
 	 * process when subscribed to, and that publishes any writing errors and the completion signal
 	 * @since 5.0.10
 	 */
-	public static Flux<DataBuffer> write(
-			Publisher<DataBuffer> source, AsynchronousFileChannel channel) {
+	public static Flux<DataBuffer> write(Publisher<DataBuffer> source, AsynchronousFileChannel channel) {
 		return write(source, channel, 0);
 	}
-
 
 	/**
 	 * Write the given stream of {@link DataBuffer DataBuffers} to the given {@code AsynchronousFileChannel}.

@@ -27,6 +27,7 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Implementation of the {@code DataBuffer} interface that wraps a Netty
@@ -43,7 +44,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 
 	/**
-	 * Creates a new {@code NettyDataBuffer} based on the given {@code ByteBuff}.
+	 * Create a new {@code NettyDataBuffer} based on the given {@code ByteBuff}.
 	 * @param byteBuf the buffer to base this buffer on
 	 */
 	NettyDataBuffer(ByteBuf byteBuf, NettyDataBufferFactory dataBufferFactory) {
@@ -69,7 +70,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public int indexOf(IntPredicate predicate, int fromIndex) {
-		Assert.notNull(predicate, "'predicate' must not be null");
+		Assert.notNull(predicate, "IntPredicate must not be null");
 		if (fromIndex < 0) {
 			fromIndex = 0;
 		}
@@ -82,7 +83,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public int lastIndexOf(IntPredicate predicate, int fromIndex) {
-		Assert.notNull(predicate, "'predicate' must not be null");
+		Assert.notNull(predicate, "IntPredicate must not be null");
 		if (fromIndex < 0) {
 			return -1;
 		}
@@ -175,9 +176,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public NettyDataBuffer write(DataBuffer... buffers) {
-		Assert.notNull(buffers, "'buffers' must not be null");
-
-		if (buffers.length > 0) {
+		if (!ObjectUtils.isEmpty(buffers)) {
 			if (hasNettyDataBuffers(buffers)) {
 				ByteBuf[] nativeBuffers = Arrays.stream(buffers)
 						.map(b -> ((NettyDataBuffer) b).getNativeBuffer())
@@ -194,9 +193,9 @@ public class NettyDataBuffer implements PooledDataBuffer {
 		return this;
 	}
 
-	private static boolean hasNettyDataBuffers(DataBuffer[] dataBuffers) {
-		for (DataBuffer dataBuffer : dataBuffers) {
-			if (!(dataBuffer instanceof NettyDataBuffer)) {
+	private static boolean hasNettyDataBuffers(DataBuffer[] buffers) {
+		for (DataBuffer buffer : buffers) {
+			if (!(buffer instanceof NettyDataBuffer)) {
 				return false;
 			}
 		}
@@ -205,25 +204,25 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public NettyDataBuffer write(ByteBuffer... buffers) {
-		Assert.notNull(buffers, "'buffers' must not be null");
-
-		for (ByteBuffer buffer : buffers) {
-			this.byteBuf.writeBytes(buffer);
+		if (!ObjectUtils.isEmpty(buffers)) {
+			for (ByteBuffer buffer : buffers) {
+				this.byteBuf.writeBytes(buffer);
+			}
 		}
 		return this;
 	}
 
 	/**
-	 * Writes one or more Netty {@link ByteBuf}s to this buffer, starting at the current
-	 * writing position.
+	 * Writes one or more Netty {@link ByteBuf}s to this buffer,
+	 * starting at the current writing position.
 	 * @param byteBufs the buffers to write into this buffer
 	 * @return this buffer
 	 */
 	public NettyDataBuffer write(ByteBuf... byteBufs) {
-		Assert.notNull(byteBufs, "'byteBufs' must not be null");
-
-		for (ByteBuf byteBuf : byteBufs) {
-			this.byteBuf.writeBytes(byteBuf);
+		if (!ObjectUtils.isEmpty(byteBufs)) {
+			for (ByteBuf byteBuf : byteBufs) {
+				this.byteBuf.writeBytes(byteBuf);
+			}
 		}
 		return this;
 	}
@@ -272,7 +271,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public boolean equals(Object other) {
-		return  (this == other || (other instanceof NettyDataBuffer &&
+		return (this == other || (other instanceof NettyDataBuffer &&
 				this.byteBuf.equals(((NettyDataBuffer) other).byteBuf)));
 	}
 
