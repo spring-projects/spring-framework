@@ -69,6 +69,8 @@ public abstract class StringUtils {
 
 	private static final char EXTENSION_SEPARATOR = '.';
 
+	public static final String EMPTY = "";
+
 
 	//---------------------------------------------------------------------
 	// General convenience methods for working with Strings
@@ -86,7 +88,7 @@ public abstract class StringUtils {
 	 * @since 3.2.1
 	 */
 	public static boolean isEmpty(@Nullable Object str) {
-		return (str == null || "".equals(str));
+		return (str == null || EMPTY.equals(str));
 	}
 
 	/**
@@ -425,7 +427,7 @@ public abstract class StringUtils {
 	 * @return the resulting {@code String}
 	 */
 	public static String delete(String inString, String pattern) {
-		return replace(inString, pattern, "");
+		return replace(inString, pattern, EMPTY);
 	}
 
 	/**
@@ -643,11 +645,11 @@ public abstract class StringUtils {
 		// "file:core/../core/io/Resource.class", where the ".." should just
 		// strip the first "core" directory while keeping the "file:" prefix.
 		int prefixIndex = pathToUse.indexOf(':');
-		String prefix = "";
+		String prefix = EMPTY;
 		if (prefixIndex != -1) {
 			prefix = pathToUse.substring(0, prefixIndex + 1);
 			if (prefix.contains(FOLDER_SEPARATOR)) {
-				prefix = "";
+				prefix = EMPTY;
 			}
 			else {
 				pathToUse = pathToUse.substring(prefixIndex + 1);
@@ -688,7 +690,7 @@ public abstract class StringUtils {
 			pathElements.add(0, TOP_PATH);
 		}
 		// If nothing else left, at least explicitly point to current path.
-		if (pathElements.size() == 1 && "".equals(pathElements.getLast()) && !prefix.endsWith(FOLDER_SEPARATOR)) {
+		if (pathElements.size() == 1 && EMPTY.equals(pathElements.getLast()) && !prefix.endsWith(FOLDER_SEPARATOR)) {
 			pathElements.add(0, CURRENT_PATH);
 		}
 
@@ -804,12 +806,12 @@ public abstract class StringUtils {
 
 	@Nullable
 	private static Locale parseLocaleTokens(String localeString, String[] tokens) {
-		String language = (tokens.length > 0 ? tokens[0] : "");
-		String country = (tokens.length > 1 ? tokens[1] : "");
+		String language = (tokens.length > 0 ? tokens[0] : EMPTY);
+		String country = (tokens.length > 1 ? tokens[1] : EMPTY);
 		validateLocalePart(language);
 		validateLocalePart(country);
 
-		String variant = "";
+		String variant = EMPTY;
 		if (tokens.length > 2) {
 			// There is definitely a variant, and it is everything after the country
 			// code sans the separator between the country code and the variant.
@@ -823,7 +825,7 @@ public abstract class StringUtils {
 
 		if (variant.isEmpty() && country.startsWith("#")) {
 			variant = country;
-			country = "";
+			country = EMPTY;
 		}
 
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
@@ -848,7 +850,7 @@ public abstract class StringUtils {
 	 */
 	@Deprecated
 	public static String toLanguageTag(Locale locale) {
-		return locale.getLanguage() + (hasText(locale.getCountry()) ? "-" + locale.getCountry() : "");
+		return locale.getLanguage() + (hasText(locale.getCountry()) ? "-" + locale.getCountry() : EMPTY);
 	}
 
 	/**
@@ -1248,7 +1250,7 @@ public abstract class StringUtils {
 			@Nullable Collection<?> coll, String delim, String prefix, String suffix) {
 
 		if (CollectionUtils.isEmpty(coll)) {
-			return "";
+			return EMPTY;
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -1270,7 +1272,7 @@ public abstract class StringUtils {
 	 * @return the delimited {@code String}
 	 */
 	public static String collectionToDelimitedString(@Nullable Collection<?> coll, String delim) {
-		return collectionToDelimitedString(coll, delim, "", "");
+		return collectionToDelimitedString(coll, delim, EMPTY, EMPTY);
 	}
 
 	/**
@@ -1292,7 +1294,7 @@ public abstract class StringUtils {
 	 */
 	public static String arrayToDelimitedString(@Nullable Object[] arr, String delim) {
 		if (ObjectUtils.isEmpty(arr)) {
-			return "";
+			return EMPTY;
 		}
 		if (arr.length == 1) {
 			return ObjectUtils.nullSafeToString(arr[0]);
