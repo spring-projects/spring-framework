@@ -491,7 +491,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		public BodyBuilder cacheControl(CacheControl cacheControl) {
 			String ccValue = cacheControl.getHeaderValue();
 			if (ccValue != null) {
-				this.headers.setCacheControl(cacheControl.getHeaderValue());
+				this.headers.setCacheControl(ccValue);
 			}
 			return this;
 		}

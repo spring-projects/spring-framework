@@ -283,9 +283,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 						// Apply cache settings, if any
 						if (getCacheControl() != null) {
-							String value = getCacheControl().getHeaderValue();
-							if (value != null) {
-								exchange.getResponse().getHeaders().setCacheControl(value);
+							String ccValue = getCacheControl().getHeaderValue();
+							if (ccValue != null) {
+								exchange.getResponse().getHeaders().setCacheControl(ccValue);
 							}
 						}
 

@@ -72,10 +72,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private static final long serialVersionUID = -8578554704772377436L;
 
-	/**
-	 * The empty {@code HttpHeaders} instance (immutable).
-	 */
-	public static final HttpHeaders EMPTY = new HttpHeaders(new LinkedHashMap<>(), true);
+
 	/**
 	 * The HTTP {@code Accept} header field name.
 	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.3.2">Section 5.3.2 of RFC 7231</a>
@@ -377,6 +374,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
+
+	/**
+	 * The empty {@code HttpHeaders} instance (immutable).
+	 */
+	public static final HttpHeaders EMPTY = new HttpHeaders(new LinkedHashMap<>(), true);
+
 	/**
 	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
 	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
@@ -394,7 +397,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	private static final DateTimeFormatter[] DATE_FORMATTERS = new DateTimeFormatter[] {
 			DateTimeFormatter.RFC_1123_DATE_TIME,
 			DateTimeFormatter.ofPattern("EEEE, dd-MMM-yy HH:mm:ss zz", Locale.US),
-			DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy",Locale.US).withZone(GMT)
+			DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy", Locale.US).withZone(GMT)
 	};
 
 
@@ -404,7 +407,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * Constructs a new, empty instance of the {@code HttpHeaders} object.
+	 * Construct a new, empty instance of the {@code HttpHeaders} object.
 	 */
 	public HttpHeaders() {
 		this(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH), false);

@@ -172,7 +172,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	public EntityResponse.Builder<T> cacheControl(CacheControl cacheControl) {
 		String ccValue = cacheControl.getHeaderValue();
 		if (ccValue != null) {
-			this.headers.setCacheControl(cacheControl.getHeaderValue());
+			this.headers.setCacheControl(ccValue);
 		}
 		return this;
 	}
