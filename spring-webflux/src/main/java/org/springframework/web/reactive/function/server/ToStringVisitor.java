@@ -23,7 +23,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 
 /**
  * Implementation of {@link RouterFunctions.Visitor} that creates a formatted
@@ -37,9 +36,6 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	private final StringBuilder builder = new StringBuilder();
 
 	private int indent = 0;
-
-	@Nullable
-	private String infix;
 
 
 	// RouterFunctions.Visitor
@@ -96,37 +92,36 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 		else {
 			this.builder.append(methods);
 		}
-		infix();
 	}
 
 	@Override
 	public void path(String pattern) {
 		this.builder.append(pattern);
-		infix();
 	}
 
 	@Override
 	public void pathExtension(String extension) {
 		this.builder.append(String.format("*.%s", extension));
-		infix();
 	}
 
 	@Override
 	public void header(String name, String value) {
 		this.builder.append(String.format("%s: %s", name, value));
-		infix();
 	}
 
 	@Override
 	public void queryParam(String name, String value) {
 		this.builder.append(String.format("?%s == %s", name, value));
-		infix();
 	}
 
 	@Override
 	public void startAnd() {
 		this.builder.append('(');
-		this.infix = "&&";
+	}
+
+	@Override
+	public void and() {
+		this.builder.append(" && ");
 	}
 
 	@Override
@@ -137,7 +132,12 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	@Override
 	public void startOr() {
 		this.builder.append('(');
-		this.infix = "||";
+	}
+
+	@Override
+	public void or() {
+		this.builder.append(" || ");
+
 	}
 
 	@Override
@@ -148,7 +148,6 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	@Override
 	public void startNegate() {
 		this.builder.append("!(");
-
 	}
 
 	@Override
@@ -160,16 +159,6 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	public void unknown(RequestPredicate predicate) {
 		this.builder.append(predicate);
 	}
-
-	private void infix() {
-		if (this.infix != null) {
-			this.builder.append(' ');
-			this.builder.append(this.infix);
-			this.builder.append(' ');
-			this.infix = null;
-		}
-	}
-
 
 	@Override
 	public String toString() {

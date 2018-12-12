@@ -370,10 +370,17 @@ public abstract class RequestPredicates {
 		/**
 		 * Receive first notification of a logical AND predicate.
 		 * The first subsequent notification will contain the left-hand side of the AND-predicate;
-		 * the second notification contains the right-hand side, followed by {@link #endAnd()}.
+		 * followed by {@link #and()}, followed by the right-hand side, followed by {@link #endAnd()}.
 		 * @see RequestPredicate#and(RequestPredicate)
 		 */
 		void startAnd();
+
+		/**
+		 * Receive "middle" notification of a logical AND predicate.
+		 * The following notification contains the right-hand side, followed by {@link #endAnd()}.
+		 * @see RequestPredicate#and(RequestPredicate)
+		 */
+		void and();
 
 		/**
 		 * Receive last notification of a logical AND predicate.
@@ -388,6 +395,13 @@ public abstract class RequestPredicates {
 		 * @see RequestPredicate#or(RequestPredicate)
 		 */
 		void startOr();
+
+		/**
+		 * Receive "middle" notification of a logical OR predicate.
+		 * The following notification contains the right-hand side, followed by {@link #endOr()}.
+		 * @see RequestPredicate#or(RequestPredicate)
+		 */
+		void or();
 
 		/**
 		 * Receive last notification of a logical OR predicate.
@@ -750,6 +764,7 @@ public abstract class RequestPredicates {
 		public void accept(Visitor visitor) {
 			visitor.startAnd();
 			this.left.accept(visitor);
+			visitor.and();
 			this.right.accept(visitor);
 			visitor.endAnd();
 		}
@@ -843,6 +858,7 @@ public abstract class RequestPredicates {
 		public void accept(Visitor visitor) {
 			visitor.startOr();
 			this.left.accept(visitor);
+			visitor.or();
 			this.right.accept(visitor);
 			visitor.endOr();
 		}
