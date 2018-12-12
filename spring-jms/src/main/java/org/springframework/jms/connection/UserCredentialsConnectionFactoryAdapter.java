@@ -149,7 +149,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	/**
 	 * Determine whether there are currently thread-bound credentials,
 	 * using them if available, falling back to the statically specified
-	 * username and password (i.e. values of the bean properties) else.
+	 * username and password (i.e. values of the bean properties) otherwise.
 	 * @see #doCreateConnection
 	 */
 	@Override
@@ -331,12 +331,10 @@ public class UserCredentialsConnectionFactoryAdapter
 
 		public final String password;
 
-
-		private JmsUserCredentials(String username, String password) {
+		public JmsUserCredentials(String username, String password) {
 			this.username = username;
 			this.password = password;
 		}
-
 
 		@Override
 		public String toString() {
