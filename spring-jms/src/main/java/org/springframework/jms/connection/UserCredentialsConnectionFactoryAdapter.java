@@ -63,6 +63,11 @@ import org.springframework.util.StringUtils;
  * definition just for the <i>option</i> of implicitly passing in user credentials
  * if the particular target ConnectionFactory requires it.
  *
+ * <p>As of Spring Framework 5, this class delegates JMS 2.0 {@code JMSContext}
+ * calls and therefore requires the JMS 2.0 API to be present at runtime.
+ * It may nevertheless run against a JMS 1.1 driver (bound to the JMS 2.0 API)
+ * as long as no actual JMS 2.0 calls are triggered by the application's setup.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see #createConnection

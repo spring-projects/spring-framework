@@ -24,17 +24,16 @@ usual (Spring) POJOs. Currently, Spring supports the following remoting technolo
 
 * *Remote Method Invocation (RMI)*: Through the use of  `RmiProxyFactoryBean` and
   `RmiServiceExporter`, Spring supports both traditional RMI (with `java.rmi.Remote`
-  interfaces and `java.rmi.RemoteException`) and transparent remoting through RMI invokers
-  (with any Java interface).
+  interfaces and `java.rmi.RemoteException`) and transparent remoting through RMI
+  invokers (with any Java interface).
 * *Spring's HTTP invoker*: Spring provides a special remoting strategy that allows
   for Java serialization though HTTP, supporting any Java interface (as the RMI
-  invoker does). The corresponding support classes are `HttpInvokerProxyFactoryBean` and
-  `HttpInvokerServiceExporter`.
+  invoker does). The corresponding support classes are `HttpInvokerProxyFactoryBean`
+  and `HttpInvokerServiceExporter`.
 * *Hessian*: By using Spring's `HessianProxyFactoryBean` and the
   `HessianServiceExporter`, you can transparently expose your services through the
   lightweight binary HTTP-based protocol provided by Caucho.
-* *JAX-WS*: Spring provides remoting support for web services through JAX-WS (the
-  successor of JAX-RPC, as introduced in Java EE 5 and Java 6).
+* *JAX-WS*: Spring provides remoting support for web services through JAX-WS.
 * *JMS*: Remoting by using JMS as the underlying protocol is supported through the
   `JmsInvokerServiceExporter` and `JmsInvokerProxyFactoryBean` classes.
 * *AMQP*: Remoting by using AMQP as the underlying protocol is supported by the Spring
@@ -627,7 +626,6 @@ and Spring's `@Autowired` configuration annotation is still honored):
 		public List<Account> getAccounts(String name) {
 			return biz.getAccounts(name);
 		}
-
 	}
 ----
 ====
@@ -732,8 +730,8 @@ accordingly first. Check the JAX-WS documentation for details on those requireme
 [[remoting-jms]]
 === Exposing Services through JMS
 
-You can also expose services transparently by using JMS as the underlying
-communication protocol. The JMS remoting support in the Spring Framework is pretty basic.
+You can also expose services transparently by using JMS as the underlying communication
+protocol. The JMS remoting support in the Spring Framework is pretty basic.
 It sends and receives on the `same thread` and in the same non-transactional
 `Session`. As a result, throughput is implementation-dependent. Note that these
 single-threaded and non-transactional constraints apply only to Spring's JMS
@@ -751,7 +749,6 @@ The following interface is used on both the server and the client sides:
 	public interface CheckingAccountService {
 
 		public void cancelAccount(Long accountId);
-
 	}
 ----
 ====
@@ -769,13 +766,12 @@ The following simple implementation of the preceding interface is used on the se
 		public void cancelAccount(Long accountId) {
 			System.out.println("Cancelling account [" + accountId + "]");
 		}
-
 	}
 ----
 ====
 
-The following configuration file contains the JMS-infrastructure beans that are shared on both
-the client and server:
+The following configuration file contains the JMS-infrastructure beans that are shared
+on both the client and the server:
 
 ====
 [source,xml,indent=0]
@@ -846,7 +842,6 @@ On the server, you need to expose the service object that uses the
 		public static void main(String[] args) throws Exception {
 			new ClassPathXmlApplicationContext(new String[]{"com/foo/server.xml", "com/foo/jms.xml"});
 		}
-
 	}
 ----
 ====
@@ -897,7 +892,6 @@ proxy takes care of forwarding the call to the server-side object via JMS):
 			CheckingAccountService service = (CheckingAccountService) ctx.getBean("checkingAccountService");
 			service.cancelAccount(new Long(10));
 		}
-
 	}
 ----
 ====
@@ -916,8 +910,8 @@ Auto-detection is not implemented for remote interfaces
 
 The main reason why auto-detection of implemented interfaces does not occur for remote
 interfaces is to avoid opening too many doors to remote callers. The target object might
-implement internal callback interfaces, such as `InitializingBean` or `DisposableBean`, which
-one would not want to expose to callers.
+implement internal callback interfaces, such as `InitializingBean` or `DisposableBean`
+which one would not want to expose to callers.
 
 Offering a proxy with all interfaces implemented by the target usually does not matter
 in the local case. However, when you export a remote service, you should expose a specific
@@ -936,13 +930,13 @@ effort and puts you on the safe side regarding controlled exposure of specific m
 [[remoting-considerations]]
 === Considerations when Choosing a Technology
 
-Each and every technology presented here has its drawbacks. When choosing a technology, you should carefully
-consider your needs, the services you expose, and the objects you send
-over the wire.
+Each and every technology presented here has its drawbacks. When choosing a technology,
+you should carefully consider your needs, the services you expose, and the objects you
+send over the wire.
 
 When using RMI, you cannot access the objects through the HTTP protocol,
-unless you tunnel the RMI traffic. RMI is a fairly heavy-weight protocol, in that
-it supports full-object serialization, which is important when you use a complex data model
+unless you tunnel the RMI traffic. RMI is a fairly heavy-weight protocol, in that it
+supports full-object serialization, which is important when you use a complex data model
 that needs serialization over the wire. However, RMI-JRMP is tied to Java clients. It is
 a Java-to-Java remoting solution.
 
@@ -967,8 +961,8 @@ technologies.
 Last but not least, EJB has an advantage over RMI, in that it supports standard
 role-based authentication and authorization and remote transaction propagation. It is
 possible to get RMI invokers or HTTP invokers to support security context propagation as
-well, although this is not provided by core Spring. Spring offers only appropriate hooks for
-plugging in third-party or custom solutions.
+well, although this is not provided by core Spring. Spring offers only appropriate hooks
+for plugging in third-party or custom solutions.
 
 
 
@@ -1607,6 +1601,19 @@ the `ConnectionFactory` suitable for use in standalone applications. It also con
 implementation of Spring's `PlatformTransactionManager` for JMS (the cunningly named
 `JmsTransactionManager`). This allows for seamless integration of JMS as a transactional
 resource into Spring's transaction management mechanisms.
+
+[NOTE]
+====
+As of Spring Framework 5, Spring's JMS package fully supports JMS 2.0 and requires the
+JMS 2.0 API to be present at runtime. We recommend the use of a JMS 2.0 compatible provider.
+
+If you happen to use an older message broker in your system, you may try upgrading to a
+JMS 2.0 compatible driver for your existing broker generation. Alternatively, you may also
+try to run against a JMS 1.1 based driver, simply putting the JMS 2.0 API jar on the
+classpath but only using JMS 1.1 compatible API against your driver. Spring's JMS support
+adheres to JMS 1.1 conventions by default, so with corresponding configuration it does
+support such a scenario. However, please consider this for transition scenarios only.
+====
 
 
 
