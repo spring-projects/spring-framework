@@ -177,6 +177,12 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 
+	@Override
+	public String toString() {
+		return org.springframework.http.HttpHeaders.formatHeaders(this);
+	}
+
+
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
 		private Iterator<HttpString> names = headers.getHeaderNames().iterator();

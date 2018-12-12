@@ -1640,7 +1640,26 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	@Override
 	public String toString() {
-		return this.headers.toString();
+		return formatHeaders(this.headers);
+	}
+
+	/**
+	 * Helps to format HTTP header values, as HTTP header values themselves can
+	 * contain comma-separated values, can become confusing with regular
+	 * {@link Map} formatting that also uses commas between entries.
+	 * @param headers the headers to format
+	 * @return the headers to a String
+	 * @since 5.1.4
+	 */
+	public static String formatHeaders(MultiValueMap<String, String> headers) {
+		return headers.entrySet().stream()
+				.map(entry -> {
+					List<String> values = entry.getValue();
+					return entry.getKey() + ":" + (values.size() == 1 ?
+							"\"" + values.get(0) + "\"" :
+							values.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
+				})
+				.collect(Collectors.joining(", ", "[", "]"));
 	}
 
 

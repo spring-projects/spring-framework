@@ -176,6 +176,12 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 
+	@Override
+	public String toString() {
+		return org.springframework.http.HttpHeaders.formatHeaders(this);
+	}
+
+
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
 		private Iterator<String> names = headers.names().iterator();

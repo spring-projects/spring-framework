@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.MimeHeaders;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
@@ -192,6 +193,12 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 				return headers.size();
 			}
 		};
+	}
+
+
+	@Override
+	public String toString() {
+		return HttpHeaders.formatHeaders(this);
 	}
 
 

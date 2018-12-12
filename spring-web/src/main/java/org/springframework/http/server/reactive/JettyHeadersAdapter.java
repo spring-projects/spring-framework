@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
@@ -173,6 +174,12 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 				return headers.size();
 			}
 		};
+	}
+
+
+	@Override
+	public String toString() {
+		return HttpHeaders.formatHeaders(this);
 	}
 
 
