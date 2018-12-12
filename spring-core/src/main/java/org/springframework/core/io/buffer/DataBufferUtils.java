@@ -139,7 +139,6 @@ public abstract class DataBufferUtils {
 		DataBuffer dataBuffer = dataBufferFactory.allocateBuffer(bufferSize);
 		ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, bufferSize);
 
-
 		Flux<DataBuffer> result = Flux.using(channelSupplier,
 				channel -> Flux.create(sink -> {
 					AsynchronousFileChannelReadCompletionHandler completionHandler =
@@ -265,7 +264,7 @@ public abstract class DataBufferUtils {
 	 * @param channel the channel to write to
 	 * @return a flux containing the same buffers as in {@code source}, that starts the writing
 	 * process when subscribed to, and that publishes any writing errors and the completion signal
-	 * @since 5.1
+	 * @since 5.0.10
 	 */
 	public static Flux<DataBuffer> write(Publisher<DataBuffer> source, AsynchronousFileChannel channel) {
 		return write(source, channel, 0);
@@ -329,7 +328,6 @@ public abstract class DataBufferUtils {
 
 		return Flux.defer(() -> {
 			AtomicLong countDown = new AtomicLong(maxByteCount);
-
 			return Flux.from(publisher)
 					.map(buffer -> {
 						long remainder = countDown.addAndGet(-buffer.readableByteCount());
@@ -359,7 +357,6 @@ public abstract class DataBufferUtils {
 
 		return Flux.defer(() -> {
 			AtomicLong countDown = new AtomicLong(maxByteCount);
-
 			return Flux.from(publisher)
 					.skipUntil(buffer -> {
 						long remainder = countDown.addAndGet(-buffer.readableByteCount());
