@@ -10,7 +10,7 @@ dependencyManagement {
 // spring-core includes asm and repackages cglib, inlining both into the spring-core jar.
 // cglib itself depends on asm and is therefore further transformed by the JarJar task to
 // depend on org.springframework.asm; this avoids including two different copies of asm.
-def cglibVersion = "3.2.9"
+def cglibVersion = "3.2.10"
 def objenesisVersion = "3.0.1"
 
 configurations {
@@ -64,7 +64,7 @@ task objenesisRepackJar(type: Jar) { repackJar ->
 dependencies {
 	cglib("cglib:cglib:${cglibVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
-	jarjar("org.pantsbuild:jarjar:1.6.6")
+	jarjar("org.pantsbuild:jarjar:1.7.2")
 
 	compile(files(cglibRepackJar))
 	compile(files(objenesisRepackJar))
