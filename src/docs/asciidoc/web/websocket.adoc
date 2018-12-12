@@ -102,11 +102,17 @@ The following example shows the XML configuration equivalent of the preceding ex
 ----
 ====
 
-The pereceding example is for use in Spring MVC applications and should be included in the
+The preceding example is for use in Spring MVC applications and should be included in the
 configuration of a <<mvc-servlet,`DispatcherServlet`>>. However, Spring's WebSocket
 support does not depend on Spring MVC. It is relatively simple to integrate a `WebSocketHandler`
 into other HTTP-serving environments with the help of
 {api-spring-framework}/web/socket/server/support/WebSocketHttpRequestHandler.html[`WebSocketHttpRequestHandler`].
+
+When using the `WebSocketHandler` API directly vs indirectly, e.g. through the
+<<websocket-stomp>> messaging, the application must synchronize the sending of messages
+since the underlying standard WebSocket session (JSR-356) does not allow concurrent
+sending. One option is to wrap the `WebSocketSession` with
+{api-spring-framework}/web/socket/handler/ConcurrentWebSocketSessionDecorator.html[`ConcurrentWebSocketSessionDecorator`].
 
 
 
