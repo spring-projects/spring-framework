@@ -52,17 +52,16 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * Represents HTTP request and response headers, mapping string header names to a list of string values.
+ * A data structure representing HTTP request or response headers, mapping String header names
+ * to a list of String values, also offering accessors for common application-level data types.
  *
- * <p>In addition to the normal methods defined by {@link Map}, this class offers the following
- * convenience methods:
+ * <p>In addition to the regular methods defined by {@link Map}, this class offers many common
+ * convenience methods, for example:
  * <ul>
  * <li>{@link #getFirst(String)} returns the first value associated with a given header name</li>
  * <li>{@link #add(String, String)} adds a header value to the list of values for a header name</li>
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
- *
- * <p>Inspired by {@code com.sun.net.httpserver.Headers}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -379,7 +378,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * The empty {@code HttpHeaders} instance (immutable).
+	 * An empty {@code HttpHeaders} instance (immutable).
+	 * @since 5.0
 	 */
 	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new HttpHeaders(new LinkedMultiValueMap<>(0)));
 
