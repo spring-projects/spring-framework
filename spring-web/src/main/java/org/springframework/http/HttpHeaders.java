@@ -43,17 +43,16 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * Represents HTTP request and response headers, mapping string header names to a list of string values.
+ * A data structure representing HTTP request or response headers, mapping String header names
+ * to a list of String values, also offering accessors for common application-level data types.
  *
- * <p>In addition to the normal methods defined by {@link Map}, this class offers the following
- * convenience methods:
+ * <p>In addition to the regular methods defined by {@link Map}, this class offers many common
+ * convenience methods, for example:
  * <ul>
  * <li>{@link #getFirst(String)} returns the first value associated with a given header name</li>
  * <li>{@link #add(String, String)} adds a header value to the list of values for a header name</li>
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
- *
- * <p>Inspired by {@code com.sun.net.httpserver.Headers}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -65,6 +64,7 @@ import org.springframework.util.StringUtils;
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
 
 	private static final long serialVersionUID = -8578554704772377436L;
+
 
 	/**
 	 * The HTTP {@code Accept} header field name.
@@ -390,7 +390,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * Constructs a new, empty instance of the {@code HttpHeaders} object.
+	 * Construct a new, empty instance of the {@code HttpHeaders} object.
 	 */
 	public HttpHeaders() {
 		this(new LinkedCaseInsensitiveMap<List<String>>(8, Locale.ENGLISH), false);
@@ -744,8 +744,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Content-Type} header.
 	 */
 	public void setContentType(MediaType mediaType) {
-		Assert.isTrue(!mediaType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
-		Assert.isTrue(!mediaType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
+		Assert.isTrue(!mediaType.isWildcardType(), "Content-Type cannot contain wildcard type '*'");
+		Assert.isTrue(!mediaType.isWildcardSubtype(), "Content-Type cannot contain wildcard subtype '*'");
 		set(CONTENT_TYPE, mediaType.toString());
 	}
 
