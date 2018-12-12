@@ -2536,20 +2536,19 @@ There are various tradeoffs to consider.
 The XML style may most familiar to existing Spring users, and it is backed by genuine
 POJOs. When using AOP as a tool to configure enterprise services, XML can be a good
 choice (a good test is whether you consider the pointcut expression to be a part of your
-configuration that you might want to change independently). With the XML style, it is arguably
-clearer from your configuration what aspects are present in the system.
+configuration that you might want to change independently). With the XML style, it is
+arguably clearer from your configuration which aspects are present in the system.
 
 The XML style has two disadvantages. First, it does not fully encapsulate the
 implementation of the requirement it addresses in a single place. The DRY principle says
 that there should be a single, unambiguous, authoritative representation of any piece of
-knowledge within a system. When using the XML style, the knowledge of how a
-requirement is implemented is split across the declaration of the backing bean class
-and the XML in the configuration file. When you use the @AspectJ style, this information
-is encapsulated in a single single module: the aspect. Secondly, the XML style
-is slightly more limited in what it can express than the @AspectJ style: Only the
-"`singleton`" aspect instantiation model is supported, and it is not possible to combine
-named pointcuts declared in XML. For example, in the @AspectJ style you can write
-something like the following:
+knowledge within a system. When using the XML style, the knowledge of how a requirement
+is implemented is split across the declaration of the backing bean class and the XML in
+the configuration file. When you use the @AspectJ style, this information is encapsulated
+in a single module: the aspect. Secondly, the XML style is slightly more limited in what
+it can express than the @AspectJ style: Only the "`singleton`" aspect instantiation model
+is supported, and it is not possible to combine named pointcuts declared in XML.
+For example, in the @AspectJ style you can write something like the following:
 
 ====
 [source,java,indent=0]
