@@ -231,10 +231,10 @@ being placed in it. A simple example:
 	Simple simple = new Simple();
 	simple.booleanList.add(true);
 
-	EvaluationContext context = SimpleEvaluationContext().forReadOnlyDataBinding().build();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
-	// false is passed in here as a string. SpEL and the conversion service will
-	// correctly recognize that it needs to be a Boolean and convert it
+	// "false" is passed in here as a String. SpEL and the conversion service
+	// will recognize that it needs to be a Boolean and convert it accordingly.
 	parser.parseExpression("booleanList[0]").setValue(context, simple, "false");
 
 	// b will be false
