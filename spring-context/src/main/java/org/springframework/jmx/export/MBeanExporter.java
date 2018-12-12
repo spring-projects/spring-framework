@@ -197,7 +197,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * Bean instances are typically linked in through bean references.
 	 * Bean names will be resolved as beans in the current factory, respecting
 	 * lazy-init markers (that is, not triggering initialization of such beans).
-	 * @param beans Map with JMX names as keys and bean instances or bean names
+	 * @param beans a Map with JMX names as keys and bean instances or bean names
 	 * as values
 	 * @see #setNamingStrategy
 	 * @see org.springframework.jmx.export.naming.KeyNamingStrategy
@@ -509,7 +509,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	/**
 	 * Register the defined beans with the {@link MBeanServer}.
 	 * <p>Each bean is exposed to the {@code MBeanServer} via a
-	 * {@code ModelMBean}. The actual implemetation of the
+	 * {@code ModelMBean}. The actual implementation of the
 	 * {@code ModelMBean} interface used depends on the implementation of
 	 * the {@code ModelMBeanProvider} interface that is configured. By
 	 * default the {@code RequiredModelMBean} class that is supplied with
@@ -939,9 +939,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * {@link org.springframework.jmx.export.notification.NotificationPublisher} is injected.
 	 */
 	private void injectNotificationPublisherIfNecessary(
-			Object managedResource, ModelMBean modelMBean, ObjectName objectName) {
+			Object managedResource, @Nullable ModelMBean modelMBean, @Nullable ObjectName objectName) {
 
-		if (managedResource instanceof NotificationPublisherAware) {
+		if (managedResource instanceof NotificationPublisherAware && modelMBean != null && objectName != null) {
 			((NotificationPublisherAware) managedResource).setNotificationPublisher(
 					new ModelMBeanNotificationPublisher(modelMBean, objectName, managedResource));
 		}
@@ -1029,7 +1029,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 
-    /**
+	/**
 	 * Notifies all registered {@link MBeanExporterListener MBeanExporterListeners} of the
 	 * registration of the MBean identified by the supplied {@link ObjectName}.
 	 */
@@ -1112,7 +1112,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 		@Override
 		protected void postProcessTargetObject(Object targetObject) {
-			Assert.state(this.modelMBean != null && this.objectName != null, "Not initialized");
 			injectNotificationPublisherIfNecessary(targetObject, this.modelMBean, this.objectName);
 		}
 	}
