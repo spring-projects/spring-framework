@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * <p>Composability methods on {@link Predicate} can be used :
  * <pre class="code">
  * Predicate&lt;Class&lt;?&gt;&gt; predicate =
- * 		HandlerTypePredicate.forAnnotation(RestController)
+ * 		HandlerTypePredicate.forAnnotation(RestController.class)
  * 				.and(HandlerTypePredicate.forBasePackage("org.example"));
  * </pre>
  *
