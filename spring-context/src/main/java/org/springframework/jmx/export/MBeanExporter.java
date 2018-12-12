@@ -939,9 +939,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * {@link org.springframework.jmx.export.notification.NotificationPublisher} is injected.
 	 */
 	private void injectNotificationPublisherIfNecessary(
-			Object managedResource, ModelMBean modelMBean, ObjectName objectName) {
+			Object managedResource, @Nullable ModelMBean modelMBean, @Nullable ObjectName objectName) {
 
-		if (managedResource instanceof NotificationPublisherAware) {
+		if (managedResource instanceof NotificationPublisherAware && modelMBean != null && objectName != null) {
 			((NotificationPublisherAware) managedResource).setNotificationPublisher(
 					new ModelMBeanNotificationPublisher(modelMBean, objectName, managedResource));
 		}
@@ -1112,7 +1112,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 		@Override
 		protected void postProcessTargetObject(Object targetObject) {
-			Assert.state(this.modelMBean != null && this.objectName != null, "Not initialized");
 			injectNotificationPublisherIfNecessary(targetObject, this.modelMBean, this.objectName);
 		}
 	}
