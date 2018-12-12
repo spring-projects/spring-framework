@@ -75,11 +75,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private static final long serialVersionUID = -8578554704772377436L;
 
-	/**
-	 * The empty {@code HttpHeaders} instance (immutable).
-	 */
-	public static final HttpHeaders EMPTY =
-			new ReadOnlyHttpHeaders(new HttpHeaders(new LinkedMultiValueMap<>(0)));
+
 	/**
 	 * The HTTP {@code Accept} header field name.
 	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.3.2">Section 5.3.2 of RFC 7231</a>
@@ -381,6 +377,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
+
+	/**
+	 * The empty {@code HttpHeaders} instance (immutable).
+	 */
+	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new HttpHeaders(new LinkedMultiValueMap<>(0)));
+
 	/**
 	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
 	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
@@ -409,15 +411,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Construct a new, empty instance of the {@code HttpHeaders} object.
 	 */
 	public HttpHeaders() {
-		this(CollectionUtils.toMultiValueMap(
-				new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH)));
+		this(CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH)));
 	}
 
 	/**
 	 * Construct a new {@code HttpHeaders} instance backed by an existing map.
+	 * @since 5.1
 	 */
 	public HttpHeaders(MultiValueMap<String, String> headers) {
-		Assert.notNull(headers, "headers must not be null");
+		Assert.notNull(headers, "MultiValueMap must not be null");
 		this.headers = headers;
 	}
 
@@ -445,7 +447,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.0
 	 */
 	public void setAcceptLanguage(List<Locale.LanguageRange> languages) {
-		Assert.notNull(languages, "'languages' must not be null");
+		Assert.notNull(languages, "LanguageRange List must not be null");
 		DecimalFormat decimal = new DecimalFormat("0.0", DECIMAL_FORMAT_SYMBOLS);
 		List<String> values = languages.stream()
 				.map(range ->
@@ -555,7 +557,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the (new) value of the {@code Access-Control-Allow-Origin} response header.
 	 */
 	public void setAccessControlAllowOrigin(@Nullable String allowedOrigin) {
-		set(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
+		setOrRemove(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
 	}
 
 	/**
@@ -614,7 +616,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the (new) value of the {@code Access-Control-Request-Method} request header.
 	 */
 	public void setAccessControlRequestMethod(@Nullable HttpMethod requestMethod) {
-		set(ACCESS_CONTROL_REQUEST_METHOD, (requestMethod != null ? requestMethod.name() : null));
+		setOrRemove(ACCESS_CONTROL_REQUEST_METHOD, (requestMethod != null ? requestMethod.name() : null));
 	}
 
 	/**
@@ -766,14 +768,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.0.5
 	 */
 	public void setCacheControl(CacheControl cacheControl) {
-		set(CACHE_CONTROL, cacheControl.getHeaderValue());
+		setOrRemove(CACHE_CONTROL, cacheControl.getHeaderValue());
 	}
 
 	/**
 	 * Set the (new) value of the {@code Cache-Control} header.
 	 */
 	public void setCacheControl(@Nullable String cacheControl) {
-		set(CACHE_CONTROL, cacheControl);
+		setOrRemove(CACHE_CONTROL, cacheControl);
 	}
 
 	/**
@@ -817,7 +819,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see #getContentDisposition()
 	 */
 	public void setContentDispositionFormData(String name, @Nullable String filename) {
-		Assert.notNull(name, "'name' must not be null");
+		Assert.notNull(name, "Name must not be null");
 		ContentDisposition.Builder disposition = ContentDisposition.builder("form-data").name(name);
 		if (filename != null) {
 			disposition.filename(filename);
@@ -860,7 +862,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.0
 	 */
 	public void setContentLanguage(@Nullable Locale locale) {
-		set(CONTENT_LANGUAGE, (locale != null ? locale.toLanguageTag() : null));
+		setOrRemove(CONTENT_LANGUAGE, (locale != null ? locale.toLanguageTag() : null));
 	}
 
 	/**
@@ -904,12 +906,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setContentType(@Nullable MediaType mediaType) {
 		if (mediaType != null) {
-			Assert.isTrue(!mediaType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
-			Assert.isTrue(!mediaType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
+			Assert.isTrue(!mediaType.isWildcardType(), "Content-Type cannot contain wildcard type '*'");
+			Assert.isTrue(!mediaType.isWildcardSubtype(), "Content-Type cannot contain wildcard subtype '*'");
 			set(CONTENT_TYPE, mediaType.toString());
 		}
 		else {
-			set(CONTENT_TYPE, null);
+			remove(CONTENT_TYPE);
 		}
 	}
 
@@ -953,8 +955,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/"),
 					"Invalid ETag: does not start with W/ or \"");
 			Assert.isTrue(etag.endsWith("\""), "Invalid ETag: does not end with \"");
+			set(ETAG, etag);
 		}
-		set(ETAG, etag);
+		else {
+			remove(ETAG);
+		}
 	}
 
 	/**
@@ -1012,7 +1017,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			set(HOST, value);
 		}
 		else {
-			set(HOST, null);
+			remove(HOST, null);
 		}
 	}
 
@@ -1160,7 +1165,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.1.4
 	 */
 	public void setLastModified(ZonedDateTime lastModified) {
-		setZonedDateTime(LAST_MODIFIED, lastModified.withZoneSameInstant(ZoneId.of("GMT")));
+		setZonedDateTime(LAST_MODIFIED, lastModified.withZoneSameInstant(GMT));
 	}
 
 	/**
@@ -1179,7 +1184,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Location} header.
 	 */
 	public void setLocation(@Nullable URI location) {
-		set(LOCATION, (location != null ? location.toASCIIString() : null));
+		setOrRemove(LOCATION, (location != null ? location.toASCIIString() : null));
 	}
 
 	/**
@@ -1197,7 +1202,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the (new) value of the {@code Origin} header.
 	 */
 	public void setOrigin(@Nullable String origin) {
-		set(ORIGIN, origin);
+		setOrRemove(ORIGIN, origin);
 	}
 
 	/**
@@ -1212,7 +1217,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the (new) value of the {@code Pragma} header.
 	 */
 	public void setPragma(@Nullable String pragma) {
-		set(PRAGMA, pragma);
+		setOrRemove(PRAGMA, pragma);
 	}
 
 	/**
@@ -1244,7 +1249,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the (new) value of the {@code Upgrade} header.
 	 */
 	public void setUpgrade(@Nullable String upgrade) {
-		set(UPGRADE, upgrade);
+		setOrRemove(UPGRADE, upgrade);
 	}
 
 	/**
@@ -1406,10 +1411,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			List<String> result = new ArrayList<>();
 			for (String value : values) {
 				if (value != null) {
-					String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-					for (String token : tokens) {
-						result.add(token);
-					}
+					Collections.addAll(result, StringUtils.tokenizeToStringArray(value, ","));
 				}
 			}
 			return result;
@@ -1468,14 +1470,30 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	protected String toCommaDelimitedString(List<String> headerValues) {
 		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> it = headerValues.iterator(); it.hasNext(); ) {
+		for (Iterator<String> it = headerValues.iterator(); it.hasNext();) {
 			String val = it.next();
-			builder.append(val);
-			if (it.hasNext()) {
-				builder.append(", ");
+			if (val != null) {
+				builder.append(val);
+				if (it.hasNext()) {
+					builder.append(", ");
+				}
 			}
 		}
 		return builder.toString();
+	}
+
+	/**
+	 * Set the given header value, or remove the header if {@code null}.
+	 * @param headerName the header name
+	 * @param headerValue the header value, or {@code null} for none
+	 */
+	private void setOrRemove(String headerName, @Nullable String headerValue) {
+		if (headerValue != null) {
+			set(headerName, headerValue);
+		}
+		else {
+			remove(headerName);
+		}
 	}
 
 

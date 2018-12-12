@@ -537,10 +537,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder cacheControl(CacheControl cacheControl) {
-			String ccValue = cacheControl.getHeaderValue();
-			if (ccValue != null) {
-				this.headers.setCacheControl(cacheControl.getHeaderValue());
-			}
+			this.headers.setCacheControl(cacheControl);
 			return this;
 		}
 
