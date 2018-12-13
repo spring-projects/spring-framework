@@ -215,6 +215,15 @@ public class DefaultDataBuffer implements DataBuffer {
 		return this;
 	}
 
+	@Override
+	public DataBuffer ensureCapacity(int length) {
+		if (length > writableByteCount()) {
+			int newCapacity = calculateCapacity(this.writePosition + length);
+			capacity(newCapacity);
+		}
+		return this;
+	}
+
 	private static ByteBuffer allocate(int capacity, boolean direct) {
 		return direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
 	}
@@ -369,13 +378,6 @@ public class DefaultDataBuffer implements DataBuffer {
 		return new DefaultDataBufferOutputStream();
 	}
 
-	private void ensureCapacity(int length) {
-		if (length <= writableByteCount()) {
-			return;
-		}
-		int newCapacity = calculateCapacity(this.writePosition + length);
-		capacity(newCapacity);
-	}
 
 	/**
 	 * Calculate the capacity of the buffer.
