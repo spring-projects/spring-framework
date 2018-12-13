@@ -362,10 +362,9 @@ the knowledge of how to convert properties to the desired type. Read more about
 A couple of examples where property editing is used in Spring:
 
 * __setting properties on beans__ is done using `PropertyEditors`. When mentioning
-  `java.lang.String` as the value of a property of some bean you're declaring in XML
-  file, Spring will (if the setter of the corresponding property has a
-  `Class`-parameter) use the `ClassEditor` to try to resolve the parameter to a `Class`
-  object.
+  `String` as the value of a property of some bean you're declaring in XML file,
+  Spring will (if the setter of the corresponding property has  `Class` parameter)
+  use the `ClassEditor` to try to resolve the parameter to a `Class` object.
 * __parsing HTTP request parameters__ in Spring's MVC framework is done using all kinds
   of `PropertyEditors` that you can manually bind in all subclasses of the
   `CommandController`.
@@ -761,9 +760,9 @@ Consider `StringToInteger` as an example for a typical `Converter` implementatio
 [[core-convert-ConverterFactory-SPI]]
 === ConverterFactory
 
-When you need to centralize the conversion logic for an entire class hierarchy, for
-example, when converting from String to java.lang.Enum objects, implement
-`ConverterFactory`:
+When you need to centralize the conversion logic for an entire class hierarchy
+(for example, when converting from `String` to `Enum` objects), you can implement
+`ConverterFactory`, as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -777,10 +776,10 @@ example, when converting from String to java.lang.Enum objects, implement
 ----
 
 Parameterize S to be the type you are converting from and R to be the base type defining
-the __range__ of classes you can convert to. Then implement getConverter(Class<T>),
+the __range__ of classes you can convert to. Then implement `getConverter(Class<T>)`,
 where T is a subclass of R.
 
-Consider the `StringToEnum` ConverterFactory as an example:
+Consider the `StringToEnumConverterFactory` as an example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -813,12 +812,13 @@ Consider the `StringToEnum` ConverterFactory as an example:
 [[core-convert-GenericConverter-SPI]]
 === GenericConverter
 
-When you require a sophisticated Converter implementation, consider the GenericConverter
-interface. With a more flexible but less strongly typed signature, a GenericConverter
-supports converting between multiple source and target types. In addition, a
-GenericConverter makes available source and target field context you can use when
-implementing your conversion logic. Such context allows a type conversion to be driven
-by a field annotation, or generic information declared on a field signature.
+When you require a sophisticated `Converter` implementation, consider using the
+`GenericConverter` interface. With a more flexible but less strongly typed signature
+than `Converter`, a `GenericConverter` supports converting between multiple source and
+target types. In addition, a `GenericConverter` makes available source and target field
+context that you can use when you implement your conversion logic. Such context lets a
+type conversion be driven by a field annotation or by generic information declared on a
+field signature. The following listing shows the interface definition of `GenericConverter`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -833,22 +833,22 @@ by a field annotation, or generic information declared on a field signature.
 	}
 ----
 
-To implement a GenericConverter, have getConvertibleTypes() return the supported
-source->target type pairs. Then implement convert(Object, TypeDescriptor,
-TypeDescriptor) to implement your conversion logic. The source TypeDescriptor provides
-access to the source field holding the value being converted. The target TypeDescriptor
-provides access to the target field where the converted value will be set.
+To implement a `GenericConverter`, have `getConvertibleTypes()` return the supported
+source->target type pairs. Then implement `convert(Object, TypeDescriptor,
+TypeDescriptor)` to contain your conversion logic. The source `TypeDescriptor` provides
+access to the source field that holds the value being converted. The target `TypeDescriptor`
+provides access to the target field where the converted value is to be set.
 
-A good example of a GenericConverter is a converter that converts between a Java Array
-and a Collection. Such an ArrayToCollectionConverter introspects the field that declares
-the target Collection type to resolve the Collection's element type. This allows each
-element in the source array to be converted to the Collection element type before the
-Collection is set on the target field.
+A good example of a `GenericConverter` is a converter that converts between a Java array
+and a collection. Such an `ArrayToCollectionConverter` introspects the field that declares
+the target collection type to resolve the collection's element type. This lets each
+element in the source array be converted to the collection element type before the
+collection is set on the target field.
 
 [NOTE]
 ====
-Because GenericConverter is a more complex SPI interface, only use it when you need it.
-Favor Converter or ConverterFactory for basic type conversion needs.
+Because `GenericConverter` is a more complex SPI interface, only use it when you need it.
+Favor `Converter` or `ConverterFactory` for basic type conversion needs.
 ====
 
 
@@ -1044,11 +1044,11 @@ general __core.convert__ Converter SPI does not address such __formatting__ requ
 directly. To directly address them, Spring 3 introduces a convenient Formatter SPI that
 provides a simple and robust alternative to PropertyEditors for client environments.
 
-In general, use the Converter SPI when you need to implement general-purpose type
-conversion logic; for example, for converting between a java.util.Date and and
-java.lang.Long. Use the Formatter SPI when you're working in a client environment, such
-as a web application, and need to parse and print localized field values. The
-ConversionService provides a unified type conversion API for both SPIs.
+In general, you can use the `Converter` SPI when you need to implement general-purpose type
+conversion logic -- for example, for converting between a `java.util.Date` and a `Long`.
+You can use the `Formatter` SPI when you work in a client environment (such as a web
+application) and need to parse and print localized field values. The `ConversionService`
+provides a unified type conversion API for both SPIs.
 
 
 
@@ -1088,22 +1088,22 @@ Where Formatter extends from the Printer and Parser building-block interfaces:
 	}
 ----
 
-To create your own Formatter, simply implement the Formatter interface above.
-Parameterize T to be the type of object you wish to format, for example,
-`java.util.Date`. Implement the `print()` operation to print an instance of T for
+To create your own `Formatter`, implement the `Formatter` interface shown earlier.
+Parameterize `T` to be the type of object you wish to format -- for example,
+`java.util.Date`. Implement the `print()` operation to print an instance of `T` for
 display in the client locale. Implement the `parse()` operation to parse an instance of
-T from the formatted representation returned from the client locale. Your Formatter
-should throw a ParseException or IllegalArgumentException if a parse attempt fails. Take
-care to ensure your Formatter implementation is thread-safe.
+`T` from the formatted representation returned from the client locale. Your `Formatter`
+should throw a `ParseException` or an `IllegalArgumentException` if a parse attempt fails. Take
+care to ensure that your `Formatter` implementation is thread-safe.
 
-Several Formatter implementations are provided in `format` subpackages as a convenience.
-The `number` package provides a `NumberStyleFormatter`, `CurrencyStyleFormatter`, and
-`PercentStyleFormatter` to format `java.lang.Number` objects using a `java.text.NumberFormat`.
+The `format` subpackages provide several `Formatter` implementations as a convenience.
+The `number` package provides `NumberStyleFormatter`, `CurrencyStyleFormatter`, and
+`PercentStyleFormatter` to format `Number` objects that use a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
 a `java.text.DateFormat`. The `datetime.joda` package provides comprehensive datetime
 formatting support based on the http://joda-time.sourceforge.net[Joda-Time library].
 
-Consider `DateFormatter` as an example `Formatter` implementation:
+The following `DateFormatter` is an example `Formatter` implementation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1230,10 +1230,11 @@ To trigger formatting, simply annotate fields with @NumberFormat:
 ==== Format Annotation API
 
 A portable format annotation API exists in the `org.springframework.format.annotation`
-package. Use @NumberFormat to format java.lang.Number fields. Use @DateTimeFormat to
-format java.util.Date, java.util.Calendar, java.util.Long, or Joda-Time fields.
+package. You can use `@NumberFormat` to format `Number` fields such as `Double` and
+`Long`, and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
+(for millisecond timestamps) as well as JSR-310 `java.time` and Joda-Time value types.
 
-The example below uses @DateTimeFormat to format a java.util.Date as a ISO Date
+The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
 (yyyy-MM-dd):
 
 [source,java,indent=0]
