@@ -99,7 +99,7 @@ import org.springframework.core.Ordered;
  *
  *     &#064;Override
  *     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
- *         return MyAsyncUncaughtExceptionHandler();
+ *         return new MyAsyncUncaughtExceptionHandler();
  *     }
  * }</pre>
  *
