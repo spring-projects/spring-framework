@@ -276,13 +276,9 @@ public class SetValueTests extends AbstractExpressionTests {
 			e.setValue(lContext, value);
 			assertEquals("Retrieved value was not equal to set value", value, e.getValue(lContext,value.getClass()));
 		}
-		catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		}
-		catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+		catch (EvaluationException | ParseException ex) {
+			ex.printStackTrace();
+			fail("Unexpected Exception: " + ex.getMessage());
 		}
 	}
 
@@ -309,13 +305,9 @@ public class SetValueTests extends AbstractExpressionTests {
 //				assertEquals("Retrieved value was not equal to set value", expectedValue, e.getValue(lContext));
 			}
 		}
-		catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		}
-		catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+		catch (EvaluationException | ParseException ex) {
+			ex.printStackTrace();
+			fail("Unexpected Exception: " + ex.getMessage());
 		}
 	}
 
