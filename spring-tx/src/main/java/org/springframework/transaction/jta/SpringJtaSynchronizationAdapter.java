@@ -121,13 +121,9 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 			boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
 			this.springSynchronization.beforeCommit(readOnly);
 		}
-		catch (RuntimeException ex) {
+		catch (RuntimeException | Error ex) {
 			setRollbackOnlyIfPossible();
 			throw ex;
-		}
-		catch (Error err) {
-			setRollbackOnlyIfPossible();
-			throw err;
 		}
 		finally {
 			// Process Spring's beforeCompletion early, in order to avoid issues
