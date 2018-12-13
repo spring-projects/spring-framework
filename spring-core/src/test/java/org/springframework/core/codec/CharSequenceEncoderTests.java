@@ -63,8 +63,6 @@ public class CharSequenceEncoderTests
 				.consumeNextWith(expectString(this.foo))
 				.consumeNextWith(expectString(this.bar))
 				.verifyComplete());
-
-
 	}
 
 }
