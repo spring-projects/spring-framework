@@ -19,6 +19,8 @@ package org.springframework.core.codec;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -48,6 +50,9 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+	private final ConcurrentMap<Charset, Float> charsetToMaxBytesPerChar =
+			new ConcurrentHashMap<>(3);
+
 
 	private CharSequenceEncoder(MimeType... mimeTypes) {
 		super(mimeTypes);
@@ -75,7 +80,8 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 				});
 			}
 			boolean release = true;
-			DataBuffer dataBuffer = bufferFactory.allocateBuffer();
+			int capacity = calculateCapacity(charSequence, charset);
+			DataBuffer dataBuffer = bufferFactory.allocateBuffer(capacity);
 			try {
 				dataBuffer.write(charSequence, charset);
 				release = false;
@@ -90,6 +96,13 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 			}
 			return dataBuffer;
 		});
+	}
+
+	private int calculateCapacity(CharSequence sequence, Charset charset) {
+		float maxBytesPerChar = this.charsetToMaxBytesPerChar
+				.computeIfAbsent(charset, cs -> cs.newEncoder().maxBytesPerChar());
+		float maxBytesForSequence = sequence.length() * maxBytesPerChar;
+		return (int) Math.ceil(maxBytesForSequence);
 	}
 
 	private Charset getCharset(@Nullable MimeType mimeType) {
