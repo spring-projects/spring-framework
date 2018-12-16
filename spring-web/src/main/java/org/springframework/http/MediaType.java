@@ -94,6 +94,20 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public static final String APPLICATION_JSON_VALUE = "application/json";
 
+    /**
+     * Public constant media type for {@code application/ld+json; profile="http://www.w3.org/ns/anno.jsonld"}.
+     * @see #APPLICATION_JSON_LD_ANNOTATION
+     * <a href="https://www.w3.org/TR/annotation-protocol/">Web Annotation Protocol</a>
+     */
+    public static final MediaType APPLICATION_JSON_LD_ANNOTATION;
+
+    /**
+     * A String equivalent of {@link MediaType#APPLICATION_JSON_LD_ANNOTATION}.
+     * @see #APPLICATION_JSON_LD_ANNOTATION_VALUE
+     */
+    public static final String APPLICATION_JSON_LD_ANNOTATION_VALUE =
+            "application/ld+json; profile=\"http://www.w3.org/ns/anno.jsonld\"";
+
 	/**
 	 * Public constant media type for {@code application/json;charset=UTF-8}.
 	 *
@@ -327,6 +341,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_ATOM_XML = valueOf(APPLICATION_ATOM_XML_VALUE);
 		APPLICATION_FORM_URLENCODED = valueOf(APPLICATION_FORM_URLENCODED_VALUE);
 		APPLICATION_JSON = valueOf(APPLICATION_JSON_VALUE);
+		APPLICATION_JSON_LD_ANNOTATION = valueOf(APPLICATION_JSON_LD_ANNOTATION_VALUE);
 		APPLICATION_JSON_UTF8 = valueOf(APPLICATION_JSON_UTF8_VALUE);
 		APPLICATION_OCTET_STREAM = valueOf(APPLICATION_OCTET_STREAM_VALUE);
 		APPLICATION_PDF = valueOf(APPLICATION_PDF_VALUE);
