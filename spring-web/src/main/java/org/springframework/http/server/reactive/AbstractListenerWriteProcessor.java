@@ -241,7 +241,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * to discard in-flight data that was in
 	 * the process of being written when the error took place.
 	 * @param data the data to be released
-	 * @since 5.1.2
+	 * @since 5.0.11
 	 */
 	protected abstract void discardData(T data);
 
