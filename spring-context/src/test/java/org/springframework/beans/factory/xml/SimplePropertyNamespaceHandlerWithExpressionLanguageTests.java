@@ -30,6 +30,10 @@ import static org.junit.Assert.*;
  *
  * @author Arjen Poutsma
  */
+/**
+ * 简单的属性值
+ * 
+ */
 public class SimplePropertyNamespaceHandlerWithExpressionLanguageTests {
 
 	@Test

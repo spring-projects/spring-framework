@@ -6,6 +6,7 @@
 
 	<bean id="foo" class="org.springframework.tests.sample.beans.TestBean" p:name="Baz"/>
 
+	<!-- 取属性值 -->
 	<bean id="bar" class="org.springframework.tests.sample.beans.TestBean" p:name="#{foo.name}"/>
 
 </beans>

@@ -339,7 +339,8 @@ public class XmlBeanFactoryTests {
 
 	@Test
 	public void testInheritanceWithClass() throws Exception {
-		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory parent;
+		parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
 		new XmlBeanDefinitionReader(child).loadBeanDefinitions(CHILD_CONTEXT);

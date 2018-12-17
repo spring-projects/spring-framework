@@ -50,9 +50,10 @@ import org.springframework.util.Assert;
  * @see GenericApplicationContext
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
+	 // classpath下的xml构建容器的类
 
 	@Nullable
-	private Resource[] configResources;
+	private Resource[] configResources;//文件
 
 
 	/**

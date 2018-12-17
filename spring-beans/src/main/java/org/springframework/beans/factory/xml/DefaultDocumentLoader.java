@@ -64,11 +64,17 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	/**
 	 * Load the {@link Document} at the supplied {@link InputSource} using the standard JAXP-configured
 	 * XML parser.
+	 * 
+	 * inputSource 输入流
+	 * entityResolver 实体解析对象
+	 * errorHandler 错误处理器
+	 * validationMode xml模式
+	 * namespaceAware 命名空间
 	 */
 	@Override
 	public Document loadDocument(InputSource inputSource, EntityResolver entityResolver,
 			ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception {
-
+		// dom解析
 		DocumentBuilderFactory factory = createDocumentBuilderFactory(validationMode, namespaceAware);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Using JAXP provider [" + factory.getClass().getName() + "]");
@@ -91,7 +97,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(namespaceAware);
 
-		if (validationMode != XmlValidationModeDetector.VALIDATION_NONE) {
+		if (validationMode != XmlValidationModeDetector.VALIDATION_NONE) {//无模式
 			factory.setValidating(true);
 			if (validationMode == XmlValidationModeDetector.VALIDATION_XSD) {
 				// Enforce namespace aware for XSD...

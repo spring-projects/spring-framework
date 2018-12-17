@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Detects whether an XML stream is using DTD- or XSD-based validation.
- *
+ * xml 验证校验模式检测器
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -37,40 +37,40 @@ public class XmlValidationModeDetector {
 	/**
 	 * Indicates that the validation should be disabled.
 	 */
-	public static final int VALIDATION_NONE = 0;
+	public static final int VALIDATION_NONE = 0;//无校验
 
 	/**
 	 * Indicates that the validation mode should be auto-guessed, since we cannot find
 	 * a clear indication (probably choked on some special characters, or the like).
 	 */
-	public static final int VALIDATION_AUTO = 1;
+	public static final int VALIDATION_AUTO = 1;//自动
 
 	/**
 	 * Indicates that DTD validation should be used (we found a "DOCTYPE" declaration).
 	 */
-	public static final int VALIDATION_DTD = 2;
+	public static final int VALIDATION_DTD = 2;//DTD 约束校验
 
 	/**
 	 * Indicates that XSD validation should be used (found no "DOCTYPE" declaration).
 	 */
-	public static final int VALIDATION_XSD = 3;
+	public static final int VALIDATION_XSD = 3;//XSD 约束校验
 
 
 	/**
 	 * The token in a XML document that declares the DTD to use for validation
 	 * and thus that DTD validation is being used.
 	 */
-	private static final String DOCTYPE = "DOCTYPE";
+	private static final String DOCTYPE = "DOCTYPE"; //文档类型
 
 	/**
 	 * The token that indicates the start of an XML comment.
 	 */
-	private static final String START_COMMENT = "<!--";
+	private static final String START_COMMENT = "<!--"; // 注释开始
 
 	/**
 	 * The token that indicates the end of an XML comment.
 	 */
-	private static final String END_COMMENT = "-->";
+	private static final String END_COMMENT = "-->"; // 注释结束
 
 
 	/**
@@ -86,19 +86,20 @@ public class XmlValidationModeDetector {
 	 * @throws IOException in case of I/O failure
 	 * @see #VALIDATION_DTD
 	 * @see #VALIDATION_XSD
+	 * 探测校验模式
 	 */
 	public int detectValidationMode(InputStream inputStream) throws IOException {
 		// Peek into the file to look for DOCTYPE.
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		try {
 			boolean isDtdValidated = false;
-			String content;
+			String content;//读取流中的数据
 			while ((content = reader.readLine()) != null) {
 				content = consumeCommentTokens(content);
 				if (this.inComment || !StringUtils.hasText(content)) {
 					continue;
 				}
-				if (hasDoctype(content)) {
+				if (hasDoctype(content)) {//是否包含文档类型
 					isDtdValidated = true;
 					break;
 				}
@@ -149,9 +150,11 @@ public class XmlValidationModeDetector {
 	 */
 	@Nullable
 	private String consumeCommentTokens(String line) {
+		// 不包含注释 则直接返回
 		if (!line.contains(START_COMMENT) && !line.contains(END_COMMENT)) {
 			return line;
 		}
+		//处理包含注释的处理
 		String currLine = line;
 		while ((currLine = consume(currLine)) != null) {
 			if (!this.inComment && !currLine.trim().startsWith(START_COMMENT)) {

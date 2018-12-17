@@ -19,6 +19,7 @@ package org.springframework.core;
 import org.springframework.util.Assert;
 
 /**
+ * 有名称的线程的类
  * {@link ThreadLocal} subclass that exposes a specified name
  * as {@link #toString()} result (allowing for introspection).
  *
