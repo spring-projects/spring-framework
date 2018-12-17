@@ -7365,7 +7365,7 @@ the abstract `createCommand()` method is overridden in such a way that it looks 
 
 	@Bean
 	public CommandManager commandManager() {
-		// return new anonymous implementation of CommandManager with command() overridden
+		// return new anonymous implementation of CommandManager with createCommand() overridden
 		// to return a new prototype Command object
 		return new CommandManager() {
 			protected Command createCommand() {
