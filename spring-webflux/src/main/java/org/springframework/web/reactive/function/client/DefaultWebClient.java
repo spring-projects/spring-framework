@@ -19,9 +19,7 @@ package org.springframework.web.reactive.function.client;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -275,9 +273,7 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public DefaultRequestBodyUriSpec ifModifiedSince(ZonedDateTime ifModifiedSince) {
-			ZonedDateTime gmt = ifModifiedSince.withZoneSameInstant(ZoneId.of("GMT"));
-			String headerValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(gmt);
-			getHeaders().set(HttpHeaders.IF_MODIFIED_SINCE, headerValue);
+			getHeaders().setIfModifiedSince(ifModifiedSince);
 			return this;
 		}
 
@@ -327,11 +323,14 @@ class DefaultWebClient implements WebClient {
 			if (defaultRequest != null) {
 				defaultRequest.accept(this);
 			}
-			URI uri = (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
-			return ClientRequest.create(this.httpMethod, uri)
+			return ClientRequest.create(this.httpMethod, initUri())
 					.headers(headers -> headers.addAll(initHeaders()))
 					.cookies(cookies -> cookies.addAll(initCookies()))
 					.attributes(attributes -> attributes.putAll(this.attributes));
+		}
+
+		private URI initUri() {
+			return (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
 		}
 
 		private HttpHeaders initHeaders() {
@@ -371,25 +370,21 @@ class DefaultWebClient implements WebClient {
 
 		private HttpRequest createRequest() {
 			return new HttpRequest() {
-
-				private HttpHeaders headers = initHeaders();
-
+				private final URI uri = initUri();
+				private final HttpHeaders headers = initHeaders();
 
 				@Override
 				public HttpMethod getMethod() {
 					return httpMethod;
 				}
-
 				@Override
 				public String getMethodValue() {
 					return httpMethod.name();
 				}
-
 				@Override
 				public URI getURI() {
-					return uri;
+					return this.uri;
 				}
-
 				@Override
 				public HttpHeaders getHeaders() {
 					return this.headers;
@@ -410,15 +405,11 @@ class DefaultWebClient implements WebClient {
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
-
-		DefaultResponseSpec(Mono<ClientResponse> responseMono,
-				Supplier<HttpRequest> requestSupplier) {
+		DefaultResponseSpec(Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier) {
 			this.responseMono = responseMono;
 			this.requestSupplier = requestSupplier;
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
-
-
 
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
@@ -473,8 +464,7 @@ class DefaultWebClient implements WebClient {
 				return bodyPublisher;
 			}
 			else {
-				return errorFunction.apply(createResponseException(response,
-						this.requestSupplier.get()));
+				return errorFunction.apply(createResponseException(response, this.requestSupplier.get()));
 			}
 		}
 
@@ -486,8 +476,9 @@ class DefaultWebClient implements WebClient {
 					.onErrorResume(ex2 -> Mono.empty()).thenReturn(ex);
 		}
 
-		private static Mono<WebClientResponseException> createResponseException(ClientResponse response,
-				HttpRequest request) {
+		private static Mono<WebClientResponseException> createResponseException(
+				ClientResponse response, HttpRequest request) {
+
 			return DataBufferUtils.join(response.body(BodyExtractors.toDataBuffers()))
 					.map(dataBuffer -> {
 						byte[] bytes = new byte[dataBuffer.readableByteCount()];
@@ -527,7 +518,6 @@ class DefaultWebClient implements WebClient {
 
 			private final BiFunction<ClientResponse, HttpRequest, Mono<? extends Throwable>> exceptionFunction;
 
-
 			public StatusHandler(Predicate<HttpStatus> predicate,
 					BiFunction<ClientResponse, HttpRequest, Mono<? extends Throwable>> exceptionFunction) {
 
@@ -536,7 +526,6 @@ class DefaultWebClient implements WebClient {
 				this.predicate = predicate;
 				this.exceptionFunction = exceptionFunction;
 			}
-
 
 			public boolean test(HttpStatus status) {
 				return this.predicate.test(status);

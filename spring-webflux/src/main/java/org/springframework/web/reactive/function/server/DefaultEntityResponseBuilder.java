@@ -158,13 +158,13 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	}
 
 	@Override
-	public EntityResponse.Builder<T> lastModified(Instant lastModified) {
+	public EntityResponse.Builder<T> lastModified(ZonedDateTime lastModified) {
 		this.headers.setLastModified(lastModified);
 		return this;
 	}
 
 	@Override
-	public EntityResponse.Builder<T> lastModified(ZonedDateTime lastModified) {
+	public EntityResponse.Builder<T> lastModified(Instant lastModified) {
 		this.headers.setLastModified(lastModified);
 		return this;
 	}

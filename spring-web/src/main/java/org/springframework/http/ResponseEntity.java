@@ -353,6 +353,26 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		/**
 		 * Set the time the resource was last changed, as specified by the
 		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @since 5.1.4
+		 * @see HttpHeaders#setLastModified(ZonedDateTime)
+		 */
+		B lastModified(ZonedDateTime lastModified);
+
+		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @since 5.1.4
+		 * @see HttpHeaders#setLastModified(Instant)
+		 */
+		B lastModified(Instant lastModified);
+
+		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
 		 * @param lastModified the last modified date
@@ -360,26 +380,6 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @see HttpHeaders#setLastModified(long)
 		 */
 		B lastModified(long lastModified);
-
-		/**
-		 * Set the time the resource was last changed, as specified by the
-		 * {@code Last-Modified} header.
-		 * @param lastModified the last modified date
-		 * @return this builder
-		 * @since 5.1.4
-		 * @see HttpHeaders#setLastModified(long)
-		 */
-		B lastModified(Instant lastModified);
-
-		/**
-		 * Set the time the resource was last changed, as specified by the
-		 * {@code Last-Modified} header.
-		 * @param lastModified the last modified date
-		 * @return this builder
-		 * @since 5.1.4
-		 * @see HttpHeaders#setLastModified(long)
-		 */
-		B lastModified(ZonedDateTime lastModified);
 
 		/**
 		 * Set the location of a resource, as specified by the {@code Location} header.
@@ -512,7 +512,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder lastModified(long date) {
+		public BodyBuilder lastModified(ZonedDateTime date) {
 			this.headers.setLastModified(date);
 			return this;
 		}
@@ -524,7 +524,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder lastModified(ZonedDateTime date) {
+		public BodyBuilder lastModified(long date) {
 			this.headers.setLastModified(date);
 			return this;
 		}

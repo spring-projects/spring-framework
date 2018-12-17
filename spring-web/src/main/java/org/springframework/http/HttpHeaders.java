@@ -1080,6 +1080,24 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Set the time the resource was last changed, as specified by the
+	 * {@code Last-Modified} header.
+	 * @since 5.1.4
+	 */
+	public void setIfModifiedSince(ZonedDateTime ifModifiedSince) {
+		setZonedDateTime(IF_MODIFIED_SINCE, ifModifiedSince.withZoneSameInstant(GMT));
+	}
+
+	/**
+	 * Set the time the resource was last changed, as specified by the
+	 * {@code Last-Modified} header.
+	 * @since 5.1.4
+	 */
+	public void setIfModifiedSince(Instant ifModifiedSince) {
+		setInstant(IF_MODIFIED_SINCE, ifModifiedSince);
+	}
+
+	/**
 	 * Set the (new) value of the {@code If-Modified-Since} header.
 	 * <p>The date should be specified as the number of milliseconds since
 	 * January 1, 1970 GMT.
@@ -1120,6 +1138,24 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Set the time the resource was last changed, as specified by the
+	 * {@code Last-Modified} header.
+	 * @since 5.1.4
+	 */
+	public void setIfUnmodifiedSince(ZonedDateTime ifUnmodifiedSince) {
+		setZonedDateTime(IF_UNMODIFIED_SINCE, ifUnmodifiedSince.withZoneSameInstant(GMT));
+	}
+
+	/**
+	 * Set the time the resource was last changed, as specified by the
+	 * {@code Last-Modified} header.
+	 * @since 5.1.4
+	 */
+	public void setIfUnmodifiedSince(Instant ifUnmodifiedSince) {
+		setInstant(IF_UNMODIFIED_SINCE, ifUnmodifiedSince);
+	}
+
+	/**
 	 * Set the (new) value of the {@code If-Unmodified-Since} header.
 	 * <p>The date should be specified as the number of milliseconds since
 	 * January 1, 1970 GMT.
@@ -1143,11 +1179,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the time the resource was last changed, as specified by the
 	 * {@code Last-Modified} header.
-	 * <p>The date should be specified as the number of milliseconds since
-	 * January 1, 1970 GMT.
+	 * @since 5.1.4
 	 */
-	public void setLastModified(long lastModified) {
-		setDate(LAST_MODIFIED, lastModified);
+	public void setLastModified(ZonedDateTime lastModified) {
+		setZonedDateTime(LAST_MODIFIED, lastModified.withZoneSameInstant(GMT));
 	}
 
 	/**
@@ -1162,10 +1197,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the time the resource was last changed, as specified by the
 	 * {@code Last-Modified} header.
-	 * @since 5.1.4
+	 * <p>The date should be specified as the number of milliseconds since
+	 * January 1, 1970 GMT.
 	 */
-	public void setLastModified(ZonedDateTime lastModified) {
-		setZonedDateTime(LAST_MODIFIED, lastModified.withZoneSameInstant(GMT));
+	public void setLastModified(long lastModified) {
+		setDate(LAST_MODIFIED, lastModified);
 	}
 
 	/**
@@ -1283,20 +1319,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the given date under the given header name after formatting it as a string
 	 * using the RFC-1123 date-time formatter. The equivalent of
 	 * {@link #set(String, String)} but for date headers.
-	 * @since 5.1.4
+	 * @since 5.0
 	 */
-	public void setInstant(String headerName, Instant date) {
-		setZonedDateTime(headerName, ZonedDateTime.ofInstant(date, GMT));
+	public void setZonedDateTime(String headerName, ZonedDateTime date) {
+		set(headerName, DATE_FORMATTERS[0].format(date));
 	}
 
 	/**
 	 * Set the given date under the given header name after formatting it as a string
 	 * using the RFC-1123 date-time formatter. The equivalent of
 	 * {@link #set(String, String)} but for date headers.
-	 * @since 5.0
+	 * @since 5.1.4
 	 */
-	public void setZonedDateTime(String headerName, ZonedDateTime date) {
-		set(headerName, DATE_FORMATTERS[0].format(date));
+	public void setInstant(String headerName, Instant date) {
+		setZonedDateTime(headerName, ZonedDateTime.ofInstant(date, GMT));
 	}
 
 	/**
@@ -1643,25 +1679,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return formatHeaders(this.headers);
 	}
 
-	/**
-	 * Helps to format HTTP header values, as HTTP header values themselves can
-	 * contain comma-separated values, can become confusing with regular
-	 * {@link Map} formatting that also uses commas between entries.
-	 * @param headers the headers to format
-	 * @return the headers to a String
-	 * @since 5.1.4
-	 */
-	public static String formatHeaders(MultiValueMap<String, String> headers) {
-		return headers.entrySet().stream()
-				.map(entry -> {
-					List<String> values = entry.getValue();
-					return entry.getKey() + ":" + (values.size() == 1 ?
-							"\"" + values.get(0) + "\"" :
-							values.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
-				})
-				.collect(Collectors.joining(", ", "[", "]"));
-	}
-
 
 	/**
 	 * Return a {@code HttpHeaders} object that can only be read, not written to.
@@ -1687,6 +1704,25 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		else {
 			return headers;
 		}
+	}
+
+	/**
+	 * Helps to format HTTP header values, as HTTP header values themselves can
+	 * contain comma-separated values, can become confusing with regular
+	 * {@link Map} formatting that also uses commas between entries.
+	 * @param headers the headers to format
+	 * @return the headers to a String
+	 * @since 5.1.4
+	 */
+	public static String formatHeaders(MultiValueMap<String, String> headers) {
+		return headers.entrySet().stream()
+				.map(entry -> {
+					List<String> values = entry.getValue();
+					return entry.getKey() + ":" + (values.size() == 1 ?
+							"\"" + values.get(0) + "\"" :
+							values.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
+				})
+				.collect(Collectors.joining(", ", "[", "]"));
 	}
 
 	// Package-private: used in ResponseCookie

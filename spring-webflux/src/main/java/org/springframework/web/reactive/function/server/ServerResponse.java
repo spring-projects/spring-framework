@@ -281,19 +281,19 @@ public interface ServerResponse {
 		 * {@code Last-Modified} header.
 		 * @param lastModified the last modified date
 		 * @return this builder
-		 * @since 5.1.4
 		 * @see HttpHeaders#setLastModified(long)
 		 */
-		B lastModified(Instant lastModified);
+		B lastModified(ZonedDateTime lastModified);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the
 		 * {@code Last-Modified} header.
 		 * @param lastModified the last modified date
 		 * @return this builder
+		 * @since 5.1.4
 		 * @see HttpHeaders#setLastModified(long)
 		 */
-		B lastModified(ZonedDateTime lastModified);
+		B lastModified(Instant lastModified);
 
 		/**
 		 * Set the location of a resource, as specified by the {@code Location} header.

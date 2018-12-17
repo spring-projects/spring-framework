@@ -158,13 +158,13 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public ServerResponse.BodyBuilder lastModified(Instant lastModified) {
+	public ServerResponse.BodyBuilder lastModified(ZonedDateTime lastModified) {
 		this.headers.setLastModified(lastModified);
 		return this;
 	}
 
 	@Override
-	public ServerResponse.BodyBuilder lastModified(ZonedDateTime lastModified) {
+	public ServerResponse.BodyBuilder lastModified(Instant lastModified) {
 		this.headers.setLastModified(lastModified);
 		return this;
 	}
@@ -315,7 +315,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		@Override
 		public final Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
 			writeStatusAndHeaders(exchange.getResponse());
-
 			Instant lastModified = Instant.ofEpochMilli(headers().getLastModified());
 			HttpMethod httpMethod = exchange.getRequest().getMethod();
 			if (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(headers().getETag(), lastModified)) {
