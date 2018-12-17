@@ -71,6 +71,7 @@ public abstract class ValidationUtils {
 			Validator validator, Object target, Errors errors, @Nullable Object... validationHints) {
 
 		Assert.notNull(validator, "Validator must not be null");
+		Assert.notNull(target, "Target object must not be null");
 		Assert.notNull(errors, "Errors object must not be null");
 
 		if (logger.isDebugEnabled()) {
