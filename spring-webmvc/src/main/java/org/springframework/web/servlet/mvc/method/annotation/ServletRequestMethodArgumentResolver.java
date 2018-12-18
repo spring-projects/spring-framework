@@ -134,7 +134,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 	private Object resolveArgument(Class<?> paramType, HttpServletRequest request) throws IOException {
 		if (HttpSession.class.isAssignableFrom(paramType)) {
 			HttpSession session = request.getSession();
-			if (session != null && !paramType.isInstance(session)) {
+			if (!paramType.isInstance(session)) {
 				throw new IllegalStateException(
 						"Current session is not of type [" + paramType.getName() + "]: " + session);
 			}
