@@ -99,7 +99,7 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 		});
 	}
 
-	private int calculateCapacity(CharSequence sequence, Charset charset) {
+	int calculateCapacity(CharSequence sequence, Charset charset) {
 		float maxBytesPerChar = this.charsetToMaxBytesPerChar
 				.computeIfAbsent(charset, cs -> cs.newEncoder().maxBytesPerChar());
 		float maxBytesForSequence = sequence.length() * maxBytesPerChar;
