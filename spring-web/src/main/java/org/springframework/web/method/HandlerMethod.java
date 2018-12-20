@@ -336,6 +336,13 @@ public class HandlerMethod {
 		List<Annotation[][]> parameterAnnotations = this.interfaceParameterAnnotations;
 		if (parameterAnnotations == null) {
 			parameterAnnotations = new ArrayList<>();
+			for (Class<?> ifc : this.beanType.getInterfaces()) {
+				for (Method candidate : ifc.getMethods()) {
+					if (isOverrideFor(candidate)) {
+						parameterAnnotations.add(candidate.getParameterAnnotations());
+					}
+				}
+			}
 			for (Class<?> ifc : this.method.getDeclaringClass().getInterfaces()) {
 				for (Method candidate : ifc.getMethods()) {
 					if (isOverrideFor(candidate)) {
