@@ -16,9 +16,8 @@
 
 package org.springframework.core.codec;
 
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.CoderMalfunctionError;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -28,6 +27,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
@@ -75,9 +75,21 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 					return Hints.getLogPrefix(hints) + "Writing " + formatted;
 				});
 			}
-			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
-			ByteBuffer byteBuffer = charset.encode(charBuffer);
-			return bufferFactory.wrap(byteBuffer);
+			boolean release = true;
+			DataBuffer dataBuffer = bufferFactory.allocateBuffer();
+			try {
+				dataBuffer.write(charSequence, charset);
+				release = false;
+			}
+			catch (CoderMalfunctionError ex) {
+				throw new EncodingException("String encoding error: " + ex.getMessage(), ex);
+			}
+			finally {
+				if (release) {
+					DataBufferUtils.release(dataBuffer);
+				}
+			}
+			return dataBuffer;
 		});
 	}
 
