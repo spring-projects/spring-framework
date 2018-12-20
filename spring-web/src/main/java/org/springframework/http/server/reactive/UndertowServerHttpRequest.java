@@ -23,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.function.IntPredicate;
 import javax.net.ssl.SSLSession;
 
@@ -295,6 +296,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		public DataBuffer ensureCapacity(int capacity) {
+			return this.dataBuffer.ensureCapacity(capacity);
+		}
+
+		@Override
 		public byte getByte(int index) {
 			return this.dataBuffer.getByte(index);
 		}
@@ -341,6 +347,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		public DataBuffer write(
 				ByteBuffer... byteBuffers) {
 			return this.dataBuffer.write(byteBuffers);
+		}
+
+		@Override
+		public DataBuffer write(CharSequence charSequence, Charset charset) {
+			return this.dataBuffer.write(charSequence, charset);
 		}
 
 		@Override
