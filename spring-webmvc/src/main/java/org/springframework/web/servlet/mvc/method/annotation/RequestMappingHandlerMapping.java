@@ -265,17 +265,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Support for methods that declared in interfaces and implemented in super class.
-	 * @since 5.1
-	 */
-	@Nullable
-	private RequestMappingInfo createRequestMappingInfo(Method method, Class<?>[] ifcs) {
-		RequestMapping requestMapping = AnnotationUtils.searchOnInterfaces(method, RequestMapping.class, ifcs);
-		RequestCondition<?> condition = getCustomMethodCondition(method);
-		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
-	}
-
-	/**
 	 * Provide a custom type-level request condition.
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
