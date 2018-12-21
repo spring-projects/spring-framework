@@ -51,7 +51,7 @@ import org.springframework.util.ClassUtils;
  */
 abstract class AutowireUtils {
 
-	private static final Comparator<Executable> COMPARATOR = (e1, e2) -> {
+	private static final Comparator<Executable> EXECUTABLE_COMPARATOR = (e1, e2) -> {
 		boolean p1 = Modifier.isPublic(e1.getModifiers());
 		boolean p2 = Modifier.isPublic(e2.getModifiers());
 		if (p1 != p2) {
@@ -70,7 +70,7 @@ abstract class AutowireUtils {
 	 * @param constructors the constructor array to sort
 	 */
 	public static void sortConstructors(Constructor<?>[] constructors) {
-		Arrays.sort(constructors, COMPARATOR);
+		Arrays.sort(constructors, EXECUTABLE_COMPARATOR);
 	}
 
 	/**
@@ -81,7 +81,7 @@ abstract class AutowireUtils {
 	 * @param factoryMethods the factory method array to sort
 	 */
 	public static void sortFactoryMethods(Method[] factoryMethods) {
-		Arrays.sort(factoryMethods, COMPARATOR);
+		Arrays.sort(factoryMethods, EXECUTABLE_COMPARATOR);
 	}
 
 	/**
