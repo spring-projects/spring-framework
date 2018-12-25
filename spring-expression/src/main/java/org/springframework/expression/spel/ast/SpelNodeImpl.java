@@ -66,12 +66,10 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
-		// pos combines start and end so can never be zero because tokens cannot be zero length
-		Assert.isTrue(pos != 0, "Pos must not be 0");
 		if (!ObjectUtils.isEmpty(operands)) {
 			this.children = operands;
-			for (SpelNodeImpl childNode : operands) {
-				childNode.parent = this;
+			for (SpelNodeImpl operand : operands) {
+				operand.parent = this;
 			}
 		}
 	}
