@@ -272,15 +272,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 				}
 			}
 		}
-		catch (AmbiguousBindingException ambigEx) {
-			if (this.raiseExceptions) {
-				throw ambigEx;
-			}
-			else {
-				return null;
-			}
-		}
-		catch (IllegalArgumentException ex) {
+		catch (AmbiguousBindingException | IllegalArgumentException ex) {
 			if (this.raiseExceptions) {
 				throw ex;
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,13 +121,9 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 			boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
 			this.springSynchronization.beforeCommit(readOnly);
 		}
-		catch (RuntimeException ex) {
+		catch (RuntimeException | Error ex) {
 			setRollbackOnlyIfPossible();
 			throw ex;
-		}
-		catch (Error err) {
-			setRollbackOnlyIfPossible();
-			throw err;
 		}
 		finally {
 			// Process Spring's beforeCompletion early, in order to avoid issues
