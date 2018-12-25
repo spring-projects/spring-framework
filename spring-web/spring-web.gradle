@@ -37,8 +37,8 @@ dependencies {
 	optional("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
-	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.1")
-	optional("com.squareup.okhttp3:okhttp:3.12.0")
+	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.2")
+	optional("com.squareup.okhttp3:okhttp:3.12.1")
 	optional("org.apache.httpcomponents:httpclient:4.5.6") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
