@@ -2347,13 +2347,13 @@ named `org.springfamework.jdbc.datasource.embedded` provides support for creatin
 embedded databases by using Java database engines, such as HSQL, H2, and Derby. See
 <<jdbc-connections>> and <<jdbc-embedded-database-support>>.
 
-`object`: The `org.springframework.jdbc.object` package contains classes that represent RDBMS
+* `object`: The `org.springframework.jdbc.object` package contains classes that represent RDBMS
 queries, updates, and stored procedures as thread-safe, reusable objects. See
 <<jdbc-object>>. This approach is modeled by JDO, although objects returned by queries
 are naturally disconnected from the database. This higher-level of JDBC abstraction
 depends on the lower-level abstraction in the `org.springframework.jdbc.core` package.
 
-`support`: The `org.springframework.jdbc.support` package provides `SQLException` translation
+* `support`: The `org.springframework.jdbc.support` package provides `SQLException` translation
 functionality and some utility classes. Exceptions thrown during JDBC processing are
 translated to exceptions defined in the `org.springframework.dao` package. This means
 that code using the Spring JDBC abstraction layer does not need to implement JDBC or
