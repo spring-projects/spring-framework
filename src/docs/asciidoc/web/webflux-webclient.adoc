@@ -9,7 +9,7 @@ and response content.
 
 Internally `WebClient` delegates to an HTTP client library. By default, it uses
 https://github.com/reactor/reactor-netty[Reactor Netty], there is built-in support for
-the Jetty https://github.com/jetty-project/jetty-reactive-httpclient[reactive HtpClient],
+the Jetty https://github.com/jetty-project/jetty-reactive-httpclient[reactive HttpClient],
 and others can be plugged in through a `ClientHttpConnector`.
 
 
