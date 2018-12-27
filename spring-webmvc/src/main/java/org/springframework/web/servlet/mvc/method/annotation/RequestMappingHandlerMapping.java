@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
@@ -218,8 +217,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		Method mostSpecificMethod = AopUtils.getMostSpecificMethod(method, handlerType);
-		RequestMappingInfo info = createRequestMappingInfo(mostSpecificMethod);
+		RequestMappingInfo info = createRequestMappingInfo(method);
+		if (info == null) {
+			info = createRequestMappingInfo(method, handlerType.getInterfaces());
+		}
 		if (info != null) {
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
 			if (typeInfo != null) {
