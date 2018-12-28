@@ -159,9 +159,8 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 			logger.debug("Searching jar file [" + jarFilePath + "] for entries matching [" + entryPattern + "]");
 		}
 		try {
-			JarFile jarFile = new JarFile(jarFilePath);
-			try {
-				for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+			try (JarFile jarFile = new JarFile(jarFilePath)) {
+				for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements(); ) {
 					JarEntry entry = entries.nextElement();
 					String entryPath = entry.getName();
 					if (getPathMatcher().match(entryPattern, entryPath)) {
@@ -170,9 +169,6 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 								ResourceUtils.FILE_URL_PREFIX + jarFilePath + ResourceUtils.JAR_URL_SEPARATOR + entryPath));
 					}
 				}
-			}
-			finally {
-				jarFile.close();
 			}
 		}
 		catch (IOException ex) {

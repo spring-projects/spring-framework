@@ -70,12 +70,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMo
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
+		try (ClientHttpResponse response = futureResponse.get()) {
 			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -101,12 +97,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMo
 				fail(ex.getMessage());
 			}
 		});
-		ClientHttpResponse response = listenableFuture.get();
-		try {
+		try (ClientHttpResponse response = listenableFuture.get()) {
 			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -131,17 +123,13 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMo
 		}
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
+		try (ClientHttpResponse response = futureResponse.get()) {
 			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
 			assertTrue("Header not found", response.getHeaders().containsKey(headerName));
 			assertEquals("Header value not found", Arrays.asList(headerValue1, headerValue2),
 					response.getHeaders().get(headerName));
 			byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
 			assertTrue("Invalid body", Arrays.equals(body, result));
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -159,16 +147,11 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMo
 		}
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
+		try (ClientHttpResponse response = futureResponse.get()) {
 			FileCopyUtils.copy(body, request.getBody());
 			fail("IllegalStateException expected");
-		}
-		catch (IllegalStateException ex) {
+		} catch (IllegalStateException ex) {
 			// expected
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -180,16 +163,11 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMo
 		FileCopyUtils.copy(body, request.getBody());
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
+		try (ClientHttpResponse response = futureResponse.get()) {
 			request.getHeaders().add("MyHeader", "value");
 			fail("UnsupportedOperationException expected");
-		}
-		catch (UnsupportedOperationException ex) {
+		} catch (UnsupportedOperationException ex) {
 			// expected
-		}
-		finally {
-			response.close();
 		}
 	}
 

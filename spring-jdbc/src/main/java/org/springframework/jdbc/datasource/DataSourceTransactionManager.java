@@ -408,12 +408,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			throws SQLException {
 
 		if (isEnforceReadOnly() && definition.isReadOnly()) {
-			Statement stmt = con.createStatement();
-			try {
+			try (Statement stmt = con.createStatement()) {
 				stmt.executeUpdate("SET TRANSACTION READ ONLY");
-			}
-			finally {
-				stmt.close();
 			}
 		}
 	}

@@ -35,26 +35,19 @@ public class AnnotationLazyInitMBeanTests {
 
 	@Test
 	public void lazyNaming() throws Exception {
-		ConfigurableApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml")) {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertNotNull(server.getObjectInstance(oname));
 			String name = (String) server.getAttribute(oname, "Name");
 			assertEquals("Invalid name returned", "TEST", name);
 		}
-		finally {
-			ctx.close();
-		}
 	}
 
 	@Test
 	public void lazyAssembling() throws Exception {
 		System.setProperty("domain", "bean");
-		ConfigurableApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml")) {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
@@ -76,26 +69,19 @@ public class AnnotationLazyInitMBeanTests {
 			assertNotNull(server.getObjectInstance(oname));
 			name = (String) server.getAttribute(oname, "Name");
 			assertEquals("Invalid name returned", "Juergen Hoeller", name);
-		}
-		finally {
+		} finally {
 			System.clearProperty("domain");
-			ctx.close();
 		}
 	}
 
 	@Test
 	public void componentScan() throws Exception {
-		ConfigurableApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/componentScan.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/componentScan.xml")) {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertNotNull(server.getObjectInstance(oname));
 			String name = (String) server.getAttribute(oname, "Name");
 			assertNull(name);
-		}
-		finally {
-			ctx.close();
 		}
 	}
 

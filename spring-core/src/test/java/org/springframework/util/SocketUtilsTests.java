@@ -80,16 +80,12 @@ public class SocketUtilsTests {
 	@Test
 	public void findAvailableTcpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
 		int port = SocketUtils.findAvailableTcpPort();
-		ServerSocket socket = ServerSocketFactory.getDefault().createServerSocket(port, 1, InetAddress.getByName("localhost"));
-		try {
+		try (ServerSocket socket = ServerSocketFactory.getDefault().createServerSocket(port, 1, InetAddress.getByName("localhost"))) {
 			exception.expect(IllegalStateException.class);
 			exception.expectMessage(startsWith("Could not find an available TCP port"));
 			exception.expectMessage(endsWith("after 1 attempts"));
 			// will only look for the exact port
 			SocketUtils.findAvailableTcpPort(port, port);
-		}
-		finally {
-			socket.close();
 		}
 	}
 
@@ -157,16 +153,12 @@ public class SocketUtilsTests {
 	@Test
 	public void findAvailableUdpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
 		int port = SocketUtils.findAvailableUdpPort();
-		DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"));
-		try {
+		try (DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"))) {
 			exception.expect(IllegalStateException.class);
 			exception.expectMessage(startsWith("Could not find an available UDP port"));
 			exception.expectMessage(endsWith("after 1 attempts"));
 			// will only look for the exact port
 			SocketUtils.findAvailableUdpPort(port, port);
-		}
-		finally {
-			socket.close();
 		}
 	}
 

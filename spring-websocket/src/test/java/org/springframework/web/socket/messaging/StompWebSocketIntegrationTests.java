@@ -90,14 +90,10 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 	@Test
 	public void sendMessageToController() throws Exception {
 		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
-		WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get();
 
-		SimpleController controller = this.wac.getBean(SimpleController.class);
-		try {
+		try (WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get()) {
+			SimpleController controller = this.wac.getBean(SimpleController.class);
 			assertTrue(controller.latch.await(TIMEOUT, TimeUnit.SECONDS));
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -110,13 +106,9 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 				.headers("destination:/app/increment").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
 			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -127,16 +119,12 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		TextMessage m2 = create(StompCommand.SEND).headers("destination:/topic/foo").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
 			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
 
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertTrue("Expected STOMP MESSAGE, got " + payload, payload.startsWith("MESSAGE\n"));
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -147,16 +135,12 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", destHeader).build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
 			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertTrue("Expected STOMP destination=/app/number, got " + payload, payload.contains(destHeader));
 			assertTrue("Expected STOMP Payload=42, got " + payload, payload.contains("42"));
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -168,17 +152,13 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		TextMessage m2 = create(StompCommand.SEND).headers("destination:/app/exception").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
 			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertTrue(payload.startsWith("MESSAGE\n"));
 			assertTrue(payload.contains("destination:/user/queue/error\n"));
 			assertTrue(payload.endsWith("Got error: Bad input\0"));
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -191,17 +171,13 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 				.headers("destination:/app/scopedBeanValue").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
 			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertTrue(payload.startsWith("MESSAGE\n"));
 			assertTrue(payload.contains("destination:/topic/scopedBeanValue\n"));
 			assertTrue(payload.endsWith("55\0"));
-		}
-		finally {
-			session.close();
 		}
 	}
 

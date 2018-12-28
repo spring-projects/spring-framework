@@ -294,40 +294,31 @@ public class QuartzSupportTests {
 
 	@Test  // SPR-772
 	public void multipleSchedulers() throws Exception {
-		ClassPathXmlApplicationContext ctx = context("multipleSchedulers.xml");
-		try {
+		try (ClassPathXmlApplicationContext ctx = context("multipleSchedulers.xml")) {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
 			assertNotSame(scheduler1, scheduler2);
 			assertEquals("quartz1", scheduler1.getSchedulerName());
 			assertEquals("quartz2", scheduler2.getSchedulerName());
-		}
-		finally {
-			ctx.close();
 		}
 	}
 
 	@Test  // SPR-16884
 	public void multipleSchedulersWithQuartzProperties() throws Exception {
-		ClassPathXmlApplicationContext ctx = context("multipleSchedulersWithQuartzProperties.xml");
-		try {
+		try (ClassPathXmlApplicationContext ctx = context("multipleSchedulersWithQuartzProperties.xml")) {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
 			assertNotSame(scheduler1, scheduler2);
 			assertEquals("quartz1", scheduler1.getSchedulerName());
 			assertEquals("quartz2", scheduler2.getSchedulerName());
-		}
-		finally {
-			ctx.close();
 		}
 	}
 
 	@Test
 	public void twoAnonymousMethodInvokingJobDetailFactoryBeans() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
-		ClassPathXmlApplicationContext ctx = context("multipleAnonymousMethodInvokingJobDetailFB.xml");
-		Thread.sleep(3000);
-		try {
+		try (ClassPathXmlApplicationContext ctx = context("multipleAnonymousMethodInvokingJobDetailFB.xml")) {
+			Thread.sleep(3000);
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
 			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
 
@@ -335,18 +326,14 @@ public class QuartzSupportTests {
 			assertEquals("doExport not called on exportService", 2, exportService.getExportCount());
 			assertEquals("doImport not called on importService", 2, importService.getImportCount());
 			assertEquals("doExport called on importService", 0, importService.getExportCount());
-		}
-		finally {
-			ctx.close();
 		}
 	}
 
 	@Test
 	public void schedulerAccessorBean() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
-		ClassPathXmlApplicationContext ctx = context("schedulerAccessorBean.xml");
-		Thread.sleep(3000);
-		try {
+		try (ClassPathXmlApplicationContext ctx = context("schedulerAccessorBean.xml")) {
+			Thread.sleep(3000);
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
 			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
 
@@ -354,9 +341,6 @@ public class QuartzSupportTests {
 			assertEquals("doExport not called on exportService", 2, exportService.getExportCount());
 			assertEquals("doImport not called on importService", 2, importService.getImportCount());
 			assertEquals("doExport called on importService", 0, importService.getExportCount());
-		}
-		finally {
-			ctx.close();
 		}
 	}
 

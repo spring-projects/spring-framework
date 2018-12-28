@@ -253,15 +253,11 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		byte[] bytes = {'a', 'b', 'c'};
 		buffer.write(bytes);
 
-		InputStream inputStream = buffer.asInputStream(true);
-
-		try {
+		try (InputStream inputStream = buffer.asInputStream(true)) {
 			byte[] result = new byte[3];
 			int len = inputStream.read(result);
 			assertEquals(3, len);
 			assertArrayEquals(bytes, result);
-		} finally {
-			inputStream.close();
 		}
 
 		// AbstractDataBufferAllocatingTestCase.LeakDetector will verify the buffer's release

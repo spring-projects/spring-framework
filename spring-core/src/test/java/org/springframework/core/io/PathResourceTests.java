@@ -298,18 +298,11 @@ public class PathResourceTests {
 	@Test
 	public void getReadableByteChannel() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
-		ReadableByteChannel channel = null;
-		try {
-			channel = resource.readableChannel();
+		try (ReadableByteChannel channel = resource.readableChannel()) {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
 			assertThat(buffer.limit(), greaterThan(0));
-		}
-		finally {
-			if (channel != null) {
-				channel.close();
-			}
 		}
 	}
 
@@ -335,15 +328,8 @@ public class PathResourceTests {
 	public void getWritableChannel() throws IOException {
 		PathResource resource = new PathResource(temporaryFolder.newFile("test").toPath());
 		ByteBuffer buffer = ByteBuffer.wrap("test".getBytes(StandardCharsets.UTF_8));
-		WritableByteChannel channel = null;
-		try {
-			channel = resource.writableChannel();
+		try (WritableByteChannel channel = resource.writableChannel()) {
 			channel.write(buffer);
-		}
-		finally {
-			if (channel != null) {
-				channel.close();
-			}
 		}
 		assertThat(resource.contentLength(), equalTo(4L));
 	}

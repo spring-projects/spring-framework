@@ -90,10 +90,9 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void metaAnnotationIsDiscovered() throws Exception {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
-				Config.class, MetaAnnotationTestBean.class);
 
-		try {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				Config.class, MetaAnnotationTestBean.class)) {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
 			assertEquals("one container should have been registered", 1, factory.getListenerContainers().size());
 
@@ -107,16 +106,12 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 					methodEndpoint.getMostSpecificMethod());
 			assertEquals("metaTestQueue", ((AbstractJmsListenerEndpoint) endpoint).getDestination());
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	@Test
 	public void sendToAnnotationFoundOnInterfaceProxy() throws Exception {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
-				Config.class, ProxyConfig.class, InterfaceProxyTestBean.class);
-		try {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				Config.class, ProxyConfig.class, InterfaceProxyTestBean.class)) {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
 			assertEquals("one container should have been registered", 1, factory.getListenerContainers().size());
 
@@ -135,16 +130,12 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 			Object destination = ReflectionUtils.invokeMethod(method, endpoint);
 			assertEquals("SendTo annotation not found on proxy", "foobar", destination);
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	@Test
 	public void sendToAnnotationFoundOnCglibProxy() throws Exception {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
-				Config.class, ProxyConfig.class, ClassProxyTestBean.class);
-		try {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				Config.class, ProxyConfig.class, ClassProxyTestBean.class)) {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
 			assertEquals("one container should have been registered", 1, factory.getListenerContainers().size());
 
@@ -162,9 +153,6 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 			ReflectionUtils.makeAccessible(method);
 			Object destination = ReflectionUtils.invokeMethod(method, endpoint);
 			assertEquals("SendTo annotation not found on proxy", "foobar", destination);
-		}
-		finally {
-			context.close();
 		}
 	}
 

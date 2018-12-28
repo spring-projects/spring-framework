@@ -111,8 +111,7 @@ public class JdbcNamespaceIntegrationTests {
 
 	@Test
 	public void createAndDestroy() throws Exception {
-		ClassPathXmlApplicationContext context = context("jdbc-destroy-config.xml");
-		try {
+		try (ClassPathXmlApplicationContext context = context("jdbc-destroy-config.xml")) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			JdbcTemplate template = new JdbcTemplate(dataSource);
 			assertNumRowsInTestTable(template, 1);
@@ -120,40 +119,29 @@ public class JdbcNamespaceIntegrationTests {
 			expected.expect(BadSqlGrammarException.class); // Table has been dropped
 			assertNumRowsInTestTable(template, 1);
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	@Test
 	public void createAndDestroyNestedWithHsql() throws Exception {
-		ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config.xml");
-		try {
+		try (ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config.xml")) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			JdbcTemplate template = new JdbcTemplate(dataSource);
 			assertNumRowsInTestTable(template, 1);
 			context.getBean(EmbeddedDatabaseFactoryBean.class).destroy();
 			expected.expect(BadSqlGrammarException.class); // Table has been dropped
 			assertNumRowsInTestTable(template, 1);
-		}
-		finally {
-			context.close();
 		}
 	}
 
 	@Test
 	public void createAndDestroyNestedWithH2() throws Exception {
-		ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config-h2.xml");
-		try {
+		try (ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config-h2.xml")) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			JdbcTemplate template = new JdbcTemplate(dataSource);
 			assertNumRowsInTestTable(template, 1);
 			context.getBean(EmbeddedDatabaseFactoryBean.class).destroy();
 			expected.expect(BadSqlGrammarException.class); // Table has been dropped
 			assertNumRowsInTestTable(template, 1);
-		}
-		finally {
-			context.close();
 		}
 	}
 
@@ -196,8 +184,7 @@ public class JdbcNamespaceIntegrationTests {
 	}
 
 	private void assertCorrectSetupAndCloseContext(String file, int count, String... dataSources) {
-		ConfigurableApplicationContext context = context(file);
-		try {
+		try (ConfigurableApplicationContext context = context(file)) {
 			for (String dataSourceName : dataSources) {
 				DataSource dataSource = context.getBean(dataSourceName, DataSource.class);
 				assertNumRowsInTestTable(new JdbcTemplate(dataSource), count);
@@ -206,22 +193,15 @@ public class JdbcNamespaceIntegrationTests {
 				assertThat(adbDataSource.getUrl(), containsString(dataSourceName));
 			}
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	private void assertCorrectSetupForSingleDataSource(String file, Predicate<String> urlPredicate) {
-		ConfigurableApplicationContext context = context(file);
-		try {
+		try (ConfigurableApplicationContext context = context(file)) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);
 			assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
 			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
 			assertTrue(urlPredicate.test(adbDataSource.getUrl()));
-		}
-		finally {
-			context.close();
 		}
 	}
 

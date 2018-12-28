@@ -68,12 +68,8 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
 
-		ClientHttpResponse response = request.execute();
-		try {
+		try (ClientHttpResponse response = request.execute()) {
 			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -98,17 +94,13 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 			StreamUtils.copy(body, request.getBody());
 		}
 
-		ClientHttpResponse response = request.execute();
-		try {
+		try (ClientHttpResponse response = request.execute()) {
 			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
 			assertTrue("Header not found", response.getHeaders().containsKey(headerName));
 			assertEquals("Header value not found", Arrays.asList(headerValue1, headerValue2),
 					response.getHeaders().get(headerName));
 			byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
 			assertTrue("Invalid body", Arrays.equals(body, result));
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -141,12 +133,8 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 		byte[] body = "Hello World".getBytes("UTF-8");
 		FileCopyUtils.copy(body, request.getBody());
 
-		ClientHttpResponse response = request.execute();
-		try {
+		try (ClientHttpResponse response = request.execute()) {
 			request.getHeaders().add("MyHeader", "value");
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -189,12 +177,8 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 		URI uri = new URI(baseUrl + "/params?param1=value&param2=value1&param2=value2");
 		ClientHttpRequest request = factory.createRequest(uri, HttpMethod.GET);
 
-		ClientHttpResponse response = request.execute();
-		try {
+		try (ClientHttpResponse response = request.execute()) {
 			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
-		}
-		finally {
-			response.close();
 		}
 	}
 

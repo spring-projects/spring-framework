@@ -166,12 +166,8 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @see #doWriteRemoteInvocation
 	 */
 	protected void writeRemoteInvocation(RemoteInvocation invocation, OutputStream os) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(decorateOutputStream(os));
-		try {
+		try (ObjectOutputStream oos = new ObjectOutputStream(decorateOutputStream(os))) {
 			doWriteRemoteInvocation(invocation, oos);
-		}
-		finally {
-			oos.close();
 		}
 	}
 
@@ -240,12 +236,8 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, @Nullable String codebaseUrl)
 			throws IOException, ClassNotFoundException {
 
-		ObjectInputStream ois = createObjectInputStream(decorateInputStream(is), codebaseUrl);
-		try {
+		try (ObjectInputStream ois = createObjectInputStream(decorateInputStream(is), codebaseUrl)) {
 			return doReadRemoteInvocationResult(ois);
-		}
-		finally {
-			ois.close();
 		}
 	}
 
