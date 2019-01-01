@@ -121,7 +121,7 @@ sending. One option is to wrap the `WebSocketSession` with
 [.small]#<<web-reactive.adoc#webflux-websocket-server-handshake,Same as in Spring WebFlux>>#
 
 The easiest way to customize the initial HTTP WebSocket handshake request is through
-a `HandshakeInterceptor`, which exposes methiods for "`before`" and "`after`" the handshake.
+a `HandshakeInterceptor`, which exposes methods for "`before`" and "`after`" the handshake.
 You can use such an interceptor to preclude the handshake or to make any attributes
 available to the `WebSocketSession`. The following example uses a built-in interceptor
 to pass HTTP session attributes to the WebSocket session:
