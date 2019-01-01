@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,9 @@ final class ProfilesParser {
 	}
 
 	private static Profiles parseTokens(String expression, StringTokenizer tokens) {
+		return parseTokens(expression, tokens, Context.NONE);
+	}
+	private static Profiles parseTokens(String expression, StringTokenizer tokens, Context context) {
 		List<Profiles> elements = new ArrayList<>();
 		Operator operator = null;
 		while (tokens.hasMoreTokens()) {
@@ -63,7 +66,12 @@ final class ProfilesParser {
 			}
 			switch (token) {
 				case "(":
-					elements.add(parseTokens(expression, tokens));
+					Profiles contents = parseTokens(expression, tokens);
+					if (context == Context.INVERT) {
+						return contents;
+					}else {
+						elements.add(contents);
+					}
 					break;
 				case "&":
 					assertWellFormed(expression, operator == null || operator == Operator.AND);
@@ -74,7 +82,7 @@ final class ProfilesParser {
 					operator = Operator.OR;
 					break;
 				case "!":
-					elements.add(not(parseTokens(expression, tokens)));
+					elements.add(not(parseTokens(expression, tokens, Context.INVERT)));
 					break;
 				case ")":
 					Profiles merged = merge(expression, elements, operator);
@@ -83,7 +91,12 @@ final class ProfilesParser {
 					operator = null;
 					break;
 				default:
-					elements.add(equals(token));
+					Profiles value = equals(token);
+					if (context == Context.INVERT) {
+						return value;
+					} else {
+						elements.add(value);
+					}
 			}
 		}
 		return merge(expression, elements, operator);
@@ -124,6 +137,7 @@ final class ProfilesParser {
 
 
 	private enum Operator {AND, OR}
+	private enum Context {NONE, INVERT}
 
 
 	private static class ParsedProfiles implements Profiles {
