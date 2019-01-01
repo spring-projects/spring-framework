@@ -194,6 +194,38 @@ public class ProfilesTests {
 		assertFalse(profiles.matches(activeProfiles("spring", "framework")));
 		assertTrue(profiles.matches(activeProfiles("java")));
 	}
+	
+	@Test
+	public void ofAndExpressionWithInvertedSingleElement() {
+		Profiles profiles = Profiles.of("!spring & framework");
+		assertOfAndExpressionWithInvertedSingleElement(profiles);
+	}
+
+	@Test
+	public void ofAndExpressionWithInvertedSingleElementWithoutSpaces() {
+		Profiles profiles = Profiles.of("!spring&framework");
+		assertOfAndExpressionWithInvertedSingleElement(profiles);
+	}
+
+	private void assertOfAndExpressionWithInvertedSingleElement(Profiles profiles) {
+		assertTrue(profiles.matches(activeProfiles("framework")));
+		assertFalse(profiles.matches(activeProfiles("java")));
+		assertFalse(profiles.matches(activeProfiles("spring", "framework")));
+		assertFalse(profiles.matches(activeProfiles("spring")));
+	}
+
+	@Test
+	public void ofOrExpressionWithInvertedSingleElementWithoutSpaces() {
+		Profiles profiles = Profiles.of("!spring|framework");
+		assertOfOrExpressionWithInvertedSingleElement(profiles);
+	}
+
+	private void assertOfOrExpressionWithInvertedSingleElement(Profiles profiles) {
+		assertTrue(profiles.matches(activeProfiles("framework")));
+		assertTrue(profiles.matches(activeProfiles("java")));
+		assertTrue(profiles.matches(activeProfiles("spring", "framework")));
+		assertFalse(profiles.matches(activeProfiles("spring")));
+	}
 
 	@Test
 	public void ofNotOrExpression() {
