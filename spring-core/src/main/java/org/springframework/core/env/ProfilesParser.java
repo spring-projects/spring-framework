@@ -66,12 +66,11 @@ final class ProfilesParser {
 			}
 			switch (token) {
 				case "(":
-					Profiles contents = parseTokens(expression, tokens);
+					Profiles contents = parseTokens(expression, tokens, Context.BRACKET);
 					if (context == Context.INVERT) {
 						return contents;
-					}else {
-						elements.add(contents);
 					}
+					elements.add(contents);
 					break;
 				case "&":
 					assertWellFormed(expression, operator == null || operator == Operator.AND);
@@ -86,6 +85,9 @@ final class ProfilesParser {
 					break;
 				case ")":
 					Profiles merged = merge(expression, elements, operator);
+					if (context == Context.BRACKET) {
+						return merged;
+					}
 					elements.clear();
 					elements.add(merged);
 					operator = null;
@@ -94,9 +96,8 @@ final class ProfilesParser {
 					Profiles value = equals(token);
 					if (context == Context.INVERT) {
 						return value;
-					} else {
-						elements.add(value);
 					}
+					elements.add(value);
 			}
 		}
 		return merge(expression, elements, operator);
@@ -137,7 +138,9 @@ final class ProfilesParser {
 
 
 	private enum Operator {AND, OR}
-	private enum Context {NONE, INVERT}
+
+
+	private enum Context {NONE, INVERT, BRACKET}
 
 
 	private static class ParsedProfiles implements Profiles {
