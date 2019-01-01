@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,10 +194,28 @@ public class ProfilesTests {
 		assertFalse(profiles.matches(activeProfiles("spring", "framework")));
 		assertTrue(profiles.matches(activeProfiles("java")));
 	}
-	
+
 	@Test
 	public void ofAndExpressionWithInvertedSingleElement() {
 		Profiles profiles = Profiles.of("!spring & framework");
+		assertOfAndExpressionWithInvertedSingleElement(profiles);
+	}
+
+	@Test
+	public void ofAndExpressionWithInBracketsInvertedSingleElement() {
+		Profiles profiles = Profiles.of("(!spring) & framework");
+		assertOfAndExpressionWithInvertedSingleElement(profiles);
+	}
+
+	@Test
+	public void ofAndExpressionWithInvertedSingleElementInBrackets() {
+		Profiles profiles = Profiles.of("! (spring) & framework");
+		assertOfAndExpressionWithInvertedSingleElement(profiles);
+	}
+
+	@Test
+	public void ofAndExpressionWithInvertedSingleElementInBracketsWithoutSpaces() {
+		Profiles profiles = Profiles.of("!(spring)&framework");
 		assertOfAndExpressionWithInvertedSingleElement(profiles);
 	}
 
