@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,17 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition = new ProducesRequestCondition(new String[] {"text/plain"}, new String[] {});
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.txt");
+
+		assertNotNull(condition.getMatchingCondition(request));
+	}
+
+	@Test // SPR-17550
+	public void matchWithNegationAndMediaTypeAllWithQualityParameter() {
+		ProducesRequestCondition condition = new ProducesRequestCondition("!application/json");
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Accept",
+				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 
 		assertNotNull(condition.getMatchingCondition(request));
 	}
