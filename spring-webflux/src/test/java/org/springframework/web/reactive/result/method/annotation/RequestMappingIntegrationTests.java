@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.ForwardedHeaderTransformer;
@@ -100,8 +102,14 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 	private static class TestRestController {
 
 		@GetMapping("/text")
-		public String text() {
+		public String textGet() {
 			return "Foo";
+		}
+
+		// SPR-17593: explicit HEAD should not clash with implicit mapping via GET
+		@RequestMapping(path = "/text", method = RequestMethod.HEAD)
+		public String textHead() {
+			return textGet();
 		}
 
 		@GetMapping("/uri")
