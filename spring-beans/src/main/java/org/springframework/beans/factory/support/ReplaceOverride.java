@@ -43,7 +43,7 @@ public class ReplaceOverride extends MethodOverride {
 
 	/**
 	 * Construct a new ReplaceOverride.
-	 * @param methodName the name of the method to override
+	 * @param methodName             the name of the method to override
 	 * @param methodReplacerBeanName the bean name of the MethodReplacer
 	 */
 	public ReplaceOverride(String methodName, String methodReplacerBeanName) {
@@ -82,9 +82,12 @@ public class ReplaceOverride extends MethodOverride {
 		if (this.typeIdentifiers.size() != method.getParameterCount()) {
 			return false;
 		}
+
+		Class<?>[] parameterTypes = method.getParameterTypes();
+
 		for (int i = 0; i < this.typeIdentifiers.size(); i++) {
 			String identifier = this.typeIdentifiers.get(i);
-			if (!method.getParameterTypes()[i].getName().contains(identifier)) {
+			if (!parameterTypes[i].getName().contains(identifier)) {
 				return false;
 			}
 		}

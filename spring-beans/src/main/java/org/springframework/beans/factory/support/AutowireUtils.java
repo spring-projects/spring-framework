@@ -116,9 +116,11 @@ abstract class AutowireUtils {
 		Method setter = pd.getWriteMethod();
 		if (setter != null) {
 			Class<?> targetClass = setter.getDeclaringClass();
+			String setterName = setter.getName();
+			Class<?>[] setterParameterTypes = setter.getParameterTypes();
 			for (Class<?> ifc : interfaces) {
 				if (ifc.isAssignableFrom(targetClass) &&
-						ClassUtils.hasMethod(ifc, setter.getName(), setter.getParameterTypes())) {
+						ClassUtils.hasMethod(ifc, setterName, setterParameterTypes)) {
 					return true;
 				}
 			}

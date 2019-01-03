@@ -1289,11 +1289,13 @@ public abstract class ClassUtils {
 	public static Method getInterfaceMethodIfPossible(Method method) {
 		if (Modifier.isPublic(method.getModifiers()) && !method.getDeclaringClass().isInterface()) {
 			Class<?> current = method.getDeclaringClass();
+			String methodName = method.getName();
+			Class<?>[] methodParameterTypes = method.getParameterTypes();
 			while (current != null && current != Object.class) {
 				Class<?>[] ifcs = current.getInterfaces();
 				for (Class<?> ifc : ifcs) {
 					try {
-						return ifc.getMethod(method.getName(), method.getParameterTypes());
+						return ifc.getMethod(methodName, methodParameterTypes);
 					}
 					catch (NoSuchMethodException ex) {
 						// ignore

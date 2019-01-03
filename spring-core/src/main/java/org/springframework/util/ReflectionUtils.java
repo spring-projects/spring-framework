@@ -626,9 +626,11 @@ public abstract class ReflectionUtils {
 		doWithMethods(leafClass, method -> {
 			boolean knownSignature = false;
 			Method methodBeingOverriddenWithCovariantReturnType = null;
+			String methodName = method.getName();
+			Class<?>[] methodParameterTypes = method.getParameterTypes();
 			for (Method existingMethod : methods) {
-				if (method.getName().equals(existingMethod.getName()) &&
-						Arrays.equals(method.getParameterTypes(), existingMethod.getParameterTypes())) {
+				if (methodName.equals(existingMethod.getName()) &&
+						Arrays.equals(methodParameterTypes, existingMethod.getParameterTypes())) {
 					// Is this a covariant return type situation?
 					if (existingMethod.getReturnType() != method.getReturnType() &&
 							existingMethod.getReturnType().isAssignableFrom(method.getReturnType())) {

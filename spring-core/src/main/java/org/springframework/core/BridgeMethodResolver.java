@@ -235,8 +235,8 @@ public final class BridgeMethodResolver {
 		if (bridgeMethod == bridgedMethod) {
 			return true;
 		}
-		return (Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()) &&
-				bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()));
+		return bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()) &&
+				Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes());
 	}
 
 }
