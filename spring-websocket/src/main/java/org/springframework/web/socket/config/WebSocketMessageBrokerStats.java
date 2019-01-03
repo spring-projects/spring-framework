@@ -199,7 +199,7 @@ public class WebSocketMessageBrokerStats {
 				", stompSubProtocol[" + getStompSubProtocolStatsInfo() + "]" +
 				", stompBrokerRelay[" + getStompBrokerRelayStatsInfo() + "]" +
 				", inboundChannel[" + getClientInboundExecutorStatsInfo() + "]" +
-				", outboundChannel" + getClientOutboundExecutorStatsInfo() + "]" +
+				", outboundChannel[" + getClientOutboundExecutorStatsInfo() + "]" +
 				", sockJsScheduler[" + getSockJsTaskSchedulerStatsInfo() + "]";
 	}
 
