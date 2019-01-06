@@ -98,6 +98,8 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String DEFAULT_VALUE = "default";
 
+	private static final String EMPTY_STRING = "";
+
 	public static final String DESCRIPTION_ELEMENT = "description";
 
 	public static final String AUTOWIRE_NO_VALUE = "no";
@@ -320,21 +322,21 @@ public class BeanDefinitionParserDelegate {
 	 */
 	protected void populateDefaults(DocumentDefaultsDefinition defaults, @Nullable DocumentDefaultsDefinition parentDefaults, Element root) {
 		String lazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
-		if (DEFAULT_VALUE.equals(lazyInit)) {
+		if (isDefault(lazyInit)) {
 			// Potentially inherited from outer <beans> sections, otherwise falling back to false.
 			lazyInit = (parentDefaults != null ? parentDefaults.getLazyInit() : FALSE_VALUE);
 		}
 		defaults.setLazyInit(lazyInit);
 
 		String merge = root.getAttribute(DEFAULT_MERGE_ATTRIBUTE);
-		if (DEFAULT_VALUE.equals(merge)) {
+		if (isDefault(merge)) {
 			// Potentially inherited from outer <beans> sections, otherwise falling back to false.
 			merge = (parentDefaults != null ? parentDefaults.getMerge() : FALSE_VALUE);
 		}
 		defaults.setMerge(merge);
 
 		String autowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
-		if (DEFAULT_VALUE.equals(autowire)) {
+		if (isDefault(autowire)) {
 			// Potentially inherited from outer <beans> sections, otherwise falling back to 'no'.
 			autowire = (parentDefaults != null ? parentDefaults.getAutowire() : AUTOWIRE_NO_VALUE);
 		}
@@ -572,7 +574,7 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
-		if (DEFAULT_VALUE.equals(lazyInit)) {
+		if (isDefault(lazyInit)) {
 			lazyInit = this.defaults.getLazyInit();
 		}
 		bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
@@ -586,7 +588,7 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		String autowireCandidate = ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE);
-		if ("".equals(autowireCandidate) || DEFAULT_VALUE.equals(autowireCandidate)) {
+		if (isDefault(autowireCandidate)) {
 			String candidatePattern = this.defaults.getAutowireCandidates();
 			if (candidatePattern != null) {
 				String[] patterns = StringUtils.commaDelimitedListToStringArray(candidatePattern);
@@ -661,7 +663,7 @@ public class BeanDefinitionParserDelegate {
 	@SuppressWarnings("deprecation")
 	public int getAutowireMode(String attValue) {
 		String att = attValue;
-		if (DEFAULT_VALUE.equals(att)) {
+		if (isDefault(att)) {
 			att = this.defaults.getAutowire();
 		}
 		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
@@ -681,6 +683,9 @@ public class BeanDefinitionParserDelegate {
 		return autowire;
 	}
 
+	private boolean isDefault(String value) {
+		return (DEFAULT_VALUE.equals(value) || EMPTY_STRING.equals(value));
+	}
 	/**
 	 * Parse constructor-arg sub-elements of the given bean element.
 	 */
@@ -1341,7 +1346,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public boolean parseMergeAttribute(Element collectionElement) {
 		String value = collectionElement.getAttribute(MERGE_ATTRIBUTE);
-		if (DEFAULT_VALUE.equals(value)) {
+		if (isDefault(value)) {
 			value = this.defaults.getMerge();
 		}
 		return TRUE_VALUE.equals(value);
