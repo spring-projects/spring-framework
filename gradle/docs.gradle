@@ -73,6 +73,7 @@ dokka {
 	}
 	externalDocumentationLink {
 		url = new URL("http://projectreactor.io/docs/core/release/api/")
+		packageListUrl = new URL("http://projectreactor.io/docs/core/release/api/element-list")
 	}
 	externalDocumentationLink {
 		url = new URL("http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
