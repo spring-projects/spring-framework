@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1694,11 +1694,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return a {@code HttpHeaders} object that can read and written to.
+	 * Return a {@code HttpHeaders} object that can be read and written to.
+	 * @since 5.1.1
 	 */
 	public static HttpHeaders writableHttpHeaders(HttpHeaders headers) {
 		Assert.notNull(headers, "HttpHeaders must not be null");
-		if (headers instanceof ReadOnlyHttpHeaders) {
+		if (headers == EMPTY) {
+			return new HttpHeaders();
+		}
+		else if (headers instanceof ReadOnlyHttpHeaders) {
 			return new HttpHeaders(headers.headers);
 		}
 		else {
