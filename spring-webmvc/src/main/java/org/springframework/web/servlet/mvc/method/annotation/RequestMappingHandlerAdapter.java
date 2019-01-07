@@ -641,6 +641,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	private List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
+		// Custom arguments
+		if (getCustomArgumentResolvers() != null) {
+			resolvers.addAll(getCustomArgumentResolvers());
+		}
+
 		// Annotation-based argument resolution
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
@@ -669,10 +674,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		resolvers.add(new SessionStatusMethodArgumentResolver());
 		resolvers.add(new UriComponentsBuilderMethodArgumentResolver());
 
-		// Custom arguments
-		if (getCustomArgumentResolvers() != null) {
-			resolvers.addAll(getCustomArgumentResolvers());
-		}
 
 		// Catch-all
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));
