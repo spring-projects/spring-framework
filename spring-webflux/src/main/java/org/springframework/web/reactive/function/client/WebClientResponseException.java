@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	/**
-	 * Create {@code WebClientResponseException} or an HTTP status specific sub-class.
+	 * Create {@code WebClientResponseException} or an HTTP status specific subclass.
 	 * @since 5.1
 	 */
 	public static WebClientResponseException create(
@@ -160,7 +160,7 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	/**
-	 * Create {@code WebClientResponseException} or an HTTP status specific sub-class.
+	 * Create {@code WebClientResponseException} or an HTTP status specific subclass.
 	 * @since 5.1.4
 	 */
 	public static WebClientResponseException create(
@@ -209,7 +209,7 @@ public class WebClientResponseException extends WebClientException {
 
 
 
-	// Sub-classes for specific, client-side, HTTP status codes..
+	// Subclasses for specific, client-side, HTTP status codes
 
 	/**
 	 * {@link WebClientResponseException} for status HTTP 400 Bad Request.
@@ -362,7 +362,7 @@ public class WebClientResponseException extends WebClientException {
 
 
 
-	// Sub-classes for specific, server-side, HTTP status codes..
+	// Subclasses for specific, server-side, HTTP status codes
 
 	/**
 	 * {@link WebClientResponseException} for status HTTP 500 Internal Server Error.
