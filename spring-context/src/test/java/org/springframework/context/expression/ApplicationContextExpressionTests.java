@@ -326,10 +326,10 @@ public class ApplicationContextExpressionTests {
 
 	@Test
 	public void resourceInjection() throws IOException {
-		System.setProperty("logfile", "do_not_delete_me.txt");
+		System.setProperty("logfile", "log4j.properties");
 		try (AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(ResourceInjectionBean.class)) {
 			ResourceInjectionBean resourceInjectionBean = ac.getBean(ResourceInjectionBean.class);
-			Resource resource = new ClassPathResource("do_not_delete_me.txt");
+			Resource resource = new ClassPathResource("log4j.properties");
 			assertEquals(resource, resourceInjectionBean.resource);
 			assertEquals(resource.getURL(), resourceInjectionBean.url);
 			assertEquals(resource.getURI(), resourceInjectionBean.uri);
