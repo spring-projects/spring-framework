@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
@@ -76,6 +77,9 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	@Nullable
 	private transient volatile ResolvableType resolvableType;
+
+	@Nullable
+	private transient volatile TypeDescriptor typeDescriptor;
 
 
 	/**
@@ -301,7 +305,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	}
 
 	/**
-	 * Build a ResolvableType object for the wrapped parameter/field.
+	 * Build a {@link ResolvableType} object for the wrapped parameter/field.
 	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
@@ -313,6 +317,21 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 			this.resolvableType = resolvableType;
 		}
 		return resolvableType;
+	}
+
+	/**
+	 * Build a {@link TypeDescriptor} object for the wrapped parameter/field.
+	 * @since 5.1.4
+	 */
+	public TypeDescriptor getTypeDescriptor() {
+		TypeDescriptor typeDescriptor = this.typeDescriptor;
+		if (typeDescriptor == null) {
+			typeDescriptor = (this.field != null ?
+					new TypeDescriptor(getResolvableType(), getDependencyType(), getAnnotations()) :
+					new TypeDescriptor(obtainMethodParameter()));
+			this.typeDescriptor = typeDescriptor;
+		}
+		return typeDescriptor;
 	}
 
 	/**

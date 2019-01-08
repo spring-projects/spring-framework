@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1183,13 +1183,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (value != null) {
 				if (value instanceof String) {
 					String strVal = resolveEmbeddedValue((String) value);
-					BeanDefinition bd = (beanName != null && containsBean(beanName) ? getMergedBeanDefinition(beanName) : null);
+					BeanDefinition bd = (beanName != null && containsBean(beanName) ?
+							getMergedBeanDefinition(beanName) : null);
 					value = evaluateBeanDefinitionString(strVal, bd);
 				}
 				TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
-				return (descriptor.getField() != null ?
-						converter.convertIfNecessary(value, type, descriptor.getField()) :
-						converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
+				try {
+					return converter.convertIfNecessary(value, type, descriptor.getTypeDescriptor());
+				}
+				catch (UnsupportedOperationException ex) {
+					// A custom TypeConverter which does not support TypeDescriptor resolution...
+					return (descriptor.getField() != null ?
+							converter.convertIfNecessary(value, type, descriptor.getField()) :
+							converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
+				}
 			}
 
 			Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
@@ -1687,7 +1694,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						super.resolveCandidate(beanName, requiredType, beanFactory));
 			}
 		};
-		return Optional.ofNullable(doResolveDependency(descriptorToUse, beanName, null, null));
+		Object result = doResolveDependency(descriptorToUse, beanName, null, null);
+		return (result instanceof Optional ? (Optional<?>) result : Optional.ofNullable(result));
 	}
 
 
@@ -1915,8 +1923,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		private Stream<Object> resolveStream(boolean ordered) {
 			DependencyDescriptor descriptorToUse = new StreamDependencyDescriptor(this.descriptor, ordered);
 			Object result = doResolveDependency(descriptorToUse, this.beanName, null, null);
-			Assert.state(result instanceof Stream, "Stream expected");
-			return (Stream<Object>) result;
+			return (result instanceof Stream ? (Stream<Object>) result : Stream.of(result));
 		}
 	}
 
