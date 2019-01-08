@@ -206,7 +206,8 @@ configure(allprojects) { project ->
 		"http://fasterxml.github.io/jackson-core/javadoc/2.8/",
 		"http://fasterxml.github.io/jackson-databind/javadoc/2.8/",
 		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.8/",
-		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/"
+		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
+		"https://junit.org/junit4/javadoc/${junitVersion}/"
 	] as String[]
 }
 
