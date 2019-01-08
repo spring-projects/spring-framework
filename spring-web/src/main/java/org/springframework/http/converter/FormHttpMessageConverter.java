@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -323,7 +323,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 	}
 
-	private void writeMultipart(final MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage) throws IOException {
+	private void writeMultipart(final MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage)
+			throws IOException {
+
 		final byte[] boundary = generateMultipartBoundary();
 		Map<String, String> parameters = Collections.singletonMap("boundary", new String(boundary, "US-ASCII"));
 
@@ -380,7 +382,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		throw new HttpMessageNotWritableException("Could not write request: no suitable HttpMessageConverter " +
 				"found for request type [" + partType.getName() + "]");
 	}
-
 
 	/**
 	 * Generate a multipart boundary.
