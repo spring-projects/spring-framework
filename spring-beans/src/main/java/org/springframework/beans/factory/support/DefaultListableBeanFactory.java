@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1594,7 +1594,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
-	 * A dependency descriptor marker for multiple elements.
+	 * A dependency descriptor for a multi-element declaration with nested elements.
 	 */
 	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
 
@@ -1622,7 +1622,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							super.resolveCandidate(beanName, requiredType, beanFactory));
 				}
 			};
-			return Optional.ofNullable(doResolveDependency(descriptorToUse, beanName, null, null));
+			Object result = doResolveDependency(descriptorToUse, beanName, null, null);
+			return (result instanceof Optional ? (Optional<?>) result : Optional.ofNullable(result));
 		}
 	}
 
