@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,7 @@ abstract class AutowireUtils {
 	 * on the given method itself.
 	 * <p>For example, given a factory method with the following signature, if
 	 * {@code resolveReturnTypeForFactoryMethod()} is invoked with the reflected
-	 * method for {@code creatProxy()} and an {@code Object[]} array containing
+	 * method for {@code createProxy()} and an {@code Object[]} array containing
 	 * {@code MyService.class}, {@code resolveReturnTypeForFactoryMethod()} will
 	 * infer that the target return type is {@code MyService}.
 	 * <pre class="code">{@code public static <T> T createProxy(Class<T> clazz)}</pre>
