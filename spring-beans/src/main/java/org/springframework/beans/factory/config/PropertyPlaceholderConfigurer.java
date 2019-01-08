@@ -34,8 +34,8 @@ import org.springframework.util.StringValueResolver;
  *
  * <p>As of Spring 3.1, {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
  * PropertySourcesPlaceholderConfigurer} should be used preferentially over this implementation; it is
- * more flexible through taking advantage of the {@link org.springframework.core.env.Environment Environment} and
- * {@link org.springframework.core.env.PropertySource PropertySource} mechanisms also made available in Spring 3.1.
+ * more flexible through taking advantage of the {@link org.springframework.core.env.Environment} and
+ * {@link org.springframework.core.env.PropertySource} mechanisms also made available in Spring 3.1.
  *
  * <p>{@link PropertyPlaceholderConfigurer} is still appropriate for use when:
  * <ul>
@@ -118,8 +118,8 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * to pass external values in as JVM system properties: This can easily be
 	 * achieved in a startup script, even for existing environment variables.
 	 * @see #setSystemPropertiesMode
-	 * @see java.lang.System#getProperty(String)
-	 * @see java.lang.System#getenv(String)
+	 * @see System#getProperty(String)
+	 * @see System#getenv(String)
 	 */
 	public void setSearchSystemEnvironment(boolean searchSystemEnvironment) {
 		this.searchSystemEnvironment = searchSystemEnvironment;
