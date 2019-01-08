@@ -441,7 +441,15 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	/**
-	 * Build a URI String. This is a shortcut for:
+	 * Build a URI String.
+	 * <p>Effectively, a shortcut for building, encoding, and returning the
+	 * String representation:
+	 * <pre class="code">
+	 * String uri = builder.build().encode().toUriString()
+	 * </pre>
+	 * <p>However if {@link #uriVariables(Map) URI variables} have been provided
+	 * then the URI template is pre-encoded separately from URI variables (see
+	 * {@link #encode()} for details), i.e. equivalent to:
 	 * <pre>
 	 * String uri = builder.encode().build().toUriString()
 	 * </pre>
@@ -449,7 +457,9 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @see UriComponents#toUriString()
 	 */
 	public String toUriString() {
-		return buildInternal(EncodingHint.ENCODE_TEMPLATE).toUriString();
+		return this.uriVariables.isEmpty() ?
+				encode().build().toUriString() :
+				buildInternal(EncodingHint.ENCODE_TEMPLATE).toUriString();
 	}
 
 
