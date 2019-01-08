@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,10 +66,11 @@ import org.springframework.util.StringUtils;
  * RestTemplate template = new RestTemplate();
  * // AllEncompassingFormHttpMessageConverter is configured by default
  *
- * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;&gt;();
+ * MultiValueMap&lt;String, Object&gt; form = new LinkedMultiValueMap&lt;&gt;();
  * form.add("field 1", "value 1");
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
+ * form.add("field 3", 4);  // non-String form values supported as of 5.1.4
  * template.postForLocation("http://example.com/myForm", form);
  * </pre>
  *
@@ -347,15 +348,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return builder.toString();
 	}
 
-	private void writeMultipart(final MultiValueMap<String, Object> parts,
-			HttpOutputMessage outputMessage) throws IOException {
+	private void writeMultipart(final MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage)
+			throws IOException {
 
 		final byte[] boundary = generateMultipartBoundary();
 		Map<String, String> parameters = new LinkedHashMap<>(2);
 		if (!isFilenameCharsetSet()) {
 			parameters.put("charset", this.charset.name());
 		}
-		parameters.put("boundary", new String(boundary, "US-ASCII"));
+		parameters.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
 
 		MediaType contentType = new MediaType(MediaType.MULTIPART_FORM_DATA, parameters);
 		HttpHeaders headers = outputMessage.getHeaders();
