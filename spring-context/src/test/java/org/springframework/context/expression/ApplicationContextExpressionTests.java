@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import java.net.URI;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.security.Permission;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Test;
 
 import org.springframework.beans.factory.ObjectFactory;
@@ -46,7 +46,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -101,6 +101,8 @@ public class ApplicationContextExpressionTests {
 				return null;
 			}
 		});
+
+		ac.getBeanFactory().setConversionService(new DefaultConversionService());
 
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
 		Properties placeholders = new Properties();
@@ -176,6 +178,9 @@ public class ApplicationContextExpressionTests {
 			System.getProperties().put("country", "UK");
 			assertEquals("123 UK", tb3.country);
 			assertEquals("123 UK", tb3.countryFactory.getObject());
+			assertEquals("123", tb3.optionalValue1.get());
+			assertEquals("123", tb3.optionalValue2.get());
+			assertFalse(tb3.optionalValue3.isPresent());
 			assertSame(tb0, tb3.tb);
 
 			tb3 = (ValueTestBean) SerializationTestUtils.serializeAndDeserialize(tb3);
@@ -209,12 +214,7 @@ public class ApplicationContextExpressionTests {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 		GenericConversionService cs = new GenericConversionService();
-		cs.addConverter(String.class, String.class, new Converter<String, String>() {
-			@Override
-			public String convert(String source) {
-				return source.trim();
-			}
-		});
+		cs.addConverter(String.class, String.class, String::trim);
 		ac.getBeanFactory().registerSingleton(GenericApplicationContext.CONVERSION_SERVICE_BEAN_NAME, cs);
 		RootBeanDefinition rbd = new RootBeanDefinition(PrototypeTestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -276,8 +276,7 @@ public class ApplicationContextExpressionTests {
 
 	@Test
 	public void systemPropertiesSecurityManager() {
-		GenericApplicationContext ac = new GenericApplicationContext();
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(TestBean.class);
@@ -313,8 +312,7 @@ public class ApplicationContextExpressionTests {
 
 	@Test
 	public void stringConcatenationWithDebugLogging() {
-		GenericApplicationContext ac = new GenericApplicationContext();
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(String.class);
@@ -364,6 +362,15 @@ public class ApplicationContextExpressionTests {
 
 		@Value("${code} #{systemProperties.country}")
 		public ObjectFactory<String> countryFactory;
+
+		@Value("${code}")
+		private transient Optional<String> optionalValue1;
+
+		@Value("${code:#{null}}")
+		private transient Optional<String> optionalValue2;
+
+		@Value("${codeX:#{null}}")
+		private transient Optional<String> optionalValue3;
 
 		@Autowired @Qualifier("original")
 		public transient TestBean tb;
