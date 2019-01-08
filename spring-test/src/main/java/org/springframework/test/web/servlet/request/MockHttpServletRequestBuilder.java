@@ -279,7 +279,8 @@ public class MockHttpServletRequestBuilder
 	 * @since 4.1.2
 	 */
 	public MockHttpServletRequestBuilder contentType(String contentType) {
-		this.contentType = MediaType.parseMediaType(contentType).toString();
+		Assert.notNull(contentType, "'contentType' must not be null");
+		this.contentType = contentType;
 		return this;
 	}
 
@@ -299,11 +300,9 @@ public class MockHttpServletRequestBuilder
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
-		List<MediaType> result = new ArrayList<>(mediaTypes.length);
-		for (String mediaType : mediaTypes) {
-			result.add(MediaType.parseMediaType(mediaType));
-		}
-		this.headers.set("Accept", MediaType.toString(result));
+		List<String> result = new ArrayList<>(mediaTypes.length);
+		result.addAll(Arrays.asList(mediaTypes));
+		this.headers.set("Accept", String.join(", ", result));
 		return this;
 	}
 
