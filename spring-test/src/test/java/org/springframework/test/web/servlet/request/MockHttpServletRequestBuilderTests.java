@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 
@@ -296,6 +298,21 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
+	public void anyAcceptMultipleContentTypeViaStringArray() {
+		this.builder.accept("any", "any2");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		List<String> accept = Collections.list(request.getHeaders("Accept"));
+		List<String> result = Stream.of(accept.get(0).split(","))
+				.map(String::trim)
+				.collect(Collectors.toList());
+
+		assertEquals("any", result.get(0));
+		assertEquals(2, result.size());
+		assertEquals("any2", result.get(1));
+	}
+
+	@Test
 	public void contentType() {
 		this.builder.contentType(MediaType.TEXT_HTML);
 
@@ -321,6 +338,19 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("text/html", contentTypes.get(0));
 	}
 
+	@Test
+	public void anyContentTypeViaString() {
+		this.builder.contentType("any");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		String contentType = request.getContentType();
+		List<String> contentTypes = Collections.list(request.getHeaders("Content-Type"));
+
+		assertEquals("any", contentType);
+		assertEquals(1, contentTypes.size());
+		assertEquals("any", contentTypes.get(0));
+	}
+
 	@Test  // SPR-11308
 	public void contentTypeViaHeader() {
 		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE);
@@ -328,6 +358,16 @@ public class MockHttpServletRequestBuilderTests {
 		String contentType = request.getContentType();
 
 		assertEquals("text/html", contentType);
+	}
+
+	@Test  // SPR-17643
+	public void invalidContentTypeViaHeader() {
+		this.builder.header("Content-Type", "yaml");
+		this.builder.content("some content");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		String contentType = request.getContentType();
+
+		assertEquals("yaml", contentType);
 	}
 
 	@Test  // SPR-11308
