@@ -18,7 +18,9 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
+import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -27,6 +29,7 @@ import org.springframework.util.Assert;
  * Provides registration of SQL types per parameter.
  *
  * @author Juergen Hoeller
+ * @author Jens Schauder
  * @since 2.0
  */
 public abstract class AbstractSqlParameterSource implements SqlParameterSource {
@@ -81,4 +84,21 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 		return this.typeNames.get(paramName);
 	}
 
+	@Override
+	public String toString() {
+		String prefix = this.getClass().getSimpleName() + "[";
+		StringJoiner stringJoiner = new StringJoiner(", ", prefix, "]");
+		String[] parameterNames = this.getParameterNames();
+		if (parameterNames != null) {
+			for (String name : parameterNames) {
+				String typeName = this.getTypeName(name);
+				Object value = this.getValue(name);
+				if (value instanceof SqlParameterValue) {
+					value = ((SqlParameterValue) value).getValue();
+				}
+				stringJoiner.add(name + "=" + value + " (sqlType: " + (typeName == null ? this.getSqlType(name) : typeName) + ")");
+			}
+		}
+		return stringJoiner.toString();
+	}
 }

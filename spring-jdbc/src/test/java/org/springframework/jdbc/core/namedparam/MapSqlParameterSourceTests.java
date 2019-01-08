@@ -16,15 +16,18 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
  * @author Arjen Poutsma
+ * @author Jens Schauder
  */
 public class MapSqlParameterSourceTests {
 
@@ -48,4 +51,12 @@ public class MapSqlParameterSourceTests {
 		assertEquals("Correct SQL Type not registered", 2, msps2.getSqlType("FOO"));
 	}
 
+	@Test
+	public void toStringShowsParameterDetails() {
+		MapSqlParameterSource source = new MapSqlParameterSource("FOO", new SqlParameterValue(2, "Foo"));
+		assertThat(source.toString(), Matchers.allOf(
+				Matchers.containsString("MapSqlParameterSource"),
+				Matchers.containsString("FOO=Foo (sqlType: 2)"))
+		);
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jdbc.core.namedparam;
 import java.sql.Types;
 import java.util.Arrays;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
@@ -29,6 +30,7 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Jens Schauder
  */
 public class BeanPropertySqlParameterSourceTests {
 
@@ -82,6 +84,15 @@ public class BeanPropertySqlParameterSourceTests {
 		assertFalse(source.hasValue("noOp"));
 	}
 
+	@Test
+	public void toStringShowsParameterDetails() {
+		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
+		assertThat(source.toString(), Matchers.allOf(
+				Matchers.containsString("BeanPropertySqlParameterSource"),
+				Matchers.containsString("name=tb (sqlType: 12)"),
+				Matchers.containsString("age=99 (sqlType: 4)"))
+		);
+	}
 
 	@SuppressWarnings("unused")
 	private static final class NoReadableProperties {
