@@ -3297,15 +3297,22 @@ is cleared. For further details, see the discussion of `@DirtiesContext` in
 
 When you use the `DependencyInjectionTestExecutionListener` (which is configured by
 default), the dependencies of your test instances are injected from beans in the
-application context that you configured with `@ContextConfiguration`. You may use setter
-injection, field injection, or both, depending on which annotations you choose and
-whether you place them on setter methods or fields. For consistency with the annotation
-support introduced in Spring 2.5 and 3.0, you can use Spring's `@Autowired` annotation or
-the `@Inject` annotation from JSR 330.
+application context that you configured with `@ContextConfiguration` or related
+annotations. You may use setter injection, field injection, or both, depending on which
+annotations you choose and whether you place them on setter methods or fields. If you are
+using JUnit Jupiter you may also optionally use constructor injection (see
+<<testcontext-junit-jupiter-di>>). For consistency with the annotation support introduced
+in Spring 2.5 and 3.0, you can use Spring's `@Autowired` annotation or the `@Inject`
+annotation from JSR 330 for field and setter injection.
 
-TIP: The TestContext framework does not instrument the manner in which a test instance is
-instantiated. Thus, the use of `@Autowired` or `@Inject` for constructors has no effect
-for test classes.
+TIP: For testing frameworks other than JUnit Jupiter, the TestContext framework does not
+participate in instantiation of the test class. Thus, the use of `@Autowired` or
+`@Inject` for constructors has no effect for test classes.
+
+NOTE: Although field injection is discouraged in production code, field injection is
+actually quite natural in test code. The rationale for the difference is that you will
+never instantiate your test class directly. Consequently, there is no need to be able to
+invoke a `public` constructor or setter method on your test class.
 
 Because `@Autowired` is used to perform <<core.adoc#beans-factory-autowire, autowiring by
 type>>, if you have multiple bean definitions of the same type, you cannot rely on this
@@ -3313,7 +3320,7 @@ approach for those particular beans. In that case, you can use `@Autowired` in
 conjunction with `@Qualifier`. As of Spring 3.0, you can also choose to use `@Inject` in
 conjunction with `@Named`. Alternatively, if your test class has access to its
 `ApplicationContext`, you can perform an explicit lookup by using (for example) a call to
-`applicationContext.getBean("titleRepository")`.
+`applicationContext.getBean("titleRepository", TitleRepository.class)`.
 
 If you do not want dependency injection applied to your test instances, do not annotate
 fields or setter methods with `@Autowired` or `@Inject`. Alternatively, you can disable
@@ -3329,7 +3336,7 @@ is presented after all sample code listings.
 [NOTE]
 ====
 The dependency injection behavior in the following code listings is not specific to JUnit
-4. The same DI techniques can be used in conjunction with any testing framework.
+4. The same DI techniques can be used in conjunction with any supported testing framework.
 
 The following examples make calls to static assertion methods, such as `assertNotNull()`,
 but without prepending the call with `Assert`. In such cases, assume that the method was
