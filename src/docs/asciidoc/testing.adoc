@@ -3618,6 +3618,29 @@ caution if Spring-managed or application-managed transactions are configured wit
 propagation type other than `REQUIRED` or `SUPPORTS` (see the discussion on
 <<data-access.adoc#tx-propagation,transaction propagation>> for details).
 
+.Preemptive timeouts and test-managed transactions
+[WARNING]
+====
+Caution must be taken when using any form of preemptive timeouts from a testing framework
+in conjunction with Spring's test-managed transactions.
+
+Specifically, Spring’s testing support binds transaction state to the current thread (via
+a `java.lang.ThreadLocal` variable) _before_ the current test method is invoked. If a
+testing framework invokes the current test method in a new thread in order to support a
+preemptive timeout, any actions performed within the current test method will _not_ be
+invoked within the test-managed transaction. Consequently, the result of any such actions
+will not be rolled back with the test-managed transaction. On the contrary, such actions
+will be committed to the persistent store -- for example, a relational database -- even
+though the test-managed transaction is properly rolled back by Spring.
+
+Situations in which this can occur include but are not limited to the following.
+
+* JUnit 4's `@Test(timeout = ...)` support and `TimeOut` rule
+* JUnit Jupiter's `assertTimeoutPreemptively(...)` methods in the
+  `org.junit.jupiter.api.Assertions` class
+* TestNG's `@Test(timeOut = ...)` support
+====
+
 [[testcontext-tx-enabling-transactions]]
 ===== Enabling and Disabling Transactions
 
