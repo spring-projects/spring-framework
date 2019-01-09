@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.ObjectUtils;
  * {@link ByteBuf}. Typically constructed with {@link NettyDataBufferFactory}.
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 5.0
  */
 public class NettyDataBuffer implements PooledDataBuffer {
@@ -240,8 +241,8 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public DataBuffer write(CharSequence charSequence, Charset charset) {
-		Assert.notNull(charSequence, "'charSequence' must not be null");
-		Assert.notNull(charset, "'charset' must not be null");
+		Assert.notNull(charSequence, "CharSequence must not be null");
+		Assert.notNull(charset, "Charset must not be null");
 		if (StandardCharsets.UTF_8.equals(charset)) {
 			ByteBufUtil.writeUtf8(this.byteBuf, charSequence);
 		}

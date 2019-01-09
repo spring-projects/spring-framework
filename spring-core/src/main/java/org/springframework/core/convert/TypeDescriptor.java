@@ -110,9 +110,10 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Create a new type descriptor from a {@link ResolvableType}. This protected
-	 * constructor is used internally and may also be used by subclasses that support
-	 * non-Java languages with extended type systems.
+	 * Create a new type descriptor from a {@link ResolvableType}.
+	 * <p>This constructor is used internally and may also be used by subclasses
+	 * that support non-Java languages with extended type systems. It is public
+	 * as of 5.1.4 whereas it was protected before.
 	 * @param resolvableType the resolvable type
 	 * @param type the backing type (or {@code null} if it should get resolved)
 	 * @param annotations the type annotations
