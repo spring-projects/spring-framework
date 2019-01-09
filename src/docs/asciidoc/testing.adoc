@@ -3120,9 +3120,10 @@ the underlying context cache, you can set the log level for the
 In the unlikely case that a test corrupts the application context and requires reloading
 (for example, by modifying a bean definition or the state of an application object), you
 can annotate your test class or test method with `@DirtiesContext` (see the discussion of
-`@DirtiesContext` in <<integration-testing-annotations-spring>>). This instructs Spring
+`@DirtiesContext` in <<spring-testing-annotation-dirtiescontext>>). This instructs Spring
 to remove the context from the cache and rebuild the application context before running
-the next test. Note that support for the `@DirtiesContext` annotation is provided by the
+the next test that requires the same application context. Note that support for the
+`@DirtiesContext` annotation is provided by the
 `DirtiesContextBeforeModesTestExecutionListener` and the
 `DirtiesContextTestExecutionListener`, which are enabled by default.
 
@@ -3287,10 +3288,9 @@ shows this configuration scenario:
 NOTE: If you use `@DirtiesContext` in a test whose context is configured as part of a
 context hierarchy, you can use the `hierarchyMode` flag to control how the context cache
 is cleared. For further details, see the discussion of `@DirtiesContext` in
-<<integration-testing-annotations-spring,Spring Testing Annotations>> and the
+<<spring-testing-annotation-dirtiescontext,Spring Testing Annotations>> and the
 {api-spring-framework}/test/annotation/DirtiesContext.html[`@DirtiesContext`] javadoc.
 --
-
 
 [[testcontext-fixture-di]]
 ==== Dependency Injection of Test Fixtures
@@ -4382,7 +4382,7 @@ and integration tests and simultaneously reap the benefits of the TestContext fr
 such as support for loading application contexts, dependency injection of test instances,
 transactional test method execution, and so on.
 
-Furthermore, thanks to the rich extension API in JUnit Jupiter, Spring can provide the
+Furthermore, thanks to the rich extension API in JUnit Jupiter, Spring provides the
 following features above and beyond the feature set that Spring supports for JUnit 4 and
 TestNG:
 
@@ -4417,7 +4417,7 @@ The following code listing shows how to configure a test class to use the
 ----
 ====
 
-Since you can also use annotations in JUnit 5 as meta-annotations, Spring can provide the
+Since you can also use annotations in JUnit 5 as meta-annotations, Spring provides the
 `@SpringJUnitConfig` and `@SpringJUnitWebConfig` composed annotations to simplify the
 configuration of the test `ApplicationContext` and JUnit Jupiter.
 
@@ -4491,6 +4491,25 @@ WARNING: If the constructor for a test class is itself annotated with `@Autowire
 Spring assumes the responsibility for resolving _all_ parameters in the constructor.
 Consequently, no other `ParameterResolver` registered with JUnit Jupiter can resolve
 parameters for such a constructor.
+
+[WARNING]
+====
+Constructor injection for test classes must not be used in conjunction with JUnit
+Jupiter's `@TestInstance(PER_CLASS)` support if `@DirtiesContext` is used to close the
+test's `ApplicationContext` before or after test methods.
+
+The reason is that `@TestInstance(PER_CLASS)` instructs JUnit Jupiter to cache the test
+instance between test method invocations. Consequently, the test instance will retain
+references to beans that were originally injected from an `ApplicationContext` that has
+been subsequently closed. Since the constructor for the test class will only be invoked
+once in such scenarios, dependency injection will not occur again, and subsequent tests
+will interact with beans from the closed `ApplicationContext` which may result in errors.
+
+To use `@DirtiesContext` with "before test method" or "after test method" modes in
+conjunction with `@TestInstance(PER_CLASS)`, one must configure dependencies from Spring
+to be supplied via field or setter injection so that they can be re-injected between test
+method invocations.
+====
 
 In the following example, Spring injects the `OrderService` bean from the
 `ApplicationContext` loaded from `TestConfig.class` into the
