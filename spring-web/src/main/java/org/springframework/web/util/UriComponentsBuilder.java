@@ -458,7 +458,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 */
 	public String toUriString() {
 		return this.uriVariables.isEmpty() ?
-				encode().build().toUriString() :
+				build().encode().toUriString() :
 				buildInternal(EncodingHint.ENCODE_TEMPLATE).toUriString();
 	}
 

@@ -919,4 +919,9 @@ public class UriComponentsBuilderTests {
 		assertEquals("http://localhost:8081/{path}?sort={sort}&sort=another_value", uri);
 	}
 
+	@Test // SPR-17630
+	public void toUriStringWithCurlyBraces() {
+		assertEquals("/path?q=%7Basa%7Dasa",
+				UriComponentsBuilder.fromUriString("/path?q={asa}asa").toUriString());
+	}
 }
