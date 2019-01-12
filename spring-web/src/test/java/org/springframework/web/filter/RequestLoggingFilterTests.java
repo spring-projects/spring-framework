@@ -17,6 +17,8 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -99,6 +101,55 @@ public class RequestLoggingFilterTests {
 		assertNotNull(filter.afterRequestMessage);
 		assertTrue(filter.afterRequestMessage.contains("[uri=/hotels]"));
 	}
+
+	@Test
+	public void includeHeaders() throws Exception {
+		filter.setIncludeHeaders(true);
+		final MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		request.addHeader("Content-Type", "application/json");
+		request.addHeader("Authorization", "Basic YWxhZGRpbjpvcGVuc2VzYW1l");
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertNotNull(filter.beforeRequestMessage);
+		assertTrue(filter.beforeRequestMessage.contains("headers=[Content-Type:\"application/json\", Authorization:\"Basic YWxhZGRpbjpvcGVuc2VzYW1l\"]"));
+
+		assertNotNull(filter.afterRequestMessage);
+		assertTrue(filter.afterRequestMessage.contains("headers=[Content-Type:\"application/json\", Authorization:\"Basic YWxhZGRpbjpvcGVuc2VzYW1l\"]"));
+	}
+
+	@Test
+	public void includeHeadersWithBlacklist() throws Exception {
+		Set<String> headersBlacklist = new HashSet<>();
+		headersBlacklist.add("Authorization");
+
+		filter.setIncludeHeaders(true);
+		filter.setHeadersBlacklist(headersBlacklist);
+
+		final MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		request.addHeader("Content-Type", "application/json");
+		request.addHeader("Authorization", "Basic YWxhZGRpbjpvcGVuc2VzYW1l");
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertNotNull(filter.beforeRequestMessage);
+		assertTrue(filter.beforeRequestMessage.contains("headers=[Content-Type:\"application/json\"]"));
+		assertFalse(filter.beforeRequestMessage.contains("Authorization:\"Basic YWxhZGRpbjpvcGVuc2VzYW1l\"]"));
+
+		assertNotNull(filter.afterRequestMessage);
+		assertTrue(filter.afterRequestMessage.contains("headers=[Content-Type:\"application/json\"]"));
+		assertFalse(filter.afterRequestMessage.contains("Authorization:\"Basic YWxhZGRpbjpvcGVuc2VzYW1l\"]"));
+
+		assertNotNull(request.getHeader("Authorization"));
+	}
+
+
 
 	@Test
 	public void payloadInputStream() throws Exception {

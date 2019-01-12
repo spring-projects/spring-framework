@@ -18,12 +18,16 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -105,6 +109,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	private String afterMessageSuffix = DEFAULT_AFTER_MESSAGE_SUFFIX;
 
+	private Set<String> headersBlacklist = new HashSet<>();
+
 
 	/**
 	 * Set whether the query string should be included in the log message.
@@ -176,6 +182,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		return this.includePayload;
 	}
 
+
 	/**
 	 * Set the maximum length of the payload body to be included in the log message.
 	 * Default is 50 characters.
@@ -226,6 +233,21 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		this.afterMessageSuffix = afterMessageSuffix;
 	}
 
+	/**
+	 * Sets a list of header name to blacklist if isIncludeHeaders() is set to true
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
+	 * "headersBlacklist" in the filter definition in {@code web.xml}.
+	 */
+	public void setHeadersBlacklist(Collection<String> headersBlacklist) {
+		this.headersBlacklist = new HashSet<>(headersBlacklist);
+	}
+
+	/**
+	 * Returns a set of headers that should not be logged
+	 */
+	protected Set<String> getHeadersBlacklist() {
+		return this.headersBlacklist;
+	}
 
 	/**
 	 * The default value is "false" so that the filter may log a "before" message
@@ -320,7 +342,9 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		}
 
 		if (isIncludeHeaders()) {
-			msg.append(";headers=").append(new ServletServerHttpRequest(request).getHeaders());
+			HttpHeaders headers = new ServletServerHttpRequest(request).getHeaders();
+			getHeadersBlacklist().forEach(headers::remove);
+			msg.append(";headers=").append(headers);
 		}
 
 		if (isIncludePayload()) {
