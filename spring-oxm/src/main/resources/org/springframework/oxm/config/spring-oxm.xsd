@@ -50,7 +50,7 @@
 		<xsd:complexType>
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.oxm.jibx.JibxMarshaller">
-					Defines a JiBX Marshaller.
+					Defines a JiBX Marshaller. Deprecated as of Spring Framework 5.1.5!
 				</xsd:documentation>
 				<xsd:appinfo>
 					<tool:annotation>
