@@ -1,7 +1,7 @@
 <!--
 Thanks for raising an issue. Please read (and discard) the below:
 
-Security Issue? Please report responsibly via https://pivotal.io/security. Do not diclose here.
+Security Issue? Please report responsibly via https://pivotal.io/security. Do not disclose here.
 
 Questions: Please use Stack Overflow.
 
