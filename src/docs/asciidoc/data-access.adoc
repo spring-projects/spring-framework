@@ -6159,7 +6159,7 @@ Spring's O-X mapping operates through two global interfaces: {api-spring-framewo
 with relative ease, with little or no change required on the classes that do the
 marshalling. This approach has the additional benefit of making it possible to do XML
 marshalling with a mix-and-match approach (for example, some marshalling performed using JAXB
-and some by Castor) in a non-intrusive fashion, letting you use the strength of each
+and some by XStream) in a non-intrusive fashion, letting you use the strength of each
 technology.
 
 
@@ -6383,18 +6383,18 @@ can do so by using the following `applicationContext.xml`:
 ----
 	<beans>
 		<bean id="application" class="Application">
-			<property name="marshaller" ref="castorMarshaller" />
-			<property name="unmarshaller" ref="castorMarshaller" />
+			<property name="marshaller" ref="xstreamMarshaller" />
+			<property name="unmarshaller" ref="xstreamMarshaller" />
 		</bean>
-		<bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller"/>
+		<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller"/>
 	</beans>
 ----
 
-This application context uses Castor, but we could have used any of the other marshaller
-instances described later in this chapter. Note that, by default, Castor does not require any further
+This application context uses XStream, but we could have used any of the other marshaller
+instances described later in this chapter. Note that, by default, XStream does not require any further
 configuration, so the bean definition is rather simple. Also note that the
-`CastorMarshaller` implements both `Marshaller` and `Unmarshaller`, so we can refer to the
-`castorMarshaller` bean in both the `marshaller` and `unmarshaller` property of the
+`XStreamMarshaller` implements both `Marshaller` and `Unmarshaller`, so we can refer to the
+`xstreamMarshaller` bean in both the `marshaller` and `unmarshaller` property of the
 application.
 
 This sample application produces the following `settings.xml` file:
@@ -6430,11 +6430,10 @@ preamble of the XML configuration file. The following example shows how to do so
 <2> Specify the `oxm` schema location.
 
 
-Currently, the schema makes the following elements available:
+The schema makes the following elements available:
 
 * <<oxm-jaxb2-xsd, `jaxb2-marshaller`>>
 * <<oxm-jibx-xsd, `jibx-marshaller`>>
-* <<oxm-castor-xsd, `castor-marshaller`>>
 
 Each tag is explained in its respective marshaller's section. As an example, though,
 the configuration of a JAXB2 marshaller might resemble the following:
@@ -6525,105 +6524,6 @@ The following table describes the available attributes:
 
 | `contextPath`
 | The JAXB Context path
-| No
-|===
-
-
-
-[[oxm-castor]]
-=== Castor
-
-Castor XML mapping is an open source XML binding framework. It lets you transform
-the data contained in a Java object model to and from an XML document. By default, it does
-not require any further configuration, though you can use a mapping file to have more
-control over the behavior of Castor.
-
-For more information on Castor, see the
-http://castor-data-binding.github.io/castor[Castor web site]. The Spring
-integration classes reside in the `org.springframework.oxm.castor` package.
-
-
-[[oxm-castor-marshaller]]
-==== Using `CastorMarshaller`
-
-As with JAXB, the `CastorMarshaller` implements both the `Marshaller` and `Unmarshaller`
-interface. It can be wired up as follows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-		<bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller" />
-		...
-	</beans>
-----
-
-
-[[oxm-castor-mapping]]
-==== Mapping
-
-Although it is possible to rely on Castor's default marshalling behavior, it might be
-necessary to have more control over it. You can get more control by using a Castor mapping
-file. For more information, see http://castor-data-binding.github.io/castor/reference-guides/1.3.3/html-single/index.html#xml.mapping[Castor
-XML Mapping].
-
-You can set the mapping by using the `mappingLocation` resource property, indicated in the following example
-with a classpath resource:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-		<bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller" >
-			<property name="mappingLocation" value="classpath:mapping.xml" />
-		</bean>
-	</beans>
-----
-
-[[oxm-castor-xsd]]
-===== XML Configuration Namespace
-
-The `castor-marshaller` tag configures a
-`org.springframework.oxm.castor.CastorMarshaller`, as the following example shows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<oxm:castor-marshaller id="marshaller" mapping-location="classpath:org/springframework/oxm/castor/mapping.xml"/>
-----
-
-You can configure the marshaller instance in two ways: by specifying either the location
-of a mapping file (through the `mapping-location` property) or by identifying Java
-POJOs (through the `target-class` or `target-package` properties) for which there exist
-corresponding XML descriptor classes. The latter way is usually used in conjunction with
-XML code generation from XML schemas.
-
-The following table describes the available attributes:
-
-|===
-| Attribute| Description| Required
-
-| `id`
-| The ID of the marshaller
-| No
-
-| `encoding`
-| The encoding to use for unmarshalling from XML
-| No
-
-| `target-class`
-| A Java class name for a POJO for which an XML class descriptor is available (as
-  generated through code generation)
-| No
-
-| `target-package`
-| A Java package name that identifies a package that contains POJOs and their
-  corresponding Castor XML descriptor classes (as generated through code generation from
-  XML schemas)
-| No
-
-| `mapping-location`
-| Location of a Castor XML mapping file
 | No
 |===
 
