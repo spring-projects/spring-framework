@@ -53,7 +53,7 @@ dependencies {
 	testCompile("org.apache.httpcomponents:httpclient:4.5.6") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	testCompile("commons-fileupload:commons-fileupload:1.3.3")
+	testCompile("commons-fileupload:commons-fileupload:1.4")
 	testCompile("commons-io:commons-io:2.5")
 	testCompile("joda-time:joda-time:2.10.1")
 	testCompile("org.mozilla:rhino:1.7.10")
