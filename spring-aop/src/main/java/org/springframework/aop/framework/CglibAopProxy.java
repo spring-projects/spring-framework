@@ -112,7 +112,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	/** Dispatcher used for methods on Advised. */
 	private final transient AdvisedDispatcher advisedDispatcher;
 
-	private transient Map<String, Integer> fixedInterceptorMap = Collections.emptyMap();
+	private transient Map<Method, Integer> fixedInterceptorMap = Collections.emptyMap();
 
 	private transient int fixedInterceptorOffset;
 
@@ -327,10 +327,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 			// TODO: small memory optimization here (can skip creation for methods with no advice)
 			for (int x = 0; x < methods.length; x++) {
-				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x], rootClass);
+				Method method = methods[x];
+				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, rootClass);
 				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
 						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetClass());
-				this.fixedInterceptorMap.put(methods[x].toString(), x);
+				this.fixedInterceptorMap.put(method, x);
 			}
 
 			// Now copy both the callbacks from mainCallbacks
@@ -762,12 +763,12 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final AdvisedSupport advised;
 
-		private final Map<String, Integer> fixedInterceptorMap;
+		private final Map<Method, Integer> fixedInterceptorMap;
 
 		private final int fixedInterceptorOffset;
 
 		public ProxyCallbackFilter(
-				AdvisedSupport advised, Map<String, Integer> fixedInterceptorMap, int fixedInterceptorOffset) {
+				AdvisedSupport advised, Map<Method, Integer> fixedInterceptorMap, int fixedInterceptorOffset) {
 
 			this.advised = advised;
 			this.fixedInterceptorMap = fixedInterceptorMap;
@@ -852,7 +853,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					}
 					return AOP_PROXY;
 				}
-				String key = method.toString();
+				Method key = method;
 				// Check to see if we have fixed interceptor to serve this method.
 				// Else use the AOP_PROXY.
 				if (isStatic && isFrozen && this.fixedInterceptorMap.containsKey(key)) {
