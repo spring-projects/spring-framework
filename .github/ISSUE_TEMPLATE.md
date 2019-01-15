@@ -1,13 +1,13 @@
 <!--
-Thanks for raising an issue. Please read (and discard) the below:
+!!! For Security Vulnerabilities, please go to https://pivotal.io/security !!!
 
-Security Issue? Please report responsibly via https://pivotal.io/security. Do not diclose here.
+Thanks for taking the time to create an issue. Please read the following:
 
-Questions: Please use Stack Overflow.
+- Questions should be asked on Stack Overflow.
+- For bugs, specify affected versions and explain what you are trying to do.
+- For enhancements, provide context and describe the problem.
 
-Issue vs Pull Request: Do not create both. You can start with an issue, and submit a pull request later, superseding the issue.
-
-Bug Reports: Specify affected versions and explain what you're trying do. A test case or sample makes it easier for us to diagnose and verify.
-
-Enhancements and Contributions: Please provide context and explain the problem. There may already be a solution, or a way to solve it you had not considered.
+Issue or Pull Request? Create only one, not both. GitHub treats them as the same.
+If unsure, start with an issue, and if you submit a pull request later, the
+issue will be closed as superseded.
 -->
