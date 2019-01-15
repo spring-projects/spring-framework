@@ -52,8 +52,8 @@ def customizePom(pom, gradleProject) {
 				}
 			}
 			issueManagement {
-				system = "Jira"
-				url = "https://jira.springsource.org/browse/SPR"
+				system = "Github"
+				url = "https://github.com/spring-projects/spring-framework/issues"
 			}
 		}
 	}
