@@ -156,6 +156,96 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 		assertNotSame(instance, instance2);
 	}
 
+	@Test
+	public void testCanRetrieveFallbackBeanByTypeWithJpaCompliantOptions() {
+		BeanContainer beanContainer = getBeanContainer();
+		assertNotNull(beanContainer);
+		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
+
+		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
+				NoDefinitionInSpringContextTestBean.class,
+				JpaLifecycleOptions.INSTANCE,
+				fallbackProducer
+		);
+
+		assertEquals(1, fallbackProducer.currentUnnamedInstantiationCount());
+		assertEquals(0, fallbackProducer.currentNamedInstantiationCount());
+
+		assertNotNull(bean);
+		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
+		assertNotNull(instance);
+		assertEquals(BeanSource.FALLBACK, instance.getSource());
+		assertNull(instance.getApplicationContext());
+	}
+
+	@Test
+	public void testCanRetrieveFallbackBeanByNameWithJpaCompliantOptions() {
+		BeanContainer beanContainer = getBeanContainer();
+		assertNotNull(beanContainer);
+		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
+
+		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
+				"some name", NoDefinitionInSpringContextTestBean.class,
+				JpaLifecycleOptions.INSTANCE,
+				fallbackProducer
+		);
+
+		assertEquals(0, fallbackProducer.currentUnnamedInstantiationCount());
+		assertEquals(1, fallbackProducer.currentNamedInstantiationCount());
+
+		assertNotNull(bean);
+		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
+		assertNotNull(instance);
+		assertEquals(BeanSource.FALLBACK, instance.getSource());
+		assertEquals("some name", instance.getName());
+		assertNull(instance.getApplicationContext());
+	}
+
+	@Test
+	public void testCanRetrieveFallbackBeanByTypeWithNativeOptions() {
+		BeanContainer beanContainer = getBeanContainer();
+		assertNotNull(beanContainer);
+		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
+
+		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
+				NoDefinitionInSpringContextTestBean.class,
+				NativeLifecycleOptions.INSTANCE,
+				fallbackProducer
+		);
+
+		assertEquals(1, fallbackProducer.currentUnnamedInstantiationCount());
+		assertEquals(0, fallbackProducer.currentNamedInstantiationCount());
+
+		assertNotNull(bean);
+		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
+		assertNotNull(instance);
+		assertEquals(BeanSource.FALLBACK, instance.getSource());
+		assertNull(instance.getApplicationContext());
+	}
+
+	@Test
+	public void testCanRetrieveFallbackBeanByNameWithNativeOptions() {
+		BeanContainer beanContainer = getBeanContainer();
+		assertNotNull(beanContainer);
+		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
+
+		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
+				"some name", NoDefinitionInSpringContextTestBean.class,
+				NativeLifecycleOptions.INSTANCE,
+				fallbackProducer
+		);
+
+		assertEquals(0, fallbackProducer.currentUnnamedInstantiationCount());
+		assertEquals(1, fallbackProducer.currentNamedInstantiationCount());
+
+		assertNotNull(bean);
+		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
+		assertNotNull(instance);
+		assertEquals(BeanSource.FALLBACK, instance.getSource());
+		assertEquals("some name", instance.getName());
+		assertNull(instance.getApplicationContext());
+	}
+
 
 	/**
 	 * The lifecycle options mandated by the JPA spec and used as a default in Hibernate ORM.
@@ -204,6 +294,51 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 		@Override
 		public <B> B produceBeanInstance(String s, Class<B> aClass) {
 			throw new UnsupportedOperationException("should not be called");
+		}
+	}
+
+	private static class NoDefinitionInSpringContextTestBeanInstanceProducer implements BeanInstanceProducer {
+		private int unnamedInstantiationCount = 0;
+		private int namedInstantiationCount = 0;
+
+		@Override
+		public <B> B produceBeanInstance(Class<B> beanType) {
+			try {
+				++unnamedInstantiationCount;
+				/*
+				 * We only expect to ever be asked to instantiate this class, so we just cut corners here.
+				 * A real-world implementation would obviously be different.
+				 */
+				NoDefinitionInSpringContextTestBean instance = new NoDefinitionInSpringContextTestBean(null, BeanSource.FALLBACK);
+				return beanType.cast( instance );
+			}
+			catch (RuntimeException e) {
+				throw new AssertionError( "Unexpected error instantiating a bean by type using reflection", e );
+			}
+		}
+
+		@Override
+		public <B> B produceBeanInstance(String name, Class<B> beanType) {
+			try {
+				++namedInstantiationCount;
+				/*
+				 * We only expect to ever be asked to instantiate this class, so we just cut corners here.
+				 * A real-world implementation would obviously be different.
+				 */
+				NoDefinitionInSpringContextTestBean instance = new NoDefinitionInSpringContextTestBean(name, BeanSource.FALLBACK);
+				return beanType.cast( instance );
+			}
+			catch (RuntimeException e) {
+				throw new AssertionError( "Unexpected error instantiating a bean by name using reflection", e );
+			}
+		}
+
+		private int currentUnnamedInstantiationCount() {
+			return unnamedInstantiationCount;
+		}
+
+		private int currentNamedInstantiationCount() {
+			return namedInstantiationCount;
 		}
 	}
 }
