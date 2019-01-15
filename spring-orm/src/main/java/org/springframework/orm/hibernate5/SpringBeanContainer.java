@@ -115,11 +115,6 @@ public final class SpringBeanContainer implements BeanContainer {
 	@SuppressWarnings("unchecked")
 	public <B> ContainedBean<B> getBean(
 			String name, Class<B> beanType, LifecycleOptions lifecycleOptions, BeanInstanceProducer fallbackProducer) {
-
-		if (!this.beanFactory.containsBean(name)) {
-			return getBean(beanType, lifecycleOptions, fallbackProducer);
-		}
-
 		SpringContainedBean<?> bean;
 		if (lifecycleOptions.canUseCachedReferences()) {
 			bean = this.beanCache.get(name);
