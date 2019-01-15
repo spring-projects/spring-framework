@@ -45,7 +45,7 @@ dependencies {
 	optional("org.apache.httpcomponents:httpasyncclient:4.1.4") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("commons-fileupload:commons-fileupload:1.3.3")
+	optional("commons-fileupload:commons-fileupload:1.4")
 	optional("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
 	optional("com.fasterxml.woodstox:woodstox-core:5.2.0") {  // woodstox before aalto
 		exclude group: "stax", module: "stax-api"
