@@ -169,6 +169,7 @@ public final class SpringBeanContainer implements BeanContainer {
 		try {
 			if (lifecycleOptions.useJpaCompliantCreation()) {
 				Object bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
+				this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 				this.beanFactory.applyBeanPropertyValues(bean, name);
 				bean = this.beanFactory.initializeBean(bean, name);
 				return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));
