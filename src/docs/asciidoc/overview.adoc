@@ -125,7 +125,7 @@ clean code structure with  no circular dependencies between packages.
 For how-to questions or diagnosing or debugging issues, we suggest using StackOverflow,
 and we have a https://spring.io/questions[questions page] that lists the suggested tags to use.
 If you're fairly certain that there is a problem in the Spring Framework or would like
-to suggest a feature, please use the https://jira.spring.io/browse/spr[JIRA issue tracker].
+to suggest a feature, please use the https://github.com/spring-projects/spring-framework/issues[GitHub Issues].
 
 If you have a solution in mind or a suggested fix, you can submit a pull request on
 https://github.com/spring-projects/spring-framework[Github]. However, please keep in mind

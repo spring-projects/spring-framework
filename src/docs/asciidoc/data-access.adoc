@@ -4983,7 +4983,7 @@ You can extend Spring JDBC embedded database support in two ways:
   connection pool to manage embedded database connections.
 
 We encourage you to contribute extensions to the Spring community at
-https://jira.spring.io/browse/SPR[jira.spring.io].
+https://github.com/spring-projects/spring-framework/issues[GitHub Issues].
 
 
 
