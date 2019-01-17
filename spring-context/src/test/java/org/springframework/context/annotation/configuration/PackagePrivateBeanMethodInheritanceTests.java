@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 
 /**
  * Reproduces SPR-8756, which has been marked as "won't fix" for reasons
- * described in the JIRA issue. Also demonstrates the suggested workaround.
+ * described in the issue. Also demonstrates the suggested workaround.
  *
  * @author Chris Beams
  */

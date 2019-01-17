@@ -1,4 +1,4 @@
-List of outstanding things to think about - turn into JIRAs once distilled to a core set of issues
+List of outstanding things to think about - turn into tickets once distilled to a core set of issues
 
 High Importance
 
