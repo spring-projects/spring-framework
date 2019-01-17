@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the {@link MessageSourceResolvable} interface.
+ * Spring's default implementation of the {@link MessageSourceResolvable} interface.
  * Offers an easy way to store all the necessary values needed to resolve
  * a message via a {@link org.springframework.context.MessageSource}.
  *
@@ -143,8 +143,8 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	}
 
 	/**
-	 * Default implementation exposes the attributes of this MessageSourceResolvable.
-	 * To be overridden in more specific subclasses, potentially including the
+	 * The default implementation exposes the attributes of this MessageSourceResolvable.
+	 * <p>To be overridden in more specific subclasses, potentially including the
 	 * resolvable content through {@code resolvableToString()}.
 	 * @see #resolvableToString()
 	 */

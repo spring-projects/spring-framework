@@ -46,6 +46,16 @@ import org.springframework.web.reactive.function.BodyInserter;
 public interface ClientRequest {
 
 	/**
+	 * Name of {@link #attributes() attribute} whose value can be used to
+	 * correlate log messages for this request. Use {@link #logPrefix()} to
+	 * obtain a consistently formatted prefix based on this attribute.
+	 * @since 5.1
+	 * @see #logPrefix()
+	 */
+	String LOG_ID_ATTRIBUTE = ClientRequest.class.getName() + ".LOG_ID";
+
+
+	/**
 	 * Return the HTTP method.
 	 */
 	HttpMethod method();
@@ -76,13 +86,7 @@ public interface ClientRequest {
 	 * @return the attribute value
 	 */
 	default Optional<Object> attribute(String name) {
-		Map<String, Object> attributes = attributes();
-		if (attributes.containsKey(name)) {
-			return Optional.of(attributes.get(name));
-		}
-		else {
-			return Optional.empty();
-		}
+		return Optional.ofNullable(attributes().get(name));
 	}
 
 	/**
@@ -91,8 +95,18 @@ public interface ClientRequest {
 	Map<String, Object> attributes();
 
 	/**
-	 * Writes this request to the given {@link ClientHttpRequest}.
-	 *
+	 * Return a log message prefix to use to correlate messages for this request.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
+	 * along with some extra formatting so that the prefix can be conveniently
+	 * prepended with no further formatting no separators required.
+	 * @return the log message prefix or an empty String if the
+	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * @since 5.1
+	 */
+	String logPrefix();
+
+	/**
+	 * Write this request to the given {@link ClientHttpRequest}.
 	 * @param request the client http request to write to
 	 * @param strategies the strategies to use when writing
 	 * @return {@code Mono<Void>} to indicate when writing is complete

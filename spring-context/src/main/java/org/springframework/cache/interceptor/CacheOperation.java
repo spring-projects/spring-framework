@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public abstract class CacheOperation implements BasicOperation {
 
 
 	/**
+	 * Create a new {@link CacheOperation} instance from the given builder.
 	 * @since 4.3
 	 */
 	protected CacheOperation(Builder b) {
@@ -126,6 +127,7 @@ public abstract class CacheOperation implements BasicOperation {
 
 
 	/**
+	 * Base class for builders that can be used to create a {@link CacheOperation}.
 	 * @since 4.3
 	 */
 	public abstract static class Builder {

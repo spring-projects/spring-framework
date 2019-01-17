@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public abstract class AbstractPropertyValuesTests {
 	/**
 	 * Must contain: forname=Tony surname=Blair age=50
 	 */
-	protected void doTestTony(PropertyValues pvs) throws Exception {
+	protected void doTestTony(PropertyValues pvs) {
 		assertTrue("Contains 3", pvs.getPropertyValues().length == 3);
 		assertTrue("Contains forname", pvs.contains("forname"));
 		assertTrue("Contains surname", pvs.contains("surname"));

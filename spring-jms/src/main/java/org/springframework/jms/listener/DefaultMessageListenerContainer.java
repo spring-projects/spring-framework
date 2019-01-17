@@ -875,7 +875,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 		if (ex instanceof SharedConnectionNotInitializedException) {
 			if (!alreadyRecovered) {
-				logger.info("JMS message listener invoker needs to establish shared Connection");
+				logger.debug("JMS message listener invoker needs to establish shared Connection");
 			}
 		}
 		else {
@@ -943,7 +943,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					Connection con = createConnection();
 					JmsUtils.closeConnection(con);
 				}
-				logger.info("Successfully refreshed JMS Connection");
+				logger.debug("Successfully refreshed JMS Connection");
 				break;
 			}
 			catch (Exception ex) {

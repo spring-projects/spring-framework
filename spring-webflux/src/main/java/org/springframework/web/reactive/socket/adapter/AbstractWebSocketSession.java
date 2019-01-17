@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,8 +41,11 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> the native delegate type
  */
 public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final T delegate;
 
@@ -52,23 +57,32 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
+	private final String logPrefix;
+
 
 	/**
 	 * Create a new WebSocket session.
 	 */
-	protected AbstractWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
-			DataBufferFactory bufferFactory) {
-
+	protected AbstractWebSocketSession(T delegate, String id, HandshakeInfo info, DataBufferFactory bufferFactory) {
 		Assert.notNull(delegate, "Native session is required.");
 		Assert.notNull(id, "Session id is required.");
-		Assert.notNull(handshakeInfo, "HandshakeInfo is required.");
+		Assert.notNull(info, "HandshakeInfo is required.");
 		Assert.notNull(bufferFactory, "DataBuffer factory is required.");
 
 		this.delegate = delegate;
 		this.id = id;
-		this.handshakeInfo = handshakeInfo;
+		this.handshakeInfo = info;
 		this.bufferFactory = bufferFactory;
-		this.attributes.putAll(handshakeInfo.getAttributes());
+		this.attributes.putAll(info.getAttributes());
+		this.logPrefix = initLogPrefix(info, id);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(getLogPrefix() + "Session id \"" + getId() + "\" for " + getHandshakeInfo().getUri());
+		}
+	}
+
+	private static String initLogPrefix(HandshakeInfo info, String id) {
+		return info.getLogPrefix() != null ? info.getLogPrefix() : "[" + id + "] ";
 	}
 
 
@@ -95,6 +109,11 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 	public Map<String, Object> getAttributes() {
 		return this.attributes;
 	}
+
+	protected String getLogPrefix() {
+		return this.logPrefix;
+	}
+
 
 	@Override
 	public abstract Flux<WebSocketMessage> receive();

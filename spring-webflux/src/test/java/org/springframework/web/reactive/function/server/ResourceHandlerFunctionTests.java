@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -53,6 +51,7 @@ public class ResourceHandlerFunctionTests {
 
 	private ServerResponse.Context context;
 
+
 	@Before
 	public void createContext() {
 		HandlerStrategies strategies = HandlerStrategies.withDefaults();
@@ -61,13 +60,11 @@ public class ResourceHandlerFunctionTests {
 			public List<HttpMessageWriter<?>> messageWriters() {
 				return strategies.messageWriters();
 			}
-
 			@Override
 			public List<ViewResolver> viewResolvers() {
 				return strategies.viewResolvers();
 			}
 		};
-
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Required;
-import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -279,9 +277,6 @@ public class ConfigurationClassProcessingTests {
 		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
 		ccpp.postProcessBeanDefinitionRegistry(factory);
 		ccpp.postProcessBeanFactory(factory);
-		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
-		rapp.setBeanFactory(factory);
-		factory.addBeanPostProcessor(rapp);
 		factory.freezeConfiguration();
 		return factory;
 	}
@@ -514,7 +509,6 @@ public class ConfigurationClassProcessingTests {
 		}
 
 		@Override
-		@Required
 		public void setSpouse(ITestBean spouse) {
 			super.setSpouse(spouse);
 		}

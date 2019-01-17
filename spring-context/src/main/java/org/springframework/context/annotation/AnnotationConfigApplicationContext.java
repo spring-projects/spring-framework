@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,9 +101,8 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 
 
 	/**
-	 * {@inheritDoc}
-	 * <p>Delegates given environment to underlying {@link AnnotatedBeanDefinitionReader}
-	 * and {@link ClassPathBeanDefinitionScanner} members.
+	 * Propagates the given custom {@code Environment} to the underlying
+	 * {@link AnnotatedBeanDefinitionReader} and {@link ClassPathBeanDefinitionScanner}.
 	 */
 	@Override
 	public void setEnvironment(ConfigurableEnvironment environment) {

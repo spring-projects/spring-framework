@@ -18,6 +18,7 @@ package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -28,6 +29,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -39,7 +42,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.util.JsonExpectationsHelper;
+import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
@@ -47,10 +52,6 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Default implementation of {@link WebTestClient}.
@@ -299,7 +300,7 @@ class DefaultWebTestClient implements WebTestClient {
 		DefaultResponseSpec(WiretapConnector.Info wiretapInfo, ClientResponse response,
 				@Nullable String uriTemplate, Duration timeout) {
 
-			this.exchangeResult = wiretapInfo.createExchangeResult(uriTemplate);
+			this.exchangeResult = wiretapInfo.createExchangeResult(timeout, uriTemplate);
 			this.response = response;
 			this.timeout = timeout;
 		}
@@ -356,13 +357,13 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(Class<T> elementType) {
 			Flux<T> body = this.response.bodyToFlux(elementType);
-			return new FluxExchangeResult<>(this.exchangeResult, body, this.timeout);
+			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType) {
 			Flux<T> body = this.response.bodyToFlux(elementType);
-			return new FluxExchangeResult<>(this.exchangeResult, body, this.timeout);
+			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 	}
 
@@ -382,7 +383,28 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public <T extends S> T isEqualTo(B expected) {
 			this.result.assertWithDiagnostics(() ->
-					assertEquals("Response body", expected, this.result.getResponseBody()));
+					AssertionErrors.assertEquals("Response body", expected, this.result.getResponseBody()));
+			return self();
+		}
+
+		@Override
+		public <T extends S> T value(Matcher<B> matcher) {
+			this.result.assertWithDiagnostics(() -> MatcherAssert.assertThat(this.result.getResponseBody(), matcher));
+			return self();
+		}
+
+		@Override
+		public <T extends S, R> T value(Function<B, R> bodyMapper, Matcher<R> matcher) {
+			this.result.assertWithDiagnostics(() -> {
+				B body = this.result.getResponseBody();
+				MatcherAssert.assertThat(bodyMapper.apply(body), matcher);
+			});
+			return self();
+		}
+
+		@Override
+		public <T extends S> T value(Consumer<B> consumer) {
+			this.result.assertWithDiagnostics(() -> consumer.accept(this.result.getResponseBody()));
 			return self();
 		}
 
@@ -415,7 +437,8 @@ class DefaultWebTestClient implements WebTestClient {
 		public ListBodySpec<E> hasSize(int size) {
 			List<E> actual = getResult().getResponseBody();
 			String message = "Response body does not contain " + size + " elements";
-			getResult().assertWithDiagnostics(() -> assertEquals(message, size, (actual != null ? actual.size() : 0)));
+			getResult().assertWithDiagnostics(() ->
+					AssertionErrors.assertEquals(message, size, (actual != null ? actual.size() : 0)));
 			return this;
 		}
 
@@ -425,7 +448,8 @@ class DefaultWebTestClient implements WebTestClient {
 			List<E> expected = Arrays.asList(elements);
 			List<E> actual = getResult().getResponseBody();
 			String message = "Response body does not contain " + expected;
-			getResult().assertWithDiagnostics(() -> assertTrue(message, (actual != null && actual.containsAll(expected))));
+			getResult().assertWithDiagnostics(() ->
+					AssertionErrors.assertTrue(message, (actual != null && actual.containsAll(expected))));
 			return this;
 		}
 
@@ -435,7 +459,8 @@ class DefaultWebTestClient implements WebTestClient {
 			List<E> expected = Arrays.asList(elements);
 			List<E> actual = getResult().getResponseBody();
 			String message = "Response body should not have contained " + expected;
-			getResult().assertWithDiagnostics(() -> assertTrue(message, (actual == null || !actual.containsAll(expected))));
+			getResult().assertWithDiagnostics(() ->
+					AssertionErrors.assertTrue(message, (actual == null || !actual.containsAll(expected))));
 			return this;
 		}
 
@@ -454,12 +479,13 @@ class DefaultWebTestClient implements WebTestClient {
 
 		DefaultBodyContentSpec(EntityExchangeResult<byte[]> result) {
 			this.result = result;
-			this.isEmpty = (result.getResponseBody() == null);
+			this.isEmpty = (result.getResponseBody() == null || result.getResponseBody().length == 0);
 		}
 
 		@Override
 		public EntityExchangeResult<Void> isEmpty() {
-			this.result.assertWithDiagnostics(() -> assertTrue("Expected empty body", this.isEmpty));
+			this.result.assertWithDiagnostics(() ->
+					AssertionErrors.assertTrue("Expected empty body", this.isEmpty));
 			return new EntityExchangeResult<>(this.result, null);
 		}
 
@@ -477,8 +503,26 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
+		public BodyContentSpec xml(String expectedXml) {
+			this.result.assertWithDiagnostics(() -> {
+				try {
+					new XmlExpectationsHelper().assertXmlEqual(expectedXml, getBodyAsString());
+				}
+				catch (Exception ex) {
+					throw new AssertionError("XML parsing error", ex);
+				}
+			});
+			return this;
+		}
+
+		@Override
 		public JsonPathAssertions jsonPath(String expression, Object... args) {
 			return new JsonPathAssertions(this, getBodyAsString(), expression, args);
+		}
+
+		@Override
+		public XpathAssertions xpath(String expression, @Nullable Map<String, String> namespaces, Object... args) {
+			return new XpathAssertions(this, expression, namespaces, args);
 		}
 
 		private String getBodyAsString() {
@@ -486,8 +530,8 @@ class DefaultWebTestClient implements WebTestClient {
 			if (body == null || body.length == 0) {
 				return "";
 			}
-			MediaType mediaType = this.result.getResponseHeaders().getContentType();
-			Charset charset = Optional.ofNullable(mediaType).map(MimeType::getCharset).orElse(UTF_8);
+			Charset charset = Optional.ofNullable(this.result.getResponseHeaders().getContentType())
+					.map(MimeType::getCharset).orElse(StandardCharsets.UTF_8);
 			return new String(body, charset);
 		}
 

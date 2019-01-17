@@ -95,7 +95,7 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	 * @param exchange the current exchange
 	 * @param bindingContext the binding context to use
 	 * @param providedArgs optional list of argument values to match by type
-	 * @return Mono with a {@link HandlerResult}.
+	 * @return a Mono with a {@link HandlerResult}.
 	 * @throws ServerErrorException if method argument resolution or method invocation fails
 	 */
 	@Nullable

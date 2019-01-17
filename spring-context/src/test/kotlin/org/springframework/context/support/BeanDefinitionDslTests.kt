@@ -20,11 +20,11 @@ import org.junit.Assert.*
 import org.junit.Test
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.getBean
-import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.support.BeanDefinitionDsl.*
 import org.springframework.core.env.SimpleCommandLinePropertySource
 import org.springframework.core.env.get
 import org.springframework.mock.env.MockPropertySource
+import java.util.stream.Collectors
 
 @Suppress("UNUSED_EXPRESSION")
 class BeanDefinitionDslTests {
@@ -34,7 +34,6 @@ class BeanDefinitionDslTests {
 		val beans = beans {
 			bean<Foo>()
 			bean<Bar>("bar", scope = Scope.PROTOTYPE)
-			bean { Baz(ref()) }
 			bean { Baz(ref("bar")) }
 		}
 
@@ -59,7 +58,6 @@ class BeanDefinitionDslTests {
 				}
 			}
 			profile("baz") {
-				bean { Baz(ref()) }
 				bean { Baz(ref("bar")) }
 			}
 		}
@@ -89,7 +87,6 @@ class BeanDefinitionDslTests {
 				bean { FooFoo(env["name"]!!) }
 			}
 			environment( { activeProfiles.contains("baz") } ) {
-				bean { Baz(ref()) }
 				bean { Baz(ref("bar")) }
 			}
 		}
@@ -130,12 +127,12 @@ class BeanDefinitionDslTests {
 		}
 	}
 
-	@Test  // SPR-16269
-	fun `Provide access to the context for allowing calling advanced features like getBeansOfType`() {
+	@Test  // SPR-17352
+	fun `Retrieve multiple beans via a bean provider`() {
 		val beans = beans {
-			bean<Foo>("foo1")
-			bean<Foo>("foo2")
-			bean { BarBar(context.getBeansOfType<Foo>().values) }
+			bean<Foo>()
+			bean<Foo>()
+			bean { BarBar(provider<Foo>().stream().collect(Collectors.toList())) }
 		}
 
 		val context = GenericApplicationContext().apply {
@@ -145,6 +142,19 @@ class BeanDefinitionDslTests {
 
 		val barbar = context.getBean<BarBar>()
 		assertEquals(2, barbar.foos.size)
+	}
+
+	@Test  // SPR-17292
+	fun `Declare beans leveraging constructor injection`() {
+		val beans = beans {
+			bean<Bar>()
+			bean<Baz>()
+		}
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
+		context.getBean<Baz>()
 	}
 	
 }

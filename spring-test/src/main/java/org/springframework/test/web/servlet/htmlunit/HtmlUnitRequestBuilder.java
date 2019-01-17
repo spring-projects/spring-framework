@@ -490,7 +490,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			synchronized (HtmlUnitRequestBuilder.this.sessions) {
 				HtmlUnitRequestBuilder.this.sessions.remove(getId());
 			}
-			removeSessionCookie(request, getId());
+			removeSessionCookie(this.request, getId());
 		}
 	}
 

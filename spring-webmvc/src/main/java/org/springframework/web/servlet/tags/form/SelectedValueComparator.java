@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
@@ -59,11 +60,7 @@ abstract class SelectedValueComparator {
 	 * the supplied {@link BindStatus}. Equality in this case differs from standard Java equality and
 	 * is described in more detail <a href="#equality-contract">here</a>.
 	 */
-	public static boolean isSelected(BindStatus bindStatus, Object candidateValue) {
-		if (bindStatus == null) {
-			return (candidateValue == null);
-		}
-
+	public static boolean isSelected(BindStatus bindStatus, @Nullable Object candidateValue) {
 		// Check obvious equality matches with the candidate first,
 		// both with the rendered value and with the original value.
 		Object boundValue = bindStatus.getValue();
@@ -85,14 +82,16 @@ abstract class SelectedValueComparator {
 		// Non-null value but no obvious equality with the candidate value:
 		// go into more exhaustive comparisons.
 		boolean selected = false;
-		if (boundValue.getClass().isArray()) {
-			selected = collectionCompare(CollectionUtils.arrayToList(boundValue), candidateValue, bindStatus);
-		}
-		else if (boundValue instanceof Collection) {
-			selected = collectionCompare((Collection<?>) boundValue, candidateValue, bindStatus);
-		}
-		else if (boundValue instanceof Map) {
-			selected = mapCompare((Map<?, ?>) boundValue, candidateValue, bindStatus);
+		if (candidateValue != null) {
+			if (boundValue.getClass().isArray()) {
+				selected = collectionCompare(CollectionUtils.arrayToList(boundValue), candidateValue, bindStatus);
+			}
+			else if (boundValue instanceof Collection) {
+				selected = collectionCompare((Collection<?>) boundValue, candidateValue, bindStatus);
+			}
+			else if (boundValue instanceof Map) {
+				selected = mapCompare((Map<?, ?>) boundValue, candidateValue, bindStatus);
+			}
 		}
 		if (!selected) {
 			selected = exhaustiveCompare(boundValue, candidateValue, bindStatus.getEditor(), null);
@@ -100,8 +99,8 @@ abstract class SelectedValueComparator {
 		return selected;
 	}
 
-	private static boolean collectionCompare(Collection<?> boundCollection, Object candidateValue,
-			BindStatus bindStatus) {
+	private static boolean collectionCompare(
+			Collection<?> boundCollection, Object candidateValue, BindStatus bindStatus) {
 		try {
 			if (boundCollection.contains(candidateValue)) {
 				return true;
@@ -128,7 +127,7 @@ abstract class SelectedValueComparator {
 	private static boolean exhaustiveCollectionCompare(
 			Collection<?> collection, Object candidateValue, BindStatus bindStatus) {
 
-		Map<PropertyEditor, Object> convertedValueCache = new HashMap<>(1);
+		Map<PropertyEditor, Object> convertedValueCache = new HashMap<>();
 		PropertyEditor editor = null;
 		boolean candidateIsString = (candidateValue instanceof String);
 		if (!candidateIsString) {
@@ -145,8 +144,8 @@ abstract class SelectedValueComparator {
 		return false;
 	}
 
-	private static boolean exhaustiveCompare(Object boundValue, Object candidate,
-			PropertyEditor editor, Map<PropertyEditor, Object> convertedValueCache) {
+	private static boolean exhaustiveCompare(@Nullable Object boundValue, @Nullable Object candidate,
+			@Nullable PropertyEditor editor, @Nullable Map<PropertyEditor, Object> convertedValueCache) {
 
 		String candidateDisplayString = ValueFormatter.getDisplayString(candidate, editor, false);
 		if (boundValue != null && boundValue.getClass().isEnum()) {

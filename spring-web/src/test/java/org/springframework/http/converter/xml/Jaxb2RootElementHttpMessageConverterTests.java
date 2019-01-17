@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,7 @@
 
 package org.springframework.http.converter.xml;
 
-import static org.junit.Assert.*;
-import static org.xmlunit.diff.ComparisonType.*;
-import static org.xmlunit.diff.DifferenceEvaluators.*;
-import static org.xmlunit.matchers.CompareMatcher.*;
-
 import java.nio.charset.StandardCharsets;
-
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -48,6 +42,11 @@ import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import static org.junit.Assert.*;
+import static org.xmlunit.diff.ComparisonType.*;
+import static org.xmlunit.diff.DifferenceEvaluators.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
+
 /**
  * Tests for {@link Jaxb2RootElementHttpMessageConverter}.
  *
@@ -68,7 +67,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		converter = new Jaxb2RootElementHttpMessageConverter();
 		rootElement = new RootElement();
 		DefaultAopProxyFactory proxyFactory = new DefaultAopProxyFactory();
@@ -81,7 +80,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 
 
 	@Test
-	public void canRead() throws Exception {
+	public void canRead() {
 		assertTrue("Converter does not support reading @XmlRootElement",
 				converter.canRead(RootElement.class, null));
 		assertTrue("Converter does not support reading @XmlType",
@@ -89,7 +88,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 	}
 
 	@Test
-	public void canWrite() throws Exception {
+	public void canWrite() {
 		assertTrue("Converter does not support writing @XmlRootElement",
 				converter.canWrite(RootElement.class, null));
 		assertTrue("Converter does not support writing @XmlRootElement subclass",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,13 @@ import org.springframework.context.annotation.Role;
  * <p>Can safely be used alongside Spring's caching support.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  * @see org.springframework.cache.annotation.EnableCaching
  * @see org.springframework.cache.annotation.CachingConfigurationSelector
  */
 @Configuration
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class ProxyJCacheConfiguration extends AbstractJCacheConfiguration {
 
 	@Bean(name = CacheManagementConfigUtils.JCACHE_ADVISOR_BEAN_NAME)
@@ -54,11 +56,8 @@ public class ProxyJCacheConfiguration extends AbstractJCacheConfiguration {
 	@Bean(name = "jCacheInterceptor")
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public JCacheInterceptor cacheInterceptor() {
-		JCacheInterceptor interceptor = new JCacheInterceptor();
+		JCacheInterceptor interceptor = new JCacheInterceptor(this.errorHandler);
 		interceptor.setCacheOperationSource(cacheOperationSource());
-		if (this.errorHandler != null) {
-			interceptor.setErrorHandler(this.errorHandler);
-		}
 		return interceptor;
 	}
 

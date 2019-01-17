@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,9 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
  */
 public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
+	/**
+	 * The bean name used for the {@code ViewResolverComposite}.
+	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "mvcViewResolver";
 
 

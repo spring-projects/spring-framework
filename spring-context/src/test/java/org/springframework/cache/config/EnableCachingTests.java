@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,23 +66,21 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 	}
 
 	@Test
-	public void singleCacheManagerBean() throws Throwable {
+	public void singleCacheManagerBean() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(SingleCacheManagerConfig.class);
 		ctx.refresh();
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void multipleCacheManagerBeans() throws Throwable {
+	@Test
+	public void multipleCacheManagerBeans() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfig.class);
 		try {
 			ctx.refresh();
 		}
-		catch (BeanCreationException ex) {
-			Throwable root = ex.getRootCause();
-			assertTrue(root.getMessage().contains("beans of type CacheManager"));
-			throw root;
+		catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("no unique bean of type CacheManager"));
 		}
 	}
 
@@ -93,8 +91,8 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 		ctx.refresh();  // does not throw an exception
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void multipleCachingConfigurers() throws Throwable {
+	@Test
+	public void multipleCachingConfigurers() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfigurer.class, EnableCachingConfig.class);
 		try {
@@ -102,22 +100,20 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 		}
 		catch (BeanCreationException ex) {
 			Throwable root = ex.getRootCause();
+			assertTrue(root instanceof IllegalStateException);
 			assertTrue(root.getMessage().contains("implementations of CachingConfigurer"));
-			throw root;
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void noCacheManagerBeans() throws Throwable {
+	@Test
+	public void noCacheManagerBeans() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(EmptyConfig.class);
 		try {
 			ctx.refresh();
 		}
-		catch (BeanCreationException ex) {
-			Throwable root = ex.getRootCause();
-			assertTrue(root.getMessage().contains("No bean of type CacheManager"));
-			throw root;
+		catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("no bean of type CacheManager"));
 		}
 	}
 

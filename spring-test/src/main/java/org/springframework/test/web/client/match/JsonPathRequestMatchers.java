@@ -281,7 +281,7 @@ public class JsonPathRequestMatchers {
 
 
 	/**
-	 * Abstract base class for {@code JsonPath}-based {@link RequestMatcher}s.
+	 * Abstract base class for {@code JsonPath}-based {@link RequestMatcher RequestMatchers}.
 	 * @see #matchInternal
 	 */
 	private abstract static class AbstractJsonPathRequestMatcher implements RequestMatcher {

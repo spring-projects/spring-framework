@@ -78,7 +78,7 @@ public class VariableReference extends SpelNodeImpl {
 		if (value == null || !Modifier.isPublic(value.getClass().getModifiers())) {
 			// If the type is not public then when generateCode produces a checkcast to it
 			// then an IllegalAccessError will occur.
-			// If resorting to Object isn't sufficient, the hierarchy could be traversed for 
+			// If resorting to Object isn't sufficient, the hierarchy could be traversed for
 			// the first public type.
 			this.exitTypeDescriptor = "Ljava/lang/Object";
 		}
@@ -108,7 +108,7 @@ public class VariableReference extends SpelNodeImpl {
 	public boolean isCompilable() {
 		return (this.exitTypeDescriptor != null);
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		if (this.name.equals(ROOT)) {
@@ -116,7 +116,7 @@ public class VariableReference extends SpelNodeImpl {
 		}
 		else {
 			mv.visitVarInsn(ALOAD, 2);
-			mv.visitLdcInsn(name);
+			mv.visitLdcInsn(this.name);
 			mv.visitMethodInsn(INVOKEINTERFACE, "org/springframework/expression/EvaluationContext", "lookupVariable", "(Ljava/lang/String;)Ljava/lang/Object;",true);
 		}
 		CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);

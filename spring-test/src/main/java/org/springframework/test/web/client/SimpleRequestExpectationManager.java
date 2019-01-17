@@ -37,11 +37,11 @@ import org.springframework.util.Assert;
  */
 public class SimpleRequestExpectationManager extends AbstractRequestExpectationManager {
 
-	/** Expectations in the order of declaration (count may be > 1) */
+	/** Expectations in the order of declaration (count may be > 1). */
 	@Nullable
 	private Iterator<RequestExpectation> expectationIterator;
 
-	/** Track expectations that have a remaining count */
+	/** Track expectations that have a remaining count. */
 	private final RequestExpectationGroup repeatExpectations = new RequestExpectationGroup();
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,11 @@ import org.springframework.lang.Nullable;
  * Strategy for reading from a {@link ReactiveHttpInputMessage} and decoding
  * the stream of bytes to Objects of type {@code <T>}.
  *
- * @param <T> the type of objects in the decoded output stream
- *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @since 5.0
+ * @param <T> the type of objects in the decoded output stream
  */
 public interface HttpMessageReader<T> {
 

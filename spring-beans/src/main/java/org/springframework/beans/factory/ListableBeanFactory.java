@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,7 +244,9 @@ public interface ListableBeanFactory extends BeanFactory {
 
 	/**
 	 * Find all names of beans whose {@code Class} has the supplied {@link Annotation}
-	 * type, without creating any bean instances yet.
+	 * type, without creating corresponding bean instances yet.
+	 * <p>Note that this method considers objects created by FactoryBeans, which means
+	 * that FactoryBeans will get initialized in order to determine their object type.
 	 * @param annotationType the type of annotation to look for
 	 * @return the names of all matching beans
 	 * @since 4.0
@@ -254,6 +256,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	/**
 	 * Find all beans whose {@code Class} has the supplied {@link Annotation} type,
 	 * returning a Map of bean names with corresponding bean instances.
+	 * <p>Note that this method considers objects created by FactoryBeans, which means
+	 * that FactoryBeans will get initialized in order to determine their object type.
 	 * @param annotationType the type of annotation to look for
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values

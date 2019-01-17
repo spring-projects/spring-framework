@@ -87,15 +87,10 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if (this.handlerMap.isEmpty()) {
 			detectResourceHandlers(event.getApplicationContext());
-			if(logger.isDebugEnabled()) {
-				logger.debug("No resource handling mappings found");
-			}
 		}
 	}
 
 	private void detectResourceHandlers(ApplicationContext context) {
-		logger.debug("Looking for resource handler mappings");
-
 		Map<String, SimpleUrlHandlerMapping> beans = context.getBeansOfType(SimpleUrlHandlerMapping.class);
 		List<SimpleUrlHandlerMapping> mappings = new ArrayList<>(beans.values());
 		AnnotationAwareOrderComparator.sort(mappings);
@@ -104,14 +99,13 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			mapping.getHandlerMap().forEach((pattern, handler) -> {
 				if (handler instanceof ResourceWebHandler) {
 					ResourceWebHandler resourceHandler = (ResourceWebHandler) handler;
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found resource handler mapping: URL pattern=\"" + pattern + "\", " +
-								"locations=" + resourceHandler.getLocations() + ", " +
-								"resolvers=" + resourceHandler.getResourceResolvers());
-					}
 					this.handlerMap.put(pattern, resourceHandler);
 				}
 			}));
+
+		if (this.handlerMap.isEmpty()) {
+			logger.trace("No resource handling mappings found");
+		}
 	}
 
 
@@ -124,18 +118,13 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @return the resolved public resource URL path, or empty if unresolved
 	 */
 	public final Mono<String> getForUriString(String uriString, ServerWebExchange exchange) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Getting resource URL for request URL \"" + uriString + "\"");
-		}
 		ServerHttpRequest request = exchange.getRequest();
 		int queryIndex = getQueryIndex(uriString);
 		String lookupPath = uriString.substring(0, queryIndex);
 		String query = uriString.substring(queryIndex);
 		PathContainer parsedLookupPath = PathContainer.parsePath(lookupPath);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
-		}
-		return resolveResourceUrl(parsedLookupPath).map(resolvedPath ->
+
+		return resolveResourceUrl(exchange, parsedLookupPath).map(resolvedPath ->
 				request.getPath().contextPath().value() + resolvedPath + query);
 	}
 
@@ -152,33 +141,27 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		return suffixIndex;
 	}
 
-	private Mono<String> resolveResourceUrl(PathContainer lookupPath) {
+	private Mono<String> resolveResourceUrl(ServerWebExchange exchange, PathContainer lookupPath) {
 		return this.handlerMap.entrySet().stream()
 				.filter(entry -> entry.getKey().matches(lookupPath))
-				.sorted((entry1, entry2) ->
+				.min((entry1, entry2) ->
 						PathPattern.SPECIFICITY_COMPARATOR.compare(entry1.getKey(), entry2.getKey()))
-				.findFirst()
 				.map(entry -> {
 					PathContainer path = entry.getKey().extractPathWithinPattern(lookupPath);
 					int endIndex = lookupPath.elements().size() - path.elements().size();
 					PathContainer mapping = lookupPath.subPath(0, endIndex);
-					if (logger.isTraceEnabled()) {
-						logger.trace("Invoking ResourceResolverChain for URL pattern " +
-								"\"" + entry.getKey() + "\"");
-					}
 					ResourceWebHandler handler = entry.getValue();
 					List<ResourceResolver> resolvers = handler.getResourceResolvers();
 					ResourceResolverChain chain = new DefaultResourceResolverChain(resolvers);
 					return chain.resolveUrlPath(path.value(), handler.getLocations())
-							.map(resolvedPath -> {
-								if (logger.isTraceEnabled()) {
-									logger.trace("Resolved public resource URL path \"" + resolvedPath + "\"");
-								}
-								return mapping.value() + resolvedPath;
-							});
-
+							.map(resolvedPath -> mapping.value() + resolvedPath);
 				})
-				.orElse(Mono.empty());
+				.orElseGet(() ->{
+					if (logger.isTraceEnabled()) {
+						logger.trace(exchange.getLogPrefix() + "No match for \"" + lookupPath + "\"");
+					}
+					return Mono.empty();
+				});
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since April 24, 2003
+ * @param <T> the result type
  * @see JdbcTemplate
  * @see RowCallbackHandler
  * @see RowMapper
@@ -52,7 +53,7 @@ public interface ResultSetExtractor<T> {
 
 	/**
 	 * Implementations must implement this method to process the entire ResultSet.
-	 * @param rs ResultSet to extract data from. Implementations should
+	 * @param rs the ResultSet to extract data from. Implementations should
 	 * not close this: it will be closed by the calling JdbcTemplate.
 	 * @return an arbitrary result object, or {@code null} if none
 	 * (the extractor will typically be stateful in the latter case).

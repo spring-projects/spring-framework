@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,19 +52,19 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class DefaultServletHttpRequestHandler implements HttpRequestHandler, ServletContextAware {
 
-	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish */
+	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish. */
 	private static final String COMMON_DEFAULT_SERVLET_NAME = "default";
 
-	/** Default Servlet name used by Google App Engine */
+	/** Default Servlet name used by Google App Engine. */
 	private static final String GAE_DEFAULT_SERVLET_NAME = "_ah_default";
 
-	/** Default Servlet name used by Resin */
+	/** Default Servlet name used by Resin. */
 	private static final String RESIN_DEFAULT_SERVLET_NAME = "resin-file";
 
-	/** Default Servlet name used by WebLogic */
+	/** Default Servlet name used by WebLogic. */
 	private static final String WEBLOGIC_DEFAULT_SERVLET_NAME = "FileServlet";
 
-	/** Default Servlet name used by WebSphere */
+	/** Default Servlet name used by WebSphere. */
 	private static final String WEBSPHERE_DEFAULT_SERVLET_NAME = "SimpleFileServlet";
 
 

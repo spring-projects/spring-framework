@@ -429,7 +429,7 @@ public class ValidatorFactoryTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	@Constraint(validatedBy=InnerValidator.class)
-	public static @interface InnerValid {
+	public @interface InnerValid {
 
 		String message() default "NOT VALID";
 

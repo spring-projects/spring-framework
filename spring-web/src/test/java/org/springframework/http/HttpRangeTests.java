@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.http;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 
@@ -101,6 +103,31 @@ public class HttpRangeTests {
 	}
 
 	@Test
+	public void parseRangesValidations() {
+
+		// 1. At limit..
+		StringBuilder sb = new StringBuilder("bytes=0-0");
+		for (int i=0; i < 99; i++) {
+			sb.append(",").append(i).append("-").append(i + 1);
+		}
+		List<HttpRange> ranges = HttpRange.parseRanges(sb.toString());
+		assertEquals(100, ranges.size());
+
+		// 2. Above limit..
+		sb = new StringBuilder("bytes=0-0");
+		for (int i=0; i < 100; i++) {
+			sb.append(",").append(i).append("-").append(i + 1);
+		}
+		try {
+			HttpRange.parseRanges(sb.toString());
+			fail();
+		}
+		catch (IllegalArgumentException ex) {
+			// Expected
+		}
+	}
+
+	@Test
 	public void rangeToString() {
 		List<HttpRange> ranges = new ArrayList<>();
 		ranges.add(HttpRange.createByteRange(0, 499));
@@ -142,6 +169,27 @@ public class HttpRangeTests {
 		given(resource.contentLength()).willThrow(IOException.class);
 		HttpRange range = HttpRange.createByteRange(0, 9);
 		range.toResourceRegion(resource);
+	}
+
+	@Test
+	public void toResourceRegionsValidations() {
+		byte[] bytes = "12345".getBytes(StandardCharsets.UTF_8);
+		ByteArrayResource resource = new ByteArrayResource(bytes);
+
+		// 1. Below length
+		List<HttpRange> ranges = HttpRange.parseRanges("bytes=0-1,2-3");
+		List<ResourceRegion> regions = HttpRange.toResourceRegions(ranges, resource);
+		assertEquals(2, regions.size());
+
+		// 2. At length
+		ranges = HttpRange.parseRanges("bytes=0-1,2-4");
+		try {
+			HttpRange.toResourceRegions(ranges, resource);
+			fail();
+		}
+		catch (IllegalArgumentException ex) {
+			// Expected..
+		}
 	}
 
 }

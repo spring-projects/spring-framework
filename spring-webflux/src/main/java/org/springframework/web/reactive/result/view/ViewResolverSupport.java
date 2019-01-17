@@ -34,6 +34,9 @@ import org.springframework.util.Assert;
  */
 public abstract class ViewResolverSupport implements Ordered {
 
+	/**
+	 * The default {@link MediaType content-type} for views.
+	 */
 	public static final MediaType DEFAULT_CONTENT_TYPE = MediaType.parseMediaType("text/html;charset=UTF-8");
 
 

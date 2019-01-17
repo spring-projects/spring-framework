@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec.support;
 
 import java.util.ArrayList;
@@ -41,6 +42,9 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.json.Jackson2SmileDecoder;
 import org.springframework.http.codec.json.Jackson2SmileEncoder;
+import org.springframework.http.codec.protobuf.ProtobufDecoder;
+import org.springframework.http.codec.protobuf.ProtobufEncoder;
+import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.lang.Nullable;
@@ -51,21 +55,26 @@ import org.springframework.util.ClassUtils;
  * as a base for client and server specific variants.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 
-	static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					BaseCodecConfigurer.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							BaseCodecConfigurer.class.getClassLoader());
+	static final boolean jackson2Present;
 
-	private static final boolean jackson2SmilePresent =
-			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
-					BaseCodecConfigurer.class.getClassLoader());
+	private static final boolean jackson2SmilePresent;
 
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", BaseCodecConfigurer.class.getClassLoader());
+	private static final boolean jaxb2Present;
+
+	private static final boolean protobufPresent;
+
+	static {
+		ClassLoader classLoader = BaseCodecConfigurer.class.getClassLoader();
+		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		protobufPresent = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
+	}
 
 
 	@Nullable
@@ -73,6 +82,20 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 
 	@Nullable
 	private Encoder<?> jackson2JsonEncoder;
+
+	@Nullable
+	private Decoder<?> protobufDecoder;
+
+	@Nullable
+	private Encoder<?> protobufEncoder;
+
+	@Nullable
+	private Decoder<?> jaxb2Decoder;
+
+	@Nullable
+	private Encoder<?> jaxb2Encoder;
+
+	private boolean enableLoggingRequestDetails = false;
 
 	private boolean registerDefaults = true;
 
@@ -85,6 +108,35 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	@Override
 	public void jackson2JsonEncoder(Encoder<?> encoder) {
 		this.jackson2JsonEncoder = encoder;
+	}
+
+	@Override
+	public void protobufDecoder(Decoder<?> decoder) {
+		this.protobufDecoder = decoder;
+	}
+
+	@Override
+	public void protobufEncoder(Encoder<?> encoder) {
+		this.protobufEncoder = encoder;
+	}
+
+	@Override
+	public void jaxb2Decoder(Decoder<?> decoder) {
+		this.jaxb2Decoder = decoder;
+	}
+
+	@Override
+	public void jaxb2Encoder(Encoder<?> encoder) {
+		this.jaxb2Encoder = encoder;
+	}
+
+	@Override
+	public void enableLoggingRequestDetails(boolean enable) {
+		this.enableLoggingRequestDetails = enable;
+	}
+
+	protected boolean isEnableLoggingRequestDetails() {
+		return this.enableLoggingRequestDetails;
 	}
 
 	/**
@@ -108,8 +160,17 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		readers.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
-		readers.add(new FormHttpMessageReader());
+		if (protobufPresent) {
+			Decoder<?> decoder = this.protobufDecoder != null ? this.protobufDecoder : new ProtobufDecoder();
+			readers.add(new DecoderHttpMessageReader<>(decoder));
+		}
+
+		FormHttpMessageReader formReader = new FormHttpMessageReader();
+		formReader.setEnableLoggingRequestDetails(this.enableLoggingRequestDetails);
+		readers.add(formReader);
+
 		extendTypedReaders(readers);
+
 		return readers;
 	}
 
@@ -134,7 +195,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 			readers.add(new DecoderHttpMessageReader<>(new Jackson2SmileDecoder()));
 		}
 		if (jaxb2Present) {
-			readers.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
+			Decoder<?> decoder = this.jaxb2Decoder != null ? this.jaxb2Decoder : new Jaxb2XmlDecoder();
+			readers.add(new DecoderHttpMessageReader<>(decoder));
 		}
 		extendObjectReaders(readers);
 		return readers;
@@ -164,6 +226,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	 * or for multipart requests only ("true"). Generally the two sets are the
 	 * same except for the multipart writer itself.
 	 */
+	@SuppressWarnings("unchecked")
 	final List<HttpMessageWriter<?>> getTypedWriters(boolean forMultipart) {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();
@@ -177,6 +240,10 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		// No client or server specific multipart writers currently..
 		if (!forMultipart) {
 			extendTypedWriters(writers);
+		}
+		if (protobufPresent) {
+			Encoder<?> encoder = this.protobufEncoder != null ? this.protobufEncoder : new ProtobufEncoder();
+			writers.add(new ProtobufHttpMessageWriter((Encoder) encoder));
 		}
 		return writers;
 	}
@@ -205,7 +272,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 			writers.add(new EncoderHttpMessageWriter<>(new Jackson2SmileEncoder()));
 		}
 		if (jaxb2Present) {
-			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
+			Encoder<?> encoder = this.jaxb2Encoder != null ? this.jaxb2Encoder : new Jaxb2XmlEncoder();
+			writers.add(new EncoderHttpMessageWriter<>(encoder));
 		}
 		// No client or server specific multipart writers currently..
 		if (!forMultipart) {
@@ -233,7 +301,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	}
 
 
-	// Accessors for use in sub-classes...
+	// Accessors for use in subclasses...
 
 	protected Decoder<?> getJackson2JsonDecoder() {
 		return (this.jackson2JsonDecoder != null ? this.jackson2JsonDecoder : new Jackson2JsonDecoder());
@@ -244,4 +312,3 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	}
 
 }
-

@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -32,6 +33,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -49,10 +51,18 @@ import static org.junit.Assert.*;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class MultipartHttpMessageWriterTests {
+public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
 
 	private final MultipartHttpMessageWriter writer =
 			new MultipartHttpMessageWriter(ClientCodecConfigurer.create().getWriters());
+
+	private MockServerHttpResponse response;
+
+
+	@Before
+	public void setUp() {
+		this.response = new MockServerHttpResponse(this.bufferFactory);
+	}
 
 
 	@Test
@@ -96,11 +106,10 @@ public class MultipartHttpMessageWriterTests {
 		bodyBuilder.asyncPart("publisher", publisher, String.class);
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
-		MockServerHttpResponse response = new MockServerHttpResponse();
 		Map<String, Object> hints = Collections.emptyMap();
-		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block(Duration.ofSeconds(5));
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, this.response, hints).block(Duration.ofSeconds(5));
 
-		MultiValueMap<String, Part> requestParts = parse(response, hints);
+		MultiValueMap<String, Part> requestParts = parse(hints);
 		assertEquals(6, requestParts.size());
 
 		Part part = requestParts.getFirst("name 1");
@@ -164,11 +173,10 @@ public class MultipartHttpMessageWriterTests {
 
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
-		MockServerHttpResponse response = new MockServerHttpResponse();
 		Map<String, Object> hints = Collections.emptyMap();
-		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, this.response, hints).block();
 
-		MultiValueMap<String, Part> requestParts = parse(response, hints);
+		MultiValueMap<String, Part> requestParts = parse(hints);
 		assertEquals(1, requestParts.size());
 
 		Part part = requestParts.getFirst("logo");
@@ -189,9 +197,8 @@ public class MultipartHttpMessageWriterTests {
 
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
-		MockServerHttpResponse response = new MockServerHttpResponse();
 		Map<String, Object> hints = Collections.emptyMap();
-		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, this.response, hints).block();
 	}
 
 	@Test // SPR-16376
@@ -212,11 +219,11 @@ public class MultipartHttpMessageWriterTests {
 
 		MultiValueMap<String, HttpEntity<?>> multipartData = bodyBuilder.build();
 
-		MockServerHttpResponse response = new MockServerHttpResponse();
 		Map<String, Object> hints = Collections.emptyMap();
-		this.writer.write(Mono.just(multipartData), null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
+		this.writer.write(Mono.just(multipartData), null, MediaType.MULTIPART_FORM_DATA,
+				this.response, hints).block();
 
-		MultiValueMap<String, Part> requestParts = parse(response, hints);
+		MultiValueMap<String, Part> requestParts = parse(hints);
 		assertEquals(2, requestParts.size());
 
 		Part part = requestParts.getFirst("resource");
@@ -230,8 +237,8 @@ public class MultipartHttpMessageWriterTests {
 		assertEquals(logo.getFile().length(), part.headers().getContentLength());
 	}
 
-	private MultiValueMap<String, Part> parse(MockServerHttpResponse response, Map<String, Object> hints) {
-		MediaType contentType = response.getHeaders().getContentType();
+	private MultiValueMap<String, Part> parse(Map<String, Object> hints) {
+		MediaType contentType = this.response.getHeaders().getContentType();
 		assertNotNull("No boundary found", contentType.getParameter("boundary"));
 
 		// see if Synchronoss NIO Multipart can read what we wrote
@@ -240,7 +247,7 @@ public class MultipartHttpMessageWriterTests {
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.contentType(MediaType.parseMediaType(contentType.toString()))
-				.body(response.getBody());
+				.body(this.response.getBody());
 
 		ResolvableType elementType = ResolvableType.forClassWithGenerics(
 				MultiValueMap.class, String.class, Part.class);
@@ -265,7 +272,7 @@ public class MultipartHttpMessageWriterTests {
 		}
 
 		public String getBar() {
-			return bar;
+			return this.bar;
 		}
 
 		public void setBar(String bar) {

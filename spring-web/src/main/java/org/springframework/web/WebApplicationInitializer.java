@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,23 +35,22 @@ import javax.servlet.ServletException;
  * DispatcherServlet}. For reference, in WEB-INF/web.xml, this would typically be done as
  * follows:
  * <pre class="code">
- * {@code
- * <servlet>
- *   <servlet-name>dispatcher</servlet-name>
- *   <servlet-class>
+ * &lt;servlet&gt;
+ *   &lt;servlet-name>dispatcher&lt;/servlet-name&gt;
+ *   &lt;servlet-class&gt;
  *     org.springframework.web.servlet.DispatcherServlet
- *   </servlet-class>
- *   <init-param>
- *     <param-name>contextConfigLocation</param-name>
- *     <param-value>/WEB-INF/spring/dispatcher-config.xml</param-value>
- *   </init-param>
- *   <load-on-startup>1</load-on-startup>
- * </servlet>
+ *   &lt;/servlet-class&gt;
+ *   &lt;init-param>
+ *     &lt;param-name>contextConfigLocation&lt;/param-name&gt;
+ *     &lt;param-value>/WEB-INF/spring/dispatcher-config.xml&lt;/param-value&gt;
+ *   &lt;/init-param&gt;
+ *   &lt;load-on-startup>1&lt;/load-on-startup&gt;
+ * &lt;/servlet&gt;
  *
- * <servlet-mapping>
- *   <servlet-name>dispatcher</servlet-name>
- *   <url-pattern>/</url-pattern>
- * </servlet-mapping>}</pre>
+ * &lt;servlet-mapping&gt;
+ *   &lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;
+ *   &lt;url-pattern&gt;/&lt;/url-pattern&gt;
+ * &lt;/servlet-mapping&gt;</pre>
  *
  * <h3>The code-based approach with {@code WebApplicationInitializer}</h3>
  * Here is the equivalent {@code DispatcherServlet} registration logic,

@@ -76,7 +76,7 @@ Backports to prior versions will be considered on a case-by-case basis and refle
 the fix version in the issue tracker.
 
 1. Use short branch names, preferably based on the JIRA issue (e.g. `SPR-1234`), or
-otherwise using succinct, lower-case, dash (-) delimited names, such as `fix-warnings'.
+otherwise using succinct, lower-case, dash (-) delimited names, such as `fix-warnings`.
 
 1. Choose the granularity of your commits consciously and squash commits that represent
 multiple edits or corrections of the same logical change. See

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,40 @@
 
 package org.springframework.core.codec;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import java.util.Map;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
  */
-public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
+public class ResourceEncoderTests extends AbstractEncoderTestCase<ResourceEncoder> {
 
-	private final ResourceEncoder encoder = new ResourceEncoder();
+	private final byte[] bytes = "foo".getBytes(UTF_8);
 
+
+	public ResourceEncoderTests() {
+		super(new ResourceEncoder());
+	}
+
+	@Override
 	@Test
-	public void canEncode() throws Exception {
+	public void canEncode() {
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
 				MimeTypeUtils.TEXT_PLAIN));
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteArrayResource.class),
@@ -57,20 +63,27 @@ public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
-	@Test
-	public void encode() throws Exception {
-		String s = "foo";
-		Resource resource = new ByteArrayResource(s.getBytes(StandardCharsets.UTF_8));
+	@Override
+	public void encode() {
+		Flux<Resource> input = Flux.just(new ByteArrayResource(this.bytes));
 
-		Mono<Resource> source = Mono.just(resource);
+		testEncodeAll(input, Resource.class, step -> step
+				.consumeNextWith(expectBytes(this.bytes))
+				.verifyComplete());
+	}
 
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
-				ResolvableType.forClass(Resource.class),
-				null, Collections.emptyMap());
+	@Override
+	protected void testEncodeError(Publisher<?> input, ResolvableType outputType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		StepVerifier.create(output)
-				.consumeNextWith(stringConsumer(s))
-				.expectComplete()
+		Flux<Resource> i = Flux.error(new InputException());
+
+		Flux<DataBuffer> result = ((Encoder<Resource>) this.encoder).encode(i,
+				this.bufferFactory, outputType,
+				mimeType, hints);
+
+		StepVerifier.create(result)
+				.expectError(InputException.class)
 				.verify();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class Ternary extends SpelNodeImpl {
 		computeExitTypeDescriptor();
 		return result;
 	}
-	
+
 	@Override
 	public String toStringAST() {
 		return getChild(0).toStringAST() + " ? " + getChild(1).toStringAST() + " : " + getChild(2).toStringAST();
@@ -89,7 +89,7 @@ public class Ternary extends SpelNodeImpl {
 				CodeFlow.isBooleanCompatible(condition.exitTypeDescriptor) &&
 				left.exitTypeDescriptor != null && right.exitTypeDescriptor != null);
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		// May reach here without it computed if all elements are literals

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,21 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Represents a reactive server-side HTTP request
+ * Represents a reactive server-side HTTP request.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
+
+	/**
+	 * Return an id that represents the underlying connection, if available,
+	 * or the request for the purpose of correlating log messages.
+	 * @since 5.1
+	 * @see org.springframework.web.server.ServerWebExchange#getLogPrefix()
+	 */
+	String getId();
 
 	/**
 	 * Returns a structured representation of the request path including the

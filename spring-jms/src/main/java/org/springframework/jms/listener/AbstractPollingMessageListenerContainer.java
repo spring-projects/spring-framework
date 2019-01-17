@@ -59,7 +59,7 @@ import org.springframework.util.Assert;
  * {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually
  * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
- * Java EE enviroment, in combination with a JTA-aware JMS ConnectionFactory
+ * Java EE environment, in combination with a JTA-aware JMS ConnectionFactory
  * obtained from JNDI (check your application server's documentation).
  *
  * <p>This base class does not assume any specific mechanism for asynchronous

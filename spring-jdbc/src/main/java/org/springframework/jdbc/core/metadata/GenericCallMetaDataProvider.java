@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  */
 public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected static final Log logger = LogFactory.getLog(CallMetaDataProvider.class);
 
 	private boolean procedureColumnMetaDataUsed = false;

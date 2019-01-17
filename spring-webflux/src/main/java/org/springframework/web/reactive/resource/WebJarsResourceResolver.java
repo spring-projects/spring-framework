@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.reactive.resource;
 
 import java.util.List;
 
-import org.webjars.MultipleMatchesException;
 import org.webjars.WebJarAssetLocator;
 import reactor.core.publisher.Mono;
 
@@ -105,24 +104,14 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 	@Nullable
 	protected String findWebJarResourcePath(String path) {
-		try {
-			int startOffset = (path.startsWith("/") ? 1 : 0);
-			int endOffset = path.indexOf('/', 1);
-			if (endOffset != -1) {
-				String webjar = path.substring(startOffset, endOffset);
-				String partialPath = path.substring(endOffset);
-				String webJarPath = webJarAssetLocator.getFullPath(webjar, partialPath);
+		int startOffset = (path.startsWith("/") ? 1 : 0);
+		int endOffset = path.indexOf('/', 1);
+		if (endOffset != -1) {
+			String webjar = path.substring(startOffset, endOffset);
+			String partialPath = path.substring(endOffset + 1);
+			String webJarPath = this.webJarAssetLocator.getFullPathExact(webjar, partialPath);
+			if (webJarPath != null) {
 				return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
-			}
-		}
-		catch (MultipleMatchesException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("WebJar version conflict for \"" + path + "\"", ex);
-			}
-		}
-		catch (IllegalArgumentException ex) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No WebJar resource found for \"" + path + "\"");
 			}
 		}
 		return null;

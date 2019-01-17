@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	/**
 	 * Register a list of Quartz Calendar objects with the Scheduler
 	 * that this FactoryBean creates, to be referenced by Triggers.
-	 * @param calendars Map with calendar names as keys as Calendar
+	 * @param calendars a Map with calendar names as keys as Calendar
 	 * objects as values
 	 * @see org.quartz.Calendar
 	 */
@@ -310,7 +310,15 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 					!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
 				this.jobDetails.add(jobDetail);
 			}
-			getScheduler().rescheduleJob(trigger.getKey(), trigger);
+			try {
+				getScheduler().rescheduleJob(trigger.getKey(), trigger);
+			}
+			catch (ObjectAlreadyExistsException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Unexpectedly encountered existing trigger on rescheduling, assumably due to " +
+							"cluster race condition: " + ex.getMessage() + " - can safely be ignored");
+				}
+			}
 		}
 		else {
 			try {
@@ -325,8 +333,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 			}
 			catch (ObjectAlreadyExistsException ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " +
-							ex.getMessage() + " - can safely be ignored");
+					logger.debug("Unexpectedly encountered existing trigger on job scheduling, assumably due to " +
+							"cluster race condition: " + ex.getMessage() + " - can safely be ignored");
 				}
 				if (this.overwriteExistingJobs) {
 					getScheduler().rescheduleJob(trigger.getKey(), trigger);

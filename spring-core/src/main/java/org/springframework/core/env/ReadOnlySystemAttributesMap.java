@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	}
 
 	/**
+	 * Returns the value to which the specified key is mapped, or {@code null} if this map
+ 	 * contains no mapping for the key.
 	 * @param key the name of the system attribute to retrieve
 	 * @throws IllegalArgumentException if given key is non-String
 	 */

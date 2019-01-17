@@ -75,21 +75,21 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		LoadTimeWeaver serverSpecificLoadTimeWeaver = createServerSpecificLoadTimeWeaver(classLoader);
 		if (serverSpecificLoadTimeWeaver != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Determined server-specific load-time weaver: " +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Determined server-specific load-time weaver: " +
 						serverSpecificLoadTimeWeaver.getClass().getName());
 			}
 			this.loadTimeWeaver = serverSpecificLoadTimeWeaver;
 		}
 		else if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
-			logger.info("Found Spring's JVM agent for instrumentation");
+			logger.debug("Found Spring's JVM agent for instrumentation");
 			this.loadTimeWeaver = new InstrumentationLoadTimeWeaver(classLoader);
 		}
 		else {
 			try {
 				this.loadTimeWeaver = new ReflectiveLoadTimeWeaver(classLoader);
-				if (logger.isInfoEnabled()) {
-					logger.info("Using a reflective load-time weaver for class loader: " +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Using reflective load-time weaver for class loader: " +
 							this.loadTimeWeaver.getInstrumentableClassLoader().getClass().getName());
 				}
 			}
@@ -137,8 +137,8 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	@Override
 	public void destroy() {
 		if (this.loadTimeWeaver instanceof InstrumentationLoadTimeWeaver) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Removing all registered transformers for class loader: " +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Removing all registered transformers for class loader: " +
 						this.loadTimeWeaver.getInstrumentableClassLoader().getClass().getName());
 			}
 			((InstrumentationLoadTimeWeaver) this.loadTimeWeaver).removeTransformers();

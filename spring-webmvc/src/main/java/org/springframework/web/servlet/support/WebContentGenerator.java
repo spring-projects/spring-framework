@@ -65,13 +65,13 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
-	/** HTTP method "GET" */
+	/** HTTP method "GET". */
 	public static final String METHOD_GET = "GET";
 
-	/** HTTP method "HEAD" */
+	/** HTTP method "HEAD". */
 	public static final String METHOD_HEAD = "HEAD";
 
-	/** HTTP method "POST" */
+	/** HTTP method "POST". */
 	public static final String METHOD_POST = "POST";
 
 	private static final String HEADER_PRAGMA = "Pragma";
@@ -81,7 +81,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	protected static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
-	/** Set of supported HTTP methods */
+	/** Set of supported HTTP methods. */
 	@Nullable
 	private Set<String> supportedMethods;
 
@@ -469,6 +469,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	/**
+	 * Check and prepare the given request and response according to the settings
+	 * of this generator.
 	 * @see #checkRequest(HttpServletRequest)
 	 * @see #prepareResponse(HttpServletResponse)
 	 * @deprecated as of 4.2, since the {@code lastModified} flag is effectively ignored,
@@ -483,6 +485,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
+	 * Check and prepare the given request and response according to the settings
+	 * of this generator.
 	 * @see #checkRequest(HttpServletRequest)
 	 * @see #applyCacheSeconds(HttpServletResponse, int)
 	 * @deprecated as of 4.2, since the {@code lastModified} flag is effectively ignored,

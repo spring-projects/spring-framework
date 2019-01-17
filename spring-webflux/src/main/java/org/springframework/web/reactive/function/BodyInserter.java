@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public interface BodyInserter<T, M extends ReactiveHttpOutputMessage> {
 	interface Context {
 
 		/**
-		 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
+		 * Return the {@link HttpMessageWriter HttpMessageWriters} to be used for response body conversion.
 		 * @return the stream of message writers
 		 */
 		List<HttpMessageWriter<?>> messageWriters();

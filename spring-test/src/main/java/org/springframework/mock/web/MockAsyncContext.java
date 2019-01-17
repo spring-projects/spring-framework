@@ -94,7 +94,7 @@ public class MockAsyncContext implements AsyncContext {
 	@Override
 	public void dispatch() {
 		dispatch(this.request.getRequestURI());
- 	}
+	}
 
 	@Override
 	public void dispatch(String path) {
@@ -116,7 +116,7 @@ public class MockAsyncContext implements AsyncContext {
 
 	@Override
 	public void complete() {
-		MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+		MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(this.request, MockHttpServletRequest.class);
 		if (mockRequest != null) {
 			mockRequest.setAsyncStarted(false);
 		}

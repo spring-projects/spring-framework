@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,11 @@ import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSe
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
- * An HTTP {@link TransportHandler} that uses a famous browser document.domain technique:
- * <a href="http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
- * http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
+ * An HTTP {@link TransportHandler} that uses a famous browser
+ * {@code document.domain technique}. See <a href=
+ * "http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
+ * stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
+ * for details.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

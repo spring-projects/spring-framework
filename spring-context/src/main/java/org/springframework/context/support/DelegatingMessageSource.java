@@ -92,4 +92,10 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 		}
 	}
 
+
+	@Override
+	public String toString() {
+		return this.parentMessageSource != null ? this.parentMessageSource.toString() : "Empty MessageSource";
+	}
+
 }

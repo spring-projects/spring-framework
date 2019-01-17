@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jca.cci.core;
 
 import java.sql.SQLException;
-
 import javax.resource.ResourceException;
 import javax.resource.cci.Record;
 
@@ -40,6 +39,7 @@ import org.springframework.lang.Nullable;
  * @author Thierry Templier
  * @author Juergen Hoeller
  * @since 1.2
+ * @param <T> the result type
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, Record, RecordExtractor)
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, RecordCreator, RecordExtractor)
  * @see javax.resource.cci.ResultSet

@@ -182,8 +182,7 @@ public class MethodReference extends SpelNodeImpl {
 			@Nullable TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 
 		List<MethodResolver> methodResolvers = evaluationContext.getMethodResolvers();
-		if (methodResolvers.size() != 1 ||
-				!(methodResolvers.get(0) instanceof ReflectiveMethodResolver)) {
+		if (methodResolvers.size() != 1 || !(methodResolvers.get(0) instanceof ReflectiveMethodResolver)) {
 			// Not a default ReflectiveMethodResolver - don't know whether caching is valid
 			return null;
 		}
@@ -249,7 +248,7 @@ public class MethodReference extends SpelNodeImpl {
 			Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
 			String descriptor = CodeFlow.toDescriptor(method.getReturnType());
 			if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
-				originalPrimitiveExitTypeDescriptor = descriptor;
+				this.originalPrimitiveExitTypeDescriptor = descriptor;
 				this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
 			}
 			else {
@@ -301,7 +300,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		return true;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
@@ -332,7 +331,7 @@ public class MethodReference extends SpelNodeImpl {
 			// Something on the stack when nothing is needed
 			mv.visitInsn(POP);
 		}
-		
+
 		if (CodeFlow.isPrimitive(descriptor)) {
 			CodeFlow.insertBoxIfNecessary(mv, descriptor.charAt(0));
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -475,7 +475,7 @@ public class PathPatternParserTests {
 	}
 	
 	private PathPattern.PathMatchInfo matchAndExtract(PathPattern pp, String path) {
-		 return pp.matchAndExtract(PathPatternTests.toPathContainer(path));
+		return pp.matchAndExtract(PathPatternTests.toPathContainer(path));
 	}
 
 	private PathContainer toPSC(String path) {

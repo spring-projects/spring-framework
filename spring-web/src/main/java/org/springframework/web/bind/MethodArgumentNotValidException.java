@@ -61,10 +61,13 @@ public class MethodArgumentNotValidException extends Exception {
 
 	@Override
 	public String getMessage() {
-		StringBuilder sb = new StringBuilder("Validation failed for argument at index ")
-			.append(this.parameter.getParameterIndex()).append(" in method: ")
-			.append(this.parameter.getExecutable().toGenericString())
-			.append(", with ").append(this.bindingResult.getErrorCount()).append(" error(s): ");
+		StringBuilder sb = new StringBuilder("Validation failed for argument [")
+			.append(this.parameter.getParameterIndex()).append("] in ")
+			.append(this.parameter.getExecutable().toGenericString());
+		if (this.bindingResult.getErrorCount() > 1) {
+			sb.append(" with ").append(this.bindingResult.getErrorCount()).append(" errors");
+		}
+		sb.append(": ");
 		for (ObjectError error : this.bindingResult.getAllErrors()) {
 			sb.append("[").append(error).append("] ");
 		}

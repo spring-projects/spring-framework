@@ -50,13 +50,17 @@ import org.springframework.validation.SmartValidator;
  * while also exposing the original JSR-303 Validator interface itself.
  *
  * <p>Can be used as a programmatic wrapper. Also serves as base class for
- * {@link CustomValidatorBean} and {@link LocalValidatorFactoryBean}.
+ * {@link CustomValidatorBean} and {@link LocalValidatorFactoryBean},
+ * and as the primary implementation of the {@link SmartValidator} interface.
  *
  * <p>As of Spring Framework 5.0, this adapter is fully compatible with
  * Bean Validation 1.1 as well as 2.0.
  *
  * @author Juergen Hoeller
  * @since 3.0
+ * @see SmartValidator
+ * @see CustomValidatorBean
+ * @see LocalValidatorFactoryBean
  */
 public class SpringValidatorAdapter implements SmartValidator, javax.validation.Validator {
 
@@ -99,26 +103,43 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	}
 
 	@Override
-	public void validate(@Nullable Object target, Errors errors) {
+	public void validate(Object target, Errors errors) {
 		if (this.targetValidator != null) {
 			processConstraintViolations(this.targetValidator.validate(target), errors);
 		}
 	}
 
 	@Override
-	public void validate(@Nullable Object target, Errors errors, @Nullable Object... validationHints) {
+	public void validate(Object target, Errors errors, Object... validationHints) {
 		if (this.targetValidator != null) {
-			Set<Class<?>> groups = new LinkedHashSet<>();
-			if (validationHints != null) {
-				for (Object hint : validationHints) {
-					if (hint instanceof Class) {
-						groups.add((Class<?>) hint);
-					}
-				}
-			}
 			processConstraintViolations(
-					this.targetValidator.validate(target, ClassUtils.toClassArray(groups)), errors);
+					this.targetValidator.validate(target, asValidationGroups(validationHints)), errors);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void validateValue(
+			Class<?> targetType, String fieldName, @Nullable Object value, Errors errors, Object... validationHints) {
+
+		if (this.targetValidator != null) {
+			processConstraintViolations(this.targetValidator.validateValue(
+					(Class) targetType, fieldName, value, asValidationGroups(validationHints)), errors);
+		}
+	}
+
+	/**
+	 * Turn the specified validation hints into JSR-303 validation groups.
+	 * @since 5.1
+	 */
+	private Class<?>[] asValidationGroups(Object... validationHints) {
+		Set<Class<?>> groups = new LinkedHashSet<>(4);
+		for (Object hint : validationHints) {
+			if (hint instanceof Class) {
+				groups.add((Class<?>) hint);
+			}
+		}
+		return ClassUtils.toClassArray(groups);
 	}
 
 	/**
@@ -141,7 +162,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
 						BindingResult bindingResult = (BindingResult) errors;
 						String nestedField = bindingResult.getNestedPath() + field;
-						if ("".equals(nestedField)) {
+						if (nestedField.isEmpty()) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
 							ObjectError error = new ObjectError(
 									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());

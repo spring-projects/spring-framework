@@ -428,9 +428,6 @@ public class XsltView extends AbstractUrlBasedView {
 		Source stylesheetSource = getStylesheetSource();
 		try {
 			Templates templates = getTransformerFactory().newTemplates(stylesheetSource);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loading templates '" + templates + "'");
-			}
 			return templates;
 		}
 		catch (TransformerConfigurationException ex) {
@@ -466,7 +463,7 @@ public class XsltView extends AbstractUrlBasedView {
 		Assert.state(url != null, "'url' not set");
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Loading XSLT stylesheet from '" + url + "'");
+			logger.debug("Applying stylesheet [" + url + "]");
 		}
 		try {
 			Resource resource = obtainApplicationContext().getResource(url);

@@ -30,6 +30,7 @@ import org.springframework.cache.interceptor.KeyGenerator;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <A> the annotation type
  */
 abstract class AbstractJCacheKeyOperation<A extends Annotation> extends AbstractJCacheOperation<A> {
 

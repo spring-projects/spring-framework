@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,9 @@ import org.springframework.util.StringUtils;
  */
 public class MessageHeaderAccessor {
 
+	/**
+	 * The default charset used for headers.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final MimeType[] READABLE_MIME_TYPES = new MimeType[] {
@@ -464,8 +467,8 @@ public class MessageHeaderAccessor {
 
 	@Nullable
 	public Object getReplyChannel() {
-        return getHeader(MessageHeaders.REPLY_CHANNEL);
-    }
+		return getHeader(MessageHeaders.REPLY_CHANNEL);
+	}
 
 	public void setErrorChannelName(String errorChannelName) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
@@ -477,8 +480,8 @@ public class MessageHeaderAccessor {
 
 	@Nullable
 	public Object getErrorChannel() {
-        return getHeader(MessageHeaders.ERROR_CHANNEL);
-    }
+		return getHeader(MessageHeaders.ERROR_CHANNEL);
+	}
 
 
 	// Log message stuff

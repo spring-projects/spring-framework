@@ -32,9 +32,8 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
  * @author Arjen Poutsma
@@ -43,14 +42,15 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 	private final ZeroCopyHandler handler = new ZeroCopyHandler();
 
+
 	@Override
 	protected HttpHandler createHttpHandler() {
-		return handler;
+		return this.handler;
 	}
+
 
 	@Test
 	public void zeroCopy() throws Exception {
-
 		// Zero-copy only does not support servlet
 		assumeTrue(server instanceof ReactorHttpServer || server instanceof UndertowHttpServer);
 
@@ -64,8 +64,8 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		assertEquals(logo.contentLength(), response.getHeaders().getContentLength());
 		assertEquals(logo.contentLength(), response.getBody().length);
 		assertEquals(MediaType.IMAGE_PNG, response.getHeaders().getContentType());
-
 	}
+
 
 	private static class ZeroCopyHandler implements HttpHandler {
 

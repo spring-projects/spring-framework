@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,8 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 		Object nativeHeaderValue = getNativeHeaderValue(message, name);
 
 		if (headerValue != null && nativeHeaderValue != null) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Message headers contain two values for the same header '" + name + "', " +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Message headers contain two values for the same header '" + name + "', " +
 						"one in the top level header map and a second in the nested map with native headers. " +
 						"Using the value from top level map. " +
 						"Use 'nativeHeader.myHeader' to resolve to the value from the nested native header map.");
@@ -106,7 +106,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	}
 
 
-	private static class HeaderNamedValueInfo extends NamedValueInfo {
+	private static final class HeaderNamedValueInfo extends NamedValueInfo {
 
 		private HeaderNamedValueInfo(Header annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());

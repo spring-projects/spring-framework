@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,7 +225,7 @@ public abstract class BshScriptUtils {
 	 * Exception to be thrown on script execution failure.
 	 */
 	@SuppressWarnings("serial")
-	public static class BshExecutionException extends NestedRuntimeException {
+	public static final class BshExecutionException extends NestedRuntimeException {
 
 		private BshExecutionException(EvalError ex) {
 			super("BeanShell script execution failed", ex);

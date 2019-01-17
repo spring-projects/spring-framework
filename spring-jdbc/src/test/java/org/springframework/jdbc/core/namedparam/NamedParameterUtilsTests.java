@@ -117,13 +117,13 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test(expected = InvalidDataAccessApiUsageException.class)
-	public void buildValueArrayWithMissingParameterValue() throws Exception {
+	public void buildValueArrayWithMissingParameterValue() {
 		String sql = "select count(0) from foo where id = :id";
 		NamedParameterUtils.buildValueArray(sql, Collections.<String, Object>emptyMap());
 	}
 
 	@Test
-	public void substituteNamedParametersWithStringContainingQuotes() throws Exception {
+	public void substituteNamedParametersWithStringContainingQuotes() {
 		String expectedSql = "select 'first name' from artists where id = ? and quote = 'exsqueeze me?'";
 		String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
 		String newSql = NamedParameterUtils.substituteNamedParameters(sql, new MapSqlParameterSource());
@@ -131,7 +131,7 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test
-	public void testParseSqlStatementWithStringContainingQuotes() throws Exception {
+	public void testParseSqlStatementWithStringContainingQuotes() {
 		String expectedSql = "select 'first name' from artists where id = ? and quote = 'exsqueeze me?'";
 		String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
@@ -173,7 +173,7 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-4612
-	public void parseSqlStatementWithPostgresCasting() throws Exception {
+	public void parseSqlStatementWithPostgresCasting() {
 		String expectedSql = "select 'first name' from artists where id = ? and birth_date=?::timestamp";
 		String sql = "select 'first name' from artists where id = :id and birth_date=:birthDate::timestamp";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
@@ -181,7 +181,7 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-13582
-	public void parseSqlStatementWithPostgresContainedOperator() throws Exception {
+	public void parseSqlStatementWithPostgresContainedOperator() {
 		String expectedSql = "select 'first name' from artists where info->'stat'->'albums' = ?? ? and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
 		String sql = "select 'first name' from artists where info->'stat'->'albums' = ?? :album and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
@@ -190,7 +190,7 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-15382
-	public void parseSqlStatementWithPostgresAnyArrayStringsExistsOperator() throws Exception {
+	public void parseSqlStatementWithPostgresAnyArrayStringsExistsOperator() {
 		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
 		String sql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
 
@@ -200,7 +200,7 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-15382
-	public void parseSqlStatementWithPostgresAllArrayStringsExistsOperator() throws Exception {
+	public void parseSqlStatementWithPostgresAllArrayStringsExistsOperator() {
 		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND ? = 'Back in Black'";
 		String sql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND :album = 'Back in Black'";
 
@@ -210,7 +210,7 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-7476
-	public void parseSqlStatementWithEscapedColon() throws Exception {
+	public void parseSqlStatementWithEscapedColon() {
 		String expectedSql = "select '0\\:0' as a, foo from bar where baz < DATE(? 23:59:59) and baz = ?";
 		String sql = "select '0\\:0' as a, foo from bar where baz < DATE(:p1 23\\:59\\:59) and baz = :p2";
 
@@ -223,7 +223,7 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-7476
-	public void parseSqlStatementWithBracketDelimitedParameterNames() throws Exception {
+	public void parseSqlStatementWithBracketDelimitedParameterNames() {
 		String expectedSql = "select foo from bar where baz = b??z";
 		String sql = "select foo from bar where baz = b:{p1}:{p2}z";
 
@@ -236,7 +236,7 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-7476
-	public void parseSqlStatementWithEmptyBracketsOrBracketsInQuotes() throws Exception {
+	public void parseSqlStatementWithEmptyBracketsOrBracketsInQuotes() {
 		String expectedSql = "select foo from bar where baz = b:{}z";
 		String sql = "select foo from bar where baz = b:{}z";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
@@ -257,7 +257,7 @@ public class NamedParameterUtilsTests {
 	public void parseSqlStatementWithSingleLetterInBrackets() {
 		String expectedSql = "select foo from bar where baz = b?z";
 		String sql = "select foo from bar where baz = b:{p}z";
-		
+
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals(1, parsedSql.getParameterNames().size());
 		assertEquals("p", parsedSql.getParameterNames().get(0));
@@ -273,14 +273,14 @@ public class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-2544
-	public void substituteNamedParametersWithLogicalAnd() throws Exception {
+	public void substituteNamedParametersWithLogicalAnd() {
 		String expectedSql = "xxx & yyyy";
 		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
 		assertEquals(expectedSql, newSql);
 	}
 
 	@Test  // SPR-3173
-	public void variableAssignmentOperator() throws Exception {
+	public void variableAssignmentOperator() {
 		String expectedSql = "x := 1";
 		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
 		assertEquals(expectedSql, newSql);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.util.Assert;
  * fixed-rate or fixed-delay, and an initial delay value may also be configured.
  * The default initial delay is 0, and the default behavior is fixed-delay
  * (i.e. the interval between successive executions is measured from each
- * <emphasis>completion</emphasis> time). To measure the interval between the
- * scheduled <emphasis>start</emphasis> time of each execution instead, set the
+ * <i>completion</i> time). To measure the interval between the
+ * scheduled <i>start</i> time of each execution instead, set the
  * 'fixedRate' property to {@code true}.
  *
  * <p>Note that the TaskScheduler interface already defines methods for scheduling
@@ -144,16 +144,16 @@ public class PeriodicTrigger implements Trigger {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof PeriodicTrigger)) {
+		if (!(other instanceof PeriodicTrigger)) {
 			return false;
 		}
-		PeriodicTrigger other = (PeriodicTrigger) obj;
-		return (this.fixedRate == other.fixedRate && this.initialDelay == other.initialDelay &&
-				this.period == other.period);
+		PeriodicTrigger otherTrigger = (PeriodicTrigger) other;
+		return (this.fixedRate == otherTrigger.fixedRate && this.initialDelay == otherTrigger.initialDelay &&
+				this.period == otherTrigger.period);
 	}
 
 	@Override

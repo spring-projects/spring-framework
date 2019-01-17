@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public interface SchedulingConfigurer {
 	/**
 	 * Callback allowing a {@link org.springframework.scheduling.TaskScheduler
 	 * TaskScheduler} and specific {@link org.springframework.scheduling.config.Task Task}
-	 * instances to be registered against the given the {@link ScheduledTaskRegistrar}
+	 * instances to be registered against the given the {@link ScheduledTaskRegistrar}.
 	 * @param taskRegistrar the registrar to be configured.
 	 */
 	void configureTasks(ScheduledTaskRegistrar taskRegistrar);

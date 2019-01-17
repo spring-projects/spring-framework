@@ -194,9 +194,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * bean property values, constructor argument values, etc.
 	 * <p>This will override the default PropertyEditor mechanism and hence make
 	 * any custom editors or custom editor registrars irrelevant.
+	 * @since 2.5
 	 * @see #addPropertyEditorRegistrar
 	 * @see #registerCustomEditor
-	 * @since 2.5
 	 */
 	void setTypeConverter(TypeConverter typeConverter);
 

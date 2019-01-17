@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
  * @since 3.1.1
  * @see SQLErrorCodesFactory
  */
-public class CustomSQLExceptionTranslatorRegistry {
+public final class CustomSQLExceptionTranslatorRegistry {
 
 	private static final Log logger = LogFactory.getLog(CustomSQLExceptionTranslatorRegistry.class);
 
@@ -66,19 +66,20 @@ public class CustomSQLExceptionTranslatorRegistry {
 	private CustomSQLExceptionTranslatorRegistry() {
 	}
 
+
 	/**
 	 * Register a new custom translator for the specified database name.
 	 * @param dbName the database name
 	 * @param translator the custom translator
 	 */
 	public void registerTranslator(String dbName, SQLExceptionTranslator translator) {
-		SQLExceptionTranslator replaced = translatorMap.put(dbName, translator);
+		SQLExceptionTranslator replaced = this.translatorMap.put(dbName, translator);
 		if (replaced != null) {
-			logger.warn("Replacing custom translator [" + replaced + "] for database '" + dbName +
+			logger.debug("Replacing custom translator [" + replaced + "] for database '" + dbName +
 					"' with [" + translator + "]");
 		}
 		else {
-			logger.info("Adding custom translator of type [" + translator.getClass().getName() +
+			logger.debug("Adding custom translator of type [" + translator.getClass().getName() +
 					"] for database '" + dbName + "'");
 		}
 	}

@@ -23,7 +23,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,6 +30,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
@@ -45,6 +45,7 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 5.0
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
@@ -57,8 +58,8 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 */
 	private enum State {NEW, COMMITTING, COMMITTED}
 
+	protected final Log logger = HttpLogging.forLogName(getClass());
 
-	private final Log logger = LogFactory.getLog(getClass());
 
 	private final DataBufferFactory dataBufferFactory;
 
@@ -75,9 +76,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
+		this(dataBufferFactory, new HttpHeaders());
+	}
+
+	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory, HttpHeaders headers) {
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
+		Assert.notNull(headers, "HttpHeaders must not be null");
 		this.dataBufferFactory = dataBufferFactory;
-		this.headers = new HttpHeaders();
+		this.headers = headers;
 		this.cookies = new LinkedMultiValueMap<>();
 	}
 
@@ -88,16 +94,12 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(@Nullable HttpStatus statusCode) {
+	public boolean setStatusCode(@Nullable HttpStatus status) {
 		if (this.state.get() == State.COMMITTED) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("HTTP response already committed. " +
-						"Status not set to " + (statusCode != null ? statusCode.toString() : "null"));
-			}
 			return false;
 		}
 		else {
-			this.statusCode = (statusCode != null ? statusCode.value() : null);
+			this.statusCode = (status != null ? status.value() : null);
 			return true;
 		}
 	}
@@ -105,7 +107,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	@Nullable
 	public HttpStatus getStatusCode() {
-		return (this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null);
+		return this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null;
 	}
 
 	/**
@@ -173,13 +175,21 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return new ChannelSendOperator<>(body,
-				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)));
+				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)))
+				.doOnError(t -> removeContentLength());
 	}
 
 	@Override
 	public final Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		return new ChannelSendOperator<>(body,
-				writePublisher -> doCommit(() -> writeAndFlushWithInternal(writePublisher)));
+				writePublisher -> doCommit(() -> writeAndFlushWithInternal(writePublisher)))
+				.doOnError(t -> removeContentLength());
+	}
+
+	private void removeContentLength() {
+		if (!this.isCommitted()) {
+			this.getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
+		}
 	}
 
 	@Override
@@ -203,9 +213,6 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 */
 	protected Mono<Void> doCommit(@Nullable Supplier<? extends Mono<Void>> writeAction) {
 		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Skipping doCommit (response already committed).");
-			}
 			return Mono.empty();
 		}
 

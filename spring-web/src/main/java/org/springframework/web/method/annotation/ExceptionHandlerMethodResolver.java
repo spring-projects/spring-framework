@@ -19,14 +19,13 @@ package org.springframework.web.method.annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.MethodIntrospector;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -48,7 +47,7 @@ public class ExceptionHandlerMethodResolver {
 	 * A filter for selecting {@code @ExceptionHandler} methods.
 	 */
 	public static final MethodFilter EXCEPTION_HANDLER_METHODS = method ->
-			(AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
+			AnnotatedElementUtils.hasAnnotation(method, ExceptionHandler.class);
 
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
@@ -90,8 +89,8 @@ public class ExceptionHandlerMethodResolver {
 		return result;
 	}
 
-	protected void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
-		ExceptionHandler ann = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+	private void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
+		ExceptionHandler ann = AnnotatedElementUtils.findMergedAnnotation(method, ExceptionHandler.class);
 		Assert.state(ann != null, "No ExceptionHandler annotation");
 		result.addAll(Arrays.asList(ann.value()));
 	}

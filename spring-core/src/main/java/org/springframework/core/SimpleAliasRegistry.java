@@ -40,10 +40,10 @@ import org.springframework.util.StringValueResolver;
  */
 public class SimpleAliasRegistry implements AliasRegistry {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Map from alias to canonical name */
+	/** Map from alias to canonical name. */
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<>(16);
 
 
@@ -69,15 +69,15 @@ public class SimpleAliasRegistry implements AliasRegistry {
 						throw new IllegalStateException("Cannot define alias '" + alias + "' for name '" +
 								name + "': It is already registered for name '" + registeredName + "'.");
 					}
-					if (this.logger.isInfoEnabled()) {
-						logger.info("Overriding alias '" + alias + "' definition for registered name '" +
+					if (logger.isDebugEnabled()) {
+						logger.debug("Overriding alias '" + alias + "' definition for registered name '" +
 								registeredName + "' with new target name '" + name + "'");
 					}
 				}
 				checkForAliasCircle(name, alias);
 				this.aliasMap.put(alias, name);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Alias definition '" + alias + "' registered for name '" + name + "'");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Alias definition '" + alias + "' registered for name '" + name + "'");
 				}
 			}
 		}
@@ -102,7 +102,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 			String registeredName = entry.getValue();
 			if (registeredName.equals(name)) {
 				String registeredAlias = entry.getKey();
-				return (registeredAlias.equals(alias) || hasAlias(registeredAlias, alias));
+				if (registeredAlias.equals(alias) || hasAlias(registeredAlias, alias)) {
+					return true;
+				}
 			}
 		}
 		return false;

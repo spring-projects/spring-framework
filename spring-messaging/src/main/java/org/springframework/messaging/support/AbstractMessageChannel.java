@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractMessageChannel implements MessageChannel, InterceptableChannel, BeanNameAware {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected Log logger = LogFactory.getLog(getClass());
 
 	private final List<ChannelInterceptor> interceptors = new ArrayList<>(5);
 
@@ -51,6 +51,23 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 		this.beanName = getClass().getSimpleName() + "@" + ObjectUtils.getIdentityHexString(this);
 	}
 
+
+	/**
+	 * Set an alternative logger to use than the one based on the class name.
+	 * @param logger the logger to use
+	 * @since 5.1
+	 */
+	public void setLogger(Log logger) {
+		this.logger = logger;
+	}
+
+	/**
+	 * Return the currently configured Logger.
+	 * @since 5.1
+	 */
+	public Log getLogger() {
+		return logger;
+	}
 
 	/**
 	 * A message channel uses the bean name primarily for logging purposes.

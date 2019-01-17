@@ -26,12 +26,12 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
 
 /**
- * Default implementation of the {@link KeyHolder} interface, to be used for
+ * The standard implementation of the {@link KeyHolder} interface, to be used for
  * holding auto-generated keys (as potentially returned by JDBC insert statements).
  *
- * <p>Create an instance of this class for each insert operation, and pass
- * it to the corresponding {@link org.springframework.jdbc.core.JdbcTemplate}
- * or {org.springframework.jdbc.object.SqlUpdate} methods.
+ * <p>Create an instance of this class for each insert operation, and pass it
+ * to the corresponding {@link org.springframework.jdbc.core.JdbcTemplate} or
+ * {@link org.springframework.jdbc.object.SqlUpdate} methods.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -92,10 +92,11 @@ public class GeneratedKeyHolder implements KeyHolder {
 		if (this.keyList.isEmpty()) {
 			return null;
 		}
-		if (this.keyList.size() > 1)
+		if (this.keyList.size() > 1) {
 			throw new InvalidDataAccessApiUsageException(
 					"The getKeys method should only be used when keys for a single row are returned.  " +
 					"The current key list contains keys for multiple rows: " + this.keyList);
+		}
 		return this.keyList.get(0);
 	}
 

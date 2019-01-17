@@ -284,7 +284,6 @@ public class ValidatorFactoryTests {
 		errors.initConversion(new DefaultConversionService());
 		validator.validate(listContainer, errors);
 
-		FieldError fieldError = errors.getFieldError("list[1]");
 		assertEquals("X", errors.getFieldValue("list[1]"));
 	}
 

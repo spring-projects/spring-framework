@@ -53,8 +53,8 @@ import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
  * A basic implementation of {@link org.springframework.web.socket.sockjs.SockJsService}
  * with support for SPI-based transport handling and session management.
  *
- * <p>Based on the {@link TransportHandler} SPI. {@link TransportHandler}s may additionally
- * implement the {@link SockJsSessionFactory} and {@link HandshakeHandler} interfaces.
+ * <p>Based on the {@link TransportHandler} SPI. {@code TransportHandlers} may
+ * additionally implement the {@link SockJsSessionFactory} and {@link HandshakeHandler} interfaces.
  *
  * <p>See the {@link AbstractSockJsService} base class for important details on request mapping.
  *
@@ -367,10 +367,10 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(() -> {
 				List<String> removedIds = new ArrayList<>();
-				for (SockJsSession session : sessions.values()) {
+				for (SockJsSession session : this.sessions.values()) {
 					try {
 						if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
-							sessions.remove(session.getId());
+							this.sessions.remove(session.getId());
 							removedIds.add(session.getId());
 							session.close();
 						}

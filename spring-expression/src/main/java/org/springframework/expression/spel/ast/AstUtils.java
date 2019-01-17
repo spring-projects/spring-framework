@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.expression.spel.ast;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.expression.PropertyAccessor;
@@ -68,7 +67,7 @@ public abstract class AstUtils {
 				}
 			}
 		}
-		List<PropertyAccessor> resolvers = new LinkedList<>();
+		List<PropertyAccessor> resolvers = new ArrayList<>(specificAccessors.size() + generalAccessors.size());
 		resolvers.addAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
 		return resolvers;

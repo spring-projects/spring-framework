@@ -138,9 +138,6 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	 * {@link #lookupMediaType}.
 	 */
 	protected void handleMatch(String key, MediaType mediaType) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Requested MediaType='" + mediaType + "' based on key='" + key + "'.");
-		}
 	}
 
 	/**

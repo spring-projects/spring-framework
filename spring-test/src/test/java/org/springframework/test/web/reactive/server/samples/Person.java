@@ -15,15 +15,27 @@
  */
 package org.springframework.test.web.reactive.server.samples;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@XmlRootElement
 class Person {
 
-	private final String name;
+	private String name;
+
+
+	// No-arg constructor for XML
+	public Person() {
+	}
 
 	@JsonCreator
 	public Person(@JsonProperty("name") String name) {
+		this.name = name;
+	}
+
+	public void setName(String name) {
 		this.name = name;
 	}
 

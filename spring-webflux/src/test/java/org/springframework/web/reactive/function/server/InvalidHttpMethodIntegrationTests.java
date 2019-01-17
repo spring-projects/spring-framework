@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.reactive.function.server;
+
+import java.io.IOException;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -32,12 +34,11 @@ public class InvalidHttpMethodIntegrationTests extends AbstractRouterFunctionInt
 	protected RouterFunction<?> routerFunction() {
 		return RouterFunctions.route(RequestPredicates.GET("/"),
 				request -> ServerResponse.ok().syncBody("FOO"))
-				.andRoute(RequestPredicates.all(),
-						request -> ServerResponse.ok().syncBody("BAR"));
+				.andRoute(RequestPredicates.all(), request -> ServerResponse.ok().syncBody("BAR"));
 	}
 
 	@Test
-	public void invalidHttpMethod() throws Exception {
+	public void invalidHttpMethod() throws IOException {
 		OkHttpClient client = new OkHttpClient();
 
 		Request request = new Request.Builder()
@@ -49,4 +50,5 @@ public class InvalidHttpMethodIntegrationTests extends AbstractRouterFunctionInt
 			assertEquals("BAR", response.body().string());
 		}
 	}
+
 }

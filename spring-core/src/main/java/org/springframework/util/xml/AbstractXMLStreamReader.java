@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@code XMLStreamReader}s.
@@ -35,7 +34,7 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 	@Override
 	public String getElementText() throws XMLStreamException {
 		if (getEventType() != XMLStreamConstants.START_ELEMENT) {
-			throw new XMLStreamException("parser must be on START_ELEMENT to read next text", getLocation());
+			throw new XMLStreamException("Parser must be on START_ELEMENT to read next text", getLocation());
 		}
 		int eventType = next();
 		StringBuilder builder = new StringBuilder();
@@ -49,11 +48,11 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 				// skipping
 			}
 			else if (eventType == XMLStreamConstants.END_DOCUMENT) {
-				throw new XMLStreamException("unexpected end of document when reading element text content",
+				throw new XMLStreamException("Unexpected end of document when reading element text content",
 						getLocation());
 			}
 			else if (eventType == XMLStreamConstants.START_ELEMENT) {
-				throw new XMLStreamException("element text content may not contain START_ELEMENT", getLocation());
+				throw new XMLStreamException("Element text content may not contain START_ELEMENT", getLocation());
 			}
 			else {
 				throw new XMLStreamException("Unexpected event type " + eventType, getLocation());
@@ -85,22 +84,21 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 			return getName().getNamespaceURI();
 		}
 		else {
-			throw new IllegalStateException("parser must be on START_ELEMENT or END_ELEMENT state");
+			throw new IllegalStateException("Parser must be on START_ELEMENT or END_ELEMENT state");
 		}
 	}
 
 	@Override
 	public String getNamespaceURI(String prefix) {
-		Assert.notNull(prefix, "No prefix given");
 		return getNamespaceContext().getNamespaceURI(prefix);
 	}
 
 	@Override
 	public boolean hasText() {
 		int eventType = getEventType();
-		return eventType == XMLStreamConstants.SPACE || eventType == XMLStreamConstants.CHARACTERS ||
+		return (eventType == XMLStreamConstants.SPACE || eventType == XMLStreamConstants.CHARACTERS ||
 				eventType == XMLStreamConstants.COMMENT || eventType == XMLStreamConstants.CDATA ||
-				eventType == XMLStreamConstants.ENTITY_REFERENCE;
+				eventType == XMLStreamConstants.ENTITY_REFERENCE);
 	}
 
 	@Override
@@ -110,14 +108,14 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 			return getName().getPrefix();
 		}
 		else {
-			throw new IllegalStateException("parser must be on START_ELEMENT or END_ELEMENT state");
+			throw new IllegalStateException("Parser must be on START_ELEMENT or END_ELEMENT state");
 		}
 	}
 
 	@Override
 	public boolean hasName() {
 		int eventType = getEventType();
-		return eventType == XMLStreamConstants.START_ELEMENT || eventType == XMLStreamConstants.END_ELEMENT;
+		return (eventType == XMLStreamConstants.START_ELEMENT || eventType == XMLStreamConstants.END_ELEMENT);
 	}
 
 	@Override
@@ -176,7 +174,7 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 	}
 
 	@Override
-	public boolean hasNext() throws XMLStreamException {
+	public boolean hasNext() {
 		return getEventType() != END_DOCUMENT;
 	}
 
@@ -191,8 +189,7 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 	}
 
 	@Override
-	public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length)
-			throws XMLStreamException {
+	public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) {
 		char[] source = getTextCharacters();
 		length = Math.min(length, source.length);
 		System.arraycopy(source, sourceStart, target, targetStart, length);
@@ -203,4 +200,5 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 	public int getTextLength() {
 		return getText().length();
 	}
+
 }

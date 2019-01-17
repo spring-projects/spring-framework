@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.config;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
@@ -55,10 +56,15 @@ public class MessageBrokerRegistry {
 	private String userDestinationPrefix;
 
 	@Nullable
+	private Integer userRegistryOrder;
+
+	@Nullable
 	private PathMatcher pathMatcher;
 
 	@Nullable
 	private Integer cacheLimit;
+
+	private boolean preservePublishOrder;
 
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
@@ -161,6 +167,22 @@ public class MessageBrokerRegistry {
 	}
 
 	/**
+	 * Set the order for the
+	 * {@link org.springframework.messaging.simp.user.SimpUserRegistry
+	 * SimpUserRegistry} to use as a {@link SmartApplicationListener}.
+	 * @param order the order value
+	 * @since 5.0.8
+	 */
+	public void setUserRegistryOrder(int order) {
+		this.userRegistryOrder = order;
+	}
+
+	@Nullable
+	protected Integer getUserRegistryOrder() {
+		return this.userRegistryOrder;
+	}
+
+	/**
 	 * Configure the PathMatcher to use to match the destinations of incoming
 	 * messages to {@code @MessageMapping} and {@code @SubscribeMapping} methods.
 	 * <p>By default {@link org.springframework.util.AntPathMatcher} is configured.
@@ -199,6 +221,21 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	/**
+	 * Whether the client must receive messages in the order of publication.
+	 * <p>By default messages sent to the {@code "clientOutboundChannel"} may
+	 * not be processed in the same order because the channel is backed by a
+	 * ThreadPoolExecutor that in turn does not guarantee processing in order.
+	 * <p>When this flag is set to {@code true} messages within the same session
+	 * will be sent to the {@code "clientOutboundChannel"} one at a time in
+	 * order to preserve the order of publication. Enable this only if needed
+	 * since there is some performance overhead to keep messages in order.
+	 * @since 5.1
+	 */
+	public MessageBrokerRegistry setPreservePublishOrder(boolean preservePublishOrder) {
+		this.preservePublishOrder = preservePublishOrder;
+		return this;
+	}
 
 	@Nullable
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
@@ -209,6 +246,7 @@ public class MessageBrokerRegistry {
 			SimpleBrokerMessageHandler handler = this.simpleBrokerRegistration.getMessageHandler(brokerChannel);
 			handler.setPathMatcher(this.pathMatcher);
 			handler.setCacheLimit(this.cacheLimit);
+			handler.setPreservePublishOrder(this.preservePublishOrder);
 			return handler;
 		}
 		return null;
@@ -217,7 +255,9 @@ public class MessageBrokerRegistry {
 	@Nullable
 	protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
 		if (this.brokerRelayRegistration != null) {
-			return this.brokerRelayRegistration.getMessageHandler(brokerChannel);
+			StompBrokerRelayMessageHandler relay = this.brokerRelayRegistration.getMessageHandler(brokerChannel);
+			relay.setPreservePublishOrder(this.preservePublishOrder);
+			return relay;
 		}
 		return null;
 	}

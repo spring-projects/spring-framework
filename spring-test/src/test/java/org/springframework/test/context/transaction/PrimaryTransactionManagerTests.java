@@ -36,6 +36,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.transaction.TransactionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;
@@ -51,7 +52,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @DirtiesContext
-public class PrimaryTransactionManagerTests {
+public final class PrimaryTransactionManagerTests {
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -90,6 +91,7 @@ public class PrimaryTransactionManagerTests {
 
 
 	@Configuration
+	@EnableTransactionManagement  // SPR-17137: should not break trying to proxy the final test class
 	static class Config {
 
 		@Primary

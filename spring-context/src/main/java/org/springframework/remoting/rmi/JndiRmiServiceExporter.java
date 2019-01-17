@@ -151,8 +151,8 @@ public class JndiRmiServiceExporter extends RmiBasedExporter implements Initiali
 	 * @throws NamingException if service binding failed
 	 */
 	public void rebind() throws NamingException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Binding RMI service to JNDI location [" + this.jndiName + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Binding RMI service to JNDI location [" + this.jndiName + "]");
 		}
 		this.jndiTemplate.rebind(this.jndiName, this.exportedObject);
 	}
@@ -162,8 +162,8 @@ public class JndiRmiServiceExporter extends RmiBasedExporter implements Initiali
 	 */
 	@Override
 	public void destroy() throws NamingException, RemoteException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Unbinding RMI service from JNDI location [" + this.jndiName + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Unbinding RMI service from JNDI location [" + this.jndiName + "]");
 		}
 		this.jndiTemplate.unbind(this.jndiName);
 		invokePortableRemoteObject(unexportObject);

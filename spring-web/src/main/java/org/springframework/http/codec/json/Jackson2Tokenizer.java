@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.0
  */
-class Jackson2Tokenizer {
+final class Jackson2Tokenizer {
 
 	private final JsonParser parser;
 
@@ -55,6 +55,7 @@ class Jackson2Tokenizer {
 	private int arrayDepth;
 
 	// TODO: change to ByteBufferFeeder when supported by Jackson
+	// See https://github.com/FasterXML/jackson-core/issues/478
 	private final ByteArrayFeeder inputFeeder;
 
 

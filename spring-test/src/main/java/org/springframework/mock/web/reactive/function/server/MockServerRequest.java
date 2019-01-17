@@ -63,7 +63,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class MockServerRequest implements ServerRequest {
+public final class MockServerRequest implements ServerRequest {
 
 	private final HttpMethod method;
 
@@ -293,6 +293,7 @@ public class MockServerRequest implements ServerRequest {
 		Builder session(WebSession session);
 
 		/**
+		 * Sets the request {@link Principal}.
 		 * @deprecated in favor of {@link #principal(Principal)}
 		 */
 		@Deprecated

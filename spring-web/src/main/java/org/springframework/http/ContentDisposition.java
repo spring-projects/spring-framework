@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
-import static java.nio.charset.StandardCharsets.*;
-import static java.time.format.DateTimeFormatter.*;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 /**
  * Represent the Content-Disposition type and parameters as defined in RFC 2183.
@@ -39,7 +40,7 @@ import static java.time.format.DateTimeFormatter.*;
  * @since 5.0
  * @see <a href="https://tools.ietf.org/html/rfc2183">RFC 2183</a>
  */
-public class ContentDisposition {
+public final class ContentDisposition {
 
 	@Nullable
 	private final String type;
@@ -177,9 +178,9 @@ public class ContentDisposition {
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.filename);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.charset);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.size);
-		result = 31 * result + (creationDate != null ? creationDate.hashCode() : 0);
-		result = 31 * result + (modificationDate != null ? modificationDate.hashCode() : 0);
-		result = 31 * result + (readDate != null ? readDate.hashCode() : 0);
+		result = 31 * result + (this.creationDate != null ? this.creationDate.hashCode() : 0);
+		result = 31 * result + (this.modificationDate != null ? this.modificationDate.hashCode() : 0);
+		result = 31 * result + (this.readDate != null ? this.readDate.hashCode() : 0);
 		return result;
 	}
 
@@ -198,7 +199,7 @@ public class ContentDisposition {
 			sb.append(this.name).append('\"');
 		}
 		if (this.filename != null) {
-			if(this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
+			if (this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
 				sb.append("; filename=\"");
 				sb.append(this.filename).append('\"');
 			}
@@ -441,12 +442,12 @@ public class ContentDisposition {
 	public interface Builder {
 
 		/**
-		 * Set the value of the {@literal name} parameter
+		 * Set the value of the {@literal name} parameter.
 		 */
 		Builder name(String name);
 
 		/**
-		 * Set the value of the {@literal filename} parameter
+		 * Set the value of the {@literal filename} parameter.
 		 */
 		Builder filename(String filename);
 
@@ -463,7 +464,7 @@ public class ContentDisposition {
 		Builder filename(String filename, Charset charset);
 
 		/**
-		 * Set the value of the {@literal size} parameter
+		 * Set the value of the {@literal size} parameter.
 		 */
 		Builder size(Long size);
 
@@ -483,7 +484,7 @@ public class ContentDisposition {
 		Builder readDate(ZonedDateTime readDate);
 
 		/**
-		 * Build the content disposition
+		 * Build the content disposition.
 		 */
 		ContentDisposition build();
 	}

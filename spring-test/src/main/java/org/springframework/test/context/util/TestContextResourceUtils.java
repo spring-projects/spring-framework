@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ public abstract class TestContextResourceUtils {
 	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:}, etc.) will be
 	 * {@link StringUtils#cleanPath cleaned} but otherwise unmodified.
+	 * </ul>
 	 * @param clazz the class with which the paths are associated
 	 * @param paths the paths to be converted
 	 * @return a new array of converted resource paths

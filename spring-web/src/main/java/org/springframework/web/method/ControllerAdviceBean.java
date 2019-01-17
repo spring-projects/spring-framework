@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,19 @@
 
 package org.springframework.web.method;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.OrderUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
@@ -59,11 +53,7 @@ public class ControllerAdviceBean implements Ordered {
 
 	private final int order;
 
-	private final Set<String> basePackages;
-
-	private final List<Class<?>> assignableTypes;
-
-	private final List<Class<? extends Annotation>> annotations;
+	private final HandlerTypePredicate beanTypePredicate;
 
 
 	/**
@@ -109,14 +99,15 @@ public class ControllerAdviceBean implements Ordered {
 				AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class) : null);
 
 		if (annotation != null) {
-			this.basePackages = initBasePackages(annotation);
-			this.assignableTypes = Arrays.asList(annotation.assignableTypes());
-			this.annotations = Arrays.asList(annotation.annotations());
+			this.beanTypePredicate = HandlerTypePredicate.builder()
+					.basePackage(annotation.basePackages())
+					.basePackageClass(annotation.basePackageClasses())
+					.assignableType(annotation.assignableTypes())
+					.annotation(annotation.annotations())
+					.build();
 		}
 		else {
-			this.basePackages = Collections.emptySet();
-			this.assignableTypes = Collections.emptyList();
-			this.annotations = Collections.emptyList();
+			this.beanTypePredicate = HandlerTypePredicate.forAnyHandlerType();
 		}
 	}
 
@@ -158,35 +149,11 @@ public class ControllerAdviceBean implements Ordered {
 	 * Check whether the given bean type should be assisted by this
 	 * {@code @ControllerAdvice} instance.
 	 * @param beanType the type of the bean to check
-	 * @see org.springframework.web.bind.annotation.ControllerAdvice
 	 * @since 4.0
+	 * @see org.springframework.web.bind.annotation.ControllerAdvice
 	 */
 	public boolean isApplicableToBeanType(@Nullable Class<?> beanType) {
-		if (!hasSelectors()) {
-			return true;
-		}
-		else if (beanType != null) {
-			for (String basePackage : this.basePackages) {
-				if (beanType.getName().startsWith(basePackage)) {
-					return true;
-				}
-			}
-			for (Class<?> clazz : this.assignableTypes) {
-				if (ClassUtils.isAssignable(clazz, beanType)) {
-					return true;
-				}
-			}
-			for (Class<? extends Annotation> annotationClass : this.annotations) {
-				if (AnnotationUtils.findAnnotation(beanType, annotationClass) != null) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private boolean hasSelectors() {
-		return (!this.basePackages.isEmpty() || !this.assignableTypes.isEmpty() || !this.annotations.isEmpty());
+		return this.beanTypePredicate.test(beanType);
 	}
 
 
@@ -218,14 +185,11 @@ public class ControllerAdviceBean implements Ordered {
 	 * {@linkplain ControllerAdvice @ControllerAdvice} in the given
 	 * ApplicationContext and wrap them as {@code ControllerAdviceBean} instances.
 	 */
-	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext applicationContext) {
-		List<ControllerAdviceBean> beans = new ArrayList<>();
-		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, Object.class)) {
-			if (applicationContext.findAnnotationOnBean(name, ControllerAdvice.class) != null) {
-				beans.add(new ControllerAdviceBean(name, applicationContext));
-			}
-		}
-		return beans;
+	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
+		return Arrays.stream(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, Object.class))
+				.filter(name -> context.findAnnotationOnBean(name, ControllerAdvice.class) != null)
+				.map(name -> new ControllerAdviceBean(name, context))
+				.collect(Collectors.toList());
 	}
 
 	private static int initOrderFromBean(Object bean) {
@@ -238,23 +202,6 @@ public class ControllerAdviceBean implements Ordered {
 			order = OrderUtils.getOrder(beanType);
 		}
 		return (order != null ? order : Ordered.LOWEST_PRECEDENCE);
-	}
-
-	private static Set<String> initBasePackages(ControllerAdvice annotation) {
-		Set<String> basePackages = new LinkedHashSet<>();
-		for (String basePackage : annotation.basePackages()) {
-			if (StringUtils.hasText(basePackage)) {
-				basePackages.add(adaptBasePackage(basePackage));
-			}
-		}
-		for (Class<?> markerClass : annotation.basePackageClasses()) {
-			basePackages.add(adaptBasePackage(ClassUtils.getPackageName(markerClass)));
-		}
-		return basePackages;
-	}
-
-	private static String adaptBasePackage(String basePackage) {
-		return (basePackage.endsWith(".") ? basePackage : basePackage + ".");
 	}
 
 }

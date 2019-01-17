@@ -44,7 +44,7 @@ import reactor.core.publisher.Mono;
  * 	&#064;Override
  * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
- * 		Flux&lt;WebSocketMessage&gt; input = session.receive()
+ * 		Flux&lt;WebSocketMessage&gt; output = session.receive()
  *			.doOnNext(message -> {
  * 				// ...
  * 			})
@@ -89,7 +89,7 @@ import reactor.core.publisher.Mono;
  * completion of that flow. That means there is no need to check if the
  * connection is open, since Reactive Streams signals will terminate activity.
  * The inbound stream receives a completion/error signal, and the outbound
- * stream receives receives a cancellation signal.
+ * stream receives a cancellation signal.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

@@ -55,7 +55,7 @@ public interface RequestPredicate {
 	 * @return a predicate that represents the logical negation of this predicate
 	 */
 	default RequestPredicate negate() {
-		return t -> !test(t);
+		return new RequestPredicates.NegateRequestPredicate(this);
 	}
 
 	/**
@@ -82,6 +82,17 @@ public interface RequestPredicate {
 	 */
 	default Optional<ServerRequest> nest(ServerRequest request) {
 		return (test(request) ? Optional.of(request) : Optional.empty());
+	}
+
+	/**
+	 * Accept the given visitor. Default implementation calls
+	 * {@link RequestPredicates.Visitor#unknown(RequestPredicate)}; composed {@code RequestPredicate}
+	 * implementations are expected to call {@code accept} for all components that make up this
+	 * request predicate.
+	 * @param visitor the visitor to accept
+	 */
+	default void accept(RequestPredicates.Visitor visitor) {
+		visitor.unknown(this);
 	}
 
 }

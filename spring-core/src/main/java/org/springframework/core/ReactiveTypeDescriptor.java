@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ReactiveTypeDescriptor {
+public final class ReactiveTypeDescriptor {
 
 	private final Class<?> reactiveType;
 

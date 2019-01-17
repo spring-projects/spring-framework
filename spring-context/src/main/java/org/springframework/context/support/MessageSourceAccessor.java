@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class MessageSourceAccessor {
 	/**
 	 * Retrieve the message for the given code and the default Locale.
 	 * @param code code of the message
-	 * @param defaultMessage String to return if the lookup fails
+	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
 	public String getMessage(String code, String defaultMessage) {
@@ -91,8 +91,8 @@ public class MessageSourceAccessor {
 	/**
 	 * Retrieve the message for the given code and the given Locale.
 	 * @param code code of the message
-	 * @param defaultMessage String to return if the lookup fails
-	 * @param locale Locale in which to do lookup
+	 * @param defaultMessage the String to return if the lookup fails
+	 * @param locale the Locale in which to do lookup
 	 * @return the message
 	 */
 	public String getMessage(String code, String defaultMessage, Locale locale) {
@@ -104,7 +104,7 @@ public class MessageSourceAccessor {
 	 * Retrieve the message for the given code and the default Locale.
 	 * @param code code of the message
 	 * @param args arguments for the message, or {@code null} if none
-	 * @param defaultMessage String to return if the lookup fails
+	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage) {
@@ -116,8 +116,8 @@ public class MessageSourceAccessor {
 	 * Retrieve the message for the given code and the given Locale.
 	 * @param code code of the message
 	 * @param args arguments for the message, or {@code null} if none
-	 * @param defaultMessage String to return if the lookup fails
-	 * @param locale Locale in which to do lookup
+	 * @param defaultMessage the String to return if the lookup fails
+	 * @param locale the Locale in which to do lookup
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, Locale locale) {
@@ -138,7 +138,7 @@ public class MessageSourceAccessor {
 	/**
 	 * Retrieve the message for the given code and the given Locale.
 	 * @param code code of the message
-	 * @param locale Locale in which to do lookup
+	 * @param locale the Locale in which to do lookup
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -161,7 +161,7 @@ public class MessageSourceAccessor {
 	 * Retrieve the message for the given code and the given Locale.
 	 * @param code code of the message
 	 * @param args arguments for the message, or {@code null} if none
-	 * @param locale Locale in which to do lookup
+	 * @param locale the Locale in which to do lookup
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -184,7 +184,7 @@ public class MessageSourceAccessor {
 	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance)
 	 * in the given Locale.
 	 * @param resolvable the MessageSourceResolvable
-	 * @param locale Locale in which to do lookup
+	 * @param locale the Locale in which to do lookup
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class CookieGenerator {
 
 	private String cookiePath = DEFAULT_COOKIE_PATH;
 
-	@Nullable 
+	@Nullable
 	private Integer cookieMaxAge;
 
 	private boolean cookieSecure = false;
@@ -195,8 +195,8 @@ public class CookieGenerator {
 			cookie.setHttpOnly(true);
 		}
 		response.addCookie(cookie);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Added cookie with name [" + getCookieName() + "] and value [" + cookieValue + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Added cookie [" + getCookieName() + "=" + cookieValue + "]");
 		}
 	}
 
@@ -220,8 +220,8 @@ public class CookieGenerator {
 			cookie.setHttpOnly(true);
 		}
 		response.addCookie(cookie);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Removed cookie with name [" + getCookieName() + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Removed cookie '" + getCookieName() + "'");
 		}
 	}
 

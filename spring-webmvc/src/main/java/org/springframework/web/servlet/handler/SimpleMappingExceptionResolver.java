@@ -133,7 +133,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * Keys are view names; values are status codes.
 	 */
 	public Map<String, Integer> getStatusCodesAsMap() {
-		return Collections.unmodifiableMap(statusCodes);
+		return Collections.unmodifiableMap(this.statusCodes);
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * from within an include.
 	 * <p>If not specified, no status code will be applied, either leaving this to the
 	 * controller or view, or keeping the servlet engine's default of 200 (OK).
-	 * @param defaultStatusCode HTTP status code value, for example 500
+	 * @param defaultStatusCode the HTTP status code value, for example 500
 	 * ({@link HttpServletResponse#SC_INTERNAL_SERVER_ERROR}) or 404 ({@link HttpServletResponse#SC_NOT_FOUND})
 	 * @see #setStatusCodes(Properties)
 	 */
@@ -226,8 +226,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 		// Return default error view else, if defined.
 		if (viewName == null && this.defaultErrorView != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Resolving to default view '" + this.defaultErrorView + "' for exception of type [" +
-						ex.getClass().getName() + "]");
+				logger.debug("Resolving to default view '" + this.defaultErrorView + "'");
 			}
 			viewName = this.defaultErrorView;
 		}
@@ -257,8 +256,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 			}
 		}
 		if (viewName != null && logger.isDebugEnabled()) {
-			logger.debug("Resolving to view '" + viewName + "' for exception of type [" + ex.getClass().getName() +
-					"], based on exception mapping [" + dominantMapping + "]");
+			logger.debug("Resolving to view '" + viewName + "' based on mapping [" + dominantMapping + "]");
 		}
 		return viewName;
 	}
@@ -318,7 +316,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	protected void applyStatusCodeIfPossible(HttpServletRequest request, HttpServletResponse response, int statusCode) {
 		if (!WebUtils.isIncludeRequest(request)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Applying HTTP status code " + statusCode);
+				logger.debug("Applying HTTP status " + statusCode);
 			}
 			response.setStatus(statusCode);
 			request.setAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE, statusCode);
@@ -349,9 +347,6 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	protected ModelAndView getModelAndView(String viewName, Exception ex) {
 		ModelAndView mv = new ModelAndView(viewName);
 		if (this.exceptionAttribute != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Exposing Exception as model attribute '" + this.exceptionAttribute + "'");
-			}
 			mv.addObject(this.exceptionAttribute, ex);
 		}
 		return mv;

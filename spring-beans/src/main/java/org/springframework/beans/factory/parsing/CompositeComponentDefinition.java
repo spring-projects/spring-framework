@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.parsing;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
@@ -38,7 +38,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 	@Nullable
 	private final Object source;
 
-	private final List<ComponentDefinition> nestedComponents = new LinkedList<>();
+	private final List<ComponentDefinition> nestedComponents = new ArrayList<>();
 
 
 	/**

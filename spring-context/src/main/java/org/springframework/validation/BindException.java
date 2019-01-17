@@ -275,7 +275,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
-	public void recordFieldValue(String field, Class<?> type, Object value) {
+	public void recordFieldValue(String field, Class<?> type, @Nullable Object value) {
 		this.bindingResult.recordFieldValue(field, type, value);
 	}
 

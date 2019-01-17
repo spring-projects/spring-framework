@@ -81,7 +81,8 @@ public class ReactiveTypeHandlerTests {
 		ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
 		factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = factoryBean.getObject();
-		this.handler = new ReactiveTypeHandler(ReactiveAdapterRegistry.getSharedInstance(), new SyncTaskExecutor(), manager);
+		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+		this.handler = new ReactiveTypeHandler(adapterRegistry, new SyncTaskExecutor(), manager);
 		resetRequest();
 	}
 
@@ -90,8 +91,8 @@ public class ReactiveTypeHandlerTests {
 		this.servletResponse = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(this.servletRequest, this.servletResponse);
 
-		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.servletRequest, this.servletResponse);
-		WebAsyncUtils.getAsyncManager(this.webRequest).setAsyncWebRequest(asyncWebRequest);
+		AsyncWebRequest webRequest = new StandardServletAsyncWebRequest(this.servletRequest, this.servletResponse);
+		WebAsyncUtils.getAsyncManager(this.webRequest).setAsyncWebRequest(webRequest);
 		this.servletRequest.setAsyncSupported(true);
 	}
 
@@ -122,7 +123,8 @@ public class ReactiveTypeHandlerTests {
 		// RxJava 1 Single
 		AtomicReference<SingleEmitter<String>> ref = new AtomicReference<>();
 		Single<String> single = Single.fromEmitter(ref::set);
-		testDeferredResultSubscriber(single, Single.class, forClass(String.class), () -> ref.get().onSuccess("foo"), "foo");
+		testDeferredResultSubscriber(single, Single.class, forClass(String.class),
+				() -> ref.get().onSuccess("foo"), "foo");
 
 		// RxJava 2 Single
 		AtomicReference<io.reactivex.SingleEmitter<String>> ref2 = new AtomicReference<>();
@@ -191,9 +193,9 @@ public class ReactiveTypeHandlerTests {
 		testSseResponse(false);
 	}
 
-	private void testSseResponse(boolean expectSseEimtter) throws Exception {
+	private void testSseResponse(boolean expectSseEmitter) throws Exception {
 		ResponseBodyEmitter emitter = handleValue(Flux.empty(), Flux.class, forClass(String.class));
-		assertEquals(expectSseEimtter, emitter instanceof SseEmitter);
+		assertEquals(expectSseEmitter, emitter instanceof SseEmitter);
 		resetRequest();
 	}
 

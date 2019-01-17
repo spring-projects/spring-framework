@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Create a new HibernateTransactionManager instance.
-	 * @param sessionFactory SessionFactory to manage transactions for
+	 * @param sessionFactory the SessionFactory to manage transactions for
 	 */
 	public HibernateTransactionManager(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -197,13 +197,20 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * manager needs to work on the underlying target DataSource. If there's
 	 * nevertheless a TransactionAwareDataSourceProxy passed in, it will be
 	 * unwrapped to extract its target DataSource.
+	 * <p><b>NOTE: For scenarios with many transactions that just read data from
+	 * Hibernate's cache (and do not actually access the database), consider using
+	 * a {@link org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy}
+	 * for the actual target DataSource. Alternatively, consider switching
+	 * {@link #setPrepareConnection "prepareConnection"} to {@code false}.</b>
+	 * In both cases, this transaction manager will not eagerly acquire a
+	 * JDBC Connection for each Hibernate Session anymore (as of Spring 5.1).
 	 * @see #setAutodetectDataSource
 	 * @see TransactionAwareDataSourceProxy
-	 * @see DataSourceUtils
+	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
-		if (dataSource != null && dataSource instanceof TransactionAwareDataSourceProxy) {
+		if (dataSource instanceof TransactionAwareDataSourceProxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
@@ -336,7 +343,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	@Nullable
 	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
 		if (this.entityInterceptor instanceof Interceptor) {
-			return (Interceptor) entityInterceptor;
+			return (Interceptor) this.entityInterceptor;
 		}
 		else if (this.entityInterceptor instanceof String) {
 			if (this.beanFactory == null) {
@@ -374,8 +381,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			DataSource sfds = SessionFactoryUtils.getDataSource(getSessionFactory());
 			if (sfds != null) {
 				// Use the SessionFactory's DataSource for exposing transactions to JDBC code.
-				if (logger.isInfoEnabled()) {
-					logger.info("Using DataSource [" + sfds +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Using DataSource [" + sfds +
 							"] of Hibernate SessionFactory for HibernateTransactionManager");
 				}
 				setDataSource(sfds);
@@ -462,39 +469,45 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			session = txObject.getSessionHolder().getSession();
 
-			if (this.prepareConnection && isSameConnectionForEntireSession(session)) {
-				// We're allowed to change the transaction settings of the JDBC Connection.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Preparing JDBC Connection of Hibernate Session [" + session + "]");
-				}
-				Connection con = ((SessionImplementor) session).connection();
-				Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
-				txObject.setPreviousIsolationLevel(previousIsolationLevel);
-				if (this.allowResultAccessAfterCompletion && !txObject.isNewSession()) {
-					int currentHoldability = con.getHoldability();
-					if (currentHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
-						txObject.setPreviousHoldability(currentHoldability);
-						con.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+			boolean holdabilityNeeded = this.allowResultAccessAfterCompletion && !txObject.isNewSession();
+			boolean isolationLevelNeeded = (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT);
+			if (holdabilityNeeded || isolationLevelNeeded || definition.isReadOnly()) {
+				if (this.prepareConnection && isSameConnectionForEntireSession(session)) {
+					// We're allowed to change the transaction settings of the JDBC Connection.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Preparing JDBC Connection of Hibernate Session [" + session + "]");
+					}
+					Connection con = ((SessionImplementor) session).connection();
+					Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
+					txObject.setPreviousIsolationLevel(previousIsolationLevel);
+					if (this.allowResultAccessAfterCompletion && !txObject.isNewSession()) {
+						int currentHoldability = con.getHoldability();
+						if (currentHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
+							txObject.setPreviousHoldability(currentHoldability);
+							con.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+						}
 					}
 				}
-			}
-			else {
-				// Not allowed to change the transaction settings of the JDBC Connection.
-				if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-					// We should set a specific isolation level but are not allowed to...
-					throw new InvalidIsolationLevelException(
-							"HibernateTransactionManager is not allowed to support custom isolation levels: " +
-							"make sure that its 'prepareConnection' flag is on (the default) and that the " +
-							"Hibernate connection release mode is set to 'on_close' (the default for JDBC).");
-				}
-				if (logger.isDebugEnabled()) {
-					logger.debug("Not preparing JDBC Connection of Hibernate Session [" + session + "]");
+				else {
+					// Not allowed to change the transaction settings of the JDBC Connection.
+					if (isolationLevelNeeded) {
+						// We should set a specific isolation level but are not allowed to...
+						throw new InvalidIsolationLevelException(
+								"HibernateTransactionManager is not allowed to support custom isolation levels: " +
+								"make sure that its 'prepareConnection' flag is on (the default) and that the " +
+								"Hibernate connection release mode is set to 'on_close' (the default for JDBC).");
+					}
+					if (logger.isDebugEnabled()) {
+						logger.debug("Not preparing JDBC Connection of Hibernate Session [" + session + "]");
+					}
 				}
 			}
 
 			if (definition.isReadOnly() && txObject.isNewSession()) {
 				// Just set to MANUAL in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.MANUAL);
+				// As of 5.1, we're also setting Hibernate's read-only entity mode by default.
+				session.setDefaultReadOnly(true);
 			}
 
 			if (!definition.isReadOnly() && !txObject.isNewSession()) {
@@ -527,13 +540,16 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
-				Connection con = ((SessionImplementor) session).connection();
-				ConnectionHolder conHolder = new ConnectionHolder(con);
+				SessionImplementor sessionImpl = (SessionImplementor) session;
+				// The following needs to use a lambda expression instead of a method reference
+				// for compatibility with Hibernate ORM <5.2 where connection() is defined on
+				// SessionImplementor itself instead of on SharedSessionContractImplementor...
+				ConnectionHolder conHolder = new ConnectionHolder(() -> sessionImpl.connection());
 				if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(timeout);
 				}
 				if (logger.isDebugEnabled()) {
-					logger.debug("Exposing Hibernate transaction as JDBC transaction [" + con + "]");
+					logger.debug("Exposing Hibernate transaction as JDBC [" + conHolder.getConnectionHandle() + "]");
 				}
 				TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 				txObject.setConnectionHolder(conHolder);
@@ -777,7 +793,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * from the {@code org.springframework.dao} hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
-	 * @param ex HibernateException that occurred
+	 * @param ex the HibernateException that occurred
 	 * @return a corresponding DataAccessException
 	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 */
@@ -890,7 +906,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Holder for suspended resources.
 	 * Used internally by {@code doSuspend} and {@code doResume}.
 	 */
-	private static class SuspendedResourcesHolder {
+	private static final class SuspendedResourcesHolder {
 
 		private final SessionHolder sessionHolder;
 

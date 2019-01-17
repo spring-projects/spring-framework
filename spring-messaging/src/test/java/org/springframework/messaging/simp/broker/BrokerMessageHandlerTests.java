@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,13 @@ import static org.mockito.Mockito.*;
  */
 public class BrokerMessageHandlerTests {
 
-	private TestBrokerMesageHandler handler;
+	private TestBrokerMessageHandler handler;
 
 
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		this.handler = new TestBrokerMesageHandler();
+		this.handler = new TestBrokerMessageHandler();
 	}
 
 
@@ -116,7 +116,7 @@ public class BrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void publishBrokerUnavailableEventWhenAlreadyUnvailable() {
+	public void publishBrokerUnavailableEventWhenAlreadyUnavailable() {
 
 		this.handler.publishBrokerAvailableEvent();
 		this.handler.publishBrokerUnavailableEvent();
@@ -126,7 +126,7 @@ public class BrokerMessageHandlerTests {
 	}
 
 
-	private static class TestBrokerMesageHandler extends AbstractBrokerMessageHandler
+	private static class TestBrokerMessageHandler extends AbstractBrokerMessageHandler
 			implements ApplicationEventPublisher {
 
 		private final List<Message<?>> messages = new ArrayList<>();
@@ -134,7 +134,7 @@ public class BrokerMessageHandlerTests {
 		private final List<Boolean> availabilityEvents = new ArrayList<>();
 
 
-		private TestBrokerMesageHandler() {
+		private TestBrokerMessageHandler() {
 			super(mock(SubscribableChannel.class), mock(MessageChannel.class), mock(SubscribableChannel.class));
 			setApplicationEventPublisher(this);
 		}
@@ -146,7 +146,7 @@ public class BrokerMessageHandlerTests {
 
 		@Override
 		public void publishEvent(ApplicationEvent event) {
-			 publishEvent((Object) event);
+			publishEvent((Object) event);
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,11 @@ package org.springframework.web.server.adapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -42,27 +41,25 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
- * This builder has two purposes.
+ * This builder has two purposes:
  *
- * <p>One is to assemble a processing chain that consists of a target
- * {@link WebHandler}, then decorated with a set of {@link WebFilter}'s, then
- * further decorated with a set of {@link WebExceptionHandler}'s.
+ * <p>One is to assemble a processing chain that consists of a target {@link WebHandler},
+ * then decorated with a set of {@link WebFilter WebFilters}, then further decorated with
+ * a set of {@link WebExceptionHandler WebExceptionHandlers}.
  *
- * <p>The second purpose is to adapt the resulting processing chain to an
- * {@link HttpHandler} -- the lowest level reactive HTTP handling abstraction,
- * which can then be used with any of the supported runtimes. The adaptation
- * is done with the help of {@link HttpWebHandlerAdapter}.
+ * <p>The second purpose is to adapt the resulting processing chain to an {@link HttpHandler}:
+ * the lowest-level reactive HTTP handling abstraction which can then be used with any of the
+ * supported runtimes. The adaptation is done with the help of {@link HttpWebHandlerAdapter}.
  *
- * <p>The processing chain can be assembled manually via builder methods, or
- * detected from Spring configuration via
- * {@link #applicationContext(ApplicationContext)}, or a mix of both.
+ * <p>The processing chain can be assembled manually via builder methods, or detected from
+ * a Spring {@link ApplicationContext} via {@link #applicationContext}, or a mix of both.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @since 5.0
  * @see HttpWebHandlerAdapter
  */
-public class WebHttpHandlerBuilder {
+public final class WebHttpHandlerBuilder {
 
 	/** Well-known name for the target WebHandler in the bean factory. */
 	public static final String WEB_HANDLER_BEAN_NAME = "webHandler";
@@ -76,8 +73,14 @@ public class WebHttpHandlerBuilder {
 	/** Well-known name for the LocaleContextResolver in the bean factory. */
 	public static final String LOCALE_CONTEXT_RESOLVER_BEAN_NAME = "localeContextResolver";
 
+	/** Well-known name for the ForwardedHeaderTransformer in the bean factory. */
+	public static final String FORWARDED_HEADER_TRANSFORMER_BEAN_NAME = "forwardedHeaderTransformer";
+
 
 	private final WebHandler webHandler;
+
+	@Nullable
+	private final ApplicationContext applicationContext;
 
 	private final List<WebFilter> filters = new ArrayList<>();
 
@@ -93,21 +96,13 @@ public class WebHttpHandlerBuilder {
 	private LocaleContextResolver localeContextResolver;
 
 	@Nullable
-	private ApplicationContext applicationContext;
+	private ForwardedHeaderTransformer forwardedHeaderTransformer;
 
-
-	/**
-	 * Private constructor.
-	 */
-	private WebHttpHandlerBuilder(WebHandler webHandler) {
-		Assert.notNull(webHandler, "WebHandler must not be null");
-		this.webHandler = webHandler;
-	}
 
 	/**
 	 * Private constructor to use when initialized from an ApplicationContext.
 	 */
-	private WebHttpHandlerBuilder(WebHandler webHandler, ApplicationContext applicationContext) {
+	private WebHttpHandlerBuilder(WebHandler webHandler, @Nullable ApplicationContext applicationContext) {
 		Assert.notNull(webHandler, "WebHandler must not be null");
 		this.webHandler = webHandler;
 		this.applicationContext = applicationContext;
@@ -118,11 +113,13 @@ public class WebHttpHandlerBuilder {
 	 */
 	private WebHttpHandlerBuilder(WebHttpHandlerBuilder other) {
 		this.webHandler = other.webHandler;
+		this.applicationContext = other.applicationContext;
 		this.filters.addAll(other.filters);
 		this.exceptionHandlers.addAll(other.exceptionHandlers);
 		this.sessionManager = other.sessionManager;
 		this.codecConfigurer = other.codecConfigurer;
 		this.localeContextResolver = other.localeContextResolver;
+		this.forwardedHeaderTransformer = other.forwardedHeaderTransformer;
 	}
 
 
@@ -132,7 +129,7 @@ public class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder webHandler(WebHandler webHandler) {
-		return new WebHttpHandlerBuilder(webHandler);
+		return new WebHttpHandlerBuilder(webHandler, null);
 	}
 
 	/**
@@ -156,16 +153,19 @@ public class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
-
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
 				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class), context);
 
-		// Autowire lists for @Bean + @Order
-
-		SortedBeanContainer container = new SortedBeanContainer();
-		context.getAutowireCapableBeanFactory().autowireBean(container);
-		builder.filters(filters -> filters.addAll(container.getFilters()));
-		builder.exceptionHandlers(handlers -> handlers.addAll(container.getExceptionHandlers()));
+		List<WebFilter> webFilters = context
+				.getBeanProvider(WebFilter.class)
+				.orderedStream()
+				.collect(Collectors.toList());
+		builder.filters(filters -> filters.addAll(webFilters));
+		List<WebExceptionHandler> exceptionHandlers = context
+				.getBeanProvider(WebExceptionHandler.class)
+				.orderedStream()
+				.collect(Collectors.toList());
+		builder.exceptionHandlers(handlers -> handlers.addAll(exceptionHandlers));
 
 		try {
 			builder.sessionManager(
@@ -191,6 +191,22 @@ public class WebHttpHandlerBuilder {
 			// Fall back on default
 		}
 
+		try {
+			builder.localeContextResolver(
+					context.getBean(LOCALE_CONTEXT_RESOLVER_BEAN_NAME, LocaleContextResolver.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
+		try {
+			builder.forwardedHeaderTransformer(
+					context.getBean(FORWARDED_HEADER_TRANSFORMER_BEAN_NAME, ForwardedHeaderTransformer.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
 		return builder;
 	}
 
@@ -202,6 +218,7 @@ public class WebHttpHandlerBuilder {
 	public WebHttpHandlerBuilder filter(WebFilter... filters) {
 		if (!ObjectUtils.isEmpty(filters)) {
 			this.filters.addAll(Arrays.asList(filters));
+			updateFilters();
 		}
 		return this;
 	}
@@ -212,7 +229,27 @@ public class WebHttpHandlerBuilder {
 	 */
 	public WebHttpHandlerBuilder filters(Consumer<List<WebFilter>> consumer) {
 		consumer.accept(this.filters);
+		updateFilters();
 		return this;
+	}
+
+	private void updateFilters() {
+
+		if (this.filters.isEmpty()) {
+			return;
+		}
+
+		List<WebFilter> filtersToUse = this.filters.stream()
+				.peek(filter -> {
+					if (filter instanceof ForwardedHeaderTransformer && this.forwardedHeaderTransformer == null) {
+						this.forwardedHeaderTransformer = (ForwardedHeaderTransformer) filter;
+					}
+				})
+				.filter(filter -> !(filter instanceof ForwardedHeaderTransformer))
+				.collect(Collectors.toList());
+
+		this.filters.clear();
+		this.filters.addAll(filtersToUse);
 	}
 
 	/**
@@ -248,13 +285,31 @@ public class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Configure the {@link ServerCodecConfigurer} to set on the
-	 * {@link ServerWebExchange WebServerExchange}.
+	 * Whether a {@code WebSessionManager} is configured or not, either detected from an
+	 * {@code ApplicationContext} or explicitly configured via {@link #sessionManager}.
+	 * @since 5.0.9
+	 */
+	public boolean hasSessionManager() {
+		return (this.sessionManager != null);
+	}
+
+	/**
+	 * Configure the {@link ServerCodecConfigurer} to set on the {@code WebServerExchange}.
 	 * @param codecConfigurer the codec configurer
 	 */
 	public WebHttpHandlerBuilder codecConfigurer(ServerCodecConfigurer codecConfigurer) {
 		this.codecConfigurer = codecConfigurer;
 		return this;
+	}
+
+
+	/**
+	 * Whether a {@code ServerCodecConfigurer} is configured or not, either detected from an
+	 * {@code ApplicationContext} or explicitly configured via {@link #codecConfigurer}.
+	 * @since 5.0.9
+	 */
+	public boolean hasCodecConfigurer() {
+		return (this.codecConfigurer != null);
 	}
 
 	/**
@@ -267,15 +322,43 @@ public class WebHttpHandlerBuilder {
 		return this;
 	}
 
+	/**
+	 * Whether a {@code LocaleContextResolver} is configured or not, either detected from an
+	 * {@code ApplicationContext} or explicitly configured via {@link #localeContextResolver}.
+	 * @since 5.0.9
+	 */
+	public boolean hasLocaleContextResolver() {
+		return (this.localeContextResolver != null);
+	}
+
+	/**
+	 * Configure the {@link ForwardedHeaderTransformer} for extracting and/or
+	 * removing forwarded headers.
+	 * @param transformer the transformer
+	 * @since 5.1
+	 */
+	public WebHttpHandlerBuilder forwardedHeaderTransformer(ForwardedHeaderTransformer transformer) {
+		this.forwardedHeaderTransformer = transformer;
+		return this;
+	}
+
+	/**
+	 * Whether a {@code ForwardedHeaderTransformer} is configured or not, either
+	 * detected from an {@code ApplicationContext} or explicitly configured via
+	 * {@link #forwardedHeaderTransformer(ForwardedHeaderTransformer)}.
+	 * @since 5.1
+	 */
+	public boolean hasForwardedHeaderTransformer() {
+		return (this.forwardedHeaderTransformer != null);
+	}
+
 
 	/**
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
 
-		WebHandler decorated;
-
-		decorated = new FilteringWebHandler(this.webHandler, this.filters);
+		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
 
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
@@ -288,9 +371,13 @@ public class WebHttpHandlerBuilder {
 		if (this.localeContextResolver != null) {
 			adapted.setLocaleContextResolver(this.localeContextResolver);
 		}
+		if (this.forwardedHeaderTransformer != null) {
+			adapted.setForwardedHeaderTransformer(this.forwardedHeaderTransformer);
+		}
 		if (this.applicationContext != null) {
 			adapted.setApplicationContext(this.applicationContext);
 		}
+		adapted.afterPropertiesSet();
 
 		return adapted;
 	}
@@ -302,32 +389,6 @@ public class WebHttpHandlerBuilder {
 	@Override
 	public WebHttpHandlerBuilder clone() {
 		return new WebHttpHandlerBuilder(this);
-	}
-
-
-	private static class SortedBeanContainer {
-
-		private List<WebFilter> filters = Collections.emptyList();
-
-		private List<WebExceptionHandler> exceptionHandlers = Collections.emptyList();
-
-		@Autowired(required = false)
-		public void setFilters(List<WebFilter> filters) {
-			this.filters = filters;
-		}
-
-		public List<WebFilter> getFilters() {
-			return this.filters;
-		}
-
-		@Autowired(required = false)
-		public void setExceptionHandlers(List<WebExceptionHandler> exceptionHandlers) {
-			this.exceptionHandlers = exceptionHandlers;
-		}
-
-		public List<WebExceptionHandler> getExceptionHandlers() {
-			return this.exceptionHandlers;
-		}
 	}
 
 }

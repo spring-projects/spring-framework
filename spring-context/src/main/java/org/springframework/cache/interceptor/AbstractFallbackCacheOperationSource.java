@@ -98,8 +98,8 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		else {
 			Collection<CacheOperation> cacheOps = computeCacheOperations(method, targetClass);
 			if (cacheOps != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheOps);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheOps);
 				}
 				this.attributeCache.put(cacheKey, cacheOps);
 			}
@@ -163,24 +163,22 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 
 
 	/**
-	 * Subclasses need to implement this to return the caching attribute
-	 * for the given method, if any.
-	 * @param method the method to retrieve the attribute for
-	 * @return all caching attribute associated with this method
-	 * (or {@code null} if none)
-	 */
-	@Nullable
-	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
-
-	/**
-	 * Subclasses need to implement this to return the caching attribute
-	 * for the given class, if any.
+	 * Subclasses need to implement this to return the caching attribute for the
+	 * given class, if any.
 	 * @param clazz the class to retrieve the attribute for
-	 * @return all caching attribute associated with this class
-	 * (or {@code null} if none)
+	 * @return all caching attribute associated with this class, or {@code null} if none
 	 */
 	@Nullable
 	protected abstract Collection<CacheOperation> findCacheOperations(Class<?> clazz);
+
+	/**
+	 * Subclasses need to implement this to return the caching attribute for the
+	 * given method, if any.
+	 * @param method the method to retrieve the attribute for
+	 * @return all caching attribute associated with this method, or {@code null} if none
+	 */
+	@Nullable
+	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
 
 	/**
 	 * Should only public methods be allowed to have caching semantics?

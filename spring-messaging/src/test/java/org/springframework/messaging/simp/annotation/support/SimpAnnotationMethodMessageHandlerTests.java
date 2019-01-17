@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxProcessor;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.lang.Nullable;
@@ -75,7 +80,6 @@ import static org.mockito.BDDMockito.*;
  * @author Brian Clozel
  * @author Sebastien Deleuze
  */
-@SuppressWarnings("unused")
 public class SimpAnnotationMethodMessageHandlerTests {
 
 	private static final String TEST_INVALID_VALUE = "invalidValue";
@@ -202,6 +206,30 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
+	public void exceptionAsCause() {
+		Message<?> message = createMessage("/pre/illegalStateCause");
+		this.messageHandler.registerHandler(this.testController);
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("handleExceptionWithHandlerMethodArg", this.testController.method);
+		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
+		assertNotNull(handlerMethod);
+		assertEquals("illegalStateCause", handlerMethod.getMethod().getName());
+	}
+
+	@Test
+	public void errorAsMessageHandlingException() {
+		Message<?> message = createMessage("/pre/error");
+		this.messageHandler.registerHandler(this.testController);
+		this.messageHandler.handleMessage(message);
+
+		assertEquals("handleErrorWithHandlerMethodArg", this.testController.method);
+		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
+		assertNotNull(handlerMethod);
+		assertEquals("errorAsThrowable", handlerMethod.getMethod().getName());
+	}
+
+	@Test
 	public void simpScope() {
 		Map<String, Object> sessionAttributes = new ConcurrentHashMap<>();
 		sessionAttributes.put("name", "value");
@@ -238,9 +266,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void listenableFutureSuccess() {
-		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
 		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
@@ -258,9 +286,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void listenableFutureFailure() {
-		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
 		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
@@ -276,9 +304,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void completableFutureSuccess() {
-		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
 		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
@@ -296,9 +324,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void completableFutureFailure() {
-		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
 		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
@@ -311,6 +339,64 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		controller.future.completeExceptionally(new IllegalStateException());
 		assertTrue(controller.exceptionCaught);
+	}
+
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void monoSuccess() {
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
+
+		ReactiveController controller = new ReactiveController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		Message<?> message = createMessage("/app1/mono");
+		this.messageHandler.handleMessage(message);
+
+		assertNotNull(controller.mono);
+		controller.mono.onNext("foo");
+		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
+		assertEquals("foo", this.payloadCaptor.getValue());
+	}
+
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void monoFailure() {
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
+
+		ReactiveController controller = new ReactiveController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		Message<?> message = createMessage("/app1/mono");
+		this.messageHandler.handleMessage(message);
+
+		controller.mono.onError(new IllegalStateException());
+		assertTrue(controller.exceptionCaught);
+	}
+
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void fluxNotHandled() {
+		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
+
+		ReactiveController controller = new ReactiveController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+
+		Message<?> message = createMessage("/app1/flux");
+		this.messageHandler.handleMessage(message);
+
+		assertNotNull(controller.flux);
+		controller.flux.onNext("foo");
+
+		verify(this.converter, never()).toMessage(any(), any(MessageHeaders.class));
 	}
 
 	@Test
@@ -412,7 +498,17 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageMapping("/illegalState")
 		public void illegalState() {
-			throw new IllegalStateException();
+			throw new IllegalStateException("my cause");
+		}
+
+		@MessageMapping("/illegalStateCause")
+		public void illegalStateCause() {
+			throw new RuntimeException(new IllegalStateException("my cause"));
+		}
+
+		@MessageMapping("/error")
+		public void errorAsThrowable() {
+			throw new Error("my cause");
 		}
 
 		@MessageExceptionHandler(MethodArgumentNotValidException.class)
@@ -420,10 +516,18 @@ public class SimpAnnotationMethodMessageHandlerTests {
 			this.method = "handleValidationException";
 		}
 
-		@MessageExceptionHandler(IllegalStateException.class)
-		public void handleExceptionWithHandlerMethodArg(HandlerMethod handlerMethod) {
+		@MessageExceptionHandler
+		public void handleExceptionWithHandlerMethodArg(IllegalStateException ex, HandlerMethod handlerMethod) {
 			this.method = "handleExceptionWithHandlerMethodArg";
 			this.arguments.put("handlerMethod", handlerMethod);
+			assertEquals("my cause", ex.getMessage());
+		}
+
+		@MessageExceptionHandler
+		public void handleErrorWithHandlerMethodArg(Error ex, HandlerMethod handlerMethod) {
+			this.method = "handleErrorWithHandlerMethodArg";
+			this.arguments.put("handlerMethod", handlerMethod);
+			assertEquals("my cause", ex.getMessage());
 		}
 
 		@MessageMapping("/scope")
@@ -445,7 +549,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	private static class DotPathSeparatorController {
 
 		private String method;
-
 
 		@MessageMapping("foo")
 		public void handleFoo() {
@@ -494,6 +597,33 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		public CompletableFuture<String> handleCompletableFuture() {
 			this.future = new CompletableFuture<>();
 			return this.future;
+		}
+
+		@MessageExceptionHandler(IllegalStateException.class)
+		public void handleValidationException() {
+			this.exceptionCaught = true;
+		}
+	}
+
+	@Controller
+	private static class ReactiveController {
+
+		private MonoProcessor<String> mono;
+
+		private FluxProcessor<String, String> flux;
+
+		private boolean exceptionCaught = false;
+
+		@MessageMapping("mono")
+		public Mono<String> handleMono() {
+			this.mono = MonoProcessor.create();
+			return this.mono;
+		}
+
+		@MessageMapping("flux")
+		public Flux<String> handleFlux() {
+			this.flux = EmitterProcessor.create();
+			return this.flux;
 		}
 
 		@MessageExceptionHandler(IllegalStateException.class)

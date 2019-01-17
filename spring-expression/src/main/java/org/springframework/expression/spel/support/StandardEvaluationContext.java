@@ -18,9 +18,9 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
@@ -88,7 +88,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
 
-	private final Map<String, Object> variables = new HashMap<>();
+	private final Map<String, Object> variables = new ConcurrentHashMap<>();
 
 
 	/**
@@ -203,7 +203,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	@Override
 	public TypeConverter getTypeConverter() {
 		if (this.typeConverter == null) {
-			 this.typeConverter = new StandardTypeConverter();
+			this.typeConverter = new StandardTypeConverter();
 		}
 		return this.typeConverter;
 	}
@@ -229,12 +229,22 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	@Override
-	public void setVariable(String name, @Nullable Object value) {
-		this.variables.put(name, value);
+	public void setVariable(@Nullable String name, @Nullable Object value) {
+		// For backwards compatibility, we ignore null names here...
+		// And since ConcurrentHashMap cannot store null values, we simply take null
+		// as a remove from the Map (with the same result from lookupVariable below).
+		if (name != null) {
+			if (value != null) {
+				this.variables.put(name, value);
+			}
+			else {
+				this.variables.remove(name);
+			}
+		}
 	}
 
-	public void setVariables(Map<String,Object> variables) {
-		this.variables.putAll(variables);
+	public void setVariables(Map<String, Object> variables) {
+		variables.forEach(this::setVariable);
 	}
 
 	public void registerFunction(String name, Method method) {

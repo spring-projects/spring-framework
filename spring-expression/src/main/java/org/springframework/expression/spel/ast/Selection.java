@@ -49,11 +49,20 @@ import org.springframework.util.ObjectUtils;
  */
 public class Selection extends SpelNodeImpl {
 
-	public static final int ALL = 0; // ?[]
+	/**
+	 * All items ({@code ?[]}).
+	 */
+	public static final int ALL = 0;
 
-	public static final int FIRST = 1; // ^[]
+	/**
+	 * The first item ({@code ^[]}).
+	 */
+	public static final int FIRST = 1;
 
-	public static final int LAST = 2; // $[]
+	/**
+	 * The last item ({@code $[]}).
+	 */
+	public static final int LAST = 2;
 
 	private final int variant;
 

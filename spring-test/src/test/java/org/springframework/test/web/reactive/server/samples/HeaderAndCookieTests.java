@@ -47,7 +47,7 @@ public class HeaderAndCookieTests {
 
 	@Test
 	public void headerMultipleValues() throws Exception {
-		this.client.get().uri("header-multi-value")
+		this.client.get().uri("/header-multi-value")
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().valueEquals("h1", "v1", "v2", "v3");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class PersistenceContextTransactionTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() {
 		factory = mock(EntityManagerFactory.class);
 		manager = mock(EntityManager.class);
 		tx = mock(EntityTransaction.class);
@@ -74,14 +74,14 @@ public class PersistenceContextTransactionTests {
 				return factory;
 			}
 		};
-		pabpp.postProcessPropertyValues(null, null, bean, "bean");
+		pabpp.postProcessProperties(null, bean, "bean");
 
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void clear() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());

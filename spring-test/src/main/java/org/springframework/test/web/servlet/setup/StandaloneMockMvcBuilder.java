@@ -268,7 +268,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	/**
-	 * Set up view resolution with the given {@link ViewResolver}s.
+	 * Set up view resolution with the given {@link ViewResolver ViewResolvers}.
 	 * If not set, an {@link InternalResourceViewResolver} is used by default.
 	 */
 	public StandaloneMockMvcBuilder setViewResolvers(ViewResolver...resolvers) {
@@ -399,6 +399,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		this.flashMapManager = new SessionFlashMapManager();
 		wac.addBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, this.flashMapManager);
+
+		extendMvcSingletons(sc).forEach(wac::addBean);
 	}
 
 	private List<ViewResolver> initViewResolvers(WebApplicationContext wac) {
@@ -412,8 +414,20 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		return this.viewResolvers;
 	}
 
+	/**
+	 * This method could be used from a sub-class to register additional Spring
+	 * MVC infrastructure such as additional {@code HandlerMapping},
+	 * {@code HandlerAdapter}, and others.
+	 * @param servletContext the ServletContext
+	 * @return a map with additional MVC infrastructure object instances
+	 * @since 5.1.4
+	 */
+	protected Map<String, Object> extendMvcSingletons(@Nullable ServletContext servletContext) {
+		return Collections.emptyMap();
+	}
 
-	/** Using the MVC Java configuration as the starting point for the "standalone" setup */
+
+	/** Using the MVC Java configuration as the starting point for the "standalone" setup. */
 	private class StandaloneConfiguration extends WebMvcConfigurationSupport {
 
 		public RequestMappingHandlerMapping getHandlerMapping() {

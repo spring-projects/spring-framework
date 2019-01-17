@@ -132,7 +132,7 @@ public class HotSwappableTargetSourceTests {
 	@Test
 	public void testRejectsSwapToNull() {
 		IllegalArgumentException ex = testRejectsSwapToInvalidValue(null);
-		assertTrue(ex.getMessage().indexOf("null") != -1);
+		assertTrue(ex.getMessage().contains("null"));
 	}
 
 	// TODO test reject swap to wrong interface or class?

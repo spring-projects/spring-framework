@@ -156,7 +156,7 @@ public class HtmlCharacterEntityReferencesTests {
 				return false;
 			}
 			catch (IOException ex) {
-				throw new IllegalStateException("Could not parse defintion resource: " + ex.getMessage());
+				throw new IllegalStateException("Could not parse definition resource: " + ex.getMessage());
 			}
 		}
 

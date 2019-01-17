@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,6 @@ import org.springframework.web.util.NestedServletException;
 /**
  * Servlet-API-based HTTP request handler that exports the specified service bean
  * as Hessian service endpoint, accessible via a Hessian proxy.
- *
- * <p><b>Note:</b> Spring also provides an alternative version of this exporter,
- * for Sun's JRE 1.6 HTTP server: {@link SimpleHessianServiceExporter}.
  *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
@@ -63,10 +60,10 @@ public class HessianServiceExporter extends HessianExporter implements HttpReque
 
 		response.setContentType(CONTENT_TYPE_HESSIAN);
 		try {
-		  invoke(request.getInputStream(), response.getOutputStream());
+			invoke(request.getInputStream(), response.getOutputStream());
 		}
 		catch (Throwable ex) {
-		  throw new NestedServletException("Hessian skeleton invocation failed", ex);
+			throw new NestedServletException("Hessian skeleton invocation failed", ex);
 		}
 	}
 

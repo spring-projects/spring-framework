@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import javax.management.Notification;
  * implementing the {@link NotificationPublisherAware} interface. After a particular
  * managed resource instance is registered with the {@link javax.management.MBeanServer},
  * Spring will inject a {@code NotificationPublisher} instance into it if that
- * resource implements the {@link NotificationPublisherAware} inteface.
+ * resource implements the {@link NotificationPublisherAware} interface.
  *
  * <p>Each managed resource instance will have a distinct instance of a
  * {@code NotificationPublisher} implementation. This instance will keep

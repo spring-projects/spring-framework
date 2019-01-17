@@ -542,7 +542,7 @@ public class MediaType extends MimeType implements Serializable {
 	}
 
 	/**
-	 * Parse the given comma-separated string into a list of {@code MediaType} objects.
+	 * Parse the comma-separated string into a list of {@code MediaType} objects.
 	 * <p>This method can be used to parse an Accept or Content-Type header.
 	 * @param mediaTypes the string to parse
 	 * @return the list of media types
@@ -552,12 +552,8 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = StringUtils.tokenizeToStringArray(mediaTypes, ",");
-		List<MediaType> result = new ArrayList<>(tokens.length);
-		for (String token : tokens) {
-			result.add(parseMediaType(token));
-		}
-		return result;
+		return MimeTypeUtils.tokenize(mediaTypes).stream()
+				.map(MediaType::parseMediaType).collect(Collectors.toList());
 	}
 
 	/**

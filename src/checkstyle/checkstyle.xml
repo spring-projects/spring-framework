@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.2//EN" "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+<module name="com.puppycrawl.tools.checkstyle.Checker">
+	<!-- Supressions -->
+	<module name="SuppressionFilter">
+		<property name="file" value="${config_loc}/checkstyle-suppressions.xml"/>
+	</module>
+
+	<!-- Root Checks -->
+	<module name="io.spring.javaformat.checkstyle.check.SpringHeaderCheck">
+		<property name="fileExtensions" value="java" />
+		<property name="headerType" value="apache2"/>
+		<property name="headerCopyrightPattern" value="20\d\d-20\d\d"/>
+		<property name="packageInfoHeaderType" value="none"/>
+	</module>
+	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck">
+		<property name="lineSeparator" value="lf"/>
+	</module>
+
+	<!-- TreeWalker Checks -->
+	<module name="com.puppycrawl.tools.checkstyle.TreeWalker">
+		<!-- Annotations -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationUseStyleCheck">
+			<property name="elementStyle" value="compact" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.MissingOverrideCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.PackageAnnotationCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationLocationCheck">
+			<property name="allowSamelineSingleParameterlessAnnotation"
+				value="false" />
+		</module>
+
+		<!-- Block Checks -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyBlockCheck">
+			<property name="option" value="text" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.LeftCurlyCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.RightCurlyCheck">
+			<property name="option" value="alone" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.AvoidNestedBlocksCheck" />
+
+		<!-- Class Design -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.design.FinalClassCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.design.InterfaceIsTypeCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.design.HideUtilityClassConstructorCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.design.MutableExceptionCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.design.InnerTypeLastCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.design.OneTopLevelClassCheck" />
+
+		<!-- Coding -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.CovariantEqualsCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.EmptyStatementCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.EqualsHashCodeCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.SimplifyBooleanExpressionCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.SimplifyBooleanReturnCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.StringLiteralEqualityCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.NestedForDepthCheck">
+			<property name="max" value="3" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.NestedIfDepthCheck">
+			<property name="max" value="5" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.NestedTryDepthCheck">
+			<property name="max" value="3" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.MultipleVariableDeclarationsCheck" />
+
+		<module name="io.spring.javaformat.checkstyle.filter.RequiresOuterThisFilter" />
+		<module name="io.spring.javaformat.checkstyle.filter.IdentCheckFilter">
+			<property name="names" value="logger" />
+			<module
+				name="com.puppycrawl.tools.checkstyle.checks.coding.RequireThisCheck">
+				<property name="checkMethods" value="false" />
+				<property name="validateOnlyOverlapping" value="false" />
+			</module>
+		</module>
+		<module name="io.spring.javaformat.checkstyle.check.SpringNoThisCheck">
+			<property name="names" value="logger" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.coding.OneStatementPerLineCheck" />
+
+		<!-- Imports -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.imports.RedundantImportCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.imports.UnusedImportsCheck">
+			<property name="processJavadoc" value="true" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck">
+			<property name="groups" value="/javax?/,/[^org\.springframework]/,org.springframework" />
+			<property name="ordered" value="true" />
+			<property name="separated" value="true" />
+			<property name="option" value="bottom" />
+			<property name="sortStaticImportsAlphabetically" value="true" />
+		</module>
+
+		<!-- Javadoc Comments -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck">
+			<property name="scope" value="package"/>
+			<property name="authorFormat" value=".+\s.+"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck">
+			<property name="allowMissingParamTags" value="true"/>
+			<property name="allowMissingThrowsTags" value="true"/>
+			<property name="allowMissingReturnTag" value="true"/>
+			<property name="allowMissingJavadoc" value="true"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocVariableCheck">
+			<property name="scope" value="public"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocStyleCheck">
+			<property name="checkEmptyJavadoc" value="true"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.NonEmptyAtclauseDescriptionCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTagContinuationIndentationCheck">
+			<property name="offset" value="0"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
+			<property name="target" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF"/>
+    		<property name="tagOrder" value="@author, @since, @param, @see, @version, @serial, @deprecated"/>
+		</module>
+ 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
+			<property name="target" value="METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
+    		<property name="tagOrder" value="@param, @return, @throws, @since, @deprecated, @see"/>
+		</module>
+
+		<!-- Miscellaneous -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.indentation.CommentsIndentationCheck">
+			<property name="tokens" value="BLOCK_COMMENT_BEGIN"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.UpperEllCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.ArrayTypeStyleCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.OuterTypeFilenameCheck" />
+
+		<!-- Regexp -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="format" value="^\t* +\t*\S" />
+			<property name="message"
+				value="Line has leading space characters; indentation should be performed with tabs only." />
+			<property name="ignoreComments" value="true" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpCheck">
+			<property name="format" value="[ \t]+$" />
+			<property name="illegalPattern" value="true" />
+			<property name="message" value="Trailing whitespace" />
+		</module>
+
+		<!-- Spring Conventions -->
+		<module name="io.spring.javaformat.checkstyle.check.SpringLambdaCheck">
+			<property name="singleArgumentParentheses" value="false" />
+		</module>
+		<module name="io.spring.javaformat.checkstyle.check.SpringCatchCheck" />
+		<module name="io.spring.javaformat.checkstyle.check.SpringJavadocCheck" />
+ 	</module>
+</module>

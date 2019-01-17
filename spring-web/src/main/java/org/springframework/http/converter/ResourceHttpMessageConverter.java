@@ -97,7 +97,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 			};
 		}
 		else {
-			throw new IllegalStateException("Unsupported resource class: " + clazz);
+			throw new HttpMessageNotReadableException("Unsupported resource class: " + clazz, inputMessage);
 		}
 	}
 

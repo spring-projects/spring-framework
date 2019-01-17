@@ -58,7 +58,7 @@ import org.springframework.web.servlet.View;
 public class XmlViewResolver extends AbstractCachingViewResolver
 		implements Ordered, InitializingBean, DisposableBean {
 
-	/** Default if no other location is supplied */
+	/** Default if no other location is supplied. */
 	public static final String DEFAULT_LOCATION = "/WEB-INF/views.xml";
 
 

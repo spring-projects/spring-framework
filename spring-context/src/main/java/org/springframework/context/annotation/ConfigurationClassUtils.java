@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
- * Utilities for identifying @{@link Configuration} classes.
+ * Utilities for identifying {@link Configuration} classes.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -119,7 +119,7 @@ abstract class ConfigurationClassUtils {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
-			return hasNestedConfigurationClass(metadata, metadataReaderFactory);
+			return false;
 		}
 
 		// It's a full or lite configuration candidate... Let's determine the order value, if any.
@@ -129,40 +129,6 @@ abstract class ConfigurationClassUtils {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Check whether the specified class declares a nested configuration class.
-	 */
-	private static boolean hasNestedConfigurationClass(
-			AnnotationMetadata metadata, MetadataReaderFactory metadataReaderFactory) {
-
-		// Potentially nested configuration classes...
-		if (metadata instanceof StandardAnnotationMetadata) {
-			Class<?> beanClass = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
-			for (Class<?> memberClass : beanClass.getDeclaredClasses()) {
-				if (isConfigurationCandidate(new StandardAnnotationMetadata(memberClass))) {
-					return true;
-				}
-			}
-		}
-		else {
-			for (String memberName : metadata.getMemberClassNames()) {
-				try {
-					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(memberName);
-					if (isConfigurationCandidate(metadataReader.getAnnotationMetadata())) {
-						return true;
-					}
-				}
-				catch (IOException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Could not find class file for introspecting configuration annotations: " +
-								memberName, ex);
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -239,8 +205,8 @@ abstract class ConfigurationClassUtils {
 	/**
 	 * Determine the order for the given configuration class metadata.
 	 * @param metadata the metadata of the annotated class
-	 * @return the {@link @Order} annotation value on the configuration class,
-	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
+	 * @return the {@code @Order} annotation value on the configuration class,
+	 * or {@code Ordered.LOWEST_PRECEDENCE} if none declared
 	 * @since 5.0
 	 */
 	@Nullable
@@ -253,7 +219,7 @@ abstract class ConfigurationClassUtils {
 	 * Determine the order for the given configuration class bean definition,
 	 * as set by {@link #checkConfigurationClassCandidate}.
 	 * @param beanDef the bean definition to check
-	 * @return the {@link @Order} annotation value on the configuration class,
+	 * @return the {@link Order @Order} annotation value on the configuration class,
 	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
 	 * @since 4.2
 	 */

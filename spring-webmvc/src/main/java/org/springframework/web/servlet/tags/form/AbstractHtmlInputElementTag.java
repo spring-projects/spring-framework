@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Base class for databinding-aware JSP tags that render HTML form input element.
@@ -63,12 +65,16 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	public static final String READONLY_ATTRIBUTE = "readonly";
 
 
+	@Nullable
 	private String onfocus;
 
+	@Nullable
 	private String onblur;
 
+	@Nullable
 	private String onchange;
 
+	@Nullable
 	private String accesskey;
 
 	private boolean disabled;
@@ -87,6 +93,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Get the value of the '{@code onfocus}' attribute.
 	 */
+	@Nullable
 	protected String getOnfocus() {
 		return this.onfocus;
 	}
@@ -102,6 +109,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Get the value of the '{@code onblur}' attribute.
 	 */
+	@Nullable
 	protected String getOnblur() {
 		return this.onblur;
 	}
@@ -117,6 +125,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Get the value of the '{@code onchange}' attribute.
 	 */
+	@Nullable
 	protected String getOnchange() {
 		return this.onchange;
 	}
@@ -132,6 +141,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Get the value of the '{@code accesskey}' attribute.
 	 */
+	@Nullable
 	protected String getAccesskey() {
 		return this.accesskey;
 	}

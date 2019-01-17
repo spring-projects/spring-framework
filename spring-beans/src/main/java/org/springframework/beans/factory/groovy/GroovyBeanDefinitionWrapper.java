@@ -24,7 +24,6 @@ import groovy.lang.GroovyObjectSupport;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -182,16 +181,16 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 			AbstractBeanDefinition bd = getBeanDefinition();
 			if (AUTOWIRE.equals(property)) {
 				if ("byName".equals(newValue)) {
-					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
 				}
 				else if ("byType".equals(newValue)) {
-					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
 				}
 				else if ("constructor".equals(newValue)) {
-					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 				}
 				else if (Boolean.TRUE.equals(newValue)) {
-					bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
 				}
 			}
 			// constructorArgs
@@ -211,8 +210,9 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 			}
 			// factoryMethod
 			else if (FACTORY_METHOD.equals(property)) {
-				if (newValue != null)
+				if (newValue != null) {
 					bd.setFactoryMethodName(newValue.toString());
+				}
 			}
 			// initMethod
 			else if (INIT_METHOD.equals(property)) {

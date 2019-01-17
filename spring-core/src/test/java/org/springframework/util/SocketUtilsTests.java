@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,14 @@ public class SocketUtilsTests {
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
+
+	@Test
+	public void canBeInstantiated() {
+		// Just making sure somebody doesn't try to make SocketUtils abstract,
+		// since that would be a breaking change due to the intentional public
+		// constructor.
+		new SocketUtils();
+	}
 
 	// TCP
 

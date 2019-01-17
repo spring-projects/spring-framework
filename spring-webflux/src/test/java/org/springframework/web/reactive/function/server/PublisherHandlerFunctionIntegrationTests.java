@@ -54,7 +54,7 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 
 
 	@Test
-	public void mono() throws Exception {
+	public void mono() {
 		ResponseEntity<Person> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/mono", Person.class);
 
@@ -63,7 +63,7 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 	}
 
 	@Test
-	public void flux() throws Exception {
+	public void flux() {
 		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<List<Person>>() {};
 		ResponseEntity<List<Person>> result =
 				restTemplate.exchange("http://localhost:" + port + "/flux", HttpMethod.GET, null, reference);

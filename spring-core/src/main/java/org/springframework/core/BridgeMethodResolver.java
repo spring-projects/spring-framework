@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,11 @@ import org.springframework.util.ReflectionUtils;
  * @author Phillip Webb
  * @since 2.0
  */
-public abstract class BridgeMethodResolver {
+public final class BridgeMethodResolver {
+
+	private BridgeMethodResolver() {
+	}
+
 
 	/**
 	 * Find the original method for the supplied {@link Method bridge Method}.
@@ -155,12 +159,12 @@ public abstract class BridgeMethodResolver {
 			Class<?> candidateParameter = candidateParameters[i];
 			if (candidateParameter.isArray()) {
 				// An array type: compare the component type.
-				if (!candidateParameter.getComponentType().equals(genericParameter.getComponentType().resolve(Object.class))) {
+				if (!candidateParameter.getComponentType().equals(genericParameter.getComponentType().toClass())) {
 					return false;
 				}
 			}
 			// A non-array type: compare the type itself.
-			if (!candidateParameter.equals(genericParameter.resolve(Object.class))) {
+			if (!candidateParameter.equals(genericParameter.toClass())) {
 				return false;
 			}
 		}
@@ -231,8 +235,8 @@ public abstract class BridgeMethodResolver {
 		if (bridgeMethod == bridgedMethod) {
 			return true;
 		}
-		return (Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()) &&
-				bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()));
+		return (bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()) &&
+				Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()));
 	}
 
 }

@@ -51,7 +51,7 @@ public class ResourceUrlProviderTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
-	
+
 	private final List<Resource> locations = new ArrayList<>();
 
 	private final ResourceWebHandler handler = new ResourceWebHandler();
@@ -95,7 +95,7 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test
-	public void getVerionedResourceUrl() {
+	public void getVersionedResourceUrl() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 		List<ResourceResolver> resolvers = new ArrayList<>();

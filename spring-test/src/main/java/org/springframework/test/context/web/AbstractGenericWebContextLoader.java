@@ -170,6 +170,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * {@link WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE} key.</li>
 	 * <li>Finally, the {@code MockServletContext} is set in the
 	 * {@code WebApplicationContext}.</li>
+	 * </ul>
 	 * @param context the web application context for which to configure the web resources
 	 * @param webMergedConfig the merged context configuration to use to load the web application context
 	 */

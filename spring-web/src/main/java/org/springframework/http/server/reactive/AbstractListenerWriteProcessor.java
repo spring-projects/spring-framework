@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -40,10 +40,19 @@ import org.springframework.util.Assert;
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> the type of element signaled to the {@link Subscriber}
  */
 public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, Void> {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Special logger for debugging Reactive Streams signals.
+	 * @see LogDelegateFactory#getHiddenLog(Class)
+	 * @see AbstractListenerReadPublisher#rsReadLogger
+	 * @see AbstractListenerWriteFlushProcessor#rsWriteFlushLogger
+	 * @see WriteResultPublisher#rsWriteResultLogger
+	 */
+	protected static final Log rsWriteLogger = LogDelegateFactory.getHiddenLog(AbstractListenerWriteProcessor.class);
+
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
@@ -55,7 +64,32 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	private volatile boolean subscriberCompleted;
 
-	private final WriteResultPublisher resultPublisher = new WriteResultPublisher();
+	private final WriteResultPublisher resultPublisher;
+
+	private final String logPrefix;
+
+
+	public AbstractListenerWriteProcessor() {
+		this("");
+	}
+
+	/**
+	 * Create an instance with the given log prefix.
+	 * @since 5.1
+	 */
+	public AbstractListenerWriteProcessor(String logPrefix) {
+		this.logPrefix = logPrefix;
+		this.resultPublisher = new WriteResultPublisher(logPrefix);
+	}
+
+
+	/**
+	 * Create an instance with the given log prefix.
+	 * @since 5.1
+	 */
+	public String getLogPrefix() {
+		return this.logPrefix;
+	}
 
 
 	// Subscriber methods and async I/O notification methods...
@@ -67,7 +101,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	@Override
 	public final void onNext(T data) {
-		logger.trace("Received onNext data item");
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "Item to write");
+		}
 		this.state.get().onNext(this, data);
 	}
 
@@ -77,8 +113,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	@Override
 	public final void onError(Throwable ex) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Received onError: " + ex);
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "Write source error: " + ex);
 		}
 		this.state.get().onError(this, ex);
 	}
@@ -89,7 +125,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	@Override
 	public final void onComplete() {
-		logger.trace("Received onComplete");
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "No more items to write");
+		}
 		this.state.get().onComplete(this);
 	}
 
@@ -99,7 +137,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * container.
 	 */
 	public final void onWritePossible() {
-		this.logger.trace("Received onWritePossible");
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "onWritePossible");
+		}
 		this.state.get().onWritePossible(this);
 	}
 
@@ -108,7 +148,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * container to cancel the upstream subscription.
 	 */
 	public void cancel() {
-		this.logger.trace("Received request to cancel");
+		rsWriteLogger.trace(getLogPrefix() + "Cancellation");
 		if (this.subscription != null) {
 			this.subscription.cancel();
 		}
@@ -118,6 +158,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
+		// Technically, cancellation from the result subscriber should be propagated
+		// to the upstream subscription. In practice, HttpHandler server adapters
+		// don't have a reason to cancel the result subscription.
 		this.resultPublisher.subscribe(subscriber);
 	}
 
@@ -136,8 +179,14 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * data item for writing once that is possible.
 	 */
 	protected void dataReceived(T data) {
-		if (this.currentData != null) {
-			throw new IllegalStateException("Current data not processed yet: " + this.currentData);
+		T prev = this.currentData;
+		if (prev != null) {
+			// This shouldn't happen:
+			//   1. dataReceived can only be called from REQUESTED state
+			//   2. currentData is cleared before requesting
+			discardData(data);
+			cancel();
+			onError(new IllegalStateException("Received new data while current not processed yet."));
 		}
 		this.currentData = data;
 	}
@@ -186,13 +235,23 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	protected void writingFailed(Throwable ex) {
 	}
 
+	/**
+	 * Invoked after any error (either from the upstream write Publisher, or
+	 * from I/O operations to the underlying server) and cancellation
+	 * to discard in-flight data that was in
+	 * the process of being written when the error took place.
+	 * @param data the data to be released
+	 * @since 5.0.11
+	 */
+	protected abstract void discardData(T data);
+
 
 	// Private methods for use from State's...
 
 	private boolean changeState(State oldState, State newState) {
 		boolean result = this.state.compareAndSet(oldState, newState);
-		if (result && logger.isTraceEnabled()) {
-			logger.trace(oldState + " -> " + newState);
+		if (result && rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + oldState + " -> " + newState);
 		}
 		return result;
 	}
@@ -205,6 +264,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	private void changeStateToComplete(State oldState) {
 		if (changeState(oldState, State.COMPLETED)) {
+			discardCurrentData();
 			writingComplete();
 			this.resultPublisher.publishComplete();
 		}
@@ -215,11 +275,19 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	private void writeIfPossible() {
 		boolean result = isWritePossible();
-		if (logger.isTraceEnabled()) {
-			logger.trace("isWritePossible[" + result + "]");
+		if (!result && rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "isWritePossible: false");
 		}
 		if (result) {
 			onWritePossible();
+		}
+	}
+
+	private void discardCurrentData() {
+		T data = this.currentData;
+		this.currentData = null;
+		if (data != null) {
+			discardData(data);
 		}
 	}
 
@@ -338,11 +406,14 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		}
 
 		public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
-			throw new IllegalStateException(toString());
+			processor.discardData(data);
+			processor.cancel();
+			processor.onError(new IllegalStateException("Illegal onNext without demand"));
 		}
 
 		public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ex) {
 			if (processor.changeState(this, COMPLETED)) {
+				processor.discardCurrentData();
 				processor.writingComplete();
 				processor.resultPublisher.publishError(ex);
 			}

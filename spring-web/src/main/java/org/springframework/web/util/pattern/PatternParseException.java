@@ -95,7 +95,7 @@ public class PatternParseException extends IllegalArgumentException {
 	public enum PatternMessage {
 
 		MISSING_CLOSE_CAPTURE("Expected close capture character after variable name '}'"),
-		MISSING_OPEN_CAPTURE("Missing preceeding open capture character before variable name'{'"),
+		MISSING_OPEN_CAPTURE("Missing preceding open capture character before variable name'{'"),
 		ILLEGAL_NESTED_CAPTURE("Not allowed to nest variable captures"),
 		CANNOT_HAVE_ADJACENT_CAPTURES("Adjacent captures are not allowed"),
 		ILLEGAL_CHARACTER_AT_START_OF_CAPTURE_DESCRIPTOR("Char ''{0}'' not allowed at start of captured variable name"),
@@ -105,7 +105,7 @@ public class PatternParseException extends IllegalArgumentException {
 		MISSING_REGEX_CONSTRAINT("Missing regex constraint on capture"),
 		ILLEGAL_DOUBLE_CAPTURE("Not allowed to capture ''{0}'' twice in the same pattern"),
 		REGEX_PATTERN_SYNTAX_EXCEPTION("Exception occurred in regex pattern compilation"),
-		CAPTURE_ALL_IS_STANDALONE_CONSTRUCT("'{*...}' can only be preceeded by a path separator");
+		CAPTURE_ALL_IS_STANDALONE_CONSTRUCT("'{*...}' can only be preceded by a path separator");
 
 		private final String message;
 

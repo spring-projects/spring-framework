@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 */
 	public final void setConnectionFactory(ConnectionFactory connectionFactory) {
 		if (this.cciTemplate == null || connectionFactory != this.cciTemplate.getConnectionFactory()) {
-		  this.cciTemplate = createCciTemplate(connectionFactory);
+			this.cciTemplate = createCciTemplate(connectionFactory);
 		}
 	}
 
@@ -95,7 +95,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 */
 	@Nullable
 	public final CciTemplate getCciTemplate() {
-	  return this.cciTemplate;
+		return this.cciTemplate;
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	/**
 	 * Close the given CCI Connection, created via this bean's ConnectionFactory,
 	 * if it isn't bound to the thread.
-	 * @param con Connection to close
+	 * @param con the Connection to close
 	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#releaseConnection
 	 */
 	protected final void releaseConnection(Connection con) {

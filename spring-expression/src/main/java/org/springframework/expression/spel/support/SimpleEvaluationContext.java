@@ -86,7 +86,7 @@ import org.springframework.lang.Nullable;
  * @see StandardTypeConverter
  * @see DataBindingPropertyAccessor
  */
-public class SimpleEvaluationContext implements EvaluationContext {
+public final class SimpleEvaluationContext implements EvaluationContext {
 
 	private static final TypeLocator typeNotFoundTypeLocator = typeName -> {
 		throw new SpelEvaluationException(SpelMessage.TYPE_NOT_FOUND, typeName);

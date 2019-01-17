@@ -72,6 +72,14 @@ public class CallableStatementCreatorFactory {
 
 
 	/**
+	 * Return the SQL call string.
+	 * @since 5.1.3
+	 */
+	public final String getCallString() {
+		return this.callString;
+	}
+
+	/**
 	 * Add a new declared parameter.
 	 * <p>Order of parameter addition is significant.
 	 * @param param the parameter to add to the list of declared parameters
@@ -110,7 +118,7 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameter mapper.
-	 * @param inParamMapper ParameterMapper implementation that will return a Map of parameters
+	 * @param inParamMapper the ParameterMapper implementation that will return a Map of parameters
 	 */
 	public CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return new CallableStatementCreatorImpl(inParamMapper);
@@ -130,7 +138,7 @@ public class CallableStatementCreatorFactory {
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.
-		 * @param inParamMapper ParameterMapper implementation for mapping input parameters
+		 * @param inParamMapper the ParameterMapper implementation for mapping input parameters
 		 */
 		public CallableStatementCreatorImpl(ParameterMapper inParamMapper) {
 			this.inParameterMapper = inParamMapper;

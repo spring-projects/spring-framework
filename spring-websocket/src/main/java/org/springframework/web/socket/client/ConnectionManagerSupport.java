@@ -42,7 +42,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 
 	private boolean autoStartup = false;
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
 
 	private volatile boolean running = false;
 

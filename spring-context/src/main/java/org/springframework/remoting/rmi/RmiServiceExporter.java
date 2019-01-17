@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,8 +273,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 		// Initialize and cache exported object.
 		this.exportedObject = getObjectToExport();
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Binding service '" + this.serviceName + "' to RMI registry: " + this.registry);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Binding service '" + this.serviceName + "' to RMI registry: " + this.registry);
 		}
 
 		// Export RMI object.
@@ -325,8 +325,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 		if (registryHost != null) {
 			// Host explicitly specified: only lookup possible.
-			if (logger.isInfoEnabled()) {
-				logger.info("Looking for RMI registry at port '" + registryPort + "' of host [" + registryHost + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Looking for RMI registry at port '" + registryPort + "' of host [" + registryHost + "]");
 			}
 			Registry reg = LocateRegistry.getRegistry(registryHost, registryPort, clientSocketFactory);
 			testRegistry(reg);
@@ -352,11 +352,11 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 		if (clientSocketFactory != null) {
 			if (this.alwaysCreateRegistry) {
-				logger.info("Creating new RMI registry");
+				logger.debug("Creating new RMI registry");
 				return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Looking for RMI registry at port '" + registryPort + "', using custom socket factory");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Looking for RMI registry at port '" + registryPort + "', using custom socket factory");
 			}
 			synchronized (LocateRegistry.class) {
 				try {
@@ -366,8 +366,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 					return reg;
 				}
 				catch (RemoteException ex) {
-					logger.debug("RMI registry access threw exception", ex);
-					logger.info("Could not detect RMI registry - creating new one");
+					logger.trace("RMI registry access threw exception", ex);
+					logger.debug("Could not detect RMI registry - creating new one");
 					// Assume no registry found -> create new one.
 					return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
 				}
@@ -387,11 +387,11 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	 */
 	protected Registry getRegistry(int registryPort) throws RemoteException {
 		if (this.alwaysCreateRegistry) {
-			logger.info("Creating new RMI registry");
+			logger.debug("Creating new RMI registry");
 			return LocateRegistry.createRegistry(registryPort);
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Looking for RMI registry at port '" + registryPort + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking for RMI registry at port '" + registryPort + "'");
 		}
 		synchronized (LocateRegistry.class) {
 			try {
@@ -401,8 +401,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 				return reg;
 			}
 			catch (RemoteException ex) {
-				logger.debug("RMI registry access threw exception", ex);
-				logger.info("Could not detect RMI registry - creating new one");
+				logger.trace("RMI registry access threw exception", ex);
+				logger.debug("Could not detect RMI registry - creating new one");
 				// Assume no registry found -> create new one.
 				return LocateRegistry.createRegistry(registryPort);
 			}
@@ -427,17 +427,17 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	 */
 	@Override
 	public void destroy() throws RemoteException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Unbinding RMI service '" + this.serviceName +
+		if (logger.isDebugEnabled()) {
+			logger.debug("Unbinding RMI service '" + this.serviceName +
 					"' from registry" + (this.createdRegistry ? (" at port '" + this.registryPort + "'") : ""));
 		}
 		try {
 			this.registry.unbind(this.serviceName);
 		}
 		catch (NotBoundException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("RMI service '" + this.serviceName + "' is not bound to registry"
-						+ (this.createdRegistry ? (" at port '" + this.registryPort + "' anymore") : ""), ex);
+			if (logger.isInfoEnabled()) {
+				logger.info("RMI service '" + this.serviceName + "' is not bound to registry" +
+						(this.createdRegistry ? (" at port '" + this.registryPort + "' anymore") : ""), ex);
 			}
 		}
 		finally {
@@ -453,9 +453,10 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 			UnicastRemoteObject.unexportObject(this.exportedObject, true);
 		}
 		catch (NoSuchObjectException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("RMI object for service '" + this.serviceName + "' isn't exported anymore", ex);
+			if (logger.isInfoEnabled()) {
+				logger.info("RMI object for service '" + this.serviceName + "' is not exported anymore", ex);
 			}
 		}
 	}
+
 }

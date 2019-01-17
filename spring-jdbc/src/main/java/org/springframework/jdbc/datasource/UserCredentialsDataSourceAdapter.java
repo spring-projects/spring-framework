@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,9 +148,10 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	/**
 	 * Determine whether there are currently thread-bound credentials,
 	 * using them if available, falling back to the statically specified
-	 * username and password (i.e. values of the bean properties) else.
+	 * username and password (i.e. values of the bean properties) otherwise.
 	 * <p>Delegates to {@link #doGetConnection(String, String)} with the
 	 * determined credentials as parameters.
+	 * @see #doGetConnection
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
@@ -202,13 +203,13 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	/**
 	 * Inner class used as ThreadLocal value.
 	 */
-	private static class JdbcUserCredentials {
+	private static final class JdbcUserCredentials {
 
 		public final String username;
 
 		public final String password;
 
-		private JdbcUserCredentials(String username, String password) {
+		public JdbcUserCredentials(String username, String password) {
 			this.username = username;
 			this.password = password;
 		}

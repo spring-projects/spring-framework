@@ -19,10 +19,12 @@ package org.springframework.web.server.session;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
@@ -31,6 +33,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Cookie-based {@link WebSessionIdResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class CookieWebSessionIdResolver implements WebSessionIdResolver {
@@ -38,6 +41,9 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	private String cookieName = "SESSION";
 
 	private Duration cookieMaxAge = Duration.ofSeconds(-1);
+
+	@Nullable
+	private Consumer<ResponseCookie.ResponseCookieBuilder> cookieInitializer = null;
 
 
 	/**
@@ -74,6 +80,17 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 		return this.cookieMaxAge;
 	}
 
+	/**
+	 * Add a {@link Consumer} for a {@code ResponseCookieBuilder} that will be invoked
+	 * for each cookie being built, just before the call to {@code build()}.
+	 * @param initializer consumer for a cookie builder
+	 * @since 5.1
+	 */
+	public void addCookieInitializer(Consumer<ResponseCookie.ResponseCookieBuilder> initializer) {
+		this.cookieInitializer = this.cookieInitializer != null ?
+				this.cookieInitializer.andThen(initializer) : initializer;
+	}
+
 
 	@Override
 	public List<String> resolveSessionIds(ServerWebExchange exchange) {
@@ -88,21 +105,31 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	@Override
 	public void setSessionId(ServerWebExchange exchange, String id) {
 		Assert.notNull(id, "'id' is required");
-		setSessionCookie(exchange, id, getCookieMaxAge());
+		ResponseCookie cookie = initSessionCookie(exchange, id, getCookieMaxAge());
+		exchange.getResponse().getCookies().set(this.cookieName, cookie);
 	}
 
 	@Override
 	public void expireSession(ServerWebExchange exchange) {
-		setSessionCookie(exchange, "", Duration.ofSeconds(0));
+		ResponseCookie cookie = initSessionCookie(exchange, "", Duration.ZERO);
+		exchange.getResponse().getCookies().set(this.cookieName, cookie);
 	}
 
-	private void setSessionCookie(ServerWebExchange exchange, String id, Duration maxAge) {
-		String name = getCookieName();
-		boolean secure = "https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme());
-		String path = exchange.getRequest().getPath().contextPath().value() + "/";
-		exchange.getResponse().getCookies().set(name,
-				ResponseCookie.from(name, id).path(path)
-						.maxAge(maxAge).httpOnly(true).secure(secure).build());
+	private ResponseCookie initSessionCookie(
+			ServerWebExchange exchange, String id, Duration maxAge) {
+
+		ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from(this.cookieName, id)
+				.path(exchange.getRequest().getPath().contextPath().value() + "/")
+				.maxAge(maxAge)
+				.httpOnly(true)
+				.secure("https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme()))
+				.sameSite("Lax");
+
+		if (this.cookieInitializer != null) {
+			this.cookieInitializer.accept(cookieBuilder);
+		}
+
+		return cookieBuilder.build();
 	}
 
 }

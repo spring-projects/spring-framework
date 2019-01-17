@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,12 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class SimpleKey implements Serializable {
 
+	/** An empty key. */
 	public static final SimpleKey EMPTY = new SimpleKey();
 
+
 	private final Object[] params;
+
 	private final int hashCode;
 
 
@@ -49,10 +52,11 @@ public class SimpleKey implements Serializable {
 		this.hashCode = Arrays.deepHashCode(this.params);
 	}
 
+
 	@Override
-	public boolean equals(Object obj) {
-		return (this == obj || (obj instanceof SimpleKey
-				&& Arrays.deepEquals(this.params, ((SimpleKey) obj).params)));
+	public boolean equals(Object other) {
+		return (this == other ||
+				(other instanceof SimpleKey && Arrays.deepEquals(this.params, ((SimpleKey) other).params)));
 	}
 
 	@Override

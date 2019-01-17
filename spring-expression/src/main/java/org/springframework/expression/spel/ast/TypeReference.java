@@ -28,7 +28,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Represents a reference to a type, for example "T(String)" or "T(com.somewhere.Foo)"
+ * Represents a reference to a type, for example
+ * {@code "T(String)" or "T(com.somewhere.Foo)"}.
  *
  * @author Andy Clement
  */
@@ -92,12 +93,12 @@ public class TypeReference extends SpelNodeImpl {
 		sb.append(")");
 		return sb.toString();
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		return (this.exitTypeDescriptor != null);
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		// TODO Future optimization - if followed by a static method call, skip generating code here

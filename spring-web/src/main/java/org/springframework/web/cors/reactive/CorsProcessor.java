@@ -28,7 +28,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 5.0
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+ * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  */
 public interface CorsProcessor {
 

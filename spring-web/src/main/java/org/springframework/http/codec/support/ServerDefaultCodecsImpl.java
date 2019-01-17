@@ -29,6 +29,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Default implementation of {@link ServerCodecConfigurer.ServerDefaultCodecs}.
+ *
+ * @author Rossen Stoyanchev
  */
 class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecConfigurer.ServerDefaultCodecs {
 
@@ -50,9 +52,15 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 	@Override
 	protected void extendTypedReaders(List<HttpMessageReader<?>> typedReaders) {
 		if (synchronossMultipartPresent) {
+			boolean enable = isEnableLoggingRequestDetails();
+
 			SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
+			partReader.setEnableLoggingRequestDetails(enable);
 			typedReaders.add(partReader);
-			typedReaders.add(new MultipartHttpMessageReader(partReader));
+
+			MultipartHttpMessageReader reader = new MultipartHttpMessageReader(partReader);
+			reader.setEnableLoggingRequestDetails(enable);
+			typedReaders.add(reader);
 		}
 	}
 

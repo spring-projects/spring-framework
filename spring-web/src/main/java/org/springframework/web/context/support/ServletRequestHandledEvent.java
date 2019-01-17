@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,19 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ServletRequestHandledEvent extends RequestHandledEvent {
 
-	/** URL that triggered the request */
+	/** URL that triggered the request. */
 	private final String requestUrl;
 
-	/** IP address that the request came from */
+	/** IP address that the request came from. */
 	private final String clientAddress;
 
-	/** Usually GET or POST */
+	/** Usually GET or POST. */
 	private final String method;
 
-	/** Name of the servlet that handled the request */
+	/** Name of the servlet that handled the request. */
 	private final String servletName;
 
-	/** HTTP status code of the response */
+	/** HTTP status code of the response. */
 	private final int statusCode;
 
 

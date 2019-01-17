@@ -309,7 +309,7 @@ public class WebDataBinder extends DataBinder {
 	 * (in case of a multipart request). To be called by subclasses.
 	 * <p>Multipart files will only be added to the property values if they
 	 * are not empty or if we're configured to bind empty multipart files too.
-	 * @param multipartFiles Map of field name String to MultipartFile object
+	 * @param multipartFiles a Map of field name String to MultipartFile object
 	 * @param mpvs the property values to be bound (can be modified)
 	 * @see org.springframework.web.multipart.MultipartFile
 	 * @see #setBindEmptyMultipartFiles

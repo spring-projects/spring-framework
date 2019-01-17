@@ -3,7 +3,7 @@
 
 <!-- We are only using one definition file for the purposes of this test, since we do not have multiple
 	classloaders available in the environment to allow combining multiple files of the same name, but
-	of course the contents within could be spread out across multiple files of the same name withing
+	of course the contents within could be spread out across multiple files of the same name within
 	different jars -->
 
 <beans>

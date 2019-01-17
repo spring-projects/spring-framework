@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,13 +126,13 @@ public class OpMultiply extends Operator {
 			return false;
 		}
 		if (this.children.length > 1) {
-			 if (!getRightOperand().isCompilable()) {
-				 return false;
-			 }
+			if (!getRightOperand().isCompilable()) {
+				return false;
+			}
 		}
 		return (this.exitTypeDescriptor != null);
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		getLeftOperand().generateCode(mv, cf);
@@ -154,12 +154,12 @@ public class OpMultiply extends Operator {
 				case 'J':
 					mv.visitInsn(LMUL);
 					break;
-				case 'F': 
+				case 'F':
 					mv.visitInsn(FMUL);
 					break;
 				case 'D':
 					mv.visitInsn(DMUL);
-					break;				
+					break;
 				default:
 					throw new IllegalStateException(
 							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");

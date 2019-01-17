@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import java.util.concurrent.Callable;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
-import org.springframework.web.context.request.async.WebAsyncTask;
 
 /**
  * Helps with configuring options for asynchronous request processing.
@@ -49,16 +49,15 @@ public class AsyncSupportConfigurer {
 
 
 	/**
-	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
-	 * returns a {@link Callable}. Controller methods can override this default on
-	 * a per-request basis by returning a {@link WebAsyncTask}.
-	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used, and it's
-	 * highly recommended to change that default in production since the simple
-	 * executor does not re-use threads.
-	 * <p>As of 5.0 this executor is also used when a controller returns a reactive
-	 * type that does streaming (e.g. "text/event-stream" or
-	 * "application/stream+json") for the blocking writes to the
-	 * {@link javax.servlet.ServletOutputStream}.
+	 * The provided task executor is used to:
+	 * <ol>
+	 * <li>Handle {@link Callable} controller method return values.
+	 * <li>Perform blocking writes when streaming to the response
+	 * through a reactive (e.g. Reactor, RxJava) controller method return value.
+	 * </ol>
+	 * <p>By default only a {@link SimpleAsyncTaskExecutor} is used. However when
+	 * using the above two use cases, it's recommended to configure an executor
+	 * backed by a thread pool such as {@link ThreadPoolTaskExecutor}.
 	 * @param taskExecutor the task executor instance to use by default
 	 */
 	public AsyncSupportConfigurer setTaskExecutor(AsyncTaskExecutor taskExecutor) {

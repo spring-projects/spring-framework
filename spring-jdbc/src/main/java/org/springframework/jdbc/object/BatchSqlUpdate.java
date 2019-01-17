@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ package org.springframework.jdbc.object;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import javax.sql.DataSource;
 
@@ -46,7 +47,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 public class BatchSqlUpdate extends SqlUpdate {
 
 	/**
-	 * Default number of inserts to accumulate before commiting a batch (5000).
+	 * Default number of inserts to accumulate before committing a batch (5000).
 	 */
 	public static final int DEFAULT_BATCH_SIZE = 5000;
 
@@ -55,7 +56,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 
 	private boolean trackRowsAffected = true;
 
-	private final LinkedList<Object[]> parameterQueue = new LinkedList<>();
+	private final Deque<Object[]> parameterQueue = new ArrayDeque<>();
 
 	private final List<Integer> rowsAffected = new ArrayList<>();
 
@@ -72,8 +73,8 @@ public class BatchSqlUpdate extends SqlUpdate {
 
 	/**
 	 * Construct an update object with a given DataSource and SQL.
-	 * @param ds DataSource to use to obtain connections
-	 * @param sql SQL statement to execute
+	 * @param ds the DataSource to use to obtain connections
+	 * @param sql the SQL statement to execute
 	 */
 	public BatchSqlUpdate(DataSource ds, String sql) {
 		super(ds, sql);
@@ -82,9 +83,9 @@ public class BatchSqlUpdate extends SqlUpdate {
 	/**
 	 * Construct an update object with a given DataSource, SQL
 	 * and anonymous parameters.
-	 * @param ds DataSource to use to obtain connections
-	 * @param sql SQL statement to execute
-	 * @param types SQL types of the parameters, as defined in the
+	 * @param ds the DataSource to use to obtain connections
+	 * @param sql the SQL statement to execute
+	 * @param types the SQL types of the parameters, as defined in the
 	 * {@code java.sql.Types} class
 	 * @see java.sql.Types
 	 */
@@ -96,9 +97,9 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * Construct an update object with a given DataSource, SQL,
 	 * anonymous parameters and specifying the maximum number of rows
 	 * that may be affected.
-	 * @param ds DataSource to use to obtain connections
-	 * @param sql SQL statement to execute
-	 * @param types SQL types of the parameters, as defined in the
+	 * @param ds the DataSource to use to obtain connections
+	 * @param sql the SQL statement to execute
+	 * @param types the SQL types of the parameters, as defined in the
 	 * {@code java.sql.Types} class
 	 * @param batchSize the number of statements that will trigger
 	 * an automatic intermediate flush

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,9 +117,9 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	public Object fromMessage(javax.jms.Message message) throws JMSException, MessageConversionException {
 		Map<String, Object> mappedHeaders = extractHeaders(message);
 		Object convertedObject = extractPayload(message);
-		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message) ?
+		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message ?
 				MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>) convertedObject) :
-				MessageBuilder.withPayload(convertedObject);
+				MessageBuilder.withPayload(convertedObject));
 		return builder.copyHeadersIfAbsent(mappedHeaders).build();
 	}
 
@@ -134,8 +134,8 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	 * Create a JMS message for the specified payload and conversionHint.
 	 * The conversion hint is an extra object passed to the {@link MessageConverter},
 	 * e.g. the associated {@code MethodParameter} (may be {@code null}}.
-	 * @see MessageConverter#toMessage(Object, Session)
 	 * @since 4.3
+	 * @see MessageConverter#toMessage(Object, Session)
 	 */
 	protected javax.jms.Message createMessageForPayload(
 			Object payload, Session session, @Nullable Object conversionHint) throws JMSException {

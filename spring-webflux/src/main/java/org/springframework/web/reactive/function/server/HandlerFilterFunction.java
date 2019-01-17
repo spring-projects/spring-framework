@@ -74,7 +74,7 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 
 	/**
 	 * Adapt the given request processor function to a filter function that only operates
-	 * on the {@code ClientRequest}.
+	 * on the {@code ServerRequest}.
 	 * @param requestProcessor the request processor
 	 * @return the filter adaptation of the request processor
 	 */
@@ -87,7 +87,7 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 
 	/**
 	 * Adapt the given response processor function to a filter function that only operates
-	 * on the {@code ClientResponse}.
+	 * on the {@code ServerResponse}.
 	 * @param responseProcessor the response processor
 	 * @return the filter adaptation of the request processor
 	 */

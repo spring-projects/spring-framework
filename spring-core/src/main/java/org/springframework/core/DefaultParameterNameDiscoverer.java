@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package org.springframework.core;
 
-import org.springframework.util.ClassUtils;
-
 /**
  * Default implementation of the {@link ParameterNameDiscoverer} strategy interface,
  * using the Java 8 standard reflection mechanism (if available), and falling back
  * to the ASM-based {@link LocalVariableTableParameterNameDiscoverer} for checking
  * debug information in the class file.
  *
- * <p>If Kotlin is present, {@link KotlinReflectionParameterNameDiscoverer} is added first
- * in the list and used for Kotlin classes and interfaces.
+ * <p>If a Kotlin reflection implementation is present,
+ * {@link KotlinReflectionParameterNameDiscoverer} is added first in the list and used
+ * for Kotlin classes and interfaces. When compiling or running as a Graal native image,
+ * no {@link ParameterNameDiscoverer} is used.
  *
  * <p>Further discoverers may be added through {@link #addDiscoverer(ParameterNameDiscoverer)}.
  *
@@ -38,15 +38,14 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
 
-	private static final boolean kotlinPresent =
-			ClassUtils.isPresent("kotlin.Unit", DefaultParameterNameDiscoverer.class.getClassLoader());
-
 	public DefaultParameterNameDiscoverer() {
-		if (kotlinPresent) {
-			addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
+		if (!GraalDetector.inImageCode()) {
+			if (KotlinDetector.isKotlinReflectPresent()) {
+				addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
+			}
+			addDiscoverer(new StandardReflectionParameterNameDiscoverer());
+			addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		}
-		addDiscoverer(new StandardReflectionParameterNameDiscoverer());
-		addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 	}
 
 }

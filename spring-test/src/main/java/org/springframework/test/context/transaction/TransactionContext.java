@@ -106,7 +106,7 @@ class TransactionContext {
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format(
 					"Began transaction (%s) for test context %s; transaction manager [%s]; rollback [%s]",
-					transactionsStarted, this.testContext, this.transactionManager, flaggedForRollback));
+					transactionsStarted, this.testContext, this.transactionManager, this.flaggedForRollback));
 		}
 	}
 

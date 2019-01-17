@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
  * @see #forInstanceMethodInvocation()
  * @see DataBindingPropertyAccessor
  */
-public class DataBindingMethodResolver extends ReflectiveMethodResolver {
+public final class DataBindingMethodResolver extends ReflectiveMethodResolver {
 
 	private DataBindingMethodResolver() {
 		super();

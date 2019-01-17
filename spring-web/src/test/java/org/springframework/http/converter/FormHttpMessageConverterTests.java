@@ -30,6 +30,7 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -148,7 +149,8 @@ public class FormHttpMessageConverterTests {
 		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		assertNotNull("No boundary found", contentType.getParameter("boundary"));
+		// SPR-17030
+		assertThat(contentType.getParameters().keySet(), Matchers.contains("charset", "boundary"));
 
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();

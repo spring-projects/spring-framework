@@ -16,6 +16,10 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.util.function.Consumer;
+
+import org.hamcrest.Matcher;
+
 import org.springframework.test.util.JsonPathExpectationsHelper;
 
 /**
@@ -130,6 +134,58 @@ public class JsonPathAssertions {
 	public WebTestClient.BodyContentSpec isMap() {
 		this.pathHelper.assertValueIsMap(this.content);
 		return this.bodySpec;
+	}
+
+	/**
+	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher)}.
+	 * @since 5.1
+	 */
+	public <T> WebTestClient.BodyContentSpec value(Matcher<T> matcher) {
+		this.pathHelper.assertValue(this.content, matcher);
+		return this.bodySpec;
+	}
+
+	/**
+	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
+	 * @since 5.1
+	 */
+	public <T> WebTestClient.BodyContentSpec value(Matcher<T> matcher, Class<T> targetType) {
+		this.pathHelper.assertValue(this.content, matcher, targetType);
+		return this.bodySpec;
+	}
+
+	/**
+	 * Consume the result of the JSONPath evaluation.
+	 * @since 5.1
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> WebTestClient.BodyContentSpec value(Consumer<T> consumer) {
+		Object value = this.pathHelper.evaluateJsonPath(this.content);
+		consumer.accept((T) value);
+		return this.bodySpec;
+	}
+
+	/**
+	 * Consume the result of the JSONPath evaluation and provide a target class.
+	 * @since 5.1
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> WebTestClient.BodyContentSpec value(Consumer<T> consumer, Class<T> targetType) {
+		Object value = this.pathHelper.evaluateJsonPath(this.content, targetType);
+		consumer.accept((T) value);
+		return this.bodySpec;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		throw new AssertionError("Object#equals is disabled " +
+				"to avoid being used in error instead of JsonPathAssertions#isEqualTo(String).");
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 
 }

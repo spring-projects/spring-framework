@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,13 +52,14 @@ public class ObjectToStringHttpMessageConverterTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ConversionService conversionService = new DefaultConversionService();
 		this.converter = new ObjectToStringHttpMessageConverter(conversionService);
 
 		this.servletResponse = new MockHttpServletResponse();
 		this.response = new ServletServerHttpResponse(this.servletResponse);
 	}
+
 
 	@Test
 	public void canRead() {
@@ -121,20 +122,22 @@ public class ObjectToStringHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
+		Short shortValue = Short.valueOf((short) 781);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType(MediaType.TEXT_PLAIN_VALUE);
-
-		Short shortValue = Short.valueOf((short) 781);
-		request.setContent(shortValue.toString().getBytes(
-				StringHttpMessageConverter.DEFAULT_CHARSET));
+		request.setContent(shortValue.toString().getBytes(StringHttpMessageConverter.DEFAULT_CHARSET));
 		assertEquals(shortValue, this.converter.read(Short.class, new ServletServerHttpRequest(request)));
 
 		Float floatValue = Float.valueOf(123);
+		request = new MockHttpServletRequest();
+		request.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		request.setCharacterEncoding("UTF-16");
 		request.setContent(floatValue.toString().getBytes("UTF-16"));
 		assertEquals(floatValue, this.converter.read(Float.class, new ServletServerHttpRequest(request)));
 
 		Long longValue = Long.valueOf(55819182821331L);
+		request = new MockHttpServletRequest();
+		request.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		request.setCharacterEncoding("UTF-8");
 		request.setContent(longValue.toString().getBytes("UTF-8"));
 		assertEquals(longValue, this.converter.read(Long.class, new ServletServerHttpRequest(request)));

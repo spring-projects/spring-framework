@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ class CaptureVariablePathElement extends PathElement {
 
 
 	/**
+	 * Create a new {@link CaptureVariablePathElement} instance.
 	 * @param pos the position in the pattern of this capture element
 	 * @param captureDescriptor is of the form {AAAAA[:pattern]}
 	 */
@@ -84,7 +85,7 @@ class CaptureVariablePathElement extends PathElement {
 		if (this.constraintPattern != null) {
 			// TODO possible optimization - only regex match if rest of pattern matches?
 			// Benefit likely to vary pattern to pattern
-			Matcher matcher = constraintPattern.matcher(candidateCapture);
+			Matcher matcher = this.constraintPattern.matcher(candidateCapture);
 			if (matcher.groupCount() != 0) {
 				throw new IllegalArgumentException(
 						"No capture groups allowed in the constraint regex: " + this.constraintPattern.pattern());
@@ -106,8 +107,8 @@ class CaptureVariablePathElement extends PathElement {
 				match = (pathIndex == matchingContext.pathLength);
 				if (!match && matchingContext.isMatchOptionalTrailingSeparator()) {
 					match = //(nextPos > candidateIndex) &&
-						    (pathIndex + 1) == matchingContext.pathLength && 
-						    matchingContext.isSeparator(pathIndex);
+							(pathIndex + 1) == matchingContext.pathLength &&
+							matchingContext.isSeparator(pathIndex);
 				}
 			}
 		}

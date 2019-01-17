@@ -263,7 +263,7 @@ public abstract class UriUtils {
 
 
 	/**
-	 * Variant of {@link #decode(String, Charset)} with a String charset.
+	 * Variant of {@link #encode(String, Charset)} with a String charset.
 	 * @param source the String to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded String

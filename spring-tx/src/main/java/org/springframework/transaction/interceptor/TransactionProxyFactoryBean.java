@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,26 +80,25 @@ import org.springframework.transaction.PlatformTransactionManager;
  * This reduces the per-bean definition effort to a minimum.
  *
  * <pre code="class">
- * {@code
- * <bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
- *     abstract="true">
- *   <property name="transactionManager" ref="transactionManager"/>
- *   <property name="transactionAttributes">
- *     <props>
- *       <prop key="insert*">PROPAGATION_REQUIRED</prop>
- *       <prop key="update*">PROPAGATION_REQUIRED</prop>
- *       <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
- *     </props>
- *   </property>
- * </bean>
+ * &lt;bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+ *     abstract="true"&gt;
+ *   &lt;property name="transactionManager" ref="transactionManager"/&gt;
+ *   &lt;property name="transactionAttributes"&gt;
+ *     &lt;props&gt;
+ *       &lt;prop key="insert*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+ *       &lt;prop key="update*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+ *       &lt;prop key="*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+ *     &lt;/props&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;
  *
- * <bean id="myProxy" parent="baseTransactionProxy">
- *   <property name="target" ref="myTarget"/>
- * </bean>
+ * &lt;bean id="myProxy" parent="baseTransactionProxy"&gt;
+ *   &lt;property name="target" ref="myTarget"/&gt;
+ * &lt;/bean&gt;
  *
- * <bean id="yourProxy" parent="baseTransactionProxy">
- *   <property name="target" ref="yourTarget"/>
- * </bean>}</pre>
+ * &lt;bean id="yourProxy" parent="baseTransactionProxy"&gt;
+ *   &lt;property name="target" ref="yourTarget"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko

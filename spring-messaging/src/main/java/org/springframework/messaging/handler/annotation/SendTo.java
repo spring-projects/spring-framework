@@ -32,9 +32,8 @@ import org.springframework.messaging.Message;
  * convey the destination to use for the reply. In that case, that destination
  * should take precedence.
  *
- * <p>The annotation may also be placed at class-level if the provider supports
- * it to indicate that all related methods should use this destination if none
- * is specified otherwise.
+* <p>This annotation may be placed class-level in which case it is inherited by
+ * methods of the class.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll

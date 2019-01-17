@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class ExponentialBackOff implements BackOff {
 	 * Return the initial interval in milliseconds.
 	 */
 	public long getInitialInterval() {
-		return initialInterval;
+		return this.initialInterval;
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class ExponentialBackOff implements BackOff {
 	 * Return the value to multiply the current interval by for each retry attempt.
 	 */
 	public double getMultiplier() {
-		return multiplier;
+		return this.multiplier;
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class ExponentialBackOff implements BackOff {
 	 * Return the maximum back off time.
 	 */
 	public long getMaxInterval() {
-		return maxInterval;
+		return this.maxInterval;
 	}
 
 	/**
@@ -162,7 +162,7 @@ public class ExponentialBackOff implements BackOff {
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
 	 */
 	public long getMaxElapsedTime() {
-		return maxElapsedTime;
+		return this.maxElapsedTime;
 	}
 
 	@Override
@@ -199,7 +199,7 @@ public class ExponentialBackOff implements BackOff {
 				return maxInterval;
 			}
 			else if (this.currentInterval < 0) {
-			 	long initialInterval = getInitialInterval();
+				long initialInterval = getInitialInterval();
 				this.currentInterval = (initialInterval < maxInterval
 						? initialInterval : maxInterval);
 			}

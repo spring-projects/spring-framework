@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cache.annotation;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -36,6 +37,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 3.1
  * @see EnableCaching
  */
@@ -46,16 +48,16 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	protected AnnotationAttributes enableCaching;
 
 	@Nullable
-	protected CacheManager cacheManager;
+	protected Supplier<CacheManager> cacheManager;
 
 	@Nullable
-	protected CacheResolver cacheResolver;
+	protected Supplier<CacheResolver> cacheResolver;
 
 	@Nullable
-	protected KeyGenerator keyGenerator;
+	protected Supplier<KeyGenerator> keyGenerator;
 
 	@Nullable
-	protected CacheErrorHandler errorHandler;
+	protected Supplier<CacheErrorHandler> errorHandler;
 
 
 	@Override
@@ -87,10 +89,10 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	 * Extract the configuration from the nominated {@link CachingConfigurer}.
 	 */
 	protected void useCachingConfigurer(CachingConfigurer config) {
-		this.cacheManager = config.cacheManager();
-		this.cacheResolver = config.cacheResolver();
-		this.keyGenerator = config.keyGenerator();
-		this.errorHandler = config.errorHandler();
+		this.cacheManager = config::cacheManager;
+		this.cacheResolver = config::cacheResolver;
+		this.keyGenerator = config::keyGenerator;
+		this.errorHandler = config::errorHandler;
 	}
 
 }

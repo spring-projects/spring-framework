@@ -63,7 +63,7 @@ public class ConstructorReference extends SpelNodeImpl {
 	private SpelNodeImpl[] dimensions;
 
 	// TODO is this caching safe - passing the expression around will mean this executor is also being passed around
-	/** The cached executor that may be reused on subsequent evaluations */
+	/** The cached executor that may be reused on subsequent evaluations. */
 	@Nullable
 	private volatile ConstructorExecutor cachedExecutor;
 
@@ -161,7 +161,7 @@ public class ConstructorReference extends SpelNodeImpl {
 			if (executorToUse instanceof ReflectiveConstructorExecutor) {
 				this.exitTypeDescriptor = CodeFlow.toDescriptor(
 						((ReflectiveConstructorExecutor) executorToUse).getConstructor().getDeclaringClass());
-				
+
 			}
 			return executorToUse.execute(state.getEvaluationContext(), arguments);
 		}
@@ -422,10 +422,10 @@ public class ConstructorReference extends SpelNodeImpl {
 	private boolean hasInitializer() {
 		return (getChildCount() > 1);
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
-		if (!(this.cachedExecutor instanceof ReflectiveConstructorExecutor) || 
+		if (!(this.cachedExecutor instanceof ReflectiveConstructorExecutor) ||
 			this.exitTypeDescriptor == null) {
 			return false;
 		}
@@ -446,7 +446,7 @@ public class ConstructorReference extends SpelNodeImpl {
 		return (Modifier.isPublic(constructor.getModifiers()) &&
 				Modifier.isPublic(constructor.getDeclaringClass().getModifiers()));
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		ReflectiveConstructorExecutor executor = ((ReflectiveConstructorExecutor) this.cachedExecutor);
@@ -460,7 +460,7 @@ public class ConstructorReference extends SpelNodeImpl {
 		// children[0] is the type of the constructor, don't want to include that in argument processing
 		SpelNodeImpl[] arguments = new SpelNodeImpl[this.children.length - 1];
 		System.arraycopy(this.children, 1, arguments, 0, this.children.length - 1);
-		generateCodeForArguments(mv, cf, constructor, arguments);	
+		generateCodeForArguments(mv, cf, constructor, arguments);
 		mv.visitMethodInsn(INVOKESPECIAL, classDesc, "<init>", CodeFlow.createSignatureDescriptor(constructor), false);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}

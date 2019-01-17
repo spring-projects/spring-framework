@@ -36,8 +36,9 @@ import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Factory for request content {@code RequestMatcher}'s. An instance of this
@@ -105,7 +106,7 @@ public class ContentRequestMatchers {
 	}
 
 	/**
-	 * Get the body of the request as a UTF-8 string and appply the given {@link Matcher}.
+	 * Get the body of the request as a UTF-8 string and apply the given {@link Matcher}.
 	 */
 	public RequestMatcher string(final Matcher<? super String> matcher) {
 		return request -> {
@@ -161,7 +162,7 @@ public class ContentRequestMatchers {
 	 * two are "similar" - i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this matcher assumes the
-	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit<a/> library is available.
+	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit</a> library is available.
 	 * @param expectedXmlContent the expected XML content
 	 */
 	public RequestMatcher xml(final String expectedXmlContent) {
@@ -204,7 +205,7 @@ public class ContentRequestMatchers {
 	 * regardless of formatting with a lenient checking (extensible, and non-strict array
 	 * ordering).
 	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param expectedJsonContent the expected JSON content
 	 * @since 5.0.5
 	 */
@@ -222,7 +223,7 @@ public class ContentRequestMatchers {
 	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
 	 * </ul>
 	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param expectedJsonContent the expected JSON content
 	 * @param strict enables strict checking
 	 * @since 5.0.5
@@ -231,7 +232,7 @@ public class ContentRequestMatchers {
 		return request -> {
 			try {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				jsonHelper.assertJsonEqual(expectedJsonContent, mockRequest.getBodyAsString(), strict);
+				this.jsonHelper.assertJsonEqual(expectedJsonContent, mockRequest.getBodyAsString(), strict);
 			}
 			catch (Exception ex) {
 				throw new AssertionError("Failed to parse expected or actual JSON request content", ex);

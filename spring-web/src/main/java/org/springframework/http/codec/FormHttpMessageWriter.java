@@ -22,7 +22,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +29,9 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.lang.Nullable;
@@ -57,8 +58,12 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  * @see org.springframework.http.codec.multipart.MultipartHttpMessageWriter
  */
-public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<String, String>> {
+public class FormHttpMessageWriter extends LoggingCodecSupport
+		implements HttpMessageWriter<MultiValueMap<String, String>> {
 
+	/**
+	 * The default charset used by the writer.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
@@ -100,8 +105,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
-		Class<?> rawClass = elementType.getRawClass();
-		if (rawClass == null || !MultiValueMap.class.isAssignableFrom(rawClass)) {
+		if (!MultiValueMap.class.isAssignableFrom(elementType.toClass())) {
 			return false;
 		}
 		if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) {
@@ -120,63 +124,59 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 			ResolvableType elementType, @Nullable MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
-		mediaType = (mediaType != null ? mediaType : DEFAULT_FORM_DATA_MEDIA_TYPE);
-		Charset charset;
-		if (mediaType.getCharset() == null) {
-			charset = getDefaultCharset();
-			mediaType = new MediaType(mediaType, charset);
-		}
-		else {
-			charset = mediaType.getCharset();
-		}
+		mediaType = getMediaType(mediaType);
 		message.getHeaders().setContentType(mediaType);
 
-		return Mono.from(inputStream).flatMap(form -> {
-					String value = serializeForm(form, charset);
-					ByteBuffer byteBuffer = charset.encode(value);
-					DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
-					message.getHeaders().setContentLength(byteBuffer.remaining());
-					return message.writeWith(Mono.just(buffer));
-				});
+		Charset charset = mediaType.getCharset();
+		Assert.notNull(charset, "No charset"); // should never occur
 
+		return Mono.from(inputStream).flatMap(form -> {
+			logFormData(form, hints);
+			String value = serializeForm(form, charset);
+			ByteBuffer byteBuffer = charset.encode(value);
+			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
+			message.getHeaders().setContentLength(byteBuffer.remaining());
+			return message.writeWith(Mono.just(buffer));
+		});
 	}
 
-	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {
-		if (mediaType != null && mediaType.getCharset() != null) {
-			return mediaType.getCharset();
+	private MediaType getMediaType(@Nullable MediaType mediaType) {
+		if (mediaType == null) {
+			return DEFAULT_FORM_DATA_MEDIA_TYPE;
+		}
+		else if (mediaType.getCharset() == null) {
+			return new MediaType(mediaType, getDefaultCharset());
 		}
 		else {
-			return getDefaultCharset();
+			return mediaType;
 		}
 	}
 
-	private String serializeForm(MultiValueMap<String, String> form, Charset charset) {
+	private void logFormData(MultiValueMap<String, String> form, Map<String, Object> hints) {
+		LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Writing " +
+				(isEnableLoggingRequestDetails() ?
+						LogFormatUtils.formatValue(form, !traceOn) :
+						"form fields " + form.keySet() + " (content masked)"));
+	}
+
+	protected String serializeForm(MultiValueMap<String, String> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
-		try {
-			for (Iterator<String> names = form.keySet().iterator(); names.hasNext();) {
-				String name = names.next();
-				for (Iterator<?> values = form.get(name).iterator(); values.hasNext();) {
-					Object rawValue = values.next();
-					builder.append(URLEncoder.encode(name, charset.name()));
-					if (rawValue != null) {
-						builder.append('=');
-						Assert.isInstanceOf(String.class, rawValue,
-								"FormHttpMessageWriter supports String values only. " +
-										"Use MultipartHttpMessageWriter for multipart requests.");
-						builder.append(URLEncoder.encode((String) rawValue, charset.name()));
-						if (values.hasNext()) {
+		formData.forEach((name, values) ->
+				values.forEach(value -> {
+					try {
+						if (builder.length() != 0) {
 							builder.append('&');
 						}
+						builder.append(URLEncoder.encode(name, charset.name()));
+						if (value != null) {
+							builder.append('=');
+							builder.append(URLEncoder.encode(value, charset.name()));
+						}
 					}
-				}
-				if (names.hasNext()) {
-					builder.append('&');
-				}
-			}
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException(ex);
-		}
+					catch (UnsupportedEncodingException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}));
 		return builder.toString();
 	}
 

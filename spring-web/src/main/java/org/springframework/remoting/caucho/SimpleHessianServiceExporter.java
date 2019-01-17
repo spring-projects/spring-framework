@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.IOException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import org.springframework.lang.UsesSunHttpServer;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -43,9 +42,10 @@ import org.springframework.util.FileCopyUtils;
  * @since 2.5.1
  * @see org.springframework.remoting.caucho.HessianClientInterceptor
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
- * @see org.springframework.remoting.httpinvoker.SimpleHttpInvokerServiceExporter
+ * @deprecated as of Spring Framework 5.1, in favor of {@link HessianServiceExporter}
  */
-@UsesSunHttpServer
+@Deprecated
+@org.springframework.lang.UsesSunHttpServer
 public class SimpleHessianServiceExporter extends HessianExporter implements HttpHandler {
 
 	/**

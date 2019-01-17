@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -38,11 +39,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static java.time.Duration.ofMillis;
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+import static java.time.Duration.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Annotated controllers accepting and returning typed Objects.
@@ -68,6 +68,15 @@ public class ResponseEntityTests {
 	}
 
 	@Test
+	public void entityMatcher() {
+		this.client.get().uri("/John")
+				.exchange()
+				.expectStatus().isOk()
+				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectBody(Person.class).value(Person::getName, startsWith("Joh"));
+	}
+
+	@Test
 	public void entityWithConsumer() {
 		this.client.get().uri("/John")
 				.exchange()
@@ -88,6 +97,18 @@ public class ResponseEntityTests {
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
 				.expectBodyList(Person.class).isEqualTo(expected);
+	}
+
+	@Test
+	public void entityListWithConsumer() {
+
+		this.client.get()
+				.exchange()
+				.expectStatus().isOk()
+				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectBodyList(Person.class).value(people -> {
+					MatcherAssert.assertThat(people, hasItem(new Person("Jason")));
+				});
 	}
 
 	@Test

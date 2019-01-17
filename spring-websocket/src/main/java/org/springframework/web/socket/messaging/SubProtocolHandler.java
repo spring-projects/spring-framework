@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,9 @@ import org.springframework.web.socket.WebSocketSession;
 
 /**
  * A contract for handling WebSocket messages as part of a higher level protocol,
- * referred to as "sub-protocol" in the WebSocket RFC specification. Handles both
- * {@link WebSocketMessage}s from a client as well as {@link Message}s to a client.
+ * referred to as "sub-protocol" in the WebSocket RFC specification.
+ * Handles both {@link WebSocketMessage WebSocketMessages} from a client
+ * as well as {@link Message Messages} to a client.
  *
  * <p>Implementations of this interface can be configured on a
  * {@link SubProtocolWebSocketHandler} which selects a sub-protocol handler to

@@ -88,7 +88,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	/**
-	 * Set the remove-on-cancel mode on {@link ScheduledThreadPoolExecutor} (JDK 7+).
+	 * Set the remove-on-cancel mode on {@link ScheduledThreadPoolExecutor}.
 	 * <p>Default is {@code false}. If set to {@code true}, the target executor will be
 	 * switched into remove-on-cancel mode (if possible, with a soft fallback otherwise).
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
@@ -99,7 +99,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(removeOnCancelPolicy);
 		}
 		else if (removeOnCancelPolicy && this.scheduledExecutor != null) {
-			logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+			logger.debug("Could not apply remove-on-cancel policy - not a ScheduledThreadPoolExecutor");
 		}
 	}
 
@@ -122,7 +122,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 				((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(true);
 			}
 			else {
-				logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+				logger.debug("Could not apply remove-on-cancel policy - not a ScheduledThreadPoolExecutor");
 			}
 		}
 
@@ -284,8 +284,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	private void executeAndTrack(ExecutorService executor, ListenableFutureTask<?> listenableFuture) {
 		Future<?> scheduledFuture = executor.submit(errorHandlingTask(listenableFuture, false));
 		this.listenableFutureMap.put(scheduledFuture, listenableFuture);
-		listenableFuture.addCallback(result -> listenableFutureMap.remove(scheduledFuture),
-				ex -> listenableFutureMap.remove(scheduledFuture));
+		listenableFuture.addCallback(result -> this.listenableFutureMap.remove(scheduledFuture),
+				ex -> this.listenableFutureMap.remove(scheduledFuture));
 	}
 
 	@Override
@@ -296,11 +296,6 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		if (listenableFuture != null) {
 			listenableFuture.cancel(true);
 		}
-	}
-
-	@Override
-	public boolean prefersShortLivedTasks() {
-		return true;
 	}
 
 
@@ -403,8 +398,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			try {
 				return this.delegate.call();
 			}
-			catch (Throwable t) {
-				this.errorHandler.handleError(t);
+			catch (Throwable ex) {
+				this.errorHandler.handleError(ex);
 				return null;
 			}
 		}

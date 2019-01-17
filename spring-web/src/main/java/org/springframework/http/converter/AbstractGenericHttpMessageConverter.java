@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 4.2
+ * @param <T> the converted object type
  */
 public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHttpMessageConverter<T>
 		implements GenericHttpMessageConverter<T> {

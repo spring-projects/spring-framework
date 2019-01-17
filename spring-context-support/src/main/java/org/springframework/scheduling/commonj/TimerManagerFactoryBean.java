@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,10 @@ import org.springframework.lang.Nullable;
  * @see ScheduledTimerListener
  * @see commonj.timers.TimerManager
  * @see commonj.timers.TimerListener
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler}
  */
+@Deprecated
 public class TimerManagerFactoryBean extends TimerManagerAccessor
 		implements FactoryBean<TimerManager>, InitializingBean, DisposableBean, Lifecycle {
 
@@ -145,7 +148,7 @@ public class TimerManagerFactoryBean extends TimerManagerAccessor
 				timer.cancel();
 			}
 			catch (Throwable ex) {
-				logger.warn("Could not cancel CommonJ Timer", ex);
+				logger.debug("Could not cancel CommonJ Timer", ex);
 			}
 		}
 		this.timers.clear();

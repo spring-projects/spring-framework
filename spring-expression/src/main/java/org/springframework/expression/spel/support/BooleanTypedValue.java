@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,21 @@ package org.springframework.expression.spel.support;
 import org.springframework.expression.TypedValue;
 
 /**
+ * A {@link TypedValue} for booleans.
+ *
  * @author Andy Clement
  * @since 3.0
  */
-public class BooleanTypedValue extends TypedValue {
+public final class BooleanTypedValue extends TypedValue {
 
+	/**
+	 * True.
+	 */
 	public static final BooleanTypedValue TRUE = new BooleanTypedValue(true);
 
+	/**
+	 * False.
+	 */
 	public static final BooleanTypedValue FALSE = new BooleanTypedValue(false);
 
 

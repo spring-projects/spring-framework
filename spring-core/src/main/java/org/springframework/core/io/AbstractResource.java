@@ -146,7 +146,7 @@ public abstract class AbstractResource implements Resource {
 		InputStream is = getInputStream();
 		try {
 			long size = 0;
-			byte[] buf = new byte[255];
+			byte[] buf = new byte[256];
 			int read;
 			while ((read = is.read(buf)) != -1) {
 				size += read;
@@ -169,10 +169,11 @@ public abstract class AbstractResource implements Resource {
 	 */
 	@Override
 	public long lastModified() throws IOException {
-		long lastModified = getFileForLastModifiedCheck().lastModified();
-		if (lastModified == 0L) {
+		File fileToCheck = getFileForLastModifiedCheck();
+		long lastModified = fileToCheck.lastModified();
+		if (lastModified == 0L && !fileToCheck.exists()) {
 			throw new FileNotFoundException(getDescription() +
-					" cannot be resolved in the file system for resolving its last-modified timestamp");
+					" cannot be resolved in the file system for checking its last-modified timestamp");
 		}
 		return lastModified;
 	}
@@ -210,22 +211,13 @@ public abstract class AbstractResource implements Resource {
 
 
 	/**
-	 * This implementation returns the description of this resource.
-	 * @see #getDescription()
-	 */
-	@Override
-	public String toString() {
-		return getDescription();
-	}
-
-	/**
 	 * This implementation compares description strings.
 	 * @see #getDescription()
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof Resource && ((Resource) obj).getDescription().equals(getDescription())));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof Resource &&
+				((Resource) other).getDescription().equals(getDescription())));
 	}
 
 	/**
@@ -235,6 +227,15 @@ public abstract class AbstractResource implements Resource {
 	@Override
 	public int hashCode() {
 		return getDescription().hashCode();
+	}
+
+	/**
+	 * This implementation returns the description of this resource.
+	 * @see #getDescription()
+	 */
+	@Override
+	public String toString() {
+		return getDescription();
 	}
 
 }

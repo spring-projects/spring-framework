@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class OpOr extends Operator {
 				CodeFlow.isBooleanCompatible(left.exitTypeDescriptor) &&
 				CodeFlow.isBooleanCompatible(right.exitTypeDescriptor));
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		// pseudo: if (leftOperandValue) { result=true; } else { result=rightOperandValue; }
@@ -98,5 +98,5 @@ public class OpOr extends Operator {
 		mv.visitLabel(endOfIf);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
-	
+
 }

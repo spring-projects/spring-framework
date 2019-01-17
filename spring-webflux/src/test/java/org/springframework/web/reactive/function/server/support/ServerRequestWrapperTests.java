@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,23 +43,18 @@ import static org.mockito.Mockito.*;
  */
 public class ServerRequestWrapperTests {
 
-	private ServerRequest mockRequest;
+	private final ServerRequest mockRequest = mock(ServerRequest.class);
 
-	private ServerRequestWrapper wrapper;
+	private final ServerRequestWrapper wrapper = new ServerRequestWrapper(mockRequest);
 
-	@Before
-	public void createWrapper() {
-		mockRequest = mock(ServerRequest.class);
-		wrapper = new ServerRequestWrapper(mockRequest);
-	}
 
 	@Test
-	public void request() throws Exception {
+	public void request() {
 		assertSame(mockRequest, wrapper.request());
 	}
 
 	@Test
-	public void method() throws Exception {
+	public void method() {
 		HttpMethod method = HttpMethod.POST;
 		when(mockRequest.method()).thenReturn(method);
 
@@ -68,7 +62,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void uri() throws Exception {
+	public void uri() {
 		URI uri = URI.create("https://example.com");
 		when(mockRequest.uri()).thenReturn(uri);
 
@@ -76,7 +70,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void path() throws Exception {
+	public void path() {
 		String path = "/foo/bar";
 		when(mockRequest.path()).thenReturn(path);
 
@@ -84,7 +78,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void headers() throws Exception {
+	public void headers() {
 		ServerRequest.Headers headers = mock(ServerRequest.Headers.class);
 		when(mockRequest.headers()).thenReturn(headers);
 
@@ -92,7 +86,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void attribute() throws Exception {
+	public void attribute() {
 		String name = "foo";
 		String value = "bar";
 		when(mockRequest.attribute(name)).thenReturn(Optional.of(value));
@@ -101,7 +95,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void queryParam() throws Exception {
+	public void queryParam() {
 		String name = "foo";
 		String value = "bar";
 		when(mockRequest.queryParam(name)).thenReturn(Optional.of(value));
@@ -110,7 +104,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void queryParams() throws Exception {
+	public void queryParams() {
 		MultiValueMap<String, String> value = new LinkedMultiValueMap<>();
 		value.add("foo", "bar");
 		when(mockRequest.queryParams()).thenReturn(value);
@@ -119,7 +113,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void pathVariable() throws Exception {
+	public void pathVariable() {
 		String name = "foo";
 		String value = "bar";
 		when(mockRequest.pathVariable(name)).thenReturn(value);
@@ -128,7 +122,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void pathVariables() throws Exception {
+	public void pathVariables() {
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		when(mockRequest.pathVariables()).thenReturn(pathVariables);
 
@@ -136,7 +130,8 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void cookies() throws Exception {
+	@SuppressWarnings("unchecked")
+	public void cookies() {
 		MultiValueMap<String, HttpCookie> cookies = mock(MultiValueMap.class);
 		when(mockRequest.cookies()).thenReturn(cookies);
 
@@ -144,7 +139,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void bodyExtractor() throws Exception {
+	public void bodyExtractor() {
 		Mono<String> result = Mono.just("foo");
 		BodyExtractor<Mono<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(String.class);
 		when(mockRequest.body(extractor)).thenReturn(result);
@@ -153,7 +148,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void bodyToMonoClass() throws Exception {
+	public void bodyToMonoClass() {
 		Mono<String> result = Mono.just("foo");
 		when(mockRequest.bodyToMono(String.class)).thenReturn(result);
 
@@ -161,7 +156,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void bodyToMonoParameterizedTypeReference() throws Exception {
+	public void bodyToMonoParameterizedTypeReference() {
 		Mono<String> result = Mono.just("foo");
 		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		when(mockRequest.bodyToMono(reference)).thenReturn(result);
@@ -170,7 +165,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void bodyToFluxClass() throws Exception {
+	public void bodyToFluxClass() {
 		Flux<String> result = Flux.just("foo");
 		when(mockRequest.bodyToFlux(String.class)).thenReturn(result);
 
@@ -178,7 +173,7 @@ public class ServerRequestWrapperTests {
 	}
 
 	@Test
-	public void bodyToFluxParameterizedTypeReference() throws Exception {
+	public void bodyToFluxParameterizedTypeReference() {
 		Flux<String> result = Flux.just("foo");
 		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		when(mockRequest.bodyToFlux(reference)).thenReturn(result);

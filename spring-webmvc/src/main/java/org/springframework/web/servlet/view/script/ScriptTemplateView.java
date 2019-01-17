@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,9 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  */
 public class ScriptTemplateView extends AbstractUrlBasedView {
 
+	/**
+	 * The default content type for the view.
+	 */
 	public static final String DEFAULT_CONTENT_TYPE = "text/html";
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
@@ -222,7 +225,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 		if (this.resourceLoaderPaths == null) {
 			String resourceLoaderPath = viewConfig.getResourceLoaderPath();
-			setResourceLoaderPath(resourceLoaderPath == null ? DEFAULT_RESOURCE_LOADER_PATH : resourceLoaderPath);
+			setResourceLoaderPath(resourceLoaderPath != null ? resourceLoaderPath : DEFAULT_RESOURCE_LOADER_PATH);
 		}
 		if (this.sharedEngine == null && viewConfig.isSharedEngine() != null) {
 			this.sharedEngine = viewConfig.isSharedEngine();
@@ -263,7 +266,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 					new EngineKey(this.engineName, this.scripts) : this.engineName);
 			ScriptEngine engine = engines.get(engineKey);
 			if (engine == null) {
-				engine = createEngineFromName(engineName);
+				engine = createEngineFromName(this.engineName);
 				engines.put(engineKey, engine);
 			}
 			return engine;

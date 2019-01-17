@@ -26,13 +26,17 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.core.log.LogFormatUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.WebHandlerDecorator;
@@ -55,8 +59,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	/**
 	 * Dedicated log category for disconnected client exceptions.
-	 * <p>Servlet containers do not expose a notification when a client disconnects,
-	 * e.g. <a href="https://java.net/jira/browse/SERVLET_SPEC-44">SERVLET_SPEC-44</a>.
+	 * <p>Servlet containers dn't expose a a client disconnected callback, see
+	 * <a href="https://github.com/eclipse-ee4j/servlet-api/issues/44">eclipse-ee4j/servlet-api#44</a>.
 	 * <p>To avoid filling logs with unnecessary stack traces, we make an
 	 * effort to identify such network failures on a per-server basis, and then
 	 * log under a separate log category a simple one-line message at DEBUG level
@@ -80,19 +84,23 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private static final Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
 
-	private static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
+	private static final Log lostClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 
-	@Nullable
-	private ServerCodecConfigurer codecConfigurer;
+	private ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
+
+	private LocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
 
 	@Nullable
-	private LocaleContextResolver localeContextResolver;
+	private ForwardedHeaderTransformer forwardedHeaderTransformer;
 
 	@Nullable
 	private ApplicationContext applicationContext;
+
+	/** Whether to log potentially sensitive info (form data at DEBUG, headers at TRACE). */
+	private boolean enableLoggingRequestDetails = false;
 
 
 	public HttpWebHandlerAdapter(WebHandler delegate) {
@@ -126,15 +134,24 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * @param codecConfigurer the codec configurer to use
 	 */
 	public void setCodecConfigurer(ServerCodecConfigurer codecConfigurer) {
-		Assert.notNull(codecConfigurer, "ServerCodecConfigurer must not be null");
+		Assert.notNull(codecConfigurer, "ServerCodecConfigurer is required");
 		this.codecConfigurer = codecConfigurer;
+
+		this.enableLoggingRequestDetails = false;
+		this.codecConfigurer.getReaders().stream()
+				.filter(LoggingCodecSupport.class::isInstance)
+				.forEach(reader -> {
+					if (((LoggingCodecSupport) reader).isEnableLoggingRequestDetails()) {
+						this.enableLoggingRequestDetails = true;
+					}
+				});
 	}
 
 	/**
 	 * Return the configured {@link ServerCodecConfigurer}.
 	 */
 	public ServerCodecConfigurer getCodecConfigurer() {
-		return (this.codecConfigurer != null ? this.codecConfigurer : ServerCodecConfigurer.create());
+		return this.codecConfigurer;
 	}
 
 	/**
@@ -142,18 +159,39 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * each created {@link DefaultServerWebExchange}.
 	 * <p>By default this is set to
 	 * {@link org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver}.
-	 * @param localeContextResolver the locale context resolver to use
+	 * @param resolver the locale context resolver to use
 	 */
-	public void setLocaleContextResolver(LocaleContextResolver localeContextResolver) {
-		this.localeContextResolver = localeContextResolver;
+	public void setLocaleContextResolver(LocaleContextResolver resolver) {
+		Assert.notNull(resolver, "LocaleContextResolver is required");
+		this.localeContextResolver = resolver;
 	}
 
 	/**
 	 * Return the configured {@link LocaleContextResolver}.
 	 */
 	public LocaleContextResolver getLocaleContextResolver() {
-		return (this.localeContextResolver != null ?
-				this.localeContextResolver : new AcceptHeaderLocaleContextResolver());
+		return this.localeContextResolver;
+	}
+
+	/**
+	 * Enable processing of forwarded headers, either extracting and removing,
+	 * or remove only.
+	 * <p>By default this is not set.
+	 * @param transformer the transformer to use
+	 * @since 5.1
+	 */
+	public void setForwardedHeaderTransformer(ForwardedHeaderTransformer transformer) {
+		Assert.notNull(transformer, "ForwardedHeaderTransformer is required");
+		this.forwardedHeaderTransformer = transformer;
+	}
+
+	/**
+	 * Return the configured {@link ForwardedHeaderTransformer}.
+	 * @since 5.1
+	 */
+	@Nullable
+	public ForwardedHeaderTransformer getForwardedHeaderTransformer() {
+		return this.forwardedHeaderTransformer;
 	}
 
 	/**
@@ -177,12 +215,37 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		return this.applicationContext;
 	}
 
+	/**
+	 * This method must be invoked after all properties have been set to
+	 * complete initialization.
+	 */
+	public void afterPropertiesSet() {
+		if (logger.isDebugEnabled()) {
+			String value = this.enableLoggingRequestDetails ?
+					"shown which may lead to unsafe logging of potentially sensitive data" :
+					"masked to prevent unsafe logging of potentially sensitive data";
+			logger.debug("enableLoggingRequestDetails='" + this.enableLoggingRequestDetails +
+					"': form data and headers will be " + value);
+		}
+	}
+
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+
+		if (this.forwardedHeaderTransformer != null) {
+			request = this.forwardedHeaderTransformer.apply(request);
+		}
+
 		ServerWebExchange exchange = createExchange(request, response);
+
+		LogFormatUtils.traceDebug(logger, traceOn ->
+				exchange.getLogPrefix() + formatRequest(exchange.getRequest()) +
+						(traceOn ? ", headers=" + formatHeaders(exchange.getRequest().getHeaders()) : ""));
+
 		return getDelegate().handle(exchange)
-				.onErrorResume(ex -> handleFailure(request, response, ex))
+				.doOnSuccess(aVoid -> logResponse(exchange))
+				.onErrorResume(ex -> handleUnresolvedError(exchange, ex))
 				.then(Mono.defer(response::setComplete));
 	}
 
@@ -191,27 +254,51 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext);
 	}
 
-	private Mono<Void> handleFailure(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
+	private String formatRequest(ServerHttpRequest request) {
+		String rawQuery = request.getURI().getRawQuery();
+		String query = StringUtils.hasText(rawQuery) ? "?" + rawQuery : "";
+		return "HTTP " + request.getMethod() + " \"" + request.getPath() + query + "\"";
+	}
+
+	private void logResponse(ServerWebExchange exchange) {
+		LogFormatUtils.traceDebug(logger, traceOn -> {
+			HttpStatus status = exchange.getResponse().getStatusCode();
+			return exchange.getLogPrefix() + "Completed " + (status != null ? status : "200 OK") +
+					(traceOn ? ", headers=" + formatHeaders(exchange.getResponse().getHeaders()) : "");
+		});
+	}
+
+	private String formatHeaders(HttpHeaders responseHeaders) {
+		return this.enableLoggingRequestDetails ?
+				responseHeaders.toString() : responseHeaders.isEmpty() ? "{}" : "{masked}";
+	}
+
+	private Mono<Void> handleUnresolvedError(ServerWebExchange exchange, Throwable ex) {
+
+		ServerHttpRequest request = exchange.getRequest();
+		ServerHttpResponse response = exchange.getResponse();
+		String logPrefix = exchange.getLogPrefix();
+
 		if (isDisconnectedClientError(ex)) {
-			if (disconnectedClientLogger.isTraceEnabled()) {
-				disconnectedClientLogger.trace("Looks like the client has gone away", ex);
+			if (lostClientLogger.isTraceEnabled()) {
+				lostClientLogger.trace(logPrefix + "Client went away", ex);
 			}
-			else if (disconnectedClientLogger.isDebugEnabled()) {
-				disconnectedClientLogger.debug("Looks like the client has gone away: " + ex +
-						" (For a full stack trace, set the log category '" + DISCONNECTED_CLIENT_LOG_CATEGORY +
-						"' to TRACE level.)");
+			else if (lostClientLogger.isDebugEnabled()) {
+				lostClientLogger.debug(logPrefix + "Client went away: " + ex +
+						" (stacktrace at TRACE level for '" + DISCONNECTED_CLIENT_LOG_CATEGORY + "')");
 			}
 			return Mono.empty();
 		}
-		if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
-			logger.error("Failed to handle request [" + request.getMethod() + " "
-					+ request.getURI() + "]", ex);
+		else if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
+			logger.error(logPrefix + "500 Server Error for " + formatRequest(request), ex);
 			return Mono.empty();
 		}
-		// After the response is committed, propagate errors to the server..
-		HttpStatus status = response.getStatusCode();
-		logger.error("Unhandled failure: " + ex.getMessage() + ", response already set (status=" + status + ")");
-		return Mono.error(ex);
+		else {
+			// After the response is committed, propagate errors to the server..
+			logger.error(logPrefix + "Error [" + ex + "] for " + formatRequest(request) +
+					", but ServerHttpResponse already committed (" + response.getStatusCode() + ")");
+			return Mono.error(ex);
+		}
 	}
 
 	private boolean isDisconnectedClientError(Throwable ex)  {

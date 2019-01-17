@@ -54,7 +54,7 @@ import org.springframework.util.MimeType;
  * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
+ * <p>Compatible with Jackson 2.9 and higher, as of Spring 5.1.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -181,8 +181,8 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			return;
 		}
 
-		boolean debugLevel = (cause instanceof JsonMappingException &&
-				cause.getMessage().startsWith("Can not find"));
+		// Do not log warning for serializer not found (note: different message wording on Jackson 2.9)
+		boolean debugLevel = (cause instanceof JsonMappingException && cause.getMessage().startsWith("Cannot find"));
 
 		if (debugLevel ? logger.isDebugEnabled() : logger.isWarnEnabled()) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +

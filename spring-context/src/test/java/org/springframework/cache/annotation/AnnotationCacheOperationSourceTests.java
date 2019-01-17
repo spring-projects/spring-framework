@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,13 +52,13 @@ public class AnnotationCacheOperationSourceTests {
 
 
 	@Test
-	public void singularAnnotation() throws Exception {
+	public void singularAnnotation() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singular", 1);
 		assertTrue(ops.iterator().next() instanceof CacheableOperation);
 	}
 
 	@Test
-	public void multipleAnnotation() throws Exception {
+	public void multipleAnnotation() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "multiple", 2);
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
@@ -66,7 +66,7 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void caching() throws Exception {
+	public void caching() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "caching", 2);
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
@@ -74,18 +74,18 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void emptyCaching() throws Exception {
+	public void emptyCaching() {
 		getOps(AnnotatedClass.class, "emptyCaching", 0);
 	}
 
 	@Test
-	public void singularStereotype() throws Exception {
+	public void singularStereotype() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singleStereotype", 1);
 		assertTrue(ops.iterator().next() instanceof CacheEvictOperation);
 	}
 
 	@Test
-	public void multipleStereotypes() throws Exception {
+	public void multipleStereotypes() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "multipleStereotype", 3);
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
@@ -98,7 +98,7 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void singleComposedAnnotation() throws Exception {
+	public void singleComposedAnnotation() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singleComposed", 2);
 		Iterator<CacheOperation> it = ops.iterator();
 
@@ -114,7 +114,7 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void multipleComposedAnnotations() throws Exception {
+	public void multipleComposedAnnotations() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "multipleComposed", 4);
 		Iterator<CacheOperation> it = ops.iterator();
 

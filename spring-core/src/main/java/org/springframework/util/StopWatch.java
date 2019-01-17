@@ -53,10 +53,10 @@ public class StopWatch {
 
 	private final List<TaskInfo> taskList = new LinkedList<>();
 
-	/** Start time of the current task */
+	/** Start time of the current task. */
 	private long startTimeMillis;
 
-	/** Name of the current task */
+	/** Name of the current task. */
 	@Nullable
 	private String currentTaskName;
 
@@ -65,7 +65,7 @@ public class StopWatch {
 
 	private int taskCount;
 
-	/** Total running time */
+	/** Total running time. */
 	private long totalTimeMillis;
 
 

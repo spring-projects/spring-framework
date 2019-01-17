@@ -42,6 +42,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  * @since 5.0
+ * @param <T> the type of element signaled
  */
 public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
@@ -77,7 +78,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 	private enum State {
 
-		/** No emissions from the upstream source yet */
+		/** No emissions from the upstream source yet. */
 		NEW,
 
 		/**
@@ -126,24 +127,24 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		@Nullable
 		private Subscription subscription;
 
-		/** Cached data item before readyToWrite */
+		/** Cached data item before readyToWrite. */
 		@Nullable
 		private T item;
 
-		/** Cached error signal before readyToWrite */
+		/** Cached error signal before readyToWrite. */
 		@Nullable
 		private Throwable error;
 
-		/** Cached onComplete signal before readyToWrite */
+		/** Cached onComplete signal before readyToWrite. */
 		private boolean completed = false;
 
-		/** Recursive demand while emitting cached signals */
+		/** Recursive demand while emitting cached signals. */
 		private long demandBeforeReadyToWrite;
 
-		/** Current state */
+		/** Current state. */
 		private State state = State.NEW;
 
-		/** The actual writeSubscriber from the HTTP server adapter */
+		/** The actual writeSubscriber from the HTTP server adapter. */
 		@Nullable
 		private Subscriber<? super T> writeSubscriber;
 
@@ -337,6 +338,9 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 		private final WriteBarrier writeBarrier;
 
+		@Nullable
+		private Subscription subscription;
+
 
 		public WriteCompletionBarrier(CoreSubscriber<? super Void> subscriber, WriteBarrier writeBarrier) {
 			this.completionSubscriber = subscriber;
@@ -356,6 +360,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
+			this.subscription = subscription;
 			subscription.request(Long.MAX_VALUE);
 		}
 
@@ -387,6 +392,10 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		@Override
 		public void cancel() {
 			this.writeBarrier.cancel();
+			Subscription subscription = this.subscription;
+			if (subscription != null) {
+				subscription.cancel();
+			}
 		}
 	}
 

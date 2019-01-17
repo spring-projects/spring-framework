@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<suppressions>
+
+	<!-- global -->
+	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks=".*" />
+	<suppress files="ValueConstants" checks="InterfaceIsType" />
+
+	<!-- spring-beans -->
+	<suppress files="TypeMismatchException" checks="MutableException"/>
+	<suppress files="BeanCreationException" checks="MutableException"/>
+	<suppress files="BeanDefinitionParserDelegate" checks="JavadocVariable" />
+	<suppress files="DefaultBeanDefinitionDocumentReader" checks="JavadocVariable" />
+	<suppress files="BeanComponentDefinition" checks="EqualsHashCode" />
+	<suppress files="GenericBeanDefinition" checks="EqualsHashCode" />
+	<suppress files="RootBeanDefinition" checks="EqualsHashCode" />
+
+	<!-- spring-core -->
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]asm[\\/]" checks=".*" />
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]cglib[\\/]" checks=".*" />
+	<suppress files="SocketUtils" checks="HideUtilityClassConstructor" />
+	<suppress files="ResolvableType" checks="FinalClass" />
+
+	<!-- spring-expression -->
+	<suppress files="ExpressionException" checks="MutableException" />
+	<suppress files="SpelMessage" checks="JavadocVariable|JavadocStyle" />
+
+	<!-- spring-jcl -->
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]apache[\\/]commons[\\/]logging[\\/]" checks="Header|SpringNoThis" />
+
+	<!-- spring-jdbc -->
+	<suppress files="ResultSetWrappingSqlRowSet" checks="JavadocStyle" />
+
+	<!-- spring-jms -->
+	<suppress files="JmsHeaderMapper" checks="InterfaceIsType" />
+	<suppress files="JmsHeaders" checks="InterfaceIsType" />
+	<suppress files="AbstractJmsListenerContainerFactory" checks="JavadocStyle" />
+	<suppress files="DefaultJmsListenerContainerFactory" checks="JavadocStyle" />
+	<suppress files="DefaultJcaListenerContainerFactory" checks="JavadocStyle" />
+
+	<!-- spring-messaging -->
+	<suppress files="SimpMessageHeaderAccessor" checks="JavadocVariable" />
+	<suppress files="SimpMessageType" checks="JavadocVariable" />
+	<suppress files="StompCommand" checks="JavadocVariable" />
+	<suppress files="StompHeaderAccessor" checks="JavadocVariable" />
+	<suppress files="StompHeaders" checks="JavadocVariable" />
+
+	<!-- spring-orm -->
+	<suppress files="jpa[\\/]vendor[\\/]Database" checks="JavadocVariable|JavadocStyle"/>
+
+	<!-- spring-tx -->
+	<suppress files="TransactionSystemException" checks="MutableException" />
+	<suppress files="TransactionTemplate" checks="EqualsHashCode" />
+
+	<!-- spring-test -->
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]jdbc[\\/]MergedSqlConfig" checks="JavadocStyle" />
+
+	<!-- spring-web -->
+	<suppress files="SpringHandlerInstantiator" checks="JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]http[\\/]HttpMethod" checks="JavadocVariable|JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]http[\\/]HttpStatus" checks="JavadocVariable|JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]CrossOrigin" checks="JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]RequestMethod" checks="JavadocVariable" />
+	<suppress files="PatternParseException" checks="JavadocVariable" />
+	<suppress files="web[\\/]reactive[\\/]socket[\\/]CloseStatus" checks="JavadocStyle" />
+
+	<!-- spring-webmvc -->
+	<suppress files="org[\\/]springframework[\\/]web[\\/]servlet[\\/]tags[\\/]form[\\/].*Tag" checks="JavadocVariable" />
+
+	<!-- spring-websocket -->
+	<suppress files="web[\\/]socket[\\/]CloseStatus" checks="JavadocStyle" />
+	<suppress files="web[\\/]socket[\\/]WebSocketHttpHeaders" checks="JavadocVariable" />
+	<suppress files="sockjs[\\/]frame[\\/]SockJsFrameType" checks="JavadocVariable" />
+	<suppress files="sockjs[\\/]transport[\\/]TransportType" checks="JavadocVariable" />
+
+</suppressions>

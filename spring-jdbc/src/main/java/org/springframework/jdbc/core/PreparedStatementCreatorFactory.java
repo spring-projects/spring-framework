@@ -44,10 +44,10 @@ import org.springframework.util.Assert;
  */
 public class PreparedStatementCreatorFactory {
 
-	/** The SQL, which won't change when the parameters change */
+	/** The SQL, which won't change when the parameters change. */
 	private final String sql;
 
-	/** List of SqlParameter objects (may not be {@code null}) */
+	/** List of SqlParameter objects (may not be {@code null}). */
 	private final List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -90,6 +90,14 @@ public class PreparedStatementCreatorFactory {
 		this.declaredParameters = declaredParameters;
 	}
 
+
+	/**
+	 * Return the SQL statement to execute.
+	 * @since 5.1.3
+	 */
+	public final String getSql() {
+		return this.sql;
+	}
 
 	/**
 	 * Add a new declared parameter.
@@ -196,7 +204,7 @@ public class PreparedStatementCreatorFactory {
 			Assert.notNull(parameters, "Parameters List must not be null");
 			this.parameters = parameters;
 			if (this.parameters.size() != declaredParameters.size()) {
-				// account for named parameters being used multiple times
+				// Account for named parameters being used multiple times
 				Set<String> names = new HashSet<>();
 				for (int i = 0; i < parameters.size(); i++) {
 					Object param = parameters.get(i);

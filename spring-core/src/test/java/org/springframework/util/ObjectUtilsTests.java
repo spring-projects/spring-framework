@@ -45,6 +45,7 @@ public class ObjectUtilsTests {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+
 	@Test
 	public void isCheckedException() {
 		assertTrue(ObjectUtils.isCheckedException(new Exception()));
@@ -101,8 +102,8 @@ public class ObjectUtilsTests {
 		assertTrue(isEmpty(new Object[0]));
 		assertTrue(isEmpty(new Integer[0]));
 
-		assertFalse(isEmpty(new int[] { 42 }));
-		assertFalse(isEmpty(new Integer[] { 42 }));
+		assertFalse(isEmpty(new int[] {42}));
+		assertFalse(isEmpty(new Integer[] {42}));
 	}
 
 	@Test
@@ -271,7 +272,7 @@ public class ObjectUtilsTests {
 	@Test
 	@Deprecated
 	public void hashCodeWithLong() {
-		long lng = 883l;
+		long lng = 883L;
 		int expected = (new Long(lng)).hashCode();
 		assertEquals(expected, ObjectUtils.hashCode(lng));
 	}
@@ -489,12 +490,12 @@ public class ObjectUtilsTests {
 
 	@Test
 	public void nullSafeHashCodeWithLongArray() {
-		long lng = 7993l;
+		long lng = 7993L;
 		int expected = 31 * 7 + (int) (lng ^ (lng >>> 32));
-		lng = 84320l;
+		lng = 84320L;
 		expected = 31 * expected + (int) (lng ^ (lng >>> 32));
 
-		long[] array = {7993l, 84320l};
+		long[] array = {7993L, 84320L};
 		int actual = ObjectUtils.nullSafeHashCode(array);
 
 		assertEquals(expected, actual);
@@ -715,7 +716,7 @@ public class ObjectUtilsTests {
 
 	@Test
 	public void nullSafeToStringWithLongArray() {
-		long[] array = {434l, 23423l};
+		long[] array = {434L, 23423L};
 		assertEquals("{434, 23423}", ObjectUtils.nullSafeToString(array));
 	}
 
@@ -807,7 +808,8 @@ public class ObjectUtilsTests {
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "BAR"), is(Tropes.BAR));
 
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(is("constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes"));
+		exception.expectMessage(
+				is("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes"));
 		ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus");
 	}
 
@@ -818,6 +820,6 @@ public class ObjectUtilsTests {
 	}
 
 
-	enum Tropes { FOO, BAR, baz }
+	enum Tropes {FOO, BAR, baz}
 
 }

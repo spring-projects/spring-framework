@@ -26,7 +26,7 @@ import org.springframework.web.util.pattern.PatternParseException.PatternMessage
 
 /**
  * Parser for URI template patterns. It breaks the path pattern into a number of
- * {@link PathElement}s in a linked list. Instances are reusable but are not thread-safe.
+ * {@link PathElement PathElements} in a linked list. Instances are reusable but are not thread-safe.
  *
  * @author Andy Clement
  * @since 5.0
@@ -135,7 +135,7 @@ class InternalPathPatternParser {
 					// throw new PatternParseException(pos, pathPatternData,
 					// PatternMessage.CANNOT_HAVE_ADJACENT_CAPTURES);
 					this.insideVariableCapture = true;
-					this.variableCaptureStart = pos;
+					this.variableCaptureStart = this.pos;
 				}
 				else if (ch == '}') {
 					if (!this.insideVariableCapture) {
@@ -202,7 +202,7 @@ class InternalPathPatternParser {
 		boolean previousBackslash = false;
 
 		while (this.pos < this.pathPatternLength) {
-			char ch = this.pathPatternData[pos];
+			char ch = this.pathPatternData[this.pos];
 			if (ch == '\\' && !previousBackslash) {
 				this.pos++;
 				previousBackslash = true;
@@ -234,8 +234,8 @@ class InternalPathPatternParser {
 	}
 
 	/**
-	 * After processing a separator, a quick peek whether it is followed by **
-	 * (and only ** before the end of the pattern or the next separator)
+	 * After processing a separator, a quick peek whether it is followed by
+	 * (and only before the end of the pattern or the next separator).
 	 */
 	private boolean peekDoubleWildcard() {
 		if ((this.pos + 2) >= this.pathPatternLength) {
@@ -248,7 +248,8 @@ class InternalPathPatternParser {
 	}
 
 	/**
-	 * @param newPathElement the new path element to add to the chain being built
+	 * Push a path element to the chain being build.
+	 * @param newPathElement the new path element to add
 	 */
 	private void pushPathElement(PathElement newPathElement) {
 		if (newPathElement instanceof CaptureTheRestPathElement) {
@@ -289,7 +290,7 @@ class InternalPathPatternParser {
 
 		resetPathElementState();
 	}
-	
+
 	private char[] getPathElementText() {
 		char[] pathElementText = new char[this.pos - this.pathElementStart];
 		System.arraycopy(this.pathPatternData, this.pathElementStart, pathElementText, 0,
@@ -306,7 +307,7 @@ class InternalPathPatternParser {
 		if (this.insideVariableCapture) {
 			throw new PatternParseException(this.pos, this.pathPatternData, PatternMessage.MISSING_CLOSE_CAPTURE);
 		}
-		
+
 		PathElement newPE = null;
 
 		if (this.variableCaptureCount > 0) {
@@ -337,7 +338,7 @@ class InternalPathPatternParser {
 					throw new PatternParseException(this.pathElementStart, this.pathPatternData,
 							PatternMessage.CAPTURE_ALL_IS_STANDALONE_CONSTRUCT);
 				}
-				RegexPathElement newRegexSection = new RegexPathElement(this.pathElementStart, 
+				RegexPathElement newRegexSection = new RegexPathElement(this.pathElementStart,
 						getPathElementText(), this.parser.isCaseSensitive(),
 						this.pathPatternData, this.parser.getSeparator());
 				for (String variableName : newRegexSection.getVariableNames()) {
@@ -373,7 +374,7 @@ class InternalPathPatternParser {
 	 * For a path element representing a captured variable, locate the constraint pattern.
 	 * Assumes there is a constraint pattern.
 	 * @param data a complete path expression, e.g. /aaa/bbb/{ccc:...}
-	 * @param offset the start of the capture pattern of interest 
+	 * @param offset the start of the capture pattern of interest
 	 * @return the index of the character after the ':' within
 	 * the pattern expression relative to the start of the whole expression
 	 */

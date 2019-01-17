@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	public static final String DEFAULT_COOKIE_NAME = CookieLocaleResolver.class.getName() + ".LOCALE";
 
 
-	private boolean languageTagCompliant = false;
+	private boolean languageTagCompliant = true;
 
 	@Nullable
 	private Locale defaultLocale;
@@ -104,8 +104,13 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	/**
 	 * Specify whether this resolver's cookies should be compliant with BCP 47
 	 * language tags instead of Java's legacy locale specification format.
-	 * The default is {@code false}.
+	 * <p>The default is {@code true}, as of 5.1. Switch this to {@code false}
+	 * for rendering Java's legacy locale specification format. For parsing,
+	 * this resolver leniently accepts the legacy {@link Locale#toString}
+	 * format as well as BCP 47 language tags in any case.
 	 * @since 4.3
+	 * @see #parseLocaleValue(String)
+	 * @see #toLocaleValue(Locale)
 	 * @see Locale#forLanguageTag(String)
 	 * @see Locale#toLanguageTag()
 	 */
@@ -193,10 +198,14 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 					String value = cookie.getValue();
 					String localePart = value;
 					String timeZonePart = null;
-					int spaceIndex = localePart.indexOf(' ');
-					if (spaceIndex != -1) {
-						localePart = value.substring(0, spaceIndex);
-						timeZonePart = value.substring(spaceIndex + 1);
+					int separatorIndex = localePart.indexOf('/');
+					if (separatorIndex == -1) {
+						// Leniently accept older cookies separated by a space...
+						separatorIndex = localePart.indexOf(' ');
+					}
+					if (separatorIndex >= 0) {
+						localePart = value.substring(0, separatorIndex);
+						timeZonePart = value.substring(separatorIndex + 1);
 					}
 					try {
 						locale = (!"-".equals(localePart) ? parseLocaleValue(localePart) : null);
@@ -205,20 +214,20 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 						}
 					}
 					catch (IllegalArgumentException ex) {
+						String cookieDescription = "invalid locale cookie '" + cookieName +
+								"': [" + value + "] due to: " + ex.getMessage();
 						if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) != null) {
 							// Error dispatch: ignore locale/timezone parse exceptions
 							if (logger.isDebugEnabled()) {
-								logger.debug("Ignoring invalid locale cookie '" + cookieName +
-										"' with value [" + value + "] due to error dispatch: " + ex.getMessage());
+								logger.debug("Ignoring " + cookieDescription);
 							}
 						}
 						else {
-							throw new IllegalStateException("Invalid locale cookie '" + cookieName +
-									"' with value [" + value + "]: " + ex.getMessage());
+							throw new IllegalStateException("Encountered " + cookieDescription);
 						}
 					}
-					if (logger.isDebugEnabled()) {
-						logger.debug("Parsed cookie value [" + cookie.getValue() + "] into locale '" + locale +
+					if (logger.isTraceEnabled()) {
+						logger.trace("Parsed cookie value [" + cookie.getValue() + "] into locale '" + locale +
 								"'" + (timeZone != null ? " and time zone '" + timeZone.getID() + "'" : ""));
 					}
 				}
@@ -250,7 +259,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 				timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
 			}
 			addCookie(response,
-					(locale != null ? toLocaleValue(locale) : "-") + (timeZone != null ? ' ' + timeZone.getID() : ""));
+					(locale != null ? toLocaleValue(locale) : "-") + (timeZone != null ? '/' + timeZone.getID() : ""));
 		}
 		else {
 			removeCookie(response);
@@ -264,16 +273,16 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	/**
 	 * Parse the given locale value coming from an incoming cookie.
-	 * <p>The default implementation calls {@link StringUtils#parseLocaleString(String)}
-	 * or JDK 7's {@link Locale#forLanguageTag(String)}, depending on the
-	 * {@link #setLanguageTagCompliant "languageTagCompliant"} configuration property.
-	 * @param locale the locale value to parse
+	 * <p>The default implementation calls {@link StringUtils#parseLocale(String)},
+	 * accepting the {@link Locale#toString} format as well as BCP 47 language tags.
+	 * @param localeValue the locale value to parse
 	 * @return the corresponding {@code Locale} instance
 	 * @since 4.3
+	 * @see StringUtils#parseLocale(String)
 	 */
 	@Nullable
-	protected Locale parseLocaleValue(String locale) {
-		return (isLanguageTagCompliant() ? Locale.forLanguageTag(locale) : StringUtils.parseLocaleString(locale));
+	protected Locale parseLocaleValue(String localeValue) {
+		return StringUtils.parseLocale(localeValue);
 	}
 
 	/**
@@ -284,6 +293,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @param locale the locale to stringify
 	 * @return a String representation for the given locale
 	 * @since 4.3
+	 * @see #isLanguageTagCompliant()
 	 */
 	protected String toLocaleValue(Locale locale) {
 		return (isLanguageTagCompliant() ? locale.toLanguageTag() : locale.toString());

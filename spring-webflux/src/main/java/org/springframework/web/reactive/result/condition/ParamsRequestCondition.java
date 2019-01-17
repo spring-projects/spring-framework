@@ -95,7 +95,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 */
 	@Override
 	public ParamsRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-		for (ParamExpression expression : expressions) {
+		for (ParamExpression expression : this.expressions) {
 			if (!expression.match(exchange)) {
 				return null;
 			}

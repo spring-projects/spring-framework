@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,3 +42,24 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(publisher: Publishe
  */
 inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyToServerSentEvents(publisher: Publisher<T>): Mono<ServerResponse> =
 		contentType(MediaType.TEXT_EVENT_STREAM).body(publisher, object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Shortcut for setting [MediaType.APPLICATION_JSON_UTF8] `Content-Type` header.
+ * @author Sebastien Deleuze
+ * @since 5.1
+ */
+fun ServerResponse.BodyBuilder.json() = contentType(MediaType.APPLICATION_JSON_UTF8)
+
+/**
+ * Shortcut for setting [MediaType.APPLICATION_XML] `Content-Type` header.
+ * @author Sebastien Deleuze
+ * @since 5.1
+ */
+fun ServerResponse.BodyBuilder.xml() = contentType(MediaType.APPLICATION_XML)
+
+/**
+ * Shortcut for setting [MediaType.TEXT_HTML] `Content-Type` header.
+ * @author Sebastien Deleuze
+ * @since 5.1
+ */
+fun ServerResponse.BodyBuilder.html() = contentType(MediaType.TEXT_HTML)

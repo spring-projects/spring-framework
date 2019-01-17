@@ -28,6 +28,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.resource.ResourceTransformerSupport;
+import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
 import org.springframework.web.server.WebHandler;
 
@@ -49,6 +51,7 @@ import org.springframework.web.server.WebHandler;
  * period for served resources.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class ResourceHandlerRegistry {
@@ -57,7 +60,10 @@ public class ResourceHandlerRegistry {
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
 
-	private int order = Ordered.LOWEST_PRECEDENCE -1;
+	private int order = Ordered.LOWEST_PRECEDENCE - 1;
+
+	@Nullable
+	private ResourceUrlProvider resourceUrlProvider;
 
 
 	/**
@@ -69,6 +75,17 @@ public class ResourceHandlerRegistry {
 		this.resourceLoader = resourceLoader;
 	}
 
+	/**
+	 * Configure the {@link ResourceUrlProvider} that can be used by
+	 * {@link org.springframework.web.reactive.resource.ResourceTransformer} instances.
+	 * @param resourceUrlProvider the resource URL provider to use
+	 * @since 5.0.11
+	 */
+	public void setResourceUrlProvider(@Nullable ResourceUrlProvider resourceUrlProvider) {
+		this.resourceUrlProvider = resourceUrlProvider;
+	}
+
+
 
 	/**
 	 * Add a resource handler for serving static resources based on the specified
@@ -77,8 +94,8 @@ public class ResourceHandlerRegistry {
 	 * <p>Patterns like {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"}
 	 * are allowed. See {@link org.springframework.web.util.pattern.PathPattern}
 	 * for more details on the syntax.
-	 * @return A {@link ResourceHandlerRegistration} to use to further
-	 * configure the registered resource handler
+	 * @return a {@link ResourceHandlerRegistration} to use to further configure
+	 * the registered resource handler
 	 */
 	public ResourceHandlerRegistration addResourceHandler(String... patterns) {
 		ResourceHandlerRegistration registration = new ResourceHandlerRegistration(this.resourceLoader, patterns);
@@ -121,6 +138,11 @@ public class ResourceHandlerRegistry {
 		for (ResourceHandlerRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceWebHandler handler = registration.getRequestHandler();
+				handler.getResourceTransformers().forEach(transformer -> {
+					if (transformer instanceof ResourceTransformerSupport) {
+						((ResourceTransformerSupport) transformer).setResourceUrlProvider(this.resourceUrlProvider);
+					}
+				});
 				try {
 					handler.afterPropertiesSet();
 				}

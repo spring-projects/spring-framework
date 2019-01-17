@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,28 @@
 
 package org.springframework.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 /**
- * Test suite for {@link FastByteArrayOutputStream}
+ * Test suite for {@link FastByteArrayOutputStream}.
+ *
  * @author Craig Andrews
  */
 public class FastByteArrayOutputStreamTests {
 
 	private static final int INITIAL_CAPACITY = 256;
 
-	private FastByteArrayOutputStream os;
+	private final FastByteArrayOutputStream os = new FastByteArrayOutputStream(INITIAL_CAPACITY);;
 
-	private byte[] helloBytes;
-
-
-	@Before
-	public void setUp() throws Exception {
-		this.os = new FastByteArrayOutputStream(INITIAL_CAPACITY);
-		this.helloBytes = "Hello World".getBytes("UTF-8");
-	}
+	private final byte[] helloBytes = "Hello World".getBytes(StandardCharsets.UTF_8);;
 
 
 	@Test
@@ -135,6 +130,15 @@ public class FastByteArrayOutputStreamTests {
 		assertEquals(inputStream.read(), this.helloBytes[1]);
 		assertEquals(inputStream.read(), this.helloBytes[2]);
 		assertEquals(inputStream.read(), this.helloBytes[3]);
+	}
+
+	@Test
+	public void getInputStreamReadBytePromotion() throws Exception {
+		byte[] bytes = new byte[] { -1 };
+		this.os.write(bytes);
+		InputStream inputStream = this.os.getInputStream();
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		assertEquals(bais.read(), inputStream.read());
 	}
 
 	@Test

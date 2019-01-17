@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2
+ * @param <T> the type of objects that may be compared by this comparator
  * @deprecated as of Spring Framework 5.0, in favor of the standard JDK 8
  * {@link Comparator#thenComparing(Comparator)}
  */
@@ -186,15 +187,9 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof CompoundComparator)) {
-			return false;
-		}
-		CompoundComparator<T> other = (CompoundComparator<T>) obj;
-		return this.comparators.equals(other.comparators);
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof CompoundComparator &&
+				this.comparators.equals(((CompoundComparator<T>) other).comparators)));
 	}
 
 	@Override

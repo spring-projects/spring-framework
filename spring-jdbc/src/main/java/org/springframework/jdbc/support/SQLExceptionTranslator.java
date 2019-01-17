@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public interface SQLExceptionTranslator {
 	 * check (and subsequent cast) is considered reliable when expecting JDBC-based
 	 * access to have happened.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem (if known)
+	 * @param sql the SQL query or update that caused the problem (if known)
 	 * @param ex the offending {@code SQLException}
 	 * @return the DataAccessException wrapping the {@code SQLException},
 	 * or {@code null} if no translation could be applied

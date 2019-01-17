@@ -85,6 +85,7 @@ import org.springframework.web.context.request.async.CallableProcessingIntercept
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.InvocableHandlerMethod;
@@ -887,7 +888,9 @@ public class MvcNamespaceTests {
 		for (String beanName : beanNames) {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertNotNull(handlerMapping);
-			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfigurations();
+			DirectFieldAccessor accessor = new DirectFieldAccessor(handlerMapping);
+			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource)accessor
+					.getPropertyValue("corsConfigurationSource")).getCorsConfigurations();
 			assertNotNull(configs);
 			assertEquals(1, configs.size());
 			CorsConfiguration config = configs.get("/**");
@@ -910,7 +913,9 @@ public class MvcNamespaceTests {
 		for (String beanName : beanNames) {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertNotNull(handlerMapping);
-			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfigurations();
+			DirectFieldAccessor accessor = new DirectFieldAccessor(handlerMapping);
+			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource)accessor
+					.getPropertyValue("corsConfigurationSource")).getCorsConfigurations();
 			assertNotNull(configs);
 			assertEquals(2, configs.size());
 			CorsConfiguration config = configs.get("/api/**");

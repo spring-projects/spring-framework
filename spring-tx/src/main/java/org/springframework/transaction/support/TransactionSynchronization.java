@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ import java.io.Flushable;
  */
 public interface TransactionSynchronization extends Flushable {
 
-	/** Completion status in case of proper commit */
+	/** Completion status in case of proper commit. */
 	int STATUS_COMMITTED = 0;
 
-	/** Completion status in case of proper rollback */
+	/** Completion status in case of proper rollback. */
 	int STATUS_ROLLED_BACK = 1;
 
-	/** Completion status in case of heuristic mixed completion or system errors */
+	/** Completion status in case of heuristic mixed completion or system errors. */
 	int STATUS_UNKNOWN = 2;
 
 

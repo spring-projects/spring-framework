@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ import org.springframework.util.StringValueResolver;
  * Example XML bean definition:
  *
  * <pre class="code">
- * <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"/>
- *   <property name="driverClassName" value="${driver}"/>
- *   <property name="url" value="jdbc:${dbname}"/>
- * </bean>
+ * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"/&gt;
+ *   &lt;property name="driverClassName" value="${driver}"/&gt;
+ *   &lt;property name="url" value="jdbc:${dbname}"/&gt;
+ * &lt;/bean&gt;
  * </pre>
  *
  * Example properties file:
@@ -89,23 +89,23 @@ import org.springframework.util.StringValueResolver;
 public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfigurer
 		implements BeanNameAware, BeanFactoryAware {
 
-	/** Default placeholder prefix: {@value} */
+	/** Default placeholder prefix: {@value}. */
 	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
 
-	/** Default placeholder suffix: {@value} */
+	/** Default placeholder suffix: {@value}. */
 	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
 
-	/** Default value separator: {@value} */
+	/** Default value separator: {@value}. */
 	public static final String DEFAULT_VALUE_SEPARATOR = ":";
 
 
-	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX} */
+	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}. */
 	protected String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
 
-	/** Defaults to {@value #DEFAULT_PLACEHOLDER_SUFFIX} */
+	/** Defaults to {@value #DEFAULT_PLACEHOLDER_SUFFIX}. */
 	protected String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
-	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR} */
+	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR}. */
 	@Nullable
 	protected String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 

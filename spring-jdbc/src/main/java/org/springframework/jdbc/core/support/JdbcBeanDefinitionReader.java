@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class JdbcBeanDefinitionReader {
 
 	/**
 	 * Load bean definitions from the database via the given SQL string.
-	 * @param sql SQL query to use for loading bean definitions.
+	 * @param sql the SQL query to use for loading bean definitions.
 	 * The first three columns must be bean name, property name and value.
 	 * Any join and any other columns are permitted: e.g.
 	 * {@code SELECT BEAN_NAME, PROPERTY, VALUE FROM CONFIG WHERE CONFIG.APP_ID = 1}

@@ -60,10 +60,10 @@ import org.springframework.util.Assert;
  */
 public abstract class RdbmsOperation implements InitializingBean {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Lower-level class used to execute SQL */
+	/** Lower-level class used to execute SQL. */
 	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -211,7 +211,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Set the column names of the auto-generated keys.
 	 * @see java.sql.Connection#prepareStatement(String, String[])
 	 */
-	public void setGeneratedKeysColumnNames(String... names) {
+	public void setGeneratedKeysColumnNames(@Nullable String... names) {
 		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException(
 					"The column names for the generated keys must be set before the operation is compiled");
@@ -230,7 +230,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Set the SQL executed by this operation.
 	 */
-	public void setSql(String sql) {
+	public void setSql(@Nullable String sql) {
 		this.sql = sql;
 	}
 
@@ -297,7 +297,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Add one or more declared parameters. Used for configuring this operation
 	 * when used in a bean factory.  Each parameter will specify SQL type and (optionally)
 	 * the parameter's name.
-	 * @param parameters Array containing the declared {@link SqlParameter} objects
+	 * @param parameters an array containing the declared {@link SqlParameter} objects
 	 * @see #declaredParameters
 	 */
 	public void setParameters(SqlParameter... parameters) {

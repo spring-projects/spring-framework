@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.accept;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class HeaderContentTypeResolver implements RequestedContentTypeResolver {
 		try {
 			List<MediaType> mediaTypes = exchange.getRequest().getHeaders().getAccept();
 			MediaType.sortBySpecificityAndQuality(mediaTypes);
-			return !CollectionUtils.isEmpty(mediaTypes) ? mediaTypes : MEDIA_TYPE_ALL_LIST;
+			return (!CollectionUtils.isEmpty(mediaTypes) ? mediaTypes : MEDIA_TYPE_ALL_LIST);
 		}
 		catch (InvalidMediaTypeException ex) {
 			String value = exchange.getRequest().getHeaders().getFirst("Accept");

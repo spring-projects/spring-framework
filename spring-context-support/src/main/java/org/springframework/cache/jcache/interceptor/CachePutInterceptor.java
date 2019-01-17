@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,16 +37,16 @@ class CachePutInterceptor extends AbstractKeyCacheInterceptor<CachePutOperation,
 		super(errorHandler);
 	}
 
-	@Override
-	protected Object invoke(CacheOperationInvocationContext<CachePutOperation> context,
-			CacheOperationInvoker invoker) {
 
-		CacheKeyInvocationContext<CachePut> invocationContext = createCacheKeyInvocationContext(context);
+	@Override
+	protected Object invoke(
+			CacheOperationInvocationContext<CachePutOperation> context, CacheOperationInvoker invoker) {
+
 		CachePutOperation operation = context.getOperation();
+		CacheKeyInvocationContext<CachePut> invocationContext = createCacheKeyInvocationContext(context);
 
 		boolean earlyPut = operation.isEarlyPut();
 		Object value = invocationContext.getValueParameter().getValue();
-
 		if (earlyPut) {
 			cacheValue(context, value);
 		}

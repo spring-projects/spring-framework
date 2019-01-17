@@ -56,6 +56,11 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	// ServerHttpRequest delegation methods...
 
 	@Override
+	public String getId() {
+		return getDelegate().getId();
+	}
+
+	@Override
 	@Nullable
 	public HttpMethod getMethod() {
 		return getDelegate().getMethod();

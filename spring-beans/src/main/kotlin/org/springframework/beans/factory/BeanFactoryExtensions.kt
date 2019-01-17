@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.beans.factory
+
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.core.ResolvableType
 
 /**
  * Extension for [BeanFactory.getBean] providing a `getBean<Foo>()` variant.
@@ -44,3 +47,15 @@ inline fun <reified T : Any> BeanFactory.getBean(name: String): T =
  */
 inline fun <reified T : Any> BeanFactory.getBean(vararg args:Any): T =
 		getBean(T::class.java, *args)
+
+/**
+ * Extension for [BeanFactory.getBeanProvider] providing a `getBeanProvider<Foo>()` variant.
+ * This extension is not subject to type erasure and retains actual generic type arguments.
+ *
+ * @see BeanFactory.getBeanProvider(ResolvableType)
+ * @author Sebastien Deleuze
+ * @since 5.1
+ */
+inline fun <reified T : Any> BeanFactory.getBeanProvider(): ObjectProvider<T> =
+		getBeanProvider(ResolvableType.forType((object : ParameterizedTypeReference<T>() {}).type))
+

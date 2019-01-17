@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.lang.Nullable;
  */
 public class RemoteInvocationResult implements Serializable {
 
-	/** Use serialVersionUID from Spring 1.1 for interoperability */
+	/** Use serialVersionUID from Spring 1.1 for interoperability. */
 	private static final long serialVersionUID = 2138555143707773549L;
 
 

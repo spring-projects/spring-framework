@@ -18,7 +18,10 @@ package org.springframework.http.server.reactive.bootstrap;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 import reactor.netty.DisposableServer;
+import reactor.netty.tcp.SslProvider.DefaultConfigurationType;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 
@@ -35,11 +38,16 @@ public class ReactorHttpsServer extends AbstractHttpServer {
 
 
 	@Override
-	protected void initServer() {
+	protected void initServer() throws Exception {
+
+		SelfSignedCertificate cert = new SelfSignedCertificate();
+		SslContextBuilder builder = SslContextBuilder.forServer(cert.certificate(), cert.privateKey());
+
 		this.reactorHandler = createHttpHandlerAdapter();
 		this.reactorServer = reactor.netty.http.server.HttpServer.create()
-			.tcpConfiguration(server -> server.host(getHost()).secure())
-			.port(getPort());
+			.host(getHost())
+			.port(getPort())
+			.secure(spec -> spec.sslContext(builder).defaultConfiguration(DefaultConfigurationType.TCP));
 	}
 
 	private ReactorHttpHandlerAdapter createHttpHandlerAdapter() {

@@ -16,12 +16,14 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.io.File;
 import java.time.Duration;
 
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.MonoProcessor;
 import reactor.test.StepVerifier;
@@ -30,11 +32,16 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.JettyClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
+import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,14 +63,35 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private WebClient webClient;
 
+	@Parameterized.Parameter(1)
+	public ClientHttpConnector connector;
+
+	@Parameterized.Parameters(name = "server [{0}] webClient [{1}]")
+	public static Object[][] arguments() {
+		File base = new File(System.getProperty("java.io.tmpdir"));
+		return new Object[][] {
+				{new JettyHttpServer(), new ReactorClientHttpConnector()},
+				{new JettyHttpServer(), new JettyClientHttpConnector()},
+				{new ReactorHttpServer(), new ReactorClientHttpConnector()},
+				{new ReactorHttpServer(), new JettyClientHttpConnector()},
+				{new TomcatHttpServer(base.getAbsolutePath()), new ReactorClientHttpConnector()},
+				{new TomcatHttpServer(base.getAbsolutePath()), new JettyClientHttpConnector()},
+				{new UndertowHttpServer(), new ReactorClientHttpConnector()},
+				{new UndertowHttpServer(), new JettyClientHttpConnector()}
+		};
+	}
+
 
 	@Override
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		this.webClient = WebClient.create("http://localhost:" + this.port + "/sse");
+		this.webClient = WebClient
+				.builder()
+				.clientConnector(this.connector)
+				.baseUrl("http://localhost:" + this.port + "/sse")
+				.build();
 	}
-
 
 	@Override
 	protected HttpHandler createHttpHandler() {
@@ -177,7 +205,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@RequestMapping("/sse")
 	static class SseController {
 
-		private static final Flux<Long> INTERVAL = interval(Duration.ofMillis(100), 50);
+		private static final Flux<Long> INTERVAL = testInterval(Duration.ofMillis(100), 50);
 
 		private MonoProcessor<Void> cancellation = MonoProcessor.create();
 

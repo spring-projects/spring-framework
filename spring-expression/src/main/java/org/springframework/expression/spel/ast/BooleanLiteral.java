@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,16 +42,16 @@ public class BooleanLiteral extends Literal {
 	public BooleanTypedValue getLiteralValue() {
 		return this.value;
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		return true;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		if (this.value == BooleanTypedValue.TRUE) {
-			mv.visitLdcInsn(1);		
+			mv.visitLdcInsn(1);
 		}
 		else {
 			mv.visitLdcInsn(0);
