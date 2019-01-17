@@ -246,30 +246,32 @@ public interface DataBuffer {
 	default DataBuffer write(CharSequence charSequence, Charset charset) {
 		Assert.notNull(charSequence, "CharSequence must not be null");
 		Assert.notNull(charset, "Charset must not be null");
-		CharsetEncoder charsetEncoder = charset.newEncoder()
-				.onMalformedInput(CodingErrorAction.REPLACE)
-				.onUnmappableCharacter(CodingErrorAction.REPLACE);
-		CharBuffer inBuffer = CharBuffer.wrap(charSequence);
-		int estimatedSize = (int) (inBuffer.remaining() * charsetEncoder.averageBytesPerChar());
-		ByteBuffer outBuffer = ensureCapacity(estimatedSize)
-				.asByteBuffer(writePosition(), writableByteCount());
-		while (true) {
-			CoderResult cr = (inBuffer.hasRemaining() ?
-					charsetEncoder.encode(inBuffer, outBuffer, true) : CoderResult.UNDERFLOW);
-			if (cr.isUnderflow()) {
-				cr = charsetEncoder.flush(outBuffer);
+		if (charSequence.length() != 0) {
+			CharsetEncoder charsetEncoder = charset.newEncoder()
+					.onMalformedInput(CodingErrorAction.REPLACE)
+					.onUnmappableCharacter(CodingErrorAction.REPLACE);
+			CharBuffer inBuffer = CharBuffer.wrap(charSequence);
+			int estimatedSize = (int) (inBuffer.remaining() * charsetEncoder.averageBytesPerChar());
+			ByteBuffer outBuffer = ensureCapacity(estimatedSize)
+					.asByteBuffer(writePosition(), writableByteCount());
+			while (true) {
+				CoderResult cr = (inBuffer.hasRemaining() ?
+						charsetEncoder.encode(inBuffer, outBuffer, true) : CoderResult.UNDERFLOW);
+				if (cr.isUnderflow()) {
+					cr = charsetEncoder.flush(outBuffer);
+				}
+				if (cr.isUnderflow()) {
+					break;
+				}
+				if (cr.isOverflow()) {
+					writePosition(outBuffer.position());
+					int maximumSize = (int) (inBuffer.remaining() * charsetEncoder.maxBytesPerChar());
+					ensureCapacity(maximumSize);
+					outBuffer = asByteBuffer(writePosition(), writableByteCount());
+				}
 			}
-			if (cr.isUnderflow()) {
-				break;
-			}
-			if (cr.isOverflow()) {
-				writePosition(outBuffer.position());
-				int maximumSize = (int) (inBuffer.remaining() * charsetEncoder.maxBytesPerChar());
-				ensureCapacity(maximumSize);
-				outBuffer = asByteBuffer(writePosition(), writableByteCount());
-			}
+			writePosition(outBuffer.position());
 		}
-		writePosition(outBuffer.position());
 		return this;
 	}
 
