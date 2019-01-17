@@ -6132,16 +6132,10 @@ that uses the `@PersistenceUnit` annotation:
 		}
 
 		public Collection loadProductsByCategory(String category) {
-			EntityManager em = this.emf.createEntityManager();
-			try {
+			try (EntityManager em = this.emf.createEntityManager()) {
 				Query query = em.createQuery("from Product as p where p.category = ?1");
 				query.setParameter(1, category);
 				return query.getResultList();
-			}
-			finally {
-				if (em != null) {
-					em.close();
-				}
 			}
 		}
 	}
@@ -6610,26 +6604,14 @@ constructs a Spring application context and calls these two methods:
 		}
 
 		public void saveSettings() throws IOException {
-			FileOutputStream os = null;
-			try {
-				os = new FileOutputStream(FILE_NAME);
+			try (FileOutputStream os = new FileOutputStream(FILE_NAME)) {
 				this.marshaller.marshal(settings, new StreamResult(os));
-			} finally {
-				if (os != null) {
-					os.close();
-				}
 			}
 		}
 
 		public void loadSettings() throws IOException {
-			FileInputStream is = null;
-			try {
-				is = new FileInputStream(FILE_NAME);
+			try (FileInputStream is = new FileInputStream(FILE_NAME)) {
 				this.settings = (Settings) this.unmarshaller.unmarshal(new StreamSource(is));
-			} finally {
-				if (is != null) {
-					is.close();
-				}
 			}
 		}
 
