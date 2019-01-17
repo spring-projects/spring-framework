@@ -213,7 +213,7 @@ TIP: If an application context hierarchy is not required, applications may confi
 
 The `DispatcherServlet` delegates to special beans to process requests and render the
 appropriate responses. By "`special beans`" we mean Spring-managed `Object` instances that
-implement WebFlux framework contracts. Those usually come with built-in contracts, but
+implement framework contracts. Those usually come with built-in contracts, but
 you can customize their properties and extend or replace them.
 
 The following table lists the special beans detected by the `DispatcherHandler`:
