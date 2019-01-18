@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -99,14 +100,16 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	/**
 	 * Set the log category for warn logging. The name will be passed to the underlying logger
 	 * implementation through Commons Logging, getting interpreted as a log category according
-	 * to the logger's configuration.
-	 * <p>Default is no warn logging. Specify this setting to activate warn logging into a specific
+	 * to the logger's configuration. If {@code null} is passed, warn logging is turned off.
+	 * <p>By default there is no warn logging although sub-classes like
+	 * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver}
+	 * can change that default. Specify this setting to activate warn logging into a specific
 	 * category. Alternatively, override the {@link #logException} method for custom logging.
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setWarnLogCategory(String loggerName) {
-		this.warnLogger = LogFactory.getLog(loggerName);
+		this.warnLogger = !StringUtils.isEmpty(loggerName) ? LogFactory.getLog(loggerName) : null;
 	}
 
 	/**
