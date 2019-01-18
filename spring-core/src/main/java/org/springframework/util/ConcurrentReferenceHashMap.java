@@ -31,6 +31,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.lang.Nullable;
@@ -476,7 +477,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * The total number of references contained in this segment. This includes chained
 		 * references and references that have been garbage collected but not purged.
 		 */
-		private volatile int count = 0;
+		private final AtomicInteger count = new AtomicInteger(0);
 
 		/**
 		 * The threshold when resizing of the references should occur. When {@code count}
@@ -496,7 +497,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			if (restructure == Restructure.WHEN_NECESSARY) {
 				restructureIfNecessary(false);
 			}
-			if (this.count == 0) {
+			if (this.count.get() == 0) {
 				return null;
 			}
 			// Use a local copy to protect against other threads writing
@@ -520,7 +521,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			if (task.hasOption(TaskOption.RESTRUCTURE_BEFORE)) {
 				restructureIfNecessary(resize);
 			}
-			if (task.hasOption(TaskOption.SKIP_IF_EMPTY) && this.count == 0) {
+			if (task.hasOption(TaskOption.SKIP_IF_EMPTY) && this.count.get() == 0) {
 				return task.execute(null, null, null);
 			}
 			lock();
@@ -536,7 +537,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 						Entry<K, V> newEntry = new Entry<>((K) key, value);
 						Reference<K, V> newReference = Segment.this.referenceManager.createReference(newEntry, hash, head);
 						Segment.this.references[index] = newReference;
-						Segment.this.count++;
+						Segment.this.count.incrementAndGet();
 					}
 				};
 				return task.execute(ref, entry, entries);
@@ -553,14 +554,14 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * Clear all items from this segment.
 		 */
 		public void clear() {
-			if (this.count == 0) {
+			if (this.count.get() == 0) {
 				return;
 			}
 			lock();
 			try {
 				this.references = createReferenceArray(this.initialSize);
 				this.resizeThreshold = (int) (this.references.length * getLoadFactor());
-				this.count = 0;
+				this.count.set(0);
 			}
 			finally {
 				unlock();
@@ -574,12 +575,12 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * @param allowResize if resizing is permitted
 		 */
 		protected final void restructureIfNecessary(boolean allowResize) {
-			boolean needsResize = (this.count > 0 && this.count >= this.resizeThreshold);
+			boolean needsResize = (this.count.get() > 0 && this.count.get() >= this.resizeThreshold);
 			Reference<K, V> ref = this.referenceManager.pollForPurge();
 			if (ref != null || (needsResize && allowResize)) {
 				lock();
 				try {
-					int countAfterRestructure = this.count;
+					int countAfterRestructure = this.count.get();
 					Set<Reference<K, V>> toPurge = Collections.emptySet();
 					if (ref != null) {
 						toPurge = new HashSet<>();
@@ -628,7 +629,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 						this.references = restructured;
 						this.resizeThreshold = (int) (this.references.length * getLoadFactor());
 					}
-					this.count = Math.max(countAfterRestructure, 0);
+					this.count.set(Math.max(countAfterRestructure, 0));
 				}
 				finally {
 					unlock();
@@ -674,7 +675,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * Return the total number of references in this segment.
 		 */
 		public final int getCount() {
-			return this.count;
+			return this.count.get();
 		}
 	}
 

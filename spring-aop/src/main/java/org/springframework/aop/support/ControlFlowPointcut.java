@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
@@ -43,7 +44,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	@Nullable
 	private String methodName;
 
-	private volatile int evaluations;
+	private final AtomicInteger evaluations = new AtomicInteger(0);
 
 
 	/**
@@ -92,7 +93,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	@Override
 	public boolean matches(Method method, Class<?> targetClass, Object... args) {
-		this.evaluations++;
+		this.evaluations.incrementAndGet();
 
 		for (StackTraceElement element : new Throwable().getStackTrace()) {
 			if (element.getClassName().equals(this.clazz.getName()) &&
@@ -107,7 +108,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * It's useful to know how many times we've fired, for optimization.
 	 */
 	public int getEvaluations() {
-		return this.evaluations;
+		return this.evaluations.get();
 	}
 
 
