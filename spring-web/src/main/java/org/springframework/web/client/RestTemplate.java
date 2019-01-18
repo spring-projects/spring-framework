@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,8 @@ import org.springframework.web.util.UriTemplateHandler;
  * modern alternative to the {@code RestTemplate} with efficient support for
  * both sync and async, as well as streaming scenarios. The {@code RestTemplate}
  * will be deprecated in a future version and will not have major new features
- * added going forward.
+ * added going forward. See the WebClient section of the Spring Framework reference
+ * documentation for more details and example code.
  *
  * @author Arjen Poutsma
  * @author Brian Clozel

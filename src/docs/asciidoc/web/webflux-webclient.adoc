@@ -591,6 +591,58 @@ WebClient client = webClient.mutate()
 
 
 
+[[webflux-client-synchronous]]
+== Synchronous Use
+
+`WebClient` can be used in synchronous style by blocking at the end for the result:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+Person person = client.get().uri("/person/{id}", i).retrieve()
+	.bodyToMono(Person.class)
+	.block();
+
+List<Person> persons = client.get().uri("/persons").retrieve()
+	.bodyToFlux(Person.class)
+	.collectList()
+	.block();
+----
+
+However if multiple calls need to be made, it's more efficient to avoid blocking on each
+response individually, and instead wait for the combined result:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+Mono<Person> personMono = client.get().uri("/person/{id}", personId)
+		.retrieve().bodyToMono(Person.class);
+
+Mono<List<Hobby>> hobbiesMono = client.get().uri("/person/{id}/hobbies", personId)
+		.retrieve().bodyToFlux(Hobby.class).collectList();
+
+Map<String, Object> data = Mono.zip(personMono, hobbiesMono, (person, hobbies) -> {
+			Map<String, String> map = new LinkedHashMap<>();
+			map.put("person", personName);
+			map.put("hobbies", hobbies);
+			return map;
+		})
+		.block();
+----
+
+The above is merely one example. There are lots of other patterns and operators for putting
+together a reactive pipeline that makes many remote calls, potentially some nested,
+inter-dependent, without ever blocking until the end.
+
+[NOTE]
+====
+You should never have to block in a Spring MVC controller. Simply return the resulting
+`Flux` or `Mono` from the controller method.
+====
+
+
+
+
 [[webflux-client-testing]]
 == Testing
 
