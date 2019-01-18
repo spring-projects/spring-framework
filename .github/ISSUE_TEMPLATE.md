@@ -1,6 +1,10 @@
 <!--
 !!! For Security Vulnerabilities, please go to https://pivotal.io/security !!!
+-->
+**Affects:** \<Spring Framework version>
 
+---
+<!--
 Thanks for taking the time to create an issue. Please read the following:
 
 - Questions should be asked on Stack Overflow.
