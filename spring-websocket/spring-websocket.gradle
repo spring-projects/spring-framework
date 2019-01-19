@@ -14,8 +14,8 @@ dependencies {
 	compile(project(":spring-web"))
 	optional(project(":spring-messaging"))
 	optional(project(":spring-webmvc"))
-	optional("javax.servlet:javax.servlet-api:4.0.1")
-	optional("javax.websocket:javax.websocket-api:1.1")
+	optional("javax.servlet:javax.servlet-api:${servletApi4Version}")
+	optional("javax.websocket:javax.websocket-api:${websocketApiVersion}")
 	optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
 		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"

@@ -10,8 +10,8 @@ dependencies {
 	optional(project(":spring-web"))
 	optional("org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.3")
 	optional("org.hibernate:hibernate-core:5.3.7.Final")
-	optional("javax.servlet:javax.servlet-api:3.1.0")
+	optional("javax.servlet:javax.servlet-api:${servletApi3Version}")
 	testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-	testRuntime("javax.xml.bind:jaxb-api:2.3.1")
+	testRuntime("javax.xml.bind:jaxb-api:${jaxbApiVersion}")
 }

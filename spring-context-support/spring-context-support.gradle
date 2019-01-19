@@ -6,9 +6,9 @@ dependencies {
 	compile(project(":spring-core"))
 	optional(project(":spring-jdbc"))  // for Quartz support
 	optional(project(":spring-tx"))  // for Quartz support
-	optional("javax.activation:javax.activation-api:1.2.0")
-	optional("javax.mail:javax.mail-api:1.6.2")
-	optional("javax.cache:cache-api:1.1.0")
+	optional("javax.activation:javax.activation-api:${activationApiVersion}")
+	optional("javax.mail:javax.mail-api:${mailApiVersion}")
+	optional("javax.cache:cache-api:${cacheApiVersion}")
 	optional("com.github.ben-manes.caffeine:caffeine:2.6.2")
 	optional("net.sf.ehcache:ehcache:2.10.4")
 	optional("org.quartz-scheduler:quartz:2.3.0")
@@ -16,10 +16,10 @@ dependencies {
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
 	testCompile(project(":spring-context"))
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-	testCompile("org.hibernate:hibernate-validator:6.0.14.Final")
-	testCompile("javax.annotation:javax.annotation-api:1.3.2")
+	testCompile("org.hibernate:hibernate-validator:${hibernateValidatorVersion}")
+	testCompile("javax.annotation:javax.annotation-api:${annotationApiVersion}")
 	testRuntime("org.ehcache:jcache:1.0.1")
 	testRuntime("org.ehcache:ehcache:3.4.0")
-	testRuntime("org.glassfish:javax.el:3.0.1-b08")
-	testRuntime("com.sun.mail:javax.mail:1.6.2")
+	testRuntime("org.glassfish:javax.el:${elVersion}")
+	testRuntime("com.sun.mail:javax.mail:${mailVersion}")
 }

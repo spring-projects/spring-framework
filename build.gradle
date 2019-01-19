@@ -28,24 +28,66 @@ ext {
 		!it.name.equals("spring-build-src") && !it.name.equals("spring-framework-bom")
 	}
 
-	aspectjVersion       = "1.9.2"
-	freemarkerVersion    = "2.3.28"
-	groovyVersion        = "2.5.5"
-	hsqldbVersion        = "2.4.1"
-	jackson2Version      = "2.9.8"
-	jettyVersion         = "9.4.14.v20181114"
-	junit5Version        = "5.3.2"
-	kotlinVersion        = "1.2.71"
-	log4jVersion         = "2.11.1"
-	nettyVersion         = "4.1.32.Final"
-	reactorVersion       = "Californium-SR4"
-	rxjavaVersion        = "1.3.8"
-	rxjavaAdapterVersion = "1.2.1"
-	rxjava2Version       = "2.2.5"
-	slf4jVersion         = "1.7.25"	  // spring-jcl + consistent 3rd party deps
-	tiles3Version        = "3.0.8"
-	tomcatVersion        = "9.0.14"
-	undertowVersion      = "2.0.16.Final"
+	aaltoXmlVersion           = "1.1.1"
+	activationApiVersion      = "1.2.0"
+	activationVersion         = "1.2.0"
+	annotationApiVersion      = "1.3.2"
+	aspectjVersion            = "1.9.2"
+	cacheApiVersion           = "1.1.0"
+	commonsFileuploadVersion  = "1.3.3"
+	commonsPoolVersion        = "2.6.0"
+	ejbApiVersion             = "3.2"
+	elApiVersion              = "3.0.1-b04"
+	elVersion                 = "3.0.1-b08"
+	freemarkerVersion         = "2.3.28"
+	groovyVersion             = "2.5.5"
+	hibernateValidatorVersion = "6.0.14.Final"
+	hsqldbVersion             = "2.4.1"
+	httpclientVersion         = "4.5.6"
+	injectTckVersion          = "1"
+	injectVersion             = "1"
+	interceptorApiVersion     = "1.2.2"
+	jackson2Version           = "2.9.8"
+	jaxbApiVersion            = "2.3.1"
+	jaxbCoreVersion           = "2.3.0.1"
+	jaxbImplVersion           = "2.3.0.1"
+	jaxwsApiVersion           = "2.3.1"
+	jettyVersion              = "9.4.14.v20181114"
+	jodaTimeVersion           = "2.10.1"
+	jrubyVersion              = "9.2.5.0"
+	jsonassertVersion         = "1.5.0"
+	jspApiVersion             = "2.3.2-b02"
+	jstlApiVersion            = "1.2.1"
+	junit4Version             = "4.12"
+	junit5Version             = "5.3.2"
+	jythonVersion             = "2.7.1"
+	kotlinVersion             = "1.2.71"
+	log4jVersion              = "2.11.1"
+	mailApiVersion            = "1.6.2"
+	mailVersion               = "1.6.2"
+	mockwebserverVersion      = "3.12.1"
+	nettyVersion              = "4.1.32.Final"
+	persistenceVersion        = "2.2.0"
+	protobufUtilVersion       = "3.6.1"
+	reactorVersion            = "Californium-SR4"
+	resourceApiVersion        = "1.7.1"
+	romeVersion               = "1.11.1"
+	rxjavaVersion             = "1.3.8"
+	rxjava2Version            = "2.2.5"
+	rxjavaAdapterVersion      = "1.2.1"
+	servletApi3Version        = "3.1.0"
+	servletApi4Version        = "4.0.1"
+	slf4jVersion              = "1.7.25"	  // spring-jcl + consistent 3rd party deps
+	tiles3Version             = "3.0.8"
+	tomcatVersion             = "9.0.14"
+	transactionApiVersion     = "1.3"
+	underscorejsVersion       = "1.8.3"
+	undertowVersion           = "2.0.16.Final"
+	validationApiVersion      = "1.1.0.Final"
+	websocketApiVersion       = "1.1"
+	woodstoxCoreVersion       = "5.2.0"
+	xmlunitMatchersVersion    = "2.6.2"
+	xstreamVersion            = "1.4.10"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
 	withoutJclOverSlf4J = {
@@ -153,7 +195,7 @@ configure(allprojects) { project ->
 	}
 
 	dependencies {
-		testCompile("junit:junit:4.12") {
+		testCompile("junit:junit:${junit4Version}") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
 		testCompile("org.mockito:mockito-core:2.23.4") {
@@ -191,7 +233,7 @@ configure(allprojects) { project ->
 		"http://fasterxml.github.io/jackson-databind/javadoc/2.9/",
 		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.9/",
 		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
-		"https://junit.org/junit4/javadoc/4.12/",
+		"https://junit.org/junit4/javadoc/${junit4Version}/",
 		"https://junit.org/junit5/docs/${junit5Version}/api/"
 	] as String[]
 }
@@ -275,9 +317,9 @@ configure(rootProject) {
 		testCompile(project(":spring-test"))
 		testCompile(project(":spring-tx"))
 		testCompile(project(":spring-web"))
-		testCompile("javax.inject:javax.inject:1")
-		testCompile("javax.resource:javax.resource-api:1.7.1")
-		testCompile("javax.servlet:javax.servlet-api:3.1.0")
+		testCompile("javax.inject:javax.inject:${injectVersion}")
+		testCompile("javax.resource:javax.resource-api:${resourceApiVersion}")
+		testCompile("javax.servlet:javax.servlet-api:${servletApi3Version}")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.hibernate:hibernate-core:5.1.16.Final")

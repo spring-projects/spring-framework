@@ -15,8 +15,8 @@ dependencies {
 	compile("io.projectreactor:reactor-core")
 	optional(project(":spring-context"))
 	optional(project(":spring-context-support"))  // for FreeMarker support
-	optional("javax.servlet:javax.servlet-api:4.0.1")
-	optional("javax.websocket:javax.websocket-api:1.1")
+	optional("javax.servlet:javax.servlet-api:${servletApi4Version}")
+	optional("javax.websocket:javax.websocket-api:${websocketApiVersion}")
 	optional("org.webjars:webjars-locator-core:0.35")
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
@@ -34,15 +34,15 @@ dependencies {
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 	}
-	optional("org.apache.httpcomponents:httpclient:4.5.6") {
+	optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-	optional("com.google.protobuf:protobuf-java-util:3.6.1")
-	testCompile("javax.xml.bind:jaxb-api:2.3.1")
-	testCompile("com.fasterxml:aalto-xml:1.1.1")
-	testCompile("org.hibernate:hibernate-validator:6.0.14.Final")
+	optional("com.google.protobuf:protobuf-java-util:${protobufUtilVersion}")
+	testCompile("javax.xml.bind:jaxb-api:${jaxbApiVersion}")
+	testCompile("com.fasterxml:aalto-xml:${aaltoXmlVersion}")
+	testCompile("org.hibernate:hibernate-validator:${hibernateValidatorVersion}")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("io.undertow:undertow-core:${undertowVersion}")
@@ -51,16 +51,16 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
 	testCompile("org.eclipse.jetty:jetty-reactive-httpclient:1.0.2")
-	testCompile("com.squareup.okhttp3:mockwebserver:3.12.1")
+	testCompile("com.squareup.okhttp3:mockwebserver:${mockwebserverVersion}")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
-	testRuntime("org.jruby:jruby:9.2.5.0")
-	testRuntime("org.python:jython-standalone:2.7.1")
+	testRuntime("org.jruby:jruby:${jrubyVersion}")
+	testRuntime("org.python:jython-standalone:${jythonVersion}")
 	testRuntime("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
-	testRuntime("org.webjars:underscorejs:1.8.3")
-	testRuntime("org.glassfish:javax.el:3.0.1-b08")
-	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
-	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
-	testRuntime("com.sun.activation:javax.activation:1.2.0")
+	testRuntime("org.webjars:underscorejs:${underscorejsVersion}")
+	testRuntime("org.glassfish:javax.el:${elVersion}")
+	testRuntime("com.sun.xml.bind:jaxb-core:${jaxbCoreVersion}")
+	testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbimplVersion}")
+	testRuntime("com.sun.activation:javax.activation:${activationVersion}")
 }
