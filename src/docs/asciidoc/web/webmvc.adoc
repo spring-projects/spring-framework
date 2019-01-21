@@ -216,7 +216,7 @@ appropriate responses. By "`special beans`" we mean Spring-managed `Object` inst
 implement framework contracts. Those usually come with built-in contracts, but
 you can customize their properties and extend or replace them.
 
-The following table lists the special beans detected by the `DispatcherHandler`:
+The following table lists the special beans detected by the `DispatcherServlet`:
 
 [[mvc-webappctx-special-beans-tbl]]
 [cols="1,2", options="header"]
