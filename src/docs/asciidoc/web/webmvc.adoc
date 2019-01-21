@@ -1359,7 +1359,7 @@ The following example has type and method level mappings:
 ==== URI patterns
 [.small]#<<web-reactive.adoc#webflux-ann-requestmapping-uri-templates,Same as in Spring WebFlux>>#
 
-You can map requests by using the following glob patterns and wildcards:
+You can map requests by using the following global patterns and wildcards:
 
 * `?` matches one character
 * `*` matches zero or more characters within a path segment
@@ -1439,10 +1439,10 @@ When multiple patterns match a URL, they must be compared to find the best match
 by using `AntPathMatcher.getPatternComparator(String path)`, which looks for patterns that are more
 specific.
 
-A pattern is less specific if it has a lower count of URI variables and single wildcards
-counted as 1 and double wildcards counted as 2. Given an equal score, the longer pattern is
-chosen. Given the same score and length, the pattern with more URI variables than wildcards
-is chosen.
+A pattern is less specific if it has a lower count of URI variables (counted as 1), single
+wildcards (counted as 1), and double wildcards (counted as 2). Given an equal score, the
+longer pattern is chosen. Given the same score and length, the pattern with more URI variables
+than wildcards is chosen.
 
 The default mapping pattern (`/{asterisk}{asterisk}`) is excluded from scoring and always
 sorted last. Also, prefix patterns (such as `/public/{asterisk}{asterisk}`) are considered less
@@ -2291,7 +2291,7 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 	}
 
 	@PostMapping("update")
-	public String update(@Valid AccountUpdateForm form, BindingResult result,
+	public String update(@Valid AccountForm form, BindingResult result,
 			@ModelAttribute(binding=false) Account account) { <1>
 		// ...
 	}
@@ -2300,7 +2300,7 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 ====
 
 You can automatically apply validation after data binding by adding the
-`javax.validation.Valid` annotation or Spring's `@Validated` annotation (ee
+`javax.validation.Valid` annotation or Spring's `@Validated` annotation (
 <<core.adoc#validation-beanvalidation, Bean validation>> and
 <<core.adoc#validation, Spring validation>>). The following example shows how to do so:
 
@@ -2458,7 +2458,7 @@ Java configuration keep this flag set to `false`, to maintain backwards compatib
 However, for new applications, we recommend setting it to `true`.
 
 Note that URI template variables from the present request are automatically made
-available when expanding a redirect URL, and you need explicitly add them
+available when expanding a redirect URL, and you don't need to explicitly add them
 through `Model` or `RedirectAttributes`. The following example shows how to define a redirect:
 
 ====
