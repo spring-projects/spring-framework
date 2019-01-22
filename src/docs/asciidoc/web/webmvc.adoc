@@ -2784,7 +2784,7 @@ types for the body.
 Spring offers support for the Jackson JSON library.
 
 [[mvc-ann-jsonview]]
-===== Jackson Serialization Views
+===== JSON Views
 [.small]#<<web-reactive.adoc#webflux-ann-jsonview,Same as in Spring WebFlux>>#
 
 Spring MVC provides built-in support for
