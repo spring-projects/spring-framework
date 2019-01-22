@@ -632,12 +632,7 @@ public final class Type {
       stringBuilder.append(descriptor);
     } else {
       stringBuilder.append('L');
-      String name = currentClass.getName();
-      int nameLength = name.length();
-      for (int i = 0; i < nameLength; ++i) {
-        char car = name.charAt(i);
-        stringBuilder.append(car == '.' ? '/' : car);
-      }
+      stringBuilder.append(getInternalName(currentClass));
       stringBuilder.append(';');
     }
   }
