@@ -505,11 +505,7 @@ public final class Type {
     if (sort == OBJECT) {
       return valueBuffer.substring(valueBegin - 1, valueEnd + 1);
     } else if (sort == INTERNAL) {
-      return new StringBuilder()
-          .append('L')
-          .append(valueBuffer, valueBegin, valueEnd)
-          .append(';')
-          .toString();
+      return 'L' + valueBuffer.substring(valueBegin, valueEnd) + ';';
     } else {
       return valueBuffer.substring(valueBegin, valueEnd);
     }
