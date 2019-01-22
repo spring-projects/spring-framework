@@ -2382,7 +2382,7 @@ for the body.
 Spring offers support for the Jackson JSON library.
 
 [[webflux-ann-jsonview]]
-===== Jackson Serialization Views
+===== JSON Views
 [.small]#<<web.adoc#mvc-ann-jackson,Same as in Spring MVC>>#
 
 Spring WebFlux provides built-in support for
