@@ -195,7 +195,6 @@ applications. It includes the following topics:
 * <<integration-testing-annotations>>
 * <<testcontext-framework>>
 * <<spring-mvc-test-framework>>
-* <<testing-examples-petclinic>>
 
 
 
@@ -3708,8 +3707,7 @@ a Hibernate-based `UserRepository`:
 
 As explained in <<testcontext-tx-rollback-and-commit-behavior>>, there is no need to
 clean up the database after the `createUser()` method runs, since any changes made to the
-database are automatically rolled back by the `TransactionalTestExecutionListener`. See
-<<testing-examples-petclinic>> for an additional example.
+database are automatically rolled back by the `TransactionalTestExecutionListener`.
 
 [[testcontext-tx-rollback-and-commit-behavior]]
 ===== Transaction Rollback and Commit Behavior
@@ -6133,113 +6131,6 @@ https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/
 tests] of client-side REST tests.
 
 include::testing-webtestclient.adoc[leveloffset=+2]
-
-
-
-[[testing-examples-petclinic]]
-=== PetClinic Example
-
-The PetClinic application, available on
-https://github.com/spring-projects/spring-petclinic[GitHub], shows several features of
-the Spring TestContext Framework in a JUnit 4 environment. Most test functionality is
-included in the `AbstractClinicTests`, for which a partial listing follows:
-
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	import static org.junit.Assert.assertEquals;
-	// import ...
-
-	@ContextConfiguration <1>
-	public abstract class AbstractClinicTests extends AbstractTransactionalJUnit4SpringContextTests { <2>
-
-		@Autowired <3>
-		protected Clinic clinic;
-
-		@Test
-		public void getVets() {
-			Collection<Vet> vets = this.clinic.getVets();
-			assertEquals("JDBC query must show the same number of vets",
-				super.countRowsInTable("VETS"), vets.size()); <4>
-			Vet v1 = EntityUtils.getById(vets, Vet.class, 2);
-			assertEquals("Leary", v1.getLastName());
-			assertEquals(1, v1.getNrOfSpecialties());
-			assertEquals("radiology", (v1.getSpecialties().get(0)).getName());
-			// ...
-		}
-
-		// ...
-	}
-----
-
-<1> Load the application context from the default location: `AbstractClinicTests-context.xml`.
-<2> This test case extends the `AbstractTransactionalJUnit4SpringContextTests` class, from
-which it inherits configuration for Dependency Injection (through the
-`DependencyInjectionTestExecutionListener`) and transactional behavior (through the
-`TransactionalTestExecutionListener`).
-<3> The `clinic` instance variable (the application object being tested) is set by
-Dependency Injection through `@Autowired` semantics.
-<4> The `getVets()` method shows how you can use the inherited `countRowsInTable()`
-method to easily verify the number of rows in a given table, thus verifying correct
-behavior of the application code being tested. This allows for stronger tests and
-lessens dependency on the exact test data. For example, you can add additional rows in
-the database without breaking tests.
-====
-
-Like many integration tests that use a database, most of the tests in
-`AbstractClinicTests` depend on a minimum amount of data already being in the database
-before the test cases run. Alternatively, you can populate the database within the test
-fixture set up of your test cases (again, within the same transaction as the tests).
-
-The PetClinic application supports three data access technologies: JDBC, Hibernate, and
-JPA. By declaring `@ContextConfiguration` without any specific resource locations, the
-`AbstractClinicTests` class has its application context loaded from the default location,
-`AbstractClinicTests-context.xml`, which declares a common `DataSource`. Subclasses
-specify additional context locations that must declare a `PlatformTransactionManager` and
-a concrete implementation of `Clinic`.
-
-For example, the Hibernate implementation of the PetClinic tests contains the following
-implementation. For this example, `HibernateClinicTests` does not contain a single line
-of code. We need only to declare `@ContextConfiguration`, and the tests are inherited
-from `AbstractClinicTests`. Because `@ContextConfiguration` is declared without any
-specific resource locations, the Spring TestContext Framework loads an application
-context from all the beans defined in `AbstractClinicTests-context.xml` (that is, the
-inherited locations) and `HibernateClinicTests-context.xml`, with
-`HibernateClinicTests-context.xml` possibly overriding beans defined in
-`AbstractClinicTests-context.xml`. The following listing shows the definition of the
-`HibernateClinicTests` class:
-
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@ContextConfiguration <1>
-	public class HibernateClinicTests extends AbstractClinicTests { }
-----
-<1> Load the application context from `AbstractClinicTests-context.xml` and `HibernateClinicTests-context.xml`.
-====
-
-In a large-scale application, the Spring configuration is often split across multiple
-files. Consequently, configuration locations are typically specified in a common base
-class for all application-specific integration tests. Such a base class can also add
-useful instance variables (populated by Dependency Injection, naturally), such as a
-`SessionFactory` in the case of an application that uses Hibernate.
-
-As far as possible, you should have exactly the same Spring configuration files in your
-integration tests as in the deployed environment. One likely point of difference concerns
-database connection pooling and transaction infrastructure. If you are deploying to a
-full-blown application server, you probably use its connection pool (available through
-JNDI) and JTA implementation. Thus, in production, you can use a `JndiObjectFactoryBean`
-or `<jee:jndi-lookup>` for the `DataSource` and `JtaTransactionManager`. JNDI and JTA are
-not available in out-of-container integration tests, so you should use a combination such
-as the Commons DBCP `BasicDataSource` and `DataSourceTransactionManager` or
-`HibernateTransactionManager` for them. You can factor out this variant behavior into a
-single XML file, having the choice between application server and a "`local`"
-configuration separated from all other configuration, which will not vary between the
-test and production environments. In addition, we recommend that you use properties files
-for connection settings. See the PetClinic application for an example.
-
 
 
 
