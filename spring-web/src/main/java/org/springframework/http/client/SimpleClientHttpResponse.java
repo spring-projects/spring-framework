@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,8 @@ final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
 
 	@Override
 	public String getStatusText() throws IOException {
-		return this.connection.getResponseMessage();
+		String result = this.connection.getResponseMessage();
+		return (result != null) ? result : "";
 	}
 
 	@Override

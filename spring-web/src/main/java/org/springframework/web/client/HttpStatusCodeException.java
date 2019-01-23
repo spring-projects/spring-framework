@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for exceptions based on an {@link HttpStatus}.
@@ -82,11 +83,17 @@ public abstract class HttpStatusCodeException extends RestClientResponseExceptio
 	protected HttpStatusCodeException(HttpStatus statusCode, String statusText,
 			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
-		super(statusCode.value() + " " + statusText, statusCode.value(), statusText,
+		super(getMessage(statusCode, statusText), statusCode.value(), statusText,
 				responseHeaders, responseBody, responseCharset);
 		this.statusCode = statusCode;
 	}
 
+	private static String getMessage(HttpStatus statusCode, String statusText) {
+		if (!StringUtils.hasLength(statusText)) {
+			statusText = statusCode.getReasonPhrase();
+		}
+		return statusCode.value() + " " + statusText;
+	}
 
 	/**
 	 * Return the HTTP status code.
