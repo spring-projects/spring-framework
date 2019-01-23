@@ -114,6 +114,22 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
+	 * Create a possibly already validated new, empty
+	 * {@link AnnotationAttributes} instance for the specified
+	 * {@code annotationType}.
+	 * @param annotationType the type of annotation represented by this
+	 * {@code AnnotationAttributes} instance; never {@code null}
+	 * @param validated if the attributes are considered already validated
+	 * @since 5.2
+	 */
+	AnnotationAttributes(Class<? extends Annotation> annotationType, boolean validated) {
+		Assert.notNull(annotationType, "'annotationType' must not be null");
+		this.annotationType = annotationType;
+		this.displayName = annotationType.getName();
+		this.validated = validated;
+	}
+
+	/**
 	 * Create a new, empty {@link AnnotationAttributes} instance for the
 	 * specified {@code annotationType}.
 	 * @param annotationType the annotation type name represented by this
