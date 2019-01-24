@@ -480,26 +480,28 @@ public class HandlerMethod {
 			Annotation[] anns = this.combinedAnnotations;
 			if (anns == null) {
 				anns = super.getParameterAnnotations();
-				for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {
-					int index = getParameterIndex();
-					if (index < ifcAnns.length) {
-						Annotation[] paramAnns = ifcAnns[index];
-						if (paramAnns.length > 0) {
-							List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
-							merged.addAll(Arrays.asList(anns));
-							for (Annotation paramAnn : paramAnns) {
-								boolean existingType = false;
-								for (Annotation ann : anns) {
-									if (ann.annotationType() == paramAnn.annotationType()) {
-										existingType = true;
-										break;
+				int index = getParameterIndex();
+				if (index >= 0) {
+					for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {
+						if (index < ifcAnns.length) {
+							Annotation[] paramAnns = ifcAnns[index];
+							if (paramAnns.length > 0) {
+								List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
+								merged.addAll(Arrays.asList(anns));
+								for (Annotation paramAnn : paramAnns) {
+									boolean existingType = false;
+									for (Annotation ann : anns) {
+										if (ann.annotationType() == paramAnn.annotationType()) {
+											existingType = true;
+											break;
+										}
+									}
+									if (!existingType) {
+										merged.add(adaptAnnotation(paramAnn));
 									}
 								}
-								if (!existingType) {
-									merged.add(adaptAnnotation(paramAnn));
-								}
+								anns = merged.toArray(new Annotation[0]);
 							}
-							anns = merged.toArray(new Annotation[0]);
 						}
 					}
 				}
