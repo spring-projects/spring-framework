@@ -63,7 +63,7 @@ public abstract class StaxUtils {
 	 * @since 5.0
 	 */
 	public static XMLInputFactory createDefensiveInputFactory() {
-		return createDefensiveInputFactory(XMLInputFactory::newFactory);
+		return createDefensiveInputFactory(XMLInputFactory::newInstance);
 	}
 
 	/**
