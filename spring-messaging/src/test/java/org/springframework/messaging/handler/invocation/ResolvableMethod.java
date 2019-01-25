@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler;
+package org.springframework.messaging.handler.invocation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -57,7 +57,10 @@ import org.springframework.util.ReflectionUtils;
 import static java.util.stream.Collectors.*;
 
 /**
- * Convenience class to resolve method parameters from hints.
+ * NOTE: This class is a replica of the same class in spring-web so it can
+ * be used for tests in spring-messaging.
+ *
+ * <p>Convenience class to resolve method parameters from hints.
  *
  * <h1>Background</h1>
  *
@@ -120,7 +123,7 @@ import static java.util.stream.Collectors.*;
  * </pre>
  *
  * @author Rossen Stoyanchev
- * @since 5.0
+ * @since 5.2
  */
 public class ResolvableMethod {
 
@@ -186,6 +189,7 @@ public class ResolvableMethod {
 
 	/**
 	 * Filter on method arguments with annotation.
+	 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 	 */
 	@SafeVarargs
 	public final ArgResolver annot(Predicate<MethodParameter>... filter) {
@@ -298,6 +302,7 @@ public class ResolvableMethod {
 
 		/**
 		 * Filter on annotated methods.
+		 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
 		public final Builder<T> annot(Predicate<Method>... filters) {
@@ -308,6 +313,7 @@ public class ResolvableMethod {
 		/**
 		 * Filter on methods annotated with the given annotation type.
 		 * @see #annot(Predicate[])
+		 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
 		public final Builder<T> annotPresent(Class<? extends Annotation>... annotationTypes) {
@@ -524,6 +530,7 @@ public class ResolvableMethod {
 
 		/**
 		 * Filter on method arguments with annotations.
+		 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
 		public final ArgResolver annot(Predicate<MethodParameter>... filters) {
@@ -535,6 +542,7 @@ public class ResolvableMethod {
 		 * Filter on method arguments that have the given annotations.
 		 * @param annotationTypes the annotation types
 		 * @see #annot(Predicate[])
+		 * See {@link org.springframework.web.method.MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
 		public final ArgResolver annotPresent(Class<? extends Annotation>... annotationTypes) {

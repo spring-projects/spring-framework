@@ -166,7 +166,7 @@ public class MethodMessageHandlerTests {
 			this.method = "secondBestMatch";
 		}
 
-		public void illegalStateException(IllegalStateException exception) {
+		public void handleIllegalStateException(IllegalStateException exception) {
 			this.method = "illegalStateException";
 			this.arguments.put("exception", exception);
 		}
