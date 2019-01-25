@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,20 @@ public class HttpMessageConverterExtractorTests {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("".getBytes()));
+
+		Object result = extractor.extractData(response);
+		assertNull(result);
+	}
+
+	@Test // gh-22265
+	@SuppressWarnings("unchecked")
+	public void nullMessageBody() throws IOException {
+		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		extractor = new HttpMessageConverterExtractor<>(String.class, createConverterList(converter));
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(null);
 
 		Object result = extractor.extractData(response);
 		assertNull(result);
