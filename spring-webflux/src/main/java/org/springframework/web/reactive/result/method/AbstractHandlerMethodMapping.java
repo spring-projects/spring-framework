@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,15 +215,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	private String formatMappings(Class<?> userType, Map<Method, T> methods) {
-
-		String formattedType = Arrays.stream(userType.getPackage().getName().split("\\."))
+		String formattedType = Arrays.stream(ClassUtils.getPackageName(userType).split("\\."))
 				.map(p -> p.substring(0, 1))
 				.collect(Collectors.joining(".", "", ".")) + userType.getSimpleName();
-
 		Function<Method, String> methodFormatter = method -> Arrays.stream(method.getParameterTypes())
 				.map(Class::getSimpleName)
 				.collect(Collectors.joining(",", "(", ")"));
-
 		return methods.entrySet().stream()
 				.map(e -> {
 					Method method = e.getKey();
