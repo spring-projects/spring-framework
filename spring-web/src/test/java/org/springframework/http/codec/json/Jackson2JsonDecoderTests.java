@@ -175,7 +175,7 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 				.verifyError(DecodingException.class));
 	}
 
-	@Test // #22042
+	@Test // gh-22042
 	public void decodeWithNullLiteral() {
 		Flux<Object> result = this.decoder.decode(Flux.concat(stringBuffer("null")),
 				ResolvableType.forType(Pojo.class), MediaType.APPLICATION_JSON, Collections.emptyMap());
