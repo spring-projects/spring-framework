@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,11 +94,10 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(this.targetMethod, EventListener.class);
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
-		this.order = resolveOrder(method);
+		this.order = resolveOrder(this.targetMethod);
 	}
 
-
-	private List<ResolvableType> resolveDeclaredEventTypes(Method method, @Nullable EventListener ann) {
+	private static List<ResolvableType> resolveDeclaredEventTypes(Method method, @Nullable EventListener ann) {
 		int count = method.getParameterCount();
 		if (count > 1) {
 			throw new IllegalStateException(
@@ -123,10 +122,11 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return Collections.singletonList(ResolvableType.forMethodParameter(method, 0));
 	}
 
-	private int resolveOrder(Method method) {
+	private static int resolveOrder(Method method) {
 		Order ann = AnnotatedElementUtils.findMergedAnnotation(method, Order.class);
 		return (ann != null ? ann.value() : 0);
 	}
+
 
 	/**
 	 * Initialize this instance.
