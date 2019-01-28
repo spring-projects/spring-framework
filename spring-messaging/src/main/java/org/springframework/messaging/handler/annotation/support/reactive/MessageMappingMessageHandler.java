@@ -24,9 +24,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.CompositeMessageCondition;
@@ -72,6 +77,8 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	@Nullable
 	private HandlerMethodReturnValueHandler encoderReturnValueHandler;
+
+	private ConversionService conversionService = new DefaultFormattingConversionService();
 
 	@Nullable
 	private StringValueResolver valueResolver;
@@ -149,6 +156,23 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		return this.encoderReturnValueHandler;
 	}
 
+	/**
+	 * Configure a {@link ConversionService} to use for type conversion of
+	 * String based values, e.g. in destination variables or headers.
+	 * <p>By default {@link DefaultFormattingConversionService} is used.
+	 * @param conversionService the conversion service to use
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
+
+	/**
+	 * Return the configured ConversionService.
+	 */
+	public ConversionService getConversionService() {
+		return this.conversionService;
+	}
+
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.valueResolver = resolver;
@@ -158,6 +182,15 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	@Override
 	protected List<? extends HandlerMethodArgumentResolver> initArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+
+		ApplicationContext context = getApplicationContext();
+		ConfigurableBeanFactory beanFactory = (context instanceof ConfigurableApplicationContext ?
+				((ConfigurableApplicationContext) context).getBeanFactory() : null);
+
+		// Annotation-based resolvers
+		resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
+		resolvers.add(new HeadersMethodArgumentResolver());
+		resolvers.add(new DestinationVariableMethodArgumentResolver(this.conversionService));
 
 		// Custom resolvers
 		resolvers.addAll(getArgumentResolverConfigurer().getCustomResolvers());
