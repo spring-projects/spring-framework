@@ -273,9 +273,9 @@ public class ReflectUtils {
 		}
 		catch (ClassNotFoundException ignore) {
 		}
-		for (int i = 0; i < packages.length; i++) {
+		for (String pckg : packages) {
 			try {
-				return Class.forName(prefix + packages[i] + '.' + className + suffix, false, loader);
+				return Class.forName(prefix + pckg + '.' + className + suffix, false, loader);
 			}
 			catch (ClassNotFoundException ignore) {
 			}
@@ -447,8 +447,8 @@ public class ReflectUtils {
 			addAllMethods(superclass, list);
 		}
 		Class[] interfaces = type.getInterfaces();
-		for (int i = 0; i < interfaces.length; i++) {
-			addAllMethods(interfaces[i], list);
+		for (Class iface : interfaces) {
+			addAllMethods(iface, list);
 		}
 
 		return list;
@@ -603,8 +603,7 @@ public class ReflectUtils {
 	// used by MethodInterceptorGenerated generated code
 	public static Method[] findMethods(String[] namesAndDescriptors, Method[] methods) {
 		Map map = new HashMap();
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];
+		for (Method method : methods) {
 			map.put(method.getName() + Type.getMethodDescriptor(method), method);
 		}
 		Method[] result = new Method[namesAndDescriptors.length / 2];

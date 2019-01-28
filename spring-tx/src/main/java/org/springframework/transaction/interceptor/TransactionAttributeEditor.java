@@ -53,9 +53,9 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 			// tokenize it with ","
 			String[] tokens = StringUtils.commaDelimitedListToStringArray(text);
 			RuleBasedTransactionAttribute attr = new RuleBasedTransactionAttribute();
-			for (int i = 0; i < tokens.length; i++) {
+			for (String tkn : tokens) {
 				// Trim leading and trailing whitespace.
-				String token = StringUtils.trimWhitespace(tokens[i].trim());
+				String token = StringUtils.trimWhitespace(tkn.trim());
 				// Check whether token contains illegal whitespace within text.
 				if (StringUtils.containsWhitespace(token)) {
 					throw new IllegalArgumentException(
