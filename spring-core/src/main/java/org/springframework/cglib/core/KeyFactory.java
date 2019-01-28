@@ -82,7 +82,7 @@ abstract public class KeyFactory {
 			TypeUtils.parseSignature("int getSort()");
 
 	//generated numbers:
-	private final static int PRIMES[] = {
+	private final static int[] PRIMES = {
 			11, 73, 179, 331,
 			521, 787, 1213, 1823,
 			2609, 3691, 5189, 7247,

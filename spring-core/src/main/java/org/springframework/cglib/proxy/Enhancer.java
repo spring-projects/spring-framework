@@ -960,7 +960,7 @@ public class Enhancer extends AbstractClassGenerator {
 	 * @param interfaces array of interfaces to implement, or null
 	 * @param callback the callback to use for all methods
 	 */
-	public static Object create(Class superclass, Class interfaces[], Callback callback) {
+	public static Object create(Class superclass, Class[] interfaces, Callback callback) {
 		Enhancer e = new Enhancer();
 		e.setSuperclass(superclass);
 		e.setInterfaces(interfaces);
@@ -1175,7 +1175,7 @@ public class Enhancer extends AbstractClassGenerator {
 		EmitUtils.constructor_switch(e, constructors, new ObjectSwitchCallback() {
 			public void processCase(Object key, Label end) {
 				MethodInfo constructor = (MethodInfo) key;
-				Type types[] = constructor.getSignature().getArgumentTypes();
+				Type[] types = constructor.getSignature().getArgumentTypes();
 				for (int i = 0; i < types.length; i++) {
 					e.load_arg(1);
 					e.push(i);
