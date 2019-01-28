@@ -273,9 +273,9 @@ public class ReflectUtils {
 		}
 		catch (ClassNotFoundException ignore) {
 		}
-		for (int i = 0; i < packages.length; i++) {
+		for (String pckg : packages) {
 			try {
-				return Class.forName(prefix + packages[i] + '.' + className + suffix, false, loader);
+				return Class.forName(prefix + pckg + '.' + className + suffix, false, loader);
 			}
 			catch (ClassNotFoundException ignore) {
 			}
@@ -447,8 +447,8 @@ public class ReflectUtils {
 			addAllMethods(superclass, list);
 		}
 		Class[] interfaces = type.getInterfaces();
-		for (int i = 0; i < interfaces.length; i++) {
-			addAllMethods(interfaces[i], list);
+		for (Class iface : interfaces) {
+			addAllMethods(iface, list);
 		}
 
 		return list;
