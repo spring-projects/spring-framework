@@ -18,9 +18,7 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.function.Predicate;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -109,7 +107,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	private String afterMessageSuffix = DEFAULT_AFTER_MESSAGE_SUFFIX;
 
-	private Set<String> headersBlacklist = new HashSet<>();
+	private Predicate<String> blacklistPredicate = key -> false;
 
 
 	/**
@@ -234,19 +232,20 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * Sets a list of header name to blacklist if isIncludeHeaders() is set to true
+	 * Sets a predicate that is used to match blacklisted headers if isIncludeHeaders()
+	 * is set to true. Returns true for any string matching a header to blacklist
 	 * <p>Should be configured using an {@code <init-param>} for parameter name
-	 * "headersBlacklist" in the filter definition in {@code web.xml}.
+	 * "blacklistPredicate" in the filter definition in {@code web.xml}.
 	 */
-	public void setHeadersBlacklist(Collection<String> headersBlacklist) {
-		this.headersBlacklist = new HashSet<>(headersBlacklist);
+	public void setBlacklistPredicate(Predicate<String> blacklistPredicate) {
+		this.blacklistPredicate = blacklistPredicate;
 	}
 
 	/**
-	 * Returns a set of headers that should not be logged
+	 * Returns a predicate that matches against header names to blacklist
 	 */
-	protected Set<String> getHeadersBlacklist() {
-		return this.headersBlacklist;
+	protected Predicate<String> getBlacklistPredicate() {
+		return this.blacklistPredicate;
 	}
 
 	/**
@@ -343,7 +342,9 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 		if (isIncludeHeaders()) {
 			HttpHeaders headers = new ServletServerHttpRequest(request).getHeaders();
-			getHeadersBlacklist().forEach(headers::remove);
+			headers.keySet().stream()
+					.filter(key -> this.getBlacklistPredicate().test(key))
+					.forEach(headers::remove);
 			msg.append(";headers=").append(headers);
 		}
 

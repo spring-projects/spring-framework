@@ -123,11 +123,9 @@ public class RequestLoggingFilterTests {
 
 	@Test
 	public void includeHeadersWithBlacklist() throws Exception {
-		Set<String> headersBlacklist = new HashSet<>();
-		headersBlacklist.add("Authorization");
 
 		filter.setIncludeHeaders(true);
-		filter.setHeadersBlacklist(headersBlacklist);
+		filter.setBlacklistPredicate(key -> key.equals("Authorization"));
 
 		final MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
