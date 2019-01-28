@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,15 @@ public interface Model {
 	 * @return whether this model contains a corresponding attribute
 	 */
 	boolean containsAttribute(String attributeName);
+
+	/**
+	 * Return the attribute value for the given name, if any.
+	 * @param attributeName the name of the model attribute (never {@code null})
+	 * @return the corresponding attribute value, or {@code null} if none
+	 * @since 5.2
+	 */
+	@Nullable
+	Object getAttribute(String attributeName);
 
 	/**
 	 * Return the current set of model attributes as a Map.
