@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.springframework.lang.Nullable;
  */
 public class CompoundExpression extends SpelNodeImpl {
 
-	public CompoundExpression(int pos, SpelNodeImpl... expressionComponents) {
-		super(pos, expressionComponents);
+	public CompoundExpression(int startPos, int endPos, SpelNodeImpl... expressionComponents) {
+		super(startPos, endPos, expressionComponents);
 		if (expressionComponents.length < 2) {
 			throw new IllegalStateException("Do not build compound expressions with less than two entries: " +
 					expressionComponents.length);
