@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.ValueConstants;
@@ -61,8 +60,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	private final ConversionService conversionService;
 
+	@Nullable
 	private final ConfigurableBeanFactory configurableBeanFactory;
 
+	@Nullable
 	private final BeanExpressionContext expressionContext;
 
 	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
@@ -70,16 +71,16 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	/**
 	 * Constructor with a {@link ConversionService} and a {@link BeanFactory}.
-	 * @param cs conversion service for converting values to match the
+	 * @param conversionService conversion service for converting values to match the
 	 * target method parameter type
 	 * @param beanFactory a bean factory to use for resolving {@code ${...}} placeholder
 	 * and {@code #{...}} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
 	 */
-	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs,
+	protected AbstractNamedValueMethodArgumentResolver(ConversionService conversionService,
 			@Nullable ConfigurableBeanFactory beanFactory) {
 
-		this.conversionService = (cs != null ? cs : DefaultConversionService.getSharedInstance());
+		this.conversionService = conversionService;
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}
@@ -161,8 +162,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * Resolve the given annotation-specified value,
 	 * potentially containing placeholders and expressions.
 	 */
+	@Nullable
 	private Object resolveStringValue(String value) {
-		if (this.configurableBeanFactory == null) {
+		if (this.configurableBeanFactory == null || this.expressionContext == null) {
 			return value;
 		}
 		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(value);
@@ -199,6 +201,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or an
 	 * exception for other primitives.
 	 */
+	@Nullable
 	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
 		if (value == null) {
 			if (Boolean.TYPE.equals(paramType)) {
@@ -221,7 +224,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param parameter the argument parameter type
 	 * @param message the message
 	 */
-	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter, Message<?> message) {
+	protected void handleResolvedValue(
+			@Nullable Object arg, String name, MethodParameter parameter, Message<?> message) {
 	}
 
 
@@ -235,9 +239,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 		private final boolean required;
 
+		@Nullable
 		private final String defaultValue;
 
-		protected NamedValueInfo(String name, boolean required, String defaultValue) {
+		protected NamedValueInfo(String name, boolean required, @Nullable String defaultValue) {
 			this.name = name;
 			this.required = required;
 			this.defaultValue = defaultValue;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,10 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	private static final Log logger = LogFactory.getLog(HeaderMethodArgumentResolver.class);
 
 
-	public HeaderMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
-		super(cs, beanFactory);
+	public HeaderMethodArgumentResolver(
+			ConversionService conversionService, @Nullable ConfigurableBeanFactory beanFactory) {
+
+		super(conversionService, beanFactory);
 	}
 
 
@@ -94,9 +96,9 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	private Map<String, List<String>> getNativeHeaders(Message<?> message) {
-		return (Map<String, List<String>>) message.getHeaders().get(
-				NativeMessageHeaderAccessor.NATIVE_HEADERS);
+		return (Map<String, List<String>>) message.getHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 	}
 
 	@Override
