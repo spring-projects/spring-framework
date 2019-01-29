@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -43,6 +45,8 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -876,6 +880,26 @@ public class RestTemplateTests {
 		assertThat(requestHeaders.get("MyHeader"), contains("MyEntityValue", "MyInterceptorValue"));
 
 		verify(response).close();
+	}
+
+	@Test
+	public void acceptHeaderValueShouldBeNotDuplicated() throws Exception {
+		final StringHttpMessageConverter utf8HttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+		final StringHttpMessageConverter iso88591HttpMessageConverter = new StringHttpMessageConverter(StandardCharsets.ISO_8859_1);
+
+		final RestTemplate multipleEncodingTemplate = new RestTemplate(Arrays.asList(utf8HttpMessageConverter, iso88591HttpMessageConverter));
+		multipleEncodingTemplate.setRequestFactory(requestFactory);
+		given(requestFactory.createRequest(new URI("http://example.com"), GET)).willReturn(request);
+
+		final HttpHeaders requestHeaders = new HttpHeaders();
+		given(request.getHeaders()).willReturn(requestHeaders);
+		given(request.execute()).willReturn(response);
+
+		final HttpHeaders responseHeaders = new HttpHeaders();
+		given(response.getHeaders()).willReturn(responseHeaders);
+
+		multipleEncodingTemplate.getForObject("http://example.com", String.class);
+		assertEquals("text/plain, */*", StringUtils.collectionToDelimitedString(request.getHeaders().get("accept"), ","));
 	}
 
 }
