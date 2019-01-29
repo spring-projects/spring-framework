@@ -33,10 +33,15 @@ import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Resolves method parameters annotated with {@link Header @Header}.
+ * Resolver for {@link Header @Header} arguments. Headers are resolved from
+ * either the top-level header map or the nested
+ * {@link NativeMessageHeaderAccessor native} header map.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see HeadersMethodArgumentResolver
+ * @see NativeMessageHeaderAccessor
  */
 public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
@@ -57,9 +62,9 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		Header annotation = parameter.getParameterAnnotation(Header.class);
-		Assert.state(annotation != null, "No Header annotation");
-		return new HeaderNamedValueInfo(annotation);
+		Header annot = parameter.getParameterAnnotation(Header.class);
+		Assert.state(annot != null, "No Header annotation");
+		return new HeaderNamedValueInfo(annot);
 	}
 
 	@Override
@@ -72,10 +77,9 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 
 		if (headerValue != null && nativeHeaderValue != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Message headers contain two values for the same header '" + name + "', " +
-						"one in the top level header map and a second in the nested map with native headers. " +
-						"Using the value from top level map. " +
-						"Use 'nativeHeader.myHeader' to resolve to the value from the nested native header map.");
+				logger.debug("A value was found for '" + name + "', in both the top level header map " +
+						"and also in the nested map for native headers. Using the value from top level map. " +
+						"Use 'nativeHeader.myHeader' to resolve the native header.");
 			}
 		}
 
