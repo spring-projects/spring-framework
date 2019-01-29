@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -767,7 +768,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				if (this.responseType instanceof Class) {
 					responseClass = (Class<?>) this.responseType;
 				}
-				List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
+				Set<MediaType> allSupportedMediaTypes = new LinkedHashSet<MediaType>();
 				for (HttpMessageConverter<?> converter : getMessageConverters()) {
 					if (responseClass != null) {
 						if (converter.canRead(responseClass, null)) {
@@ -782,11 +783,12 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 				}
 				if (!allSupportedMediaTypes.isEmpty()) {
-					MediaType.sortBySpecificity(allSupportedMediaTypes);
+					List<MediaType> result = new ArrayList<MediaType>(allSupportedMediaTypes);
+					MediaType.sortBySpecificity(result);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Setting request Accept header to " + allSupportedMediaTypes);
 					}
-					request.getHeaders().setAccept(allSupportedMediaTypes);
+					request.getHeaders().setAccept(result);
 				}
 			}
 		}
