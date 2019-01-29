@@ -92,7 +92,7 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
             if (!suggestedTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME)) {
 				throw new IllegalStateException(
 						"Transformer not of the expected type DelegatingClassFileTransformer: " +
-						this.delegatingTransformer.getClass().getName());
+						suggestedTransformer.getClass().getName());
 			}
 			
 			this.delegatingTransformer = suggestedTransformer;
