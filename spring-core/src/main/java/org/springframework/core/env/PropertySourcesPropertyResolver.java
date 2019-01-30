@@ -34,7 +34,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	@Nullable
 	private final PropertySources propertySources;
 
-
 	/**
 	 * Create a new resolver against the given property sources.
 	 * @param propertySources the set of {@link PropertySource} objects to use
@@ -42,7 +41,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	public PropertySourcesPropertyResolver(@Nullable PropertySources propertySources) {
 		this.propertySources = propertySources;
 	}
-
 
 	@Override
 	public boolean containsProperty(String key) {
@@ -77,17 +75,22 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	@Nullable
 	protected <T> T getProperty(String key, Class<T> targetValueType, boolean resolveNestedPlaceholders) {
 		if (this.propertySources != null) {
-			for (PropertySource<?> propertySource : this.propertySources) {
+			// 遍历 propertySources 数组
+		    for (PropertySource<?> propertySource : this.propertySources) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Searching for key '" + key + "' in PropertySource '" +
 							propertySource.getName() + "'");
 				}
+				// 获得 key 对应的 value 值
 				Object value = propertySource.getProperty(key);
 				if (value != null) {
+				    // 如果解决嵌套占位符，解析占位符
 					if (resolveNestedPlaceholders && value instanceof String) {
 						value = resolveNestedPlaceholders((String) value);
 					}
+					// 如果未找到 key 对应的值，则打印日志
 					logKeyFound(key, propertySource, value);
+					// value 的类型转换
 					return convertValueIfNecessary(value, targetValueType);
 				}
 			}

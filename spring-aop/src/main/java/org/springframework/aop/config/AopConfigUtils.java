@@ -117,7 +117,7 @@ public abstract class AopConfigUtils {
             //      2> 你需要将 CGLIB 二进制发型包放在 classpath 下面。
             // 为什么 Spring 默认使用 JDK 的动态代理呢？笔者猜测原因如下：
             //      1> 使用 JDK 原生支持，减少三方依赖
-            //      2> JDK8 开始后，JDK 代理的性能反倒超过 CGLIB 的性能。可参见：https://www.cnblogs.com/haiq/p/4304615.html
+            //      2> JDK8 开始后，JDK 代理的性能差距 CGLIB 的性能不会太多。可参见：https://www.cnblogs.com/haiq/p/4304615.html
 			definition.getPropertyValues().add("proxyTargetClass", Boolean.TRUE);
 		}
 	}

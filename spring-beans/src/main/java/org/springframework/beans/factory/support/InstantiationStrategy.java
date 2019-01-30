@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 /**
  * Interface responsible for creating instances corresponding to a root bean definition.
@@ -36,6 +36,8 @@ import org.springframework.lang.Nullable;
 public interface InstantiationStrategy {
 
 	/**
+     * 默认构造方法
+     *
 	 * Return an instance of the bean with the given name in this factory.
 	 * @param bd the bean definition
 	 * @param beanName the name of the bean when it is created in this context.
@@ -49,6 +51,8 @@ public interface InstantiationStrategy {
 			throws BeansException;
 
 	/**
+     * 指定构造方法
+     *
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given constructor.
 	 * @param bd the bean definition
@@ -65,6 +69,8 @@ public interface InstantiationStrategy {
 			Constructor<?> ctor, Object... args) throws BeansException;
 
 	/**
+     * 工厂方法
+     *
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given factory method.
 	 * @param bd the bean definition
@@ -74,7 +80,7 @@ public interface InstantiationStrategy {
 	 * @param owner the owning BeanFactory
 	 * @param factoryBean the factory bean instance to call the factory method on,
 	 * or {@code null} in case of a static factory method
-	 * @param factoryMethod the factory method to use
+	 * @param factoryMethod the factory method to use 工厂方法
 	 * @param args the factory method arguments to apply
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation attempt failed

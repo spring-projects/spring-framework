@@ -137,7 +137,6 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 */
 	protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName,
 			BeanFactory owner, @Nullable Constructor<?> ctor, Object... args) {
-
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
@@ -175,6 +174,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					currentlyInvokedFactoryMethod.remove();
 				}
 			}
+        // 一大堆 catch 异常
 		} catch (IllegalArgumentException ex) {
 			throw new BeanInstantiationException(factoryMethod,
 					"Illegal arguments to factory method '" + factoryMethod.getName() + "'; " +

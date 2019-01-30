@@ -16,13 +16,13 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.Set;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.lang.Nullable;
+
+import java.util.Set;
 
 /**
  * A factory for common {@link org.springframework.core.convert.ConversionService}
@@ -47,17 +47,15 @@ public final class ConversionServiceFactory {
 	 */
 	public static void registerConverters(@Nullable Set<?> converters, ConverterRegistry registry) {
 		if (converters != null) {
+		    // 遍历 converters 数组，逐个注解
 			for (Object converter : converters) {
 				if (converter instanceof GenericConverter) {
 					registry.addConverter((GenericConverter) converter);
-				}
-				else if (converter instanceof Converter<?, ?>) {
+				} else if (converter instanceof Converter<?, ?>) {
 					registry.addConverter((Converter<?, ?>) converter);
-				}
-				else if (converter instanceof ConverterFactory<?, ?>) {
+				} else if (converter instanceof ConverterFactory<?, ?>) {
 					registry.addConverterFactory((ConverterFactory<?, ?>) converter);
-				}
-				else {
+				} else {
 					throw new IllegalArgumentException("Each converter object must implement one of the " +
 							"Converter, ConverterFactory, or GenericConverter interfaces");
 				}
