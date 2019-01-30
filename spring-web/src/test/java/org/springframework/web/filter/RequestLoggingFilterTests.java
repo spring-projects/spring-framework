@@ -17,8 +17,6 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -125,7 +123,7 @@ public class RequestLoggingFilterTests {
 	public void includeHeadersWithBlacklist() throws Exception {
 
 		filter.setIncludeHeaders(true);
-		filter.setBlacklistPredicate(key -> key.equals("Authorization"));
+		filter.setBlacklistPredicate(key -> "Authorization".equals(key));
 
 		final MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
