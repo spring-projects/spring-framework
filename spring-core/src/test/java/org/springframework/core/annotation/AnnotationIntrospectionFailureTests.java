@@ -78,6 +78,24 @@ public class AnnotationIntrospectionFailureTests {
 				exampleMetaAnnotationClass)).isTrue();
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void filteredTypeInMetaAnnotationWhenUsingMergedAnnotationsHandlesException() throws Exception {
+		FilteringClassLoader classLoader = new FilteringClassLoader(
+				getClass().getClassLoader());
+		Class<?> withExampleMetaAnnotation = ClassUtils.forName(
+				WithExampleMetaAnnotation.class.getName(), classLoader);
+		Class<Annotation> exampleAnnotationClass = (Class<Annotation>) ClassUtils.forName(
+				ExampleAnnotation.class.getName(), classLoader);
+		Class<Annotation> exampleMetaAnnotationClass = (Class<Annotation>) ClassUtils.forName(
+				ExampleMetaAnnotation.class.getName(), classLoader);
+		MergedAnnotations annotations = MergedAnnotations.from(withExampleMetaAnnotation);
+		assertThat(annotations.get(exampleAnnotationClass).isPresent()).isFalse();
+		assertThat(annotations.get(exampleMetaAnnotationClass).isPresent()).isFalse();
+		assertThat(annotations.isPresent(exampleMetaAnnotationClass)).isFalse();
+		assertThat(annotations.isPresent(exampleAnnotationClass)).isFalse();
+	}
+
 
 	static class FilteringClassLoader extends OverridingClassLoader {
 
