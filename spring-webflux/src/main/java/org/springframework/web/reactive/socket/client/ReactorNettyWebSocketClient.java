@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
+import reactor.netty.http.websocket.WebsocketOutbound;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -88,7 +89,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 					String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
 					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(outbound.alloc());
-					WebSocketSession session = new ReactorNettyWebSocketSession(inbound, outbound, info, factory);
+					WebSocketSession session = createWebSocketSession(inbound, outbound, info, factory);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Started session '" + session.getId() + "' for " + url);
 					}
@@ -100,6 +101,10 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 					}
 				})
 				.next();
+	}
+
+	protected ReactorNettyWebSocketSession createWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound, HandshakeInfo info, NettyDataBufferFactory factory) {
+		return new ReactorNettyWebSocketSession(inbound, outbound, info, factory);
 	}
 
 	private void setNettyHeaders(HttpHeaders httpHeaders, io.netty.handler.codec.http.HttpHeaders nettyHeaders) {
