@@ -17,6 +17,7 @@
 package org.springframework.jdbc.core.metadata;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -304,12 +305,8 @@ public class TableMetaDataContext {
 						getTableName() + "' so an insert statement can't be generated");
 			}
 		}
-		for (int i = 0; i < columnCount; i++) {
-			if (i > 0) {
-				insertStatement.append(", ");
-			}
-			insertStatement.append("?");
-		}
+		String params = String.join(", ", Collections.nCopies(columnCount, "?"));
+		insertStatement.append(params);
 		insertStatement.append(")");
 		return insertStatement.toString();
 	}
