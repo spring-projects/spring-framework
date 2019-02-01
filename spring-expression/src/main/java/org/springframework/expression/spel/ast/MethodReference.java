@@ -23,6 +23,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
@@ -259,16 +260,11 @@ public class MethodReference extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder(this.name);
-		sb.append("(");
+		StringJoiner sj = new StringJoiner(",", "(", ")");
 		for (int i = 0; i < getChildCount(); i++) {
-			if (i > 0) {
-				sb.append(",");
-			}
-			sb.append(getChild(i).toStringAST());
+			sj.add(getChild(i).toStringAST());
 		}
-		sb.append(")");
-		return sb.toString();
+		return this.name + sj.toString();
 	}
 
 	/**

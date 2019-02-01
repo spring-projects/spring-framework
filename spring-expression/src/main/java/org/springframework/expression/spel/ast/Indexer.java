@@ -24,6 +24,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
@@ -320,15 +321,11 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder("[");
+		StringJoiner sj = new StringJoiner(",", "[", "]");
 		for (int i = 0; i < getChildCount(); i++) {
-			if (i > 0) {
-				sb.append(",");
-			}
-			sb.append(getChild(i).toStringAST());
+			sj.add(getChild(i).toStringAST());
 		}
-		sb.append("]");
-		return sb.toString();
+		return sj.toString();
 	}
 
 
