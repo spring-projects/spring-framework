@@ -300,6 +300,23 @@ public interface JdbcOperations {
 	<T> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException;
 
 	/**
+	 * Query using a prepared statement, allowing for a PreparedStatementCreator
+	 * and a PreparedStatementSetter. Most other query methods use this method,
+	 * but application code will always work with either a creator or a setter.
+	 * @param psc the Callback handler that can create a PreparedStatement given a
+	 * Connection
+	 * @param pss object that knows how to set values on the prepared statement.
+	 * If this is null, the SQL will be assumed to contain no bind parameters.
+	 * @param rse object that will extract results.
+	 * @return an arbitrary result object, as returned by the ResultSetExtractor
+	 * @throws DataAccessException if there is any problem
+	 */
+	@Nullable
+	public <T> T query(
+			PreparedStatementCreator psc, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse)
+			throws DataAccessException;
+
+	/**
 	 * Query using a prepared statement, reading the ResultSet with a
 	 * ResultSetExtractor.
 	 * <p>A PreparedStatementCreator can either be implemented directly or

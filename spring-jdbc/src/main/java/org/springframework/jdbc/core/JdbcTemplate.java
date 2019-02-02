@@ -646,18 +646,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return execute(new SimplePreparedStatementCreator(sql), action);
 	}
 
-	/**
-	 * Query using a prepared statement, allowing for a PreparedStatementCreator
-	 * and a PreparedStatementSetter. Most other query methods use this method,
-	 * but application code will always work with either a creator or a setter.
-	 * @param psc the Callback handler that can create a PreparedStatement given a
-	 * Connection
-	 * @param pss object that knows how to set values on the prepared statement.
-	 * If this is null, the SQL will be assumed to contain no bind parameters.
-	 * @param rse object that will extract results.
-	 * @return an arbitrary result object, as returned by the ResultSetExtractor
-	 * @throws DataAccessException if there is any problem
-	 */
+	@Override
 	@Nullable
 	public <T> T query(
 			PreparedStatementCreator psc, @Nullable final PreparedStatementSetter pss, final ResultSetExtractor<T> rse)
