@@ -1132,8 +1132,8 @@ The following `DateFormatter` is an example `Formatter` implementation:
 	}
 ----
 
-The Spring team welcomes community-driven `Formatter` contributionsSee
-https://jira.spring.io/browse/SPR[jira.spring.io] to contribute.
+The Spring team welcomes community-driven `Formatter` contributions. See
+https://github.com/spring-projects/spring-framework/issues[GitHub Issues] to contribute.
 
 
 

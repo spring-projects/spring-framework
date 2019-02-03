@@ -52,14 +52,8 @@ import org.springframework.util.ClassUtils;
 abstract class AutowireUtils {
 
 	private static final Comparator<Executable> EXECUTABLE_COMPARATOR = (e1, e2) -> {
-		boolean p1 = Modifier.isPublic(e1.getModifiers());
-		boolean p2 = Modifier.isPublic(e2.getModifiers());
-		if (p1 != p2) {
-			return (p1 ? -1 : 1);
-		}
-		int c1pl = e1.getParameterCount();
-		int c2pl = e2.getParameterCount();
-		return Integer.compare(c2pl, c1pl);
+		int result = Boolean.compare(Modifier.isPublic(e2.getModifiers()), Modifier.isPublic(e1.getModifiers()));
+		return result != 0 ? result : Integer.compare(e2.getParameterCount(), e1.getParameterCount());
 	};
 
 

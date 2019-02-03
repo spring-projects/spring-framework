@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -516,6 +517,29 @@ public class UriComponentsBuilderTests {
 		UriComponents before = UriComponentsBuilder.fromPath("/foo/").build();
 		UriComponents after = UriComponentsBuilder.newInstance().uriComponents(before).build();
 		assertEquals("/foo/", after.getPath());
+	}
+
+	@Test // gh-19890
+	public void fromHttpRequestWithEmptyScheme() {
+		HttpRequest request = new HttpRequest() {
+			@Override
+			public String getMethodValue() {
+				return "GET";
+			}
+
+			@Override
+			public URI getURI() {
+				return UriComponentsBuilder.fromUriString("/").build().toUri();
+			}
+
+			@Override
+			public HttpHeaders getHeaders() {
+				return new HttpHeaders();
+			}
+		};
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(request).build();
+
+		assertEquals("/", result.toString());
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,12 @@ public class TypeReference extends SpelNodeImpl {
 	private transient Class<?> type;
 
 
-	public TypeReference(int pos, SpelNodeImpl qualifiedId) {
-		this(pos, qualifiedId, 0);
+	public TypeReference(int startPos, int endPos, SpelNodeImpl qualifiedId) {
+		this(startPos, endPos, qualifiedId, 0);
 	}
 
-	public TypeReference(int pos, SpelNodeImpl qualifiedId, int dims) {
-		super(pos, qualifiedId);
+	public TypeReference(int startPos, int endPos, SpelNodeImpl qualifiedId, int dims) {
+		super(startPos, endPos, qualifiedId);
 		this.dimensions = dims;
 	}
 

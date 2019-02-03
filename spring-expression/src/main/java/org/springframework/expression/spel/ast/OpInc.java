@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ public class OpInc extends Operator {
 	private final boolean postfix;  // false means prefix
 
 
-	public OpInc(int pos, boolean postfix, SpelNodeImpl... operands) {
-		super("++", pos, operands);
+	public OpInc(int startPos, int endPos, boolean postfix, SpelNodeImpl... operands) {
+		super("++", startPos, endPos, operands);
 		this.postfix = postfix;
 		Assert.notEmpty(operands, "Operands must not be empty");
 	}

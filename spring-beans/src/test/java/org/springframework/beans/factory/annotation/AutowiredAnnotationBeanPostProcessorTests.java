@@ -251,6 +251,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testExtendedResourceInjectionWithAtRequired() {
 		bf.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
 		RootBeanDefinition bd = new RootBeanDefinition(TypedExtendedResourceInjectionBean.class);
@@ -2260,7 +2261,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 
 		@Override
-		@Autowired @Required
+		@Autowired
+		@Required
+		@SuppressWarnings("deprecation")
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
 		}

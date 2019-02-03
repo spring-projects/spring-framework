@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,16 +67,15 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	 */
 	public EncoderHttpMessageWriter(Encoder<T> encoder) {
 		Assert.notNull(encoder, "Encoder is required");
+		initLogger(encoder);
 		this.encoder = encoder;
 		this.mediaTypes = MediaType.asMediaTypes(encoder.getEncodableMimeTypes());
 		this.defaultMediaType = initDefaultMediaType(this.mediaTypes);
-		initLogger(encoder);
 	}
 
-	private void initLogger(Encoder<T> encoder) {
+	private static void initLogger(Encoder<?> encoder) {
 		if (encoder instanceof AbstractEncoder &&
-				encoder.getClass().getPackage().getName().startsWith("org.springframework.core.codec")) {
-
+				encoder.getClass().getName().startsWith("org.springframework.core.codec")) {
 			Log logger = HttpLogging.forLog(((AbstractEncoder) encoder).getLogger());
 			((AbstractEncoder) encoder).setLogger(logger);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.core.codec.AbstractDecoderTestCase;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 import org.springframework.util.MimeType;
 
@@ -172,6 +173,14 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 				Flux.from(stringBuffer("{\"foofoo\": \"foofoo\", \"barbar\": \"barbar\""));
 		testDecode(input, Pojo.class, step -> step
 				.verifyError(DecodingException.class));
+	}
+
+	@Test // gh-22042
+	public void decodeWithNullLiteral() {
+		Flux<Object> result = this.decoder.decode(Flux.concat(stringBuffer("null")),
+				ResolvableType.forType(Pojo.class), MediaType.APPLICATION_JSON, Collections.emptyMap());
+
+		StepVerifier.create(result).expectComplete().verify();
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,15 +44,6 @@ import org.springframework.lang.Nullable;
  * @since 1.2.2
  */
 public abstract class ReflectionUtils {
-
-	/**
-	 * Pre-built MethodFilter that matches all non-bridge methods.
-	 * @since 3.0
-	 * @deprecated as of 5.0.11, in favor of a custom {@link MethodFilter}
-	 */
-	@Deprecated
-	public static final MethodFilter NON_BRIDGED_METHODS =
-			(method -> !method.isBridge());
 
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge non-synthetic methods
@@ -247,52 +237,6 @@ public abstract class ReflectionUtils {
 		}
 		catch (Exception ex) {
 			handleReflectionException(ex);
-		}
-		throw new IllegalStateException("Should never get here");
-	}
-
-	/**
-	 * Invoke the specified JDBC API {@link Method} against the supplied target
-	 * object with no arguments.
-	 * @param method the method to invoke
-	 * @param target the target object to invoke the method on
-	 * @return the invocation result, if any
-	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
-	 * @see #invokeJdbcMethod(java.lang.reflect.Method, Object, Object[])
-	 * @deprecated as of 5.0.11, in favor of custom SQLException handling
-	 */
-	@Deprecated
-	@Nullable
-	public static Object invokeJdbcMethod(Method method, @Nullable Object target) throws SQLException {
-		return invokeJdbcMethod(method, target, new Object[0]);
-	}
-
-	/**
-	 * Invoke the specified JDBC API {@link Method} against the supplied target
-	 * object with the supplied arguments.
-	 * @param method the method to invoke
-	 * @param target the target object to invoke the method on
-	 * @param args the invocation arguments (may be {@code null})
-	 * @return the invocation result, if any
-	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
-	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
-	 * @deprecated as of 5.0.11, in favor of custom SQLException handling
-	 */
-	@Deprecated
-	@Nullable
-	public static Object invokeJdbcMethod(Method method, @Nullable Object target, @Nullable Object... args)
-			throws SQLException {
-		try {
-			return method.invoke(target, args);
-		}
-		catch (IllegalAccessException ex) {
-			handleReflectionException(ex);
-		}
-		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof SQLException) {
-				throw (SQLException) ex.getTargetException();
-			}
-			handleInvocationTargetException(ex);
 		}
 		throw new IllegalStateException("Should never get here");
 	}

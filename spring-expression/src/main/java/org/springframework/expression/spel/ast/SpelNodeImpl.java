@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	private static final SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 
 
-	protected final int pos;  // start = top 16bits, end = bottom 16bits
+	private final int startPos;
+
+	private final int endPos;
 
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 
@@ -67,8 +69,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	protected volatile String exitTypeDescriptor;
 
 
-	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
-		this.pos = pos;
+	public SpelNodeImpl(int startPos, int endPos, SpelNodeImpl... operands) {
+		this.startPos = startPos;
+		this.endPos = endPos;
 		if (!ObjectUtils.isEmpty(operands)) {
 			this.children = operands;
 			for (SpelNodeImpl operand : operands) {
@@ -146,12 +149,12 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	@Override
 	public int getStartPosition() {
-		return (this.pos >> 16);
+		return this.startPos;
 	}
 
 	@Override
 	public int getEndPosition() {
-		return (this.pos & 0xffff);
+		return this.endPos;
 	}
 
 	/**

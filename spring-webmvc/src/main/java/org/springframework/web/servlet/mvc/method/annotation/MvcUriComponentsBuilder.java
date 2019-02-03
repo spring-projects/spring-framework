@@ -852,9 +852,6 @@ public class MvcUriComponentsBuilder {
 			this.controllerType = controllerType;
 			this.method = method;
 			this.argumentValues = new Object[method.getParameterCount()];
-			for (int i = 0; i < this.argumentValues.length; i++) {
-				this.argumentValues[i] = null;
-			}
 		}
 
 		private static String getPath() {
