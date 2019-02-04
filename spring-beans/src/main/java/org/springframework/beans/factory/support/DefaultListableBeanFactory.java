@@ -677,7 +677,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (bd instanceof AbstractBeanDefinition) {
 				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
 				if (abd.hasBeanClass()) {
-					ann = AnnotationUtils.findAnnotation(abd.getBeanClass(), annotationType);
+					Class<?> beanClass = abd.getBeanClass();
+					if (beanClass != beanType) {
+						ann = AnnotationUtils.findAnnotation(beanClass, annotationType);
+					}
 				}
 			}
 		}
