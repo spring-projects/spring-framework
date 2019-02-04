@@ -6302,7 +6302,7 @@ The following example shows how to do so with Gradle:
 [subs="verbatim,quotes,attributes"]
 ----
 	dependencies {
-		compileOnly("org.springframework:spring-context-indexer:{spring-version}")
+		annotationProcessor("org.springframework:spring-context-indexer:{spring-version}")
 	}
 ----
 ====
