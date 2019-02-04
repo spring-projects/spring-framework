@@ -2586,10 +2586,11 @@ The following table describes the supported scopes:
   the context of a web-aware Spring `ApplicationContext`.
 |===
 
-NOTE: As of Spring 3.0, a thread scope is available but is not registered by default. For
-more information, see the documentation for
-{api-spring-framework}/context/support/SimpleThreadScope.html[`SimpleThreadScope`].
-For instructions on how to register this or any other custom scope, see
+NOTE: As of Spring 3.0, a thread scope is available but is not registered by default:
+see {api-spring-framework}/context/support/SimpleThreadScope.html[`SimpleThreadScope`].
+As of Spring 4.2, a transaction scope is available as well:
+{api-spring-framework}/transaction/support/SimpleTransactionScope.html[`SimpleTransactionScope`].
+For instructions on how to register these or any other custom scopes, see
 <<beans-factory-scopes-custom-using>>.
 
 
