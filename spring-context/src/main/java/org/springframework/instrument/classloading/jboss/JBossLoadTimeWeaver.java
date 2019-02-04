@@ -41,7 +41,8 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 
 	private static final String DELEGATING_TRANSFORMER_CLASS_NAME =
 			"org.jboss.as.server.deployment.module.DelegatingClassFileTransformer";
-
+	
+	private static final String WRAPPER_TRANSFORMER_CLASS_NAME = "org.jboss.modules.JLIClassTransformer";
 
 	private final ClassLoader classLoader;
 
@@ -76,12 +77,25 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 			}
 			transformer.setAccessible(true);
 
-			this.delegatingTransformer = transformer.get(classLoader);
-			if (!this.delegatingTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME)) {
+			Object suggestedTransformer = transformer.get(classLoader);
+
+            if (suggestedTransformer.getClass().getName().equals(WRAPPER_TRANSFORMER_CLASS_NAME)) {
+                Field wrappedTransformer = ReflectionUtils.findField(suggestedTransformer.getClass(), "transformer");
+                if (wrappedTransformer == null) {
+                    throw new IllegalArgumentException("Could not find 'transformer' field on JBoss ClassTransformer: " +
+                            suggestedTransformer.getClass().getName());
+                }
+                wrappedTransformer.setAccessible(true);
+                suggestedTransformer = wrappedTransformer.get(suggestedTransformer);
+            }
+
+            if (!suggestedTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME)) {
 				throw new IllegalStateException(
 						"Transformer not of the expected type DelegatingClassFileTransformer: " +
-						this.delegatingTransformer.getClass().getName());
+						suggestedTransformer.getClass().getName());
 			}
+			
+			this.delegatingTransformer = suggestedTransformer;
 
 			Method addTransformer = ReflectionUtils.findMethod(this.delegatingTransformer.getClass(),
 					"addTransformer", ClassFileTransformer.class);
