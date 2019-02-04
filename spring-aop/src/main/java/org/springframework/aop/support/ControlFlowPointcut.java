@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 	/**
-	 * Subclasses can override this if it's possible to filter out
-	 * some candidate classes.
+	 * Subclasses can override this if it's possible to filter out some candidate classes.
 	 */
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
