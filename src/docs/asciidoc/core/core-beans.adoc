@@ -6295,14 +6295,28 @@ how to do so with Maven:
 ----
 ====
 
-The following example shows how to do so with Gradle:
+With Gradle 4.5 and earlier, the dependency should be declared in the `compileOnly`
+configuration, as shown in the following example:
 
 ====
 [source,groovy,indent=0]
 [subs="verbatim,quotes,attributes"]
 ----
 	dependencies {
-		compileOnly("org.springframework:spring-context-indexer:{spring-version}")
+		compileOnly "org.springframework:spring-context-indexer:{spring-version}"
+	}
+----
+====
+
+With Gradle 4.6 and later, the dependency should be declared in the `annotationProcessor`
+configuration, as shown in the following example:
+
+====
+[source,groovy,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	dependencies {
+		annotationProcessor "org.springframework:spring-context-indexer:{spring-version}"
 	}
 ----
 ====
