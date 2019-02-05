@@ -399,6 +399,16 @@ public abstract class MimeTypeUtils {
 		return new String(generateMultipartBoundary(), StandardCharsets.US_ASCII);
 	}
 
+	/**
+	 * Simple Least Recently Used cache, bounded by the maximum size given
+	 * to the class constructor.
+	 * This implementation is backed by a {@code ConcurrentHashMap} for storing
+	 * the cached values and a {@code ConcurrentLinkedQueue} for ordering
+	 * the keys and choosing the least recently used key when the cache is at
+	 * full capacity.
+ 	 * @param <K> the type of the key used for caching
+	 * @param <V> the type of the cached values
+	 */
 	static class ConcurrentLRUCache<K, V> {
 
 		private final int maxSize;
@@ -418,7 +428,7 @@ public abstract class MimeTypeUtils {
 			this.generator = generator;
 		}
 
-		public V get(K key) {
+		V get(K key) {
 			this.lock.readLock().lock();
 			try {
 				if (this.queue.remove(key)) {

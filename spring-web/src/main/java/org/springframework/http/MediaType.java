@@ -328,7 +328,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
 		APPLICATION_JSON = new MediaType("application", "json");
 		APPLICATION_JSON_UTF8 = new MediaType("application", "json", StandardCharsets.UTF_8);
-		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");;
+		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
 		APPLICATION_PDF = new MediaType("application", "pdf");
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
 		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem", StandardCharsets.UTF_8);
