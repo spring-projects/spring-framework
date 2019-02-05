@@ -186,6 +186,12 @@
 	</bean>
 
 	<bean id="MySQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductNames">
+			<list>
+				<value>MySQL</value>
+				<value>MariaDB</value>
+			</list>
+		</property>
 		<property name="badSqlGrammarCodes">
 			<value>1054,1064,1146</value>
 		</property>
