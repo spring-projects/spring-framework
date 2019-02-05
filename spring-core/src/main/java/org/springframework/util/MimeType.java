@@ -103,7 +103,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	private final Map<String, String> parameters;
 
-	private String mimetype;
+	@Nullable
+	private volatile String toStringValue;
 
 
 	/**
@@ -471,12 +472,14 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	@Override
 	public String toString() {
-		if (this.mimetype == null) {
+		String value = this.toStringValue;
+		if (value == null) {
 			StringBuilder builder = new StringBuilder();
 			appendTo(builder);
-			this.mimetype = builder.toString();
+			value = builder.toString();
+			this.toStringValue = value;
 		}
-		return this.mimetype;
+		return value;
 	}
 
 	protected void appendTo(StringBuilder builder) {

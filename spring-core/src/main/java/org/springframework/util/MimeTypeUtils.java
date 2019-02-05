@@ -36,7 +36,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.MimeType.SpecificityComparator;
 
 /**
  * Miscellaneous {@link MimeType} utility methods.
@@ -55,13 +54,10 @@ public abstract class MimeTypeUtils {
 					'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
 					'V', 'W', 'X', 'Y', 'Z'};
 
-	private static final ConcurrentLRUCache<String, MimeType> CACHED_MIMETYPES =
-			new ConcurrentLRUCache<>(32, MimeTypeUtils::parseMimeTypeInternal);
-
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
 	 */
-	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>();
+	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new MimeType.SpecificityComparator<>();
 
 	/**
 	 * Public constant mime type that includes all media ranges (i.e. "&#42;/&#42;").
@@ -163,6 +159,10 @@ public abstract class MimeTypeUtils {
 	 */
 	public static final String TEXT_XML_VALUE = "text/xml";
 
+
+	private static final ConcurrentLruCache<String, MimeType> cachedMimeTypes =
+			new ConcurrentLruCache<>(32, MimeTypeUtils::parseMimeTypeInternal);
+
 	@Nullable
 	private static volatile Random random;
 
@@ -179,6 +179,7 @@ public abstract class MimeTypeUtils {
 		TEXT_XML = new MimeType("text", "xml");
 	}
 
+
 	/**
 	 * Parse the given String into a single {@code MimeType}.
 	 * Recently parsed {@code MimeType} are cached for further retrieval.
@@ -187,7 +188,7 @@ public abstract class MimeTypeUtils {
 	 * @throws InvalidMimeTypeException if the string cannot be parsed
 	 */
 	public static MimeType parseMimeType(String mimeType) {
-		return CACHED_MIMETYPES.get(mimeType);
+		return cachedMimeTypes.get(mimeType);
 	}
 
 	private static MimeType parseMimeTypeInternal(String mimeType) {
@@ -275,6 +276,7 @@ public abstract class MimeTypeUtils {
 				.map(MimeTypeUtils::parseMimeType).collect(Collectors.toList());
 	}
 
+
 	/**
 	 * Tokenize the given comma-separated string of {@code MimeType} objects
 	 * into a {@code List<String>}. Unlike simple tokenization by ",", this
@@ -329,7 +331,6 @@ public abstract class MimeTypeUtils {
 		}
 		return builder.toString();
 	}
-
 
 	/**
 	 * Sorts the given list of {@code MimeType} objects by specificity.
@@ -399,17 +400,17 @@ public abstract class MimeTypeUtils {
 		return new String(generateMultipartBoundary(), StandardCharsets.US_ASCII);
 	}
 
+
 	/**
 	 * Simple Least Recently Used cache, bounded by the maximum size given
 	 * to the class constructor.
-	 * This implementation is backed by a {@code ConcurrentHashMap} for storing
-	 * the cached values and a {@code ConcurrentLinkedQueue} for ordering
-	 * the keys and choosing the least recently used key when the cache is at
-	 * full capacity.
- 	 * @param <K> the type of the key used for caching
+	 * <p>This implementation is backed by a {@code ConcurrentHashMap} for storing
+	 * the cached values and a {@code ConcurrentLinkedQueue} for ordering the keys
+	 * and choosing the least recently used key when the cache is at full capacity.
+	 * @param <K> the type of the key used for caching
 	 * @param <V> the type of the cached values
 	 */
-	static class ConcurrentLRUCache<K, V> {
+	private static class ConcurrentLruCache<K, V> {
 
 		private final int maxSize;
 
@@ -421,14 +422,14 @@ public abstract class MimeTypeUtils {
 
 		private final Function<K, V> generator;
 
-		ConcurrentLRUCache(int maxSize, Function<K, V> generator) {
+		public ConcurrentLruCache(int maxSize, Function<K, V> generator) {
 			Assert.isTrue(maxSize > 0, "LRU max size should be positive");
 			Assert.notNull(generator, "Generator function should not be null");
 			this.maxSize = maxSize;
 			this.generator = generator;
 		}
 
-		V get(K key) {
+		public V get(K key) {
 			this.lock.readLock().lock();
 			try {
 				if (this.queue.remove(key)) {
@@ -443,7 +444,9 @@ public abstract class MimeTypeUtils {
 			try {
 				if (this.queue.size() == this.maxSize) {
 					K leastUsed = this.queue.poll();
-					this.cache.remove(leastUsed);
+					if (leastUsed != null) {
+						this.cache.remove(leastUsed);
+					}
 				}
 				V value = this.generator.apply(key);
 				this.queue.add(key);
@@ -454,7 +457,6 @@ public abstract class MimeTypeUtils {
 				this.lock.writeLock().unlock();
 			}
 		}
-
 	}
 
 }
