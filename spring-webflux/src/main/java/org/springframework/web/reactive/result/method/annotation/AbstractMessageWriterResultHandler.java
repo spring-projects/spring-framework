@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -137,7 +137,8 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
-		MediaType bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType));
+		List<MediaType> writableMediaTypes = getMediaTypesFor(elementType);
+		MediaType bestMediaType = selectMediaType(exchange, () -> writableMediaTypes);
 		if (bestMediaType != null) {
 			String logPrefix = exchange.getLogPrefix();
 			if (logger.isDebugEnabled()) {
@@ -152,12 +153,12 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			}
 		}
 		else {
-			if (getMediaTypesFor(elementType).isEmpty()) {
+			if (writableMediaTypes.isEmpty()) {
 				return Mono.error(new IllegalStateException("No writer for : " + elementType));
 			}
 		}
 
-		return Mono.error(new NotAcceptableStatusException(getMediaTypesFor(elementType)));
+		return Mono.error(new NotAcceptableStatusException(writableMediaTypes));
 	}
 
 	private ResolvableType getElementType(ReactiveAdapter adapter, ResolvableType genericType) {
@@ -173,10 +174,13 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	}
 
 	private List<MediaType> getMediaTypesFor(ResolvableType elementType) {
-		return getMessageWriters().stream()
-				.filter(converter -> converter.canWrite(elementType, null))
-				.flatMap(converter -> converter.getWritableMediaTypes().stream())
-				.collect(Collectors.toList());
+		List<MediaType> writableMediaTypes = new ArrayList<>();
+		for (HttpMessageWriter<?> converter : getMessageWriters()) {
+			if (converter.canWrite(elementType, null)) {
+				writableMediaTypes.addAll(converter.getWritableMediaTypes());
+			}
+		}
+		return writableMediaTypes;
 	}
 
 }
