@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<bean id="single" class="org.springframework.orm.jpa.hibernate.beans.SinglePrototypeInSpringContextTestBean" scope="prototype">
+		<property name="source" value="SPRING" />
+		<property name="name" value="single" />
+	</bean>
+
+	<bean id="multiple-1" class="org.springframework.orm.jpa.hibernate.beans.MultiplePrototypesInSpringContextTestBean" scope="prototype">
+		<property name="source" value="SPRING" />
+		<property name="name" value="multiple-1" />
+	</bean>
+
+	<bean id="multiple-2" class="org.springframework.orm.jpa.hibernate.beans.MultiplePrototypesInSpringContextTestBean" scope="prototype">
+		<property name="source" value="SPRING" />
+		<property name="name" value="multiple-2" />
+	</bean>
+
+</beans>
