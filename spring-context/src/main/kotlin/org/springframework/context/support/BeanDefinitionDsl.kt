@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	internal val children = arrayListOf<BeanDefinitionDsl>()
 
 	/**
-	 * @see provider
+	 * @see BeanSupplierContext
 	 */
 	@PublishedApi
 	internal lateinit var context: GenericApplicationContext
@@ -217,7 +217,7 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 									  destroyMethodName: String? = null,
 									  description: String? = null,
 									  role: Role? = null,
-									  crossinline function: () -> T) {
+									  crossinline function: BeanSupplierContext.() -> T) {
 
 		val customizer = BeanDefinitionCustomizer { bd ->
 			scope?.let { bd.scope = scope.name.toLowerCase() }
@@ -232,29 +232,35 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 
 
 		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context);
-		context.registerBean(beanName, T::class.java, Supplier { function.invoke() }, customizer)
+		context.registerBean(beanName, T::class.java, Supplier { function.invoke(BeanSupplierContext(context)) }, customizer)
 	}
 
 	/**
-	 * Get a reference to the bean by type or type + name with the syntax
-	 * `ref<Foo>()` or `ref<Foo>("foo")`. When leveraging Kotlin type inference
-	 * it could be as short as `ref()` or `ref("foo")`.
-	 * @param name the name of the bean to retrieve
-	 * @param T type the bean must match, can be an interface or superclass
+	 * Limit access to `ref()` and `provider()` to bean supplier lambdas.
+	 * @since 5.2
 	 */
-	inline fun <reified T : Any> ref(name: String? = null) : T = when (name) {
-		null -> context.getBean(T::class.java)
-		else -> context.getBean(name, T::class.java)
+	open class BeanSupplierContext(@PublishedApi internal val context: GenericApplicationContext) {
+
+		/**
+		 * Get a reference to the bean by type or type + name with the syntax
+		 * `ref<Foo>()` or `ref<Foo>("foo")`. When leveraging Kotlin type inference
+		 * it could be as short as `ref()` or `ref("foo")`.
+		 * @param name the name of the bean to retrieve
+		 * @param T type the bean must match, can be an interface or superclass
+		 */
+		inline fun <reified T : Any> ref(name: String? = null) : T = when (name) {
+			null -> context.getBean(T::class.java)
+			else -> context.getBean(name, T::class.java)
+		}
+
+		/**
+		 * Return an provider for the specified bean, allowing for lazy on-demand retrieval
+		 * of instances, including availability and uniqueness options.
+		 * @see org.springframework.beans.factory.BeanFactory.getBeanProvider
+		 */
+		inline fun <reified T : Any> provider() : ObjectProvider<T> = context.getBeanProvider()
+
 	}
-
-
-	/**
-	 * Return an provider for the specified bean, allowing for lazy on-demand retrieval
-	 * of instances, including availability and uniqueness options.
-	 * @since 5.1.1
-	 * @see org.springframework.beans.factory.BeanFactory.getBeanProvider
-	 */
-	inline fun <reified T : Any> provider() : ObjectProvider<T> = context.getBeanProvider()
 
 	/**
 	 * Take in account bean definitions enclosed in the provided lambda only when the
