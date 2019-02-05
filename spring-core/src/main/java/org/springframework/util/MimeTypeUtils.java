@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -39,6 +44,7 @@ import org.springframework.util.MimeType.SpecificityComparator;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Dimitrios Liapis
+ * @author Brian Clozel
  * @since 4.0
  */
 public abstract class MimeTypeUtils {
@@ -48,6 +54,9 @@ public abstract class MimeTypeUtils {
 					'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A',
 					'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
 					'V', 'W', 'X', 'Y', 'Z'};
+
+	private static final ConcurrentLRUCache<String, MimeType> CACHED_MIMETYPES =
+			new ConcurrentLRUCache<>(32, MimeTypeUtils::parseMimeTypeInternal);
 
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
@@ -157,28 +166,31 @@ public abstract class MimeTypeUtils {
 	@Nullable
 	private static volatile Random random;
 
-
 	static {
-		ALL = MimeType.valueOf(ALL_VALUE);
-		APPLICATION_JSON = MimeType.valueOf(APPLICATION_JSON_VALUE);
-		APPLICATION_OCTET_STREAM = MimeType.valueOf(APPLICATION_OCTET_STREAM_VALUE);
-		APPLICATION_XML = MimeType.valueOf(APPLICATION_XML_VALUE);
-		IMAGE_GIF = MimeType.valueOf(IMAGE_GIF_VALUE);
-		IMAGE_JPEG = MimeType.valueOf(IMAGE_JPEG_VALUE);
-		IMAGE_PNG = MimeType.valueOf(IMAGE_PNG_VALUE);
-		TEXT_HTML = MimeType.valueOf(TEXT_HTML_VALUE);
-		TEXT_PLAIN = MimeType.valueOf(TEXT_PLAIN_VALUE);
-		TEXT_XML = MimeType.valueOf(TEXT_XML_VALUE);
+		ALL = new MimeType("*", "*");
+		APPLICATION_JSON = new MimeType("application", "json");
+		APPLICATION_OCTET_STREAM = new MimeType("application", "octet-stream");
+		APPLICATION_XML = new MimeType("application", "xml");
+		IMAGE_GIF = new MimeType("image", "gif");
+		IMAGE_JPEG = new MimeType("image", "jpeg");
+		IMAGE_PNG = new MimeType("image", "png");
+		TEXT_HTML = new MimeType("text", "html");
+		TEXT_PLAIN = new MimeType("text", "plain");
+		TEXT_XML = new MimeType("text", "xml");
 	}
-
 
 	/**
 	 * Parse the given String into a single {@code MimeType}.
+	 * Recently parsed {@code MimeType} are cached for further retrieval.
 	 * @param mimeType the string to parse
 	 * @return the mime type
 	 * @throws InvalidMimeTypeException if the string cannot be parsed
 	 */
 	public static MimeType parseMimeType(String mimeType) {
+		return CACHED_MIMETYPES.get(mimeType);
+	}
+
+	private static MimeType parseMimeTypeInternal(String mimeType) {
 		if (!StringUtils.hasLength(mimeType)) {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
 		}
@@ -385,6 +397,54 @@ public abstract class MimeTypeUtils {
 	 */
 	public static String generateMultipartBoundaryString() {
 		return new String(generateMultipartBoundary(), StandardCharsets.US_ASCII);
+	}
+
+	static class ConcurrentLRUCache<K, V> {
+
+		private final int maxSize;
+
+		private final ConcurrentLinkedQueue<K> queue = new ConcurrentLinkedQueue<>();
+
+		private final ConcurrentHashMap<K, V> cache = new ConcurrentHashMap<>();
+
+		private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
+		private final Function<K, V> generator;
+
+		ConcurrentLRUCache(int maxSize, Function<K, V> generator) {
+			Assert.isTrue(maxSize > 0, "LRU max size should be positive");
+			Assert.notNull(generator, "Generator function should not be null");
+			this.maxSize = maxSize;
+			this.generator = generator;
+		}
+
+		public V get(K key) {
+			this.lock.readLock().lock();
+			try {
+				if (this.queue.remove(key)) {
+					this.queue.add(key);
+					return this.cache.get(key);
+				}
+			}
+			finally {
+				this.lock.readLock().unlock();
+			}
+			this.lock.writeLock().lock();
+			try {
+				if (this.queue.size() == this.maxSize) {
+					K leastUsed = this.queue.poll();
+					this.cache.remove(leastUsed);
+				}
+				V value = this.generator.apply(key);
+				this.queue.add(key);
+				this.cache.put(key, value);
+				return value;
+			}
+			finally {
+				this.lock.writeLock().unlock();
+			}
+		}
+
 	}
 
 }
