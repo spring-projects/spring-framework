@@ -285,7 +285,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			@Nullable
-			protected V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries entries) {
+			protected V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
 				if (entry != null) {
 					V oldValue = entry.getValue();
 					if (overwriteExisting) {
@@ -530,15 +530,12 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				final Reference<K, V> head = this.references[index];
 				Reference<K, V> ref = findInChain(head, key, hash);
 				Entry<K, V> entry = (ref != null ? ref.get() : null);
-				Entries entries = new Entries() {
-					@Override
-					public void add(@Nullable V value) {
-						@SuppressWarnings("unchecked")
-						Entry<K, V> newEntry = new Entry<>((K) key, value);
-						Reference<K, V> newReference = Segment.this.referenceManager.createReference(newEntry, hash, head);
-						Segment.this.references[index] = newReference;
-						Segment.this.count.incrementAndGet();
-					}
+				Entries<V> entries = value -> {
+					@SuppressWarnings("unchecked")
+					Entry<K, V> newEntry = new Entry<>((K) key, value);
+					Reference<K, V> newReference = Segment.this.referenceManager.createReference(newEntry, hash, head);
+					Segment.this.references[index] = newReference;
+					Segment.this.count.incrementAndGet();
 				};
 				return task.execute(ref, entry, entries);
 			}
@@ -802,7 +799,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * @see #execute(Reference, Entry)
 		 */
 		@Nullable
-		protected T execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries entries) {
+		protected T execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
 			return execute(ref, entry);
 		}
 
@@ -830,15 +827,15 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 
 	/**
-	 * Allows a task access to {@link Segment} entries.
+	 * Allows a task access to {@link ConcurrentReferenceHashMap.Segment} entries.
 	 */
-	private abstract class Entries {
+	private interface Entries<V> {
 
 		/**
 		 * Add a new entry with the specified value.
 		 * @param value the value to add
 		 */
-		public abstract void add(@Nullable V value);
+		void add(@Nullable V value);
 	}
 
 
