@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.MimeType.SpecificityComparator;
 
 /**
  * Miscellaneous {@link MimeType} utility methods.
@@ -52,7 +51,7 @@ public abstract class MimeTypeUtils {
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
 	 */
-	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>();
+	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new MimeType.SpecificityComparator<>();
 
 	/**
 	 * Public constant mime type that includes all media ranges (i.e. "&#42;/&#42;").
@@ -154,9 +153,9 @@ public abstract class MimeTypeUtils {
 	 */
 	public static final String TEXT_XML_VALUE = "text/xml";
 
+
 	@Nullable
 	private static volatile Random random;
-
 
 	static {
 		ALL = MimeType.valueOf(ALL_VALUE);
@@ -263,6 +262,7 @@ public abstract class MimeTypeUtils {
 				.map(MimeTypeUtils::parseMimeType).collect(Collectors.toList());
 	}
 
+
 	/**
 	 * Tokenize the given comma-separated string of {@code MimeType} objects
 	 * into a {@code List<String>}. Unlike simple tokenization by ",", this
@@ -317,7 +317,6 @@ public abstract class MimeTypeUtils {
 		}
 		return builder.toString();
 	}
-
 
 	/**
 	 * Sorts the given list of {@code MimeType} objects by specificity.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.lang.Nullable;
 /**
  * Represents a reference to a value.  With a reference it is possible to get or set the
  * value. Passing around value references rather than the values themselves can avoid
- * incorrect duplication of operand evaluation. For example in 'list[index++]++' without a
- * value reference for 'list[index++]' it would be necessary to evaluate list[index++]
+ * incorrect duplication of operand evaluation. For example in 'list[index++]++' without
+ * a value reference for 'list[index++]' it would be necessary to evaluate list[index++]
  * twice (once to get the value, once to determine where the value goes) and that would
  * double increment index.
  *
@@ -103,7 +103,8 @@ public interface ValueRef {
 
 		@Override
 		public void setValue(@Nullable Object newValue) {
-			throw new SpelEvaluationException(this.node.pos, SpelMessage.NOT_ASSIGNABLE, this.node.toStringAST());
+			throw new SpelEvaluationException(
+					this.node.getStartPosition(), SpelMessage.NOT_ASSIGNABLE, this.node.toStringAST());
 		}
 
 		@Override
