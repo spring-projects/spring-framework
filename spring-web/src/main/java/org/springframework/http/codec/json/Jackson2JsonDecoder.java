@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.http.codec.json;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Decode a byte stream into JSON and convert to Object's with Jackson 2.9,
@@ -27,6 +29,7 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Greg Turnquist
  * @since 5.0
  * @see Jackson2JsonEncoder
  */
@@ -38,6 +41,10 @@ public class Jackson2JsonDecoder extends AbstractJackson2Decoder {
 
 	public Jackson2JsonDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
+	}
+
+	public Jackson2JsonDecoder(ObjectMapper mapper, List<MimeType> mimeTypes) {
+		super(mapper, mimeTypes.toArray(new MimeType[]{}));
 	}
 
 }

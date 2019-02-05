@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import reactor.core.publisher.Flux;
+import org.springframework.core.ResolvableType;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MimeType;
+
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import reactor.core.publisher.Flux;
-
-import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.lang.Nullable;
-import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects using Jackson 2.9.
@@ -41,6 +41,7 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
+ * @author Greg Turnquist
  * @since 5.0
  * @see Jackson2JsonDecoder
  */
@@ -58,6 +59,10 @@ public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 		super(mapper, mimeTypes);
 		setStreamingMediaTypes(Collections.singletonList(MediaType.APPLICATION_STREAM_JSON));
 		this.ssePrettyPrinter = initSsePrettyPrinter();
+	}
+
+	public Jackson2JsonEncoder(ObjectMapper mapper, List<MimeType> mimeTypes) {
+		this(mapper, mimeTypes.toArray(new MimeType[]{}));
 	}
 
 	private static PrettyPrinter initSsePrettyPrinter() {

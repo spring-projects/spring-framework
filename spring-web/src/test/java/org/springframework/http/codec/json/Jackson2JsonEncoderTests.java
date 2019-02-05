@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
 
 package org.springframework.http.codec.json;
 
+import static java.util.Collections.*;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.http.codec.json.Jackson2JsonEncoder.*;
+import static org.springframework.http.codec.json.JacksonViewBean.*;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractEncoderTestCase;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -36,19 +38,13 @@ import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.util.MimeType;
 
-import static java.util.Collections.singletonMap;
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
-import static org.springframework.http.MediaType.APPLICATION_XML;
-import static org.springframework.http.codec.json.Jackson2JsonEncoder.JSON_VIEW_HINT;
-import static org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
-import static org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Sebastien Deleuze
+ * @author Greg Turnquist
  */
 public class Jackson2JsonEncoderTests extends AbstractEncoderTestCase<Jackson2JsonEncoder> {
 
@@ -198,6 +194,13 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTestCase<Jackson2Js
 								.andThen(DataBufferUtils::release))
 						.verifyComplete(),
 				null, hints);
+	}
+
+	@Test // SPR-22349
+	public void createEncoderUsingList() {
+		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), Collections.singletonList(MediaType.APPLICATION_JSON));
+
+		assertTrue(encoder.getMimeTypes().contains(MediaType.APPLICATION_JSON));
 	}
 
 
