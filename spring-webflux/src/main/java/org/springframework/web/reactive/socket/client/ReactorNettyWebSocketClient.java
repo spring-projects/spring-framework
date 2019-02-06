@@ -37,15 +37,16 @@ import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSess
  * {@link WebSocketClient} implementation for use with Reactor Netty.
  *
  * @author Rossen Stoyanchev
+ * @author Usman Arshad
  * @since 5.0
  */
 public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyWebSocketClient.class);
 
+	private int maxFramePayloadLength = 65536;
 
 	private final HttpClient httpClient;
-
 
 	/**
 	 * Default constructor.
@@ -63,7 +64,6 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 		this.httpClient = httpClient;
 	}
 
-
 	/**
 	 * Return the configured {@link HttpClient}.
 	 */
@@ -71,6 +71,20 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 		return this.httpClient;
 	}
 
+	/**
+	 * Return the configured maxFramePayloadLength used by the configured {@link HttpClient}.
+	 * Default value of 65536 if not set.
+	 */
+	public int getMaxFramePayloadLength() {
+		return maxFramePayloadLength;
+	}
+
+	/**
+	 * Sets the maxFramePayloadLength to be used by the configured {@link HttpClient}.
+	 */
+	public void setMaxFramePayloadLength(int maxFramePayloadLength) {
+		this.maxFramePayloadLength = maxFramePayloadLength;
+	}
 
 	@Override
 	public Mono<Void> execute(URI url, WebSocketHandler handler) {
@@ -81,7 +95,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		return getHttpClient()
 				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
-				.websocket(StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols()))
+				.websocket(StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols()), getMaxFramePayloadLength())
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
 					HttpHeaders responseHeaders = toHttpHeaders(inbound);
