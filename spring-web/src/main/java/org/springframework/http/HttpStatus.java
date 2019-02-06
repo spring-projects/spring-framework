@@ -414,10 +414,12 @@ public enum HttpStatus {
 
 	private final String reasonPhrase;
 
+	private final Series series;
 
 	HttpStatus(int value, String reasonPhrase) {
 		this.value = value;
 		this.reasonPhrase = reasonPhrase;
+		this.series = Series.valueOf(value);
 	}
 
 
@@ -440,7 +442,7 @@ public enum HttpStatus {
 	 * @see HttpStatus.Series
 	 */
 	public Series series() {
-		return Series.valueOf(this);
+		return this.series;
 	}
 
 	/**
@@ -575,10 +577,9 @@ public enum HttpStatus {
 		 * Return the enum constant of this type with the corresponding series.
 		 * @param status a standard HTTP status enum value
 		 * @return the enum constant of this type with the corresponding series
-		 * @throws IllegalArgumentException if this enum has no corresponding constant
 		 */
 		public static Series valueOf(HttpStatus status) {
-			return valueOf(status.value);
+			return status.series;
 		}
 
 		/**
