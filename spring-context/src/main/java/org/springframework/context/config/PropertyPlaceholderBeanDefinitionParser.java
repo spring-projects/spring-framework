@@ -18,7 +18,6 @@ package org.springframework.context.config;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -40,6 +39,7 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBea
 
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected Class<?> getBeanClass(Element element) {
 		// As of Spring 3.1, the default value of system-properties-mode has changed from
 		// 'FALLBACK' to 'ENVIRONMENT'. This latter value indicates that resolution of
@@ -51,7 +51,7 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBea
 
 		// The user has explicitly specified a value for system-properties-mode: revert to
 		// PropertyPlaceholderConfigurer to ensure backward compatibility with 3.0 and earlier.
-		return PropertyPlaceholderConfigurer.class;
+		return org.springframework.beans.factory.config.PropertyPlaceholderConfigurer.class;
 	}
 
 	@Override
