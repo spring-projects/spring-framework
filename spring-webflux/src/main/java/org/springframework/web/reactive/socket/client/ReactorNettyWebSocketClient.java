@@ -16,14 +16,8 @@
 
 package org.springframework.web.reactive.socket.client;
 
-import java.net.URI;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Mono;
-import reactor.netty.http.client.HttpClient;
-import reactor.netty.http.websocket.WebsocketInbound;
-
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
@@ -32,20 +26,32 @@ import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.websocket.WebsocketInbound;
+
+import java.net.URI;
 
 /**
  * {@link WebSocketClient} implementation for use with Reactor Netty.
  *
  * @author Rossen Stoyanchev
+ * @author Usman Arshad
  * @since 5.0
  */
 public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyWebSocketClient.class);
-
+	private int maxFramePayloadLength = 65536;
 
 	private final HttpClient httpClient;
 
+	/**
+	 * Default constructor.
+	 */
+	public ReactorNettyWebSocketClient(int maxFramePayloadLength) {
+		this(HttpClient.create());
+	}
 
 	/**
 	 * Default constructor.
@@ -62,7 +68,6 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 		Assert.notNull(httpClient, "HttpClient is required");
 		this.httpClient = httpClient;
 	}
-
 
 	/**
 	 * Return the configured {@link HttpClient}.
@@ -81,7 +86,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		return getHttpClient()
 				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
-				.websocket(StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols()))
+				.websocket(StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols()), getMaxFramePayloadLength())
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
 					HttpHeaders responseHeaders = toHttpHeaders(inbound);
@@ -100,6 +105,14 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 					}
 				})
 				.next();
+	}
+
+	public int getMaxFramePayloadLength() {
+		return maxFramePayloadLength;
+	}
+
+	public void setMaxFramePayloadLength(int maxFramePayloadLength) {
+		this.maxFramePayloadLength = maxFramePayloadLength;
 	}
 
 	private void setNettyHeaders(HttpHeaders httpHeaders, io.netty.handler.codec.http.HttpHeaders nettyHeaders) {
