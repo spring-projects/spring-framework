@@ -17,11 +17,13 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
+
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
@@ -41,16 +43,10 @@ import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSess
 public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyWebSocketClient.class);
+
 	private int maxFramePayloadLength = 65536;
 
 	private final HttpClient httpClient;
-
-	/**
-	 * Default constructor.
-	 */
-	public ReactorNettyWebSocketClient(int maxFramePayloadLength) {
-		this(HttpClient.create());
-	}
 
 	/**
 	 * Default constructor.
