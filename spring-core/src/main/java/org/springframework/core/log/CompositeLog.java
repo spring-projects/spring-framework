@@ -114,7 +114,7 @@ final class CompositeLog implements Log {
 
 	@Override
 	public void error(Object message, Throwable ex) {
-		this.errorLogger.error(message);
+		this.errorLogger.error(message, ex);
 	}
 
 	@Override
