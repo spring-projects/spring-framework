@@ -334,6 +334,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 						if (builder.length() != 0) {
 							builder.append('&');
 						}
+						Assert.notNull(name, "Name must not be null");
 						builder.append(URLEncoder.encode(name, charset.name()));
 						if (value != null) {
 							builder.append('=');
