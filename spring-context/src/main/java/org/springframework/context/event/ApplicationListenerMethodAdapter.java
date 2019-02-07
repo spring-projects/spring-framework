@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
-		this.order = resolveOrder(method);
+		this.order = resolveOrder(targetMethod);
 
 		this.methodKey = new AnnotatedElementKey(method, targetClass);
 	}
