@@ -30,7 +30,7 @@ ext {
 
 	aspectjVersion       = "1.9.2"
 	freemarkerVersion    = "2.3.28"
-	groovyVersion        = "2.5.5"
+	groovyVersion        = "2.5.6"
 	hsqldbVersion        = "2.4.1"
 	jackson2Version      = "2.9.8"
 	jettyVersion         = "9.4.14.v20181114"
@@ -280,7 +280,7 @@ configure(rootProject) {
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.hibernate:hibernate-core:5.1.16.Final")
+		testCompile("org.hibernate:hibernate-core:5.1.17.Final")
 	}
 
 	artifacts {
