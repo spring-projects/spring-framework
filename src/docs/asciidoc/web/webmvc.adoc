@@ -220,10 +220,10 @@ If an application context hierarchy is not required, applications may configure 
 
 The `DispatcherServlet` delegates to special beans to process requests and render the
 appropriate responses. By "special beans" we mean Spring-managed, Object instances that
-implement WebFlux framework contracts. Those usually come with built-in contracts but
-you can customize their properties, extend or replace them.
+implement framework contracts. Those usually come with built-in contracts but you can
+customize their properties, extend or replace them.
 
-The table below lists the special beans detected by the `DispatcherHandler`:
+The table below lists the special beans detected by the `DispatcherServlet`:
 
 [[mvc-webappctx-special-beans-tbl]]
 [cols="1,2", options="header"]
@@ -236,34 +236,34 @@ The table below lists the special beans detected by the `DispatcherHandler`:
   The mapping is based on some criteria the details of which vary by `HandlerMapping`
   implementation.
 
-  The two main `HandlerMapping` implementations are `RequestMappingHandlerMapping` which
-  supports `@RequestMapping` annotated methods and `SimpleUrlHandlerMapping` which
-  maintains explicit registrations of URI path patterns to handlers.
+  The two main `HandlerMapping` implementations are `RequestMappingHandlerMapping`
+  (which supports `@RequestMapping` annotated methods) and `SimpleUrlHandlerMapping`
+  (which maintains explicit registrations of URI path patterns to handlers).
 
 | HandlerAdapter
-| Help the `DispatcherServlet` to invoke a handler mapped to a request regardless of
+| Help the `DispatcherServlet` to invoke a handler mapped to a request, regardless of
   how the handler is actually invoked. For example, invoking an annotated controller
   requires resolving annotations. The main purpose of a `HandlerAdapter` is
   to shield the `DispatcherServlet` from such details.
 
 | <<mvc-exceptionhandlers,HandlerExceptionResolver>>
-| Strategy to resolve exceptions possibly mapping them to handlers, or to HTML error
-  views, or other. See <<mvc-exceptionhandlers>>.
+| Strategy to resolve exceptions, possibly mapping them to handlers, to HTML error
+  views, or other targets. See <<mvc-exceptionhandlers>>.
 
 | <<mvc-viewresolver,ViewResolver>>
-| Resolve logical String-based view names returned from a handler to an actual `View`
-  to render to the response with. See <<mvc-viewresolver>> and <<mvc-view>>.
+| Resolve logical `String`-based view names returned from a handler to an actual `View`
+  with which to render to the response. See <<mvc-viewresolver>> and <<mvc-view>>.
 
 | <<mvc-localeresolver,LocaleResolver>>, <<mvc-timezone,LocaleContextResolver>>
 | Resolve the `Locale` a client is using and possibly their time zone, in order to be able
   to offer internationalized views. See <<mvc-localeresolver>>.
 
 | <<mvc-themeresolver,ThemeResolver>>
-| Resolve themes your web application can use, for example, to offer personalized layouts.
+| Resolve themes your web application can use -- for example, to offer personalized layouts.
   See <<mvc-themeresolver>>.
 
 | <<mvc-multipart,MultipartResolver>>
-| Abstraction for parsing a multi-part request (e.g. browser form file upload) with
+| Abstraction for parsing a multi-part request (for example, browser form file upload) with
   the help of some multipart parsing library. See <<mvc-multipart>>.
 
 | <<mvc-flash-attributes,FlashMapManager>>
@@ -448,7 +448,7 @@ handler that is found implements the __LastModified__ interface. If so, the valu
 the client.
 
 You can customize individual `DispatcherServlet` instances by adding Servlet
-initialization parameters ( `init-param` elements) to the Servlet declaration in the
+initialization parameters (`init-param` elements) to the Servlet declaration in the
 `web.xml` file. See the following table for the list of supported parameters.
 
 [[mvc-disp-servlet-init-params-tbl]]
