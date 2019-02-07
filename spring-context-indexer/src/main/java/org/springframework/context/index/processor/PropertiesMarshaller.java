@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import java.util.Set;
 abstract class PropertiesMarshaller {
 
 	public static void write(CandidateComponentsMetadata metadata, OutputStream out) throws IOException {
-		Properties props = new Properties();
+		Properties props = new SortedProperties(true);
 		metadata.getItems().forEach(m -> props.put(m.getType(), String.join(",", m.getStereotypes())));
 		props.store(out, "");
 	}
