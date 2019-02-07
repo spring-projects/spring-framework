@@ -221,9 +221,9 @@ The following table lists the special beans detected by the `DispatcherServlet`:
   The mapping is based on some criteria, the details of which vary by `HandlerMapping`
   implementation.
 
-  The two main `HandlerMapping` implementations are `RequestMappingHandlerMapping`( which
-  supports `@RequestMapping` annotated methods) and `SimpleUrlHandlerMapping` (which
-  maintains explicit registrations of URI path patterns to handlers).
+  The two main `HandlerMapping` implementations are `RequestMappingHandlerMapping`
+  (which supports `@RequestMapping` annotated methods) and `SimpleUrlHandlerMapping`
+  (which maintains explicit registrations of URI path patterns to handlers).
 
 | `HandlerAdapter`
 | Help the `DispatcherServlet` to invoke a handler mapped to a request, regardless of
