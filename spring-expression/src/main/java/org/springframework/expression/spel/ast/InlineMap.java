@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.expression.spel.SpelNode;
 public class InlineMap extends SpelNodeImpl {
 
 	// If the map is purely literals, it is a constant value and can be computed and cached
-	private TypedValue constant = null;
+	private TypedValue constant;
 
 
 	public InlineMap(int pos, SpelNodeImpl... args) {
@@ -44,7 +44,7 @@ public class InlineMap extends SpelNodeImpl {
 
 
 	/**
-	 * If all the components of the list are constants, or lists/maps that themselves
+	 * If all the components of the map are constants, or lists/maps that themselves
 	 * contain constants, then a constant list can be built to represent this node.
 	 * This will speed up later getValue calls and reduce the amount of garbage created.
 	 */
@@ -67,14 +67,14 @@ public class InlineMap extends SpelNodeImpl {
 						break;
 					}
 				}
-				else if (!((c%2)==0 && (child instanceof PropertyOrFieldReference))) {					
+				else if (!(c % 2 == 0 && child instanceof PropertyOrFieldReference)) {
 					isConstant = false;
 					break;
 				}
 			}
 		}
 		if (isConstant) {
-			Map<Object,Object> constantMap = new LinkedHashMap<Object,Object>();			
+			Map<Object, Object> constantMap = new LinkedHashMap<Object, Object>();
 			int childCount = getChildCount();
 			for (int c = 0; c < childCount; c++) {
 				SpelNode keyChild = getChild(c++);
@@ -148,15 +148,15 @@ public class InlineMap extends SpelNodeImpl {
 	}
 
 	/**
-	 * @return whether this list is a constant value
+	 * Return whether this list is a constant value.
 	 */
 	public boolean isConstant() {
 		return this.constant != null;
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<Object,Object> getConstantValue() {
-		return (Map<Object,Object>) this.constant.getValue();
+	public Map<Object, Object> getConstantValue() {
+		return (Map<Object, Object>) this.constant.getValue();
 	}
 
 }

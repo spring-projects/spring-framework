@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.springframework.util.Assert;
 /**
  * A simple descriptor for an injection point, pointing to a method/constructor
  * parameter or a field. Exposed by {@link UnsatisfiedDependencyException}.
+ * Also available as an argument for factory methods, reacting to the
+ * requesting injection point for building a customized bean instance.
  *
  * @author Juergen Hoeller
  * @since 4.3
@@ -101,10 +103,12 @@ public class InjectionPoint {
 	 */
 	public Annotation[] getAnnotations() {
 		if (this.field != null) {
-			if (this.fieldAnnotations == null) {
-				this.fieldAnnotations = this.field.getAnnotations();
+			Annotation[] fieldAnnotations = this.fieldAnnotations;
+			if (fieldAnnotations == null) {
+				fieldAnnotations = this.field.getAnnotations();
+				this.fieldAnnotations = fieldAnnotations;
 			}
-			return this.fieldAnnotations;
+			return fieldAnnotations;
 		}
 		else {
 			return this.methodParameter.getParameterAnnotations();
