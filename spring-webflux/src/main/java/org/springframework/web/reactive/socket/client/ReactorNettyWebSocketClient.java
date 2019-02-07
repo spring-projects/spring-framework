@@ -71,6 +71,20 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 		return this.httpClient;
 	}
 
+	/**
+	 * Return the configured maxFramePayloadLength used by the configured {@link HttpClient}.
+	 * Default value of 65536 if not set.
+	 */
+	public int getMaxFramePayloadLength() {
+		return maxFramePayloadLength;
+	}
+
+	/**
+	 * Sets the maxFramePayloadLength to be used by the configured {@link HttpClient}.
+	 */
+	public void setMaxFramePayloadLength(int maxFramePayloadLength) {
+		this.maxFramePayloadLength = maxFramePayloadLength;
+	}
 
 	@Override
 	public Mono<Void> execute(URI url, WebSocketHandler handler) {
@@ -100,14 +114,6 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 					}
 				})
 				.next();
-	}
-
-	public int getMaxFramePayloadLength() {
-		return maxFramePayloadLength;
-	}
-
-	public void setMaxFramePayloadLength(int maxFramePayloadLength) {
-		this.maxFramePayloadLength = maxFramePayloadLength;
 	}
 
 	private void setNettyHeaders(HttpHeaders httpHeaders, io.netty.handler.codec.http.HttpHeaders nettyHeaders) {
