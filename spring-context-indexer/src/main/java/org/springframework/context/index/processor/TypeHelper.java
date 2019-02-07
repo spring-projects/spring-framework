@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.context.index.processor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -110,7 +111,12 @@ class TypeHelper {
 	}
 
 	public List<? extends AnnotationMirror> getAllAnnotationMirrors(Element e) {
-		return this.env.getElementUtils().getAllAnnotationMirrors(e);
+		try {
+			return this.env.getElementUtils().getAllAnnotationMirrors(e);
+		}
+		catch (Throwable ex) {
+			return Collections.emptyList();
+		}
 	}
 
 }
