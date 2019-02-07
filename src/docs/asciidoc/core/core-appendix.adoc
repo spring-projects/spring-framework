@@ -563,10 +563,10 @@ available to you:
 ==== Using `<property-placeholder/>`
 
 This element activates the replacement of `${...}` placeholders, which are resolved against a
-specified properties file (as a <<core.adoc#resources,Spring resource location>>). This element is
-a convenience mechanism that sets up a <<core.adoc#beans-factory-placeholderconfigurer,
-`PropertyPlaceholderConfigurer`>> for you. If you need more control over the
-`PropertyPlaceholderConfigurer`, you can explicitly define one yourself.
+specified properties file (as a <<core.adoc#resources,Spring resource location>>). This element
+is a convenience mechanism that sets up a <<core.adoc#beans-factory-placeholderconfigurer,
+`PropertySourcesPlaceholderConfigurer`>> for you. If you need more control over the
+`PropertySourcesPlaceholderConfigurer`, you can explicitly define one yourself.
 
 
 

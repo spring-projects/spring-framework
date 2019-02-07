@@ -163,7 +163,6 @@ The following example shows the basic structure of XML-based configuration metad
 <2> The `class` attribute defines the type of the bean and uses the fully qualified
 classname.
 
-
 The value of the `id` attribute refers to collaborating objects. The XML for
 referring to collaborating objects is not shown in this example. See
 <<beans-dependencies,Dependencies>> for more information.
@@ -1355,7 +1354,7 @@ You can also configure a `java.util.Properties` instance, as follows:
 [subs="verbatim,quotes"]
 ----
 	<bean id="mappings"
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
 
 		<!-- typed as a java.util.Properties -->
 		<property name="properties">
@@ -3980,19 +3979,19 @@ to work with bean instances within a `BeanFactoryPostProcessor` (for example, by
 standard container lifecycle. This may cause negative side effects, such as bypassing
 bean post processing.
 
-Also, `BeanFactoryPostProcessor` instances are scoped per-container. This is only relevant if
-you use container hierarchies. If you define a `BeanFactoryPostProcessor` in one
-container, it is applied only to the bean definitions in that container. Bean
-definitions in one container are not post-processed by `BeanFactoryPostProcessor` instances
-in another container, even if both containers are part of the same hierarchy.
+Also, `BeanFactoryPostProcessor` instances are scoped per-container. This is only relevant
+if you use container hierarchies. If you define a `BeanFactoryPostProcessor` in one
+container, it is applied only to the bean definitions in that container. Bean definitions
+in one container are not post-processed by `BeanFactoryPostProcessor` instances in another
+container, even if both containers are part of the same hierarchy.
 ====
 
 A bean factory post-processor is automatically executed when it is declared inside an
 `ApplicationContext`, in order to apply changes to the configuration metadata that
 define the container. Spring includes a number of predefined bean factory
 post-processors, such as `PropertyOverrideConfigurer` and
-`PropertyPlaceholderConfigurer`. You can also use a custom `BeanFactoryPostProcessor` --
-for example, to register custom property editors.
+`PropertySourcesPlaceholderConfigurer`. You can also use a custom `BeanFactoryPostProcessor`
+-- for example, to register custom property editors.
 
 An `ApplicationContext` automatically detects any beans that are deployed into it that
 implement the `BeanFactoryPostProcessor` interface. It uses these beans as bean factory
@@ -4008,13 +4007,13 @@ Thus, marking it for lazy initialization will be ignored, and the
 
 
 [[beans-factory-placeholderconfigurer]]
-==== Example: The Class Name Substitution `PropertyPlaceholderConfigurer`
+==== Example: The Class Name Substitution `PropertySourcesPlaceholderConfigurer`
 
-You can use the `PropertyPlaceholderConfigurer` to externalize property values from a bean
-definition in a separate file by using the standard Java `Properties` format. Doing so
-enables the person deploying an application to customize environment-specific properties,
-such as database URLs and passwords, without the complexity or risk of modifying the
-main XML definition file or files for the container.
+You can use the `PropertySourcesPlaceholderConfigurer` to externalize property values
+from a bean definition in a separate file by using the standard Java `Properties` format.
+Doing so enables the person deploying an application to customize environment-specific
+properties, such as database URLs and passwords, without the complexity or risk of
+modifying the main XML definition file or files for the container.
 
 Consider the following XML-based configuration metadata fragment, where a `DataSource`
 with placeholder values is defined:
@@ -4022,7 +4021,7 @@ with placeholder values is defined:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+	<bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
 		<property name="locations" value="classpath:com/something/jdbc.properties"/>
 	</bean>
 
@@ -4035,11 +4034,10 @@ with placeholder values is defined:
 	</bean>
 ----
 
-The example shows properties configured from an
-external `Properties` file. At runtime, a `PropertyPlaceholderConfigurer` is applied to
-the metadata that replaces some properties of the DataSource. The values to replace
-are specified as placeholders of the form `${property-name}`, which follows the Ant and
-log4j and JSP EL style.
+The example shows properties configured from an external `Properties` file. At runtime,
+a `PropertySourcesPlaceholderConfigurer` is applied to the metadata that replaces some
+properties of the DataSource. The values to replace are specified as placeholders of the
+form `${property-name}`, which follows the Ant and log4j and JSP EL style.
 
 The actual values come from another file in the standard Java `Properties` format:
 
@@ -4054,12 +4052,12 @@ jdbc.password=root
 
 Therefore, the `${jdbc.username}` string is replaced at runtime with the value, 'sa', and
 the same applies for other placeholder values that match keys in the properties file.
-The `PropertyPlaceholderConfigurer` checks for placeholders in most properties and
+The `PropertySourcesPlaceholderConfigurer` checks for placeholders in most properties and
 attributes of a bean definition. Furthermore, you can customize the placeholder prefix and suffix.
 
-With the `context` namespace introduced in Spring 2.5, you can configure
-property placeholders with a dedicated configuration element. You can provide one or more locations
-as a comma-separated list in the `location` attribute, as the following example shows:
+With the `context` namespace introduced in Spring 2.5, you can configure property placeholders
+with a dedicated configuration element. You can provide one or more locations as a
+comma-separated list in the `location` attribute, as the following example shows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4067,30 +4065,20 @@ as a comma-separated list in the `location` attribute, as the following example 
 	<context:property-placeholder location="classpath:com/something/jdbc.properties"/>
 ----
 
-The `PropertyPlaceholderConfigurer` not only looks for properties in the `Properties`
-file you specify. By default,  if it
-cannot find a property in the specified properties files, it also checks against the Java `System` properties. You can customize this
-behavior by setting the `systemPropertiesMode` property of the configurer with one of
-the following three supported integer values:
-
-* `never` (0): Never check system properties.
-* `fallback` (1): Check system properties if not resolvable in the specified
-  properties files. This is the default.
-* `override` (2): Check system properties first, before trying the specified
-  properties files. This lets system properties override any other property source.
-
-See the {api-spring-framework}/beans/factory/config/PropertyPlaceholderConfigurer.html[`PropertyPlaceholderConfigurer`] javadoc for more information.
+The `PropertySourcesPlaceholderConfigurer` not only looks for properties in the `Properties`
+file you specify. By default, if it cannot find a property in the specified properties files,
+it checks against Spring `Environment` properties and regular Java `System` properties.
 
 [TIP]
 =====
-You can use the `PropertyPlaceholderConfigurer` to substitute class names, which is
-sometimes useful when you have to pick a particular implementation class at runtime. The
-following example shows how to do so:
+You can use the `PropertySourcesPlaceholderConfigurer` to substitute class names, which
+is sometimes useful when you have to pick a particular implementation class at runtime.
+The following example shows how to do so:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+	<bean class="org.springframework.beans.factory.config.PropertySourcesPlaceholderConfigurer">
 		<property name="locations">
 			<value>classpath:com/something/strategy.properties</value>
 		</property>
@@ -4112,8 +4100,8 @@ phase of an `ApplicationContext` for a non-lazy-init bean.
 ==== Example: The `PropertyOverrideConfigurer`
 
 The `PropertyOverrideConfigurer`, another bean factory post-processor, resembles the
-`PropertyPlaceholderConfigurer`, but unlike the latter, the original definitions can
-have default values or no values at all for bean properties. If an overriding
+`PropertySourcesPlaceholderConfigurer`, but unlike the latter, the original definitions
+can have default values or no values at all for bean properties. If an overriding
 `Properties` file does not have an entry for a certain bean property, the default
 context definition is used.
 
@@ -9030,7 +9018,7 @@ you need to call its `postProcessBeanFactory` method, as the following example s
 	reader.loadBeanDefinitions(new FileSystemResource("beans.xml"));
 
 	// bring in some property values from a Properties file
-	PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
+	PropertySourcesPlaceholderConfigurer cfg = new PropertySourcesPlaceholderConfigurer();
 	cfg.setLocation(new FileSystemResource("jdbc.properties"));
 
 	// now actually do the replacement
