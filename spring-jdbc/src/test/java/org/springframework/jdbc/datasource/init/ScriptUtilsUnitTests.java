@@ -163,6 +163,20 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test
+	public void readAndSplitScriptContainingMultiLineNestedComments() throws Exception {
+		String script = readScript("test-data-with-multi-line-nested-comments.sql");
+		List<String> statements = new ArrayList<>();
+		splitSqlScript(script, ';', statements);
+
+		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
+		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
+
+		assertEquals("wrong number of statements", 2, statements.size());
+		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
+		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
+	}
+
+	@Test
 	public void containsDelimiters() {
 		assertFalse(containsSqlScriptDelimiters("select 1\n select ';'", ";"));
 		assertTrue(containsSqlScriptDelimiters("select 1; select 2", ";"));
