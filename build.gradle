@@ -143,7 +143,7 @@ configure(allprojects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.16"
+		toolVersion = "8.17"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
@@ -157,7 +157,7 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:4.12") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("org.mockito:mockito-core:2.23.4") {
+		testCompile("org.mockito:mockito-core:2.24.0") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
 		testCompile("io.mockk:mockk:1.9")
