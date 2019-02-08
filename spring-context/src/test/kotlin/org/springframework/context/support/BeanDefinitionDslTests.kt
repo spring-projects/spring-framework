@@ -170,6 +170,38 @@ class BeanDefinitionDslTests {
 		context.getBean<Baz>()
 	}
 	
+
+	@Test
+	fun `Declare beans with accepted profiles`() {
+		val beans = beans {
+			profile("foo") { bean<Foo>() }
+			profile("!bar") { bean<Bar>() }
+			profile("bar | barbar") { bean<BarBar>() }
+			profile("baz & buz") { bean<Baz>() }
+			profile("baz & foo") { bean<FooFoo>() }
+		}
+		val context = GenericApplicationContext().apply {
+			environment.addActiveProfile("barbar")
+			environment.addActiveProfile("baz")
+			environment.addActiveProfile("buz")
+			beans.initialize(this)
+			refresh()
+		}
+		context.getBean<Baz>()
+		context.getBean<BarBar>()
+		context.getBean<Bar>()
+
+		try {
+			context.getBean<Foo>()
+			fail()
+		} catch (ignored: Exception) {
+		}
+		try {
+			context.getBean<FooFoo>()
+			fail()
+		} catch (ignored: Exception) {
+		}
+	}
 }
 
 class Foo
