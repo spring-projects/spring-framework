@@ -663,7 +663,7 @@ The following example shows how to do so in Java configuration:
 ----
 	@Configuration
 	@EnableWebSocket
-	public class WebSocketConfig implements WebSocketConfigurer {
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
