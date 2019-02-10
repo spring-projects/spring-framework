@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,8 +235,8 @@ public final class BridgeMethodResolver {
 		if (bridgeMethod == bridgedMethod) {
 			return true;
 		}
-		return (Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()) &&
-				bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()));
+		return (bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()) &&
+				Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()));
 	}
 
 }

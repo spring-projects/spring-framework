@@ -136,7 +136,6 @@ dependency-inject domain objects with Spring>>.
 
 The following example shows the basic structure of XML-based configuration metadata:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -163,7 +162,6 @@ The following example shows the basic structure of XML-based configuration metad
 
 <2> The `class` attribute defines the type of the bean and uses the fully qualified
 classname.
-====
 
 The value of the `id` attribute refers to collaborating objects. The XML for
 referring to collaborating objects is not shown in this example. See
@@ -179,13 +177,11 @@ supplied to an `ApplicationContext` constructor are resource strings that let
 the container load configuration metadata from a variety of external resources, such
 as the local file system, the Java `CLASSPATH`, and so on.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");
 ----
-====
 
 [NOTE]
 ====
@@ -197,7 +193,6 @@ mechanism for reading an InputStream from locations defined in a URI syntax. In 
 
 The following example shows the service layer objects `(services.xml)` configuration file:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -219,11 +214,9 @@ The following example shows the service layer objects `(services.xml)` configura
 
 	</beans>
 ----
-====
 
 The following example shows the data access objects `daos.xml` file:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -246,7 +239,6 @@ The following example shows the data access objects `daos.xml` file:
 
 	</beans>
 ----
-====
 
 In the preceding example, the service layer consists of the `PetStoreServiceImpl` class
 and two data access objects of the types `JpaAccountDao` and `JpaItemDao` (based
@@ -269,7 +261,6 @@ XML fragments. This constructor takes multiple `Resource` locations, as was show
 occurrences of the `<import/>` element to load bean definitions from another file or
 files. The following example shows how to do so:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -282,7 +273,6 @@ files. The following example shows how to do so:
 		<bean id="bean2" class="..."/>
 	</beans>
 ----
-====
 
 In the preceding example, external bean definitions are loaded from three files:
 `services.xml`, `messageSource.xml`, and `themeSource.xml`. All location paths are
@@ -324,7 +314,6 @@ be expressed in Spring's Groovy Bean Definition DSL, as known from the Grails fr
 Typically, such configuration live in a ".groovy" file with the structure shown in the
 following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -346,7 +335,6 @@ following example:
 		}
 	}
 ----
-====
 
 This configuration style is largely equivalent to XML bean definitions and even
 supports Spring's XML configuration namespaces. It also allows for importing XML
@@ -364,7 +352,6 @@ name, Class<T> requiredType)`, you can retrieve instances of your beans.
 The `ApplicationContext` lets you read bean definitions and access them, as the following
 example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -377,7 +364,6 @@ example shows:
 	// use configured instance
 	List<String> userList = service.getUsernameList();
 ----
-====
 
 With Groovy configuration, bootstrapping looks very similar. It has a different context
 implementation class which is Groovy-aware (but also understands XML bean definitions).
@@ -393,7 +379,6 @@ The most flexible variant is `GenericApplicationContext` in combination with rea
 delegates -- for example, with `XmlBeanDefinitionReader` for XML files, as the following
 example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -401,12 +386,10 @@ example shows:
 	new XmlBeanDefinitionReader(context).loadBeanDefinitions("services.xml", "daos.xml");
 	context.refresh();
 ----
-====
 
 You can also use the `GroovyBeanDefinitionReader` for Groovy files, as the following
 example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -414,7 +397,6 @@ example shows:
 	new GroovyBeanDefinitionReader(context).loadBeanDefinitions("services.groovy", "daos.groovy");
 	context.refresh();
 ----
-====
 
 You can mix and match such reader delegates on the same `ApplicationContext`,
 reading bean definitions from diverse configuration sources.
@@ -565,36 +547,32 @@ itself.
 Specifying all aliases where the bean is actually defined is not always adequate,
 however. It is sometimes desirable to introduce an alias for a bean that is defined
 elsewhere. This is commonly the case in large systems where configuration is split
-amongst each subsystem, with each subsystem having its own set of object definitions. In
-XML-based configuration metadata, you can use the `<alias/>` element to accomplish this.
-The following example shows how to do so:
+amongst each subsystem, with each subsystem having its own set of object definitions.
+In XML-based configuration metadata, you can use the `<alias/>` element to accomplish
+this. The following example shows how to do so:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<alias name="fromName" alias="toName"/>
 ----
-====
 
 In this case, a bean (in the same container) named `fromName` may also,
 after the use of this alias definition, be referred to as `toName`.
 
-For example, the configuration metadata for subsystem A may refer to a DataSource by
-the name of `subsystemA-dataSource`. The configuration metadata for subsystem B may refer to
+For example, the configuration metadata for subsystem A may refer to a DataSource by the
+name of `subsystemA-dataSource`. The configuration metadata for subsystem B may refer to
 a DataSource by the name of `subsystemB-dataSource`. When composing the main application
 that uses both these subsystems, the main application refers to the DataSource by the
-name of `myApp-dataSource`. To have all three names refer to the same object, you can add
-the following alias definitions to the configuration metadata:
+name of `myApp-dataSource`. To have all three names refer to the same object, you can
+add the following alias definitions to the configuration metadata:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<alias name="subsystemA-dataSource" alias="subsystemB-dataSource"/>
-	<alias name="subsystemA-dataSource" alias="myApp-dataSource" />
+	<alias name="myApp-dataSource" alias="subsystemA-dataSource"/>
+	<alias name="myApp-dataSource" alias="subsystemB-dataSource"/>
 ----
-====
 
 Now each component and the main application can refer to the dataSource through a name
 that is unique and guaranteed not to clash with any other definition (effectively
@@ -664,7 +642,6 @@ well.
 
 With XML-based configuration metadata you can specify your bean class as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -672,7 +649,6 @@ With XML-based configuration metadata you can specify your bean class as follows
 
 	<bean name="anotherExample" class="examples.ExampleBeanTwo"/>
 ----
-====
 
 For details about the mechanism for supplying arguments to the constructor (if required)
 and setting object instance properties after the object is constructed, see
@@ -694,7 +670,6 @@ factory method. The definition does not specify the type (class) of the returned
 only the class containing the factory method. In this example, the `createInstance()`
 method must be a static method. The following example shows how to specify a factory method:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -702,11 +677,9 @@ method must be a static method. The following example shows how to specify a fac
 		class="examples.ClientService"
 		factory-method="createInstance"/>
 ----
-====
 
 The following example shows a class that would work with the preceding bean definition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -719,7 +692,6 @@ The following example shows a class that would work with the preceding bean defi
 		}
 	}
 ----
-====
 
 For details about the mechanism for supplying (optional) arguments to the factory method
 and setting object instance properties after the object is returned from the factory,
@@ -738,7 +710,6 @@ the instance method that is to be invoked to create the object. Set the name of 
 factory method itself with the `factory-method` attribute. The following example shows
 how to configure such a bean:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -752,11 +723,9 @@ how to configure such a bean:
 		factory-bean="serviceLocator"
 		factory-method="createClientServiceInstance"/>
 ----
-====
 
 The following example shows the corresponding Java class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -769,11 +738,9 @@ The following example shows the corresponding Java class:
 		}
 	}
 ----
-====
 
 One factory class can also hold more than one factory method, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -789,11 +756,9 @@ One factory class can also hold more than one factory method, as the following e
 		factory-bean="serviceLocator"
 		factory-method="createAccountServiceInstance"/>
 ----
-====
 
 The following example shows the corresponding Java class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -812,7 +777,6 @@ The following example shows the corresponding Java class:
 		}
 	}
 ----
-====
 
 This approach shows that the factory bean itself can be managed and configured through
 dependency injection (DI). See <<beans-factory-properties-detailed,Dependencies and
@@ -871,7 +835,6 @@ treats arguments to a constructor and to a `static` factory method similarly. Th
 following example shows a class that can only be dependency-injected with constructor
 injection:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -888,7 +851,6 @@ injection:
 		// business logic that actually uses the injected MovieFinder is omitted...
 	}
 ----
-====
 
 Notice that there is nothing special about this class. It is a POJO that
 has no dependencies on container specific interfaces, base classes or annotations.
@@ -902,7 +864,6 @@ order in which the constructor arguments are defined in a bean definition is the
 in which those arguments are supplied to the appropriate constructor when the bean is
 being instantiated. Consider the following class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -915,36 +876,32 @@ being instantiated. Consider the following class:
 		}
 	}
 ----
-====
 
 Assuming that `ThingTwo` and `ThingThree` classes are not related by inheritance, no potential
 ambiguity exists. Thus, the following configuration works fine, and you do not need to specify
 the constructor argument indexes or types explicitly in the `<constructor-arg/>`
 element.
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<beans>
-		<bean id="thingOne" class="x.y.ThingOne">
-			<constructor-arg ref="thingTwo"/>
-			<constructor-arg ref="thingThree"/>
+		<bean id="beanOne" class="x.y.ThingOne">
+			<constructor-arg ref="beanTwo"/>
+			<constructor-arg ref="beanThree"/>
 		</bean>
 
-		<bean id="thingTwo" class="x.y.ThingTwo"/>
+		<bean id="beanTwo" class="x.y.ThingTwo"/>
 
-		<bean id="thingThree" class="x.y.ThingThree"/>
+		<bean id="beanThree" class="x.y.ThingThree"/>
 	</beans>
 ----
-====
 
 When another bean is referenced, the type is known, and matching can occur (as was the
 case with the preceding example). When a simple type is used, such as
 `<value>true</value>`, Spring cannot determine the type of the value, and so cannot match
 by type without help. Consider the following class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -964,7 +921,6 @@ by type without help. Consider the following class:
 		}
 	}
 ----
-====
 
 .[[beans-factory-ctor-arguments-type]]Constructor argument type matching
 --
@@ -972,7 +928,6 @@ In the preceding scenario, the container can use type matching with simple types
 you explicitly specify the type of the constructor argument by using the `type` attribute.
 as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -981,7 +936,6 @@ as the following example shows:
 		<constructor-arg type="java.lang.String" value="42"/>
 	</bean>
 ----
-====
 --
 
 .[[beans-factory-ctor-arguments-index]]Constructor argument index
@@ -989,7 +943,6 @@ as the following example shows:
 You can use the `index` attribute to specify explicitly the index of constructor arguments,
 as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -998,7 +951,6 @@ as the following example shows:
 		<constructor-arg index="1" value="42"/>
 	</bean>
 ----
-====
 
 In addition to resolving the ambiguity of multiple simple values, specifying an index
 resolves ambiguity where a constructor has two arguments of the same type.
@@ -1011,7 +963,6 @@ NOTE: The index is 0-based.
 You can also use the constructor parameter name for value disambiguation, as the following
 example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1020,7 +971,6 @@ example shows:
 		<constructor-arg name="ultimateAnswer" value="42"/>
 	</bean>
 ----
-====
 
 Keep in mind that, to make this work out of the box, your code must be compiled with the
 debug flag enabled so that Spring can look up the parameter name from the constructor.
@@ -1029,7 +979,6 @@ http://download.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.ht
 JDK annotation to explicitly name your constructor arguments. The sample class would
 then have to look as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1046,7 +995,6 @@ then have to look as follows:
 		}
 	}
 ----
-====
 --
 
 
@@ -1061,7 +1009,6 @@ The following example shows a class that can only be dependency-injected by usin
 setter injection. This class is conventional Java. It is a POJO that has no dependencies
 on container specific interfaces, base classes, or annotations.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1078,7 +1025,6 @@ on container specific interfaces, base classes, or annotations.
 		// business logic that actually uses the injected MovieFinder is omitted...
 	}
 ----
-====
 
 The `ApplicationContext` supports constructor-based and setter-based DI for the beans it
 manages. It also supports setter-based DI after some dependencies have already been
@@ -1097,7 +1043,8 @@ load an entire Spring IoC container instance.
 Since you can mix constructor-based and setter-based DI, it is a good rule of thumb to
 use constructors for mandatory dependencies and setter methods or configuration methods
 for optional dependencies. Note that use of the <<beans-required-annotation,@Required>>
-annotation on a setter method can be used to make the property be a required dependency.
+annotation on a setter method can be used to make the property be a required dependency;
+however, constructor injection with programmatic validation of arguments is preferable.
 
 The Spring team generally advocates constructor injection, as it lets you implement
 application components as immutable objects and ensures that required dependencies
@@ -1129,8 +1076,8 @@ The container performs bean dependency resolution as follows:
   describes all the beans. Configuration metadata can be specified by XML, Java code, or
   annotations.
 * For each bean, its dependencies are expressed in the form of properties, constructor
-  arguments, or arguments to the static-factory method( if you use that instead of
-  a normal constructor). These dependencies are provided to the bean, when the bean is
+  arguments, or arguments to the static-factory method (if you use that instead of a
+  normal constructor). These dependencies are provided to the bean, when the bean is
   actually created.
 * Each property or constructor argument is an actual definition of the value to set, or
   a reference to another bean in the container.
@@ -1199,7 +1146,6 @@ are invoked.
 The following example uses XML-based configuration metadata for setter-based DI. A small
 part of a Spring XML configuration file specifies some bean definitions as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1217,11 +1163,9 @@ part of a Spring XML configuration file specifies some bean definitions as follo
 	<bean id="anotherExampleBean" class="examples.AnotherBean"/>
 	<bean id="yetAnotherBean" class="examples.YetAnotherBean"/>
 ----
-====
 
 The following example shows the corresponding `ExampleBean` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1246,12 +1190,10 @@ The following example shows the corresponding `ExampleBean` class:
 		}
 	}
 ----
-====
 
 In the preceding example, setters are declared to match against the properties specified
 in the XML file. The following example uses constructor-based DI:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1270,11 +1212,9 @@ in the XML file. The following example uses constructor-based DI:
 	<bean id="anotherExampleBean" class="examples.AnotherBean"/>
 	<bean id="yetAnotherBean" class="examples.YetAnotherBean"/>
 ----
-====
 
 The following example shows the corresponding `ExampleBean` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1294,7 +1234,6 @@ The following example shows the corresponding `ExampleBean` class:
 		}
 	}
 ----
-====
 
 The constructor arguments specified in the bean definition are used as arguments to
 the constructor of the `ExampleBean`.
@@ -1302,7 +1241,6 @@ the constructor of the `ExampleBean`.
 Now consider a variant of this example, where, instead of using a constructor, Spring is
 told to call a `static` factory method to return an instance of the object:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1315,11 +1253,9 @@ told to call a `static` factory method to return an instance of the object:
 	<bean id="anotherExampleBean" class="examples.AnotherBean"/>
 	<bean id="yetAnotherBean" class="examples.YetAnotherBean"/>
 ----
-====
 
 The following example shows the corresponding `ExampleBean` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1342,7 +1278,6 @@ The following example shows the corresponding `ExampleBean` class:
 		}
 	}
 ----
-====
 
 Arguments to the `static` factory method are supplied by `<constructor-arg/>` elements,
 exactly the same as if a constructor had actually been used. The type of the class being
@@ -1373,7 +1308,6 @@ argument as a human-readable string representation. Spring's
 values from a `String` to the actual type of the property or argument.
 The following example shows various values being set:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1385,12 +1319,10 @@ The following example shows various values being set:
 		<property name="password" value="masterkaoli"/>
 	</bean>
 ----
-====
 
 The following example uses the <<beans-p-namespace,p-namespace>> for even more succinct
 XML configuration:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1409,7 +1341,6 @@ XML configuration:
 
 	</beans>
 ----
-====
 
 The preceding XML is more succinct. However, typos are discovered at runtime rather than
 design time, unless you use an IDE (such as http://www.jetbrains.com/idea/[IntelliJ
@@ -1419,12 +1350,11 @@ assistance is highly recommended.
 
 You can also configure a `java.util.Properties` instance, as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="mappings"
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
 
 		<!-- typed as a java.util.Properties -->
 		<property name="properties">
@@ -1435,7 +1365,6 @@ You can also configure a `java.util.Properties` instance, as follows:
 		</property>
 	</bean>
 ----
-====
 
 The Spring container converts the text inside the `<value/>` element into a
 `java.util.Properties` instance by using the JavaBeans `PropertyEditor` mechanism. This
@@ -1449,7 +1378,6 @@ The `idref` element is simply an error-proof way to pass the `id` (a string valu
 a reference) of another bean in the container to a `<constructor-arg/>` or `<property/>`
 element. The following example shows how to use it:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1461,12 +1389,10 @@ element. The following example shows how to use it:
 		</property>
 	</bean>
 ----
-====
 
 The preceding bean definition snippet is exactly equivalent (at runtime) to the
 following snippet:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1476,7 +1402,6 @@ following snippet:
 		<property name="targetName" value="theTargetBean"/>
 	</bean>
 ----
-====
 
 The first form is preferable to the second, because using the `idref` tag lets the
 container validate at deployment time that the referenced, named bean actually
@@ -1515,13 +1440,11 @@ parent container, regardless of whether it is in the same XML file. The value of
 as one of the values in the `name` attribute of the target bean. The following example
 shows how to use a `ref` element:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<ref bean="someBean"/>
 ----
-====
 
 Specifying the target bean through the `parent` attribute creates a reference to a bean
 that is in a parent container of the current container. The value of the `parent`
@@ -1532,7 +1455,6 @@ when you have a hierarchy of containers and you want to wrap an existing bean in
 container with a proxy that has the same name as the parent bean. The following pair of
 listings shows how to use the `parent` attribute:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1554,7 +1476,6 @@ listings shows how to use the `parent` attribute:
 		<!-- insert other configuration and dependencies as required here -->
 	</bean>
 ----
-====
 
 NOTE: The `local` attribute on the `ref` element is no longer supported in the 4.0 beans
 XSD, since it does not provide value over a regular `bean` reference any more. Change
@@ -1567,7 +1488,6 @@ your existing `ref local` references to `ref bean` when upgrading to the 4.0 sch
 A `<bean/>` element inside the `<property/>` or `<constructor-arg/>` elements defines an
 inner bean, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1581,7 +1501,6 @@ inner bean, as the following example shows:
 		</property>
 	</bean>
 ----
-====
 
 An inner bean definition does not require a defined ID or name. If specified, the container
 does not use such a value as an identifier. The container also ignores the `scope` flag on
@@ -1603,7 +1522,6 @@ The `<list/>`, `<set/>`, `<map/>`, and `<props/>` elements set the properties
 and arguments of the Java `Collection` types `List`, `Set`, `Map`, and `Properties`,
 respectively. The following example shows how to use them:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1639,18 +1557,15 @@ respectively. The following example shows how to use them:
 		</property>
 	</bean>
 ----
-====
 
 The value of a map key or value, or a set value, can also be any of the
 following elements:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	bean | ref | idref | list | set | map | props | value | null
 ----
-====
 
 [[beans-collection-elements-merging]]
 ===== Collection Merging
@@ -1668,7 +1583,6 @@ with parent and child bean definitions may wish to read the
 
 The following example demonstrates collection merging:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1692,7 +1606,6 @@ The following example demonstrates collection merging:
 		</bean>
 	<beans>
 ----
-====
 
 Notice the use of the `merge=true` attribute on the `<props/>` element of the
 `adminEmails` property of the `child` bean definition. When the `child` bean is resolved
@@ -1701,7 +1614,6 @@ and instantiated by the container, the resulting instance has an `adminEmails`
 `adminEmails` collection with the parent's `adminEmails` collection. The following listing
 shows the result:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -1709,7 +1621,6 @@ administrator=administrator@example.com
 sales=sales@example.com
 support=support@example.co.uk
 ----
-====
 
 The child `Properties` collection's value set inherits all property elements from the
 parent `<props/>`, and the child's value for the `support` value overrides the value in
@@ -1743,7 +1654,6 @@ type-conversion support such that the elements of your strongly-typed `Collectio
 instances are converted to the appropriate type prior to being added to the `Collection`.
 The following Java class and bean definition show how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1772,7 +1682,6 @@ The following Java class and bean definition show how to do so:
 		</bean>
 	</beans>
 ----
-====
 
 When the `accounts` property of the `something` bean is prepared for injection, the generics
 information about the element type of the strongly-typed `Map<String, Float>` is
@@ -1788,7 +1697,6 @@ Spring treats empty arguments for properties and the like as empty `Strings`. Th
 following XML-based configuration metadata snippet sets the `email` property to the empty
 `String` value ("").
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1796,21 +1704,17 @@ following XML-based configuration metadata snippet sets the `email` property to 
 		<property name="email" value=""/>
 	</bean>
 ----
-====
 
 The preceding example is equivalent to the following Java code:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	exampleBean.setEmail("");
 ----
-====
 
 The `<null/>` element handles `null` values. The following listing shows an example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1820,17 +1724,14 @@ The `<null/>` element handles `null` values. The following listing shows an exam
 		</property>
 	</bean>
 ----
-====
 
 The preceding configuration is equivalent to the following Java code:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	exampleBean.setEmail(null);
 ----
-====
 
 
 [[beans-p-namespace]]
@@ -1847,7 +1748,6 @@ in an XSD file and exists only in the core of Spring.
 The following example shows two XML snippets (the first uses
 standard XML format and the second uses the p-namespace) that resolve to the same result:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1865,7 +1765,6 @@ standard XML format and the second uses the p-namespace) that resolve to the sam
 			p:email="someone@somewhere.com"/>
 	</beans>
 ----
-====
 
 The example shows an attribute in the p-namespace called `email` in the bean definition.
 This tells Spring to include a property declaration. As previously mentioned, the
@@ -1875,7 +1774,6 @@ to the property name.
 This next example includes two more bean definitions that both have a reference to
 another bean:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1900,7 +1798,6 @@ another bean:
 		</bean>
 	</beans>
 ----
-====
 
 This example includes not only a property value using the p-namespace
 but also uses a special format to declare property references. Whereas the first bean
@@ -1927,7 +1824,6 @@ then nested `constructor-arg` elements.
 The following example uses the `c:` namespace to do the same thing as the from
 <<beans-constructor-injection>>:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1937,43 +1833,44 @@ The following example uses the `c:` namespace to do the same thing as the from
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-		<bean id="thingOne" class="x.y.ThingTwo"/>
-		<bean id="thingTwo" class="x.y.ThingThree"/>
+		<bean id="beanTwo" class="x.y.ThingTwo"/>
+		<bean id="beanThree" class="x.y.ThingThree"/>
 
-		<!-- traditional declaration -->
-		<bean id="thingOne" class="x.y.ThingOne">
-			<constructor-arg ref="thingTwo"/>
-			<constructor-arg ref="thingThree"/>
-			<constructor-arg value="something@somewhere.com"/>
+		<!-- traditional declaration with optional argument names -->
+		<bean id="beanOne" class="x.y.ThingOne">
+			<constructor-arg name="thingTwo" ref="beanTwo"/>
+			<constructor-arg name="thingThree" ref="beanThree"/>
+			<constructor-arg name="email" value="something@somewhere.com"/>
 		</bean>
 
-		<!-- c-namespace declaration -->
-		<bean id="thingOne" class="x.y.ThingOne" c:thingTwo-ref="thingTwo" c:thingThree-ref="thingThree" c:email="something@somewhere.com"/>
+		<!-- c-namespace declaration with argument names -->
+		<bean id="beanOne" class="x.y.ThingOne" c:thingTwo-ref="beanTwo"
+			c:thingThree-ref="beanThree" c:email="something@somewhere.com"/>
 
 	</beans>
 ----
-====
 
-The `c:` namespace uses the same conventions as the `p:` one (a trailing `-ref` for bean
-references) for setting the constructor arguments by their names. Similarly, it
-needs to be declared even though it is not defined in an XSD schema (it exists
-inside the Spring core).
+The `c:` namespace uses the same conventions as the `p:` one (a trailing `-ref` for
+bean references) for setting the constructor arguments by their names. Similarly,
+it needs to be declared in the XML file even though it is not defined in an XSD schema
+(it exists inside the Spring core).
 
 For the rare cases where the constructor argument names are not available (usually if
 the bytecode was compiled without debugging information), you can use fallback to the
 argument indexes, as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<!-- c-namespace index declaration -->
-	<bean id="thingOne" class="x.y.ThingOne" c:_0-ref="thingTwo" c:_1-ref="thingThree"/>
+	<bean id="beanOne" class="x.y.ThingOne" c:_0-ref="beanTwo" c:_1-ref="beanThree"
+		c:_2="something@somewhere.com"/>
 ----
-====
 
 NOTE: Due to the XML grammar, the index notation requires the presence of the leading `_`,
 as XML attribute names cannot start with a number (even though some IDEs allow it).
+A corresponding index notation is also available for `<constructor-arg>` elements but
+not commonly used since the plain order of declaration is usually sufficient there.
 
 In practice, the constructor resolution
 <<beans-factory-ctor-arguments-resolution,mechanism>> is quite efficient in matching
@@ -1988,7 +1885,6 @@ You can use compound or nested property names when you set bean properties, as l
 all components of the path except the final property name are not `null`. Consider the
 following bean definition:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1996,7 +1892,6 @@ following bean definition:
 		<property name="fred.bob.sammy" value="123" />
 	</bean>
 ----
-====
 
 The `something` bean has a `fred` property, which has a `bob` property, which has a `sammy`
 property, and that final `sammy` property is being set to a value of `123`. In order for
@@ -2017,20 +1912,17 @@ explicitly force one or more beans to be initialized before the bean using this 
 is initialized. The following example uses the `depends-on` attribute to express a
 dependency on a single bean:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="beanOne" class="ExampleBean" depends-on="manager"/>
 	<bean id="manager" class="ManagerBean" />
 ----
-====
 
 To express a dependency on multiple beans, supply a list of bean names as the value of
 the `depends-on` attribute (commas, whitespace, and semicolons are valid
 delimiters):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2041,7 +1933,6 @@ delimiters):
 	<bean id="manager" class="ManagerBean" />
 	<bean id="accountDao" class="x.y.jdbc.JdbcAccountDao" />
 ----
-====
 
 NOTE: The `depends-on` attribute can specify both an initialization-time dependency and,
 in the case of <<beans-factory-scopes-singleton,singleton>> beans only, a corresponding
@@ -2066,14 +1957,12 @@ instance when it is first requested, rather than at startup.
 In XML, this behavior is controlled by the `lazy-init` attribute on the `<bean/>`
 element, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="lazy" class="com.something.ExpensiveToCreateBean" lazy-init="true"/>
 	<bean name="not.lazy" class="com.something.AnotherBean"/>
 ----
-====
 
 When the preceding configuration is consumed by an `ApplicationContext`, the `lazy` bean
 is not eagerly pre-instantiated when the `ApplicationContext` starts,
@@ -2087,7 +1976,6 @@ is injected into a singleton bean elsewhere that is not lazy-initialized.
 You can also control lazy-initialization at the container level by using the
 `default-lazy-init` attribute on the `<beans/>` element, a the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2095,7 +1983,6 @@ You can also control lazy-initialization at the container level by using the
 		<!-- no beans will be pre-instantiated... -->
 	</beans>
 ----
-====
 
 
 
@@ -2245,7 +2132,6 @@ and by <<beans-factory-client,making a `getBean("B")` call to the container>> as
 typically new) bean B instance every time bean A needs it. The following example
 shows this approach:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2280,7 +2166,6 @@ shows this approach:
 		}
 	}
 ----
-====
 
 The preceding is not desirable, because the business code is aware of and coupled to the
 Spring Framework. Method Injection, a somewhat advanced feature of the Spring IoC
@@ -2322,7 +2207,6 @@ Spring container dynamically overrides the implementation of the `createCommand(
 method. The `CommandManager` class does not have any Spring dependencies, as
 the reworked example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2344,24 +2228,20 @@ the reworked example shows:
 		protected abstract Command createCommand();
 	}
 ----
-====
 
 In the client class that contains the method to be injected (the `CommandManager` in this
 case), the method to be injected requires a signature of the following form:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<public|protected> [abstract] <return-type> theMethodName(no-arguments);
 ----
-====
 
 If the method is `abstract`, the dynamically-generated subclass implements the method.
 Otherwise, the dynamically-generated subclass overrides the concrete method defined in
 the original class. Consider the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2375,7 +2255,6 @@ the original class. Consider the following example:
 		<lookup-method name="createCommand" bean="myCommand"/>
 	</bean>
 ----
-====
 
 The bean identified as `commandManager` calls its own `createCommand()` method
 whenever it needs a new instance of the `myCommand` bean. You must be careful to deploy
@@ -2386,7 +2265,6 @@ bean is returned each time.
 Alternatively, within the annotation-based component model, you can declare a lookup
 method through the `@Lookup` annotation, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2402,12 +2280,10 @@ method through the `@Lookup` annotation, as the following example shows:
 		protected abstract Command createCommand();
 	}
 ----
-====
 
 Or, more idiomatically, you can rely on the target bean getting resolved against the
 declared return type of the lookup method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2423,7 +2299,6 @@ declared return type of the lookup method:
 		protected abstract MyCommand createCommand();
 	}
 ----
-====
 
 Note that you should typically declare such annotated lookup methods with a concrete
 stub implementation, in order for them to be compatible with Spring's component
@@ -2452,7 +2327,6 @@ With XML-based configuration metadata, you can use the `replaced-method` element
 replace an existing method implementation with another, for a deployed bean. Consider
 the following class, which has a method called `computeValue` that we want to override:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2465,12 +2339,10 @@ the following class, which has a method called `computeValue` that we want to ov
 		// some other methods...
 	}
 ----
-====
 
 A class that implements the `org.springframework.beans.factory.support.MethodReplacer`
 interface provides the new method definition, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2488,12 +2360,10 @@ interface provides the new method definition, as the following example shows:
 		}
 	}
 ----
-====
 
 The bean definition to deploy the original class and specify the method override would
 resemble the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2506,7 +2376,6 @@ resemble the following example:
 
 	<bean id="replacementComputeValue" class="a.b.c.ReplacementComputeValue"/>
 ----
-====
 
 You can use one or more `<arg-type/>` elements within the `<replaced-method/>`
 element to indicate the method signature of the method being overridden. The signature
@@ -2515,7 +2384,6 @@ exist within the class. For convenience, the type string for an argument may be 
 substring of the fully qualified type name. For example, the following all match
 `java.lang.String`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2523,7 +2391,6 @@ substring of the fully qualified type name. For example, the following all match
 	String
 	Str
 ----
-====
 
 Because the number of arguments is often enough to distinguish between each possible
 choice, this shortcut can save a lot of typing, by letting you type only the
@@ -2615,7 +2482,6 @@ of the class defined by that bean definition. The singleton scope is the default
 in Spring. To define a bean as a singleton in XML, you can define a bean as shown in the
 following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2624,7 +2490,6 @@ following example:
 	<!-- the following is equivalent, though redundant (singleton scope is the default) -->
 	<bean id="accountService" class="com.something.DefaultAccountService" scope="singleton"/>
 ----
-====
 
 
 
@@ -2648,13 +2513,11 @@ singleton diagram.)
 
 The following example defines a bean as a prototype in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="accountService" class="com.something.DefaultAccountService" scope="prototype"/>
 ----
-====
 
 In contrast to the other scopes, Spring does not manage the complete lifecycle of a
 prototype bean. The container instantiates, configures, and otherwise assembles a
@@ -2724,7 +2587,6 @@ For Servlet 3.0+, this can be done programmatically by using the `WebApplication
 interface. Alternatively, or for older containers, add the following declaration to
 your web application's `web.xml` file:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2738,14 +2600,12 @@ your web application's `web.xml` file:
 		...
 	</web-app>
 ----
-====
 
 Alternatively, if there are issues with your listener setup, consider using Spring's
 `RequestContextFilter`. The filter mapping depends on the surrounding web
 application configuration, so you have to change it as appropriate. The following listing
 shows the filter part of a web application:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2762,7 +2622,6 @@ shows the filter part of a web application:
 		...
 	</web-app>
 ----
-====
 
 `DispatcherServlet`, `RequestContextListener`, and `RequestContextFilter` all do exactly
 the same thing, namely bind the HTTP request object to the `Thread` that is servicing
@@ -2776,13 +2635,11 @@ down the call chain.
 
 Consider the following XML configuration for a bean definition:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="loginAction" class="com.something.LoginAction" scope="request"/>
 ----
-====
 
 The Spring container creates a new instance of the `LoginAction` bean by using the
 `loginAction` bean definition for each and every HTTP request. That is, the
@@ -2796,7 +2653,6 @@ When using annotation-driven components or Java configuration, the `@RequestScop
 can be used to assign a component to the `request` scope. The following example shows how
 to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2806,7 +2662,6 @@ to do so:
 		// ...
 	}
 ----
-====
 
 
 
@@ -2815,13 +2670,11 @@ to do so:
 
 Consider the following XML configuration for a bean definition:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="userPreferences" class="com.something.UserPreferences" scope="session"/>
 ----
-====
 
 The Spring container creates a new instance of the `UserPreferences` bean by using the
 `userPreferences` bean definition for the lifetime of a single HTTP `Session`. In other
@@ -2836,7 +2689,6 @@ HTTP `Session` is eventually discarded, the bean that is scoped to that particul
 When using annotation-driven components or Java configuration, you can use the
 `@SessionScope` annotation to assign a component to the `session` scope.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2846,7 +2698,6 @@ When using annotation-driven components or Java configuration, you can use the
 		// ...
 	}
 ----
-====
 
 
 
@@ -2855,13 +2706,11 @@ When using annotation-driven components or Java configuration, you can use the
 
 Consider the following XML configuration for a bean definition:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="appPreferences" class="com.something.AppPreferences" scope="application"/>
 ----
-====
 
 The Spring container creates a new instance of the `AppPreferences` bean by using the
 `appPreferences` bean definition once for the entire web application. That is, the
@@ -2875,7 +2724,6 @@ When using annotation-driven components or Java configuration, you can use the
 `@ApplicationScope` annotation to assign a component to the `application` scope. The
 following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2885,7 +2733,6 @@ following example shows how to do so:
 		// ...
 	}
 ----
-====
 
 
 
@@ -2927,7 +2774,6 @@ See <<beans-standard-annotations,here>> for more details on JSR-330 overall.
 The configuration in the following example is only one line, but it is important to
 understand the "`why`" as well as the "`how`" behind it:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2954,7 +2800,7 @@ understand the "`why`" as well as the "`how`" behind it:
 	</beans>
 ----
 <1> The line that defines the proxy.
-====
+
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
 bean definition (see <<beans-factory-scopes-other-injection-proxies>> and
@@ -2965,7 +2811,6 @@ Consider the following singleton bean definition and contrast it with
 what you need to define for the aforementioned scopes (note that the following
 `userPreferences` bean definition as it stands is incomplete):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2975,7 +2820,6 @@ what you need to define for the aforementioned scopes (note that the following
 		<property name="userPreferences" ref="userPreferences"/>
 	</bean>
 ----
-====
 
 In the preceding example, the singleton bean (`userManager`) is injected with a reference
 to the HTTP `Session`-scoped bean (`userPreferences`). The salient point here is that the
@@ -3003,7 +2847,6 @@ Thus, you need the following (correct and complete) configuration when injecting
 `request-` and `session-scoped` beans into collaborating objects, as the following example
 shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3015,7 +2858,6 @@ shows:
 		<property name="userPreferences" ref="userPreferences"/>
 	</bean>
 ----
-====
 
 [[beans-factory-scopes-other-injection-proxies]]
 ===== Choosing the Type of Proxy to Create
@@ -3038,7 +2880,6 @@ the scoped bean must implement at least one interface and that all collaborators
 into which the scoped bean is injected must reference the bean through one of its
 interfaces. The following example shows a proxy based on an interface:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3051,7 +2892,6 @@ interfaces. The following example shows a proxy based on an interface:
 		<property name="userPreferences" ref="userPreferences"/>
 	</bean>
 ----
-====
 
 For more detailed information about choosing class-based or interface-based proxying,
 see <<aop-proxying>>.
@@ -3084,50 +2924,42 @@ implementation, for example, returns the session-scoped bean (if it does not exi
 the method returns a new instance of the bean, after having bound it to the session for
 future reference). The following method returns the object from the underlying scope:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	Object get(String name, ObjectFactory objectFactory)
 ----
-====
 
 The session scope
 implementation, for example, removes the session-scoped bean from the underlying session.
 The object should be returned, but you can return null if the object with the specified
 name is not found. The following method removes the object from the underlying scope:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	Object remove(String name)
 ----
-====
 
 The following method registers the callbacks the scope should execute when it is
 destroyed or when the specified object in the scope is destroyed:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	void registerDestructionCallback(String name, Runnable destructionCallback)
 ----
-====
 
 See the {api-spring-framework}/beans/factory/config/Scope.html#registerDestructionCallback[javadoc]
 or a Spring scope implementation for more information on destruction callbacks.
 
 The following method obtains the conversation identifier for the underlying scope:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	String getConversationId()
 ----
-====
 
 This identifier is different for each scope. For a session scoped implementation, this
 identifier can be the session identifier.
@@ -3141,13 +2973,11 @@ After you write and test one or more custom `Scope` implementations, you need to
 the Spring container aware of your new scopes. The following method is the central
 method to register a new `Scope` with the Spring container:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	void registerScope(String scopeName, Scope scope);
 ----
-====
 
 This method is declared on the `ConfigurableBeanFactory` interface, which is available
 through the `BeanFactory` property on most of the concrete `ApplicationContext`
@@ -3165,31 +2995,26 @@ NOTE: The next example uses `SimpleThreadScope`, which is included with Spring b
 registered by default. The instructions would be the same for your own custom `Scope`
 implementations.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	Scope threadScope = new SimpleThreadScope();
 	beanFactory.registerScope("thread", threadScope);
 ----
-====
 
 You can then create bean definitions that adhere to the scoping rules of your custom
 `Scope`, as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="..." class="..." scope="thread">
 ----
-====
 
 With a custom `Scope` implementation, you are not limited to programmatic registration
 of the scope. You can also do the `Scope` registration declaratively, by using the
 `CustomScopeConfigurer` class, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3223,7 +3048,6 @@ of the scope. You can also do the `Scope` registration declaratively, by using t
 
 	</beans>
 ----
-====
 
 NOTE: When you place `<aop:scoped-proxy/>` in a `FactoryBean` implementation, it is the factory
 bean itself that is scoped, not the object returned from `getObject()`.
@@ -3246,8 +3070,8 @@ of a bean. This section groups them as follows:
 [[beans-factory-lifecycle]]
 === Lifecycle Callbacks
 
-To interact with the container's management of the bean lifecycle, you can implement the
-Spring `InitializingBean` and `DisposableBean` interfaces. The container calls
+To interact with the container's management of the bean lifecycle, you can implement
+the Spring `InitializingBean` and `DisposableBean` interfaces. The container calls
 `afterPropertiesSet()` for the former and `destroy()` for the latter to let the bean
 perform certain actions upon initialization and destruction of your beans.
 
@@ -3255,11 +3079,11 @@ perform certain actions upon initialization and destruction of your beans.
 ====
 The JSR-250 `@PostConstruct` and `@PreDestroy` annotations are generally considered best
 practice for receiving lifecycle callbacks in a modern Spring application. Using these
-annotations means that your beans are not coupled to Spring-specific interfaces. For
-details, see <<beans-postconstruct-and-predestroy-annotations>>.
+annotations means that your beans are not coupled to Spring-specific interfaces.
+For details, see <<beans-postconstruct-and-predestroy-annotations>>.
 
 If you do not want to use the JSR-250 annotations but you still want to remove
-coupling, consider using of `init-method` and `destroy-method` object definition metadata.
+coupling, consider `init-method` and `destroy-method` bean definition metadata.
 ====
 
 Internally, the Spring Framework uses `BeanPostProcessor` implementations to process any
@@ -3275,7 +3099,6 @@ startup and shutdown process, as driven by the container's own lifecycle.
 The lifecycle callback interfaces are described in this section.
 
 
-
 [[beans-factory-lifecycle-initializingbean]]
 ==== Initialization Callbacks
 
@@ -3283,13 +3106,11 @@ The `org.springframework.beans.factory.InitializingBean` interface lets a bean
 perform initialization work after the container has set all necessary properties on the
 bean. The `InitializingBean` interface specifies a single method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	void afterPropertiesSet() throws Exception;
 ----
-====
 
 We recommend that you do not use the `InitializingBean` interface, because it
 unnecessarily couples the code to Spring. Alternatively, we suggest using
@@ -3299,7 +3120,6 @@ you can use the `init-method` attribute to specify the name of the method that h
 no-argument signature. With Java configuration, you can use the `initMethod` attribute of
 `@Bean`. See <<beans-java-lifecycle-callbacks>>. Consider the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3316,12 +3136,10 @@ no-argument signature. With Java configuration, you can use the `initMethod` att
 		}
 	}
 ----
-====
 
-The preceding example has almost exactly the same effect as the following example (which
-consists of two listings):
+The preceding example has almost exactly the same effect as the following example
+(which consists of two listings):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3338,7 +3156,6 @@ consists of two listings):
 		}
 	}
 ----
-====
 
 However, the first of the two preceding examples does not couple the code to Spring.
 
@@ -3350,13 +3167,11 @@ Implementing the `org.springframework.beans.factory.DisposableBean` interface le
 bean get a callback when the container that contains it is destroyed. The
 `DisposableBean` interface specifies a single method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	void destroy() throws Exception;
 ----
-====
 
 We recommend that you do not use the `DisposableBean` callback interface, because it
 unnecessarily couples the code to Spring. Alternatively, we suggest using
@@ -3366,7 +3181,6 @@ configuration metadata, you can use the `destroy-method` attribute on the `<bean
 With Java configuration, you can use the `destroyMethod` attribute of `@Bean`. See
 <<beans-java-lifecycle-callbacks>>. Consider the following definition:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3383,11 +3197,9 @@ With Java configuration, you can use the `destroyMethod` attribute of `@Bean`. S
 		}
 	}
 ----
-====
 
 The preceding definition has almost exactly the same effect as the following definition:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3404,7 +3216,6 @@ The preceding definition has almost exactly the same effect as the following def
 		}
 	}
 ----
-====
 
 However, the first of the two preceding definitions does not couple the code to Spring.
 
@@ -3439,7 +3250,6 @@ Suppose that your initialization callback methods are named `init()` and your de
 callback methods are named `destroy()`. Your class then resembles the class in the
 following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3459,11 +3269,9 @@ following example:
 		}
 	}
 ----
-====
 
 You could then use that class in a bean resembling the following:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3475,7 +3283,6 @@ You could then use that class in a bean resembling the following:
 
 	</beans>
 ----
-====
 
 The presence of the `default-init-method` attribute on the top-level `<beans/>` element
 attribute causes the Spring IoC container to recognize a method called `init` on the bean
@@ -3542,7 +3349,6 @@ Destroy methods are called in the same order:
 The `Lifecycle` interface defines the essential methods for any object that has its own
 lifecycle requirements (such as starting and stopping some background process):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3555,7 +3361,6 @@ lifecycle requirements (such as starting and stopping some background process):
 		boolean isRunning();
 	}
 ----
-====
 
 Any Spring-managed object may implement the `Lifecycle` interface. Then, when the
 `ApplicationContext` itself receives start and stop signals (for example, for a stop/restart
@@ -3563,7 +3368,6 @@ scenario at runtime), it cascades those calls to all `Lifecycle` implementations
 defined within that context. It does this by delegating to a `LifecycleProcessor`, shown
 in the following listing:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3574,7 +3378,6 @@ in the following listing:
 		void onClose();
 	}
 ----
-====
 
 Notice that the `LifecycleProcessor` is itself an extension of the `Lifecycle`
 interface. It also adds two other methods for reacting to the context being refreshed
@@ -3601,7 +3404,6 @@ prior to objects of another type. In those cases, the `SmartLifecycle` interface
 another option, namely the `getPhase()` method as defined on its super-interface,
 `Phased`. The following listing shows the definition of the `Phased` interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3610,11 +3412,9 @@ another option, namely the `getPhase()` method as defined on its super-interface
 		int getPhase();
 	}
 ----
-====
 
 The following listing shows the definition of the `SmartLifecycle` interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3625,7 +3425,6 @@ The following listing shows the definition of the `SmartLifecycle` interface:
 		void stop(Runnable callback);
 	}
 ----
-====
 
 When starting, the objects with the lowest phase start first. When stopping, the
 reverse order is followed. Therefore, an object that implements `SmartLifecycle` and
@@ -3648,7 +3447,6 @@ You can override the default lifecycle processor instance by defining a bean nam
 `lifecycleProcessor` within the context. If you want only to modify the timeout,
 defining the following would suffice:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3657,7 +3455,6 @@ defining the following would suffice:
 		<property name="timeoutPerShutdownPhase" value="10000"/>
 	</bean>
 ----
-====
 
 As mentioned earlier, the `LifecycleProcessor` interface defines callback methods for the
 refreshing and closing of the context as well. The latter drives the shutdown
@@ -3693,7 +3490,6 @@ and implement these destroy callbacks correctly.
 To register a shutdown hook, call the `registerShutdownHook()` method that is
 declared on the `ConfigurableApplicationContext` interface, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3714,7 +3510,6 @@ declared on the `ConfigurableApplicationContext` interface, as the following exa
 		}
 	}
 ----
-====
 
 
 
@@ -3726,7 +3521,6 @@ When an `ApplicationContext` creates an object instance that implements the
 with a reference to that `ApplicationContext`. The following listing shows the definition
 of the `ApplicationContextAware` interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3735,7 +3529,6 @@ of the `ApplicationContextAware` interface:
 		void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
 	}
 ----
-====
 
 Thus, beans can programmatically manipulate the `ApplicationContext` that created them,
 through the `ApplicationContext` interface or by casting the reference to a known
@@ -3764,7 +3557,6 @@ When an `ApplicationContext` creates a class that implements the
 a reference to the name defined in its associated object definition. The following listing
 shows the definition of the BeanNameAware interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3773,7 +3565,6 @@ shows the definition of the BeanNameAware interface:
 		void setBeanName(String name) throws BeansException;
 	}
 ----
-====
 
 The callback is invoked after population of normal bean properties but before an
 initialization callback such as `InitializingBean`, `afterPropertiesSet`, or a custom
@@ -3872,7 +3663,6 @@ metadata, you can indicate a child bean definition by using the `parent` attribu
 specifying the parent bean as the value of this attribute. The following example shows how
 to do so:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3890,7 +3680,7 @@ to do so:
 	</bean>
 ----
 <1> Note the `parent` attribute.
-====
+
 
 A child bean definition uses the bean class from the parent definition if none is
 specified but can also override it. In the latter case, the child bean class must be
@@ -3909,7 +3699,6 @@ the `abstract` attribute. If the parent definition does not specify a class, exp
 marking the parent bean definition as `abstract` is required, as the following example
 shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3924,7 +3713,6 @@ shows:
 		<!-- age will inherit the value of 1 from the parent bean definition-->
 	</bean>
 ----
-====
 
 The parent bean cannot be instantiated on its own because it is incomplete, and it is
 also explicitly marked as `abstract`. When a definition is `abstract`, it is
@@ -3958,10 +3746,10 @@ integration interfaces.
 === Customizing Beans by Using a `BeanPostProcessor`
 
 The `BeanPostProcessor` interface defines callback methods that you can implement to
-provide your own (or override the container's default) instantiation logic,
-dependency-resolution logic, and so forth. If you want to implement some custom logic
-after the Spring container finishes instantiating, configuring, and initializing a bean,
-you can plug in one or more `BeanPostProcessor` implementations.
+provide your own (or override the container's default) instantiation logic, dependency
+resolution logic, and so forth. If you want to implement some custom logic after the
+Spring container finishes instantiating, configuring, and initializing a bean, you can
+plug in one or more custom `BeanPostProcessor` implementations.
 
 You can configure multiple `BeanPostProcessor` instances, and you can control the order
 in which these `BeanPostProcessor` instances execute by setting the `order` property.
@@ -3975,13 +3763,13 @@ registration of `BeanPostProcessor` instances>>.
 
 [NOTE]
 ====
-`BeanPostProcessor` instances operate on bean (or object) instances. That is, the
-Spring IoC container instantiates a bean instance and then `BeanPostProcessor` instances do
-their work.
+`BeanPostProcessor` instances operate on bean (or object) instances. That is,
+the Spring IoC container instantiates a bean instance and then `BeanPostProcessor`
+instances do their work.
 
 `BeanPostProcessor` instances are scoped per-container. This is relevant only if you
-use container hierarchies. If you define a `BeanPostProcessor` in one container, it
-post-processes only the beans in that container. In other words, beans that are
+use container hierarchies. If you define a `BeanPostProcessor` in one container,
+it post-processes only the beans in that container. In other words, beans that are
 defined in one container are not post-processed by a `BeanPostProcessor` defined in
 another container, even if both containers are part of the same hierarchy.
 
@@ -3994,12 +3782,12 @@ The `org.springframework.beans.factory.config.BeanPostProcessor` interface consi
 exactly two callback methods. When such a class is registered as a post-processor with
 the container, for each bean instance that is created by the container, the
 post-processor gets a callback from the container both before container
-initialization methods (such as `InitializingBean.afterPropertiesSet()`, after any
+initialization methods (such as `InitializingBean.afterPropertiesSet()` or any
 declared `init` method) are called, and after any bean initialization callbacks.
 The post-processor can take any action with the bean instance, including ignoring the
-callback completely. A bean post-processor typically checks for callback interfaces, or it
-may wrap a bean with a proxy. Some Spring AOP infrastructure classes are implemented as
-bean post-processors in order to provide proxy-wrapping logic.
+callback completely. A bean post-processor typically checks for callback interfaces,
+or it may wrap a bean with a proxy. Some Spring AOP infrastructure classes are
+implemented as bean post-processors in order to provide proxy-wrapping logic.
 
 An `ApplicationContext` automatically detects any beans that are defined in the
 configuration metadata that implements the `BeanPostProcessor` interface. The
@@ -4018,27 +3806,27 @@ initialization of other beans in the context, this early type detection is criti
 [[beans-factory-programmatically-registering-beanpostprocessors]]
 .Programmatically registering `BeanPostProcessor` instances
 NOTE: While the recommended approach for `BeanPostProcessor` registration is through
-`ApplicationContext` auto-detection (as described earlier), you can
-register them programmatically against a `ConfigurableBeanFactory` by using the
-`addBeanPostProcessor` method. This can be useful when you need to evaluate conditional
-logic before registration or even for copying bean post processors across contexts in a
-hierarchy. Note, however, that `BeanPostProcessor` instances added programmatically do not
-respect the `Ordered` interface. Here, it is the order of registration that
-dictates the order of execution. Note also that `BeanPostProcessor` instances registered
-programmatically are always processed before those registered through auto-detection,
-regardless of any explicit ordering.
+`ApplicationContext` auto-detection (as described earlier), you can register them
+programmatically against a `ConfigurableBeanFactory` by using the `addBeanPostProcessor`
+method. This can be useful when you need to evaluate conditional logic before
+registration or even for copying bean post processors across contexts in a hierarchy.
+Note, however, that `BeanPostProcessor` instances added programmatically do not respect
+the `Ordered` interface. Here, it is the order of registration that dictates the order
+of execution. Note also that `BeanPostProcessor` instances registered programmatically
+are always processed before those registered through auto-detection, regardless of any
+explicit ordering.
 
 .`BeanPostProcessor` instances and AOP auto-proxying
 [NOTE]
 ====
 Classes that implement the `BeanPostProcessor` interface are special and are treated
-differently by the container. All `BeanPostProcessor` instances and beans that they directly reference
-are instantiated on startup, as part of the special startup phase of the
-`ApplicationContext`. Next, all `BeanPostProcessor` instances are registered in a sorted fashion
-and applied to all further beans in the container. Because AOP auto-proxying is
-implemented as a `BeanPostProcessor` itself, neither `BeanPostProcessor` instances nor the beans
-they directly reference are eligible for auto-proxying and, thus, do not have aspects
-woven into them.
+differently by the container. All `BeanPostProcessor` instances and beans that they
+directly reference are instantiated on startup, as part of the special startup phase
+of the `ApplicationContext`. Next, all `BeanPostProcessor` instances are registered
+in a sorted fashion and applied to all further beans in the container. Because AOP
+auto-proxying is implemented as a `BeanPostProcessor` itself, neither `BeanPostProcessor`
+instances nor the beans they directly reference are eligible for auto-proxying and,
+thus, do not have aspects woven into them.
 
 For any such bean, you should see an informational log message: `Bean someBean is not
 eligible for getting processed by all BeanPostProcessor interfaces (for example: not
@@ -4066,7 +3854,6 @@ it is created by the container and prints the resulting string to the system con
 
 The following listing shows the custom `BeanPostProcessor` implementation class definition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4087,11 +3874,9 @@ The following listing shows the custom `BeanPostProcessor` implementation class 
 		}
 	}
 ----
-====
 
 The following `beans` element uses the `InstantiationTracingBeanPostProcessor`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4117,7 +3902,6 @@ The following `beans` element uses the `InstantiationTracingBeanPostProcessor`:
 
 	</beans>
 ----
-====
 
 Notice how the `InstantiationTracingBeanPostProcessor` is merely defined. It does not
 even have a name, and, because it is a bean, it can be dependency-injected as you would any
@@ -4127,7 +3911,6 @@ script. The Spring dynamic language support is detailed in the chapter entitled
 
 The following Java application runs the preceding code and configuration:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4145,18 +3928,15 @@ The following Java application runs the preceding code and configuration:
 
 	}
 ----
-====
 
 The output of the preceding application resembles the following:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 Bean 'messenger' created : org.springframework.scripting.groovy.GroovyMessenger@272961
 org.springframework.scripting.groovy.GroovyMessenger@272961
 ----
-====
 
 
 [[beans-factory-extension-bpp-examples-rabpp]]
@@ -4199,19 +3979,19 @@ to work with bean instances within a `BeanFactoryPostProcessor` (for example, by
 standard container lifecycle. This may cause negative side effects, such as bypassing
 bean post processing.
 
-Also, `BeanFactoryPostProcessor` instances are scoped per-container. This is only relevant if
-you use container hierarchies. If you define a `BeanFactoryPostProcessor` in one
-container, it is applied only to the bean definitions in that container. Bean
-definitions in one container are not post-processed by `BeanFactoryPostProcessor` instances
-in another container, even if both containers are part of the same hierarchy.
+Also, `BeanFactoryPostProcessor` instances are scoped per-container. This is only relevant
+if you use container hierarchies. If you define a `BeanFactoryPostProcessor` in one
+container, it is applied only to the bean definitions in that container. Bean definitions
+in one container are not post-processed by `BeanFactoryPostProcessor` instances in another
+container, even if both containers are part of the same hierarchy.
 ====
 
 A bean factory post-processor is automatically executed when it is declared inside an
 `ApplicationContext`, in order to apply changes to the configuration metadata that
 define the container. Spring includes a number of predefined bean factory
 post-processors, such as `PropertyOverrideConfigurer` and
-`PropertyPlaceholderConfigurer`. You can also use a custom `BeanFactoryPostProcessor` --
-for example, to register custom property editors.
+`PropertySourcesPlaceholderConfigurer`. You can also use a custom `BeanFactoryPostProcessor`
+-- for example, to register custom property editors.
 
 An `ApplicationContext` automatically detects any beans that are deployed into it that
 implement the `BeanFactoryPostProcessor` interface. It uses these beans as bean factory
@@ -4227,22 +4007,21 @@ Thus, marking it for lazy initialization will be ignored, and the
 
 
 [[beans-factory-placeholderconfigurer]]
-==== Example: The Class Name Substitution `PropertyPlaceholderConfigurer`
+==== Example: The Class Name Substitution `PropertySourcesPlaceholderConfigurer`
 
-You can use the `PropertyPlaceholderConfigurer` to externalize property values from a bean
-definition in a separate file by using the standard Java `Properties` format. Doing so
-enables the person deploying an application to customize environment-specific properties,
-such as database URLs and passwords, without the complexity or risk of modifying the
-main XML definition file or files for the container.
+You can use the `PropertySourcesPlaceholderConfigurer` to externalize property values
+from a bean definition in a separate file by using the standard Java `Properties` format.
+Doing so enables the person deploying an application to customize environment-specific
+properties, such as database URLs and passwords, without the complexity or risk of
+modifying the main XML definition file or files for the container.
 
 Consider the following XML-based configuration metadata fragment, where a `DataSource`
 with placeholder values is defined:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+	<bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
 		<property name="locations" value="classpath:com/something/jdbc.properties"/>
 	</bean>
 
@@ -4254,17 +4033,14 @@ with placeholder values is defined:
 		<property name="password" value="${jdbc.password}"/>
 	</bean>
 ----
-====
 
-The example shows properties configured from an
-external `Properties` file. At runtime, a `PropertyPlaceholderConfigurer` is applied to
-the metadata that replaces some properties of the DataSource. The values to replace
-are specified as placeholders of the form `${property-name}`, which follows the Ant and
-log4j and JSP EL style.
+The example shows properties configured from an external `Properties` file. At runtime,
+a `PropertySourcesPlaceholderConfigurer` is applied to the metadata that replaces some
+properties of the DataSource. The values to replace are specified as placeholders of the
+form `${property-name}`, which follows the Ant and log4j and JSP EL style.
 
 The actual values come from another file in the standard Java `Properties` format:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -4273,50 +4049,36 @@ jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
 jdbc.password=root
 ----
-====
 
 Therefore, the `${jdbc.username}` string is replaced at runtime with the value, 'sa', and
 the same applies for other placeholder values that match keys in the properties file.
-The `PropertyPlaceholderConfigurer` checks for placeholders in most properties and
+The `PropertySourcesPlaceholderConfigurer` checks for placeholders in most properties and
 attributes of a bean definition. Furthermore, you can customize the placeholder prefix and suffix.
 
-With the `context` namespace introduced in Spring 2.5, you can configure
-property placeholders with a dedicated configuration element. You can provide one or more locations
-as a comma-separated list in the `location` attribute, as the following example shows:
+With the `context` namespace introduced in Spring 2.5, you can configure property placeholders
+with a dedicated configuration element. You can provide one or more locations as a
+comma-separated list in the `location` attribute, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<context:property-placeholder location="classpath:com/something/jdbc.properties"/>
 ----
-====
 
-The `PropertyPlaceholderConfigurer` not only looks for properties in the `Properties`
-file you specify. By default,  if it
-cannot find a property in the specified properties files, it also checks against the Java `System` properties. You can customize this
-behavior by setting the `systemPropertiesMode` property of the configurer with one of
-the following three supported integer values:
-
-* `never` (0): Never check system properties.
-* `fallback` (1): Check system properties if not resolvable in the specified
-  properties files. This is the default.
-* `override` (2): Check system properties first, before trying the specified
-  properties files. This lets system properties override any other property source.
-
-See the {api-spring-framework}/beans/factory/config/PropertyPlaceholderConfigurer.html[`PropertyPlaceholderConfigurer`] javadoc for more information.
+The `PropertySourcesPlaceholderConfigurer` not only looks for properties in the `Properties`
+file you specify. By default, if it cannot find a property in the specified properties files,
+it checks against Spring `Environment` properties and regular Java `System` properties.
 
 [TIP]
 =====
-You can use the `PropertyPlaceholderConfigurer` to substitute class names, which is
-sometimes useful when you have to pick a particular implementation class at runtime. The
-following example shows how to do so:
+You can use the `PropertySourcesPlaceholderConfigurer` to substitute class names, which
+is sometimes useful when you have to pick a particular implementation class at runtime.
+The following example shows how to do so:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+	<bean class="org.springframework.beans.factory.config.PropertySourcesPlaceholderConfigurer">
 		<property name="locations">
 			<value>classpath:com/something/strategy.properties</value>
 		</property>
@@ -4327,7 +4089,6 @@ following example shows how to do so:
 
 	<bean id="serviceStrategy" class="${custom.strategy.class}"/>
 ----
-====
 
 If the class cannot be resolved at runtime to a valid class, resolution of the bean
 fails when it is about to be created, which is during the `preInstantiateSingletons()`
@@ -4339,8 +4100,8 @@ phase of an `ApplicationContext` for a non-lazy-init bean.
 ==== Example: The `PropertyOverrideConfigurer`
 
 The `PropertyOverrideConfigurer`, another bean factory post-processor, resembles the
-`PropertyPlaceholderConfigurer`, but unlike the latter, the original definitions can
-have default values or no values at all for bean properties. If an overriding
+`PropertySourcesPlaceholderConfigurer`, but unlike the latter, the original definitions
+can have default values or no values at all for bean properties. If an overriding
 `Properties` file does not have an entry for a certain bean property, the default
 context definition is used.
 
@@ -4351,24 +4112,20 @@ values for the same bean property, the last one wins, due to the overriding mech
 
 Properties file configuration lines take the following format:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 beanName.property=value
 ----
-====
 
 The following listing shows an example of the format:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 dataSource.driverClassName=com.mysql.jdbc.Driver
 dataSource.url=jdbc:mysql:mydb
 ----
-====
 
 This example file can be used with a container definition that contains a bean called
 `dataSource` that has `driver` and `url` properties.
@@ -4378,13 +4135,11 @@ except the final property being overridden is already non-null (presumably initi
 by the constructors). In the following example, the `sammy` property of the `bob` property of the `fred` property of the `tom` bean
 is set to the scalar value `123`:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 tom.fred.bob.sammy=123
 ----
-====
 
 
 NOTE: Specified override values are always literal values. They are not translated into
@@ -4394,13 +4149,11 @@ definition specifies a bean reference.
 With the `context` namespace introduced in Spring 2.5, it is possible to configure
 property overriding with a dedicated configuration element, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<context:property-override location="classpath:override.properties"/>
 ----
-====
 
 
 
@@ -4488,7 +4241,6 @@ As always, you can register them as individual bean definitions, but they can al
 implicitly registered by including the following tag in an XML-based Spring
 configuration (notice the inclusion of the `context` namespace):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4505,7 +4257,6 @@ configuration (notice the inclusion of the `context` namespace):
 
 	</beans>
 ----
-====
 
 (The implicitly registered post-processors include
 {api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
@@ -4531,7 +4282,6 @@ it only checks for `@Autowired` beans in your controllers, and not your services
 The `@Required` annotation applies to bean property setter methods, as in the following
 example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4547,15 +4297,21 @@ example:
 		// ...
 	}
 ----
-====
 
 This annotation indicates that the affected bean property must be populated at
 configuration time, through an explicit property value in a bean definition or through
 autowiring. The container throws an exception if the affected bean property has not been
-populated. This allows for eager and explicit failure, avoiding `NullPointerException` instances
-or the like later on. We still recommend that you put assertions into the bean
-class itself (for example, into an init method). Doing so enforces those required
+populated. This allows for eager and explicit failure, avoiding `NullPointerException`
+instances or the like later on. We still recommend that you put assertions into the
+bean class itself (for example, into an init method). Doing so enforces those required
 references and values even when you use the class outside of a container.
+
+[NOTE]
+====
+The `@Required` annotation is formally deprecated as of Spring Framework 5.1, in favor
+of using constructor injection for required settings (or a custom implementation of
+`InitializingBean.afterPropertiesSet()` along with bean property setter methods).
+====
 
 
 
@@ -4570,7 +4326,6 @@ examples included in this section. See <<beans-standard-annotations,here>> for m
 
 You can apply the `@Autowired` annotation to constructors, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4586,7 +4341,6 @@ You can apply the `@Autowired` annotation to constructors, as the following exam
 		// ...
 	}
 ----
-====
 
 [NOTE]
 ====
@@ -4599,7 +4353,6 @@ teach the container which one to use.
 You can also apply the `@Autowired` annotation to "`traditional`" setter
 methods, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4615,12 +4368,10 @@ methods, as the following example shows:
 		// ...
 	}
 ----
-====
 
 You can also apply the annotation to methods with arbitrary names and multiple
 arguments, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4640,12 +4391,10 @@ arguments, as the following example shows:
 		// ...
 	}
 ----
-====
 
 You can apply `@Autowired` to fields as well and even mix it with constructors, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4664,7 +4413,6 @@ following example shows:
 		// ...
 	}
 ----
-====
 
 [TIP]
 ====
@@ -4684,7 +4432,6 @@ You can also provide all beans of a particular type from the
 `ApplicationContext` by adding the annotation to a field or method that expects an array
 of that type, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4696,11 +4443,9 @@ of that type, as the following example shows:
 		// ...
 	}
 ----
-====
 
 The same applies for typed collections, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4716,7 +4461,6 @@ The same applies for typed collections, as the following example shows:
 		// ...
 	}
 ----
-====
 
 [TIP]
 ====
@@ -4740,7 +4484,6 @@ Even typed `Map` instances can be autowired as long as the expected key type is 
 values contain all beans of the expected type, and the keys contain the
 corresponding bean names, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4756,14 +4499,12 @@ corresponding bean names, as the following example shows:
 		// ...
 	}
 ----
-====
 
 By default, the autowiring fails whenever zero candidate beans are available. The
 default behavior is to treat annotated methods, constructors, and fields as
 indicating required dependencies. You can change this behavior as demonstrated, in the
 following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4779,7 +4520,6 @@ following example:
 		// ...
 	}
 ----
-====
 
 [NOTE]
 ====
@@ -4798,7 +4538,6 @@ by the container. If no value is injected, a corresponding exception is raised.
 Alternatively, you can express the non-required nature of a particular dependency
 through Java 8's `java.util.Optional`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4810,12 +4549,10 @@ through Java 8's `java.util.Optional`, as the following example shows:
 		}
 	}
 ----
-====
 
 As of Spring Framework 5.0, you can also use a `@Nullable` annotation (of any kind
 in any package -- for example, `javax.annotation.Nullable` from JSR-305):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4827,7 +4564,6 @@ in any package -- for example, `javax.annotation.Nullable` from JSR-305):
 		}
 	}
 ----
-====
 
 You can also use `@Autowired` for interfaces that are well-known resolvable
 dependencies: `BeanFactory`, `ApplicationContext`, `Environment`, `ResourceLoader`,
@@ -4874,7 +4610,6 @@ autowired value.
 Consider the following configuration that defines `firstMovieCatalog` as the
 primary `MovieCatalog`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4891,12 +4626,10 @@ primary `MovieCatalog`:
 		// ...
 	}
 ----
-====
 
 With the preceding configuration, the following `MovieRecommender` is autowired with the
 `firstMovieCatalog`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4908,11 +4641,9 @@ With the preceding configuration, the following `MovieRecommender` is autowired 
 		// ...
 	}
 ----
-====
 
 The corresponding bean definitions follow:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4939,7 +4670,6 @@ The corresponding bean definitions follow:
 
 	</beans>
 ----
-====
 
 
 
@@ -4953,7 +4683,6 @@ with specific arguments, narrowing the set of type matches so that a specific be
 chosen for each argument. In the simplest case, this can be a plain descriptive value, as
 shown in the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4966,12 +4695,10 @@ shown in the following example:
 		// ...
 	}
 ----
-====
 
 You can also specify the `@Qualifier` annotation on individual constructor arguments or
 method parameters, as shown in the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4991,11 +4718,9 @@ method parameters, as shown in the following example:
 		// ...
 	}
 ----
-====
 
 The following example shows corresponding bean definitions.
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5091,12 +4816,10 @@ narrowing through qualifier annotations at the parameter level. By contrast, `@R
 is supported only for fields and bean property setter methods with a single argument.
 As a consequence, you should stick with qualifiers if your injection target is a constructor or a
 multi-argument method.
-====
 
 You can create your own custom qualifier annotations. To do so, define an annotation and
 provide the `@Qualifier` annotation within your definition, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5108,12 +4831,10 @@ provide the `@Qualifier` annotation within your definition, as the following exa
 		String value();
 	}
 ----
-====
 
 Then you can provide the custom qualifier on autowired fields and parameters, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5133,7 +4854,6 @@ following example shows:
 		// ...
 	}
 ----
-====
 
 Next, you can provide the information for the candidate bean definitions. You can add
 `<qualifier/>` tags as sub-elements of the `<bean/>` tag and then specify the `type` and
@@ -5142,7 +4862,6 @@ fully-qualified class name of the annotation. Alternately, as a convenience if n
 conflicting names exists, you can use the short class name. The following example
 demonstrates both approaches:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5171,7 +4890,6 @@ demonstrates both approaches:
 
 	</beans>
 ----
-====
 
 In <<beans-classpath-scanning>>, you can see an annotation-based alternative to
 providing the qualifier metadata in XML. Specifically, see <<beans-scanning-qualifiers>>.
@@ -5182,7 +4900,6 @@ several different types of dependencies. For example, you may provide an offline
 catalog that can be searched when no Internet connection is available. First, define
 the simple annotation, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5193,12 +4910,10 @@ the simple annotation, as the following example shows:
 
 	}
 ----
-====
 
 Then add the annotation to the field or property to be autowired, as shown in the
 following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5212,11 +4927,10 @@ following example:
 	}
 ----
 <1> This line adds the `@Offline` annotation.
-====
+
 
 Now the bean definition only needs a qualifier `type`, as shown in the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5226,7 +4940,7 @@ Now the bean definition only needs a qualifier `type`, as shown in the following
 	</bean>
 ----
 <1> This element specifies the qualifier.
-====
+
 
 You can also define custom qualifier annotations that accept named attributes in
 addition to or instead of the simple `value` attribute. If multiple attribute values are
@@ -5234,7 +4948,6 @@ then specified on a field or parameter to be autowired, a bean definition must m
 all such attribute values to be considered an autowire candidate. As an example,
 consider the following annotation definition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5248,11 +4961,9 @@ consider the following annotation definition:
 		Format format();
 	}
 ----
-====
 
 In this case `Format` is an enum, defined as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5260,12 +4971,10 @@ In this case `Format` is an enum, defined as follows:
 		VHS, DVD, BLURAY
 	}
 ----
-====
 
 The fields to be autowired are annotated with the custom qualifier and include values
 for both attributes: `genre` and `format`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5290,7 +4999,6 @@ for both attributes: `genre` and `format`, as the following example shows:
 		// ...
 	}
 ----
-====
 
 Finally, the bean definitions should contain matching qualifier values. This example
 also demonstrates that you can use bean meta attributes instead of the
@@ -5299,7 +5007,6 @@ precedence, but the autowiring mechanism falls back on the values provided withi
 `<meta/>` tags if no such qualifier is present, as in the last two bean definitions in
 the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5344,7 +5051,6 @@ the following example:
 
 	</beans>
 ----
-====
 
 
 
@@ -5355,7 +5061,6 @@ In addition to the `@Qualifier` annotation, you can use Java generic types
 as an implicit form of qualification. For example, suppose you have the following
 configuration:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5373,13 +5078,11 @@ configuration:
 		}
 	}
 ----
-====
 
 Assuming that the preceding beans implement a generic interface, (that is, `Store<String>` and
 `Store<Integer>`), you can `@Autowire` the `Store` interface and the generic is
 used as a qualifier, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5389,12 +5092,10 @@ used as a qualifier, as the following example shows:
 	@Autowired
 	private Store<Integer> s2; // <Integer> qualifier, injects the integerStore bean
 ----
-====
 
 Generic qualifiers also apply when autowiring lists, `Map` instances and arrays. The
 following example autowires a generic `List`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5403,7 +5104,6 @@ following example autowires a generic `List`:
 	@Autowired
 	private List<Store<Integer>> s;
 ----
-====
 
 
 
@@ -5415,7 +5115,6 @@ is a `BeanFactoryPostProcessor` that lets you register your own custom qualifier
 annotation types, even if they are not annotated with Spring's `@Qualifier` annotation.
 The following example shows how to use `CustomAutowireConfigurer`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5428,7 +5127,6 @@ The following example shows how to use `CustomAutowireConfigurer`:
 		</property>
 	</bean>
 ----
-====
 
 The `AutowireCandidateResolver` determines autowire candidates by:
 
@@ -5446,16 +5144,15 @@ attribute set to `true`, it is selected.
 [[beans-resource-annotation]]
 === Injection with `@Resource`
 
-Spring also supports injection by using the JSR-250 `@Resource` annotation on fields or
-bean property setter methods. This is a common pattern in Java EE 5 and 6 (for example,
-in JSF 1.2 managed beans or JAX-WS 2.0 endpoints). Spring supports this pattern for
-Spring-managed objects as well.
+Spring also supports injection by using the JSR-250 `@Resource` annotation
+(`javax.annotation.Resource`) on fields or bean property setter methods.
+This is a common pattern in Java EE: for example, in JSF-managed beans and JAX-WS
+endpoints. Spring supports this pattern for Spring-managed objects as well.
 
-`@Resource` takes a name attribute. By default, Spring interprets that value as the
-bean name to be injected. In other words, it follows by-name semantics, as
-demonstrated in the following example:
+`@Resource` takes a name attribute. By default, Spring interprets that value as
+the bean name to be injected. In other words, it follows by-name semantics,
+as demonstrated in the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5470,14 +5167,13 @@ demonstrated in the following example:
 	}
 ----
 <1> This line injects a `@Resource`.
-====
+
 
 If no name is explicitly specified, the default name is derived from the field name or
 setter method. In case of a field, it takes the field name. In case of a setter method,
 it takes the bean property name. The following example is going to have the bean
 named `movieFinder` injected into its setter method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5491,7 +5187,6 @@ named `movieFinder` injected into its setter method:
 		}
 	}
 ----
-====
 
 NOTE: The name provided with the annotation is resolved as a bean name by the
 `ApplicationContext` of which the `CommonAnnotationBeanPostProcessor` is aware.
@@ -5507,10 +5202,9 @@ and resolves well known resolvable dependencies: the `BeanFactory`,
 interfaces.
 
 Thus, in the following example, the `customerPreferenceDao` field first looks for a bean
-named customerPreferenceDao and then falls back to a primary type match for the type
+named "customerPreferenceDao" and then falls back to a primary type match for the type
 `CustomerPreferenceDao`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5530,7 +5224,6 @@ named customerPreferenceDao and then falls back to a primary type match for the 
 ----
 <1> The `context` field is injected based on the known resolvable dependency type:
 `ApplicationContext`.
-====
 
 
 
@@ -5538,17 +5231,17 @@ named customerPreferenceDao and then falls back to a primary type match for the 
 === Using `@PostConstruct` and `@PreDestroy`
 
 The `CommonAnnotationBeanPostProcessor` not only recognizes the `@Resource` annotation
-but also the JSR-250 lifecycle annotations. Introduced in Spring 2.5, the support
-for these annotations offers yet another alternative to those described in
+but also the JSR-250 lifecycle annotations: `javax.annotation.PostConstruct` and
+`javax.annotation.PreDestroy`. Introduced in Spring 2.5, the support for these
+annotations offers an alternative to the lifecycle callback mechanism described in
 <<beans-factory-lifecycle-initializingbean,initialization callbacks>> and
 <<beans-factory-lifecycle-disposablebean,destruction callbacks>>. Provided that the
-`CommonAnnotationBeanPostProcessor` is registered within the Spring
-`ApplicationContext`, a method carrying one of these annotations is invoked at the same
-point in the lifecycle as the corresponding Spring lifecycle interface method or
-explicitly declared callback method. In the following example, the cache is
-pre-populated upon initialization and cleared upon destruction:
+`CommonAnnotationBeanPostProcessor` is registered within the Spring `ApplicationContext`,
+a method carrying one of these annotations is invoked at the same point in the lifecycle
+as the corresponding Spring lifecycle interface method or explicitly declared callback
+method. In the following example, the cache is pre-populated upon initialization and
+cleared upon destruction:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5565,10 +5258,19 @@ pre-populated upon initialization and cleared upon destruction:
 		}
 	}
 ----
+
+For details about the effects of combining various lifecycle mechanisms, see
+<<beans-factory-lifecycle-combined-effects>>.
+
+[NOTE]
+====
+Like `@Resource`, the `@PostConstruct` and `@PreDestroy` annotation types were a part
+of the standard Java libraries from JDK 6 to 8. However, the entire `javax.annotation`
+package got separated from the core Java modules in JDK 9 and eventually removed in
+JDK 11. If needed, the `javax.annotation-api` artifact needs to be obtained via Maven
+Central now, simply to be added to the application's classpath like any other library.
 ====
 
-NOTE: For details about the effects of combining various lifecycle mechanisms, see
-<<beans-factory-lifecycle-combined-effects>>.
 
 
 
@@ -5630,7 +5332,6 @@ own code. A meta-annotation is an annotation that can be applied to another
 annotation. For example, the `@Service` annotation mentioned <<beans-stereotype-annotations,earlier>> is meta-annotated with
 `@Component`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5644,7 +5345,7 @@ annotation. For example, the `@Service` annotation mentioned <<beans-stereotype-
 	}
 ----
 <1> The `Component` causes `@Service` to be treated in the same way as `@Component`.
-====
+
 
 You can also combine meta-annotations to create "`composed annotations`". For example,
 the `@RestController` annotation from Spring MVC is composed of `@Controller` and
@@ -5678,7 +5379,6 @@ customization of the `proxyMode`. The following listing shows the definition of 
 
 You can then use `@SessionScope` without declaring the `proxyMode` as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5688,11 +5388,9 @@ You can then use `@SessionScope` without declaring the `proxyMode` as follows:
 		// ...
 	}
 ----
-====
 
 You can also override the value for the `proxyMode`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5702,7 +5400,6 @@ You can also override the value for the `proxyMode`, as the following example sh
 		// ...
 	}
 ----
-====
 
 For further details, see the
 https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
@@ -5717,7 +5414,6 @@ Spring can automatically detect stereotyped classes and register corresponding
 `BeanDefinition` instances with the `ApplicationContext`. For example, the following two classes
 are eligible for such autodetection:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5741,14 +5437,12 @@ are eligible for such autodetection:
 		// implementation elided for clarity
 	}
 ----
-====
 
 To autodetect these classes and register the corresponding beans, you need to add
 `@ComponentScan` to your `@Configuration` class, where the `basePackages` attribute
 is a common parent package for the two classes. (Alternatively, you can specify a
 comma- or semicolon- or space-separated list that includes the parent package of each class.)
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5758,14 +5452,12 @@ comma- or semicolon- or space-separated list that includes the parent package of
 		...
 	}
 ----
-====
 
 NOTE: For brevity, the preceding example could have used the `value` attribute of the
 annotation (that is, `@ComponentScan("org.example")`).
 
 The following alternative uses XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5782,7 +5474,6 @@ The following alternative uses XML:
 
 	</beans>
 ----
-====
 
 TIP: The use of `<context:component-scan>` implicitly enables the functionality of
 `<context:annotation-config>`. There is usually no need to include the
@@ -5855,7 +5546,6 @@ and `expression` attributes. The following table describes the filtering options
 The following example shows the configuration ignoring all `@Repository` annotations
 and using "`stub`" repositories instead:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5867,11 +5557,9 @@ and using "`stub`" repositories instead:
 		...
 	}
 ----
-====
 
 The following listing shows the equivalent XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5884,7 +5572,6 @@ The following listing shows the equivalent XML:
 		</context:component-scan>
 	</beans>
 ----
-====
 
 NOTE: You can also disable the default filters by setting `useDefaultFilters=false` on the annotation or
  by providing `use-default-filters="false"` as an attribute of the `<component-scan/>` element. This,
@@ -5900,7 +5587,6 @@ Spring components can also contribute bean definition metadata to the container.
 this with the same `@Bean` annotation used to define bean metadata within `@Configuration`
 annotated classes. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5918,7 +5604,6 @@ annotated classes. The following example shows how to do so:
 		}
 	}
 ----
-====
 
 The preceding class is a Spring component that has application-specific code in its
 `doWork()` method. However, it also contributes a bean definition that has a factory
@@ -5934,7 +5619,6 @@ leads to the injection of a lazy-resolution proxy.
 Autowired fields and methods are supported, as previously discussed, with additional
 support for autowiring of `@Bean` methods. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5972,7 +5656,6 @@ support for autowiring of `@Bean` methods. The following example shows how to do
 		}
 	}
 ----
-====
 
 The example autowires the `String` method parameter `country` to the value of the `age`
 property on another bean named `privateInstance`. A Spring Expression Language element
@@ -5991,7 +5674,6 @@ injection point that triggered the creation of a new bean instance in the given 
 You can use the provided injection point metadata with semantic care in such scenarios.
 The following example shows how to do use `InjectionPoint`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6004,7 +5686,6 @@ The following example shows how to do use `InjectionPoint`:
 		}
 	}
 ----
-====
 
 The `@Bean` methods in a regular Spring component are processed differently than their
 counterparts inside a Spring `@Configuration` class. The difference is that `@Component`
@@ -6068,7 +5749,6 @@ If such an annotation contains no name `value` or for any other detected compone
 the uncapitalized non-qualified class name. For example, if the following component
 classes were detected, the names would be `myMovieLister` and `movieFinderImpl`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6086,7 +5766,6 @@ classes were detected, the names would be `myMovieLister` and `movieFinderImpl`:
 		// ...
 	}
 ----
-====
 
 NOTE: If you do not want to rely on the default bean-naming strategy, you can provide a
 custom bean-naming strategy. First, implement the
@@ -6095,7 +5774,6 @@ interface, and be sure to include a default no-arg constructor. Then, provide th
 qualified class name when configuring the scanner, as the following example annotation
 and bean definition show:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6114,7 +5792,6 @@ and bean definition show:
 			name-generator="org.example.MyNameGenerator" />
 	</beans>
 ----
-====
 
 As a general rule, consider specifying the name with the annotation whenever other
 components may be making explicit references to it. On the other hand, the
@@ -6130,7 +5807,6 @@ autodetected components is `singleton`. However, sometimes you need a different 
 that can be specified by the `@Scope` annotation. You can provide the name of the
 scope within the annotation, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6140,7 +5816,6 @@ scope within the annotation, as the following example shows:
 		// ...
 	}
 ----
-====
 
 NOTE: `@Scope` annotations are only introspected on the concrete bean class (for annotated
 components) or the factory method (for `@Bean` methods). In contrast to XML bean
@@ -6160,7 +5835,6 @@ interface. Be sure to include a default no-arg constructor. Then you can provide
 fully qualified class name when configuring the scanner, as the following example of both
 an annotation and a bean definition shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6178,7 +5852,6 @@ an annotation and a bean definition shows:
 		<context:component-scan base-package="org.example" scope-resolver="org.example.MyScopeResolver"/>
 	</beans>
 ----
-====
 
 When using certain non-singleton scopes, it may be necessary to generate proxies for the
 scoped objects. The reasoning is described in <<beans-factory-scopes-other-injection>>.
@@ -6186,7 +5859,6 @@ For this purpose, a scoped-proxy attribute is available on the component-scan
 element. The three possible values are: `no`, `interfaces`, and `targetClass`. For example,
 the following configuration results in standard JDK dynamic proxies:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6204,7 +5876,6 @@ the following configuration results in standard JDK dynamic proxies:
 		<context:component-scan base-package="org.example" scoped-proxy="interfaces"/>
 	</beans>
 ----
-====
 
 
 
@@ -6221,7 +5892,6 @@ auto-detection of components, you can provide the qualifier metadata with type-l
 annotations on the candidate class. The following three examples demonstrate this
 technique:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6251,7 +5921,6 @@ technique:
 		// ...
 	}
 ----
-====
 
 NOTE: As with most annotation-based alternatives, keep in mind that the annotation metadata is
 bound to the class definition itself, while the use of XML allows for multiple beans
@@ -6265,7 +5934,10 @@ metadata is provided per-instance rather than per-class.
 
 While classpath scanning is very fast, it is possible to improve the startup performance
 of large applications by creating a static list of candidates at compilation time. In this
-mode, all modules of the application must use this mechanism as, when the
+mode, all modules that are target of component scan must use this mechanism.
+
+NOTE: Your existing `@ComponentScan` or `<context:component-scan` directives must stay as
+is to request the context to scan candidates in certain packages. When the
 `ApplicationContext` detects such an index, it automatically uses it rather than scanning
 the classpath.
 
@@ -6273,7 +5945,6 @@ To generate the index, add an additional dependency to each module that contains
 components that are targets for component scan directives. The following example shows
 how to do so with Maven:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
 ----
@@ -6286,19 +5957,30 @@ how to do so with Maven:
 		</dependency>
 	</dependencies>
 ----
+
+With Gradle 4.5 and earlier, the dependency should be declared in the `compileOnly`
+configuration, as shown in the following example:
+
+[source,groovy,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	dependencies {
+		compileOnly "org.springframework:spring-context-indexer:{spring-version}"
+	}
+----
 ====
 
-The following example shows how to do so with Gradle:
+With Gradle 4.6 and later, the dependency should be declared in the `annotationProcessor`
+configuration, as shown in the following example:
 
 ====
 [source,groovy,indent=0]
 [subs="verbatim,quotes,attributes"]
 ----
 	dependencies {
-		compileOnly("org.springframework:spring-context-indexer:{spring-version}")
+		annotationProcessor "org.springframework:spring-context-indexer:{spring-version}"
 	}
 ----
-====
 
 That process generates a `META-INF/spring.components` file that is
 included in the jar file.
@@ -6330,7 +6012,6 @@ repository (
 http://repo1.maven.org/maven2/javax/inject/javax.inject/1/[http://repo1.maven.org/maven2/javax/inject/javax.inject/1/]).
 You can add the following dependency to your file pom.xml:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6340,7 +6021,6 @@ You can add the following dependency to your file pom.xml:
 		<version>1</version>
 	</dependency>
 ----
-====
 =====
 
 
@@ -6350,7 +6030,6 @@ You can add the following dependency to your file pom.xml:
 
 Instead of `@Autowired`, you can use `@javax.inject.Inject` as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6371,7 +6050,6 @@ Instead of `@Autowired`, you can use `@javax.inject.Inject` as follows:
 		}
 	}
 ----
-====
 
 As with `@Autowired`, you can use `@Inject` at the field level, method level
 and constructor-argument level. Furthermore, you may declare your injection point as a
@@ -6379,7 +6057,6 @@ and constructor-argument level. Furthermore, you may declare your injection poin
 other beans through a `Provider.get()` call. The following example offers a variant of the
 preceding example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6401,12 +6078,10 @@ preceding example:
 		}
 	}
 ----
-====
 
 If you would like to use a qualified name for the dependency that should be injected,
 you should use the `@Named` annotation, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6425,14 +6100,12 @@ you should use the `@Named` annotation, as the following example shows:
 		// ...
 	}
 ----
-====
 
 As with `@Autowired`, `@Inject` can also be used with `java.util.Optional` or
 `@Nullable`. This is even more applicable here, since `@Inject` does not have
 a `required` attribute. The following pair of examples show how to use `@Inject` and
 `@Nullable`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6456,7 +6129,6 @@ a `required` attribute. The following pair of examples show how to use `@Inject`
 		}
 	}
 ----
-====
 
 
 
@@ -6466,7 +6138,6 @@ a `required` attribute. The following pair of examples show how to use `@Inject`
 Instead of `@Component`, you can use `@javax.inject.Named` or `javax.annotation.ManagedBean`,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6486,12 +6157,10 @@ as the following example shows:
 		// ...
 	}
 ----
-====
 
 It is very common to use `@Component` without specifying a name for the component.
 `@Named` can be used in a similar fashion, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6511,12 +6180,10 @@ It is very common to use `@Component` without specifying a name for the componen
 		// ...
 	}
 ----
-====
 
 When you use `@Named` or `@ManagedBean`, you can use component scanning in the
 exact same way as when you use Spring annotations, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6526,7 +6193,6 @@ exact same way as when you use Spring annotations, as the following example show
 		...
 	}
 ----
-====
 
 NOTE: In contrast to `@Component`, the JSR-330 `@Named` and the JSR-250 `ManagedBean`
 annotations are not composable. You should use Spring's stereotype model for building
@@ -6624,7 +6290,6 @@ source of bean definitions. Furthermore, `@Configuration` classes let inter-bean
 dependencies be defined by calling other `@Bean` methods in the same class.
 The simplest possible `@Configuration` class reads as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6637,11 +6302,9 @@ The simplest possible `@Configuration` class reads as follows:
 		}
 	}
 ----
-====
 
 The preceding `AppConfig` class is equivalent to the following Spring `<beans/>` XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6649,7 +6312,6 @@ The preceding `AppConfig` class is equivalent to the following Spring `<beans/>`
 		<bean id="myService" class="com.acme.services.MyServiceImpl"/>
 	</beans>
 ----
-====
 
 .Full @Configuration vs "`lite`" @Bean mode?
 ****
@@ -6707,7 +6369,6 @@ In much the same way that Spring XML files are used as input when instantiating 
 instantiating an `AnnotationConfigApplicationContext`. This allows for completely
 XML-free usage of the Spring container, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6717,13 +6378,11 @@ XML-free usage of the Spring container, as the following example shows:
 		myService.doStuff();
 	}
 ----
-====
 
 As mentioned earlier, `AnnotationConfigApplicationContext` is not limited to working only
 with `@Configuration` classes. Any `@Component` or JSR-330 annotated class may be supplied
 as input to the constructor, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6733,7 +6392,6 @@ as input to the constructor, as the following example shows:
 		myService.doStuff();
 	}
 ----
-====
 
 The preceding example assumes that `MyServiceImpl`, `Dependency1`, and `Dependency2` use Spring
 dependency injection annotations such as `@Autowired`.
@@ -6747,7 +6405,6 @@ and then configure it by using the `register()` method. This approach is particu
 when programmatically building an `AnnotationConfigApplicationContext`. The following
 example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6760,7 +6417,6 @@ example shows how to do so:
 		myService.doStuff();
 	}
 ----
-====
 
 
 [[beans-java-instantiating-container-scan]]
@@ -6768,7 +6424,6 @@ example shows how to do so:
 
 To enable component scanning, you can annotate your `@Configuration` class as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6779,14 +6434,13 @@ To enable component scanning, you can annotate your `@Configuration` class as fo
 	}
 ----
 <1> This annotation enables component scanning.
-====
+
 
 [TIP]
 =====
 Experienced Spring users may be familiar with the XML declaration equivalent from
 Spring's `context:` namespace, shown in the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6794,7 +6448,6 @@ Spring's `context:` namespace, shown in the following example:
 		<context:component-scan base-package="com.acme"/>
 	</beans>
 ----
-====
 =====
 
 In the preceding example, the `com.acme` package is scanned to look for any
@@ -6803,7 +6456,6 @@ definitions within the container. `AnnotationConfigApplicationContext` exposes t
 `scan(String...)` method to allow for the same component-scanning functionality, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6814,7 +6466,6 @@ following example shows:
 		MyService myService = ctx.getBean(MyService.class);
 	}
 ----
-====
 
 NOTE: Remember that `@Configuration` classes are <<beans-meta-annotations,meta-annotated>>
 with `@Component`, so they are candidates for component-scanning. In the preceding example,
@@ -6833,7 +6484,6 @@ configuring the Spring `ContextLoaderListener` servlet listener, Spring MVC
 Spring MVC web application (note the use of the `contextClass` context-param and
 init-param):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6887,7 +6537,6 @@ init-param):
 		</servlet-mapping>
 	</web-app>
 ----
-====
 
 
 
@@ -6913,7 +6562,6 @@ method to register a bean definition within an `ApplicationContext` of the type
 specified as the method's return value. By default, the bean name is the same as
 the method name. The following example shows a `@Bean` method declaration:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6926,11 +6574,9 @@ the method name. The following example shows a `@Bean` method declaration:
 		}
 	}
 ----
-====
 
 The preceding configuration is exactly equivalent to the following Spring XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6938,24 +6584,20 @@ The preceding configuration is exactly equivalent to the following Spring XML:
 		<bean id="transferService" class="com.acme.TransferServiceImpl"/>
 	</beans>
 ----
-====
 
 Both declarations make a bean named `transferService` available in the
 `ApplicationContext`, bound to an object instance of type `TransferServiceImpl`, as the
 following text image shows:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 transferService -> com.acme.TransferServiceImpl
 ----
-====
 
 You can also declare your `@Bean` method with an interface (or base class)
 return type, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -6968,7 +6610,6 @@ return type, as the following example shows:
 		}
 	}
 ----
-====
 
 However, this limits the visibility for advance type prediction to the specified
 interface type (`TransferService`). Then, with the full type (`TransferServiceImpl`)
@@ -6993,7 +6634,6 @@ dependencies required to build that bean. For instance, if our `TransferService`
 requires an `AccountRepository`, we can materialize that dependency with a method
 parameter, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7006,7 +6646,6 @@ parameter, as the following example shows:
 		}
 	}
 ----
-====
 
 The resolution mechanism is pretty much identical to constructor-based dependency
 injection. See <<beans-constructor-injection,the relevant section>> for more details.
@@ -7033,7 +6672,6 @@ The `@Bean` annotation supports specifying arbitrary initialization and destruct
 callback methods, much like Spring XML's `init-method` and `destroy-method` attributes
 on the `bean` element, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7065,7 +6703,6 @@ on the `bean` element, as the following example shows:
 		}
 	}
 ----
-====
 
 [NOTE]
 =====
@@ -7082,7 +6719,6 @@ for a `DataSource`, as it is known to be problematic on Java EE application serv
 The following example shows how to prevent an automatic destruction callback for a
 `DataSource`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7091,10 +6727,9 @@ The following example shows how to prevent an automatic destruction callback for
 		return (DataSource) jndiTemplate.lookup("MyDS");
 	}
 ----
-====
 
-Also, with `@Bean` methods, you typically use programmatic JNDI lookups,
-either by using Spring's `JndiTemplate` or `JndiLocatorDelegate` helpers or straight JNDI
+Also, with `@Bean` methods, you typically use programmatic JNDI lookups, either by
+using Spring's `JndiTemplate` or `JndiLocatorDelegate` helpers or straight JNDI
 `InitialContext` usage but not the `JndiObjectFactoryBean` variant (which would force
 you to declare the return type as the `FactoryBean` type instead of the actual target
 type, making it harder to use for cross-reference calls in other `@Bean` methods that
@@ -7104,7 +6739,6 @@ intend to refer to the provided resource here).
 In the case of `BeanOne` from the example above the preceding note, it would be equally valid to call the `init()`
 method directly during construction, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7121,7 +6755,6 @@ method directly during construction, as the following example shows:
 		// ...
 	}
 ----
-====
 
 TIP: When you work directly in Java, you can do anything you like with your objects and do
 not always need to rely on the container lifecycle.
@@ -7142,7 +6775,6 @@ specific scope. You can use any of the standard scopes specified in the
 The default scope is `singleton`, but you can override this with the `@Scope` annotation,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7156,7 +6788,6 @@ as the following example shows:
 		}
 	}
 ----
-====
 
 [[beans-java-scoped-proxy]]
 ===== `@Scope` and `scoped-proxy`
@@ -7165,13 +6796,12 @@ Spring offers a convenient way of working with scoped dependencies through
 <<beans-factory-scopes-other-injection,scoped proxies>>. The easiest way to create such
 a proxy when using the XML configuration is the `<aop:scoped-proxy/>` element.
 Configuring your beans in Java with a `@Scope` annotation offers equivalent support with
-the `proxyMode` attribute. The default is no proxy ( `ScopedProxyMode.NO`), but you can
+the `proxyMode` attribute. The default is no proxy (`ScopedProxyMode.NO`), but you can
 specify `ScopedProxyMode.TARGET_CLASS` or `ScopedProxyMode.INTERFACES`.
 
 If you port the scoped proxy example from the XML reference documentation (see
 <<beans-factory-scopes-other-injection,scoped proxies>>) to our `@Bean` using Java, it resembles the following:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7190,7 +6820,6 @@ If you port the scoped proxy example from the XML reference documentation (see
 		return service;
 	}
 ----
-====
 
 
 [[beans-java-customizing-bean-naming]]
@@ -7200,7 +6829,6 @@ By default, configuration classes use a `@Bean` method's name as the name of the
 resulting bean. This functionality can be overridden, however, with the `name` attribute,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7213,7 +6841,6 @@ as the following example shows:
 		}
 	}
 ----
-====
 
 
 [[beans-java-bean-aliasing]]
@@ -7224,20 +6851,18 @@ multiple names, otherwise known as bean aliasing. The `name` attribute of the `@
 annotation accepts a String array for this purpose. The following example shows how to set
 a number of aliases for a bean:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@Configuration
 	public class AppConfig {
 
-		@Bean(name = { "dataSource", "subsystemA-dataSource", "subsystemB-dataSource" })
+		@Bean({"dataSource", "subsystemA-dataSource", "subsystemB-dataSource"})
 		public DataSource dataSource() {
 			// instantiate, configure and return DataSource bean...
 		}
 	}
 ----
-====
 
 
 [[beans-java-bean-description]]
@@ -7250,7 +6875,6 @@ To add a description to a `@Bean`, you can use the
 {api-spring-framework}/context/annotation/Description.html[`@Description`]
 annotation, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7264,7 +6888,6 @@ annotation, as the following example shows:
 		}
 	}
 ----
-====
 
 
 
@@ -7283,7 +6906,6 @@ inter-bean dependencies. See <<beans-java-basic-concepts>> for a general introdu
 When beans have dependencies on one another, expressing that dependency is as simple
 as having one bean method call another, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7301,7 +6923,6 @@ as having one bean method call another, as the following example shows:
 		}
 	}
 ----
-====
 
 In the preceding example, `beanOne` receives a reference to `beanTwo` through constructor
 injection.
@@ -7321,7 +6942,6 @@ singleton-scoped bean has a dependency on a prototype-scoped bean. Using Java fo
 type of configuration provides a natural means for implementing this pattern. The
 following example shows how to use lookup method injection:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7338,13 +6958,11 @@ following example shows how to use lookup method injection:
 		protected abstract Command createCommand();
 	}
 ----
-====
 
 By using Java configuration, you can create a subclass of `CommandManager` where
 the abstract `createCommand()` method is overridden in such a way that it looks up a new
 (prototype) command object. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7358,8 +6976,8 @@ the abstract `createCommand()` method is overridden in such a way that it looks 
 
 	@Bean
 	public CommandManager commandManager() {
-		// return new anonymous implementation of CommandManager with command() overridden
-		// to return a new prototype Command object
+		// return new anonymous implementation of CommandManager with createCommand()
+		// overridden to return a new prototype Command object
 		return new CommandManager() {
 			protected Command createCommand() {
 				return asyncCommand();
@@ -7367,7 +6985,6 @@ the abstract `createCommand()` method is overridden in such a way that it looks 
 		}
 	}
 ----
-====
 
 
 [[beans-java-further-information-java-config]]
@@ -7375,7 +6992,6 @@ the abstract `createCommand()` method is overridden in such a way that it looks 
 
 Consider the following example, which shows a `@Bean` annotated method being called twice:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7402,7 +7018,6 @@ Consider the following example, which shows a `@Bean` annotated method being cal
 		}
 	}
 ----
-====
 
 `clientDao()` has been called once in `clientService1()` and once in `clientService2()`.
 Since this method creates a new instance of `ClientDaoImpl` and returns it, you would
@@ -7451,7 +7066,6 @@ Much as the `<import/>` element is used within Spring XML files to aid in modula
 configurations, the `@Import` annotation allows for loading `@Bean` definitions from
 another configuration class, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7474,13 +7088,11 @@ another configuration class, as the following example shows:
 		}
 	}
 ----
-====
 
 Now, rather than needing to specify both `ConfigA.class` and `ConfigB.class` when
 instantiating the context, only `ConfigB` needs to be supplied explicitly, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7492,7 +7104,6 @@ following example shows:
 		B b = ctx.getBean(B.class);
 	}
 ----
-====
 
 This approach simplifies container instantiation, as only one class needs to be dealt
 with, rather than requiring you to remember a potentially large number of
@@ -7518,7 +7129,6 @@ a `@Bean` method can have an arbitrary number of parameters that describe the be
 dependencies. Consider the following more real-world scenario with several `@Configuration`
 classes, each depending on beans declared in the others:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7557,7 +7167,6 @@ classes, each depending on beans declared in the others:
 		transferService.transfer(100.00, "A123", "C456");
 	}
 ----
-====
 
 There is another way to achieve the same result. Remember that `@Configuration` classes are
 ultimately only another bean in the container: This means that they can take advantage of
@@ -7578,7 +7187,6 @@ work on the configuration class itself, since it is being created as a bean inst
 
 The following example shows how one bean can be autowired to another bean:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7627,7 +7235,6 @@ The following example shows how one bean can be autowired to another bean:
 		transferService.transfer(100.00, "A123", "C456");
 	}
 ----
-====
 
 TIP: Constructor injection in `@Configuration` classes is only supported as of Spring
 Framework 4.3. Note also that there is no need to specify `@Autowired` if the target
@@ -7650,7 +7257,6 @@ In cases where this ambiguity is not acceptable and you wish to have direct navi
 from within your IDE from one `@Configuration` class to another, consider autowiring the
 configuration classes themselves. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7667,14 +7273,12 @@ configuration classes themselves. The following example shows how to do so:
 		}
 	}
 ----
-====
 
 In the preceding situation, where `AccountRepository` is defined is completely explicit.
 However, `ServiceConfig` is now tightly coupled to `RepositoryConfig`. That is the
 tradeoff. This tight coupling can be somewhat mitigated by using interface-based or
 abstract class-based `@Configuration` classes. Consider the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7723,7 +7327,6 @@ abstract class-based `@Configuration` classes. Consider the following example:
 		transferService.transfer(100.00, "A123", "C456");
 	}
 ----
-====
 
 Now `ServiceConfig` is loosely coupled with respect to the concrete
 `DefaultRepositoryConfig`, and built-in IDE tooling is still useful: You can easily
@@ -7757,7 +7360,6 @@ Implementations of the `Condition` interface provide a `matches(...)`
 method that returns `true` or `false`. For example, the following listing shows the actual
 `Condition` implementation used for `@Profile`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7778,7 +7380,6 @@ method that returns `true` or `false`. For example, the following listing shows 
 		return true;
 	}
 ----
-====
 
 See the {api-spring-framework}/context/annotation/Conditional.html[`@Conditional`]
 javadoc for more detail.
@@ -7815,7 +7416,6 @@ properly.
 
 The following example shows an ordinary configuration class in Java:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7836,11 +7436,9 @@ The following example shows an ordinary configuration class in Java:
 		}
 	}
 ----
-====
 
 The following example shows part of a sample `system-test-config.xml` file:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7858,11 +7456,9 @@ The following example shows part of a sample `system-test-config.xml` file:
 		</bean>
 	</beans>
 ----
-====
 
 The following example shows a possible `jdbc.properties` file:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -7880,7 +7476,6 @@ jdbc.password=
 		// ...
 	}
 ----
-====
 
 NOTE: In `system-test-config.xml` file, the `AppConfig` `<bean/>` does not declare an `id`
 element. While it would be acceptable to do so, it is unnecessary, given that no other bean
@@ -7900,7 +7495,6 @@ functionality.
 
 The following example shows the modified `system-test-config.xml` file:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7916,7 +7510,6 @@ The following example shows the modified `system-test-config.xml` file:
 		</bean>
 	</beans>
 ----
-====
 --
 
 [[beans-java-combining-java-centric]]
@@ -7931,7 +7524,6 @@ that defines a bean, a properties file, and the `main` class) shows how to use
 the `@ImportResource` annotation to achieve "`Java-centric`" configuration that uses XML
 as needed:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -7982,7 +7574,6 @@ jdbc.password=
 		// ...
 	}
 ----
-====
 
 
 
@@ -8027,7 +7618,6 @@ B deployments.
 Consider the first use case in a practical application that requires a
 `DataSource`. In a test environment, the configuration might resemble the following:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8040,14 +7630,12 @@ Consider the first use case in a practical application that requires a
 			.build();
 	}
 ----
-====
 
 Now consider how this application can be deployed into a QA or production
 environment, assuming that the datasource for the application is registered
 with the production application server's JNDI directory. Our `dataSource` bean
 now looks like the following listing:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8057,7 +7645,6 @@ now looks like the following listing:
 		return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
 	}
 ----
-====
 
 The problem is how to switch between using these two variations based on the
 current environment. Over time, Spring users have devised a number of ways to
@@ -8082,7 +7669,6 @@ annotation lets you indicate that a component is eligible for registration
 when one or more specified profiles are active. Using our preceding example, we
 can rewrite the `dataSource` configuration as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8115,7 +7701,6 @@ can rewrite the `dataSource` configuration as follows:
 		}
 	}
 ----
-====
 
 NOTE: As mentioned earlier, with `@Bean` methods, you typically choose to use programmatic
 JNDI lookups, by using either Spring's `JndiTemplate`/`JndiLocatorDelegate` helpers or the
@@ -8140,7 +7725,6 @@ of creating a custom composed annotation. The following example defines a custom
 `@Production` annotation that you can use as a drop-in replacement for
 `@Profile("production")`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8150,7 +7734,6 @@ of creating a custom composed annotation. The following example defines a custom
 	public @interface Production {
 	}
 ----
-====
 
 TIP: If a `@Configuration` class is marked with `@Profile`, all of the `@Bean` methods and
 `@Import` annotations associated with that class are bypassed unless one or more of
@@ -8165,7 +7748,6 @@ active. For example, given `@Profile({"p1", "!p2"})`, registration will occur if
 of a configuration class (for example, for alternative variants of a particular bean), as
 the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8211,7 +7793,6 @@ attribute, as shown in the preceding example. If the argument signatures are all
 the same (for example, all of the variants have no-arg factory methods), this is the only
 way to represent such an arrangement in a valid Java class in the first place
 (since there can only be one method of a particular name and argument signature).
-====
 
 
 [[beans-definition-profiles-xml]]
@@ -8220,7 +7801,6 @@ way to represent such an arrangement in a valid Java class in the first place
 The XML counterpart is the `profile` attribute of the `<beans>` element. Our preceding sample
 configuration can be rewritten in two XML files, as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8249,12 +7829,10 @@ configuration can be rewritten in two XML files, as follows:
 		<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/datasource"/>
 	</beans>
 ----
-====
 
 It is also possible to avoid that split and nest `<beans/>` elements within the same file,
 as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8278,7 +7856,6 @@ as the following example shows:
 		</beans>
 	</beans>
 ----
-====
 
 The `spring-bean.xsd` has been constrained to allow such elements only as the
 last ones in the file. This should help provide flexibility without incurring
@@ -8290,7 +7867,6 @@ The XML counterpart does not support the profile expressions described earlier. 
 however, to negate a profile by using the `!` operator. It is also possible to apply a logical
 "`and`" by nesting the profiles, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8309,7 +7885,6 @@ however, to negate a profile by using the `!` operator. It is also possible to a
 		</beans>
 	</beans>
 ----
-====
 
 In the preceding example, the `dataSource` bean is exposed if both the `production` and
 `us-east` profiles are active.
@@ -8328,7 +7903,6 @@ Activating a profile can be done in several ways, but the most straightforward i
 it programmatically against the `Environment` API which is available through an
 `ApplicationContext`. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8337,7 +7911,6 @@ it programmatically against the `Environment` API which is available through an
 	ctx.register(SomeConfig.class, StandaloneDataConfig.class, JndiDataConfig.class);
 	ctx.refresh();
 ----
-====
 
 In addition, you can also declaratively activate profiles through the
 `spring.profiles.active` property, which may be specified through system environment
@@ -8352,24 +7925,20 @@ profiles at once. Programmatically, you can provide multiple profile names to th
 `setActiveProfiles()` method, which accepts `String...` varargs. The following example
 activates multiple profiles:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	ctx.getEnvironment().setActiveProfiles("profile1", "profile2");
 ----
-====
 
 Declaratively, `spring.profiles.active` may accept a comma-separated list of profile names,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	-Dspring.profiles.active="profile1,profile2"
 ----
-====
 
 
 [[beans-definition-profiles-default]]
@@ -8378,7 +7947,6 @@ as the following example shows:
 The default profile represents the profile that is enabled by default. Consider the
 following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8395,7 +7963,6 @@ following example:
 		}
 	}
 ----
-====
 
 If no profile is active, the `dataSource` is created. You can see this
 as a way to provide a default definition for one or more beans. If any
@@ -8412,7 +7979,6 @@ the `Environment` or ,declaratively, by using the `spring.profiles.default` prop
 Spring's `Environment` abstraction provides search operations over a configurable
 hierarchy of property sources. Consider the following listing:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8421,7 +7987,6 @@ Environment env = ctx.getEnvironment();
 boolean containsMyProperty = env.containsProperty("my-property");
 System.out.println("Does my environment contain the 'my-property' property? " + containsMyProperty);
 ----
-====
 
 In the preceding snippet, we see a high-level way of asking Spring whether the `my-property` property is
 defined for the current environment. To answer this question, the `Environment` object performs
@@ -8465,7 +8030,6 @@ of properties that you want to integrate into this search. To do so, implement
 and instantiate your own `PropertySource` and add it to the set of `PropertySources` for the
 current `Environment`. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8473,7 +8037,6 @@ ConfigurableApplicationContext ctx = new GenericApplicationContext();
 MutablePropertySources sources = ctx.getEnvironment().getPropertySources();
 sources.addFirst(new MyPropertySource());
 ----
-====
 
 In the preceding code, `MyPropertySource` has been added with highest precedence in the
 search. If it contains a  `my-property` property, the property is detected and returned, in favor of
@@ -8495,7 +8058,6 @@ Given a file called `app.properties` that contains the key-value pair `testbean.
 the following `@Configuration` class uses `@PropertySource` in such a way that
 a call to `testBean.getName()` returns `myTestBean`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8514,13 +8076,11 @@ a call to `testBean.getName()` returns `myTestBean`:
 	   }
    }
 ----
-====
 
 Any `${...}` placeholders present in a `@PropertySource` resource location are
 resolved against the set of property sources already registered against the
 environment, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8539,7 +8099,6 @@ environment, as the following example shows:
 	   }
    }
 ----
-====
 
 Assuming that `my.placeholder` is present in one of the property sources already
 registered (for example, system properties or environment variables), the placeholder is
@@ -8569,7 +8128,6 @@ own property sources to the mix, as appropriate.
 Concretely, the following statement works regardless of where the `customer`
 property is defined, as long as it is available in the `Environment`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8577,7 +8135,6 @@ property is defined, as long as it is available in the `Environment`:
 		<import resource="com/bank/service/${customer}-config.xml"/>
 	</beans>
 ----
-====
 
 
 
@@ -8591,7 +8148,6 @@ loaded into the Java virtual machine (JVM).
 To enable load-time weaving, you can add the `@EnableLoadTimeWeaving` to one of your
 `@Configuration` classes, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8600,11 +8156,9 @@ To enable load-time weaving, you can add the `@EnableLoadTimeWeaving` to one of 
 	public class AppConfig {
 	}
 ----
-====
 
 Alternatively, for XML configuration, you can use the `context:load-time-weaver` element:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8612,7 +8166,6 @@ Alternatively, for XML configuration, you can use the `context:load-time-weaver`
 		<context:load-time-weaver/>
 	</beans>
 ----
-====
 
 Once configured for the `ApplicationContext`, any bean within that `ApplicationContext`
 may implement `LoadTimeWeaverAware`, thereby receiving a reference to the load-time
@@ -8687,7 +8240,6 @@ Spring provides two `MessageSource` implementations, `ResourceBundleMessageSourc
 messaging. The `StaticMessageSource` is rarely used but provides programmatic ways to
 add messages to the source. The following example shows `ResourceBundleMessageSource`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8704,7 +8256,6 @@ add messages to the source. The following example shows `ResourceBundleMessageSo
 		</bean>
 	</beans>
 ----
-====
 
 The example assumes that you have three resource bundles called `format`, `exceptions` and `windows`
 defined in your classpath. Any request to resolve a message is
@@ -8712,7 +8263,6 @@ handled in the JDK-standard way of resolving messages through `ResourceBundle` o
 purposes of the example, assume the contents of two of the above resource bundle files
 are as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8726,13 +8276,11 @@ are as follows:
 	# in exceptions.properties
 	argument.required=The {0} argument is required.
 ----
-====
 
 The next example shows a program to execute the `MessageSource` functionality.
 Remember that all `ApplicationContext` implementations are also `MessageSource`
 implementations and so can be cast to the `MessageSource` interface.
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8742,17 +8290,14 @@ implementations and so can be cast to the `MessageSource` interface.
 		System.out.println(message);
 	}
 ----
-====
 
 The resulting output from the above program is as follows:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 Alligators rock!
 ----
-====
 
 To summarize, the `MessageSource` is defined in a file called `beans.xml`, which
 exists at the root of your classpath. The `messageSource` bean definition refers to a
@@ -8764,7 +8309,6 @@ classpath and are called `format.properties`, `exceptions.properties`, and
 The next example shows arguments passed to the message lookup. These arguments are
 converted into `String` objects and inserted into placeholders in the lookup message.
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8801,17 +8345,14 @@ converted into `String` objects and inserted into placeholders in the lookup mes
 		}
 	}
 ----
-====
 
 The resulting output from the invocation of the `execute()` method is as follows:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 The userDao argument is required.
 ----
-====
 
 With regard to internationalization ("`i18n`"), Spring's various `MessageSource`
 implementations follow the same locale resolution and fallback rules as the standard JDK
@@ -8824,7 +8365,6 @@ Typically, locale resolution is managed by the surrounding environment of the
 application. In the following example, the locale against which (British) messages are
 resolved is specified manually:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -8842,17 +8382,14 @@ argument.required=Ebagum lad, the {0} argument is required, I say, required.
 		System.out.println(message);
 	}
 ----
-====
 
 The resulting output from the running of the above program is as follows:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 Ebagum lad, the 'userDao' argument is required, I say, required.
 ----
-====
 
 You can also use the `MessageSourceAware` interface to acquire a reference to any
 `MessageSource` that has been defined. Any bean that is defined in an
@@ -8932,7 +8469,6 @@ The following table describes the standard events that Spring provides:
 You can also create and publish your own custom events. The following example shows a
 simple class that extends Spring's `ApplicationEvent` base class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8950,14 +8486,12 @@ simple class that extends Spring's `ApplicationEvent` base class:
 		// accessor and other methods...
 	}
 ----
-====
 
 To publish a custom `ApplicationEvent`, call the `publishEvent()` method on an
 `ApplicationEventPublisher`. Typically, this is done by creating a class that implements
 `ApplicationEventPublisherAware` and registering it as a Spring bean. The following
 example shows such a class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -8983,7 +8517,6 @@ example shows such a class:
 		}
 	}
 ----
-====
 
 At configuration time, the Spring container detects that `EmailService` implements
 `ApplicationEventPublisherAware` and automatically calls
@@ -8995,7 +8528,6 @@ To receive the custom `ApplicationEvent`, you can create a class that implements
 `ApplicationListener` and register it as a Spring bean. The following example
 shows such a class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9012,7 +8544,6 @@ shows such a class:
 		}
 	}
 ----
-====
 
 Notice that `ApplicationListener` is generically parameterized with the type of your
 custom event (`BlackListEvent` in the preceding example). This means that the `onApplicationEvent()` method can
@@ -9028,7 +8559,6 @@ event publication becomes necessary, See the javadoc for Spring's
 The following example shows the bean definitions used to register and configure each of
 the classes above:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9046,7 +8576,6 @@ the classes above:
 		<property name="notificationAddress" value="blacklist@example.org"/>
 	</bean>
 ----
-====
 
 Putting it all together, when the `sendEmail()` method of the `emailService` bean is
 called, if there are any email messages that should be blacklisted, a custom event of type
@@ -9070,7 +8599,6 @@ As of Spring 4.2, you can register an event listener on any public method of a m
 bean by using the `EventListener` annotation. The `BlackListNotifier` can be rewritten as
 follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9088,7 +8616,6 @@ follows:
 		}
 	}
 ----
-====
 
 The method signature once again declares the event type to which it listens,
 but, this time, with a flexible name and without implementing a specific listener interface.
@@ -9099,7 +8626,6 @@ If your method should listen to several events or if you want to define it with 
 parameter at all, the event types can also be specified on the annotation itself. The
 following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9108,7 +8634,6 @@ following example shows how to do so:
 		...
 	}
 ----
-====
 
 It is also possible to add additional runtime filtering by using the `condition` attribute of the
 annotation that defines a <<expressions,`SpEL` expression>> , which should match to actually
@@ -9117,7 +8642,6 @@ invoke the method for a particular event.
 The following example shows how our notifier can be rewritten to be invoked only if the `content` attribute
 of the event is equal to `my-event`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9126,7 +8650,6 @@ of the event is equal to `my-event`:
 		// notify appropriate parties via notificationAddress...
 	}
 ----
-====
 
 Each `SpEL` expression evaluates against a dedicated context. The following table lists the
 items made available to the context so that you can use them for conditional event processing:
@@ -9160,7 +8683,6 @@ signature actually refers to an arbitrary object that was published.
 If you need to publish an event as the result of processing another event, you can change the
 method signature to return the event that should be published, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9170,7 +8692,6 @@ method signature to return the event that should be published, as the following 
 		// then publish a ListUpdateEvent...
 	}
 ----
-====
 
 NOTE: This feature is not supported for <<context-functionality-events-async,asynchronous
 listeners>>.
@@ -9187,7 +8708,6 @@ If you want a particular listener to process events asynchronously, you can reus
 <<integration.adoc#scheduling-annotation-support-async,regular `@Async` support>>. The
 following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9197,7 +8717,6 @@ following example shows how to do so:
 		// BlackListEvent is processed in a separate thread
 	}
 ----
-====
 
 Be aware of the following limitations when using asynchronous events:
 
@@ -9214,7 +8733,6 @@ Be aware of the following limitations when using asynchronous events:
 If you need one listener to be invoked before another one, you can add the `@Order`
 annotation to the method declaration, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9224,7 +8742,6 @@ annotation to the method declaration, as the following example shows:
 		// notify appropriate parties via notificationAddress...
 	}
 ----
-====
 
 
 [[context-functionality-events-generics]]
@@ -9235,7 +8752,6 @@ You can also use generics to further define the structure of your event. Conside
 can create the following listener definition to receive only `EntityCreatedEvent` for a
 `Person`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9244,7 +8760,6 @@ can create the following listener definition to receive only `EntityCreatedEvent
 		...
 	}
 ----
-====
 
 Due to type erasure, this works only if the event that is fired resolves the generic
 parameters on which the event listener filters (that is, something like
@@ -9255,7 +8770,6 @@ structure (as should be the case for the event in the preceding example). In suc
 you can implement `ResolvableTypeProvider` to guide the framework beyond what the runtime
 environment provides. The following event shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9271,7 +8785,6 @@ environment provides. The following event shows how to do so:
 		}
 	}
 ----
-====
 
 TIP: This works not only for `ApplicationEvent` but any arbitrary object that you send as
 an event.
@@ -9322,7 +8835,6 @@ programmatically by using one of the `ApplicationContext` implementations.
 You can register an `ApplicationContext` by using the `ContextLoaderListener`, as the
 following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9335,16 +8847,15 @@ following example shows:
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 ----
-====
 
 The listener inspects the `contextConfigLocation` parameter. If the parameter does not
 exist, the listener uses `/WEB-INF/applicationContext.xml` as a default. When the
 parameter does exist, the listener separates the `String` by using predefined
 delimiters (comma, semicolon, and whitespace) and uses the values as locations where
 application contexts are searched. Ant-style path patterns are supported as well.
-Examples are `/WEB-INF/{asterisk}Context.xml` (for all files with names that end with `Context.xml`
-and that reside in the `WEB-INF` directory) and `/WEB-INF/**/*Context.xml`( for all such files
-in any subdirectory of `WEB-INF`).
+Examples are `/WEB-INF/{asterisk}Context.xml` (for all files with names that end with
+`Context.xml` and that reside in the `WEB-INF` directory) and `/WEB-INF/**/*Context.xml`
+(for all such files in any subdirectory of `WEB-INF`).
 
 
 
@@ -9355,17 +8866,17 @@ It is possible to deploy a Spring `ApplicationContext` as a RAR file, encapsulat
 context and all of its required bean classes and library JARs in a Java EE RAR deployment
 unit. This is the equivalent of bootstrapping a stand-alone `ApplicationContext` (only hosted
 in Java EE environment) being able to access the Java EE servers facilities. RAR deployment
-is a more natural alternative to a scenario of deploying a headless WAR file -- in effect, a WAR
-file without any HTTP entry points that is used only for bootstrapping a Spring
+is a more natural alternative to a scenario of deploying a headless WAR file -- in effect,
+a WAR file without any HTTP entry points that is used only for bootstrapping a Spring
 `ApplicationContext` in a Java EE environment.
 
 RAR deployment is ideal for application contexts that do not need HTTP entry points but
 rather consist only of message endpoints and scheduled jobs. Beans in such a context can
 use application server resources such as the JTA transaction manager and JNDI-bound JDBC
-`DataSource` instances and JMS `ConnectionFactory` instances and can also register with the
-platform's JMX server -- all through Spring's standard transaction management and JNDI
-and JMX support facilities. Application components can also interact with the
-application server's JCA `WorkManager` through Spring's `TaskExecutor` abstraction.
+`DataSource` instances and JMS `ConnectionFactory` instances and can also register with
+the platform's JMX server -- all through Spring's standard transaction management and JNDI
+and JMX support facilities. Application components can also interact with the application
+server's JCA `WorkManager` through Spring's `TaskExecutor` abstraction.
 
 See the javadoc of the
 {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
@@ -9384,13 +8895,13 @@ and the corresponding Spring XML bean definition file(s) (typically
 . Drop the resulting RAR file into your
 application server's deployment directory.
 
-NOTE: Such RAR deployment units are usually self-contained. They do not expose components to
-the outside world, not even to other modules of the same application. Interaction with a
+NOTE: Such RAR deployment units are usually self-contained. They do not expose components
+to the outside world, not even to other modules of the same application. Interaction with a
 RAR-based `ApplicationContext` usually occurs through JMS destinations that it shares with
 other modules. A RAR-based `ApplicationContext` may also, for example, schedule some jobs
 or react to new files in the file system (or the like). If it needs to allow synchronous
-access from the outside, it could (for example) export RMI endpoints, which may
-be used by other application modules on the same machine.
+access from the outside, it could (for example) export RMI endpoints, which may be used
+by other application modules on the same machine.
 
 
 
@@ -9483,7 +8994,6 @@ The following table lists features provided by the `BeanFactory` and
 To explicitly register a bean post-processor with a `DefaultListableBeanFactory`,
 you need to programmatically call `addBeanPostProcessor`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9496,12 +9006,10 @@ you need to programmatically call `addBeanPostProcessor`, as the following examp
 
 	// now start using the factory
 ----
-====
 
 To apply a `BeanFactoryPostProcessor` to a plain `DefaultListableBeanFactory`,
 you need to call its `postProcessBeanFactory` method, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -9510,13 +9018,12 @@ you need to call its `postProcessBeanFactory` method, as the following example s
 	reader.loadBeanDefinitions(new FileSystemResource("beans.xml"));
 
 	// bring in some property values from a Properties file
-	PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
+	PropertySourcesPlaceholderConfigurer cfg = new PropertySourcesPlaceholderConfigurer();
 	cfg.setLocation(new FileSystemResource("jdbc.properties"));
 
 	// now actually do the replacement
 	cfg.postProcessBeanFactory(factory);
 ----
-====
 
 In both cases, the explicit registration steps are inconvenient, which is
 why the various `ApplicationContext` variants are preferred over a plain

@@ -36,31 +36,41 @@ import org.slf4j.spi.LocationAwareLogger;
  */
 final class LogAdapter {
 
-	private static LogApi logApi = LogApi.JUL;
+	private static final String LOG4J_SPI = "org.apache.logging.log4j.spi.ExtendedLogger";
+
+	private static final String LOG4J_SLF4J_PROVIDER = "org.apache.logging.slf4j.SLF4JProvider";
+
+	private static final String SLF4J_SPI = "org.slf4j.spi.LocationAwareLogger";
+
+	private static final String SLF4J_API = "org.slf4j.Logger";
+
+
+	private static final LogApi logApi;
 
 	static {
-		ClassLoader cl = LogAdapter.class.getClassLoader();
-		try {
-			// Try Log4j 2.x API
-			Class.forName("org.apache.logging.log4j.spi.ExtendedLogger", false, cl);
-			logApi = LogApi.LOG4J;
-		}
-		catch (ClassNotFoundException ex1) {
-			try {
-				// Try SLF4J 1.7 SPI
-				Class.forName("org.slf4j.spi.LocationAwareLogger", false, cl);
+		if (isPresent(LOG4J_SPI)) {
+			if (isPresent(LOG4J_SLF4J_PROVIDER) && isPresent(SLF4J_SPI)) {
+				// log4j-to-slf4j bridge -> we'll rather go with the SLF4J SPI;
+				// however, we still prefer Log4j over the plain SLF4J API since
+				// the latter does not have location awareness support.
 				logApi = LogApi.SLF4J_LAL;
 			}
-			catch (ClassNotFoundException ex2) {
-				try {
-					// Try SLF4J 1.7 API
-					Class.forName("org.slf4j.Logger", false, cl);
-					logApi = LogApi.SLF4J;
-				}
-				catch (ClassNotFoundException ex3) {
-					// Keep java.util.logging as default
-				}
+			else {
+				// Use Log4j 2.x directly, including location awareness support
+				logApi = LogApi.LOG4J;
 			}
+		}
+		else if (isPresent(SLF4J_SPI)) {
+			// Full SLF4J SPI including location awareness support
+			logApi = LogApi.SLF4J_LAL;
+		}
+		else if (isPresent(SLF4J_API)) {
+			// Minimal SLF4J API without location awareness support
+			logApi = LogApi.SLF4J;
+		}
+		else {
+			// java.util.logging as default
+			logApi = LogApi.JUL;
 		}
 	}
 
@@ -89,6 +99,16 @@ final class LogAdapter {
 				// of the JavaUtilLog adapter - e.g. by a JVM in debug mode - when eagerly
 				// trying to parse the bytecode for all the cases of this switch clause.
 				return JavaUtilAdapter.createLog(name);
+		}
+	}
+
+	private static boolean isPresent(String className) {
+		try {
+			Class.forName(className, false, LogAdapter.class.getClassLoader());
+			return true;
+		}
+		catch (ClassNotFoundException ex) {
+			return false;
 		}
 	}
 

@@ -29,7 +29,9 @@ import org.springframework.lang.Nullable;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 3.0
+ * @deprecated as of 5.1.3, not used by {@link JdbcTemplate} anymore
  */
+@Deprecated
 public abstract class BatchUpdateUtils {
 
 	public static int[] executeBatchUpdate(

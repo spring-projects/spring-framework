@@ -35,6 +35,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.InOrder;
 
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -50,6 +51,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Nikita Khateev
+ * @author Fedor Bobin
  */
 public class NamedParameterJdbcTemplateTests {
 
@@ -465,6 +467,41 @@ public class NamedParameterJdbcTemplateTests {
 		verify(preparedStatement).setObject(1, 200);
 		verify(preparedStatement, times(2)).addBatch();
 		verify(preparedStatement, atLeastOnce()).close();
+		verify(connection, atLeastOnce()).close();
+	}
+
+	@Test
+	public void testBatchUpdateWithInClause() throws Exception {
+		@SuppressWarnings("unchecked")
+		Map<String, Object>[] parameters = new Map[2];
+		parameters[0] = Collections.singletonMap("ids", Arrays.asList(1, 2));
+		parameters[1] = Collections.singletonMap("ids", Arrays.asList(3, 4));
+
+		final int[] rowsAffected = new int[] {1, 2};
+		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
+		given(connection.getMetaData()).willReturn(databaseMetaData);
+
+		JdbcTemplate template = new JdbcTemplate(dataSource, false);
+		namedParameterTemplate = new NamedParameterJdbcTemplate(template);
+
+		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
+				"delete sometable where id in (:ids)",
+				parameters
+		);
+
+		assertEquals("executed 2 updates", 2, actualRowsAffected.length);
+
+		InOrder inOrder = inOrder(preparedStatement);
+
+		inOrder.verify(preparedStatement).setObject(1, 1);
+		inOrder.verify(preparedStatement).setObject(2, 2);
+		inOrder.verify(preparedStatement).addBatch();
+
+		inOrder.verify(preparedStatement).setObject(1, 3);
+		inOrder.verify(preparedStatement).setObject(2, 4);
+		inOrder.verify(preparedStatement).addBatch();
+
+		inOrder.verify(preparedStatement, atLeastOnce()).close();
 		verify(connection, atLeastOnce()).close();
 	}
 

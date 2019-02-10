@@ -933,6 +933,7 @@ public interface JdbcOperations {
 	 * @param pss the ParameterizedPreparedStatementSetter to use
 	 * @return an array containing for each batch another array containing the numbers of rows affected
 	 * by each update in the batch
+	 * @since 3.1
 	 */
 	<T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,
 			ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException;

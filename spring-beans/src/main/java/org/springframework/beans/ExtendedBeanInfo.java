@@ -314,6 +314,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Class<?> getPropertyType() {
 			if (this.propertyType == null) {
 				try {
@@ -425,6 +426,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Class<?> getPropertyType() {
 			if (this.propertyType == null) {
 				try {
@@ -460,6 +462,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Class<?> getIndexedPropertyType() {
 			if (this.indexedPropertyType == null) {
 				try {

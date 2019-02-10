@@ -141,7 +141,6 @@ An `Encoder` allocates data buffers that others must read (and release). So an `
 doesn't have much to do. However an `Encoder` must take care to release a data buffer if
 a serialization error occurs while populating the buffer with data. For example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -158,7 +157,6 @@ a serialization error occurs while populating the buffer with data. For example:
 	}
 	return buffer;
 ----
-====
 
 The consumer of an `Encoder` is responsible for releasing the data buffers it receives.
 In a WebFlux application, the output of the `Encoder` is used to write to the HTTP server

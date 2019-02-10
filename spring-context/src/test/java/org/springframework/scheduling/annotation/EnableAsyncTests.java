@@ -217,7 +217,7 @@ public class EnableAsyncTests {
 	}
 
 	@Test
-	public void customExecutorConfig() throws InterruptedException {
+	public void customExecutorConfig() {
 		// Arrange
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(CustomExecutorConfig.class);

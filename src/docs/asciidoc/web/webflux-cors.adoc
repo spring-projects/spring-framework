@@ -83,7 +83,6 @@ The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation enables cross-origin requests on annotated controller methods, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -103,7 +102,6 @@ public class AccountController {
 	}
 }
 ----
-====
 
 By default, `@CrossOrigin` allows:
 
@@ -121,7 +119,6 @@ should be used only where appropriate.
 `@CrossOrigin` is supported at the class level, too, and inherited by all methods.
 The following example specifies a certain domain and sets `maxAge` to an hour:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -141,11 +138,9 @@ public class AccountController {
 	}
 }
 ----
-====
 
 You can use `@CrossOrigin` at both the class and the method level,
 as the following example shows:
-====
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -169,8 +164,6 @@ public class AccountController {
 ----
 <1> Using `@CrossOrigin` at the class level.
 <2> Using `@CrossOrigin` at the method level.
-====
-
 
 
 
@@ -198,7 +191,6 @@ should be used only where appropriate.
 To enable CORS in the WebFlux Java configuration, you can use the `CorsRegistry` callback,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -220,7 +212,6 @@ public class WebConfig implements WebFluxConfigurer {
 	}
 }
 ----
-====
 
 
 
@@ -233,10 +224,14 @@ You can apply CORS support through the built-in
 {api-spring-framework}/web/cors/reactive/CorsWebFilter.html[`CorsWebFilter`], which is a
 good fit with <<webflux-fn,functional endpoints>>.
 
+NOTE: If you try to use the `CorsFilter` with Spring Security, keep in mind that Spring
+Security has
+https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#cors[built-in support]
+for CORS.
+
 To configure the filter, you can declare a `CorsWebFilter` bean and pass a
 `CorsConfigurationSource` to its constructor, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim"]
 ----
@@ -259,4 +254,3 @@ CorsWebFilter corsFilter() {
 	return new CorsWebFilter(source);
 }
 ----
-====

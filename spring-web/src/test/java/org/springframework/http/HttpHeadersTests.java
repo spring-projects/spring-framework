@@ -38,8 +38,8 @@ import java.util.TimeZone;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
-import static org.hamcrest.Matchers.is;
+import static java.time.format.DateTimeFormatter.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -356,10 +356,17 @@ public class HttpHeadersTests {
 	}
 
 	@Test
+	public void cacheControlEmpty() {
+		headers.setCacheControl(CacheControl.empty());
+		assertNull("Invalid Cache-Control header", headers.getCacheControl());
+		assertNull("Invalid Cache-Control header", headers.getFirst("cache-control"));
+	}
+
+	@Test
 	public void cacheControlAllValues() {
 		headers.add(HttpHeaders.CACHE_CONTROL, "max-age=1000, public");
 		headers.add(HttpHeaders.CACHE_CONTROL, "s-maxage=1000");
-		assertThat(headers.getCacheControl(), is("max-age=1000, public, s-maxage=1000"));
+		assertEquals("max-age=1000, public, s-maxage=1000", headers.getCacheControl());
 	}
 
 	@Test
@@ -375,7 +382,7 @@ public class HttpHeadersTests {
 
 	@Test  // SPR-11917
 	public void getAllowEmptySet() {
-		headers.setAllow(Collections.<HttpMethod> emptySet());
+		headers.setAllow(Collections.emptySet());
 		assertThat(headers.getAllow(), Matchers.emptyCollectionOf(HttpMethod.class));
 	}
 

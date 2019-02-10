@@ -72,6 +72,14 @@ public class CallableStatementCreatorFactory {
 
 
 	/**
+	 * Return the SQL call string.
+	 * @since 5.1.3
+	 */
+	public final String getCallString() {
+		return this.callString;
+	}
+
+	/**
 	 * Add a new declared parameter.
 	 * <p>Order of parameter addition is significant.
 	 * @param param the parameter to add to the list of declared parameters

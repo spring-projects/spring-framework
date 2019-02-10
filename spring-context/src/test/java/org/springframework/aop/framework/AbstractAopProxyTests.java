@@ -736,7 +736,7 @@ public abstract class AbstractAopProxyTests {
 			fail("Shouldn't be able to add introduction interceptor except via introduction advice");
 		}
 		catch (AopConfigException ex) {
-			assertTrue(ex.getMessage().indexOf("ntroduction") > -1);
+			assertTrue(ex.getMessage().contains("ntroduction"));
 		}
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		ITestBean proxied = (ITestBean) createProxy(pc);
@@ -849,7 +849,7 @@ public abstract class AbstractAopProxyTests {
 			fail("Shouldn't be able to add interceptor when frozen");
 		}
 		catch (AopConfigException ex) {
-			assertTrue(ex.getMessage().indexOf("frozen") > -1);
+			assertTrue(ex.getMessage().contains("frozen"));
 		}
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		assertEquals(target.getAge(), proxied.getAge());

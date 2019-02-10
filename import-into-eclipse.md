@@ -22,7 +22,7 @@ _Within your locally cloned `spring-framework` working directory:_
    to directory -> Select Finish)
 3. If prompted, exclude the `spring-aspects` module (or after the import by closing or
    deleting the project)
-4. In the `spring-oxm` project, add the two folders (`castor` and `jaxb`) in
+4. In the `spring-oxm` project, add the `jaxb` folder in
    `build/generated-sources` to the build path (right click on them and select
    `Build Path -> Use as Source Folder`)
 5. To apply project specific settings run `./gradlew eclipseBuildship`

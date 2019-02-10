@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package org.springframework.web.reactive.function.client
 
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Answers
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.bodyToFlux
@@ -32,22 +29,20 @@ import org.springframework.web.reactive.function.server.bodyToMono
  *
  * @author Sebastien Deleuze
  */
-@RunWith(MockitoJUnitRunner::class)
 class ServerRequestExtensionsTests {
 
-	@Mock(answer = Answers.RETURNS_MOCKS)
-	lateinit var request: ServerRequest
+	val request = mockk<ServerRequest>(relaxed = true)
 
 	@Test
 	fun `bodyToMono with reified type parameters`() {
 		request.bodyToMono<List<Foo>>()
-		verify(request, times(1)).bodyToMono(object : ParameterizedTypeReference<List<Foo>>() {})
+		verify { request.bodyToMono(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
 	fun `bodyToFlux with reified type parameters`() {
 		request.bodyToFlux<List<Foo>>()
-		verify(request, times(1)).bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {})
+		verify { request.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	class Foo

@@ -20,7 +20,6 @@ To use the elements in the `jee` schema, you need to have the following preamble
 of your Spring XML configuration file. The text in the following snippet references the
 correct schema so that the elements in the `jee` namespace are available to you:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -34,7 +33,6 @@ correct schema so that the elements in the `jee` namespace are available to you:
 		<!-- bean definitions here -->
 	</beans>
 ----
-====
 
 
 
@@ -43,7 +41,6 @@ correct schema so that the elements in the `jee` namespace are available to you:
 
 The following example shows how to use JNDI to look up a data source without the `jee` schema:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -55,12 +52,10 @@ The following example shows how to use JNDI to look up a data source without the
 		<property name="dataSource" ref="**dataSource**"/>
 	</bean>
 ----
-====
 
 The following example shows how to use JNDI to look up a data source with the `jee`
 schema:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -71,7 +66,6 @@ schema:
 		<property name="dataSource" ref="**dataSource**"/>
 	</bean>
 ----
-====
 
 
 
@@ -81,7 +75,6 @@ schema:
 The following example shows how to use JNDI to look up an environment variable without
 `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -94,7 +87,6 @@ The following example shows how to use JNDI to look up an environment variable w
 		</property>
 	</bean>
 ----
-====
 
 The following example shows how to use JNDI to look up an environment variable with `jee`:
 
@@ -113,7 +105,6 @@ The following example shows how to use JNDI to look up an environment variable w
 The following example shows how to use JNDI to look up multiple environment variables
 without `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -127,12 +118,10 @@ without `jee`:
 		</property>
 	</bean>
 ----
-====
 
 The following example shows how to use JNDI to look up multiple environment variables with
 `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -144,7 +133,6 @@ The following example shows how to use JNDI to look up multiple environment vari
 		</jee:environment>
 	</jee:jndi-lookup>
 ----
-====
 
 
 [[xsd-schemas-jee-jndi-lookup-complex]]
@@ -153,7 +141,6 @@ The following example shows how to use JNDI to look up multiple environment vari
 The following example shows how to use JNDI to look up a data source and a number of
 different properties without `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -166,12 +153,10 @@ different properties without `jee`:
 		<property name="proxyInterface" value="com.myapp.Thing"/>
 	</bean>
 ----
-====
 
 The following example shows how to use JNDI to look up a data source and a number of
 different properties with `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -183,7 +168,6 @@ different properties with `jee`:
 			expected-type="com.myapp.DefaultThing"
 			proxy-interface="com.myapp.Thing"/>
 ----
-====
 
 
 
@@ -195,7 +179,6 @@ The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless 
 The following example shows how to configures a reference to a local EJB Stateless
 SessionBean without `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -205,19 +188,16 @@ SessionBean without `jee`:
 		<property name="businessInterface" value="com.foo.service.RentalService"/>
 	</bean>
 ----
-====
 
 The following example shows how to configures a reference to a local EJB Stateless
 SessionBean with `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<jee:local-slsb id="simpleSlsb" jndi-name="ejb/RentalServiceBean"
 			business-interface="com.foo.service.RentalService"/>
 ----
-====
 
 
 
@@ -229,7 +209,6 @@ The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless 
 The following example shows how to configures a reference to a local EJB Stateless
 SessionBean and a number of properties without `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -242,12 +221,10 @@ SessionBean and a number of properties without `jee`:
 		<property name="resourceRef" value="true"/>
 	</bean>
 ----
-====
 
 The following example shows how to configures a reference to a local EJB Stateless
 SessionBean and a number of properties with `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -258,7 +235,6 @@ SessionBean and a number of properties with `jee`:
 			lookup-home-on-startup="true"
 			resource-ref="true">
 ----
-====
 
 
 [[xsd-schemas-jee-remote-slsb]]
@@ -270,7 +246,6 @@ SessionBean.
 The following example shows how to configures a reference to a remote EJB Stateless
 SessionBean without `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -285,12 +260,10 @@ SessionBean without `jee`:
 		<property name="refreshHomeOnConnectFailure" value="true"/>
 	</bean>
 ----
-====
 
 The following example shows how to configures a reference to a remote EJB Stateless
 SessionBean with `jee`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -303,7 +276,6 @@ SessionBean with `jee`:
 			home-interface="com.foo.service.RentalService"
 			refresh-home-on-connect-failure="true">
 ----
-====
 
 
 
@@ -321,7 +293,6 @@ the following preamble at the top of your Spring XML configuration file. The tex
 following snippet references the correct schema so that the elements in the `jms` namespace
 are available to you:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -335,7 +306,6 @@ are available to you:
 		<!-- bean definitions here -->
 	</beans>
 ----
-====
 
 
 
@@ -359,7 +329,6 @@ To use the elements in the `cache` schema, you need to have the following preamb
 top of your Spring XML configuration file. The text in the following snippet references
 the correct schema so that the elements in the `cache` namespace are available to you:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -373,4 +342,3 @@ the correct schema so that the elements in the `cache` namespace are available t
 		<!-- bean definitions here -->
 	</beans>
 ----
-====

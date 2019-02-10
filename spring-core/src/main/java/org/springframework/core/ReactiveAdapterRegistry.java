@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,15 +141,17 @@ public class ReactiveAdapterRegistry {
 		if (clazz == null) {
 			return null;
 		}
-
-		return this.adapters.stream()
-				.filter(adapter -> adapter.getReactiveType() == clazz)
-				.findFirst()
-				.orElseGet(() ->
-						this.adapters.stream()
-								.filter(adapter -> adapter.getReactiveType().isAssignableFrom(clazz))
-								.findFirst()
-								.orElse(null));
+		for(ReactiveAdapter adapter : this.adapters) {
+			if (adapter.getReactiveType() == clazz) {
+				return adapter;
+			}
+		}
+		for(ReactiveAdapter adapter : this.adapters) {
+			if (adapter.getReactiveType().isAssignableFrom(clazz)) {
+				return adapter;
+			}
+		}
+		return null;
 	}
 
 

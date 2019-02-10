@@ -21,6 +21,7 @@ import java.net.URI;
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 
@@ -99,6 +100,23 @@ public class ForwardedHeaderTransformerTests {
 		assertEquals("/prefix/path", request.getPath().value());
 		assertForwardedHeadersRemoved(request);
 	}
+
+	@Test // SPR-17525
+	public void shouldNotDoubleEncode() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Forwarded", "host=84.198.58.199;proto=https");
+
+		ServerHttpRequest request = MockServerHttpRequest
+				.method(HttpMethod.GET, new URI("http://example.com/a%20b?q=a%2Bb"))
+				.headers(headers)
+				.build();
+
+		request = this.requestMutator.apply(request);
+
+		assertEquals(new URI("https://84.198.58.199/a%20b?q=a%2Bb"), request.getURI());
+		assertForwardedHeadersRemoved(request);
+	}
+
 
 	private MockServerHttpRequest getRequest(HttpHeaders headers) {
 		return MockServerHttpRequest.get(BASE_URL).headers(headers).build();

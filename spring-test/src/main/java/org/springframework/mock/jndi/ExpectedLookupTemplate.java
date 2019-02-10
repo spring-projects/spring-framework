@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	public ExpectedLookupTemplate(String name, Object object) {
 		addObject(name, object);
 	}
+
 
 	/**
 	 * Add the given object to the list of JNDI objects that this template will expose.

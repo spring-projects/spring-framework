@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -44,6 +45,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -121,10 +123,11 @@ public class BodyInsertersTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
-
-		DataBuffer buffer = new DefaultDataBufferFactory().wrap(body.getBytes(UTF_8));
 		StepVerifier.create(response.getBody())
-				.expectNext(buffer)
+				.consumeNextWith(buf -> {
+					String actual = DataBufferTestUtils.dumpString(buf, UTF_8);
+					Assert.assertEquals("foo", actual);
+				})
 				.expectComplete()
 				.verify();
 	}
@@ -166,11 +169,11 @@ public class BodyInsertersTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
-
-		ByteBuffer byteBuffer = ByteBuffer.wrap("foo".getBytes(UTF_8));
-		DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
 		StepVerifier.create(response.getBody())
-				.expectNext(buffer)
+				.consumeNextWith(buf -> {
+					String actual = DataBufferTestUtils.dumpString(buf, UTF_8);
+					Assert.assertEquals("foo", actual);
+				})
 				.expectComplete()
 				.verify();
 	}

@@ -46,7 +46,6 @@ integration for using Spring MVC with FreeMarker templates.
 
 The following example shows how to configure FreeMarker as a view technology:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -69,11 +68,9 @@ The following example shows how to configure FreeMarker as a view technology:
 		}
 	}
 ----
-====
 
 The following example shows how to configure the same in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -88,12 +85,10 @@ The following example shows how to configure the same in XML:
 		<mvc:template-loader-path location="/WEB-INF/freemarker"/>
 	</mvc:freemarker-configurer>
 ----
-====
 
 Alternatively, you can also declare the `FreeMarkerConfigurer` bean for full control over all
 properties, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -101,7 +96,6 @@ properties, as the following example shows:
 		<property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
 	</bean>
 ----
-====
 
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
 shown in the preceding example. Given the preceding configuration, if your controller returns a view name
@@ -119,7 +113,6 @@ the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
 `java.util.Properties` object, and the `freemarkerVariables` property requires a
 `java.util.Map`. The following example shows how to do so:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -134,7 +127,6 @@ the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
 
 	<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape"/>
 ----
-====
 
 See the FreeMarker documentation for details of settings and variables as they apply to
 the `Configuration` object.
@@ -173,7 +165,6 @@ controller, you can use code similar to the next example to bind to field values
 display error messages for each input field in similar fashion to the JSP equivalent.
 The following example shows the `personForm` view that was configured earlier:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -196,7 +187,6 @@ The following example shows the `personForm` view that was configured earlier:
 		...
 	</html>
 ----
-====
 
 `<@spring.bind>` requires a 'path' argument, which consists of the name of your command
 object (it is 'command', unless you changed it in your `FormController` properties)
@@ -318,14 +308,12 @@ time, a class name or style attribute. Note that FreeMarker can specify default
 values for the attributes parameter. The following example shows how to use the `formInput`
 and `showWErrors` macros:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<@spring.formInput "command.name"/>
 	<@spring.showErrors "<br>"/>
 ----
-====
 
 The next example shows the output of the form fragment, generating the name field and displaying a
 validation error after the form was submitted with no value in the field. Validation
@@ -333,7 +321,6 @@ occurs through Spring's Validation framework.
 
 The generated HTML resembles the following example:
 
-====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -344,7 +331,6 @@ The generated HTML resembles the following example:
 	<br>
 	<br>
 ----
-====
 
 The `formTextarea` macro works the same way as the `formInput` macro and accepts the same
 parameter list. Commonly, the second parameter (attributes) is used to pass style
@@ -370,7 +356,6 @@ value of 'London' for this field, so no validation is necessary. When the form i
 rendered, the entire list of cities to choose from is supplied as reference data in the
 model under the name 'cityMap'. The following listing shows the example:
 
-====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -378,7 +363,6 @@ model under the name 'cityMap'. The following listing shows the example:
 	Town:
 	<@spring.formRadioButtons "command.address.town", cityMap, ""/><br><br>
 ----
-====
 
 The preceding listing renders a line of radio buttons, one for each value in `cityMap`, and uses a
 separator of `""`. No additional attributes are supplied (the last parameter to the macro is
@@ -387,7 +371,6 @@ keys are what the form actually submits as POSTed request parameters. The map va
 labels that the user sees. In the preceding example, given a list of three well known cities
 and a default value in the form backing object, the HTML resembles the following:
 
-====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -396,12 +379,10 @@ and a default value in the form backing object, the HTML resembles the following
 	<input type="radio" name="address.town" value="Paris" checked="checked">Paris</input>
 	<input type="radio" name="address.town" value="New York">New York</input>
 ----
-====
 
 If your application expects to handle cities by internal codes (for example), you can create the map of
 codes with suitable keys, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -416,12 +397,10 @@ codes with suitable keys, as the following example shows:
 		return model;
 	}
 ----
-====
 
 The code now produces output where the radio values are the relevant codes, but the
 user still sees the more user-friendly city names, as follows:
 
-====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -430,7 +409,6 @@ user still sees the more user-friendly city names, as follows:
 	<input type="radio" name="address.town" value="PRS" checked="checked">Paris</input>
 	<input type="radio" name="address.town" value="NYC">New York</input>
 ----
-====
 
 
 [[mvc-views-form-macros-html-escaping]]
@@ -447,21 +425,18 @@ template processing to provide different behavior for different fields in your f
 To switch to XHTML compliance for your tags, specify a value of `true` for a
 model or context variable named `xhtmlCompliant`, as the following example shows:
 
-====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<#-- for FreeMarker -->
 	<#assign xhtmlCompliant = true>
 ----
-====
 
 After processing
 this directive, any elements generated by the Spring macros are now XHTML compliant.
 
 In similar fashion, you can specify HTML escaping per field, as the following example shows:
 
-====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -474,7 +449,6 @@ In similar fashion, you can specify HTML escaping per field, as the following ex
 	<#assign htmlEscape = false in spring>
 	<#-- all future fields will be bound with HTML escaping off -->
 ----
-====
 
 
 
@@ -496,7 +470,6 @@ NOTE: The Groovy Markup Template engine requires Groovy 2.3.1+.
 
 The following example shows how to configure the Groovy Markup Template Engine:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -519,11 +492,9 @@ The following example shows how to configure the Groovy Markup Template Engine:
 		}
 	}
 ----
-====
 
 The following example shows how to configure the same in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -536,7 +507,6 @@ The following example shows how to configure the same in XML:
 	<!-- Configure the Groovy Markup Template Engine... -->
 	<mvc:groovy-configurer resource-loader-path="/WEB-INF/"/>
 ----
-====
 
 
 
@@ -546,7 +516,6 @@ The following example shows how to configure the same in XML:
 Unlike traditional template engines, Groovy Markup relies on a DSL that uses a builder
 syntax. The following example shows a sample template for an HTML page:
 
-====
 [source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -561,7 +530,6 @@ syntax. The following example shows a sample template for an HTML page:
 		}
 	}
 ----
-====
 
 
 
@@ -620,7 +588,6 @@ You can declare a `ScriptTemplateConfigurer` bean to specify the script engine t
 the script files to load, what function to call to render templates, and so on.
 The following example uses Mustache templates and the Nashorn JavaScript engine:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -644,11 +611,9 @@ The following example uses Mustache templates and the Nashorn JavaScript engine:
 		}
 	}
 ----
-====
 
 The following example shows the same arrangement in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -662,11 +627,9 @@ The following example shows the same arrangement in XML:
 		<mvc:script location="mustache.js"/>
 	</mvc:script-template-configurer>
 ----
-====
 
 The controller would look no different for the Java and XML configurations, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -681,11 +644,9 @@ The controller would look no different for the Java and XML configurations, as t
 		}
 	}
 ----
-====
 
 The following example shows the Mustache template:
 
-====
 [source,html,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -698,7 +659,6 @@ The following example shows the Mustache template:
 		</body>
 	</html>
 ----
-====
 
 The render function is called with the following parameters:
 
@@ -719,7 +679,6 @@ browser facilities that are not available in the server-side script engine.
 
 The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -743,7 +702,6 @@ The following example shows how to do so:
 		}
 	}
 ----
-====
 
 NOTE: Setting the `sharedEngine` property to `false` is required when you use non-thread-safe
 script engines with templating libraries not designed for concurrency, such as Handlebars or
@@ -752,20 +710,17 @@ to https://bugs.openjdk.java.net/browse/JDK-8076099[this bug].
 
 `polyfill.js` defines only the `window` object needed by Handlebars to run properly, as follows:
 
-====
 [source,javascript,indent=0]
 [subs="verbatim,quotes"]
 ----
 	var window = {};
 ----
-====
 
 This basic `render.js` implementation compiles the template before using it. A production-ready
 implementation should also store any reused cached templates or pre-compiled templates.
 You can do so on the script side (and handle any customization you need -- managing
 template engine configuration, for example). The following example shows how to do so:
 
-====
 [source,javascript,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -774,7 +729,6 @@ template engine configuration, for example). The following example shows how to 
 		return compiledTemplate(model);
 	}
 ----
-====
 
 Check out the Spring Framework unit tests,
 https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[Java], and
@@ -801,7 +755,6 @@ When developing with JSPs, you can declare a `InternalResourceViewResolver` or a
 mapped to a class and a URL. With a `ResourceBundleViewResolver`, you
 can mix different types of views byusing only one resolver, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -831,7 +784,6 @@ directory so there can be no direct access by clients.
 		<property name="suffix" value=".jsp"/>
 	</bean>
 ----
-====
 
 
 
@@ -884,14 +836,12 @@ called `spring-form.tld`.
 To use the tags from this library, add the following directive to the top of your JSP
 page:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 ----
 where `form` is the tag name prefix you want to use for the tags from this library.
-====
 
 
 [[mvc-view-jsp-formtaglib-formtag]]
@@ -907,7 +857,6 @@ such as `firstName` and `lastName`. We can use it as the form-backing object of 
 form controller, which returns `form.jsp`. The following example shows what `form.jsp` could
 look like:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -929,7 +878,6 @@ look like:
 		</table>
 	</form:form>
 ----
-====
 
 The `firstName` and `lastName` values are retrieved from the command object placed in
 the `PageContext` by the page controller. Keep reading to see more complex examples of
@@ -937,7 +885,6 @@ how inner tags are used with the `form` tag.
 
 The following listing shows the generated HTML, which looks like a standard form:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -959,14 +906,12 @@ The following listing shows the generated HTML, which looks like a standard form
 		</table>
 	</form>
 ----
-====
 
 The preceding JSP assumes that the variable name of the form-backing object is
 `command`. If you have put the form-backing object into the model under another name
 (definitely a best practice), you can bind the form to the named variable, as the
 following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -988,7 +933,6 @@ following example shows:
 		</table>
 	</form:form>
 ----
-====
 
 
 [[mvc-view-jsp-formtaglib-inputtag]]
@@ -1008,7 +952,6 @@ This tag renders an HTML `input` tag with the `type` set to `checkbox`.
 Assume that our `User` has preferences such as newsletter subscription and a list of
 hobbies. The following example shows the `Preferences` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1043,11 +986,9 @@ hobbies. The following example shows the `Preferences` class:
 		}
 	}
 ----
-====
 
 The corresponding `form.jsp` could then resemble the following:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1079,7 +1020,6 @@ The corresponding `form.jsp` could then resemble the following:
 		</table>
 	</form:form>
 ----
-====
 
 There are three approaches to the `checkbox` tag, which should meet all your checkbox needs.
 
@@ -1095,7 +1035,6 @@ There are three approaches to the `checkbox` tag, which should meet all your che
 Note that, regardless of the approach, the same HTML structure is generated. The following
 HTML snippet defines some checkboxes:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1111,7 +1050,6 @@ HTML snippet defines some checkboxes:
 		</td>
 	</tr>
 ----
-====
 
 You might not expect to see the additional hidden field after each checkbox.
 When a checkbox in an HTML page is not checked, its value is not sent to the
@@ -1137,7 +1075,6 @@ the available options in the `items` property. Typically, the bound property is 
 collection so that it can hold multiple values selected by the user. The following example
 shows a JSP that uses this tag:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1153,7 +1090,6 @@ shows a JSP that uses this tag:
 		</table>
 	</form:form>
 ----
-====
 
 This example assumes that the `interestList` is a `List` available as a model attribute
 that contains strings of the values to be selected from. If you use a `Map`,
@@ -1171,7 +1107,6 @@ This tag renders an HTML `input` element with the `type` set to `radio`.
 A typical usage pattern involves multiple tag instances bound to the same property
 but with different values, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1183,7 +1118,6 @@ but with different values, as the following example shows:
 		</td>
 	</tr>
 ----
-====
 
 
 
@@ -1200,7 +1134,6 @@ entry's value are used as the label to be displayed. You can also use a custom
 object where you can provide the property names for the value by using `itemValue` and the
 label by using `itemLabel`, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1209,7 +1142,6 @@ label by using `itemLabel`, as the following example shows:
 		<td><form:radiobuttons path="sex" items="${sexOptions}"/></td>
 	</tr>
 ----
-====
 
 
 [[mvc-view-jsp-formtaglib-passwordtag]]
@@ -1217,7 +1149,6 @@ label by using `itemLabel`, as the following example shows:
 
 This tag renders an HTML `input` tag with the type set to `password` with the bound value.
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1228,13 +1159,11 @@ This tag renders an HTML `input` tag with the type set to `password` with the bo
 		</td>
 	</tr>
 ----
-====
 
 Note that, by default, the password value is not shown. If you do want the
 password value to be shown, you can set the value of the `showPassword` attribute to
 `true`, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1245,7 +1174,6 @@ password value to be shown, you can set the value of the `showPassword` attribut
 		</td>
 	</tr>
 ----
-====
 
 
 [[mvc-view-jsp-formtaglib-selecttag]]
@@ -1256,7 +1184,6 @@ option as well as the use of nested `option` and `options` tags.
 
 Assume that a `User` has a list of skills. The corresponding HTML could be as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1265,12 +1192,10 @@ Assume that a `User` has a list of skills. The corresponding HTML could be as fo
 		<td><form:select path="skills" items="${skills}"/></td>
 	</tr>
 ----
-====
 
 If the `User's` skill are in Herbology, the HTML source of the 'Skills' row could be
 as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1285,7 +1210,6 @@ as follows:
 		</td>
 	</tr>
 ----
-====
 
 
 
@@ -1295,7 +1219,6 @@ as follows:
 This tag renders an HTML `option` element. It sets `selected`, based on the bound
 value. The following HTML shows typical output for it:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1311,12 +1234,10 @@ value. The following HTML shows typical output for it:
 		</td>
 	</tr>
 ----
-====
 
 If the `User's` house was in Gryffindor, the HTML source of the 'House' row would be
 as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1333,7 +1254,6 @@ as follows:
 	</tr>
 ----
 <1> Note the addition of a `selected` attribute.
-====
 
 
 
@@ -1343,7 +1263,6 @@ as follows:
 This tag renders a list of HTML `option` elements. It sets the `selected` attribute,
 based on the bound value. The following HTML shows typical output for it:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1357,11 +1276,9 @@ based on the bound value. The following HTML shows typical output for it:
 		</td>
 	</tr>
 ----
-====
 
 If the `User` lived in the UK, the HTML source of the 'Country' row would be as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1378,7 +1295,7 @@ If the `User` lived in the UK, the HTML source of the 'Country' row would be as 
 	</tr>
 ----
 <1> Note the addition of a `selected` attribute.
-====
+
 
 As the preceding example shows, the combined usage of an `option` tag with the `options` tag
 generates the same standard HTML but lets you explicitly specify a value in the
@@ -1400,7 +1317,6 @@ the item label property applies to the map value.
 
 This tag renders an HTML `textarea` element. The following HTML shows typical output for it:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1410,7 +1326,6 @@ This tag renders an HTML `textarea` element. The following HTML shows typical ou
 		<td><form:errors path="notes"/></td>
 	</tr>
 ----
-====
 
 
 [[mvc-view-jsp-formtaglib-hiddeninputtag]]
@@ -1420,24 +1335,20 @@ This tag renders an HTML `input` tag with the `type` set to `hidden` with the bo
 an unbound hidden value, use the HTML `input` tag with the `type` set to `hidden`.
 The following HTML shows typical output for it:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<form:hidden path="house"/>
 ----
-====
 
 If we choose to submit the `house` value as a hidden one, the HTML would be as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<input name="house" type="hidden" value="Gryffindor"/>
 
 ----
-====
 
 
 [[mvc-view-jsp-formtaglib-errorstag]]
@@ -1451,7 +1362,6 @@ Assume that we want to display all error messages for the `firstName` and `lastN
 fields once we submit the form. We have a validator for instances of the `User` class
 called `UserValidator`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1467,11 +1377,9 @@ called `UserValidator`, as the following example shows:
 		}
 	}
 ----
-====
 
 The `form.jsp` could be as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1498,12 +1406,10 @@ The `form.jsp` could be as follows:
 		</table>
 	</form:form>
 ----
-====
 
 If we submit a form with empty values in the `firstName` and `lastName` fields,
 the HTML would be as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1530,7 +1436,6 @@ the HTML would be as follows:
 		</table>
 	</form>
 ----
-====
 
 What if we want to display the entire list of errors for a given page? The next example
 shows that the `errors` tag also supports some basic wildcarding functionality.
@@ -1542,7 +1447,6 @@ shows that the `errors` tag also supports some basic wildcarding functionality.
 The following example displays a list of errors at the top of the page, followed by
 field-specific errors next to the fields:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1567,11 +1471,9 @@ field-specific errors next to the fields:
 		</table>
 	</form:form>
 ----
-====
 
 The HTML would be as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1597,7 +1499,6 @@ The HTML would be as follows:
 		</table>
 	</form>
 ----
-====
 
 The `spring-form.tld` tag library descriptor (TLD) is included in the `spring-webmvc.jar`.
 For a comprehensive reference on individual tags, browse the
@@ -1628,7 +1529,6 @@ To support HTTP method conversion, the Spring MVC form tag was updated to suppor
 the HTTP method. For example, the following snippet comes from the Pet Clinic
 sample:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1636,13 +1536,11 @@ sample:
 		<p class="submit"><input type="submit" value="Delete Pet"/></p>
 	</form:form>
 ----
-====
 
 The preceding example perform an HTTP POST, with the "`real`" DELETE method hidden behind a
 request parameter. It is picked up by the `HiddenHttpMethodFilter`, which is defined in
 web.xml, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1656,11 +1554,9 @@ web.xml, as the following example shows:
 		<servlet-name>petclinic</servlet-name>
 	</filter-mapping>
 ----
-====
 
 The following example shows the corresponding `@Controller` method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1670,7 +1566,6 @@ The following example shows the corresponding `@Controller` method:
 		return "redirect:/owners/" + ownerId;
 	}
 ----
-====
 
 
 [[mvc-view-jsp-formtaglib-html5]]
@@ -1715,7 +1610,6 @@ To be able to use Tiles, you have to configure it by using files that contain de
 http://tiles.apache.org[]). In Spring, this is done by using the `TilesConfigurer`.
 The following example `ApplicationContext` configuration shows how to do so:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1731,7 +1625,6 @@ The following example `ApplicationContext` configuration shows how to do so:
 		</property>
 	</bean>
 ----
-====
 
 The preceding example defines five files that contain definitions. The files are all located in
 the `WEB-INF/defs` directory. At initialization of the `WebApplicationContext`, the
@@ -1744,7 +1637,6 @@ implementations, the `UrlBasedViewResolver` and the `ResourceBundleViewResolver`
 You can specify locale-specific Tiles definitions by adding an underscore and then
 the locale, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1757,7 +1649,6 @@ the locale, as the following example shows:
 		</property>
 	</bean>
 ----
-====
 
 With the preceding configuration, `tiles_fr_FR.xml` is used for requests with the `fr_FR` locale,
 and `tiles.xml` is used by default.
@@ -1773,7 +1664,6 @@ them otherwise in the file names for Tiles definitions.
 The `UrlBasedViewResolver` instantiates the given `viewClass` for each view it has to
 resolve. The following bean defines a `UrlBasedViewResolver`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1781,7 +1671,6 @@ resolve. The following bean defines a `UrlBasedViewResolver`:
 		<property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView"/>
 	</bean>
 ----
-====
 
 
 [[mvc-view-tiles-resource]]
@@ -1792,7 +1681,6 @@ view names and view classes that the resolver can use. The following example sho
 definition for a `ResourceBundleViewResolver` and the corresponding view names and view
 classes (taken from the Pet Clinic sample):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1815,7 +1703,6 @@ classes (taken from the Pet Clinic sample):
 	findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 	...
 ----
-====
 
 When you use the `ResourceBundleViewResolver`, you can easily mix
 different view technologies.
@@ -1845,7 +1732,6 @@ configuration, scoped beans, and so on. Note that you need to define one Spring 
 for each preparer name (as used in your Tiles definitions). The following example shows
 how to define a set a `SpringBeanPreparerFactory` property on a `TilesConfigurer` bean:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1866,7 +1752,6 @@ how to define a set a `SpringBeanPreparerFactory` property on a `TilesConfigurer
 
 	</bean>
 ----
-====
 
 
 
@@ -1883,7 +1768,6 @@ package `org.springframework.web.servlet.view.feed`.
 optionally override the `buildFeedMetadata()` method (the default implementation is
 empty). The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1903,11 +1787,9 @@ empty). The following example shows how to do so:
 
 	}
 ----
-====
 
 Similar requirements apply for implementing `AbstractRssFeedView`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1926,7 +1808,6 @@ Similar requirements apply for implementing `AbstractRssFeedView`, as the follow
 		}
 	}
 ----
-====
 
 The `buildFeedItems()` and `buildFeedEntries()` methods pass in the HTTP request, in case
 you need to access the Locale. The HTTP response is passed in only for the setting of
@@ -1973,7 +1854,6 @@ A simple PDF view for a word list could extend
 `org.springframework.web.servlet.view.document.AbstractPdfView` and implement the
 `buildPdfDocument()` method, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1989,7 +1869,6 @@ A simple PDF view for a word list could extend
 		}
 	}
 ----
-====
 
 A controller can return such a view either from an external view definition
 (referencing it by name) or as a `View` instance from the handler method.
@@ -2020,7 +1899,7 @@ Spring offers support for the Jackson JSON library.
 
 
 [[mvc-view-json-mapping]]
-=== Jackson-based JSON Views
+=== Jackson-based JSON MVC Views
 [.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
 
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
@@ -2094,7 +1973,6 @@ Configuration is standard for a simple Spring web application: The MVC configura
 has to define an `XsltViewResolver` bean and regular MVC annotation configuration.
 The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2112,7 +1990,6 @@ public class WebConfig implements WebMvcConfigurer {
 	}
 }
 ----
-====
 
 
 
@@ -2124,7 +2001,6 @@ We also need a Controller that encapsulates our word-generation logic.
 The controller logic is encapsulated in a `@Controller` class, with the
 handler method being defined as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2149,7 +2025,6 @@ handler method being defined as follows:
 		}
 	}
 ----
-====
 
 So far, we have only created a DOM document and added it to the Model map. Note that you
 can also load an XML file as a `Resource` and use it instead of a custom DOM document.
@@ -2172,7 +2047,6 @@ and end with an `xslt` file extension.
 
 The following example shows an XSLT transform:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2199,11 +2073,9 @@ The following example shows an XSLT transform:
 
 	</xsl:stylesheet>
 ----
-====
 
 The preceding transform is rendered as the following HTML:
 
-====
 [source,html,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2222,4 +2094,3 @@ The preceding transform is rendered as the following HTML:
 	</body>
 </html>
 ----
-====

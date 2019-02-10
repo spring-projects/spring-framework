@@ -394,6 +394,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void writeAsynchronousFileChannelErrorInWrite() throws Exception {
 		DataBuffer foo = stringBuffer("foo");
 		DataBuffer bar = stringBuffer("bar");

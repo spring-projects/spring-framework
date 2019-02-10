@@ -148,9 +148,9 @@ public interface ServerWebExchange {
 	/**
 	 * Return the {@link ApplicationContext} associated with the web application,
 	 * if it was initialized with one via
-	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext}.
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)}.
 	 * @since 5.0.3
-	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
+	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)
 	 */
 	@Nullable
 	ApplicationContext getApplicationContext();

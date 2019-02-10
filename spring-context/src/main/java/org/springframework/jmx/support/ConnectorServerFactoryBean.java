@@ -170,11 +170,12 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 		try {
 			if (this.threaded) {
 				// Start the connector server asynchronously (in a separate thread).
+				final JMXConnectorServer serverToStart = this.connectorServer;
 				Thread connectorThread = new Thread() {
 					@Override
 					public void run() {
 						try {
-							connectorServer.start();
+							serverToStart.start();
 						}
 						catch (IOException ex) {
 							throw new JmxException("Could not start JMX connector server after delay", ex);

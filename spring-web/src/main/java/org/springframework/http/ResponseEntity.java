@@ -17,6 +17,8 @@
 package org.springframework.http;
 
 import java.net.URI;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -351,6 +353,26 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		/**
 		 * Set the time the resource was last changed, as specified by the
 		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @since 5.1.4
+		 * @see HttpHeaders#setLastModified(ZonedDateTime)
+		 */
+		B lastModified(ZonedDateTime lastModified);
+
+		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @since 5.1.4
+		 * @see HttpHeaders#setLastModified(Instant)
+		 */
+		B lastModified(Instant lastModified);
+
+		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
 		 * @param lastModified the last modified date
@@ -490,6 +512,18 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
+		public BodyBuilder lastModified(ZonedDateTime date) {
+			this.headers.setLastModified(date);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder lastModified(Instant date) {
+			this.headers.setLastModified(date);
+			return this;
+		}
+
+		@Override
 		public BodyBuilder lastModified(long date) {
 			this.headers.setLastModified(date);
 			return this;
@@ -503,10 +537,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder cacheControl(CacheControl cacheControl) {
-			String ccValue = cacheControl.getHeaderValue();
-			if (ccValue != null) {
-				this.headers.setCacheControl(cacheControl.getHeaderValue());
-			}
+			this.headers.setCacheControl(cacheControl);
 			return this;
 		}
 

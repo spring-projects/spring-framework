@@ -45,6 +45,7 @@ public class ObjectUtilsTests {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+
 	@Test
 	public void isCheckedException() {
 		assertTrue(ObjectUtils.isCheckedException(new Exception()));
@@ -101,8 +102,8 @@ public class ObjectUtilsTests {
 		assertTrue(isEmpty(new Object[0]));
 		assertTrue(isEmpty(new Integer[0]));
 
-		assertFalse(isEmpty(new int[] { 42 }));
-		assertFalse(isEmpty(new Integer[] { 42 }));
+		assertFalse(isEmpty(new int[] {42}));
+		assertFalse(isEmpty(new Integer[] {42}));
 	}
 
 	@Test
@@ -807,7 +808,8 @@ public class ObjectUtilsTests {
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "BAR"), is(Tropes.BAR));
 
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(is("constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes"));
+		exception.expectMessage(
+				is("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes"));
 		ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus");
 	}
 
@@ -818,6 +820,6 @@ public class ObjectUtilsTests {
 	}
 
 
-	enum Tropes { FOO, BAR, baz }
+	enum Tropes {FOO, BAR, baz}
 
 }

@@ -126,6 +126,10 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		if (contentType != null && contentType.getCharset() != null) {
 			return contentType.getCharset();
 		}
+		else if (contentType != null && contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+			// Matching to AbstractJackson2HttpMessageConverter#DEFAULT_CHARSET
+			return StandardCharsets.UTF_8;
+		}
 		else {
 			Charset charset = getDefaultCharset();
 			Assert.state(charset != null, "No default charset");

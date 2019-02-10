@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ public class IntLiteral extends Literal {
 	private final TypedValue value;
 
 
-	public IntLiteral(String payload, int pos, int value) {
-		super(payload, pos);
+	public IntLiteral(String payload, int startPos, int endPos, int value) {
+		super(payload, startPos, endPos);
 		this.value = new TypedValue(value);
 		this.exitTypeDescriptor = "I";
 	}

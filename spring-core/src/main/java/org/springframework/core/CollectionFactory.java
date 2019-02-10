@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ public final class CollectionFactory {
 	 * Create the most appropriate collection for the given collection type.
 	 * <p>Delegates to {@link #createCollection(Class, Class, int)} with a
 	 * {@code null} element type.
-	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param collectionType the desired type of the target collection (never {@code null})
 	 * @param capacity the initial capacity
 	 * @return a new collection instance
 	 * @throws IllegalArgumentException if the supplied {@code collectionType}
@@ -164,7 +164,7 @@ public final class CollectionFactory {
 	 * supplied {@code elementType} is an enum type matching type {@code E}.
 	 * As an alternative, the caller may wish to treat the return value as a
 	 * raw collection or collection of {@link Object}.
-	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param collectionType the desired type of the target collection (never {@code null})
 	 * @param elementType the collection's element type, or {@code null} if unknown
 	 * (note: only relevant for {@link EnumSet} creation)
 	 * @param capacity the initial capacity
@@ -195,7 +195,7 @@ public final class CollectionFactory {
 				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
 			}
 		}
-		else if (EnumSet.class == collectionType) {
+		else if (EnumSet.class.isAssignableFrom(collectionType)) {
 			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
 			// Cast is necessary for compilation in Eclipse 4.4.1.
 			return (Collection<E>) EnumSet.noneOf(asEnumType(elementType));
@@ -280,7 +280,7 @@ public final class CollectionFactory {
 	 * may wish to treat the return value as a raw map or map keyed by
 	 * {@link Object}. Similarly, type safety cannot be enforced if the
 	 * desired {@code mapType} is {@link MultiValueMap}.
-	 * @param mapType the desired type of the target map; never {@code null}
+	 * @param mapType the desired type of the target map (never {@code null})
 	 * @param keyType the map's key type, or {@code null} if unknown
 	 * (note: only relevant for {@link EnumMap} creation)
 	 * @param capacity the initial capacity

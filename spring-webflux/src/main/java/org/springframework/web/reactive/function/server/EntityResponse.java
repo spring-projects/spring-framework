@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -176,11 +177,11 @@ public interface EntityResponse<T> extends ServerResponse {
 
 		/**
 		 * Set the entity tag of the body, as specified by the {@code ETag} header.
-		 * @param eTag the new entity tag
+		 * @param etag the new entity tag
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
 		 */
-		Builder<T> eTag(String eTag);
+		Builder<T> eTag(String etag);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the
@@ -192,6 +193,18 @@ public interface EntityResponse<T> extends ServerResponse {
 		 * @see HttpHeaders#setLastModified(long)
 		 */
 		Builder<T> lastModified(ZonedDateTime lastModified);
+
+		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
+		 * <p>The date should be specified as the number of milliseconds since
+		 * January 1, 1970 GMT.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @since 5.1.4
+		 * @see HttpHeaders#setLastModified(long)
+		 */
+		Builder<T> lastModified(Instant lastModified);
 
 		/**
 		 * Set the location of a resource, as specified by the {@code Location} header.

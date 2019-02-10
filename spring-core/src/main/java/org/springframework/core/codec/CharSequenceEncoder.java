@@ -16,11 +16,12 @@
 
 package org.springframework.core.codec;
 
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.CoderMalfunctionError;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -28,6 +29,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
@@ -48,6 +50,9 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 	 * The default charset used by the encoder.
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
+	private final ConcurrentMap<Charset, Float> charsetToMaxBytesPerChar =
+			new ConcurrentHashMap<>(3);
 
 
 	private CharSequenceEncoder(MimeType... mimeTypes) {
@@ -75,10 +80,30 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 					return Hints.getLogPrefix(hints) + "Writing " + formatted;
 				});
 			}
-			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
-			ByteBuffer byteBuffer = charset.encode(charBuffer);
-			return bufferFactory.wrap(byteBuffer);
+			boolean release = true;
+			int capacity = calculateCapacity(charSequence, charset);
+			DataBuffer dataBuffer = bufferFactory.allocateBuffer(capacity);
+			try {
+				dataBuffer.write(charSequence, charset);
+				release = false;
+			}
+			catch (CoderMalfunctionError ex) {
+				throw new EncodingException("String encoding error: " + ex.getMessage(), ex);
+			}
+			finally {
+				if (release) {
+					DataBufferUtils.release(dataBuffer);
+				}
+			}
+			return dataBuffer;
 		});
+	}
+
+	int calculateCapacity(CharSequence sequence, Charset charset) {
+		float maxBytesPerChar = this.charsetToMaxBytesPerChar
+				.computeIfAbsent(charset, cs -> cs.newEncoder().maxBytesPerChar());
+		float maxBytesForSequence = sequence.length() * maxBytesPerChar;
+		return (int) Math.ceil(maxBytesForSequence);
 	}
 
 	private Charset getCharset(@Nullable MimeType mimeType) {

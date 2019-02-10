@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,8 +72,8 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * Create a constructor reference. The first argument is the type, the rest are the parameters to the constructor
 	 * call
 	 */
-	public ConstructorReference(int pos, SpelNodeImpl... arguments) {
-		super(pos, arguments);
+	public ConstructorReference(int startPos, int endPos, SpelNodeImpl... arguments) {
+		super(startPos, endPos, arguments);
 		this.isArrayConstructor = false;
 	}
 
@@ -81,8 +81,8 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * Create a constructor reference. The first argument is the type, the rest are the parameters to the constructor
 	 * call
 	 */
-	public ConstructorReference(int pos, SpelNodeImpl[] dimensions, SpelNodeImpl... arguments) {
-		super(pos, arguments);
+	public ConstructorReference(int startPos, int endPos, SpelNodeImpl[] dimensions, SpelNodeImpl... arguments) {
+		super(startPos, endPos, arguments);
 		this.isArrayConstructor = true;
 		this.dimensions = dimensions;
 	}

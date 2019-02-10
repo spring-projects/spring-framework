@@ -128,7 +128,9 @@ public class ProtobufDecoderTests extends AbstractDecoderTestCase<ProtobufDecode
 	}
 
 	@Test
-	public void decodeSplitChunks() throws IOException {
+	public void decodeSplitChunks() {
+
+
 		Flux<DataBuffer> input = Flux.just(this.testMsg1, this.testMsg2)
 				.flatMap(msg -> Mono.defer(() -> {
 					DataBuffer buffer = this.bufferFactory.allocateBuffer();
@@ -155,6 +157,44 @@ public class ProtobufDecoderTests extends AbstractDecoderTestCase<ProtobufDecode
 		testDecode(input, Msg.class, step -> step
 				.expectNext(this.testMsg1)
 				.expectNext(this.testMsg2)
+				.verifyComplete());
+	}
+
+	@Test  // SPR-17429
+	public void decodeSplitMessageSize() {
+		this.decoder.setMaxMessageSize(100009);
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < 10000; i++) {
+			builder.append("azertyuiop");
+		}
+		Msg bigMessage = Msg.newBuilder().setFoo(builder.toString()).setBlah(secondMsg2).build();
+
+		Flux<DataBuffer> input = Flux.just(bigMessage, bigMessage)
+				.flatMap(msg -> Mono.defer(() -> {
+					DataBuffer buffer = this.bufferFactory.allocateBuffer();
+					try {
+						msg.writeDelimitedTo(buffer.asOutputStream());
+						return Mono.just(buffer);
+					}
+					catch (IOException e) {
+						release(buffer);
+						return Mono.error(e);
+					}
+				}))
+				.flatMap(buffer -> {
+					int len = 2;
+					Flux<DataBuffer> result = Flux.just(
+							DataBufferUtils.retain(buffer.slice(0, len)),
+							DataBufferUtils
+									.retain(buffer.slice(len, buffer.readableByteCount() - len))
+					);
+					release(buffer);
+					return result;
+				});
+
+		testDecode(input, Msg.class, step -> step
+				.expectNext(bigMessage)
+				.expectNext(bigMessage)
 				.verifyComplete());
 	}
 

@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
 import static junit.framework.TestCase.assertTrue;
@@ -75,12 +76,14 @@ public class ServerHttpResponseTests {
 	@Test
 	public void writeWithError() throws Exception {
 		TestServerHttpResponse response = new TestServerHttpResponse();
+		response.getHeaders().setContentLength(12);
 		IllegalStateException error = new IllegalStateException("boo");
 		response.writeWith(Flux.error(error)).onErrorResume(ex -> Mono.empty()).block();
 
 		assertFalse(response.statusCodeWritten);
 		assertFalse(response.headersWritten);
 		assertFalse(response.cookiesWritten);
+		assertFalse(response.getHeaders().containsKey(HttpHeaders.CONTENT_LENGTH));
 		assertTrue(response.body.isEmpty());
 	}
 

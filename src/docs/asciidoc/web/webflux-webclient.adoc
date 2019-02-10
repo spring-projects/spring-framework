@@ -9,7 +9,7 @@ and response content.
 
 Internally `WebClient` delegates to an HTTP client library. By default, it uses
 https://github.com/reactor/reactor-netty[Reactor Netty], there is built-in support for
-the Jetty https://github.com/jetty-project/jetty-reactive-httpclient[reactive HtpClient],
+the Jetty https://github.com/jetty-project/jetty-reactive-httpclient[reactive HttpClient],
 and others can be plugged in through a `ClientHttpConnector`.
 
 
@@ -38,7 +38,6 @@ You can also use `WebClient.builder()` with further options:
 
 The following example configures <<web-reactive.adoc#webflux-codecs,HTTP codecs>>:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -52,12 +51,10 @@ The following example configures <<web-reactive.adoc#webflux-codecs,HTTP codecs>
 			.exchangeStrategies(strategies)
 			.build();
 ----
-====
 
 Once built, a `WebClient` instance is immutable. However, you can clone it and build a
 modified copy without affecting the original instance, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -71,7 +68,6 @@ modified copy without affecting the original instance, as the following example 
 
 	// client2 has filterA, filterB, filterC, filterD
 ----
-====
 
 
 
@@ -80,7 +76,6 @@ modified copy without affecting the original instance, as the following example 
 
 To customize Reactor Netty settings, simple provide a pre-configured `HttpClient`:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -90,7 +85,6 @@ To customize Reactor Netty settings, simple provide a pre-configured `HttpClient
 			.clientConnector(new ReactorClientHttpConnector(httpClient))
 			.build();
 ----
-====
 
 
 [[webflux-client-builder-reactor-resources]]
@@ -108,7 +102,6 @@ application deployed as a WAR), you can declare a Spring-managed bean of type
 Netty global resources are shut down when the Spring `ApplicationContext` is closed,
 as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -117,13 +110,11 @@ as the following example shows:
 		return new ReactorResourceFactory();
 	}
 ----
-====
 
 You can also choose not to participate in the global Reactor Netty resources. However,
 in this mode, the burden is on you to ensure that all Reactor Netty client and server
 instances use shared resources, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -150,7 +141,6 @@ instances use shared resources, as the following example shows:
 <1> Create resources independent of global ones.
 <2> Use the `ReactorClientHttpConnector` constructor with resource factory.
 <3> Plug the connector into the `WebClient.Builder`.
-====
 
 
 [[webflux-client-builder-reactor-timeout]]
@@ -158,7 +148,6 @@ instances use shared resources, as the following example shows:
 
 To configure a connection timeout:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -168,11 +157,9 @@ HttpClient httpClient = HttpClient.create()
 		.tcpConfiguration(client ->
 				client.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000));
 ----
-====
 
 To configure a read and/or write timeout values:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -185,7 +172,6 @@ HttpClient httpClient = HttpClient.create()
 						.addHandlerLast(new ReadTimeoutHandler(10))
 						.addHandlerLast(new WriteTimeoutHandler(10))));
 ----
-====
 
 
 
@@ -194,7 +180,6 @@ HttpClient httpClient = HttpClient.create()
 
 The following example shows how to customize Jetty `HttpClient` settings:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -204,7 +189,6 @@ The following example shows how to customize Jetty `HttpClient` settings:
 
 	WebClient webClient = WebClient.builder().clientConnector(connector).build();
 ----
-====
 
 By default, `HttpClient` creates its own resources (`Executor`, `ByteBufferPool`, `Scheduler`),
 which remain active until the process exits or `stop()` is called.
@@ -214,7 +198,6 @@ ensure that the resources are shut down when the Spring `ApplicationContext` is 
 declaring a Spring-managed bean of type `JettyResourceFactory`, as the following example
 shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -238,7 +221,6 @@ shows:
 ----
 <1> Use the `JettyClientHttpConnector` constructor with resource factory.
 <2> Plug the connector into the `WebClient.Builder`.
-====
 
 
 
@@ -249,7 +231,6 @@ shows:
 The `retrieve()` method is the easiest way to get a response body and decode it.
 The following example shows how to do so:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -260,11 +241,9 @@ The following example shows how to do so:
 			.retrieve()
 			.bodyToMono(Person.class);
 ----
-====
 
 You can also get a stream of objects decoded from the response, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -273,7 +252,6 @@ You can also get a stream of objects decoded from the response, as the following
 			.retrieve()
 			.bodyToFlux(Quote.class);
 ----
-====
 
 By default, responses with 4xx or 5xx status codes result in an
 `WebClientResponseException` or one of its HTTP status specific sub-classes, such as
@@ -281,18 +259,16 @@ By default, responses with 4xx or 5xx status codes result in an
 You can also use the `onStatus` method to customize the resulting exception,
 as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
 	Mono<Person> result = client.get()
 			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
 			.retrieve()
-			.onStatus(HttpStatus::is4xxServerError, response -> ...)
+			.onStatus(HttpStatus::is4xxClientError, response -> ...)
 			.onStatus(HttpStatus::is5xxServerError, response -> ...)
 			.bodyToMono(Person.class);
 ----
-====
 
 When `onStatus` is used, if the response is expected to have content, then the `onStatus`
 callback should consume it. If not, the content will be automatically drained to ensure
@@ -307,7 +283,6 @@ resources are released.
 The `exchange()` method provides more control than the `retrieve` method. The following example is equivalent
 to `retrieve()` but also provides access to the `ClientResponse`:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -316,11 +291,9 @@ to `retrieve()` but also provides access to the `ClientResponse`:
 			.exchange()
 			.flatMap(response -> response.bodyToMono(Person.class));
 ----
-====
 
 At this level, you can also create a full `ResponseEntity`:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -329,7 +302,6 @@ At this level, you can also create a full `ResponseEntity`:
 			.exchange()
 			.flatMap(response -> response.toEntity(Person.class));
 ----
-====
 
 Note that (unlike `retrieve()`), with `exchange()`, there are no automatic error signals for
 4xx and 5xx responses. You have to check the status code and decide how to proceed.
@@ -348,7 +320,6 @@ is closed and is not placed back in the pool.
 
 The request body can be encoded from an `Object`, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -361,11 +332,9 @@ The request body can be encoded from an `Object`, as the following example shows
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
-====
 
 You can also have a stream of objects be encoded, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -378,12 +347,10 @@ You can also have a stream of objects be encoded, as the following example shows
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
-====
 
 Alternatively, if you have the actual value, you can use the `syncBody` shortcut method,
 as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -396,7 +363,6 @@ as the following example shows:
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
-====
 
 
 
@@ -407,7 +373,6 @@ To send form data, you can provide a `MultiValueMap<String, String>` as the body
 content is automatically set to `application/x-www-form-urlencoded` by the
 `FormHttpMessageWriter`. The following example shows how to use `MultiValueMap<String, String>`:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -419,11 +384,9 @@ content is automatically set to `application/x-www-form-urlencoded` by the
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
-====
 
 You can also supply form data in-line by using `BodyInserters`, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -435,7 +398,6 @@ You can also supply form data in-line by using `BodyInserters`, as the following
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
-====
 
 
 
@@ -467,7 +429,6 @@ builder `part` methods.
 Once a `MultiValueMap` is prepared, the easiest way to pass it to the the `WebClient` is
 through the `syncBody` method, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -479,7 +440,6 @@ through the `syncBody` method, as the following example shows:
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
-====
 
 If the `MultiValueMap` contains at least one non-`String` value, which could also
 represent regular form data (that is, `application/x-www-form-urlencoded`), you need not
@@ -489,7 +449,6 @@ set the `Content-Type` to `multipart/form-data`. This is always the case when us
 As an alternative to `MultipartBodyBuilder`, you can also provide multipart content,
 inline-style, through the built-in `BodyInserters`, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -501,7 +460,6 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
-====
 
 
 
@@ -512,7 +470,6 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 You can register a client filter (`ExchangeFilterFunction`) through the `WebClient.Builder`
 in order to intercept and modify requests, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -527,12 +484,10 @@ WebClient client = WebClient.builder()
 		})
 		.build();
 ----
-====
 
 This can be used for cross-cutting concerns, such as authentication. The following example uses
 a filter for basic authentication through a static factory method:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -543,13 +498,11 @@ WebClient client = WebClient.builder()
 		.filter(basicAuthentication("user", "password"))
 		.build();
 ----
-====
 
 Filters apply globally to every request. To change a filter's behavior for a specific
 request, you can add request attributes to the `ClientRequest` that can then be accessed
 by all filters in the chain, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -567,13 +520,11 @@ client.get().uri("http://example.org/")
 
 	}
 ----
-====
 
 You can also replicate an existing `WebClient`, insert new filters, or remove already
 registered filters. The following example, inserts a basic authentication filter at
 index 0:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -586,6 +537,57 @@ WebClient client = webClient.mutate()
 		})
 		.build();
 ----
+
+
+
+
+[[webflux-client-synchronous]]
+== Synchronous Use
+
+`WebClient` can be used in synchronous style by blocking at the end for the result:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+Person person = client.get().uri("/person/{id}", i).retrieve()
+	.bodyToMono(Person.class)
+	.block();
+
+List<Person> persons = client.get().uri("/persons").retrieve()
+	.bodyToFlux(Person.class)
+	.collectList()
+	.block();
+----
+
+However if multiple calls need to be made, it's more efficient to avoid blocking on each
+response individually, and instead wait for the combined result:
+
+[source,java,intent=0]
+[subs="verbatim,quotes"]
+----
+Mono<Person> personMono = client.get().uri("/person/{id}", personId)
+		.retrieve().bodyToMono(Person.class);
+
+Mono<List<Hobby>> hobbiesMono = client.get().uri("/person/{id}/hobbies", personId)
+		.retrieve().bodyToFlux(Hobby.class).collectList();
+
+Map<String, Object> data = Mono.zip(personMono, hobbiesMono, (person, hobbies) -> {
+			Map<String, String> map = new LinkedHashMap<>();
+			map.put("person", personName);
+			map.put("hobbies", hobbies);
+			return map;
+		})
+		.block();
+----
+
+The above is merely one example. There are lots of other patterns and operators for putting
+together a reactive pipeline that makes many remote calls, potentially some nested,
+inter-dependent, without ever blocking until the end.
+
+[NOTE]
+====
+You should never have to block in a Spring MVC controller. Simply return the resulting
+`Flux` or `Mono` from the controller method.
 ====
 
 

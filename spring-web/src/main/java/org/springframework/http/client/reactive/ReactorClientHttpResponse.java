@@ -29,7 +29,6 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -49,7 +48,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final NettyInbound inbound;
 
-	private final AtomicBoolean bodyConsumed = new AtomicBoolean();
+	private final AtomicBoolean rejectSubscribers = new AtomicBoolean();
 
 
 	public ReactorClientHttpResponse(HttpClientResponse response, NettyInbound inbound, ByteBufAllocator alloc) {
@@ -62,10 +61,18 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return this.inbound.receive()
-				.doOnSubscribe(s ->
-						// See https://github.com/reactor/reactor-netty/issues/503
-						Assert.state(this.bodyConsumed.compareAndSet(false, true),
-								"The client response body can only be consumed once."))
+				.doOnSubscribe(s -> {
+					if (this.rejectSubscribers.get()) {
+						throw new IllegalStateException("The client response body can only be consumed once.");
+					}
+				})
+				.doOnCancel(() -> {
+					// https://github.com/reactor/reactor-netty/issues/503
+					// FluxReceive rejects multiple subscribers, but not after a cancel().
+					// Subsequent subscribers after cancel() will not be rejected, but will hang instead.
+					// So we need to intercept and reject them in that case.
+					this.rejectSubscribers.set(true);
+				})
 				.map(byteBuf -> {
 					byteBuf.retain();
 					return this.bufferFactory.wrap(byteBuf);

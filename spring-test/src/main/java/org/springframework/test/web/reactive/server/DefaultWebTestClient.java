@@ -479,7 +479,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		DefaultBodyContentSpec(EntityExchangeResult<byte[]> result) {
 			this.result = result;
-			this.isEmpty = (result.getResponseBody() == null);
+			this.isEmpty = (result.getResponseBody() == null || result.getResponseBody().length == 0);
 		}
 
 		@Override

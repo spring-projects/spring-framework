@@ -167,7 +167,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * Invoked after an I/O read error from the underlying server or after a
 	 * cancellation signal from the downstream consumer to allow sub-classes
 	 * to discard any current cached data they might have.
-	 * @since 5.1.2
+	 * @since 5.0.11
 	 */
 	protected abstract void discardData();
 

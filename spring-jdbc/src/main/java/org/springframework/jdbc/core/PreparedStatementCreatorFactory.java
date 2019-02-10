@@ -92,6 +92,14 @@ public class PreparedStatementCreatorFactory {
 
 
 	/**
+	 * Return the SQL statement to execute.
+	 * @since 5.1.3
+	 */
+	public final String getSql() {
+		return this.sql;
+	}
+
+	/**
 	 * Add a new declared parameter.
 	 * <p>Order of parameter addition is significant.
 	 * @param param the parameter to add to the list of declared parameters
@@ -196,7 +204,7 @@ public class PreparedStatementCreatorFactory {
 			Assert.notNull(parameters, "Parameters List must not be null");
 			this.parameters = parameters;
 			if (this.parameters.size() != declaredParameters.size()) {
-				// account for named parameters being used multiple times
+				// Account for named parameters being used multiple times
 				Set<String> names = new HashSet<>();
 				for (int i = 0; i < parameters.size(); i++) {
 					Object param = parameters.get(i);

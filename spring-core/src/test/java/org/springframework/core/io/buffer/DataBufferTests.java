@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -147,6 +148,80 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 		assertArrayEquals(new byte[]{'b', 'c', 'd', 'e'}, result);
 
+		release(buffer);
+	}
+
+	@Test
+	public void writeNullString() {
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			buffer.write(null, StandardCharsets.UTF_8);
+			fail("IllegalArgumentException expected");
+		}
+		catch (IllegalArgumentException exc) {
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@Test
+	public void writeNullCharset() {
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			buffer.write("test", null);
+			fail("IllegalArgumentException expected");
+		}
+		catch (IllegalArgumentException exc) {
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@Test
+	public void writeEmptyString() {
+		DataBuffer buffer = createDataBuffer(1);
+		buffer.write("", StandardCharsets.UTF_8);
+
+		assertEquals(0, buffer.readableByteCount());
+
+		release(buffer);
+	}
+
+	@Test
+	public void writeUtf8String() {
+		DataBuffer buffer = createDataBuffer(6);
+		buffer.write("Spring", StandardCharsets.UTF_8);
+
+		byte[] result = new byte[6];
+		buffer.read(result);
+
+		assertArrayEquals("Spring".getBytes(StandardCharsets.UTF_8), result);
+		release(buffer);
+	}
+
+	@Test
+	public void writeUtf8StringOutGrowsCapacity() {
+		DataBuffer buffer = createDataBuffer(5);
+		buffer.write("Spring €", StandardCharsets.UTF_8);
+
+		byte[] result = new byte[10];
+		buffer.read(result);
+
+		assertArrayEquals("Spring €".getBytes(StandardCharsets.UTF_8), result);
+		release(buffer);
+	}
+
+	@Test
+	public void writeIsoString() {
+		DataBuffer buffer = createDataBuffer(3);
+		buffer.write("\u00A3", StandardCharsets.ISO_8859_1);
+
+		byte[] result = new byte[1];
+		buffer.read(result);
+
+		assertArrayEquals("\u00A3".getBytes(StandardCharsets.ISO_8859_1), result);
 		release(buffer);
 	}
 

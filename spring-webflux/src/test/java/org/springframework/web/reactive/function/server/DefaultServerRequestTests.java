@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -45,12 +46,14 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 import static org.junit.Assert.*;
@@ -61,7 +64,8 @@ import static org.springframework.web.reactive.function.BodyExtractors.*;
  */
 public class DefaultServerRequestTests {
 
-	private final List<HttpMessageReader<?>> messageReaders = Collections.singletonList(
+	private final List<HttpMessageReader<?>> messageReaders = Arrays.asList(
+			new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()),
 			new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 
 
@@ -277,6 +281,28 @@ public class DefaultServerRequestTests {
 		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
 		Mono<String> resultMono = request.bodyToMono(typeReference);
 		assertEquals("foo", resultMono.block());
+	}
+
+	@Test
+	public void bodyToMonoDecodingException() {
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("{\"invalid\":\"json\" ".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.POST, "http://example.com/invalid")
+				.headers(httpHeaders)
+				.body(body);
+		DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
+
+		Mono<Map<String, String>> resultMono = request.bodyToMono(
+				new ParameterizedTypeReference<Map<String, String>>() {});
+		StepVerifier.create(resultMono)
+				.expectError(ServerWebInputException.class)
+				.verify();
 	}
 
 	@Test

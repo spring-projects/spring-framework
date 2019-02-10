@@ -133,7 +133,7 @@ public class XsltViewTests {
 		model.put("someKey", getProductDataResource());
 		model.put("title", "Product List");
 		doTestWithModel(model);
-		assertTrue(this.response.getContentAsString().indexOf("Product List") > -1);
+		assertTrue(this.response.getContentAsString().contains("Product List"));
 	}
 
 	@Test
@@ -148,7 +148,7 @@ public class XsltViewTests {
 
 		view.render(model, this.request, this.response);
 		assertHtmlOutput(this.response.getContentAsString());
-		assertTrue(this.response.getContentAsString().indexOf("Product List") > -1);
+		assertTrue(this.response.getContentAsString().contains("Product List"));
 
 	}
 

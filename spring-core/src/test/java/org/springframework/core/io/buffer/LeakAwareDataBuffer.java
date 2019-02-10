@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.io.buffer;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.function.IntPredicate;
 
 import org.springframework.util.Assert;
@@ -44,11 +45,14 @@ class LeakAwareDataBuffer implements PooledDataBuffer {
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 		this.delegate = delegate;
 		this.dataBufferFactory = dataBufferFactory;
-		this.leakError = createLeakError();
+		this.leakError = createLeakError(delegate);
 	}
 
-	private static AssertionError createLeakError() {
-		AssertionError result = new AssertionError("Leak detected in test case");
+	private static AssertionError createLeakError(DataBuffer delegate) {
+		String message = String.format("DataBuffer leak detected: {%s} has not been released.%n" +
+				"Stack trace of buffer allocation statement follows:",
+				delegate);
+		AssertionError result = new AssertionError(message);
 		// remove first four irrelevant stack trace elements
 		StackTraceElement[] oldTrace = result.getStackTrace();
 		StackTraceElement[] newTrace = new StackTraceElement[oldTrace.length - 4];
@@ -137,6 +141,11 @@ class LeakAwareDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
+	public DataBuffer ensureCapacity(int capacity) {
+		return this.delegate.ensureCapacity(capacity);
+	}
+
+	@Override
 	public byte getByte(int index) {
 		return this.delegate.getByte(index);
 	}
@@ -177,8 +186,13 @@ class LeakAwareDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	public DataBuffer write(ByteBuffer... byteBuffers) {
-		return this.delegate.write(byteBuffers);
+	public DataBuffer write(ByteBuffer... buffers) {
+		return this.delegate.write(buffers);
+	}
+
+	@Override
+	public DataBuffer write(CharSequence charSequence, Charset charset) {
+		return this.delegate.write(charSequence, charset);
 	}
 
 	@Override

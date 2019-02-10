@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.StringValueResolver;
  * the property values and constructor argument values contained in them,
  * resolving bean metadata values.
  *
- * <p>Used by {@link PropertyPlaceholderConfigurer} to parse all String values
+ * <p>Used by {@link PlaceholderConfigurerSupport} to parse all String values
  * contained in a BeanDefinition, resolving any placeholders found.
  *
  * @author Juergen Hoeller
@@ -43,7 +43,7 @@ import org.springframework.util.StringValueResolver;
  * @see BeanDefinition
  * @see BeanDefinition#getPropertyValues
  * @see BeanDefinition#getConstructorArgumentValues
- * @see PropertyPlaceholderConfigurer
+ * @see PlaceholderConfigurerSupport
  */
 public class BeanDefinitionVisitor {
 

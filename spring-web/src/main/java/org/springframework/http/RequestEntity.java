@@ -19,6 +19,8 @@ package org.springframework.http;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 import org.springframework.lang.Nullable;
@@ -329,6 +331,20 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
+		 * @param ifModifiedSince the new value of the header
+		 * @since 5.1.4
+		 */
+		B ifModifiedSince(ZonedDateTime ifModifiedSince);
+
+		/**
+		 * Set the value of the {@code If-Modified-Since} header.
+		 * @param ifModifiedSince the new value of the header
+		 * @since 5.1.4
+		 */
+		B ifModifiedSince(Instant ifModifiedSince);
+
+		/**
+		 * Set the value of the {@code If-Modified-Since} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
 		 * @param ifModifiedSince the new value of the header
@@ -435,6 +451,18 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		@Override
 		public BodyBuilder contentType(MediaType contentType) {
 			this.headers.setContentType(contentType);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder ifModifiedSince(ZonedDateTime ifModifiedSince) {
+			this.headers.setIfModifiedSince(ifModifiedSince);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder ifModifiedSince(Instant ifModifiedSince) {
+			this.headers.setIfModifiedSince(ifModifiedSince);
 			return this;
 		}
 

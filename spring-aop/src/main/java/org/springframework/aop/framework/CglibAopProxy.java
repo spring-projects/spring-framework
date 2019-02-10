@@ -723,17 +723,20 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static class CglibMethodInvocation extends ReflectiveMethodInvocation {
 
+		@Nullable
 		private final MethodProxy methodProxy;
-
-		private final boolean publicMethod;
 
 		public CglibMethodInvocation(Object proxy, @Nullable Object target, Method method,
 				Object[] arguments, @Nullable Class<?> targetClass,
 				List<Object> interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
 
 			super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
-			this.methodProxy = methodProxy;
-			this.publicMethod = Modifier.isPublic(method.getModifiers());
+
+			// Only use method proxy for public methods not derived from java.lang.Object
+			this.methodProxy = (Modifier.isPublic(method.getModifiers()) &&
+					method.getDeclaringClass() != Object.class && !AopUtils.isEqualsMethod(method) &&
+					!AopUtils.isHashCodeMethod(method) && !AopUtils.isToStringMethod(method) ?
+					methodProxy : null);
 		}
 
 		/**
@@ -742,7 +745,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		 */
 		@Override
 		protected Object invokeJoinpoint() throws Throwable {
-			if (this.publicMethod && getMethod().getDeclaringClass() != Object.class) {
+			if (this.methodProxy != null) {
 				return this.methodProxy.invoke(this.target, this.arguments);
 			}
 			else {

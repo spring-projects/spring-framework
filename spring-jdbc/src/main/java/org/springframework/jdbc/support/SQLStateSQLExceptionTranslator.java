@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,32 +58,32 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 
 
 	static {
-		BAD_SQL_GRAMMAR_CODES.add("07");	// Dynamic SQL error
-		BAD_SQL_GRAMMAR_CODES.add("21");	// Cardinality violation
-		BAD_SQL_GRAMMAR_CODES.add("2A");	// Syntax error direct SQL
-		BAD_SQL_GRAMMAR_CODES.add("37");	// Syntax error dynamic SQL
-		BAD_SQL_GRAMMAR_CODES.add("42");	// General SQL syntax error
-		BAD_SQL_GRAMMAR_CODES.add("65");	// Oracle: unknown identifier
+		BAD_SQL_GRAMMAR_CODES.add("07");  // Dynamic SQL error
+		BAD_SQL_GRAMMAR_CODES.add("21");  // Cardinality violation
+		BAD_SQL_GRAMMAR_CODES.add("2A");  // Syntax error direct SQL
+		BAD_SQL_GRAMMAR_CODES.add("37");  // Syntax error dynamic SQL
+		BAD_SQL_GRAMMAR_CODES.add("42");  // General SQL syntax error
+		BAD_SQL_GRAMMAR_CODES.add("65");  // Oracle: unknown identifier
 
-		DATA_INTEGRITY_VIOLATION_CODES.add("01");	// Data truncation
-		DATA_INTEGRITY_VIOLATION_CODES.add("02");	// No data found
-		DATA_INTEGRITY_VIOLATION_CODES.add("22");	// Value out of range
-		DATA_INTEGRITY_VIOLATION_CODES.add("23");	// Integrity constraint violation
-		DATA_INTEGRITY_VIOLATION_CODES.add("27");	// Triggered data change violation
-		DATA_INTEGRITY_VIOLATION_CODES.add("44");	// With check violation
+		DATA_INTEGRITY_VIOLATION_CODES.add("01");  // Data truncation
+		DATA_INTEGRITY_VIOLATION_CODES.add("02");  // No data found
+		DATA_INTEGRITY_VIOLATION_CODES.add("22");  // Value out of range
+		DATA_INTEGRITY_VIOLATION_CODES.add("23");  // Integrity constraint violation
+		DATA_INTEGRITY_VIOLATION_CODES.add("27");  // Triggered data change violation
+		DATA_INTEGRITY_VIOLATION_CODES.add("44");  // With check violation
 
-		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("08");	 // Connection exception
-		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("53");	 // PostgreSQL: insufficient resources (e.g. disk full)
-		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("54");	 // PostgreSQL: program limit exceeded (e.g. statement too complex)
-		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("57");	 // DB2: out-of-memory exception / database not started
-		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("58");	 // DB2: unexpected system error
+		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("08");  // Connection exception
+		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("53");  // PostgreSQL: insufficient resources (e.g. disk full)
+		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("54");  // PostgreSQL: program limit exceeded (e.g. statement too complex)
+		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("57");  // DB2: out-of-memory exception / database not started
+		DATA_ACCESS_RESOURCE_FAILURE_CODES.add("58");  // DB2: unexpected system error
 
-		TRANSIENT_DATA_ACCESS_RESOURCE_CODES.add("JW");	 // Sybase: internal I/O error
-		TRANSIENT_DATA_ACCESS_RESOURCE_CODES.add("JZ");	 // Sybase: unexpected I/O error
-		TRANSIENT_DATA_ACCESS_RESOURCE_CODES.add("S1");	 // DB2: communication failure
+		TRANSIENT_DATA_ACCESS_RESOURCE_CODES.add("JW");  // Sybase: internal I/O error
+		TRANSIENT_DATA_ACCESS_RESOURCE_CODES.add("JZ");  // Sybase: unexpected I/O error
+		TRANSIENT_DATA_ACCESS_RESOURCE_CODES.add("S1");  // DB2: communication failure
 
-		CONCURRENCY_FAILURE_CODES.add("40");	// Transaction rollback
-		CONCURRENCY_FAILURE_CODES.add("61");	// Oracle: deadlock
+		CONCURRENCY_FAILURE_CODES.add("40");  // Transaction rollback
+		CONCURRENCY_FAILURE_CODES.add("61");  // Oracle: deadlock
 	}
 
 

@@ -341,6 +341,7 @@ public class MockHttpServletRequestTests {
 		List<Locale> actual = Collections.list(request.getLocales());
 		assertEquals(Arrays.asList(Locale.forLanguageTag("fr-ch"), Locale.forLanguageTag("fr"),
 				Locale.forLanguageTag("en"), Locale.forLanguageTag("de")), actual);
+		assertEquals(headerValue, request.getHeader("Accept-Language"));
 	}
 
 	@Test

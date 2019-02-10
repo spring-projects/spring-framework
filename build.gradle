@@ -11,7 +11,7 @@ buildscript {
 // 3rd party plugin repositories can be configured in settings.gradle
 plugins {
 	id "io.spring.dependency-management" version "1.0.5.RELEASE" apply false
-	id "org.jetbrains.kotlin.jvm" version "1.2.71" apply false
+	id "org.jetbrains.kotlin.jvm" version "1.3.21" apply false
 	id "org.jetbrains.dokka" version "0.9.17"
 	id "org.asciidoctor.convert" version "1.5.8"
 }
@@ -19,7 +19,7 @@ plugins {
 ext {
 	linkHomepage = "https://projects.spring.io/spring-framework"
 	linkCi = "https://build.spring.io/browse/SPR"
-	linkIssue = "https://jira.spring.io/browse/SPR"
+	linkIssue = "https://github.com/spring-projects/spring-framework/issues"
 	linkScmUrl = "https://github.com/spring-projects/spring-framework"
 	linkScmConnection = "scm:git:git://github.com/spring-projects/spring-framework.git"
 	linkScmDevConnection = "scm:git:ssh://git@github.com:spring-projects/spring-framework.git"
@@ -30,22 +30,22 @@ ext {
 
 	aspectjVersion       = "1.9.2"
 	freemarkerVersion    = "2.3.28"
-	groovyVersion        = "2.5.3"
+	groovyVersion        = "2.5.6"
 	hsqldbVersion        = "2.4.1"
-	jackson2Version      = "2.9.7"
-	jettyVersion         = "9.4.12.v20180830"
-	junit5Version        = "5.3.1"
-	kotlinVersion        = "1.2.71"
+	jackson2Version      = "2.9.8"
+	jettyVersion         = "9.4.14.v20181114"
+	junit5Version        = "5.4.0"
+	kotlinVersion        = "1.3.21"
 	log4jVersion         = "2.11.1"
-	nettyVersion         = "4.1.31.Final"
+	nettyVersion         = "4.1.33.Final"
 	reactorVersion       = "Californium-BUILD-SNAPSHOT"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
-	rxjava2Version       = "2.2.3"
+	rxjava2Version       = "2.2.6"
 	slf4jVersion         = "1.7.25"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
-	tomcatVersion        = "9.0.12"
-	undertowVersion      = "2.0.15.Final"
+	tomcatVersion        = "9.0.14"
+	undertowVersion      = "2.0.17.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
 	withoutJclOverSlf4J = {
@@ -117,8 +117,8 @@ configure(allprojects) { project ->
 		kotlinOptions {
 			jvmTarget = "1.8"
 			freeCompilerArgs = ["-Xjsr305=strict"]
-			apiVersion = "1.1"
-			languageVersion = "1.1"
+			apiVersion = "1.2"
+			languageVersion = "1.2"
 		}
 	}
 
@@ -132,6 +132,7 @@ configure(allprojects) { project ->
 	test {
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
+		systemProperty("io.netty.leakDetection.level", "paranoid")
 		scanForTestClasses = false
 		include(["**/*Tests.class", "**/*Test.class"])
 		// Since we set scanForTestClasses to false, we need to filter out inner
@@ -142,27 +143,24 @@ configure(allprojects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.14"
+		toolVersion = "8.17"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
 	repositories {
+		mavenLocal()
 		maven { url "https://repo.spring.io/libs-release" }
-		maven { url "https://repo.spring.io/snapshot" } // Californium snapshots
+		maven { url "https://repo.spring.io/snapshot" } // Reactor
 	}
 
 	dependencies {
 		testCompile("junit:junit:4.12") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("org.mockito:mockito-core:2.23.0") {
+		testCompile("org.mockito:mockito-core:2.24.0") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("com.nhaarman:mockito-kotlin:1.6.0") {
-			exclude module: "kotlin-stdlib"
-			exclude module: "kotlin-reflect"
-			exclude module: "mockito-core"
-		}
+		testCompile("io.mockk:mockk:1.9")
 		testCompile("org.hamcrest:hamcrest-all:1.3")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
@@ -186,10 +184,12 @@ configure(allprojects) { project ->
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/2.10.4",
 		"http://quartz-scheduler.org/api/2.2.1/",
-		"http://fasterxml.github.io/jackson-core/javadoc/2.8/",
-		"http://fasterxml.github.io/jackson-databind/javadoc/2.8/",
-		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.8/",
-		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/"
+		"http://fasterxml.github.io/jackson-core/javadoc/2.9/",
+		"http://fasterxml.github.io/jackson-databind/javadoc/2.9/",
+		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.9/",
+		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
+		"https://junit.org/junit4/javadoc/4.12/",
+		"https://junit.org/junit5/docs/${junit5Version}/api/"
 	] as String[]
 }
 
@@ -277,7 +277,7 @@ configure(rootProject) {
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.hibernate:hibernate-core:5.1.16.Final")
+		testCompile("org.hibernate:hibernate-core:5.1.17.Final")
 	}
 
 	artifacts {

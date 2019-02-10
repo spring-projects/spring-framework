@@ -103,14 +103,9 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		if (super.canDecode(elementType, mimeType)) {
-			Class<?> outputClass = elementType.toClass();
-			return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
-					outputClass.isAnnotationPresent(XmlType.class));
-		}
-		else {
-			return false;
-		}
+		Class<?> outputClass = elementType.toClass();
+		return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
+				outputClass.isAnnotationPresent(XmlType.class)) && super.canDecode(elementType, mimeType);
 	}
 
 	@Override

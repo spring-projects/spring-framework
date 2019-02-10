@@ -10,7 +10,6 @@ A WebSocket interaction begins with an HTTP request that uses the HTTP `Upgrade`
 to upgrade or, in this case, to switch to the WebSocket protocol. The following example
 shows such an interaction:
 
-====
 [source,yaml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -25,12 +24,11 @@ shows such an interaction:
 ----
 <1> The `Upgrade` header.
 <2> Using the `Upgrade` connection.
-====
+
 
 Instead of the usual 200 status code, a server with WebSocket support returns output
 similar to the following:
 
-====
 [source,yaml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -41,7 +39,7 @@ similar to the following:
 	Sec-WebSocket-Protocol: v10.stomp
 ----
 <1> Protocol switch
-====
+
 
 After a successful handshake, the TCP socket underlying the HTTP upgrade request remains
 open for both the client and the server to continue to send and receive messages.

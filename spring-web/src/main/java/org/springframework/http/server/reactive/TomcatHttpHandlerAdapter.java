@@ -25,7 +25,9 @@ import javax.servlet.AsyncContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.catalina.connector.CoyoteInputStream;
 import org.apache.catalina.connector.CoyoteOutputStream;
@@ -102,12 +104,28 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		private static HttpHeaders createTomcatHttpHeaders(HttpServletRequest request) {
+			RequestFacade requestFacade = getRequestFacade(request);
 			org.apache.catalina.connector.Request connectorRequest = (org.apache.catalina.connector.Request)
-					ReflectionUtils.getField(COYOTE_REQUEST_FIELD, request);
+					ReflectionUtils.getField(COYOTE_REQUEST_FIELD, requestFacade);
 			Assert.state(connectorRequest != null, "No Tomcat connector request");
 			Request tomcatRequest = connectorRequest.getCoyoteRequest();
 			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders());
 			return new HttpHeaders(headers);
+		}
+
+		private static RequestFacade getRequestFacade(HttpServletRequest request) {
+			if (request instanceof RequestFacade) {
+				return (RequestFacade) request;
+			}
+			else if (request instanceof HttpServletRequestWrapper) {
+				HttpServletRequestWrapper wrapper = (HttpServletRequestWrapper) request;
+				HttpServletRequest wrappedRequest = (HttpServletRequest) wrapper.getRequest();
+				return getRequestFacade(wrappedRequest);
+			}
+			else {
+				throw new IllegalArgumentException("Cannot convert [" + request.getClass() +
+						"] to org.apache.catalina.connector.RequestFacade");
+			}
 		}
 
 		@Override
@@ -159,12 +177,28 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		private static HttpHeaders createTomcatHttpHeaders(HttpServletResponse response) {
+			ResponseFacade responseFacade = getResponseFacade(response);
 			org.apache.catalina.connector.Response connectorResponse = (org.apache.catalina.connector.Response)
-					ReflectionUtils.getField(COYOTE_RESPONSE_FIELD, response);
+					ReflectionUtils.getField(COYOTE_RESPONSE_FIELD, responseFacade);
 			Assert.state(connectorResponse != null, "No Tomcat connector response");
 			Response tomcatResponse = connectorResponse.getCoyoteResponse();
 			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatResponse.getMimeHeaders());
 			return new HttpHeaders(headers);
+		}
+
+		private static ResponseFacade getResponseFacade(HttpServletResponse response) {
+			if (response instanceof ResponseFacade) {
+				return (ResponseFacade) response;
+			}
+			else if (response instanceof HttpServletResponseWrapper) {
+				HttpServletResponseWrapper wrapper = (HttpServletResponseWrapper) response;
+				HttpServletResponse wrappedResponse = (HttpServletResponse) wrapper.getResponse();
+				return getResponseFacade(wrappedResponse);
+			}
+			else {
+				throw new IllegalArgumentException("Cannot convert [" + response.getClass() +
+						"] to org.apache.catalina.connector.ResponseFacade");
+			}
 		}
 
 		@Override

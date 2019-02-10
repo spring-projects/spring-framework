@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import javax.annotation.Resource;
 import javax.inject.Provider;
 
 import org.junit.Rule;
@@ -223,6 +224,22 @@ public class ConfigurationClassProcessingTests {
 		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
 
 		adaptive = ctx.getBean(AdaptiveInjectionPoints.class);
+		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
+		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
+		ctx.close();
+	}
+
+	@Test
+	public void configurationWithAdaptiveResourcePrototypes() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithPrototypeBean.class, AdaptiveResourceInjectionPoints.class);
+		ctx.refresh();
+
+		AdaptiveResourceInjectionPoints adaptive = ctx.getBean(AdaptiveResourceInjectionPoints.class);
+		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
+		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
+
+		adaptive = ctx.getBean(AdaptiveResourceInjectionPoints.class);
 		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
 		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
 		ctx.close();
@@ -438,6 +455,21 @@ public class ConfigurationClassProcessingTests {
 		public TestBean adaptiveInjectionPoint2;
 
 		@Autowired @Qualifier("adaptive2")
+		public void setAdaptiveInjectionPoint2(TestBean adaptiveInjectionPoint2) {
+			this.adaptiveInjectionPoint2 = adaptiveInjectionPoint2;
+		}
+	}
+
+
+	@Scope("prototype")
+	static class AdaptiveResourceInjectionPoints {
+
+		@Resource(name = "adaptive1")
+		public TestBean adaptiveInjectionPoint1;
+
+		public TestBean adaptiveInjectionPoint2;
+
+		@Resource(name = "adaptive2")
 		public void setAdaptiveInjectionPoint2(TestBean adaptiveInjectionPoint2) {
 			this.adaptiveInjectionPoint2 = adaptiveInjectionPoint2;
 		}

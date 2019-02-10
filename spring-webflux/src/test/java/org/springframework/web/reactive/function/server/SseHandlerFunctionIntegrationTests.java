@@ -42,18 +42,18 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	private WebClient webClient;
 
 
+	@Before
+	public void setup() throws Exception {
+		super.setup();
+		this.webClient = WebClient.create("http://localhost:" + this.port);
+	}
+
 	@Override
 	protected RouterFunction<?> routerFunction() {
 		SseHandler sseHandler = new SseHandler();
 		return route(RequestPredicates.GET("/string"), sseHandler::string)
 				.and(route(RequestPredicates.GET("/person"), sseHandler::person))
 				.and(route(RequestPredicates.GET("/event"), sseHandler::sse));
-	}
-
-	@Before
-	public void setup() throws Exception {
-		super.setup();
-		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
 

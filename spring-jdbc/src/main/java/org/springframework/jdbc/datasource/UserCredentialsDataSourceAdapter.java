@@ -148,9 +148,10 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	/**
 	 * Determine whether there are currently thread-bound credentials,
 	 * using them if available, falling back to the statically specified
-	 * username and password (i.e. values of the bean properties) else.
+	 * username and password (i.e. values of the bean properties) otherwise.
 	 * <p>Delegates to {@link #doGetConnection(String, String)} with the
 	 * determined credentials as parameters.
+	 * @see #doGetConnection
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
@@ -208,7 +209,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
 		public final String password;
 
-		private JdbcUserCredentials(String username, String password) {
+		public JdbcUserCredentials(String username, String password) {
 			this.username = username;
 			this.password = password;
 		}

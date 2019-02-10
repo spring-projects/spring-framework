@@ -90,8 +90,8 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) {
 		String type = parameter.getNestedParameterType().getSimpleName();
-		throw new ServerWebInputException("Missing request header '" + name +
-				"' for method parameter of type " + type);
+		throw new ServerWebInputException("Missing request header '" + name + "' " +
+				"for method parameter of type " + type, parameter);
 	}
 
 

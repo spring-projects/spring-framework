@@ -149,6 +149,19 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertEquals(expected, responseEntity.getBody());
 	}
 
+	@Test // SPR-17506
+	public void personResponseBodyWithEmptyMono() throws Exception {
+		ResponseEntity<Person> responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
+		assertEquals(0, responseEntity.getHeaders().getContentLength());
+		assertNull(responseEntity.getBody());
+
+		// As we're on the same connection, the 2nd request proves server response handling
+		// did complete after the 1st request..
+		responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
+		assertEquals(0, responseEntity.getHeaders().getContentLength());
+		assertNull(responseEntity.getBody());
+	}
+
 	@Test
 	public void personResponseBodyWithMonoDeclaredAsObject() throws Exception {
 		Person expected = new Person("Robert");
@@ -493,6 +506,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		@GetMapping("/mono")
 		public Mono<Person> getMono() {
 			return Mono.just(new Person("Robert"));
+		}
+
+		@GetMapping("/mono-empty")
+		public Mono<Person> getMonoEmpty() {
+			return Mono.empty();
 		}
 
 		@GetMapping("/mono-declared-as-object")

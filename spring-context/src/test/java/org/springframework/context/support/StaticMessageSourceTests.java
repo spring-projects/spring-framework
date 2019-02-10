@@ -109,8 +109,8 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 		// Now msg better be as expected
 		assertTrue("2nd search within MsgFormat cache returned expected message for Locale.US",
-				sac.getMessage("message.format.example1", arguments, Locale.US).indexOf(
-						"there was \"a disturbance in the Force\" on planet 7.") != -1);
+				sac.getMessage("message.format.example1", arguments, Locale.US).
+						contains("there was \"a disturbance in the Force\" on planet 7."));
 
 		Object[] newArguments = {
 			new Integer(8), new Date(System.currentTimeMillis()),
@@ -119,8 +119,8 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 		// Now msg better be as expected even with different args
 		assertTrue("2nd search within MsgFormat cache with different args returned expected message for Locale.US",
-				sac.getMessage("message.format.example1", newArguments, Locale.US)
-				.indexOf("there was \"a disturbance in the Force\" on planet 8.") != -1);
+				sac.getMessage("message.format.example1", newArguments, Locale.US).
+						contains("there was \"a disturbance in the Force\" on planet 8."));
 	}
 
 	/**
@@ -142,13 +142,13 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		 minutes of the time might not be the same.
 		 */
 		assertTrue("msg from staticMsgSource for Locale.US substituting args for placeholders is as expected",
-				sac.getMessage("message.format.example1", arguments, Locale.US)
-				.indexOf("there was \"a disturbance in the Force\" on planet 7.") != -1);
+				sac.getMessage("message.format.example1", arguments, Locale.US).
+						contains("there was \"a disturbance in the Force\" on planet 7."));
 
 		// Try with Locale.UK
 		assertTrue("msg from staticMsgSource for Locale.UK substituting args for placeholders is as expected",
-				sac.getMessage("message.format.example1", arguments, Locale.UK)
-				.indexOf("there was \"a disturbance in the Force\" on station number 7.") != -1);
+				sac.getMessage("message.format.example1", arguments, Locale.UK).
+						contains("there was \"a disturbance in the Force\" on station number 7."));
 
 		// Try with Locale.US - Use a different test msg that requires no args
 		assertTrue("msg from staticMsgSource for Locale.US that requires no args is as expected",

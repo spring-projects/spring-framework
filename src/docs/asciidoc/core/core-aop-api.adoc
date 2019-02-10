@@ -29,7 +29,6 @@ target different advice with the same pointcut.
 The `org.springframework.aop.Pointcut` interface is the central interface, used to
 target advices to particular classes and methods. The complete interface follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -41,7 +40,6 @@ target advices to particular classes and methods. The complete interface follows
 
 	}
 ----
-====
 
 Splitting the `Pointcut` interface into two parts allows reuse of class and method
 matching parts and fine-grained composition operations (such as performing a "`union`"
@@ -51,7 +49,6 @@ The `ClassFilter` interface is used to restrict the pointcut to a given set of t
 classes. If the `matches()` method always returns true, all target classes are
 matched. The following listing shows the `ClassFilter` interface definition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -60,11 +57,9 @@ matched. The following listing shows the `ClassFilter` interface definition:
 		boolean matches(Class clazz);
 	}
 ----
-====
 
 The `MethodMatcher` interface is normally more important. The complete interface follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -77,7 +72,6 @@ The `MethodMatcher` interface is normally more important. The complete interface
 		boolean matches(Method m, Class targetClass, Object[] args);
 	}
 ----
-====
 
 The `matches(Method, Class)` method is used to test whether this pointcut ever
 matches a given method on a target class. This evaluation can be performed when an AOP
@@ -153,7 +147,6 @@ effectively the union of these pointcuts.)
 
 The following example shows how to use `JdkRegexpMethodPointcut`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -167,7 +160,6 @@ The following example shows how to use `JdkRegexpMethodPointcut`:
 		</property>
 	</bean>
 ----
-====
 
 Spring provides a convenience class named `RegexpMethodPointcutAdvisor`, which lets us
 also reference an `Advice` (remember that an `Advice` can be an interceptor, before advice,
@@ -175,7 +167,6 @@ throws advice, and others). Behind the scenes, Spring uses a `JdkRegexpMethodPoi
 Using `RegexpMethodPointcutAdvisor` simplifies wiring, as the one bean encapsulates both
 pointcut and advice, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -192,7 +183,6 @@ pointcut and advice, as the following example shows:
 		</property>
 	</bean>
 ----
-====
 
 You can use `RegexpMethodPointcutAdvisor` with any `Advice` type.
 
@@ -239,7 +229,6 @@ Because static pointcuts are most useful, you should probably subclass
 abstract method (although you can override other methods to customize behavior). The
 following example shows how to subclass `StaticMethodMatcherPointcut`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -250,7 +239,6 @@ following example shows how to subclass `StaticMethodMatcherPointcut`:
 		}
 	}
 ----
-====
 
 There are also superclasses for dynamic pointcuts.
 
@@ -313,7 +301,6 @@ Spring is compliant with the AOP `Alliance` interface for around advice that use
 interception. Classes that implement `MethodInterceptor` and that implement around advice should also implement the
 following interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -322,7 +309,6 @@ following interface:
 		Object invoke(MethodInvocation invocation) throws Throwable;
 	}
 ----
-====
 
 The `MethodInvocation` argument to the `invoke()` method exposes the method being
 invoked, the target join point, the AOP proxy, and the arguments to the method. The
@@ -331,7 +317,6 @@ point.
 
 The following example shows a simple `MethodInterceptor` implementation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -345,7 +330,6 @@ The following example shows a simple `MethodInterceptor` implementation:
 		}
 	}
 ----
-====
 
 Note the call to the `proceed()` method of `MethodInvocation`. This proceeds down the
 interceptor chain towards the join point. Most interceptors invoke this method and
@@ -374,7 +358,6 @@ interceptor chain.
 
 The following listing shows the `MethodBeforeAdvice` interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -383,7 +366,6 @@ The following listing shows the `MethodBeforeAdvice` interface:
 		void before(Method m, Object[] args, Object target) throws Throwable;
 	}
 ----
-====
 
 (Spring's API design would allow for
 field before advice, although the usual objects apply to field interception and it is
@@ -398,7 +380,6 @@ wrapped in an unchecked exception by the AOP proxy.
 
 The following example shows a before advice in Spring, which counts all method invocations:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -415,7 +396,6 @@ The following example shows a before advice in Spring, which counts all method i
 		}
 	}
 ----
-====
 
 TIP: Before advice can be used with any pointcut.
 
@@ -429,13 +409,11 @@ an exception. Spring offers typed throws advice. Note that this means that the
 tag interface identifying that the given object implements one or more typed throws
 advice methods. These should be in the following form:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	afterThrowing([Method, args, target], subclassOfThrowable)
 ----
-====
 
 Only the last argument is required. The method signatures may have either one or four
 arguments, depending on whether the advice method is interested in the method and
@@ -443,7 +421,6 @@ arguments. The next two listing show classes that are examples of throws advice.
 
 The following advice is invoked if a `RemoteException` is thrown (including from subclasses):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -454,13 +431,11 @@ The following advice is invoked if a `RemoteException` is thrown (including from
 		}
 	}
 ----
-====
 
 Unlike the preceding
 advice, the next example declares four arguments, so that it has access to the invoked method, method
 arguments, and target object. The following advice is invoked if a `ServletException` is thrown:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -471,13 +446,11 @@ arguments, and target object. The following advice is invoked if a `ServletExcep
 		}
 	}
 ----
-====
 
 The final example illustrates how these two methods could be used in a single class
 that handles both `RemoteException` and `ServletException`. Any number of throws advice
 methods can be combined in a single class. The following listing shows the final example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -492,7 +465,6 @@ methods can be combined in a single class. The following listing shows the final
 		}
 	}
 ----
-====
 
 NOTE: If a throws-advice method throws an exception itself, it overrides the
 original exception (that is, it changes the exception thrown to the user). The overriding
@@ -511,7 +483,6 @@ TIP: Throws advice can be used with any pointcut.
 An after returning advice in Spring must implement the
 `org.springframework.aop.AfterReturningAdvice` interface, which the following listing shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -521,7 +492,6 @@ An after returning advice in Spring must implement the
 				throws Throwable;
 	}
 ----
-====
 
 An after returning advice has access to the return value (which it cannot modify),
 the invoked method, the method's arguments, and the target.
@@ -529,7 +499,6 @@ the invoked method, the method's arguments, and the target.
 The following after returning advice counts all successful method invocations that have
 not thrown exceptions:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -547,7 +516,6 @@ not thrown exceptions:
 		}
 	}
 ----
-====
 
 This advice does not change the execution path. If it throws an exception, it is
 thrown up the interceptor chain instead of the return value.
@@ -563,7 +531,6 @@ Spring treats introduction advice as a special kind of interception advice.
 Introduction requires an `IntroductionAdvisor` and an `IntroductionInterceptor` that
 implement the following interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -572,7 +539,6 @@ implement the following interface:
 		boolean implementsInterface(Class intf);
 	}
 ----
-====
 
 The `invoke()` method inherited from the AOP Alliance `MethodInterceptor` interface must
 implement the introduction. That is, if the invoked method is on an introduced
@@ -583,7 +549,6 @@ Introduction advice cannot be used with any pointcut, as it applies only at the 
 rather than the method, level. You can only use introduction advice with the
 `IntroductionAdvisor`, which has the following methods:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -599,7 +564,6 @@ rather than the method, level. You can only use introduction advice with the
 		Class[] getInterfaces();
 	}
 ----
-====
 
 There is no `MethodMatcher` and, hence, no `Pointcut` associated with introduction
 advice. Only class filtering is logical.
@@ -612,7 +576,6 @@ introduced interfaces can be implemented by the configured `IntroductionIntercep
 Consider an example from the Spring test suite and suppose we want to
 introduce the following interface to one or more objects:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -622,7 +585,6 @@ introduce the following interface to one or more objects:
 		boolean locked();
 	}
 ----
-====
 
 This illustrates a mixin. We want to be able to cast advised objects to `Lockable`,
 whatever their type and call lock and unlock methods. If we call the `lock()` method, we
@@ -659,7 +621,6 @@ to that held in the target object.
 
 The following example shows the example `LockMixin` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -688,7 +649,6 @@ The following example shows the example `LockMixin` class:
 
 	}
 ----
-====
 
 Often, you need not override the `invoke()` method. The
 `DelegatingIntroductionInterceptor` implementation (which calls the `delegate` method if
@@ -703,7 +663,6 @@ interceptor (which would be defined as a prototype). In this case, there is no
 configuration relevant for a `LockMixin`, so we create it by using `new`.
 The following example shows our `LockMixinAdvisor` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -714,7 +673,6 @@ The following example shows our `LockMixinAdvisor` class:
 		}
 	}
 ----
-====
 
 We can apply this advisor very simply, because it requires no configuration. (However, it
 is impossible to use an `IntroductionInterceptor` without an
@@ -904,7 +862,6 @@ Consider a simple example of `ProxyFactoryBean` in action. This example involves
 
 The following listing shows the example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -933,7 +890,6 @@ The following listing shows the example:
 		</property>
 	</bean>
 ----
-====
 
 Note that the `interceptorNames` property takes a list of `String`, which holds the bean names of the
 interceptors or advisors in the current factory. You can use advisors, interceptors, before, after
@@ -948,18 +904,15 @@ an instance of the prototype from the factory. Holding a reference is not suffic
 The `person` bean definition shown earlier can be used in place of a `Person` implementation, as
 follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	Person person = (Person) factory.getBean("person");
 ----
-====
 
 Other beans in the same IoC context can express a strongly typed dependency on it, as
 with an ordinary Java object. The following example shows how to do so:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -967,7 +920,6 @@ with an ordinary Java object. The following example shows how to do so:
 		<property name="person"><ref bean="person"/></property>
 	</bean>
 ----
-====
 
 The `PersonUser` class in this example exposes a property of type `Person`. As far as
 it is concerned, the AOP proxy can be used transparently in place of a "`real`" person
@@ -979,7 +931,6 @@ inner bean. Only the `ProxyFactoryBean` definition is different. The
 advice is included only for completeness. The following example shows how to use an
 anonymous inner bean:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1006,7 +957,6 @@ anonymous inner bean:
 		</property>
 	</bean>
 ----
-====
 
 Using an anonymous inner bean has the advantage that there is only one object of type `Person`. This is useful if we want
 to prevent users of the application context from obtaining a reference to the un-advised
@@ -1060,7 +1010,6 @@ the part before the asterisk are added to the advisor chain. This can come in ha
 if you need to add a standard set of "`global`" advisors. The following example defines
 two global advisors:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1076,7 +1025,6 @@ two global advisors:
 	<bean id="global_debug" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 	<bean id="global_performance" class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/>
 ----
-====
 
 
 
@@ -1090,7 +1038,6 @@ definitions, can result in much cleaner and more concise proxy definitions.
 
 First, we create a parent, template, bean definition for the proxy, as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1104,14 +1051,12 @@ First, we create a parent, template, bean definition for the proxy, as follows:
 		</property>
 	</bean>
 ----
-====
 
 This is never instantiated itself, so it can actually be incomplete. Then, each proxy
 that needs to be created is a child bean definition, which wraps the target of the
 proxy as an inner bean definition, since the target is never used on its own anyway.
 The following example shows such a child bean:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1122,12 +1067,10 @@ The following example shows such a child bean:
 		</property>
 	</bean>
 ----
-====
 
 You can override properties from the parent template. In the following example,
 we override the transaction propagation settings:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1146,7 +1089,6 @@ we override the transaction propagation settings:
 		</property>
 	</bean>
 ----
-====
 
 Note that in the parent bean example, we explicitly marked the parent bean definition as
 being abstract by setting the `abstract` attribute to `true`, as described
@@ -1171,7 +1113,6 @@ The interfaces implemented by the target object are
 automatically proxied. The following listing shows creation of a proxy for a target object, with one
 interceptor and one advisor:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1180,7 +1121,6 @@ interceptor and one advisor:
 	factory.addAdvisor(myAdvisor);
 	MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();
 ----
-====
 
 The first step is to construct an object of type
 `org.springframework.aop.framework.ProxyFactory`. You can create this with a target
@@ -1211,7 +1151,6 @@ However you create AOP proxies, you can manipulate them BY using the
 interface, no matter which other interfaces it implements. This interface includes the
 following methods:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1235,7 +1174,6 @@ following methods:
 
 	boolean isFrozen();
 ----
-====
 
 The `getAdvisors()` method returns an `Advisor` for every advisor, interceptor, or
 other advice type that has been added to the factory. If you added an `Advisor`, the
@@ -1257,7 +1195,6 @@ change. (You can obtain a new proxy from the factory to avoid this problem.)
 The following example shows casting an AOP proxy to the `Advised` interface and examining and
 manipulating its advice:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1276,7 +1213,6 @@ manipulating its advice:
 
 	assertEquals("Added two advisors", oldAdvisorCount + 2, advised.getAdvisors().length);
 ----
-====
 
 NOTE: It is questionable whether it is advisable (no pun intended) to modify advice on a
 business object in production, although there are, no doubt, legitimate usage cases.
@@ -1333,7 +1269,6 @@ The `BeanNameAutoProxyCreator` class is a `BeanPostProcessor` that automatically
 AOP proxies for beans with names that match literal values or wildcards. The following
 example shows how to create a `BeanNameAutoProxyCreator` bean:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1346,7 +1281,6 @@ example shows how to create a `BeanNameAutoProxyCreator` bean:
 		</property>
 	</bean>
 ----
-====
 
 As with `ProxyFactoryBean`, there is an `interceptorNames` property rather than a list
 of interceptors, to allow correct behavior for prototype advisors. Named "`interceptors`"
@@ -1398,7 +1332,6 @@ bean`" idiom shown earlier also offers this benefit.)
 The following example creates a `DefaultAdvisorAutoProxyCreator` bean and the other
 elements discussed in this section:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1416,7 +1349,6 @@ elements discussed in this section:
 
 	<bean id="businessObject2" class="com.mycompany.BusinessObject2"/>
 ----
-====
 
 The `DefaultAdvisorAutoProxyCreator` is very useful if you want to apply the same advice
 consistently to many business objects. Once the infrastructure definitions are in place,
@@ -1470,18 +1402,15 @@ Changing the target source's target takes effect immediately. The
 
 You can change the target by using the `swap()` method on HotSwappableTargetSource, as the follow example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 	Object oldTarget = swapper.swap(newTarget);
 ----
-====
 
 The following example shows the required XML definitions:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1495,7 +1424,6 @@ The following example shows the required XML definitions:
 		<property name="targetSource" ref="swapper"/>
 	</bean>
 ----
-====
 
 The preceding `swap()` call changes the target of the swappable bean. Clients that hold a
 reference to that bean are unaware of the change but immediately start hitting
@@ -1528,7 +1456,6 @@ NOTE: Commons Pool 1.5+ is also supported but is deprecated as of Spring Framewo
 
 The following listing shows an example configuration:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1547,7 +1474,6 @@ The following listing shows an example configuration:
 		<property name="interceptorNames" value="myInterceptor"/>
 	</bean>
 ----
-====
 
 Note that the target object (`businessObjectTarget` in the preceding example) must be a
 prototype. This lets the `PoolingTargetSource` implementation create new instances
@@ -1565,7 +1491,6 @@ You can configure Spring to be able to cast any pooled object to the
 about the configuration and current size of the pool through an introduction. You
 need to define an advisor similar to the following:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1574,7 +1499,6 @@ need to define an advisor similar to the following:
 		<property name="targetMethod" value="getPoolingConfigMixin"/>
 	</bean>
 ----
-====
 
 This advisor is obtained by calling a convenience method on the
 `AbstractPoolingTargetSource` class, hence the use of `MethodInvokingFactoryBean`. This
@@ -1583,14 +1507,12 @@ the `ProxyFactoryBean` that exposes the pooled object.
 
 The cast is defined as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
 	System.out.println("Max pool size is " + conf.getMaxSize());
 ----
-====
 
 NOTE: Pooling stateless service objects is not usually necessary. We do not believe it should
 be the default choice, as most stateless objects are naturally thread safe, and instance
@@ -1613,7 +1535,6 @@ use this approach without very good reason.
 To do this, you could modify the `poolTargetSource` definition shown earlier as follows
 (we also changed the name, for clarity):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1621,7 +1542,6 @@ To do this, you could modify the `poolTargetSource` definition shown earlier as 
 		<property name="targetBeanName" ref="businessObjectTarget"/>
 	</bean>
 ----
-====
 
 The only property is the name of the target bean. Inheritance is used in the
 `TargetSource` implementations to ensure consistent naming. As with the pooling target
@@ -1638,7 +1558,6 @@ facility to transparently store a resource alongside a thread. Setting up a
 `ThreadLocalTargetSource` is pretty much the same as was explained for the other types
 of target source, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1646,7 +1565,6 @@ of target source, as the following example shows:
 		<property name="targetBeanName" value="businessObjectTarget"/>
 	</bean>
 ----
-====
 
 NOTE: `ThreadLocal` instances come with serious issues (potentially resulting in memory leaks) when
 incorrectly using them in multi-threaded and multi-classloader environments. You

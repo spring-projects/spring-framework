@@ -10,7 +10,7 @@ dependencyManagement {
 // spring-core includes asm and repackages cglib, inlining both into the spring-core jar.
 // cglib itself depends on asm and is therefore further transformed by the JarJar task to
 // depend on org.springframework.asm; this avoids including two different copies of asm.
-def cglibVersion = "3.2.9"
+def cglibVersion = "3.2.10"
 def objenesisVersion = "3.0.1"
 
 configurations {
@@ -64,7 +64,7 @@ task objenesisRepackJar(type: Jar) { repackJar ->
 dependencies {
 	cglib("cglib:cglib:${cglibVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
-	jarjar("org.pantsbuild:jarjar:1.6.6")
+	jarjar("org.pantsbuild:jarjar:1.7.2")
 
 	compile(files(cglibRepackJar))
 	compile(files(objenesisRepackJar))
@@ -81,8 +81,8 @@ dependencies {
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
-	testCompile("javax.xml.bind:jaxb-api:2.3.0")
-	testCompile("com.fasterxml.woodstox:woodstox-core:5.1.0") {
+	testCompile("javax.xml.bind:jaxb-api:2.3.1")
+	testCompile("com.fasterxml.woodstox:woodstox-core:5.2.0") {
 		exclude group: "stax", module: "stax-api"
 	}
 }

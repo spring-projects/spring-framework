@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -480,24 +480,29 @@ public class HandlerMethod {
 			Annotation[] anns = this.combinedAnnotations;
 			if (anns == null) {
 				anns = super.getParameterAnnotations();
-				for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {
-					Annotation[] paramAnns = ifcAnns[getParameterIndex()];
-					if (paramAnns.length > 0) {
-						List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
-						merged.addAll(Arrays.asList(anns));
-						for (Annotation paramAnn : paramAnns) {
-							boolean existingType = false;
-							for (Annotation ann : anns) {
-								if (ann.annotationType() == paramAnn.annotationType()) {
-									existingType = true;
-									break;
+				int index = getParameterIndex();
+				if (index >= 0) {
+					for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {
+						if (index < ifcAnns.length) {
+							Annotation[] paramAnns = ifcAnns[index];
+							if (paramAnns.length > 0) {
+								List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
+								merged.addAll(Arrays.asList(anns));
+								for (Annotation paramAnn : paramAnns) {
+									boolean existingType = false;
+									for (Annotation ann : anns) {
+										if (ann.annotationType() == paramAnn.annotationType()) {
+											existingType = true;
+											break;
+										}
+									}
+									if (!existingType) {
+										merged.add(adaptAnnotation(paramAnn));
+									}
 								}
-							}
-							if (!existingType) {
-								merged.add(adaptAnnotation(paramAnn));
+								anns = merged.toArray(new Annotation[0]);
 							}
 						}
-						anns = merged.toArray(new Annotation[0]);
 					}
 				}
 				this.combinedAnnotations = anns;

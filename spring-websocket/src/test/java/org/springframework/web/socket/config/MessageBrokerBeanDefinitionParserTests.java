@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -323,7 +323,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 				"processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
 				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
 				"completed tasks = \\d\\], " +
-				"outboundChannelpool size = \\d, active threads = \\d, queued tasks = \\d, " +
+				"outboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
 				"completed tasks = \\d\\], " +
 				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
 				"completed tasks = \\d\\]";
@@ -445,27 +445,23 @@ public class MessageBrokerBeanDefinitionParserTests {
 	}
 
 
-	private void testChannel(String channelName, List<Class<? extends  MessageHandler>> subscriberTypes,
-			int interceptorCount) {
+	private void testChannel(
+			String channelName, List<Class<? extends  MessageHandler>> subscriberTypes, int interceptorCount) {
 
 		AbstractSubscribableChannel channel = this.appContext.getBean(channelName, AbstractSubscribableChannel.class);
-
 		for (Class<? extends  MessageHandler> subscriberType : subscriberTypes) {
 			MessageHandler subscriber = this.appContext.getBean(subscriberType);
 			assertNotNull("No subscription for " + subscriberType, subscriber);
 			assertTrue(channel.hasSubscription(subscriber));
 		}
-
 		List<ChannelInterceptor> interceptors = channel.getInterceptors();
 		assertEquals(interceptorCount, interceptors.size());
 		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
 	}
 
 	private void testExecutor(String channelName, int corePoolSize, int maxPoolSize, int keepAliveSeconds) {
-
 		ThreadPoolTaskExecutor taskExecutor =
 				this.appContext.getBean(channelName + "Executor", ThreadPoolTaskExecutor.class);
-
 		assertEquals(corePoolSize, taskExecutor.getCorePoolSize());
 		assertEquals(maxPoolSize, taskExecutor.getMaxPoolSize());
 		assertEquals(keepAliveSeconds, taskExecutor.getKeepAliveSeconds());
@@ -483,6 +479,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		return (handler instanceof WebSocketHandlerDecorator) ?
 				((WebSocketHandlerDecorator) handler).getLastHandler() : handler;
 	}
+
 }
 
 
@@ -509,7 +506,6 @@ class CustomReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
-
 	}
 }
 
@@ -540,12 +536,15 @@ class TestWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 class TestStompErrorHandler extends StompSubProtocolErrorHandler {
 }
 
+
 class TestValidator implements Validator {
+
 	@Override
 	public boolean supports(Class<?> clazz) {
 		return false;
 	}
 
 	@Override
-	public void validate(@Nullable Object target, Errors errors) { }
+	public void validate(@Nullable Object target, Errors errors) {
+	}
 }

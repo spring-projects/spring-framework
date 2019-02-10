@@ -21,7 +21,6 @@ To use the tags in the `util` schema, you need to have the following preamble at
 of your Spring XML configuration file (the text in the snippet references the
 correct schema so that the tags in the `util` namespace are available to you):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -35,7 +34,6 @@ correct schema so that the tags in the `util` namespace are available to you):
 			<!-- bean definitions here -->
 	</beans>
 ----
-====
 
 
 
@@ -44,7 +42,6 @@ correct schema so that the tags in the `util` namespace are available to you):
 
 Consider the following bean definition:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -55,7 +52,6 @@ Consider the following bean definition:
 		</property>
 	</bean>
 ----
-====
 
 The preceding configuration uses a Spring `FactoryBean` implementation (the
 `FieldRetrievingFactoryBean`) to set the value of the `isolation` property on a bean
@@ -66,7 +62,6 @@ plumbing to the end user.
 The following XML Schema-based version is more concise, clearly expresses the
 developer's intent ("`inject this constant value`"), and it reads better:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -76,7 +71,6 @@ developer's intent ("`inject this constant value`"), and it reads better:
 		</property>
 	</bean>
 ----
-====
 
 
 
@@ -92,7 +86,6 @@ The following example shows how a `static` field is exposed, by using the
 {api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)[`staticField`]
 property:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -101,26 +94,22 @@ property:
 		<property name="staticField" value="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
 	</bean>
 ----
-====
 
 There is also a convenience usage form where the `static` field is specified as the bean
 name, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
 			class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/>
 ----
-====
 
 This does mean that there is no longer any choice in what the bean `id` is (so any other
 bean that refers to it also has to use this longer name), but this form is very
 concise to define and very convenient to use as an inner bean since the `id` does not have
 to be specified for the bean reference, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -131,7 +120,6 @@ to be specified for the bean reference, as the following example shows:
 		</property>
 	</bean>
 ----
-====
 
 You can also access a non-static (instance) field of another bean, as
 described in the API documentation for the
@@ -144,7 +132,6 @@ anything about the Spring internals (or even about classes such as the
 `FieldRetrievingFactoryBean`). The following example enumeration shows how easy injecting an
 enum value is:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -156,11 +143,9 @@ enum value is:
 		EXTENDED
 	}
 ----
-====
 
 Now consider the following setter of type `PersistenceContextType` and the corresponding bean definition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -183,7 +168,6 @@ Now consider the following setter of type `PersistenceContextType` and the corre
 		<property name="persistenceContextType" value="TRANSACTION"/>
 	</bean>
 ----
-====
 
 
 
@@ -192,7 +176,6 @@ Now consider the following setter of type `PersistenceContextType` and the corre
 
 Consider the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -209,7 +192,6 @@ Consider the following example:
 	<!-- results in 10, which is the value of property 'age' of bean 'testBean' -->
 	<bean id="testBean.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
 ----
-====
 
 The preceding configuration uses a Spring `FactoryBean` implementation (the
 `PropertyPathFactoryBean`) to create a bean (of type `int`) called `testBean.age` that
@@ -217,7 +199,6 @@ has a value equal to the `age` property of the `testBean` bean.
 
 Now consider the following example, which adds a `<util:property-path/>` element:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -234,7 +215,6 @@ Now consider the following example, which adds a `<util:property-path/>` element
 	<!-- results in 10, which is the value of property 'age' of bean 'testBean' -->
 	<util:property-path id="name" path="testBean.age"/>
 ----
-====
 
 The value of the `path` attribute of the `<property-path/>` element follows the form of
 `beanName.beanProperty`. In this case, it picks up the `age` property of the bean named
@@ -250,7 +230,6 @@ argument.
 
 The following example shows a path being used against another bean, by name:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -271,11 +250,9 @@ The following example shows a path being used against another bean, by name:
 		<property name="propertyPath" value="spouse.age"/>
 	</bean>
 ----
-====
 
 In the following example, a path is evaluated against an inner bean:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -290,12 +267,10 @@ In the following example, a path is evaluated against an inner bean:
 		<property name="propertyPath" value="age"/>
 	</bean>
 ----
-====
 
 There is also a shortcut form, where the bean name is the property path.
 The following example shows the shortcut form:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -303,13 +278,11 @@ The following example shows the shortcut form:
 	<bean id="person.age"
 			class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
 ----
-====
 
 This form does mean that there is no choice in the name of the bean. Any reference to it
 also has to use the same `id`, which is the path. If used as an inner
 bean, there is no need to refer to it at all, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -320,7 +293,6 @@ bean, there is no need to refer to it at all, as the following example shows:
 		</property>
 	</bean>
 ----
-====
 
 You can specifically set the result type in the actual definition. This is not necessary
 for most use cases, but it can sometimes be useful. See the javadoc for more info on
@@ -332,7 +304,6 @@ this feature.
 
 Consider the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -341,7 +312,6 @@ Consider the following example:
 		<property name="location" value="classpath:com/foo/jdbc-production.properties"/>
 	</bean>
 ----
-====
 
 The preceding configuration uses a Spring `FactoryBean` implementation (the
 `PropertiesFactoryBean`) to instantiate a `java.util.Properties` instance with values
@@ -349,14 +319,12 @@ loaded from the supplied <<core.adoc#resources, `Resource`>> location).
 
 The following example uses a `util:properties` element to make a more concise representation:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<!-- creates a java.util.Properties instance with values loaded from the supplied location -->
 	<util:properties id="jdbcConfiguration" location="classpath:com/foo/jdbc-production.properties"/>
 ----
-====
 
 
 
@@ -365,7 +333,6 @@ The following example uses a `util:properties` element to make a more concise re
 
 Consider the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -381,7 +348,6 @@ Consider the following example:
 		</property>
 	</bean>
 ----
-====
 
 The preceding configuration uses a Spring `FactoryBean` implementation (the
 `ListFactoryBean`) to create a `java.util.List` instance and initialize it with values taken
@@ -389,7 +355,6 @@ from the supplied `sourceList`.
 
 The following example uses a `<util:list/>` element to make a more concise representation:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -401,14 +366,12 @@ The following example uses a `<util:list/>` element to make a more concise repre
 		<value>porfiry@gov.org</value>
 	</util:list>
 ----
-====
 
 You can also explicitly control the exact type of `List` that is instantiated and
 populated by using the `list-class` attribute on the `<util:list/>` element. For
 example, if we really need a `java.util.LinkedList` to be instantiated, we could use the
 following configuration:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -419,7 +382,6 @@ following configuration:
 		<value>d'Arcachon@nemesis.org</value>
 	</util:list>
 ----
-====
 
 If no `list-class` attribute is supplied, the container chooses a `List` implementation.
 
@@ -430,7 +392,6 @@ If no `list-class` attribute is supplied, the container chooses a `List` impleme
 
 Consider the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -446,7 +407,6 @@ Consider the following example:
 		</property>
 	</bean>
 ----
-====
 
 The preceding configuration uses a Spring `FactoryBean` implementation (the
 `MapFactoryBean`) to create a `java.util.Map` instance initialized with key-value pairs
@@ -454,7 +414,6 @@ taken from the supplied `'sourceMap'`.
 
 The following example uses a `<util:map/>` element to make a more concise representation:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -466,14 +425,12 @@ The following example uses a `<util:map/>` element to make a more concise repres
 		<entry key="porfiry" value="porfiry@gov.org"/>
 	</util:map>
 ----
-====
 
 You can also explicitly control the exact type of `Map` that is instantiated and
 populated by using the `'map-class'` attribute on the `<util:map/>` element. For
 example, if we really need a `java.util.TreeMap` to be instantiated, we could use the
 following configuration:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -484,7 +441,6 @@ following configuration:
 		<entry key="porfiry" value="porfiry@gov.org"/>
 	</util:map>
 ----
-====
 
 If no `'map-class'` attribute is supplied, the container chooses a `Map` implementation.
 
@@ -495,7 +451,6 @@ If no `'map-class'` attribute is supplied, the container chooses a `Map` impleme
 
 Consider the following example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -511,7 +466,6 @@ Consider the following example:
 		</property>
 	</bean>
 ----
-====
 
 The preceding configuration uses a Spring `FactoryBean` implementation (the
 `SetFactoryBean`) to create a `java.util.Set` instance initialized with values taken
@@ -519,7 +473,6 @@ from the supplied `sourceSet`.
 
 The following example uses a `<util:set/>` element to make a more concise representation:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -531,14 +484,12 @@ The following example uses a `<util:set/>` element to make a more concise repres
 		<value>porfiry@gov.org</value>
 	</util:set>
 ----
-====
 
 You can also explicitly control the exact type of `Set` that is instantiated and
 populated by using the `set-class` attribute on the `<util:set/>` element. For
 example, if we really need a `java.util.TreeSet` to be instantiated, we could use the
 following configuration:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -549,7 +500,6 @@ following configuration:
 		<value>porfiry@gov.org</value>
 	</util:set>
 ----
-====
 
 If no `set-class` attribute is supplied, the container chooses a `Set` implementation.
 
@@ -568,7 +518,6 @@ the following preamble at the top of your Spring XML configuration file (the tex
 snippet references the correct schema so that the tags in the `aop` namespace
 are available to you):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -582,7 +531,6 @@ are available to you):
 		<!-- bean definitions here -->
 	</beans>
 ----
-====
 
 
 
@@ -595,7 +543,6 @@ a lot of the "`grunt`" work in Spring, such as `BeanfactoryPostProcessors`. The 
 snippet references the correct schema so that the elements in the `context` namespace are
 available to you:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -609,7 +556,6 @@ available to you:
 		<!-- bean definitions here -->
 	</beans>
 ----
-====
 
 
 
@@ -617,10 +563,10 @@ available to you:
 ==== Using `<property-placeholder/>`
 
 This element activates the replacement of `${...}` placeholders, which are resolved against a
-specified properties file (as a <<core.adoc#resources,Spring resource location>>). This element is
-a convenience mechanism that sets up a <<core.adoc#beans-factory-placeholderconfigurer,
-`PropertyPlaceholderConfigurer`>> for you. If you need more control over the
-`PropertyPlaceholderConfigurer`, you can explicitly define one yourself.
+specified properties file (as a <<core.adoc#resources,Spring resource location>>). This element
+is a convenience mechanism that sets up a <<core.adoc#beans-factory-placeholderconfigurer,
+`PropertySourcesPlaceholderConfigurer`>> for you. If you need more control over the
+`PropertySourcesPlaceholderConfigurer`, you can explicitly define one yourself.
 
 
 
@@ -696,7 +642,6 @@ The following example shows the `<meta/>` element in the context of a surroundin
 (note that, without any logic to interpret it, the metadata is effectively useless
 as it stands).
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -714,7 +659,7 @@ as it stands).
 	</beans>
 ----
 <1> This is the example `meta` element
-====
+
 
 In the case of the preceding example, you could assume that there is some logic that
 consumes the bean definition and sets up some caching infrastructure that uses the supplied
@@ -749,7 +694,6 @@ XML extension (a custom XML element) that lets us configure objects of the type
 `SimpleDateFormat` (from the `java.text` package). When we are done,
 we will be able to define bean definitions of type `SimpleDateFormat` as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -757,7 +701,6 @@ we will be able to define bean definitions of type `SimpleDateFormat` as follows
 		pattern="yyyy-MM-dd HH:mm"
 		lenient="true"/>
 ----
-====
 
 (We include much more detailed
 examples follow later in this appendix. The intent of this first simple example is to walk you
@@ -772,7 +715,6 @@ Creating an XML configuration extension for use with Spring's IoC container star
 authoring an XML Schema to describe the extension. For our example, we use the following schema
 to configure `SimpleDateFormat` objects:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -804,14 +746,12 @@ to configure `SimpleDateFormat` objects:
 (meaning they have an `id` attribute that we can use as the bean identifier in the
 container). We can use this attribute because we imported the Spring-provided
 `beans` namespace.
-====
 
 
 The preceding schema lets us configure `SimpleDateFormat` objects directly in an
 XML application context file by using the `<myns:dateformat/>` element, as the following
 example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -819,12 +759,10 @@ example shows:
 		pattern="yyyy-MM-dd HH:mm"
 		lenient="true"/>
 ----
-====
 
 Note that, after we have created the infrastructure classes, the preceding snippet of XML is
 essentially the same as the following XML snippet:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -833,7 +771,6 @@ essentially the same as the following XML snippet:
 		<property name="lenient" value="true"/>
 	</bean>
 ----
-====
 
 The second of the two preceding snippets
 creates a bean in the container (identified by the name `dateFormat` of type
@@ -876,7 +813,6 @@ element results in a single `SimpleDateFormat` bean definition). Spring features
 number of convenience classes that support this scenario. In the following example, we
 use the `NamespaceHandlerSupport` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -892,7 +828,6 @@ use the `NamespaceHandlerSupport` class:
 
 	}
 ----
-====
 
 You may notice that there is not actually a whole lot of parsing logic
 in this class. Indeed, the `NamespaceHandlerSupport` class has a built-in notion of
@@ -916,7 +851,6 @@ responsible for parsing one distinct top-level XML element defined in the schema
 the parser, we' have access to the XML element (and thus to its subelements, too) so that
 we can parse our custom XML content, as you can see in the following example:
 
-====
 [source,java,indent=0]
 ----
 	package org.springframework.samples.xml;
@@ -954,7 +888,7 @@ the basic grunt work of creating a single `BeanDefinition`.
 
 <2> We supply the `AbstractSingleBeanDefinitionParser` superclass with the type that our
 single `BeanDefinition` represents.
-====
+
 
 In this simple case, this is all that we need to do. The creation of our single
 `BeanDefinition` is handled by the `AbstractSingleBeanDefinitionParser` superclass, as
@@ -980,13 +914,11 @@ these special properties files, the formats of which are detailed in the next tw
 The properties file called `spring.handlers` contains a mapping of XML Schema URIs to
 namespace handler classes. For our example, we need to write the following:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 http\://www.mycompany.com/schema/myns=org.springframework.samples.xml.MyNamespaceHandler
 ----
-====
 
 (The `:` character is a valid delimiter in the Java properties format, so
 `:` character in the URI needs to be escaped with a backslash.)
@@ -1009,13 +941,11 @@ properties file, Spring searches for the schema (in this case,
 `myns.xsd` in the `org.springframework.samples.xml` package) on the classpath.
 The following snippet shows the line we need to add for our custom schema:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 http\://www.mycompany.com/schema/myns/myns.xsd=org/springframework/samples/xml/myns.xsd
 ----
-====
 
 (Remember that the `:` character must be escaped.)
 
@@ -1032,7 +962,6 @@ one of the "`custom`" extensions that Spring provides. The following
 example uses the custom `<dateformat/>` element developed in the previous steps
 in a Spring XML configuration file:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1057,7 +986,6 @@ in a Spring XML configuration file:
 	</beans>
 ----
 <1> Our custom bean.
-====
 
 
 
@@ -1074,7 +1002,6 @@ This section presents some more detailed examples of custom XML extensions.
 The example presented in this section shows how you to write the various artifacts required
 to satisfy a target of the following configuration:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1096,7 +1023,6 @@ to satisfy a target of the following configuration:
 
 	</beans>
 ----
-====
 
 The preceding configuration nests custom extensions within each other. The class
 that is actually configured by the `<foo:component/>` element is the `Component`
@@ -1105,7 +1031,6 @@ setter method for the `components` property. This makes it hard (or rather impos
 to configure a bean definition for the `Component` class by using setter injection.
 The following listing shows the `Component` class:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1138,12 +1063,11 @@ The following listing shows the `Component` class:
 
 	}
 ----
-====
 
 The typical solution to this issue is to create a custom `FactoryBean` that exposes a
 setter property for the `components` property. The following listing shows such a custom
 `FactoryBean`:
-====
+
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1186,7 +1110,6 @@ setter property for the `components` property. The following listing shows such 
 
 	}
 ----
-====
 
 This works nicely, but it exposes a lot of Spring plumbing to the
 end user. What we are going to do is write a custom extension that hides away all of
@@ -1194,7 +1117,6 @@ this Spring plumbing. If we stick to <<xsd-custom-introduction,the steps describ
 previously>>, we start off by creating the XSD schema to define the structure of our
 custom tag, as the following listing shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1218,11 +1140,9 @@ custom tag, as the following listing shows:
 
 	</xsd:schema>
 ----
-====
 
 Again following <<xsd-custom-introduction,the process described earlier>>, we then create a custom `NamespaceHandler`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1238,13 +1158,11 @@ Again following <<xsd-custom-introduction,the process described earlier>>, we th
 
 	}
 ----
-====
 
 Next up is the custom `BeanDefinitionParser`. Remember that we are creating
 `BeanDefinition` that describes a `ComponentFactoryBean`. The following listing shows our
 custom `BeanDefinitionParser`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1295,12 +1213,10 @@ custom `BeanDefinitionParser`:
 
 	}
 ----
-====
 
 Finally, the various artifacts need to be registered with the Spring XML infrastructure,
 by modifying the `META-INF/spring.handlers` and `META-INF/spring.schemas` files, as follows:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -1314,7 +1230,6 @@ http\://www.foo.com/schema/component=com.foo.ComponentNamespaceHandler
 # in 'META-INF/spring.schemas'
 http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd
 ----
-====
 
 
 
@@ -1333,7 +1248,6 @@ http://jcp.org/en/jsr/detail?id=107[JCache], and you want to ensure that the nam
 JCache instance is eagerly started within the surrounding cluster. The following
 listing shows such a definition:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1342,7 +1256,6 @@ listing shows such a definition:
 		<!-- other dependencies here... -->
 	</bean>
 ----
-====
 
 We can then create another `BeanDefinition` when the
 `'jcache:cache-name'` attribute is parsed. This `BeanDefinition` then initializes
@@ -1350,7 +1263,6 @@ the named JCache for us. We can also modify the existing `BeanDefinition` for th
 `'checkingAccountService'` so that it has a dependency on this new
 JCache-initializing `BeanDefinition`. The following listing shows our `JCacheInitializer`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1370,12 +1282,10 @@ JCache-initializing `BeanDefinition`. The following listing shows our `JCacheIni
 
 	}
 ----
-====
 
 Now we can move onto the custom extension. First, we need to author the XSD schema that describes the
 custom attribute, as follows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1390,11 +1300,9 @@ custom attribute, as follows:
 
 	</xsd:schema>
 ----
-====
 
 Next, we need to create the associated `NamespaceHandler`, as follows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1411,13 +1319,11 @@ Next, we need to create the associated `NamespaceHandler`, as follows:
 
 	}
 ----
-====
 
 Next, we need to create the parser. Note that, in this case, because we are going to parse an XML
 attribute, we write a `BeanDefinitionDecorator` rather than a `BeanDefinitionParser`.
 The following listing shows our `BeanDefinitionDecorator`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1473,12 +1379,10 @@ The following listing shows our `BeanDefinitionDecorator`:
 
 	}
 ----
-====
 
 Finally, we need to register the various artifacts with the Spring XML infrastructure
 by modifying the `META-INF/spring.handlers` and `META-INF/spring.schemas` files, as follows:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -1492,4 +1396,3 @@ http\://www.foo.com/schema/jcache=com.foo.JCacheNamespaceHandler
 # in 'META-INF/spring.schemas'
 http\://www.foo.com/schema/jcache/jcache.xsd=com/foo/jcache.xsd
 ----
-====

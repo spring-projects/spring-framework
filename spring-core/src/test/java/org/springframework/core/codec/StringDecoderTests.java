@@ -34,12 +34,12 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
-import static java.nio.charset.StandardCharsets.UTF_16BE;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.charset.StandardCharsets.*;
 import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link StringDecoder}.
+ *
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @author Mark Paluch
@@ -48,29 +48,21 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 
 	private static final ResolvableType TYPE = ResolvableType.forClass(String.class);
 
+
 	public StringDecoderTests() {
 		super(StringDecoder.allMimeTypes());
 	}
 
+
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(
-				TYPE, MimeTypeUtils.TEXT_PLAIN));
-
-		assertTrue(this.decoder.canDecode(
-				TYPE, MimeTypeUtils.TEXT_HTML));
-
-		assertTrue(this.decoder.canDecode(
-				TYPE, MimeTypeUtils.APPLICATION_JSON));
-
-		assertTrue(this.decoder.canDecode(
-				TYPE, MimeTypeUtils.parseMimeType("text/plain;charset=utf-8")));
-
-
+		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_HTML));
+		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.parseMimeType("text/plain;charset=utf-8")));
 		assertFalse(this.decoder.canDecode(
 				ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-
 		assertFalse(this.decoder.canDecode(
 				ResolvableType.forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
 	}
@@ -157,7 +149,6 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 
 	@Test
 	public void decodeNewLineIncludeDelimiters() {
-
 		this.decoder = StringDecoder.allMimeTypes(StringDecoder.DEFAULT_DELIMITERS, false);
 
 		Flux<DataBuffer> input = Flux.just(
@@ -219,7 +210,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeToMonoWithEmptyFlux() throws InterruptedException {
+	public void decodeToMonoWithEmptyFlux() {
 		Flux<DataBuffer> input = Flux.empty();
 
 		testDecodeToMono(input, String.class, step -> step

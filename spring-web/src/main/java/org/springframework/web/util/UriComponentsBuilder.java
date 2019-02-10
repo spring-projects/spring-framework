@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -385,15 +385,22 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
+		return buildInternal(encoded ?
+				EncodingHint.FULLY_ENCODED :
+				this.encodeTemplate ? EncodingHint.ENCODE_TEMPLATE : EncodingHint.NONE);
+	}
+
+	private UriComponents buildInternal(EncodingHint hint) {
 		UriComponents result;
 		if (this.ssp != null) {
 			result = new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
 			HierarchicalUriComponents uric = new HierarchicalUriComponents(this.scheme, this.fragment,
-					this.userInfo, this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded);
+					this.userInfo, this.host, this.port, this.pathBuilder.build(), this.queryParams,
+					hint == EncodingHint.FULLY_ENCODED);
 
-			result = this.encodeTemplate ? uric.encodeTemplate(this.charset) : uric;
+			result = hint == EncodingHint.ENCODE_TEMPLATE ? uric.encodeTemplate(this.charset) : uric;
 		}
 		if (!this.uriVariables.isEmpty()) {
 			result = result.expand(name -> this.uriVariables.getOrDefault(name, UriTemplateVariables.SKIP_VALUE));
@@ -425,24 +432,34 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	@Override
 	public URI build(Object... uriVariables) {
-		return encode().buildAndExpand(uriVariables).toUri();
+		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 
 	@Override
 	public URI build(Map<String, ?> uriVariables) {
-		return encode().buildAndExpand(uriVariables).toUri();
+		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 
-
 	/**
-	 * Build a URI String. This is a shortcut method which combines calls
-	 * to {@link #build()}, then {@link UriComponents#encode()} and finally
-	 * {@link UriComponents#toUriString()}.
+	 * Build a URI String.
+	 * <p>Effectively, a shortcut for building, encoding, and returning the
+	 * String representation:
+	 * <pre class="code">
+	 * String uri = builder.build().encode().toUriString()
+	 * </pre>
+	 * <p>However if {@link #uriVariables(Map) URI variables} have been provided
+	 * then the URI template is pre-encoded separately from URI variables (see
+	 * {@link #encode()} for details), i.e. equivalent to:
+	 * <pre>
+	 * String uri = builder.encode().build().toUriString()
+	 * </pre>
 	 * @since 4.1
 	 * @see UriComponents#toUriString()
 	 */
 	public String toUriString() {
-		return encode().build().toUriString();
+		return this.uriVariables.isEmpty() ?
+				build().encode().toUriString() :
+				buildInternal(EncodingHint.ENCODE_TEMPLATE).toUriString();
 	}
 
 
@@ -1048,5 +1065,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			return builder;
 		}
 	}
+
+
+	private enum EncodingHint { ENCODE_TEMPLATE, FULLY_ENCODED, NONE }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	private static final Set<String> WHITELISTED_MEDIA_BASE_TYPES = new HashSet<>(
 			Arrays.asList("audio", "image", "video"));
 
-	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
+	private static final List<MediaType> ALL_APPLICATION_MEDIA_TYPES =
+			Arrays.asList(MediaType.ALL, new MediaType("application"));
 
 	private static final Type RESOURCE_REGION_LIST_TYPE =
 			new ParameterizedTypeReference<List<ResourceRegion>>() { }.getType();
@@ -257,7 +258,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 					selectedMediaType = mediaType;
 					break;
 				}
-				else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION)) {
+				else if (mediaType.isPresentIn(ALL_APPLICATION_MEDIA_TYPES)) {
 					selectedMediaType = MediaType.APPLICATION_OCTET_STREAM;
 					break;
 				}
@@ -283,7 +284,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 					if (body != null) {
 						Object theBody = body;
 						LogFormatUtils.traceDebug(logger, traceOn ->
-								"Writing [" + LogFormatUtils.formatValue(theBody, traceOn) + "]");
+								"Writing [" + LogFormatUtils.formatValue(theBody, !traceOn) + "]");
 						addContentDispositionHeader(inputMessage, outputMessage);
 						if (genericConverter != null) {
 							genericConverter.write(body, targetType, selectedMediaType, outputMessage);

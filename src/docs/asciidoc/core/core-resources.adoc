@@ -37,7 +37,6 @@ Spring's `Resource` interface is meant to be a more capable interface for abstra
 access to low-level resources. The following listing shows the `Resource` interface
 definition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -59,13 +58,11 @@ definition:
 
 	}
 ----
-====
 
 As the definition of the `Resource` interface shows, it extends the `InputStreamSource`
 interface. The following listing shows the definition of the `InputStreamSource`
 interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -75,7 +72,6 @@ interface:
 
 	}
 ----
-====
 
 Some of the most important methods from the `Resource` interface are:
 
@@ -227,7 +223,6 @@ The `ResourceLoader` interface is meant to be implemented by objects that can re
 (that is, load) `Resource` instances. The following listing shows the `ResourceLoader`
 interface definition:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -237,7 +232,6 @@ interface definition:
 
 	}
 ----
-====
 
 All application contexts implement the `ResourceLoader` interface. Therefore, all
 application contexts may be used to obtain `Resource` instances.
@@ -247,13 +241,11 @@ specified doesn't have a specific prefix, you get back a `Resource` type that is
 appropriate to that particular application context. For example, assume the following
 snippet of code was executed against a `ClassPathXmlApplicationContext` instance:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	Resource template = ctx.getResource("some/resource/path/myTemplate.txt");
 ----
-====
 
 Against a `ClassPathXmlApplicationContext`, that code returns a `ClassPathResource`. If the same method were executed
 against a `FileSystemXmlApplicationContext` instance, it would return a
@@ -267,19 +259,16 @@ On the other hand, you may also force `ClassPathResource` to be used, regardless
 application context type, by specifying the special `classpath:` prefix, as the following
 example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	Resource template = ctx.getResource("classpath:some/resource/path/myTemplate.txt");
 ----
-====
 
 Similarly, you can force a `UrlResource` to be used by specifying any of the standard
 `java.net.URL` prefixes. The following pair of examples use the `file` and `http`
 prefixes:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -291,7 +280,6 @@ prefixes:
 ----
 	Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");
 ----
-====
 
 The following table summarizes the strategy for converting `String` objects to `Resource` objects:
 
@@ -327,7 +315,6 @@ The `ResourceLoaderAware` interface is a special marker interface that identifie
 that expect to be provided with a `ResourceLoader` reference. The following listing shows
 the definition of the `ResourceLoaderAware` interface:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -336,7 +323,6 @@ the definition of the `ResourceLoaderAware` interface:
 		void setResourceLoader(ResourceLoader resourceLoader);
 	}
 ----
-====
 
 When a class implements `ResourceLoaderAware` and is deployed into an application
 context (as a Spring-managed bean), it is recognized as `ResourceLoaderAware` by the
@@ -381,7 +367,6 @@ register and use a special JavaBeans `PropertyEditor`, which can convert `String
 to `Resource` objects. So, if `myBean` has a template property of type `Resource`, it can
 be configured with a simple string for that resource, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -389,7 +374,6 @@ be configured with a simple string for that resource, as the following example s
 		<property name="template" value="some/resource/path/myTemplate.txt"/>
 	</bean>
 ----
-====
 
 Note that the resource path has no prefix. Consequently, because the application context itself is
 going to be used as the `ResourceLoader`, the resource itself is loaded through a
@@ -400,7 +384,6 @@ If you need to force a specific `Resource` type to be used, you can use a prefix
 The following two examples show how to force a `ClassPathResource` and a
 `UrlResource` (the latter being used to access a filesystem file):
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -412,7 +395,6 @@ The following two examples show how to force a `ClassPathResource` and a
 ----
 	<property name="template" value="file:///some/resource/path/myTemplate.txt"/>
 ----
-====
 
 
 
@@ -437,25 +419,21 @@ that path and used to load the bean definitions depends on and is appropriate to
 specific application context. For example, consider the following example, which creates a
 `ClassPathXmlApplicationContext`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx = new ClassPathXmlApplicationContext("conf/appContext.xml");
 ----
-====
 
 The bean definitions are loaded from the classpath, because a `ClassPathResource` is
 used. However, consider the following example, which creates a `FileSystemXmlApplicationContext`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("conf/appContext.xml");
 ----
-====
 
 Now the bean definition is loaded from a filesystem location (in this case, relative to
 the current working directory).
@@ -487,7 +465,6 @@ then derives the path information from the supplied class.
 
 Consider the following directory layout:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -497,19 +474,16 @@ com/
     daos.xml
     MessengerService.class
 ----
-====
 
 The following example shows how a `ClassPathXmlApplicationContext` instance composed of the beans defined in
 files named `services.xml` and `daos.xml` (which are on the classpath) can be instantiated:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx = new ClassPathXmlApplicationContext(
 		new String[] {"services.xml", "daos.xml"}, MessengerService.class);
 ----
-====
 
 See the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`ClassPathXmlApplicationContext`]
 javadoc for details on the various constructors.
@@ -542,7 +516,6 @@ a resource points to just one resource at a time.
 
 Path locations can contain Ant-style patterns, as the following example shows:
 
-====
 [literal]
 [subs="verbatim"]
 ----
@@ -551,7 +524,6 @@ com/mycompany/**/applicationContext.xml
 file:C:/some/path/*-context.xml
 classpath:com/mycompany/**/applicationContext.xml
 ----
-====
 
 When the path location contains an Ant-style pattern, the resolver follows a more complex procedure to try to resolve the
 wildcard. It produces a `Resource` for the path up to the last non-wildcard segment and
@@ -590,14 +562,12 @@ coming from jars be thoroughly tested in your specific environment before you re
 When constructing an XML-based application context, a location string may use the
 special `classpath*:` prefix, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx =
 		new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");
 ----
-====
 
 This special prefix specifies that all classpath resources that match the given name
 must be obtained (internally, this essentially happens through a call to
@@ -655,13 +625,11 @@ Ant-style patterns with `classpath:` resources are not guaranteed to find matchi
 resources if the root package to search is available in multiple class path locations.
 Consider the following example of a resource location:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 com/mycompany/package1/service-context.xml
 ----
-====
 
 Now consider an Ant-style path that someone might use to try to find that file:
 
@@ -695,7 +663,6 @@ For backwards compatibility (historical) reasons however, this changes when the
 to treat all location paths as relative, whether they start with a leading slash or not.
 In practice, this means the following examples are equivalent:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -709,12 +676,10 @@ In practice, this means the following examples are equivalent:
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("/conf/context.xml");
 ----
-====
 
 The following examples are also equivalent (even though it would make sense for them to be different, as one
 case is relative and the other absolute):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -728,14 +693,12 @@ case is relative and the other absolute):
 	FileSystemXmlApplicationContext ctx = ...;
 	ctx.getResource("/some/resource/path/myTemplate.txt");
 ----
-====
 
 In practice, if you need true absolute filesystem paths, you should avoid using
 absolute paths with `FileSystemResource` or `FileSystemXmlApplicationContext` and
 force the use of a `UrlResource` by using the `file:` URL prefix. The following examples
 show how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -750,4 +713,3 @@ show how to do so:
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("file:///conf/context.xml");
 ----
-====

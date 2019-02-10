@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,12 @@ final class CompositeLog implements Log {
 	}
 
 	private static Log initLogger(List<Log> loggers, Predicate<Log> predicate) {
-		return loggers.stream().filter(predicate).findFirst().orElse(NO_OP_LOG);
+		for (Log logger : loggers) {
+			if (predicate.test(logger)) {
+				return logger;
+			}
+		}
+		return NO_OP_LOG;
 	}
 
 
@@ -114,7 +119,7 @@ final class CompositeLog implements Log {
 
 	@Override
 	public void error(Object message, Throwable ex) {
-		this.errorLogger.error(message);
+		this.errorLogger.error(message, ex);
 	}
 
 	@Override

@@ -541,7 +541,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
 				SessionImplementor sessionImpl = (SessionImplementor) session;
-				ConnectionHolder conHolder = new ConnectionHolder(sessionImpl::connection);
+				// The following needs to use a lambda expression instead of a method reference
+				// for compatibility with Hibernate ORM <5.2 where connection() is defined on
+				// SessionImplementor itself instead of on SharedSessionContractImplementor...
+				ConnectionHolder conHolder = new ConnectionHolder(() -> sessionImpl.connection());
 				if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(timeout);
 				}

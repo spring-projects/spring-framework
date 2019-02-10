@@ -40,7 +40,6 @@ The following example of the Java configuration registers and initializes
 the `DispatcherServlet`, which is auto-detected by the Servlet container
 (see <<mvc-container-config>>):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -62,7 +61,6 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 		}
 	}
 ----
-====
 
 NOTE: In addition to using the ServletContext API directly, you can also extend
 `AbstractAnnotationConfigDispatcherServletInitializer` and override specific methods
@@ -70,7 +68,6 @@ NOTE: In addition to using the ServletContext API directly, you can also extend
 
 The following example of `web.xml` configuration registers and initializes the `DispatcherServlet`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -102,7 +99,6 @@ The following example of `web.xml` configuration registers and initializes the `
 
 </web-app>
 ----
-====
 
 NOTE: Spring Boot follows a different initialization sequence. Rather than hooking into
 the lifecycle of the Servlet container, Spring Boot uses Spring configuration to
@@ -139,7 +135,6 @@ image::images/mvc-context-hierarchy.png[]
 
 The following example configures a `WebApplicationContext` hierarchy:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -161,14 +156,12 @@ The following example configures a `WebApplicationContext` hierarchy:
 		}
 	}
 ----
-====
 
 TIP: If an application context hierarchy is not required, applications can return all
 configuration through `getRootConfigClasses()` and `null` from `getServletConfigClasses()`.
 
 The following example shows the `web.xml` equivalent:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -200,7 +193,6 @@ The following example shows the `web.xml` equivalent:
 
 </web-app>
 ----
-====
 
 TIP: If an application context hierarchy is not required, applications may configure a
 "`root`" context only and leave the `contextConfigLocation` Servlet parameter empty.
@@ -213,10 +205,10 @@ TIP: If an application context hierarchy is not required, applications may confi
 
 The `DispatcherServlet` delegates to special beans to process requests and render the
 appropriate responses. By "`special beans`" we mean Spring-managed `Object` instances that
-implement WebFlux framework contracts. Those usually come with built-in contracts, but
+implement framework contracts. Those usually come with built-in contracts, but
 you can customize their properties and extend or replace them.
 
-The following table lists the special beans detected by the `DispatcherHandler`:
+The following table lists the special beans detected by the `DispatcherServlet`:
 
 [[mvc-webappctx-special-beans-tbl]]
 [cols="1,2", options="header"]
@@ -229,9 +221,9 @@ The following table lists the special beans detected by the `DispatcherHandler`:
   The mapping is based on some criteria, the details of which vary by `HandlerMapping`
   implementation.
 
-  The two main `HandlerMapping` implementations are `RequestMappingHandlerMapping`( which
-  supports `@RequestMapping` annotated methods) and `SimpleUrlHandlerMapping` (which
-  maintains explicit registrations of URI path patterns to handlers).
+  The two main `HandlerMapping` implementations are `RequestMappingHandlerMapping`
+  (which supports `@RequestMapping` annotated methods) and `SimpleUrlHandlerMapping`
+  (which maintains explicit registrations of URI path patterns to handlers).
 
 | `HandlerAdapter`
 | Help the `DispatcherServlet` to invoke a handler mapped to a request, regardless of
@@ -293,7 +285,6 @@ In a Servlet 3.0+ environment, you have the option of configuring the Servlet co
 programmatically as an alternative or in combination with a `web.xml` file. The following
 example registers a `DispatcherServlet`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -312,7 +303,6 @@ example registers a `DispatcherServlet`:
 		}
 	}
 ----
-====
 
 `WebApplicationInitializer` is an interface provided by Spring MVC that ensures your
 implementation is detected and automatically used to initialize any Servlet 3 container.
@@ -324,7 +314,6 @@ location of the `DispatcherServlet` configuration.
 This is recommended for applications that use Java-based Spring configuration, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -346,12 +335,10 @@ following example shows:
 		}
 	}
 ----
-====
 
 If you use XML-based Spring configuration, you should extend directly from
 `AbstractDispatcherServletInitializer`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -375,13 +362,11 @@ If you use XML-based Spring configuration, you should extend directly from
 		}
 	}
 ----
-====
 
 `AbstractDispatcherServletInitializer` also provides a convenient way to add `Filter`
 instances and have them be automatically mapped to the `DispatcherServlet`, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -396,7 +381,6 @@ following example shows:
 		}
 	}
 ----
-====
 
 Each filter is added with a default name based on its concrete type and automatically
 mapped to the `DispatcherServlet`.
@@ -582,7 +566,6 @@ Servlet containers can render a default error page in HTML. To customize the def
 error page of the container, you can declare an error page mapping in `web.xml`.
 The following example shows how to do so:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -590,7 +573,6 @@ The following example shows how to do so:
 		<location>/error</location>
 	</error-page>
 ----
-====
 
 Given the preceding example, when an exception bubbles up or the response has an error status, the
 Servlet container makes an ERROR dispatch within the container to the configured URL
@@ -598,7 +580,6 @@ Servlet container makes an ERROR dispatch within the container to the configured
 to a `@Controller`, which could be implemented to return an error view name with a model
 or to render a JSON response, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -614,7 +595,6 @@ or to render a JSON response, as the following example shows:
 		}
 	}
 ----
-====
 
 TIP: The Servlet API does not provide a way to create error page mappings in Java. You can,
 however, use both a `WebApplicationInitializer` and a minimal `web.xml`.
@@ -813,7 +793,6 @@ This locale resolver inspects a `Cookie` that might exist on the client to see i
 properties of this locale resolver, you can specify the name of the cookie as well as the
 maximum age. The following example defines a `CookieLocaleResolver`:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -826,7 +805,6 @@ maximum age. The following example defines a `CookieLocaleResolver`:
 
 	</bean>
 ----
-====
 
 The following table describes the properties `CookieLocaleResolver`:
 
@@ -878,7 +856,6 @@ that contain a parameter named `siteLanguage` now changes the locale. So, for ex
 a request for the URL, `http://www.sf.net/home.view?siteLanguage=nl`, changes the site
 language to Dutch. The following example shows how to intercept the locale:
 
-====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -902,7 +879,6 @@ language to Dutch. The following example shows how to intercept the locale:
 		</property>
 	</bean>
 ----
-====
 
 
 
@@ -931,21 +907,18 @@ The web application context automatically detects a bean with that name and uses
 When you use the `ResourceBundleThemeSource`, a theme is defined in a simple properties
 file. The properties file lists the resources that make up the theme, as the following example shows:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 styleSheet=/themes/cool/style.css
 background=/themes/cool/img/coolBg.jpg
 ----
-====
 
 The keys of the properties are the names that refer to the themed elements from view
 code. For a JSP, you typically do this using the `spring:theme` custom tag, which is
 very similar to the `spring:message` tag. The following JSP fragment uses the theme
 defined in the previous example to customize the look and feel:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -959,7 +932,6 @@ defined in the previous example to customize the look and feel:
 		</body>
 	</html>
 ----
-====
 
 By default, the `ResourceBundleThemeSource` uses an empty base name prefix. As a result,
 the properties files are loaded from the root of the classpath. Thus, you would put the
@@ -1037,7 +1009,6 @@ To do so:
 
 The following example shows how to set a `MultipartConfigElement` on the Servlet registration:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1054,7 +1025,6 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 
 	}
 ----
-====
 
 Once the Servlet 3.0 configuration is in place, you can add a bean of type
 `StandardServletMultipartResolver` with a name of `multipartResolver`.
@@ -1087,7 +1057,6 @@ through the `enableLoggingRequestDetails` property on `DispatcherServlet`.
 
 The following example shows how to do so by using Java configuration:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1116,7 +1085,6 @@ public class MyInitializer
 
 }
 ----
-====
 
 
 
@@ -1213,7 +1181,6 @@ exception handling, and more. Annotated controllers have flexible method signatu
 do not have to extend base classes nor implement specific interfaces.
 The following example shows a controller defined by annotations:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1227,7 +1194,6 @@ The following example shows a controller defined by annotations:
 		}
 	}
 ----
-====
 
 In the preceding example, the method accepts a `Model` and returns a view name as a `String`,
 but many other options exist and are explained later in this chapter.
@@ -1250,7 +1216,6 @@ annotated class, indicating its role as a web component.
 To enable auto-detection of such `@Controller` beans, you can add component scanning to
 your Java configuration, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1261,11 +1226,9 @@ your Java configuration, as the following example shows:
 		// ...
 	}
 ----
-====
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1286,7 +1249,6 @@ The following example shows the XML configuration equivalent of the preceding ex
 
 	</beans>
 ----
-====
 
 `@RestController` is a <<core.adoc#beans-meta-annotations,composed annotation>> that is
 itself meta-annotated with `@Controller` and `@ResponseBody` to indicate a controller whose
@@ -1332,7 +1294,6 @@ using `@RequestMapping`, which, by default, matches to all HTTP methods. At the 
 
 The following example has type and method level mappings:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1352,14 +1313,13 @@ The following example has type and method level mappings:
 		}
 	}
 ----
-====
 
 
 [[mvc-ann-requestmapping-uri-templates]]
 ==== URI patterns
 [.small]#<<web-reactive.adoc#webflux-ann-requestmapping-uri-templates,Same as in Spring WebFlux>>#
 
-You can map requests by using the following glob patterns and wildcards:
+You can map requests by using the following global patterns and wildcards:
 
 * `?` matches one character
 * `*` matches zero or more characters within a path segment
@@ -1368,7 +1328,6 @@ You can map requests by using the following glob patterns and wildcards:
 You can also declare URI variables and access their values with `@PathVariable`,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1377,11 +1336,9 @@ as the following example shows:
 		// ...
 	}
 ----
-====
 
 You can declare URI variables at the class and method levels, as the following example shows:
 
-====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1395,7 +1352,6 @@ public class OwnerController {
 	}
 }
 ----
-====
 
 URI variables are automatically converted to the appropriate type, or `TypeMismatchException`
 is raised. Simple types (`int`, `long`, `Date`, and so on) are supported by default and you can
@@ -1410,7 +1366,6 @@ The syntax `{varName:regex}` declares a URI variable with a regular expression t
 syntax of `{varName:regex}`. For example, given URL `"/spring-web-3.0.5 .jar"`, the following method
 extracts the name, version, and file extension:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1419,7 +1374,6 @@ extracts the name, version, and file extension:
 		// ...
 	}
 ----
-====
 
 URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
 by using `PropertyPlaceHolderConfigurer` against local, system, environment, and other property
@@ -1439,10 +1393,10 @@ When multiple patterns match a URL, they must be compared to find the best match
 by using `AntPathMatcher.getPatternComparator(String path)`, which looks for patterns that are more
 specific.
 
-A pattern is less specific if it has a lower count of URI variables and single wildcards
-counted as 1 and double wildcards counted as 2. Given an equal score, the longer pattern is
-chosen. Given the same score and length, the pattern with more URI variables than wildcards
-is chosen.
+A pattern is less specific if it has a lower count of URI variables (counted as 1), single
+wildcards (counted as 1), and double wildcards (counted as 2). Given an equal score, the
+longer pattern is chosen. Given the same score and length, the pattern with more URI variables
+than wildcards is chosen.
 
 The default mapping pattern (`/{asterisk}{asterisk}`) is excluded from scoring and always
 sorted last. Also, prefix patterns (such as `/public/{asterisk}{asterisk}`) are considered less
@@ -1519,7 +1473,6 @@ recommendations related to RFD.
 You can narrow the request mapping based on the `Content-Type` of the request,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1529,7 +1482,7 @@ as the following example shows:
 	}
 ----
 <1> Using a `consumes` attribute to narrow the mapping by the content type.
-====
+
 
 The `consumes` attribute also supports negation expressions -- for example, `!text/plain` means any
 content type other than `text/plain`.
@@ -1549,7 +1502,6 @@ TIP: `MediaType` provides constants for commonly used media types, such as
 You can narrow the request mapping based on the `Accept` request header and the list of
 content types that a controller method produces, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1560,7 +1512,7 @@ content types that a controller method produces, as the following example shows:
 	}
 ----
 <1> Using a `produces` attribute to narrow the mapping by the content type.
-====
+
 
 The media type can specify a character set. Negated expressions are supported -- for example,
 `!text/plain` means any content type other than "text/plain".
@@ -1586,7 +1538,6 @@ You can narrow request mappings based on request parameter conditions. You can t
 presence of a request parameter (`myParam`), for the absence of one (`!myParam`), or for a
 specific value (`myParam=myValue`). The following example shows how to test for a specific value:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1596,11 +1547,10 @@ specific value (`myParam=myValue`). The following example shows how to test for 
 	}
 ----
 <1> Testing whether `myParam` equals `myValue`.
-====
+
 
 You can also use the same with request header conditions, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1610,7 +1560,7 @@ You can also use the same with request header conditions, as the following examp
 	}
 ----
 <1> Testing whether `myHeader` equals `myValue`.
-====
+
 
 TIP: You can match `Content-Type` and `Accept` with the headers condition, but it is better to use
 <<mvc-ann-requestmapping-consumes,consumes>> and <<mvc-ann-requestmapping-produces,produces>>
@@ -1672,7 +1622,6 @@ You can programmatically register handler methods, which you can use for dynamic
 registrations or for advanced cases, such as different instances of the same handler
 under different URLs. The following example registers a handler method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1698,7 +1647,7 @@ public class MyConfig {
 <2> Prepare the request mapping meta data.
 <3> Get the handler method.
 <4> Add the registration.
-====
+
 
 
 
@@ -1980,7 +1929,6 @@ method must use a URI variable to mask that variable content and ensure the requ
 be matched successfully independent of matrix variable order and presence.
 The following example uses a matrix variable:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -1993,13 +1941,11 @@ The following example uses a matrix variable:
 		// q == 11
 	}
 ----
-====
 
 Given that all path segments may contain matrix variables, you may sometimes need to
 disambiguate which path variable the matrix variable is expected to be in.
 The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2014,12 +1960,10 @@ The following example shows how to do so:
 		// q2 == 22
 	}
 ----
-====
 
 A matrix variable may be defined as optional and a default value specified, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2031,11 +1975,9 @@ following example shows:
 		// q == 1
 	}
 ----
-====
 
 To get all matrix variables, you can use a `MultiValueMap`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2050,7 +1992,6 @@ To get all matrix variables, you can use a `MultiValueMap`, as the following exa
 		// petMatrixVars: ["q" : 22, "s" : 23]
 	}
 ----
-====
 
 Note that you need to enable the use of matrix variables. In the MVC Java configuration,
 you need to set a `UrlPathHelper` with `removeSemicolonContent=false` through
@@ -2067,7 +2008,6 @@ query parameters or form data) to a method argument in a controller.
 
 The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2089,7 +2029,7 @@ The following example shows how to do so:
 	}
 ----
 <1> Using `@RequestParam` to bind `petId`.
-====
+
 
 By default, method parameters that use this annotation are required, but you can specify that
 a method parameter is optional by setting the `@RequestParam` annotation's `required` flag to
@@ -2121,7 +2061,6 @@ controller.
 
 Consider the following request, with headers:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -2132,11 +2071,9 @@ Accept-Encoding         gzip,deflate
 Accept-Charset          ISO-8859-1,utf-8;q=0.7,*;q=0.7
 Keep-Alive              300
 ----
-====
 
 The following example gets the value of the `Accept-Encoding` and `Keep-Alive` headers:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2149,7 +2086,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 ----
 <1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
-====
+
 
 If the target method parameter type is not
 `String`, type conversion is automatically applied. See <<mvc-ann-typeconversion>>.
@@ -2173,17 +2110,14 @@ in a controller.
 
 Consider a request with the following cookie:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
 JSESSIONID=415A4AC178C59DACE0B2C9CA727CDD84
 ----
-====
 
 The following example shows how to get the cookie value:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2193,7 +2127,7 @@ The following example shows how to get the cookie value:
 	}
 ----
 <1> Get the value of the `JSESSIONID` cookie.
-====
+
 
 if the target method parameter type is not
 `String`, type conversion is applied automatically. See <<mvc-ann-typeconversion>>.
@@ -2209,7 +2143,6 @@ values from HTTP Servlet request parameters whose names match to field names. Th
 referred to as data binding, and it saves you from having to deal with parsing and
 converting individual query parameters and form fields. The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2217,7 +2150,7 @@ converting individual query parameters and form fields. The following example sh
 	public String processSubmit(@ModelAttribute Pet pet) { } <1>
 ----
 <1> Bind an instance of `Pet`.
-====
+
 
 The `Pet` instance above is resolved as follows:
 
@@ -2235,7 +2168,6 @@ with a URI path variable convention. In the following example, the model attribu
 `account`, matches the URI path variable, `account`, and the `Account` is loaded by passing
 the `String` account number through a registered `Converter<String, Account>`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2244,7 +2176,6 @@ the `String` account number through a registered `Converter<String, Account>`:
 		// ...
 	}
 ----
-====
 
 After the model attribute instance is obtained, data binding is applied. The
 `WebDataBinder` class matches Servlet request parameter names (query parameters and form
@@ -2257,7 +2188,6 @@ Data binding can result in errors. By default, a `BindException` is raised. Howe
 for such errors in the controller method, you can add a `BindingResult` argument immediately next
 to the `@ModelAttribute`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2270,13 +2200,12 @@ to the `@ModelAttribute`, as the following example shows:
 	}
 ----
 <1> Adding a `BindingResult` next to the `@ModelAttribute`.
-====
+
 
 In some cases, you may want access to a model attribute without data binding. For such
 cases, you can inject the `Model` into the controller and access it directly or,
 alternatively, set `@ModelAttribute(binding=false)`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2291,20 +2220,19 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 	}
 
 	@PostMapping("update")
-	public String update(@Valid AccountUpdateForm form, BindingResult result,
+	public String update(@Valid AccountForm form, BindingResult result,
 			@ModelAttribute(binding=false) Account account) { <1>
 		// ...
 	}
 ----
 <1> Setting `@ModelAttribute(binding=false)`.
-====
+
 
 You can automatically apply validation after data binding by adding the
-`javax.validation.Valid` annotation or Spring's `@Validated` annotation (ee
+`javax.validation.Valid` annotation or Spring's `@Validated` annotation (
 <<core.adoc#validation-beanvalidation, Bean validation>> and
 <<core.adoc#validation, Spring validation>>). The following example shows how to do so:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2317,7 +2245,7 @@ You can automatically apply validation after data binding by adding the
 	}
 ----
 <1> Validate the `Pet` instance.
-====
+
 
 Note that using `@ModelAttribute` is optional (for example, to set its attributes).
 By default, any argument that is not a simple value type (as determined by
@@ -2338,7 +2266,6 @@ requests to access.
 
 The following example uses the `@SessionAttributes` annotation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2349,14 +2276,13 @@ The following example uses the `@SessionAttributes` annotation:
 	}
 ----
 <1> Using the `@SessionAttributes` annotation.
-====
+
 
 On the first request, when a model attribute with the name, `pet`, is added to the model,
 it is automatically promoted to and saved in the HTTP Servlet session. It remains there
 until another controller method uses a `SessionStatus` method argument to clear the
 storage, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2379,7 +2305,7 @@ storage, as the following example shows:
 ----
 <1> Storing the `Pet` value in the Servlet session.
 <2> Clearing the `Pet` value from the Servlet session.
-====
+
 
 
 [[mvc-ann-sessionattribute]]
@@ -2391,7 +2317,6 @@ If you need access to pre-existing session attributes that are managed globally
 you can use the `@SessionAttribute` annotation on a method parameter,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2401,7 +2326,7 @@ as the following example shows:
 	}
 ----
 <1> Using a `@SessionAttribute` annotation.
-====
+
 
 For use cases that require adding or removing session attributes, consider injecting
 `org.springframework.web.context.request.WebRequest` or
@@ -2420,7 +2345,6 @@ Similar to `@SessionAttribute`, you can use the `@RequestAttribute` annotations 
 access pre-existing request attributes created earlier (for example, by a Servlet `Filter`
 or `HandlerInterceptor`):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2430,7 +2354,7 @@ or `HandlerInterceptor`):
 	}
 ----
 <1> Using the `@RequestAttribute` annotation.
-====
+
 
 
 [[mvc-redirecting-passing-data]]
@@ -2458,10 +2382,9 @@ Java configuration keep this flag set to `false`, to maintain backwards compatib
 However, for new applications, we recommend setting it to `true`.
 
 Note that URI template variables from the present request are automatically made
-available when expanding a redirect URL, and you need explicitly add them
+available when expanding a redirect URL, and you don't need to explicitly add them
 through `Model` or `RedirectAttributes`. The following example shows how to define a redirect:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2471,7 +2394,6 @@ through `Model` or `RedirectAttributes`. The following example shows how to defi
 		return "redirect:files/{path}";
 	}
 ----
-====
 
 Another way of passing data to the redirect target is by using flash attributes. Unlike
 other redirect attributes, flash attributes are saved in the HTTP session (and, hence, do
@@ -2533,7 +2455,6 @@ requests with `multipart/form-data` is parsed and accessible as regular request
 parameters. The following example accesses one regular form field and one uploaded
 file:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2553,7 +2474,6 @@ public class FileUploadController {
 	}
 }
 ----
-====
 
 Declaring the argument type as a `List<MultipartFile>` allows for resolving multiple
 files for the same parameter name.
@@ -2570,7 +2490,6 @@ You can also use multipart content as part of data binding to a
 and file from the preceding example could be fields on a form object,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2597,12 +2516,10 @@ public class FileUploadController {
 	}
 }
 ----
-====
 
 Multipart requests can also be submitted from non-browser clients in a RESTful service
 scenario. The following example shows a file with JSON:
 
-====
 [literal]
 [subs="verbatim,quotes"]
 ----
@@ -2638,7 +2555,6 @@ public String handle(**@RequestPart("meta-data") MetaData metadata,
 	// ...
 }
 ----
-====
 
 You can use `@RequestPart` in combination with `javax.validation.Valid` or use Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
@@ -2647,7 +2563,6 @@ into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation erro
 within the controller through an `Errors` or `BindingResult` argument,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2657,7 +2572,6 @@ public String handle(**@Valid** @RequestPart("meta-data") MetaData metadata,
 	// ...
 }
 ----
-====
 
 
 [[mvc-ann-requestbody]]
@@ -2668,7 +2582,6 @@ You can use the `@RequestBody` annotation to have the request body read and dese
 `Object` through an <<integration.adoc#rest-message-conversion,`HttpMessageConverter`>>.
 The following example uses a `@RequestBody` argument:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2677,7 +2590,6 @@ The following example uses a `@RequestBody` argument:
 		// ...
 	}
 ----
-====
 
 You can use the <<mvc-config-message-converters>> option of the <<mvc-config>> to
 configure or customize message conversion.
@@ -2689,7 +2601,6 @@ into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation erro
 within the controller through an `Errors` or `BindingResult` argument,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2698,7 +2609,6 @@ as the following example shows:
 		// ...
 	}
 ----
-====
 
 
 [[mvc-ann-httpentity]]
@@ -2708,7 +2618,6 @@ as the following example shows:
 `HttpEntity` is more or less identical to using <<mvc-ann-requestbody>> but is based on a
 container object that exposes request headers and body. The following listing shows an example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2717,7 +2626,6 @@ container object that exposes request headers and body. The following listing sh
 		// ...
 	}
 ----
-====
 
 
 [[mvc-ann-responsebody]]
@@ -2728,7 +2636,6 @@ You can use the `@ResponseBody` annotation on a method to have the return serial
 response body through an
 <<integration.adoc#rest-message-conversion,HttpMessageConverter>>. The following listing shows an example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2738,7 +2645,6 @@ response body through an
 		// ...
 	}
 ----
-====
 
 `@ResponseBody` is also supported at the class level, in which case it is inherited by
 all controller methods. This is the effect of `@RestController`, which is nothing more
@@ -2760,7 +2666,6 @@ See <<mvc-ann-jackson>> for details.
 
 `ResponseEntity` is like <<mvc-ann-responsebody>> but with status and headers. For example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2771,7 +2676,6 @@ See <<mvc-ann-jackson>> for details.
 		return ResponseEntity.ok().eTag(etag).build(body);
 	}
 ----
-====
 
 Spring MVC supports using a single value <<mvc-ann-async-reactive-types,reactive type>>
 to produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive
@@ -2784,7 +2688,7 @@ types for the body.
 Spring offers support for the Jackson JSON library.
 
 [[mvc-ann-jsonview]]
-===== Jackson Serialization Views
+===== JSON Views
 [.small]#<<web-reactive.adoc#webflux-ann-jsonview,Same as in Spring WebFlux>>#
 
 Spring MVC provides built-in support for
@@ -2793,7 +2697,6 @@ which allow rendering only a subset of all fields in an `Object`. To use it with
 `@ResponseBody` or `ResponseEntity` controller methods, you can use Jackson's
 `@JsonView` annotation to activate a serialization view class, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2834,7 +2737,6 @@ which allow rendering only a subset of all fields in an `Object`. To use it with
 		}
 	}
 ----
-====
 
 NOTE: `@JsonView` allows an array of view classes, but you can specify only one per
 controller method. If you need to activate multiple views, you can use a composite interface.
@@ -2842,7 +2744,6 @@ controller method. If you need to activate multiple views, you can use a composi
 For controllers that rely on view resolution, you can add the serialization view class
 to the model, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2857,7 +2758,6 @@ to the model, as the following example shows:
 		}
 	}
 ----
-====
 
 
 
@@ -2886,7 +2786,6 @@ related to the request body.
 
 The following example shows a `@ModelAttribute` method:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2896,11 +2795,9 @@ The following example shows a `@ModelAttribute` method:
 		// add more ...
 	}
 ----
-====
 
 The following example adds only one attribute:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2909,7 +2806,6 @@ The following example adds only one attribute:
 		return accountRepository.findAccount(number);
 	}
 ----
-====
 
 NOTE: When a name is not explicitly specified, a default name is chosen based on the `Object`
 type, as explained in the javadoc for {api-spring-framework}/core/Conventions.html[`Conventions`].
@@ -2922,7 +2818,6 @@ attribute. This is typically not required, as it is the default behavior in HTML
 unless the return value is a `String` that would otherwise be interpreted as a view name.
 `@ModelAttribute` can also customize the model attribute name, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2933,7 +2828,6 @@ unless the return value is a `String` that would otherwise be interpreted as a v
 		return account;
 	}
 ----
-====
 
 
 
@@ -2959,7 +2853,6 @@ do, except for `@ModelAttribute` (command object) arguments. Typically, they are
 with a `WebDataBinder` argument (for registrations) and a `void` return value.
 The following listing shows an example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2977,13 +2870,12 @@ The following listing shows an example:
 	}
 ----
 <1> Defining an `@InitBinder` method.
-====
+
 
 Alternatively, when you use a `Formatter`-based setup through a shared
 `FormattingConversionService`, you can re-use the same approach and register
 controller-specific `Formatter` implementations, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -2999,7 +2891,7 @@ controller-specific `Formatter` implementations, as the following example shows:
 	}
 ----
 <1> Defining an `@InitBinder` method on a custom formatter.
-====
+
 
 
 
@@ -3010,7 +2902,6 @@ controller-specific `Formatter` implementations, as the following example shows:
 `@Controller` and <<mvc-ann-controller-advice,@ControllerAdvice>> classes can have
 `@ExceptionHandler` methods to handle exceptions from controller methods, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3025,7 +2916,6 @@ controller-specific `Formatter` implementations, as the following example shows:
 		}
 	}
 ----
-====
 
 The exception may match against a top-level exception being propagated (that is, a direct
 `IOException` being thrown) or against the immediate cause within a top-level wrapper exception
@@ -3039,7 +2929,6 @@ used to sort exceptions based on their depth from the thrown exception type.
 Alternatively, the annotation declaration may narrow the exception types to match,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3048,12 +2937,10 @@ as the following example shows:
 		// ...
 	}
 ----
-====
 
 You can even use a list of specific exception types with a very generic argument signature,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3062,7 +2949,6 @@ as the following example shows:
 		// ...
 	}
 ----
-====
 
 [NOTE]
 ====
@@ -3274,7 +3160,6 @@ By default, `@ControllerAdvice` methods apply to every request (that is, all con
 you can narrow that down to a subset of controllers by using attributes on the annotation,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3290,7 +3175,6 @@ as the following example shows:
 	@ControllerAdvice(assignableTypes = {ControllerInterface.class, AbstractController.class})
 	public class ExampleAdvice3 {}
 ----
-====
 
 The selectors in the preceding example are evaluated at runtime and may negatively impact
 performance if used extensively. See the
@@ -3316,7 +3200,6 @@ include::web-uris.adoc[leveloffset=+2]
 You can use `ServletUriComponentsBuilder` to create URIs relative to the current request,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3329,11 +3212,9 @@ as the following example shows:
 			.expand("123")
 			.encode();
 ----
-====
 
 You can create URIs relative to the context path, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3342,12 +3223,10 @@ You can create URIs relative to the context path, as the following example shows
 	ServletUriComponentsBuilder ucb = ServletUriComponentsBuilder.fromContextPath(request)
 			.path("/accounts").build()
 ----
-====
 
 You can create URIs relative to a Servlet (for example, `/main/{asterisk}`),
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3356,7 +3235,6 @@ as the following example shows:
 	ServletUriComponentsBuilder ucb = ServletUriComponentsBuilder.fromServletMapping(request)
 			.path("/accounts").build()
 ----
-====
 
 NOTE: As of 5.1, `ServletUriComponentsBuilder` ignores information from the `Forwarded` and
 `X-Forwarded-*` headers, which specify the client-originated address. Consider using the
@@ -3371,7 +3249,6 @@ such headers.
 Spring MVC provides a mechanism to prepare links to controller methods. For example,
 the following MVC controller allows for link creation:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3385,11 +3262,9 @@ the following MVC controller allows for link creation:
 		}
 	}
 ----
-====
 
 You can prepare a link by referring to the method by name, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3398,7 +3273,6 @@ You can prepare a link by referring to the method by name, as the following exam
 
 	URI uri = uriComponents.encode().toUri();
 ----
-====
 
 In the preceding example, we provide actual method argument values (in this case, the long value: `21`)
 to be used as a path variable and inserted into the URL. Furthermore, we provide the
@@ -3411,7 +3285,6 @@ There are additional ways to use `MvcUriComponentsBuilder`. For example, you can
 akin to mock testing through proxies to avoid referring to the controller method by name, as the following example shows
 (the example assumes static import of `MvcUriComponentsBuilder.on`):
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3420,7 +3293,6 @@ akin to mock testing through proxies to avoid referring to the controller method
 
 	URI uri = uriComponents.encode().toUri();
 ----
-====
 
 NOTE: Controller method signatures are limited in their design when they are supposed to be usable for
 link creation with `fromMethodCall`. Aside from needing a proper parameter signature,
@@ -3442,7 +3314,6 @@ For such cases, you can use the static `fromXxx` overloaded methods that accept 
 with a base URL and then use the instance-based `withXxx` methods. For example, the
 following listing uses `withMethodCall`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3452,7 +3323,6 @@ following listing uses `withMethodCall`:
 
 	URI uri = uriComponents.encode().toUri();
 ----
-====
 
 NOTE: As of 5.1, `MvcUriComponentsBuilder` ignores information from the `Forwarded` and
 `X-Forwarded-*` headers, which specify the client-originated address. Consider using the
@@ -3469,7 +3339,6 @@ by referring to the implicitly or explicitly assigned name for each request mapp
 
 Consider the following example:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3480,11 +3349,9 @@ Consider the following example:
 		public HttpEntity getAddress(@PathVariable String country) { ... }
 	}
 ----
-====
 
 Given the preceding controller, you can prepare a link from a JSP, as follows:
 
-====
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3492,7 +3359,6 @@ Given the preceding controller, you can prepare a link from a JSP, as follows:
 ...
 <a href="${s:mvcUrl('PAC#getAddress').arg(0,'US').buildAndExpand('123')}">Get Address</a>
 ----
-====
 
 The preceding example relies on the `mvcUrl` function declared in the Spring tag library
 (that is, META-INF/spring.tld), but it is easy to define your own function or prepare a
@@ -3533,7 +3399,6 @@ Once the asynchronous request processing feature is
 wrap any supported controller method return value with `DeferredResult`, as the following
 example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3548,7 +3413,6 @@ example shows:
 	// From some other thread...
 	deferredResult.setResult(data);
 ----
-====
 
 The controller can produce the return value asynchronously, from a different thread -- for
 example, in response to an external event (JMS message), a scheduled task, or other event.
@@ -3562,7 +3426,6 @@ example, in response to an external event (JMS message), a scheduled task, or ot
 A controller can wrap any supported return value with `java.util.concurrent.Callable`,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3578,7 +3441,6 @@ as the following example shows:
 
 	}
 ----
-====
 
 The return value can then be obtained by running the the given task through the
 <<mvc-ann-async-configuration-spring-mvc,configured>> `TaskExecutor`.
@@ -3711,7 +3573,6 @@ each object is serialized with an
 <<integration.adoc#rest-message-conversion,`HttpMessageConverter`>> and written to the
 response, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3731,7 +3592,6 @@ response, as the following example shows:
 	// and done at some point
 	emitter.complete();
 ----
-====
 
 You can also use `ResponseBodyEmitter` as the body in a `ResponseEntity`, letting you
 customize the status and headers of the response.
@@ -3752,7 +3612,6 @@ http://www.w3.org/TR/eventsource/[Server-Sent Events], where events sent from th
 are formatted according to the W3C SSE specification. To produce an SSE
 stream from a controller, return `SseEmitter`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3772,7 +3631,6 @@ stream from a controller, return `SseEmitter`, as the following example shows:
 	// and done at some point
 	emitter.complete();
 ----
-====
 
 While SSE is the main option for streaming into browsers, note that Internet Explorer
 does not support Server-Sent Events. Consider using Spring's
@@ -3790,7 +3648,6 @@ Sometimes, it is useful to bypass message conversion and stream directly to the 
 `OutputStream` (for example, for a file download). You can use the `StreamingResponseBody`
 return value type to do so, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3804,7 +3661,6 @@ return value type to do so, as the following example shows:
 		};
 	}
 ----
-====
 
 You can use `StreamingResponseBody` as the body in a `ResponseEntity` to
 customize the status and headers of the response.
@@ -3965,7 +3821,6 @@ While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all 
 directives for the `Cache-Control` response header, the `CacheControl` type takes a
 use case-oriented approach that focuses on the common scenarios:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -3980,7 +3835,6 @@ use case-oriented approach that focuses on the common scenarios:
 	// "Cache-Control: max-age=864000, public, no-transform"
 	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
 ----
-====
 
 `WebContentGenerator` also accept a simpler `cachePeriod` property (defined in seconds) that
 works as follows:
@@ -4001,7 +3855,6 @@ Controllers can add explicit support for HTTP caching. We recommended doing so, 
 against conditional request headers. A controller can add an `ETag` header and `Cache-Control`
 settings to a `ResponseEntity`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4018,7 +3871,6 @@ settings to a `ResponseEntity`, as the following example shows:
 				.body(book);
 	}
 ----
-====
 
 The preceding example sends an 304 (NOT_MODIFIED) response with an empty body if the comparison
 to the conditional request headers indicates that the content has not changed. Otherwise, the
@@ -4027,7 +3879,6 @@ to the conditional request headers indicates that the content has not changed. O
 You can also make the check against conditional request headers in the controller,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4048,7 +3899,7 @@ as the following example shows:
 <1> Application-specific calculation.
 <2> The response has been set to 304 (NOT_MODIFIED) -- no further processing.
 <3> Continue with the request processing.
-====
+
 
 There are three variants for checking conditional requests against `eTag` values, `lastModified`
 values, or both. For conditional `GET` and `HEAD` requests, you can set the response to
@@ -4100,7 +3951,6 @@ and <<mvc-servlet-config>>.
 In Java configuration, you can use the `@EnableWebMvc` annotation to enable MVC
 configuration, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4109,12 +3959,10 @@ configuration, as the following example shows:
 	public class WebConfig {
 	}
 ----
-====
 
 In XML configuration, you can use the `<mvc:annotation-driven>` element to enable MVC
 configuration, as the following example shows:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4132,7 +3980,6 @@ configuration, as the following example shows:
 
 	</beans>
 ----
-====
 
 The preceding example registers a number of Spring MVC
 <<mvc-servlet-special-bean-types,infrastructure beans>> and adapts to dependencies
@@ -4147,7 +3994,6 @@ available on the classpath (for example, payload converters for JSON, XML, and o
 In Java configuration, you can implement the `WebMvcConfigurer` interface, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4158,7 +4004,6 @@ following example shows:
 		// Implement configuration methods...
 	}
 ----
-====
 
 In XML, you can check attributes and sub-elements of `<mvc:annotation-driven/>`. You can
 view the http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use
@@ -4178,7 +4023,6 @@ formatting library is also installed if Joda-Time is present on the classpath.
 In Java configuration, you can register custom formatters and converters, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4192,11 +4036,9 @@ following example shows:
 		}
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4234,7 +4076,6 @@ The following example shows how to achieve the same configuration in XML:
 
 	</beans>
 ----
-====
 
 NOTE: See <<core.adoc#format-FormatterRegistrar-SPI,the `FormatterRegistrar` SPI>>
 and the `FormattingConversionServiceFactoryBean` for more information on when to use FormatterRegistrar implementations.
@@ -4253,7 +4094,6 @@ controller method arguments.
 In Java configuration, you can customize the global `Validator` instance, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4267,11 +4107,9 @@ following example shows:
 		}
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4289,12 +4127,10 @@ The following example shows how to achieve the same configuration in XML:
 
 	</beans>
 ----
-====
 
 Note that you can also register `Validator` implementations locally, as the following
 example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4308,7 +4144,6 @@ example shows:
 
 	}
 ----
-====
 
 TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
 mark it with `@Primary` in order to avoid conflict with the one declared in the MVC configuration.
@@ -4321,7 +4156,6 @@ mark it with `@Primary` in order to avoid conflict with the one declared in the 
 In Java configuration, you can register interceptors to apply to incoming requests, as
 the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim"]
 ----
@@ -4337,11 +4171,9 @@ the following example shows:
 		}
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -4358,7 +4190,6 @@ The following example shows how to achieve the same configuration in XML:
 		</mvc:interceptor>
 	</mvc:interceptors>
 ----
-====
 
 
 
@@ -4381,7 +4212,6 @@ more details.
 In Java configuration, you can customize requested content type resolution, as the
 following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4396,11 +4226,9 @@ following example shows:
 		}
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4415,7 +4243,6 @@ The following example shows how to achieve the same configuration in XML:
 		</property>
 	</bean>
 ----
-====
 
 
 
@@ -4432,7 +4259,6 @@ You can customize `HttpMessageConverter` in Java configuration by overriding
 The following example adds XML and Jackson JSON converters with a customized
 `ObjectMapper` instead of the default ones:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4451,7 +4277,6 @@ The following example adds XML and Jackson JSON converters with a customized
 		}
 	}
 ----
-====
 
 In the preceding example,
 {api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`]
@@ -4484,7 +4309,6 @@ Other interesting Jackson modules are available:
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4506,7 +4330,6 @@ The following example shows how to achieve the same configuration in XML:
 
 	<bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true"/>
 ----
-====
 
 
 
@@ -4519,7 +4342,6 @@ logic to execute before the view generates the response.
 
 The following example of Java configuration forwards a request for `/` to a view called `home`:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4533,18 +4355,15 @@ The following example of Java configuration forwards a request for `/` to a view
 		}
 	}
 ----
-====
 
 The following example achieves the same thing as the preceding example, but with XML, by
 using the `<mvc:view-controller>` element:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<mvc:view-controller path="/" view-name="home"/>
 ----
-====
 
 
 
@@ -4557,7 +4376,6 @@ The MVC configuration simplifies the registration of view resolvers.
 The following Java configuration example configures content negotiation view
 resolution by using JSP and Jackson as a default `View` for JSON rendering:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4572,11 +4390,9 @@ resolution by using JSP and Jackson as a default `View` for JSON rendering:
 		}
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4589,14 +4405,12 @@ The following example shows how to achieve the same configuration in XML:
 		<mvc:jsp/>
 	</mvc:view-resolvers>
 ----
-====
 
 Note, however, that FreeMarker, Tiles, Groovy Markup, and script templates also require
 configuration of the underlying view technology.
 
 The MVC namespace provides dedicated elements. The following example works with FreeMarker:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4615,12 +4429,10 @@ The MVC namespace provides dedicated elements. The following example works with 
 	</mvc:freemarker-configurer>
 
 ----
-====
 
 In Java configuration, you can add the respective `Configurer` bean,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4642,7 +4454,6 @@ as the following example shows:
 		}
 	}
 ----
-====
 
 
 
@@ -4662,7 +4473,6 @@ status code is returned.
 
 The following listing shows how to do so with Java configuration:
 
-====
 [source,java,indent=0]
 [subs="verbatim"]
 ----
@@ -4678,11 +4488,9 @@ The following listing shows how to do so with Java configuration:
 		}
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4690,7 +4498,6 @@ The following example shows how to achieve the same configuration in XML:
 		location="/public, classpath:/static/"
 		cache-period="31556926" />
 ----
-====
 
 See also
 <<mvc-caching-static-resources, HTTP caching support for static resources>>.
@@ -4707,7 +4514,6 @@ JavaScript resources used with a module loader.
 
 The following example shows how to use `VersionResourceResolver` in Java configuration:
 
-====
 [source,java,indent=0]
 [subs="verbatim"]
 ----
@@ -4724,11 +4530,9 @@ The following example shows how to use `VersionResourceResolver` in Java configu
 		}
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim"]
 ----
@@ -4743,7 +4547,6 @@ The following example shows how to achieve the same configuration in XML:
 	</mvc:resource-chain>
 </mvc:resources>
 ----
-====
 
 You can then use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
 transformers -- for example, to insert versions. The MVC configuration provides a `ResourceUrlProvider`
@@ -4780,7 +4583,6 @@ lower than that of the `DefaultServletHttpRequestHandler`, which is `Integer.MAX
 
 The following example shows how to enable the feature by using the default setup:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4794,17 +4596,14 @@ The following example shows how to enable the feature by using the default setup
 		}
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<mvc:default-servlet-handler/>
 ----
-====
 
 The caveat to overriding the `/` Servlet mapping is that the `RequestDispatcher` for the
 default Servlet must be retrieved by name rather than by path. The
@@ -4815,7 +4614,6 @@ If the default Servlet has been custom-configured with a different name, or if a
 different Servlet container is being used where the default Servlet name is unknown,
 then you must explicitly provide the default Servlet's name, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4830,17 +4628,14 @@ then you must explicitly provide the default Servlet's name, as the following ex
 
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<mvc:default-servlet-handler default-servlet-name="myCustomDefaultServlet"/>
 ----
-====
 
 
 
@@ -4854,7 +4649,6 @@ For details on the individual options, see the
 
 The following example shows how to customize path matching in Java configuration:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4886,11 +4680,9 @@ The following example shows how to customize path matching in Java configuration
 
 	}
 ----
-====
 
 The following example shows how to achieve the same configuration in XML:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4906,7 +4698,6 @@ The following example shows how to achieve the same configuration in XML:
 	<bean id="pathHelper" class="org.example.app.MyPathHelper"/>
 	<bean id="pathMatcher" class="org.example.app.MyPathMatcher"/>
 ----
-====
 
 
 
@@ -4923,7 +4714,6 @@ For advanced mode, you can remove `@EnableWebMvc` and extend directly from
 `DelegatingWebMvcConfiguration` instead of implementing `WebMvcConfigurer`,
 as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4934,7 +4724,6 @@ as the following example shows:
 
 	}
 ----
-====
 
 You can keep existing methods in `WebConfig`, but you can now also override bean declarations
 from the base class, and you can still have any number of other `WebMvcConfigurer` implementations on
@@ -4949,7 +4738,6 @@ The MVC namespace does not have an advanced mode. If you need to customize a pro
 a bean that you cannot change otherwise, you can use the `BeanPostProcessor` lifecycle
 hook of the Spring `ApplicationContext`, as the following example shows:
 
-====
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -4961,7 +4749,6 @@ hook of the Spring `ApplicationContext`, as the following example shows:
 		}
 	}
 ----
-====
 
 Note that you need to declare `MyPostProcessor` as a bean, either explicitly in XML or
 by letting it be detected through a `<component-scan/>` declaration.

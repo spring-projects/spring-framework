@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,15 +61,14 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 	 */
 	public DecoderHttpMessageReader(Decoder<T> decoder) {
 		Assert.notNull(decoder, "Decoder is required");
+		initLogger(decoder);
 		this.decoder = decoder;
 		this.mediaTypes = MediaType.asMediaTypes(decoder.getDecodableMimeTypes());
-		initLogger(decoder);
 	}
 
-	private void initLogger(Decoder<T> decoder) {
+	private static void initLogger(Decoder<?> decoder) {
 		if (decoder instanceof AbstractDecoder &&
-				decoder.getClass().getPackage().getName().startsWith("org.springframework.core.codec")) {
-
+				decoder.getClass().getName().startsWith("org.springframework.core.codec")) {
 			Log logger = HttpLogging.forLog(((AbstractDecoder) decoder).getLogger());
 			((AbstractDecoder) decoder).setLogger(logger);
 		}

@@ -264,8 +264,7 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Inserter to write the given
-	 * {@code Publisher<DataBuffer>} to the body.
+	 * Inserter to write the given {@code Publisher<DataBuffer>} to the body.
 	 * @param publisher the data buffer publisher to write
 	 * @param <T> the type of the publisher
 	 * @return the inserter to write directly to the body

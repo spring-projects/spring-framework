@@ -32,7 +32,6 @@ the following preamble at the top of your Spring XML configuration file. The tex
 following snippet references the correct schema so that the tags in the `tx` namespace
 are available to you:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -52,7 +51,6 @@ are available to you:
 ----
 <1> Declare usage of the `tx` namespace.
 <2> Specify the location (with other schema locations).
-====
 
 NOTE: Often, when you use the elements in the `tx` namespace, you are also using the
 elements from the `aop` namespace (since the declarative transaction support in Spring is
@@ -74,7 +72,6 @@ To use the elements in the `jdbc` schema, you need to have the following preambl
 top of your Spring XML configuration file. The text in the following snippet references
 the correct schema so that the elements in the `jdbc` namespace are available to you:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -92,4 +89,3 @@ the correct schema so that the elements in the `jdbc` namespace are available to
 ----
 <1> Declare usage of the `jdbc` namespace.
 <2> Specify the location (with other schema locations).
-====

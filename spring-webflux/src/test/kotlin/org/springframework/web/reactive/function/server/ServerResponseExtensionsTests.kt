@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,9 @@
 
 package org.springframework.web.reactive.function.server
 
-import com.nhaarman.mockito_kotlin.mock
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Answers
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.junit.MockitoJUnitRunner
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType.*
@@ -32,43 +28,41 @@ import org.springframework.http.MediaType.*
  *
  * @author Sebastien Deleuze
  */
-@RunWith(MockitoJUnitRunner::class)
 class ServerResponseExtensionsTests {
 
-	@Mock(answer = Answers.RETURNS_MOCKS)
-	lateinit var bodyBuilder: ServerResponse.BodyBuilder
+	val bodyBuilder = mockk<ServerResponse.BodyBuilder>(relaxed = true)
 
 
 	@Test
 	fun `BodyBuilder#body with Publisher and reified type parameters`() {
-		val body = mock<Publisher<List<Foo>>>()
+		val body = mockk<Publisher<List<Foo>>>()
 		bodyBuilder.body(body)
-		verify(bodyBuilder, times(1)).body(body, object : ParameterizedTypeReference<List<Foo>>() {})
+		verify { bodyBuilder.body(body, object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
 	fun `BodyBuilder#bodyToServerSentEvents with Publisher and reified type parameters`() {
-		val body = mock<Publisher<List<Foo>>>()
+		val body = mockk<Publisher<List<Foo>>>()
 		bodyBuilder.bodyToServerSentEvents(body)
-		verify(bodyBuilder, times(1)).contentType(TEXT_EVENT_STREAM)
+		verify { bodyBuilder.contentType(TEXT_EVENT_STREAM) }
 	}
 
 	@Test
 	fun `BodyBuilder#json`() {
 		bodyBuilder.json()
-		verify(bodyBuilder, times(1)).contentType(APPLICATION_JSON_UTF8)
+		verify { bodyBuilder.contentType(APPLICATION_JSON_UTF8) }
 	}
 
 	@Test
 	fun `BodyBuilder#xml`() {
 		bodyBuilder.xml()
-		verify(bodyBuilder, times(1)).contentType(APPLICATION_XML)
+		verify { bodyBuilder.contentType(APPLICATION_XML) }
 	}
 
 	@Test
 	fun `BodyBuilder#html`() {
 		bodyBuilder.html()
-		verify(bodyBuilder, times(1)).contentType(TEXT_HTML)
+		verify { bodyBuilder.contentType(TEXT_HTML) }
 	}
 
 	class Foo

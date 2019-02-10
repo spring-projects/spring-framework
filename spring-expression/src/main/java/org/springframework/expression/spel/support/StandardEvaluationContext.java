@@ -229,12 +229,17 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	@Override
-	public void setVariable(String name, @Nullable Object value) {
-		if (value != null) {
-			this.variables.put(name, value);
-		}
-		else {
-			this.variables.remove(name);
+	public void setVariable(@Nullable String name, @Nullable Object value) {
+		// For backwards compatibility, we ignore null names here...
+		// And since ConcurrentHashMap cannot store null values, we simply take null
+		// as a remove from the Map (with the same result from lookupVariable below).
+		if (name != null) {
+			if (value != null) {
+				this.variables.put(name, value);
+			}
+			else {
+				this.variables.remove(name);
+			}
 		}
 	}
 

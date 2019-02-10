@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,10 +116,6 @@ public final class SpringBeanContainer implements BeanContainer {
 	public <B> ContainedBean<B> getBean(
 			String name, Class<B> beanType, LifecycleOptions lifecycleOptions, BeanInstanceProducer fallbackProducer) {
 
-		if (!this.beanFactory.containsBean(name)) {
-			return getBean(beanType, lifecycleOptions, fallbackProducer);
-		}
-
 		SpringContainedBean<?> bean;
 		if (lifecycleOptions.canUseCachedReferences()) {
 			bean = this.beanCache.get(name);
@@ -169,6 +165,7 @@ public final class SpringBeanContainer implements BeanContainer {
 		try {
 			if (lifecycleOptions.useJpaCompliantCreation()) {
 				Object bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
+				this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 				this.beanFactory.applyBeanPropertyValues(bean, name);
 				bean = this.beanFactory.initializeBean(bean, name);
 				return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));

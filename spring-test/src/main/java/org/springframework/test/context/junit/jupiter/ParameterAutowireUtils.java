@@ -118,7 +118,8 @@ abstract class ParameterAutowireUtils {
 		Autowired autowired = AnnotatedElementUtils.findMergedAnnotation(annotatedParameter, Autowired.class);
 		boolean required = (autowired == null || autowired.required());
 
-		MethodParameter methodParameter = SynthesizingMethodParameter.forParameter(parameter);
+		MethodParameter methodParameter = SynthesizingMethodParameter.forExecutable(
+				parameter.getDeclaringExecutable(), parameterIndex);
 		DependencyDescriptor descriptor = new DependencyDescriptor(methodParameter, required);
 		descriptor.setContainingClass(containingClass);
 		return applicationContext.getAutowireCapableBeanFactory().resolveDependency(descriptor, null);

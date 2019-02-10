@@ -84,7 +84,7 @@ public class BeanWrapperGenericsTests {
 			fail("Should have thrown TypeMismatchException");
 		}
 		catch (TypeMismatchException ex) {
-			assertTrue(ex.getMessage().indexOf("java.lang.Integer") != -1);
+			assertTrue(ex.getMessage().contains("java.lang.Integer"));
 		}
 	}
 

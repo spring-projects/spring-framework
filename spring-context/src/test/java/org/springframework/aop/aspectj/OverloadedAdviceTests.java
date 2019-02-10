@@ -40,7 +40,7 @@ public class OverloadedAdviceTests {
 			Throwable cause = ex.getRootCause();
 			assertTrue("Should be IllegalArgumentException", cause instanceof IllegalArgumentException);
 			assertTrue("invalidAbsoluteTypeName should be detected by AJ",
-					cause.getMessage().indexOf("invalidAbsoluteTypeName") != -1);
+					cause.getMessage().contains("invalidAbsoluteTypeName"));
 		}
 	}
 
@@ -53,7 +53,7 @@ public class OverloadedAdviceTests {
 			Throwable cause = ex.getRootCause();
 			assertTrue("Should be IllegalArgumentException", cause instanceof IllegalArgumentException);
 			assertTrue("Cannot resolve method 'myBeforeAdvice' to a unique method",
-					cause.getMessage().indexOf("Cannot resolve method 'myBeforeAdvice' to a unique method") != -1);
+					cause.getMessage().contains("Cannot resolve method 'myBeforeAdvice' to a unique method"));
 		}
 	}
 
