@@ -167,6 +167,7 @@ public abstract class MimeTypeUtils {
 	private static volatile Random random;
 
 	static {
+		// Not using "parseMimeType" to avoid static init cost
 		ALL = new MimeType("*", "*");
 		APPLICATION_JSON = new MimeType("application", "json");
 		APPLICATION_OCTET_STREAM = new MimeType("application", "octet-stream");

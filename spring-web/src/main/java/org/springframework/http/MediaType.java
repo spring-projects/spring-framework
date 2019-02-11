@@ -323,6 +323,7 @@ public class MediaType extends MimeType implements Serializable {
 
 
 	static {
+		// Not using "valueOf' to avoid static init cost
 		ALL = new MediaType("*", "*");
 		APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
 		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
@@ -552,6 +553,7 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
+		// Avoid using java.util.stream.Stream in hot paths
 		List<String> tokenizedTypes = MimeTypeUtils.tokenize(mediaTypes);
 		List<MediaType> result = new ArrayList<>(tokenizedTypes.size());
 		for (String type : tokenizedTypes) {
