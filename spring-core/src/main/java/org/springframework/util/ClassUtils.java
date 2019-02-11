@@ -1120,13 +1120,7 @@ public abstract class ClassUtils {
 			}
 		}
 		else {
-			Set<Method> candidates = new HashSet<>(1);
-			Method[] methods = clazz.getMethods();
-			for (Method method : methods) {
-				if (methodName.equals(method.getName())) {
-					candidates.add(method);
-				}
-			}
+			Set<Method> candidates = findMethodCandidatesByName(clazz, methodName);
 			if (candidates.size() == 1) {
 				return candidates.iterator().next();
 			}
@@ -1165,13 +1159,7 @@ public abstract class ClassUtils {
 			}
 		}
 		else {
-			Set<Method> candidates = new HashSet<>(1);
-			Method[] methods = clazz.getMethods();
-			for (Method method : methods) {
-				if (methodName.equals(method.getName())) {
-					candidates.add(method);
-				}
-			}
+			Set<Method> candidates = findMethodCandidatesByName(clazz, methodName);
 			if (candidates.size() == 1) {
 				return candidates.iterator().next();
 			}
@@ -1362,4 +1350,14 @@ public abstract class ClassUtils {
 		}
 	}
 
+	private static Set<Method> findMethodCandidatesByName(Class<?> clazz, String methodName) {
+		Set<Method> candidates = new HashSet<>(1);
+		Method[] methods = clazz.getMethods();
+		for (Method method : methods) {
+			if (methodName.equals(method.getName())) {
+				candidates.add(method);
+			}
+		}
+		return candidates;
+	}
 }
