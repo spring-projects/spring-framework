@@ -180,14 +180,27 @@ In Java, you can, for example, write the following:
 );
 ----
 
-In Kotlin, with reified type parameters and `GenericApplicationContext`
-Kotlin extensions, you can instead write the following:
+In Kotlin, with reified type parameters and `GenericApplicationContext` Kotlin extensions,
+you can instead write the following:
 
 [source,kotlin,indent=0]
 ----
 	val context = GenericApplicationContext().apply {
 		registerBean<Foo>()
-		registerBean { Bar(it.getBean<Foo>()) }
+		registerBean { Bar(it.getBean()) }
+	}
+----
+====
+
+If the class `Bar` has a single constructor, you can even just specify the bean class,
+the constructor parameters will be autowired by type:
+
+====
+[source,kotlin,indent=0]
+----
+	val context = GenericApplicationContext().apply {
+		registerBean<Foo>()
+		registerBean<Bar>()
 	}
 ----
 
@@ -199,38 +212,22 @@ how beans are registered. The following example creates a `Play` profile:
 
 [source,kotlin,indent=0]
 ----
-	fun beans() = beans {
-		bean<UserHandler>()
-		bean<Routes>()
-		bean<WebHandler>("webHandler") {
-			RouterFunctions.toWebHandler(
-				ref<Routes>().router(),
-				HandlerStrategies.builder().viewResolver(ref()).build()
-			)
-		}
-		bean("messageSource") {
-			ReloadableResourceBundleMessageSource().apply {
-				setBasename("messages")
-				setDefaultEncoding("UTF-8")
+	val myBeans = beans {
+		bean<Foo>()
+		bean<Bar>()
+		bean("bazBean") {
+			Baz().apply {
+				message = "Hello world"
 			}
 		}
-		bean {
-			val prefix = "classpath:/templates/"
-			val suffix = ".mustache"
-			val loader = MustacheResourceTemplateLoader(prefix, suffix)
-			MustacheViewResolver(Mustache.compiler().withLoader(loader)).apply {
-				setPrefix(prefix)
-				setSuffix(suffix)
-			}
-		}
-		profile("play") {
-			bean<Play>()
+		profile("foobar") {
+			bean { FooBar(ref("bazBean")) }
 		}
 	}
 ----
 
-In the preceding example, `bean<Routes>()` uses autowiring by constructor, and `ref<Routes>()`
-is a shortcut for `applicationContext.getBean(Routes::class.java)`.
+NOTE: This DSL is programmatic, meaning it allows custom registration logic of beans
+through an `if` expression, a `for` loop, or any other Kotlin constructs.
 
 You can then use this `beans()` function to register beans on the application context,
 as the following example shows:
@@ -238,18 +235,15 @@ as the following example shows:
 [source,kotlin,indent=0]
 ----
 	val context = GenericApplicationContext().apply {
-		beans().initialize(this)
+		myBeans.initialize(this)
 		refresh()
 	}
 ----
 
-NOTE: This DSL is programmatic, meaning it allows custom registration logic of beans
-through an `if` expression, a `for` loop, or any other Kotlin constructs.
 
-See https://github.com/sdeleuze/spring-kotlin-functional/blob/master/src/main/kotlin/functional/Beans.kt[spring-kotlin-functional beans declaration]
-for a concrete example.
+See https://github.com/sdeleuze/spring-kotlin-functional[spring-kotlin-functional beans declaration] for a concrete example.
 
-NOTE: Spring Boot is based on Java configuration and
+NOTE: Spring Boot is based on JavaConfig and
 https://github.com/spring-projects/spring-boot/issues/8115[does not yet provide specific support for functional bean definition],
 but you can experimentally use functional bean definitions through Spring Boot's `ApplicationContextInitializer` support.
 See https://stackoverflow.com/questions/45935931/how-to-use-functional-bean-definition-kotlin-dsl-with-spring-boot-and-spring-w/46033685#46033685[this Stack Overflow answer]
@@ -266,8 +260,8 @@ for more details and up-to-date information.
 
 Spring Framework now comes with a
 {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[Kotlin routing DSL]
-that lets you use the <<web-reactive#webflux-fn,WebFlux functional
-API>> to write clean and idiomatic Kotlin code, as the following example shows:
+that lets you use the <<web-reactive#webflux-fn,WebFlux functional API>> to write clean and idiomatic Kotlin code,
+as the following example shows:
 
 [source,kotlin,indent=0]
 ----
@@ -293,7 +287,7 @@ NOTE: This DSL is programmatic, meaning that it allows custom registration logic
 through an `if` expression, a `for` loop, or any other Kotlin constructs. That can be useful when you need to register routes
 depending on dynamic data (for example, from a database).
 
-See https://github.com/mixitconf/mixit/tree/bad6b92bce6193f9b3f696af9d416c276501dbf1/src/main/kotlin/mixit/web/routes[MiXiT project routes]
+See https://github.com/mixitconf/mixit/tree/dafd5ccc92dfab6d9c306fcb60b28921a1ccbf79/src/main/kotlin/mixit/web/routes[MiXiT project routes]
 for a concrete example.
 
 
@@ -553,8 +547,42 @@ all HTTP methods will be matched, not only the `GET` one.
 
 === Testing
 
-This section address testing with the combination of Kotlin and the Spring Framework.
+This section addresses testing with the combination of Kotlin and Spring Framework. The recommended testing framework
+is https://junit.org/junit5/[JUnit 5], as well as https://mockk.io/[Mockk] for mocking.
 
+
+==== Constructor injection
+
+As described in the <<testing#testcontext-junit-jupiter-di#spring-web-reactive,dedicated section>>, JUnit 5 allows
+constructor injection of beans which is pretty useful with Kotlin in order to use `val` instead of `lateinit var `.
+
+
+====
+[source]
+----
+@SpringJUnitConfig(TestConfig::class)
+class OrderServiceIntegrationTests(@Autowired val orderService: OrderService,
+                                   @Autowired val customerService: CustomerService) {
+
+    // tests that use the injected OrderService and CustomerService
+}
+----
+====
+
+You can also use `@Autowired` at constructor level to autowire all parameters.
+
+====
+[source]
+----
+@SpringJUnitConfig(TestConfig::class)
+class OrderServiceIntegrationTests @Autowired constructor(
+		val orderService: OrderService,
+		val customerService: CustomerService) {
+
+    // tests that use the injected OrderService and CustomerService
+}
+----
+====
 
 
 ==== `PER_CLASS` Lifecycle
@@ -647,19 +675,14 @@ See also the related https://jira.spring.io/browse/SPR-16057[SPR-16057] issue.
 [[kotlin-getting-started]]
 == Getting Started
 
-This section describes the fastest way to get started with a project that combines
-Kotlin and the Spring Framework.
+The easiest way to learn how to build a Spring application with Kotlin is to follow
+https://spring.io/guides/tutorials/spring-boot-kotlin/[the dedicated tutorial].
 
 
-
-=== Using `start.spring.io`
+=== `start.spring.io`
 
 The easiest way to start a new Spring Framework 5 project in Kotlin is to create a new Spring
 Boot 2 project on https://start.spring.io/#!language=kotlin[start.spring.io].
-
-You can also create a standalone WebFlux project, as described in
-https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[this blog post].
-
 
 
 === Choosing the Web Flavor
@@ -668,11 +691,11 @@ Spring Framework now comes with two different web stacks: <<web#mvc,Spring MVC>>
 <<web-reactive#spring-web-reactive,Spring WebFlux>>.
 
 Spring WebFlux is recommended if you want to create applications that will deal with latency,
-long-lived connections, o streaming scenarios or if you want to use the web functional
+long-lived connections, streaming scenarios or if you want to use the web functional
 Kotlin DSL.
 
 For other use cases, especially if you are using blocking technologies such as JPA, Spring
-MVC and its annotation-based programming model is a perfectly valid and fully supported choice.
+MVC and its annotation-based programming model is the recommended choice.
 
 
 
@@ -690,27 +713,6 @@ Kotlin and the Spring Framework:
 * https://kotlin.link/[Awesome Kotlin]
 
 
-
-=== Tutorials
-
-We recommend the following tutorials:
-
-* https://spring.io/guides/tutorials/spring-boot-kotlin/[Building web applications with Spring Boot and Kotlin]
-* https://kotlinlang.org/docs/tutorials/spring-boot-restful.html[Creating a RESTful Web Service with Spring Boot]
-
-
-
-=== Blog posts
-
-The following blog posts provide further details:
-
-* https://spring.io/blog/2016/02/15/developing-spring-boot-applications-with-kotlin[Developing Spring Boot applications with Kotlin]
-* https://spring.io/blog/2016/03/20/a-geospatial-messenger-with-kotlin-spring-boot-and-postgresql[A Geospatial Messenger with Kotlin, Spring Boot and PostgreSQL]
-* https://spring.io/blog/2017/01/04/introducing-kotlin-support-in-spring-framework-5-0[Introducing Kotlin support in Spring Framework 5.0]
-* https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[Spring Framework 5 Kotlin APIs, the functional way]
-
-
-
 === Examples
 
 The following Github projects offer examples that you can learn from and possibly even extend:
@@ -721,6 +723,7 @@ The following Github projects offer examples that you can learn from and possibl
 * https://github.com/sdeleuze/spring-kotlin-fullstack[spring-kotlin-fullstack]: WebFlux Kotlin fullstack example with Kotlin2js for frontend instead of JavaScript or TypeScript
 * https://github.com/spring-petclinic/spring-petclinic-kotlin[spring-petclinic-kotlin]: Kotlin version of the Spring PetClinic Sample Application
 * https://github.com/sdeleuze/spring-kotlin-deepdive[spring-kotlin-deepdive]: A step-by-step migration guide for Boot 1.0 and Java to Boot 2.0 and Kotlin
+* https://github.com/spring-cloud/spring-cloud-gcp/tree/master/spring-cloud-gcp-kotlin-samples/spring-cloud-gcp-kotlin-app-sample[spring-cloud-gcp-kotlin-app-sample]: Spring Boot with Google Cloud Platform Integrations
 
 
 
@@ -729,22 +732,19 @@ The following Github projects offer examples that you can learn from and possibl
 The following list categorizes the pending issues related to Spring and Kotlin support:
 
 * Spring Framework
-** https://jira.spring.io/browse/SPR-16057[Unable to use WebTestClient with mock server in Kotlin]
-** https://jira.spring.io/browse/SPR-15942[Support null-safety at generics, varargs and array elements level]
-** https://jira.spring.io/browse/SPR-15413[Add support for Kotlin coroutines]
+** https://github.com/spring-projects/spring-framework/issues/20606[Unable to use WebTestClient with mock server in Kotlin]
+** https://github.com/spring-projects/spring-framework/issues/20496[Support null-safety at generics, varargs and array elements level]
+** https://github.com/spring-projects/spring-framework/issues/19975[Add support for Kotlin coroutines]
 * Spring Boot
 ** https://github.com/spring-projects/spring-boot/issues/8762[Allow `@ConfigurationProperties` binding for immutable POJOs]
-** https://github.com/spring-projects/spring-boot/issues/1254[Allow `@ConfigurationProperties` binding on interfaces]
 ** https://github.com/spring-projects/spring-boot/issues/8115[Expose the functional bean registration API via `SpringApplication`]
 ** https://github.com/spring-projects/spring-boot/issues/10712[Add null-safety annotations on Spring Boot APIs]
 ** https://github.com/spring-projects/spring-boot/issues/9486[Use Kotlin's bom to provide dependency management for Kotlin]
 * Kotlin
 ** https://youtrack.jetbrains.com/issue/KT-6380[Parent issue for Spring Framework support]
 ** https://youtrack.jetbrains.com/issue/KT-5464[Kotlin requires type inference where Java doesn't]
-** https://github.com/Kotlin/KEEP/issues/79[Better generics null-safety support]
 ** https://youtrack.jetbrains.com/issue/KT-20283[Smart cast regression with open classes]
 ** https://youtrack.jetbrains.com/issue/KT-14984[Impossible to pass not all SAM argument as function]
-** https://youtrack.jetbrains.com/issue/KT-19592[Apply JSR 305 meta-annotations to generic type parameters]
-** https://youtrack.jetbrains.com/issue/KT-18398[Provide a way for libraries to avoid mixing Kotlin 1.0 and 1.1 dependencies]
 ** https://youtrack.jetbrains.com/issue/KT-15125[Support JSR 223 bindings directly via script variables]
-** https://youtrack.jetbrains.com/issue/KT-15467[Support all-open and no-arg compiler plugins in Kotlin Eclipse plugin]
+** https://youtrack.jetbrains.com/issue/KT-6653[Kotlin properties do not override Java-style getters and setters]
+
