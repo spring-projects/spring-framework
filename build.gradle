@@ -36,7 +36,7 @@ ext {
 	jettyVersion         = "9.4.14.v20181114"
 	junit5Version        = "5.3.2"
 	kotlinVersion        = "1.2.71"
-	log4jVersion         = "2.11.1"
+	log4jVersion         = "2.11.2"
 	nettyVersion         = "4.1.33.Final"
 	reactorVersion       = "Californium-BUILD-SNAPSHOT"
 	rxjavaVersion        = "1.3.8"
@@ -44,7 +44,7 @@ ext {
 	rxjava2Version       = "2.2.6"
 	slf4jVersion         = "1.7.25"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
-	tomcatVersion        = "9.0.14"
+	tomcatVersion        = "9.0.16"
 	undertowVersion      = "2.0.17.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
