@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 
+import io.vavr.control.Try;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -78,6 +79,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Key to use to store the default transaction manager.
 	 */
 	private static final Object DEFAULT_TRANSACTION_MANAGER_KEY = new Object();
+
+	/**
+	 * Vavr library present on the classpath?
+	 */
+	private static final boolean vavrPresent = ClassUtils.isPresent(
+			"io.vavr.control.Try", TransactionAspectSupport.class.getClassLoader());
 
 	/**
 	 * Holder to support the {@code currentTransactionStatus()} method,
@@ -287,7 +294,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.
 			TransactionInfo txInfo = createTransactionIfNecessary(tm, txAttr, joinpointIdentification);
-			Object retVal = null;
+
+			Object retVal;
 			try {
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
@@ -301,6 +309,15 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			finally {
 				cleanupTransactionInfo(txInfo);
 			}
+
+			if (vavrPresent && VavrDelegate.isVavrTry(retVal)) {
+				// Set rollback-only in case of Vavr failure matching our rollback rules...
+				TransactionStatus status = txInfo.getTransactionStatus();
+				if (status != null && txAttr != null) {
+					retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
+				}
+			}
+
 			commitTransactionAfterReturning(txInfo);
 			return retVal;
 		}
@@ -313,7 +330,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr, status -> {
 					TransactionInfo txInfo = prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 					try {
-						return invocation.proceedWithInvocation();
+						Object retVal = invocation.proceedWithInvocation();
+						if (vavrPresent && VavrDelegate.isVavrTry(retVal)) {
+							// Set rollback-only in case of Vavr failure matching our rollback rules...
+							retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
+						}
+						return retVal;
 					}
 					catch (Throwable ex) {
 						if (txAttr.rollbackOn(ex)) {
@@ -709,6 +731,25 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		@Override
 		public String toString() {
 			return getCause().toString();
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on the Vavr library at runtime.
+	 */
+	private static class VavrDelegate {
+
+		public static boolean isVavrTry(Object retVal) {
+			return (retVal instanceof Try);
+		}
+
+		public static Object evaluateTryFailure(Object retVal, TransactionAttribute txAttr, TransactionStatus status) {
+			return ((Try<?>) retVal).onFailure(ex -> {
+				if (txAttr.rollbackOn(ex)) {
+					status.setRollbackOnly();
+				}
+			});
 		}
 	}
 
