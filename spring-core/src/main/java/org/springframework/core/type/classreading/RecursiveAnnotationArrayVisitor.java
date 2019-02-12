@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,11 @@ class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor
 				try {
 					Class<?> attributeType = annotationType.getMethod(this.attributeName).getReturnType();
 					if (attributeType.isArray()) {
-						this.attributes.put(this.attributeName, Array.newInstance(attributeType.getComponentType(), 0));
+						Class<?> elementType = attributeType.getComponentType();
+						if (elementType.isAnnotation()) {
+							elementType = AnnotationAttributes.class;
+						}
+						this.attributes.put(this.attributeName, Array.newInstance(elementType, 0));
 					}
 				}
 				catch (NoSuchMethodException ex) {
