@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import static org.mockito.Mockito.*;
  * Unit tests for {@link DefaultWebClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class DefaultWebClientTests {
 
@@ -56,14 +57,16 @@ public class DefaultWebClientTests {
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.exchangeFunction = mock(ExchangeFunction.class);
-		when(this.exchangeFunction.exchange(this.captor.capture())).thenReturn(Mono.empty());
+		ClientResponse mockResponse = mock(ClientResponse.class);
+		when(this.exchangeFunction.exchange(this.captor.capture())).thenReturn(Mono.just(mockResponse));
 		this.builder = WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction);
 	}
 
 
 	@Test
 	public void basic() {
-		this.builder.build().get().uri("/path").exchange();
+		this.builder.build().get().uri("/path")
+				.exchange().block(Duration.ofSeconds(10));
 
 		ClientRequest request = verifyAndGetRequest();
 		assertEquals("/base/path", request.url().toString());
@@ -75,34 +78,31 @@ public class DefaultWebClientTests {
 	public void uriBuilder() {
 		this.builder.build().get()
 				.uri(builder -> builder.path("/path").queryParam("q", "12").build())
-				.exchange();
+				.exchange().block(Duration.ofSeconds(10));
 
 		ClientRequest request = verifyAndGetRequest();
 		assertEquals("/base/path?q=12", request.url().toString());
-		verifyNoMoreInteractions(this.exchangeFunction);
 	}
 
 	@Test
 	public void uriBuilderWithPathOverride() {
 		this.builder.build().get()
 				.uri(builder -> builder.replacePath("/path").build())
-				.exchange();
+				.exchange().block(Duration.ofSeconds(10));
 
 		ClientRequest request = verifyAndGetRequest();
 		assertEquals("/path", request.url().toString());
-		verifyNoMoreInteractions(this.exchangeFunction);
 	}
 
 	@Test
 	public void requestHeaderAndCookie() {
 		this.builder.build().get().uri("/path").accept(MediaType.APPLICATION_JSON)
 				.cookies(cookies -> cookies.add("id", "123"))	// SPR-16178
-				.exchange();
+				.exchange().block(Duration.ofSeconds(10));
 
 		ClientRequest request = verifyAndGetRequest();
 		assertEquals("application/json", request.headers().getFirst("Accept"));
 		assertEquals("123", request.cookies().getFirst("id"));
-		verifyNoMoreInteractions(this.exchangeFunction);
 	}
 
 	@Test
@@ -111,12 +111,11 @@ public class DefaultWebClientTests {
 				.defaultHeader("Accept", "application/json").defaultCookie("id", "123")
 				.build();
 
-		client.get().uri("/path").exchange();
+		client.get().uri("/path").exchange().block(Duration.ofSeconds(10));
 
 		ClientRequest request = verifyAndGetRequest();
 		assertEquals("application/json", request.headers().getFirst("Accept"));
 		assertEquals("123", request.cookies().getFirst("id"));
-		verifyNoMoreInteractions(this.exchangeFunction);
 	}
 
 	@Test
@@ -126,12 +125,14 @@ public class DefaultWebClientTests {
 				.defaultCookie("id", "123")
 				.build();
 
-		client.get().uri("/path").header("Accept", "application/xml").cookie("id", "456").exchange();
+		client.get().uri("/path")
+				.header("Accept", "application/xml")
+				.cookie("id", "456")
+				.exchange().block(Duration.ofSeconds(10));
 
 		ClientRequest request = verifyAndGetRequest();
 		assertEquals("application/xml", request.headers().getFirst("Accept"));
 		assertEquals("456", request.cookies().getFirst("id"));
-		verifyNoMoreInteractions(this.exchangeFunction);
 	}
 
 	@Test
@@ -151,7 +152,8 @@ public class DefaultWebClientTests {
 
 		try {
 			context.set("bar");
-			client.get().uri("/path").attribute("foo", "bar").exchange();
+			client.get().uri("/path").attribute("foo", "bar")
+					.exchange().block(Duration.ofSeconds(10));
 		}
 		finally {
 			context.remove();
@@ -219,7 +221,7 @@ public class DefaultWebClientTests {
 		this.builder.filter(filter).build()
 				.get().uri("/path")
 				.attribute("foo", "bar")
-				.exchange();
+				.exchange().block(Duration.ofSeconds(10));
 
 		assertEquals("bar", actual.get("foo"));
 
@@ -238,7 +240,7 @@ public class DefaultWebClientTests {
 		this.builder.filter(filter).build()
 				.get().uri("/path")
 				.attribute("foo", null)
-				.exchange();
+				.exchange().block(Duration.ofSeconds(10));
 
 		assertNull(actual.get("foo"));
 
@@ -254,19 +256,38 @@ public class DefaultWebClientTests {
 						.defaultCookie("id", "123"))
 				.build();
 
-		client.get().uri("/path").exchange();
+		client.get().uri("/path").exchange().block(Duration.ofSeconds(10));
 
 		ClientRequest request = verifyAndGetRequest();
 		assertEquals("application/json", request.headers().getFirst("Accept"));
 		assertEquals("123", request.cookies().getFirst("id"));
-		verifyNoMoreInteractions(this.exchangeFunction);
 	}
 
 	@Test
 	public void switchToErrorOnEmptyClientResponseMono() {
+		ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
+		when(exchangeFunction.exchange(any())).thenReturn(Mono.empty());
+		WebClient.Builder builder = WebClient.builder().baseUrl("/base").exchangeFunction(exchangeFunction);
 		StepVerifier.create(builder.build().get().uri("/path").exchange())
 				.expectErrorMessage("The underlying HTTP client completed without emitting a response.")
 				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	public void shouldApplyFiltersAtSubscription() {
+		WebClient client = this.builder
+				.filter((request, next) -> {
+					return next.exchange(ClientRequest
+							.from(request)
+							.header("Custom", "value")
+							.build());
+				})
+				.build();
+		Mono<ClientResponse> exchange = client.get().uri("/path").exchange();
+		verifyZeroInteractions(this.exchangeFunction);
+		exchange.block(Duration.ofSeconds(10));
+		ClientRequest request = verifyAndGetRequest();
+		assertEquals("value", request.headers().getFirst("Custom"));
 	}
 
 	private ClientRequest verifyAndGetRequest() {
