@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,6 +181,20 @@ public class ConfigurationClassPostProcessorTests {
 	public void postProcessorWorksWithComposedConfigurationWithAttributeOverrideForExcludeFilterUsingAsm() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(
 				ComposedConfigurationWithAttributeOverrideForExcludeFilter.class.getName());
+		assertSupportForComposedAnnotationWithExclude(beanDefinition);
+	}
+
+	@Test
+	public void postProcessorWorksWithExtendedConfigurationWithAttributeOverrideForExcludesFilterUsingReflection() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(
+				ExtendedConfigurationWithAttributeOverrideForExcludeFilter.class);
+		assertSupportForComposedAnnotationWithExclude(beanDefinition);
+	}
+
+	@Test
+	public void postProcessorWorksWithExtendedConfigurationWithAttributeOverrideForExcludesFilterUsingAsm() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(
+				ExtendedConfigurationWithAttributeOverrideForExcludeFilter.class.getName());
 		assertSupportForComposedAnnotationWithExclude(beanDefinition);
 	}
 
@@ -1513,6 +1527,15 @@ public class ConfigurationClassPostProcessorTests {
 	@ComposedConfigurationWithAttributeOverrides(basePackages = "org.springframework.context.annotation.componentscan.simple",
 			excludeFilters = @ComponentScan.Filter(Component.class))
 	public static class ComposedConfigurationWithAttributeOverrideForExcludeFilter {
+	}
+
+	@ComponentScan(basePackages = "org.springframework.context.annotation.componentscan.base", excludeFilters = {})
+	public static class BaseConfigurationWithEmptyExcludeFilters {
+	}
+
+	@ComponentScan(basePackages = "org.springframework.context.annotation.componentscan.simple",
+			excludeFilters = @ComponentScan.Filter(Component.class))
+	public static class ExtendedConfigurationWithAttributeOverrideForExcludeFilter extends BaseConfigurationWithEmptyExcludeFilters {
 	}
 
 	@ComposedConfigurationWithAttributeOverrides
