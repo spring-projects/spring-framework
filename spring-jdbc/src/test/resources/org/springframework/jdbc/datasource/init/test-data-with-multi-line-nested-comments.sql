@@ -11,7 +11,7 @@ INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller');
 -- A fancy multi-line comments that puts
 -- single line comments inside of a multi-line
 -- comment block.
-Moreover, the block commend end delimiter
+Moreover, the block comment end delimiter
 appears on a line that can potentially also
 be a single-line comment if we weren't
 already inside a multi-line comment run.

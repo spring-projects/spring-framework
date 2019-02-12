@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -363,7 +363,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	private void assertAttributeType(String attributeName, Object attributeValue, Class<?> expectedType) {
 		if (!expectedType.isInstance(attributeValue)) {
 			throw new IllegalArgumentException(String.format(
-					"Attribute '%s' is of type [%s], but [%s] was expected in attributes for annotation [%s]",
+					"Attribute '%s' is of type %s, but %s was expected in attributes for annotation [%s]",
 					attributeName, attributeValue.getClass().getSimpleName(), expectedType.getSimpleName(),
 					this.displayName));
 		}
