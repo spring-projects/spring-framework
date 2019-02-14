@@ -936,8 +936,7 @@ public abstract class StringUtils {
 			return array1;
 		}
 
-		List<String> result = new ArrayList<>();
-		result.addAll(Arrays.asList(array1));
+		List<String> result = new ArrayList<>(Arrays.asList(array1));
 		for (String str : array2) {
 			if (!result.contains(str)) {
 				result.add(str);
