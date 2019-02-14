@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.util.ClassUtils;
 
 /**
  * Internal utilities for the conversion package.
@@ -59,7 +60,7 @@ abstract class ConversionUtils {
 			// yes
 			return true;
 		}
-		if (sourceElementType.getType().isAssignableFrom(targetElementType.getType())) {
+		if (ClassUtils.isAssignable(sourceElementType.getType(), targetElementType.getType())) {
 			// maybe
 			return true;
 		}
