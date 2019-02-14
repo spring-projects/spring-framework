@@ -101,8 +101,8 @@ public class PayloadMethodArgumentResolverTests {
 	public void stringMono() {
 		String body = "foo";
 		MethodParameter param = this.testMethod.arg(ResolvableType.forClassWithGenerics(Mono.class, String.class));
-		Mono<DataBuffer> value = Mono.delay(Duration.ofMillis(10)).map(aLong -> toDataBuffer(body));
-		Mono<Object> mono = resolveValue(param, value, null);
+		Mono<Object> mono = resolveValue(param,
+				Mono.delay(Duration.ofMillis(10)).map(aLong -> toDataBuffer(body)), null);
 
 		assertEquals(body, mono.block());
 	}
@@ -112,8 +112,8 @@ public class PayloadMethodArgumentResolverTests {
 		List<String> body = Arrays.asList("foo", "bar");
 		ResolvableType type = ResolvableType.forClassWithGenerics(Flux.class, String.class);
 		MethodParameter param = this.testMethod.arg(type);
-		Flux<Object> flux = resolveValue(param, Flux.fromIterable(body)
-				.delayElements(Duration.ofMillis(10)).map(value -> toDataBuffer(value + "\n")), null);
+		Flux<Object> flux = resolveValue(param,
+				Flux.fromIterable(body).delayElements(Duration.ofMillis(10)).map(this::toDataBuffer), null);
 
 		assertEquals(body, flux.collectList().block());
 	}
@@ -141,7 +141,7 @@ public class PayloadMethodArgumentResolverTests {
 	public void validateStringFlux() {
 		ResolvableType type = ResolvableType.forClassWithGenerics(Flux.class, String.class);
 		MethodParameter param = this.testMethod.arg(type);
-		Flux<Object> flux = resolveValue(param, Flux.just(toDataBuffer("12345678\n12345")), new TestValidator());
+		Flux<Object> flux = resolveValue(param, Mono.just(toDataBuffer("12345678\n12345")), new TestValidator());
 
 		StepVerifier.create(flux)
 				.expectNext("12345678")

@@ -192,6 +192,11 @@ public class MethodMessageHandlerTests {
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
 
+		public TestMethodMessageHandler() {
+			setHandlerPredicate(handlerType -> handlerType.getName().endsWith("Controller"));
+		}
+
+
 		@Override
 		protected List<? extends HandlerMethodArgumentResolver> initArgumentResolvers() {
 			return Collections.emptyList();
@@ -209,11 +214,6 @@ public class MethodMessageHandlerTests {
 
 		public void register(Object handler, Method method, String mapping) {
 			super.registerHandlerMethod(handler, method, mapping);
-		}
-
-		@Override
-		protected boolean isHandler(Class<?> handlerType) {
-			return handlerType.getName().endsWith("Controller");
 		}
 
 		@Override

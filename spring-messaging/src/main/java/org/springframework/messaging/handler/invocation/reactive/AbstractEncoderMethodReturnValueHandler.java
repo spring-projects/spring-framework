@@ -32,20 +32,21 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
 
 /**
- * Base class for a return value handler that encodes the return value, possibly
- * a {@link Publisher} of values, to a {@code Flux<DataBuffer>} through a
- * compatible {@link Encoder}.
+ * Base class for a return value handler that encodes return values to
+ * {@code Flux<DataBuffer>} through the configured {@link Encoder}s.
  *
  * <p>Sub-classes must implement the abstract method
- * {@link #handleEncodedContent} to do something with the resulting encoded
- * content.
+ * {@link #handleEncodedContent} to handle the resulting encoded content.
  *
  * <p>This handler should be ordered last since its {@link #supportsReturnType}
  * returns {@code true} for any method parameter type.
@@ -67,8 +68,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 
 	private final ReactiveAdapterRegistry adapterRegistry;
 
-	// TODO: configure or passed via MessageHeaders
-	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+	private DataBufferFactory defaultBufferFactory = new DefaultDataBufferFactory();
 
 
 	protected AbstractEncoderMethodReturnValueHandler(List<Encoder<?>> encoders, ReactiveAdapterRegistry registry) {
@@ -96,69 +96,104 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
+		// We could check canEncode but we're probably last in order anyway
 		return true;
 	}
 
 	@Override
-	public Mono<Void> handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) {
-		Flux<DataBuffer> encodedContent = encodeContent(returnValue, returnType, this.bufferFactory);
+	public Mono<Void> handleReturnValue(
+			@Nullable Object returnValue, MethodParameter returnType, Message<?> message) {
+
+		DataBufferFactory bufferFactory = (DataBufferFactory) message.getHeaders()
+				.getOrDefault(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, this.defaultBufferFactory);
+
+		MimeType mimeType = (MimeType) message.getHeaders().get(MessageHeaders.CONTENT_TYPE);
+
+		Flux<DataBuffer> encodedContent = encodeContent(
+				returnValue, returnType, bufferFactory, mimeType, Collections.emptyMap());
+
 		return handleEncodedContent(encodedContent, returnType, message);
 	}
 
 	@SuppressWarnings("unchecked")
-	private Flux<DataBuffer> encodeContent(@Nullable Object content, MethodParameter returnType,
-			DataBufferFactory bufferFactory) {
+	private Flux<DataBuffer> encodeContent(
+			@Nullable Object content, MethodParameter returnType, DataBufferFactory bufferFactory,
+			@Nullable MimeType mimeType, Map<String, Object> hints) {
 
-		ResolvableType bodyType = ResolvableType.forMethodParameter(returnType);
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(bodyType.resolve(), content);
+		ResolvableType returnValueType = ResolvableType.forMethodParameter(returnType);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(returnValueType.resolve(), content);
 
 		Publisher<?> publisher;
 		ResolvableType elementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(content);
-			ResolvableType genericType = bodyType.getGeneric();
+			ResolvableType genericType = returnValueType.getGeneric();
 			elementType = getElementType(adapter, genericType);
 		}
 		else {
 			publisher = Mono.justOrEmpty(content);
-			elementType = (bodyType.toClass() == Object.class && content != null ?
-					ResolvableType.forInstance(content) : bodyType);
+			elementType = returnValueType.toClass() == Object.class && content != null ?
+					ResolvableType.forInstance(content) : returnValueType;
 		}
 
 		if (elementType.resolve() == void.class || elementType.resolve() == Void.class) {
 			return Flux.from(publisher).cast(DataBuffer.class);
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug((publisher instanceof Mono ? "0..1" : "0..N") + " [" + elementType + "]");
-		}
+		Encoder<?> encoder = getEncoder(elementType, mimeType);
 
-		for (Encoder<?> encoder : getEncoders()) {
-			if (encoder.canEncode(elementType, null)) {
-				Map<String, Object> hints = Collections.emptyMap();
-				return encoder.encode((Publisher) publisher, bufferFactory, elementType, null, hints);
-			}
-		}
-
-		return Flux.error(new MessagingException("No encoder for " + returnType));
+		return Flux.from((Publisher) publisher).concatMap(value ->
+				encodeValue(value, elementType, encoder, bufferFactory, mimeType, hints));
 	}
 
-	private ResolvableType getElementType(ReactiveAdapter adapter, ResolvableType genericType) {
+	private ResolvableType getElementType(ReactiveAdapter adapter, ResolvableType type) {
 		if (adapter.isNoValue()) {
 			return VOID_RESOLVABLE_TYPE;
 		}
-		else if (genericType != ResolvableType.NONE) {
-			return genericType;
+		else if (type != ResolvableType.NONE) {
+			return type;
 		}
 		else {
 			return OBJECT_RESOLVABLE_TYPE;
 		}
 	}
 
+	@Nullable
+	@SuppressWarnings("unchecked")
+	private <T> Encoder<T> getEncoder(ResolvableType elementType, @Nullable MimeType mimeType) {
+		for (Encoder<?> encoder : getEncoders()) {
+			if (encoder.canEncode(elementType, mimeType)) {
+				return (Encoder<T>) encoder;
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> Mono<DataBuffer> encodeValue(
+			Object element, ResolvableType elementType, @Nullable Encoder<T> encoder,
+			DataBufferFactory bufferFactory, @Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints) {
+
+		if (encoder == null) {
+			encoder = getEncoder(ResolvableType.forInstance(element), mimeType);
+			if (encoder == null) {
+				return Mono.error(new MessagingException(
+						"No encoder for " + elementType + ", current value type is " + element.getClass()));
+			}
+		}
+		Mono<T> mono = Mono.just((T) element);
+		Flux<DataBuffer> dataBuffers = encoder.encode(mono, bufferFactory, elementType, mimeType, hints);
+		return DataBufferUtils.join(dataBuffers);
+	}
+
 	/**
-	 * Handle the encoded content in some way, e.g. wrapping it in a message and
-	 * passing it on for further processing.
-	 * @param encodedContent the result of data encoding
+	 * Sub-classes implement this method to handle encoded values in some way
+	 * such as creating and sending messages.
+	 *
+	 * @param encodedContent the encoded content; each {@code DataBuffer}
+	 * represents the fully-aggregated, encoded content for one value
+	 * (i.e. payload) returned from the HandlerMethod.
 	 * @param returnType return type of the handler method that produced the data
 	 * @param message the input message handled by the handler method
 	 * @return completion {@code Mono<Void>} for the handling

@@ -19,6 +19,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
@@ -148,38 +149,47 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 	 * @param message the message from which the content was extracted
 	 * @return a Mono with the result of argument resolution
 	 *
-	 * @see #extractPayloadContent(MethodParameter, Message)
+	 * @see #extractContent(MethodParameter, Message)
 	 * @see #getMimeType(Message)
 	 */
 	@Override
 	public final Mono<Object> resolveArgument(MethodParameter parameter, Message<?> message) {
+
 		Payload ann = parameter.getParameterAnnotation(Payload.class);
 		if (ann != null && StringUtils.hasText(ann.expression())) {
 			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver");
 		}
-		Publisher<DataBuffer> content = extractPayloadContent(parameter, message);
-		return decodeContent(parameter, message, ann == null || ann.required(), content, getMimeType(message));
+
+		MimeType mimeType = getMimeType(message);
+		mimeType = mimeType != null ? mimeType : MimeTypeUtils.APPLICATION_OCTET_STREAM;
+
+		Flux<DataBuffer> content = extractContent(parameter, message);
+		return decodeContent(parameter, message, ann == null || ann.required(), content, mimeType);
 	}
 
-	/**
-	 * Extract the content to decode from the message. By default, the message
-	 * payload is expected to be {@code Publisher<DataBuffer>}. Sub-classes can
-	 * override this method to change that assumption.
-	 * @param parameter the target method parameter we're decoding to
-	 * @param message the input message with the content
-	 * @return the content to decode
-	 */
 	@SuppressWarnings("unchecked")
-	protected Publisher<DataBuffer> extractPayloadContent(MethodParameter parameter, Message<?> message) {
-		Publisher<DataBuffer> content;
-		try {
-			content = (Publisher<DataBuffer>) message.getPayload();
+	private Flux<DataBuffer> extractContent(MethodParameter parameter, Message<?> message) {
+		Object payload = message.getPayload();
+		if (payload instanceof DataBuffer) {
+			return Flux.just((DataBuffer) payload);
 		}
-		catch (ClassCastException ex) {
-			throw new MethodArgumentResolutionException(
-					message, parameter, "Expected Publisher<DataBuffer> payload", ex);
+		if (payload instanceof Publisher) {
+			return Flux.from((Publisher<?>) payload).map(value -> {
+				if (value instanceof DataBuffer) {
+					return (DataBuffer) value;
+				}
+				String className = value.getClass().getName();
+				throw getUnexpectedPayloadError(message, parameter, "Publisher<" + className + ">");
+			});
 		}
-		return content;
+		return Flux.error(getUnexpectedPayloadError(message, parameter, payload.getClass().getName()));
+	}
+
+	private MethodArgumentResolutionException getUnexpectedPayloadError(
+			Message<?> message, MethodParameter parameter, String actualType) {
+
+		return new MethodArgumentResolutionException(message, parameter,
+				"Expected DataBuffer or Publisher<DataBuffer> for the Message payload, actual: " + actualType);
 	}
 
 	/**
@@ -206,7 +216,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 	}
 
 	private Mono<Object> decodeContent(MethodParameter parameter, Message<?> message,
-			boolean isContentRequired, Publisher<DataBuffer> content, @Nullable MimeType mimeType) {
+			boolean isContentRequired, Flux<DataBuffer> content, MimeType mimeType) {
 
 		ResolvableType targetType = ResolvableType.forMethodParameter(parameter);
 		Class<?> resolvedType = targetType.resolve();
@@ -215,19 +225,14 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 		isContentRequired = isContentRequired || (adapter != null && !adapter.supportsEmpty());
 		Consumer<Object> validator = getValidator(message, parameter);
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Mime type:" + mimeType);
-		}
-		mimeType = mimeType != null ? mimeType : MimeTypeUtils.APPLICATION_OCTET_STREAM;
+		Map<String, Object> hints = Collections.emptyMap();
 
 		for (Decoder<?> decoder : this.decoders) {
 			if (decoder.canDecode(elementType, mimeType)) {
 				if (adapter != null && adapter.isMultiValue()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("0..N [" + elementType + "]");
-					}
-					Flux<?> flux = decoder.decode(content, elementType, mimeType, Collections.emptyMap());
-					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(parameter, message, ex)));
+					Flux<?> flux = content
+							.concatMap(buffer -> decoder.decode(Mono.just(buffer), elementType, mimeType, hints))
+							.onErrorResume(ex -> Flux.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
 						flux = flux.switchIfEmpty(Flux.error(() -> handleMissingBody(parameter, message)));
 					}
@@ -237,12 +242,10 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
-					if (logger.isDebugEnabled()) {
-						logger.debug("0..1 [" + elementType + "]");
-					}
 					// Single-value (with or without reactive type wrapper)
-					Mono<?> mono = decoder.decodeToMono(content, targetType, mimeType, Collections.emptyMap());
-					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(parameter, message, ex)));
+					Mono<?> mono = decoder
+							.decodeToMono(content.next(), targetType, mimeType, hints)
+							.onErrorResume(ex -> Mono.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
 						mono = mono.switchIfEmpty(Mono.error(() -> handleMissingBody(parameter, message)));
 					}

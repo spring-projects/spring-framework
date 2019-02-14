@@ -16,7 +16,6 @@
 package org.springframework.messaging.handler.invocation.reactive;
 
 import java.util.Collections;
-import java.util.List;
 
 import io.reactivex.Completable;
 import org.junit.Test;
@@ -27,15 +26,10 @@ import reactor.test.StepVerifier;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.Encoder;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.GenericMessage;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.messaging.handler.invocation.ResolvableMethod.*;
 
 /**
@@ -49,41 +43,43 @@ public class EncoderMethodReturnValueHandlerTests {
 			Collections.singletonList(CharSequenceEncoder.textPlainOnly()),
 			ReactiveAdapterRegistry.getSharedInstance());
 
-	private final Message<?> message = mock(Message.class);
+	private final Message<?> message = new GenericMessage<>("shouldn't matter");
 
 
 	@Test
 	public void stringReturnValue() {
 		MethodParameter parameter = on(TestController.class).resolveReturnType(String.class);
-		this.handler.handleReturnValue("foo", parameter, message).block();
-		Flux<DataBuffer> result = this.handler.encodedContent;
+		this.handler.handleReturnValue("foo", parameter, this.message).block();
+		Flux<String> result = this.handler.getContentAsStrings();
 
-		StepVerifier.create(result)
-				.consumeNextWith(buffer -> assertEquals("foo", DataBufferTestUtils.dumpString(buffer, UTF_8)))
-				.verifyComplete();
+		StepVerifier.create(result).expectNext("foo").verifyComplete();
 	}
 
 	@Test
 	public void objectReturnValue() {
 		MethodParameter parameter = on(TestController.class).resolveReturnType(Object.class);
-		this.handler.handleReturnValue("foo", parameter, message).block();
-		Flux<DataBuffer> result = this.handler.encodedContent;
+		this.handler.handleReturnValue("foo", parameter, this.message).block();
+		Flux<String> result = this.handler.getContentAsStrings();
 
-		StepVerifier.create(result)
-				.consumeNextWith(buffer -> assertEquals("foo", DataBufferTestUtils.dumpString(buffer, UTF_8)))
-				.verifyComplete();
+		StepVerifier.create(result).expectNext("foo").verifyComplete();
 	}
 
 	@Test
 	public void fluxStringReturnValue() {
 		MethodParameter parameter = on(TestController.class).resolveReturnType(Flux.class, String.class);
-		this.handler.handleReturnValue(Flux.just("foo", "bar"), parameter, message).block();
-		Flux<DataBuffer> result = this.handler.encodedContent;
+		this.handler.handleReturnValue(Flux.just("foo", "bar"), parameter, this.message).block();
+		Flux<String> result = this.handler.getContentAsStrings();
 
-		StepVerifier.create(result)
-				.consumeNextWith(buffer -> assertEquals("foo", DataBufferTestUtils.dumpString(buffer, UTF_8)))
-				.consumeNextWith(buffer -> assertEquals("bar", DataBufferTestUtils.dumpString(buffer, UTF_8)))
-				.verifyComplete();
+		StepVerifier.create(result).expectNext("foo").expectNext("bar").verifyComplete();
+	}
+
+	@Test
+	public void fluxObjectReturnValue() {
+		MethodParameter parameter = on(TestController.class).resolveReturnType(Flux.class, Object.class);
+		this.handler.handleReturnValue(Flux.just("foo", "bar"), parameter, this.message).block();
+		Flux<String> result = this.handler.getContentAsStrings();
+
+		StepVerifier.create(result).expectNext("foo").expectNext("bar").verifyComplete();
 	}
 
 	@Test
@@ -91,23 +87,19 @@ public class EncoderMethodReturnValueHandlerTests {
 		testVoidReturnType(null, on(TestController.class).resolveReturnType(void.class));
 		testVoidReturnType(Mono.empty(), on(TestController.class).resolveReturnType(Mono.class, Void.class));
 		testVoidReturnType(Completable.complete(), on(TestController.class).resolveReturnType(Completable.class));
-
 	}
 
 	private void testVoidReturnType(@Nullable Object value, MethodParameter bodyParameter) {
-		this.handler.handleReturnValue(value, bodyParameter, message).block();
-		Flux<DataBuffer> result = this.handler.encodedContent;
+		this.handler.handleReturnValue(value, bodyParameter, this.message).block();
+		Flux<String> result = this.handler.getContentAsStrings();
 		StepVerifier.create(result).expectComplete().verify();
 	}
 
 	@Test
 	public void noEncoder() {
 		MethodParameter parameter = on(TestController.class).resolveReturnType(Object.class);
-		this.handler.handleReturnValue(new Object(), parameter, message).block();
-		Flux<DataBuffer> result = this.handler.encodedContent;
-
-		StepVerifier.create(result)
-				.expectErrorMessage("No encoder for method 'object' parameter -1")
+		StepVerifier.create(this.handler.handleReturnValue(new Object(), parameter, this.message))
+				.expectErrorMessage("No encoder for java.lang.Object, current value type is class java.lang.Object")
 				.verify();
 	}
 
@@ -121,34 +113,13 @@ public class EncoderMethodReturnValueHandlerTests {
 
 		Flux<String> fluxString() { return null; }
 
+		Flux<Object> fluxObject() { return null; }
+
 		void voidReturn() { }
 
 		Mono<Void> monoVoid() { return null; }
 
 		Completable completable() { return null; }
-	}
-
-
-	private static class TestEncoderMethodReturnValueHandler extends AbstractEncoderMethodReturnValueHandler {
-
-		private Flux<DataBuffer> encodedContent;
-
-
-		public Flux<DataBuffer> getEncodedContent() {
-			return this.encodedContent;
-		}
-
-		protected TestEncoderMethodReturnValueHandler(List<Encoder<?>> encoders, ReactiveAdapterRegistry registry) {
-			super(encoders, registry);
-		}
-
-		@Override
-		protected Mono<Void> handleEncodedContent(
-				Flux<DataBuffer> encodedContent, MethodParameter returnType, Message<?> message) {
-
-			this.encodedContent = encodedContent;
-			return Mono.empty();
-		}
 	}
 
 }

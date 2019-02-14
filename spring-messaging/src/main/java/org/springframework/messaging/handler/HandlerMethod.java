@@ -298,7 +298,7 @@ public class HandlerMethod {
 	 */
 	public String getShortLogMessage() {
 		int args = this.method.getParameterCount();
-		return getBeanType().getName() + "#" + this.method.getName() + "[" + args + " args]";
+		return getBeanType().getSimpleName() + "#" + this.method.getName() + "[" + args + " args]";
 	}
 
 

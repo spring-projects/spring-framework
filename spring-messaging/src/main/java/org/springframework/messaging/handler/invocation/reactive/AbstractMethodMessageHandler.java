@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,6 +95,9 @@ public abstract class AbstractMethodMessageHandler<T>
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 	@Nullable
+	private Predicate<Class<?>> handlerPredicate;
+
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
@@ -135,6 +139,24 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	public ReturnValueHandlerConfigurer getReturnValueHandlerConfigurer() {
 		return this.returnValueHandlerConfigurer;
+	}
+
+	/**
+	 * Configure a predicate to decide if which beans in the Spring context
+	 * should be checked to see if they have message handling methods.
+	 * <p>By default this is not set and sub-classes should configure it in
+	 * order to enable auto-detection of message handling methods.
+	 */
+	public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {
+		this.handlerPredicate = handlerPredicate;
+	}
+
+	/**
+	 * Return the {@link #setHandlerPredicate configured} handler predicate.
+	 */
+	@Nullable
+	public Predicate<Class<?>> getHandlerPredicate() {
+		return this.handlerPredicate;
 	}
 
 	/**
@@ -228,6 +250,10 @@ public abstract class AbstractMethodMessageHandler<T>
 			logger.warn("No ApplicationContext available for detecting beans with message handling methods.");
 			return;
 		}
+		if (this.handlerPredicate == null) {
+			logger.warn("'handlerPredicate' not configured: no auto-detection of message handling methods.");
+			return;
+		}
 		for (String beanName : this.applicationContext.getBeanNamesForType(Object.class)) {
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
 				Class<?> beanType = null;
@@ -240,7 +266,7 @@ public abstract class AbstractMethodMessageHandler<T>
 						logger.debug("Could not resolve target class for bean with name '" + beanName + "'", ex);
 					}
 				}
-				if (beanType != null && isHandler(beanType)) {
+				if (beanType != null && this.handlerPredicate.test(beanType)) {
 					detectHandlerMethods(beanName);
 				}
 			}
@@ -248,16 +274,14 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Whether the given bean could contain message handling methods.
-	 */
-	protected abstract boolean isHandler(Class<?> beanType);
-
-	/**
 	 * Detect if the given handler has any methods that can handle messages and if
 	 * so register it with the extracted mapping information.
+	 * <p><strong>Note:</strong> This method is protected and can be invoked by
+	 * sub-classes, but this should be done on startup only as documented in
+	 * {@link #registerHandlerMethod}.
 	 * @param handler the handler to check, either an instance of a Spring bean name
 	 */
-	private void detectHandlerMethods(Object handler) {
+	protected final void detectHandlerMethods(Object handler) {
 		Class<?> handlerType;
 		if (handler instanceof String) {
 			ApplicationContext context = getApplicationContext();
@@ -288,14 +312,17 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
-	 * Register a handler method and its unique mapping, on startup.
+	 * Register a handler method and its unique mapping.
+	 * <p><strong>Note:</strong> This method is protected and can be invoked by
+	 * sub-classes. Keep in mind however that the registration is not protected
+	 * for concurrent use, and is expected to be done on startup.
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
 	 * @param mapping the mapping conditions associated with the handler method
 	 * @throws IllegalStateException if another method was already registered
 	 * under the same mapping
 	 */
-	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
+	protected final void registerHandlerMethod(Object handler, Method method, T mapping) {
 		Assert.notNull(mapping, "Mapping must not be null");
 		HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
 		HandlerMethod oldHandlerMethod = this.handlerMethods.get(mapping);
@@ -348,6 +375,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	public Mono<Void> handleMessage(Message<?> message) throws MessagingException {
 		Match<T> match = getHandlerMethod(message);
 		if (match == null) {
+			// handleNoMatch would have been invoked already
 			return Mono.empty();
 		}
 		HandlerMethod handlerMethod = match.getHandlerMethod().createWithResolvedBean();
@@ -383,6 +411,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			addMatchesToCollection(allMappings, message, matches);
 		}
 		if (matches.isEmpty()) {
+			handleNoMatch(destination, message);
 			return null;
 		}
 		Comparator<Match<T>> comparator = new MatchComparator(getMappingComparator(message));
@@ -443,12 +472,22 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected abstract Comparator<T> getMappingComparator(Message<?> message);
 
+	/**
+	 * Invoked when no matching handler is found.
+	 * @param destination the destination
+	 * @param message the message
+	 */
+	@Nullable
+	protected void handleNoMatch(@Nullable String destination, Message<?> message) {
+		logger.debug("No handlers for destination '" + destination + "'");
+	}
+
 
 	private Mono<Void> processHandlerException(Message<?> message, HandlerMethod handlerMethod, Exception ex) {
 		InvocableHandlerMethod exceptionInvocable = findExceptionHandler(handlerMethod, ex);
 		if (exceptionInvocable == null) {
 			logger.error("Unhandled exception from message handling method", ex);
-			return Mono.empty();
+			return Mono.error(ex);
 		}
 		exceptionInvocable.setArgumentResolvers(this.argumentResolvers.getResolvers());
 		if (logger.isDebugEnabled()) {

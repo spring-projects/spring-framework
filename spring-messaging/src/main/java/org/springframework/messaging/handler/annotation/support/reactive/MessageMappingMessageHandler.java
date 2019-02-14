@@ -19,21 +19,25 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.ReactiveSubscribableChannel;
 import org.springframework.messaging.handler.CompositeMessageCondition;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -51,58 +55,57 @@ import org.springframework.util.StringValueResolver;
 import org.springframework.validation.Validator;
 
 /**
- * Extension of {@link AbstractMethodMessageHandler} for
- * {@link MessageMapping @MessageMapping} methods.
+ * Extension of {@link AbstractMethodMessageHandler} for reactive, non-blocking
+ * handling of messages via {@link MessageMapping @MessageMapping} methods.
+ * By default such methods are detected in {@code @Controller} Spring beans but
+ * that can be changed via {@link #setHandlerPredicate(Predicate)}.
  *
- * <p>The payload of incoming messages is decoded through
- * {@link PayloadMethodArgumentResolver} using one of the configured
- * {@link #setDecoders(List)} decoders.
+ * <p>Payloads for incoming messages are decoded through the configured
+ * {@link #setDecoders(List)} decoders, with the help of
+ * {@link PayloadMethodArgumentResolver}.
  *
- * <p>The {@link #setEncoderReturnValueHandler encoderReturnValueHandler}
- * property must be set to encode and handle return values from
- * {@code @MessageMapping} methods.
+ * <p>There is no default handling for return values but
+ * {@link #setReturnValueHandlerConfigurer} can be used to configure custom
+ * return value handlers. Sub-classes may also override
+ * {@link #initReturnValueHandlers()} to set up default return value handlers.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
+ * @see AbstractEncoderMethodReturnValueHandler
  */
 public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<CompositeMessageCondition>
-		implements EmbeddedValueResolverAware {
+		implements SmartLifecycle, EmbeddedValueResolverAware {
 
-	private PathMatcher pathMatcher = new AntPathMatcher();
+	private final ReactiveSubscribableChannel inboundChannel;
 
 	private final List<Decoder<?>> decoders = new ArrayList<>();
 
 	@Nullable
 	private Validator validator;
 
-	@Nullable
-	private HandlerMethodReturnValueHandler encoderReturnValueHandler;
+	private PathMatcher pathMatcher;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
 	@Nullable
 	private StringValueResolver valueResolver;
 
+	private volatile boolean running = false;
 
-	/**
-	 * Set the PathMatcher implementation to use for matching destinations
-	 * against configured destination patterns.
-	 * <p>By default, {@link AntPathMatcher} is used.
-	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be null");
-		this.pathMatcher = pathMatcher;
+	private final Object lifecycleMonitor = new Object();
+
+
+	public MessageMappingMessageHandler(ReactiveSubscribableChannel inboundChannel) {
+		Assert.notNull(inboundChannel, "`inboundChannel` is required");
+		this.inboundChannel = inboundChannel;
+		this.pathMatcher = new AntPathMatcher();
+		((AntPathMatcher) this.pathMatcher).setPathSeparator(".");
+		setHandlerPredicate(beanType -> AnnotatedElementUtils.hasAnnotation(beanType, Controller.class));
 	}
 
-	/**
-	 * Return the PathMatcher implementation to use for matching destinations.
-	 */
-	public PathMatcher getPathMatcher() {
-		return this.pathMatcher;
-	}
 
 	/**
-	 * Configure the decoders to user for incoming payloads.
+	 * Configure the decoders to use for incoming payloads.
 	 */
 	public void setDecoders(List<? extends Decoder<?>> decoders) {
 		this.decoders.addAll(decoders);
@@ -116,14 +119,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	/**
-	 * Return the configured Validator instance.
-	 */
-	@Nullable
-	public Validator getValidator() {
-		return this.validator;
-	}
-
-	/**
 	 * Set the Validator instance used for validating {@code @Payload} arguments.
 	 * @see org.springframework.validation.annotation.Validated
 	 * @see PayloadMethodArgumentResolver
@@ -133,27 +128,28 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	/**
-	 * Configure the return value handler that will encode response content.
-	 * Consider extending {@link AbstractEncoderMethodReturnValueHandler} which
-	 * provides the infrastructure to encode and all that's left is to somehow
-	 * handle the encoded content, e.g. by wrapping as a message and passing it
-	 * to something or sending it somewhere.
-	 * <p>By default this is not configured in which case payload/content return
-	 * values from {@code @MessageMapping} methods will remain unhandled.
-	 * @param encoderReturnValueHandler the return value handler to use
-	 * @see AbstractEncoderMethodReturnValueHandler
+	 * Return the configured Validator instance.
 	 */
-	public void setEncoderReturnValueHandler(@Nullable HandlerMethodReturnValueHandler encoderReturnValueHandler) {
-		this.encoderReturnValueHandler = encoderReturnValueHandler;
+	@Nullable
+	public Validator getValidator() {
+		return this.validator;
 	}
 
 	/**
-	 * Return the configured
-	 * {@link #setEncoderReturnValueHandler encoderReturnValueHandler}.
+	 * Set the PathMatcher implementation to use for matching destinations
+	 * against configured destination patterns.
+	 * <p>By default, {@link AntPathMatcher} is used with separator set to ".".
 	 */
-	@Nullable
-	public HandlerMethodReturnValueHandler getEncoderReturnValueHandler() {
-		return this.encoderReturnValueHandler;
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		this.pathMatcher = pathMatcher;
+	}
+
+	/**
+	 * Return the PathMatcher implementation to use for matching destinations.
+	 */
+	public PathMatcher getPathMatcher() {
+		return this.pathMatcher;
 	}
 
 	/**
@@ -204,19 +200,39 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	@Override
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
-		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
-		handlers.addAll(getReturnValueHandlerConfigurer().getCustomHandlers());
-		if (this.encoderReturnValueHandler != null) {
-			handlers.add(this.encoderReturnValueHandler);
-		}
-		return handlers;
+		return Collections.emptyList();
 	}
 
 
 	@Override
-	protected boolean isHandler(Class<?> beanType) {
-		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
+	public final void start() {
+		synchronized (this.lifecycleMonitor) {
+			this.inboundChannel.subscribe(this);
+			this.running = true;
+		}
 	}
+
+	@Override
+	public final void stop() {
+		synchronized (this.lifecycleMonitor) {
+			this.running = false;
+			this.inboundChannel.unsubscribe(this);
+		}
+	}
+
+	@Override
+	public final void stop(Runnable callback) {
+		synchronized (this.lifecycleMonitor) {
+			stop();
+			callback.run();
+		}
+	}
+
+	@Override
+	public final boolean isRunning() {
+		return this.running;
+	}
+
 
 	@Override
 	protected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType) {

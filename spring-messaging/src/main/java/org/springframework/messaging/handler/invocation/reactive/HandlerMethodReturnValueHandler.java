@@ -31,6 +31,10 @@ import org.springframework.messaging.Message;
  */
 public interface HandlerMethodReturnValueHandler {
 
+	/** Header containing a DataBufferFactory to use. */
+	public static final String DATA_BUFFER_FACTORY_HEADER = "dataBufferFactoryHeader";
+
+
 	/**
 	 * Whether the given {@linkplain MethodParameter method return type} is
 	 * supported by this handler.
