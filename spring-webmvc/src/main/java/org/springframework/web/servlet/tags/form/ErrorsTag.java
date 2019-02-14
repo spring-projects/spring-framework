@@ -317,8 +317,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 */
 	@Override
 	protected void exposeAttributes() throws JspException {
-		List<String> errorMessages = new ArrayList<>();
-		errorMessages.addAll(Arrays.asList(getBindStatus().getErrorMessages()));
+		List<String> errorMessages = new ArrayList<>(Arrays.asList(getBindStatus().getErrorMessages()));
 		this.oldMessages = this.pageContext.getAttribute(MESSAGES_ATTRIBUTE, PageContext.PAGE_SCOPE);
 		this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, errorMessages, PageContext.PAGE_SCOPE);
 		this.errorMessagesWereExposed = true;
