@@ -289,8 +289,8 @@ The following table summarizes the strategy for converting ``String``s to ``Reso
 [[resources-resourceloaderaware]]
 == The ResourceLoaderAware interface
 
-The `ResourceLoaderAware` interface is a special marker interface, identifying objects
-that expect to be provided with a `ResourceLoader` reference.
+The `ResourceLoaderAware` interface is a special callback interface which identifies
+components that expect to be provided with a `ResourceLoader` reference:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
