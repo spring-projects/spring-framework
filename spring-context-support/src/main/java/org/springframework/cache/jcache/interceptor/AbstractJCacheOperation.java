@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,12 +62,15 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 		this.allParameterDetails = initializeAllParameterDetails(methodDetails.getMethod());
 	}
 
-
-	/**
-	 * Return the {@link ExceptionTypeFilter} to use to filter exceptions thrown while
-	 * invoking the method.
-	 */
-	public abstract ExceptionTypeFilter getExceptionTypeFilter();
+	private static List<CacheParameterDetail> initializeAllParameterDetails(Method method) {
+		int parameterCount = method.getParameterCount();
+		List<CacheParameterDetail> result = new ArrayList<>(parameterCount);
+		for (int i = 0; i < parameterCount; i++) {
+			CacheParameterDetail detail = new CacheParameterDetail(method, i);
+			result.add(detail);
+		}
+		return result;
+	}
 
 
 	@Override
@@ -113,11 +116,24 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 		return result.toArray(new CacheInvocationParameter[0]);
 	}
 
+
+	/**
+	 * Return the {@link ExceptionTypeFilter} to use to filter exceptions thrown while
+	 * invoking the method.
+	 * @see #createExceptionTypeFilter
+	 */
+	public abstract ExceptionTypeFilter getExceptionTypeFilter();
+
+	/**
+	 * Convenience method for subclasses to create a specific {@code ExceptionTypeFilter}.
+	 * @see #getExceptionTypeFilter()
+	 */
 	protected ExceptionTypeFilter createExceptionTypeFilter(
 			Class<? extends Throwable>[] includes, Class<? extends Throwable>[] excludes) {
 
 		return new ExceptionTypeFilter(Arrays.asList(includes), Arrays.asList(excludes), true);
 	}
+
 
 	@Override
 	public String toString() {
@@ -133,16 +149,6 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 		result.append(getClass().getSimpleName());
 		result.append("[");
 		result.append(this.methodDetails);
-		return result;
-	}
-
-
-	private static List<CacheParameterDetail> initializeAllParameterDetails(Method method) {
-		List<CacheParameterDetail> result = new ArrayList<>();
-		for (int i = 0; i < method.getParameterCount(); i++) {
-			CacheParameterDetail detail = new CacheParameterDetail(method, i);
-			result.add(detail);
-		}
 		return result;
 	}
 
