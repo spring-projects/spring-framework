@@ -26,7 +26,7 @@ import java.net.URI
 
 /**
  * Allow to create easily a `RouterFunction<ServerResponse>` from a Kotlin router DSL based
- * on the same building blocks than the Java one ([RouterFunction], [RequestPredicate],
+ * on the same building blocks as the Java one ([RouterFunction], [RequestPredicate],
  * [HandlerFunction]).
  *
  * Example:
