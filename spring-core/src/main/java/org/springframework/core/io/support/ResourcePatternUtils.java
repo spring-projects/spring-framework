@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,10 @@ public abstract class ResourcePatternUtils {
 	}
 
 	/**
-	 * Return a default ResourcePatternResolver for the given ResourceLoader.
-	 * <p>This might be the ResourceLoader itself, if it implements the
-	 * ResourcePatternResolver extension, or a PathMatchingResourcePatternResolver
-	 * built on the given ResourceLoader.
+	 * Return a default {@link ResourcePatternResolver} for the given {@link ResourceLoader}.
+	 * <p>This might be the {@code ResourceLoader} itself, if it implements the
+	 * {@code ResourcePatternResolver} extension, or a default
+	 * {@link PathMatchingResourcePatternResolver} built on the given {@code ResourceLoader}.
 	 * @param resourceLoader the ResourceLoader to build a pattern resolver for
 	 * (may be {@code null} to indicate a default ResourceLoader)
 	 * @return the ResourcePatternResolver

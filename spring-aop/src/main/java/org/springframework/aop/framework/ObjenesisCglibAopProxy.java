@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Objenesis-based extension of {@link CglibAopProxy} to create proxy instances
- * without invoking the constructor of the class.
+ * without invoking the constructor of the class. Used by default as of Spring 4.
  *
  * @author Oliver Gierke
  * @author Juergen Hoeller
@@ -53,7 +53,6 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected Object createProxyClassAndInstance(Enhancer enhancer, Callback[] callbacks) {
 		Class<?> proxyClass = enhancer.createClass();
 		Object proxyInstance = null;
