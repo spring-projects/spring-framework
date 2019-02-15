@@ -125,8 +125,8 @@ public class CompoundExpression extends SpelNodeImpl {
 
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		for (int i = 0; i < this.children.length;i++) {
-			this.children[i].generateCode(mv, cf);
+		for (SpelNodeImpl child : this.children) {
+			child.generateCode(mv, cf);
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}

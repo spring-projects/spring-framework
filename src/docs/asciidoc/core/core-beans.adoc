@@ -3534,16 +3534,16 @@ Thus, beans can programmatically manipulate the `ApplicationContext` that create
 through the `ApplicationContext` interface or by casting the reference to a known
 subclass of this interface (such as `ConfigurableApplicationContext`, which exposes
 additional functionality). One use would be the programmatic retrieval of other beans.
-Sometimes this capability is useful. However, in general, you should avoid it, because it
-couples the code to Spring and does not follow the Inversion of Control style, where
-collaborators are provided to beans as properties. Other methods of the
-`ApplicationContext` provide access to file resources, publishing application events, and
-accessing a `MessageSource`. These additional features are described in
+Sometimes this capability is useful. However, in general, you should avoid it, because
+it couples the code to Spring and does not follow the Inversion of Control style,
+where collaborators are provided to beans as properties. Other methods of the
+`ApplicationContext` provide access to file resources, publishing application events,
+and accessing a `MessageSource`. These additional features are described in
 <<context-introduction>>.
 
 As of Spring 2.5, autowiring is another alternative to obtain a reference to the
-`ApplicationContext`. The "`traditional`" `constructor` and `byType` autowiring modes (as
-described in <<beans-factory-autowire>>) can provide a dependency of type
+`ApplicationContext`. The "`traditional`" `constructor` and `byType` autowiring modes
+(as described in <<beans-factory-autowire>>) can provide a dependency of type
 `ApplicationContext` for a constructor argument or a setter method parameter,
 respectively. For more flexibility, including the ability to autowire fields and
 multiple parameter methods, use the new annotation-based autowiring features. If you do,
@@ -3575,11 +3575,10 @@ init-method.
 [[aware-list]]
 === Other `Aware` Interfaces
 
-Besides `ApplicationContextAware` and `BeanNameAware` (discussed
-<<beans-factory-aware,earlier>>), Spring offers a range of `Aware` interfaces that let
-beans indicate to the container that they require a certain infrastructure dependency. As
-a general rule, the name is a good indication of the dependency type. The following table
-summarizes the most important `Aware` interfaces:
+Besides `ApplicationContextAware` and `BeanNameAware` (discussed <<beans-factory-aware,earlier>>),
+Spring offers a wide range of `Aware` callback interfaces that let beans indicate to the container
+that they require a certain infrastructure dependency. As a general rule, the name indicates the
+dependency type. The following table summarizes the most important `Aware` interfaces:
 
 [[beans-factory-nature-aware-list]]
 .Aware interfaces
@@ -3608,7 +3607,7 @@ summarizes the most important `Aware` interfaces:
 
 | `BootstrapContextAware`
 | Resource adapter `BootstrapContext` the container runs in. Typically available only in
-  JCA aware `ApplicationContext` instances.
+  JCA-aware `ApplicationContext` instances.
 | <<integration.adoc#cci, JCA CCI>>
 
 | `LoadTimeWeaverAware`
@@ -8809,19 +8808,18 @@ specific and appropriate to the actual application context type.
 
 You can configure a bean deployed into the application context to implement the special
 callback interface, `ResourceLoaderAware`, to be automatically called back at
-initialization time with the application context itself passed in as the
-`ResourceLoader`. You can also expose properties of type `Resource`, to be used to
-access static resources. They are injected into it like any other properties. You
-can specify those `Resource` properties as simple `String` paths and rely on a special
-JavaBean `PropertyEditor` (which is automatically registered by the context) to convert
-those text strings to actual `Resource` objects when the bean is deployed.
+initialization time with the application context itself passed in as the `ResourceLoader`.
+You can also expose properties of type `Resource`, to be used to access static resources.
+They are injected into it like any other properties. You can specify those `Resource`
+properties as simple `String` paths and rely on automatic conversion from those text
+strings to actual `Resource` objects when the bean is deployed.
 
 The location path or paths supplied to an `ApplicationContext` constructor are actually
-resource strings and, in simple form, are treated appropriately according to the specific context
-implementation. For example `ClassPathXmlApplicationContext` treats a simple location path as a
-classpath location. You can also use location paths (resource strings) with special
-prefixes to force loading of definitions from the classpath or a URL, regardless of the
-actual context type.
+resource strings and, in simple form, are treated appropriately according to the specific
+context implementation. For example `ClassPathXmlApplicationContext` treats a simple
+location path as a classpath location. You can also use location paths (resource strings)
+with special prefixes to force loading of definitions from the classpath or a URL,
+regardless of the actual context type.
 
 
 
