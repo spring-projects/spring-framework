@@ -323,9 +323,9 @@ The following table summarizes the strategy for converting `String` objects to `
 [[resources-resourceloaderaware]]
 == The `ResourceLoaderAware` interface
 
-The `ResourceLoaderAware` interface is a special marker interface that identifies objects
-that expect to be provided with a `ResourceLoader` reference. The following listing shows
-the definition of the `ResourceLoaderAware` interface:
+The `ResourceLoaderAware` interface is a special callback interface which identifies
+components that expect to be provided with a `ResourceLoader` reference. The following
+listing shows the definition of the `ResourceLoaderAware` interface:
 
 ====
 [source,java,indent=0]
@@ -338,29 +338,29 @@ the definition of the `ResourceLoaderAware` interface:
 ----
 ====
 
-When a class implements `ResourceLoaderAware` and is deployed into an application
-context (as a Spring-managed bean), it is recognized as `ResourceLoaderAware` by the
-application context. The application context then invokes
-`setResourceLoader(ResourceLoader)`, supplying itself as the argument (remember, all
-application contexts in Spring implement the `ResourceLoader` interface).
+When a class implements `ResourceLoaderAware` and is deployed into an application context
+(as a Spring-managed bean), it is recognized as `ResourceLoaderAware` by the application
+context. The application context then invokes `setResourceLoader(ResourceLoader)`,
+supplying itself as the argument (remember, all application contexts in Spring implement
+the `ResourceLoader` interface).
 
-Since an `ApplicationContext` is a `ResourceLoader`, the bean could also
-implement the `ApplicationContextAware` interface and use the supplied application
-context directly to load resources. However, in general, it is better to use the specialized
-`ResourceLoader` interface if that is all you need. The code would be coupled only
-to the resource loading interface (which can be considered a utility interface) and not to
-the whole Spring `ApplicationContext` interface.
+Since an `ApplicationContext` is a `ResourceLoader`, the bean could also implement the
+`ApplicationContextAware` interface and use the supplied application context directly to
+load resources. However, in general, it is better to use the specialized `ResourceLoader`
+interface if that is all you need. The code would be coupled only to the resource loading
+interface (which can be considered a utility interface) and not to the whole Spring
+`ApplicationContext` interface.
 
 As of Spring 2.5, you can rely upon autowiring of the `ResourceLoader` as an alternative
 to implementing the `ResourceLoaderAware` interface. The "`traditional`" `constructor` and
-`byType` autowiring modes (as described in <<beans-factory-autowire>>) are now capable
-of providing a dependency of type `ResourceLoader` for either a constructor argument or a
+`byType` autowiring modes (as described in <<beans-factory-autowire>>) are now capable of
+providing a dependency of type `ResourceLoader` for either a constructor argument or a
 setter method parameter, respectively. For more flexibility (including the ability to
 autowire fields and multiple parameter methods), consider using the annotation-based
 autowiring features. In that case, the `ResourceLoader` is autowired into a field,
-constructor argument, or method parameter that expects the `ResourceLoader` type as
-long as the field, constructor, or method in question carries the `@Autowired`
-annotation. For more information, see <<beans-autowired-annotation>>.
+constructor argument, or method parameter that expects the `ResourceLoader` type as long
+as the field, constructor, or method in question carries the `@Autowired` annotation.
+For more information, see <<beans-autowired-annotation>>.
 
 
 
