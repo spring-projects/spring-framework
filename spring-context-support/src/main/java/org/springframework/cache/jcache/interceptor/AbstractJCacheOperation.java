@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cache.jcache.interceptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,8 +32,6 @@ import javax.cache.annotation.CacheValue;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ExceptionTypeFilter;
-
-import static java.util.Arrays.*;
 
 /**
  * A base {@link JCacheOperation} implementation.
@@ -50,24 +49,27 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 
 
 	/**
-	 * Create a new instance.
+	 * Construct a new {@code AbstractJCacheOperation}.
 	 * @param methodDetails the {@link CacheMethodDetails} related to the cached method
 	 * @param cacheResolver the cache resolver to resolve regular caches
 	 */
 	protected AbstractJCacheOperation(CacheMethodDetails<A> methodDetails, CacheResolver cacheResolver) {
-		Assert.notNull(methodDetails, "method details must not be null.");
-		Assert.notNull(cacheResolver, "cache resolver must not be null.");
+		Assert.notNull(methodDetails, "CacheMethodDetails must not be null");
+		Assert.notNull(cacheResolver, "CacheResolver must not be null");
 		this.methodDetails = methodDetails;
 		this.cacheResolver = cacheResolver;
 		this.allParameterDetails = initializeAllParameterDetails(methodDetails.getMethod());
 	}
 
-
-	/**
-	 * Return the {@link ExceptionTypeFilter} to use to filter exceptions thrown while
-	 * invoking the method.
-	 */
-	public abstract ExceptionTypeFilter getExceptionTypeFilter();
+	private static List<CacheParameterDetail> initializeAllParameterDetails(Method method) {
+		int parameterCount = method.getParameterTypes().length;
+		List<CacheParameterDetail> result = new ArrayList<CacheParameterDetail>(parameterCount);
+		for (int i = 0; i < parameterCount; i++) {
+			CacheParameterDetail detail = new CacheParameterDetail(method, i);
+			result.add(detail);
+		}
+		return result;
+	}
 
 
 	@Override
@@ -113,11 +115,24 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 		return result.toArray(new CacheInvocationParameter[result.size()]);
 	}
 
+
+	/**
+	 * Return the {@link ExceptionTypeFilter} to use to filter exceptions thrown while
+	 * invoking the method.
+	 * @see #createExceptionTypeFilter
+	 */
+	public abstract ExceptionTypeFilter getExceptionTypeFilter();
+
+	/**
+	 * Convenience method for subclasses to create a specific {@code ExceptionTypeFilter}.
+	 * @see #getExceptionTypeFilter()
+	 */
 	protected ExceptionTypeFilter createExceptionTypeFilter(
 			Class<? extends Throwable>[] includes, Class<? extends Throwable>[] excludes) {
 
-		return new ExceptionTypeFilter(asList(includes), asList(excludes), true);
+		return new ExceptionTypeFilter(Arrays.asList(includes), Arrays.asList(excludes), true);
 	}
+
 
 	@Override
 	public String toString() {
@@ -137,16 +152,9 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	}
 
 
-	private static List<CacheParameterDetail> initializeAllParameterDetails(Method method) {
-		List<CacheParameterDetail> result = new ArrayList<CacheParameterDetail>();
-		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			CacheParameterDetail detail = new CacheParameterDetail(method, i);
-			result.add(detail);
-		}
-		return result;
-	}
-
-
+	/**
+	 * Details for a single cache parameter.
+	 */
 	protected static class CacheParameterDetail {
 
 		private final Class<?> rawType;
@@ -196,6 +204,9 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	}
 
 
+	/**
+	 * A single cache invocation parameter.
+	 */
 	protected static class CacheInvocationParameterImpl implements CacheInvocationParameter {
 
 		private final CacheParameterDetail detail;
