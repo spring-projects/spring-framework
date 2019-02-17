@@ -528,6 +528,16 @@ and https://github.com/spring-projects/spring-boot/issues/1254[`@ConfigurationPr
 for more details.
 
 
+=== Checked Exceptions
+
+Java and https://kotlinlang.org/docs/reference/exceptions.html[Kotlin exception handling] are pretty close, with the main
+difference being that Kotlin treats all exceptions as unchecked exceptions. However, when using proxied objects
+(for example classes or methods annotated with `@Transactional`), checked exceptions thrown will be wrapped by default in
+an `UndeclaredThrowableException`.
+
+To get the original exception thrown like in Java, methods should be annotated with https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-throws/index.html[`@Throws`]
+to specify explicitly the checked exceptions thrown (for example `@Throws(IOException::class)`).
+
 
 === Annotation Array Attributes
 
