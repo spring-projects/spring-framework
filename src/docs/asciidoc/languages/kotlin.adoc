@@ -324,9 +324,12 @@ refactoring support in a supported IDE, as the following example shows:
 	"""
 ----
 
+NOTE: Kotlin Script Templates are not compatible yet with Spring Boot fatjar mechanism, see related
+https://youtrack.jetbrains.com/issue/KT-21443[KT-21443] and https://youtrack.jetbrains.com/issue/KT-27956[KT-27956]
+issues.
+
 See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
-
 
 
 [[kotlin-spring-projects-in-kotlin]]
@@ -496,6 +499,16 @@ See these issues about https://github.com/spring-projects/spring-boot/issues/876
 and https://github.com/spring-projects/spring-boot/issues/1254[`@ConfigurationProperties` binding on interfaces]
 for more details.
 
+
+=== Checked Exceptions
+
+Java and https://kotlinlang.org/docs/reference/exceptions.html[Kotlin exception handling] are pretty close, with the main
+difference being that Kotlin treats all exceptions as unchecked exceptions. However, when using proxied objects
+(for example classes or methods annotated with `@Transactional`), checked exceptions thrown will be wrapped by default in
+an `UndeclaredThrowableException`.
+
+To get the original exception thrown like in Java, methods should be annotated with https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-throws/index.html[`@Throws`]
+to specify explicitly the checked exceptions thrown (for example `@Throws(IOException::class)`).
 
 
 === Annotation Array Attributes
