@@ -340,9 +340,12 @@ refactoring support in a supported IDE, as the following example shows:
 ----
 ====
 
+NOTE: Kotlin Script Templates are not compatible yet with Spring Boot fatjar mechanism, see related
+https://youtrack.jetbrains.com/issue/KT-21443[KT-21443] and https://youtrack.jetbrains.com/issue/KT-27956[KT-27956]
+issues.
+
 See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
-
 
 
 [[kotlin-spring-projects-in-kotlin]]
