@@ -117,8 +117,6 @@ configure(allprojects) { project ->
 		kotlinOptions {
 			jvmTarget = "1.8"
 			freeCompilerArgs = ["-Xjsr305=strict"]
-			apiVersion = "1.2"
-			languageVersion = "1.2"
 		}
 	}
 
@@ -160,7 +158,7 @@ configure(allprojects) { project ->
 		testCompile("org.mockito:mockito-core:2.24.0") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("io.mockk:mockk:1.9")
+		testCompile("io.mockk:mockk:1.9.1")
 		testCompile("org.hamcrest:hamcrest-all:1.3")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
