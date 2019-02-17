@@ -567,7 +567,7 @@ is https://junit.org/junit5/[JUnit 5], as well as https://mockk.io/[Mockk] for m
 ==== Constructor injection
 
 As described in the <<testing#testcontext-junit-jupiter-di#spring-web-reactive,dedicated section>>, JUnit 5 allows
-constructor injection of beans which is pretty useful with Kotlin in order to use `val` instead of `lateinit var `.
+constructor injection of beans which is pretty useful with Kotlin in order to use `val` instead of `lateinit var`.
 
 
 ====
@@ -589,8 +589,8 @@ You can also use `@Autowired` at constructor level to autowire all parameters.
 ----
 @SpringJUnitConfig(TestConfig::class)
 class OrderServiceIntegrationTests @Autowired constructor(
-		val orderService: OrderService,
-		val customerService: CustomerService) {
+        val orderService: OrderService,
+        val customerService: CustomerService) {
 
     // tests that use the injected OrderService and CustomerService
 }
@@ -600,16 +600,16 @@ class OrderServiceIntegrationTests @Autowired constructor(
 
 ==== `PER_CLASS` Lifecycle
 
-Kotlin lets you specify meaningful test function names between backticks (\`).
+Kotlin lets you specify meaningful test function names between backticks (```).
 As of JUnit 5, Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
 annotation to enable a single instantiation of test classes, which allows the use of `@BeforeAll` and `@AfterAll`
 annotations on non-static methods, which is a good fit for Kotlin.
 
-You can now change the default behavior to `PER_CLASS` thanks to a
+You can also change the default behavior to `PER_CLASS` thanks to a
 `junit-platform.properties` file with a
 `junit.jupiter.testinstance.lifecycle.default = per_class` property.
 
-The following example `@BeforeAll` and `@AfterAll` annotations on non-static methods:
+The following example demonstrates `@BeforeAll` and `@AfterAll` annotations on non-static methods:
 
 [source]
 ----
