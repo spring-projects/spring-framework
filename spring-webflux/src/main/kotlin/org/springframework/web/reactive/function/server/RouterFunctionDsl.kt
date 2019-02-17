@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
 import reactor.core.publisher.cast
 import java.net.URI
+import java.util.function.Supplier
 
 /**
  * Allow to create easily a `RouterFunction<ServerResponse>` from a Kotlin router DSL based
@@ -51,6 +52,7 @@ import java.net.URI
  * ```
  * @author Sebastien Deleuze
  * @see RouterFunctionDsl
+ * @see RouterFunctions.Builder
  * @since 5.0
  */
 fun router(routes: RouterFunctionDsl.() -> Unit) = RouterFunctionDsl(routes).invoke()
@@ -61,11 +63,10 @@ fun router(routes: RouterFunctionDsl.() -> Unit) = RouterFunctionDsl(routes).inv
  * @author Sebastien Deleuze
  * @author Yevhenii Melnyk
  * @since 5.0
- * @see <a href="https://youtrack.jetbrains.com/issue/KT-15667">Kotlin issue about supporting ::foo for member functions</a>
  */
 open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : () -> RouterFunction<ServerResponse> {
 
-	private val routes = mutableListOf<RouterFunction<ServerResponse>>()
+	private val builder = RouterFunctions.route()
 
 	/**
 	 * Return a composed request predicate that tests against both this predicate AND
@@ -135,7 +136,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.nest
 	 */
 	fun RequestPredicate.nest(init: RouterFunctionDsl.() -> Unit) {
-		routes += RouterFunctions.nest(this, RouterFunctionDsl(init).invoke())
+		builder.nest(this, Supplier { RouterFunctionDsl(init).invoke() })
 	}
 
 	/**
@@ -147,7 +148,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RequestPredicates.path
 	*/
 	fun String.nest(init: RouterFunctionDsl.() -> Unit) {
-		routes += RouterFunctions.nest(path(this), RouterFunctionDsl(init).invoke())
+		builder.path(this, Supplier { RouterFunctionDsl(init).invoke() })
 	}
 
 	/**
@@ -155,7 +156,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun GET(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.GET(pattern), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.GET(pattern) { f(it).cast() }
 	}
 
 	/**
@@ -170,7 +171,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun HEAD(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.HEAD(pattern), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.HEAD(pattern) { f(it).cast() }
 	}
 
 	/**
@@ -185,7 +186,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun POST(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.POST(pattern), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.POST(pattern) { f(it).cast() }
 	}
 
 	/**
@@ -200,7 +201,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun PUT(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.PUT(pattern), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.PUT(pattern) { f(it).cast() }
 	}
 
 	/**
@@ -215,7 +216,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun PATCH(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.PATCH(pattern), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.PATCH(pattern) { f(it).cast() }
 	}
 
 	/**
@@ -232,7 +233,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun DELETE(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.DELETE(pattern), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.DELETE(pattern) { f(it).cast() }
 	}
 
 	/**
@@ -249,7 +250,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun OPTIONS(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.OPTIONS(pattern), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.OPTIONS(pattern) { f(it).cast() }
 	}
 
 	/**
@@ -266,7 +267,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun accept(mediaType: MediaType, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.accept(mediaType), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(RequestPredicates.accept(mediaType), HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -283,7 +284,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun contentType(mediaType: MediaType, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.contentType(mediaType), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(RequestPredicates.contentType(mediaType), HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -300,7 +301,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun headers(headersPredicate: (ServerRequest.Headers) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.headers(headersPredicate), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(RequestPredicates.headers(headersPredicate), HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -316,7 +317,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun method(httpMethod: HttpMethod, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.method(httpMethod), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(RequestPredicates.method(httpMethod), HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -331,7 +332,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun path(pattern: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.path(pattern), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(RequestPredicates.path(pattern), HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -345,7 +346,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun pathExtension(extension: String, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.pathExtension(extension), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(extension), HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -360,7 +361,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun pathExtension(predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.pathExtension(predicate), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(predicate), HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -376,7 +377,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	fun queryParam(name: String, predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.queryParam(name, predicate), HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(RequestPredicates.queryParam(name, predicate), HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -395,7 +396,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	operator fun RequestPredicate.invoke(f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(this, HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(this, HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -404,7 +405,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.route
 	 */
 	operator fun String.invoke(f: (ServerRequest) -> Mono<out ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.path(this),  HandlerFunction<ServerResponse> { f(it).cast() })
+		builder.add(RouterFunctions.route(RequestPredicates.path(this),  HandlerFunction<ServerResponse> { f(it).cast() }))
 	}
 
 	/**
@@ -412,7 +413,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.resources
 	 */
 	fun resources(path: String, location: Resource) {
-		routes += RouterFunctions.resources(path, location)
+		builder.resources(path, location)
 	}
 
 	/**
@@ -421,7 +422,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * [HandlerFunction] that handles GET, HEAD, and OPTIONS requests.
 	 */
 	fun resources(lookupFunction: (ServerRequest) -> Mono<Resource>) {
-		routes += RouterFunctions.resources(lookupFunction)
+		builder.resources(lookupFunction)
 	}
 
 	/**
@@ -546,12 +547,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 */
 	override fun invoke(): RouterFunction<ServerResponse> {
 		init()
-		return if (routes.isEmpty()) {
-			RouterFunction<ServerResponse> { Mono.empty() }
-		}
-		else {
-			routes.reduce(RouterFunction<ServerResponse>::and)
-		}
+		return builder.build()
 	}
 
 }
