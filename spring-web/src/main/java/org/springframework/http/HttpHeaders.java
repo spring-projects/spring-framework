@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -1505,17 +1506,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @return a combined result with comma delimitation
 	 */
 	protected String toCommaDelimitedString(List<String> headerValues) {
-		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> it = headerValues.iterator(); it.hasNext();) {
-			String val = it.next();
+		StringJoiner joiner = new StringJoiner(", ");
+		for (String val : headerValues) {
 			if (val != null) {
-				builder.append(val);
-				if (it.hasNext()) {
-					builder.append(", ");
-				}
+				joiner.add(val);
 			}
 		}
-		return builder.toString();
+		return joiner.toString();
 	}
 
 	/**

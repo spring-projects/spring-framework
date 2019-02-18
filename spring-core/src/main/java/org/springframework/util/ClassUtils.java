@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.springframework.lang.Nullable;
 
@@ -656,16 +657,11 @@ public abstract class ClassUtils {
 		if (CollectionUtils.isEmpty(classes)) {
 			return "[]";
 		}
-		StringBuilder sb = new StringBuilder("[");
-		for (Iterator<Class<?>> it = classes.iterator(); it.hasNext(); ) {
-			Class<?> clazz = it.next();
-			sb.append(clazz.getName());
-			if (it.hasNext()) {
-				sb.append(", ");
-			}
+		StringJoiner sj = new StringJoiner(", ", "[", "]");
+		for (Class<?> clazz : classes) {
+			sj.add(clazz.getName());
 		}
-		sb.append("]");
-		return sb.toString();
+		return sj.toString();
 	}
 
 	/**
