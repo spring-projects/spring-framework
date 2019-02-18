@@ -16,11 +16,15 @@
 
 package org.springframework.web.reactive.function.client
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
+import reactor.core.publisher.Mono
 
 /**
  * Mock object based tests for [WebClient] Kotlin extensions
@@ -29,9 +33,9 @@ import org.springframework.core.ParameterizedTypeReference
  */
 class WebClientExtensionsTests {
 
-	val requestBodySpec = mockk<WebClient.RequestBodySpec>(relaxed = true)
+	private val requestBodySpec = mockk<WebClient.RequestBodySpec>(relaxed = true)
 
-	val responseSpec = mockk<WebClient.ResponseSpec>(relaxed = true)
+	private val responseSpec = mockk<WebClient.ResponseSpec>(relaxed = true)
 
 
 	@Test
@@ -51,6 +55,37 @@ class WebClientExtensionsTests {
 	fun `ResponseSpec#bodyToFlux with reified type parameters`() {
 		responseSpec.bodyToFlux<List<Foo>>()
 		verify { responseSpec.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun awaitResponse() {
+		val response = mockk<ClientResponse>()
+		every { requestBodySpec.exchange() } returns Mono.just(response)
+		runBlocking {
+			assertEquals(response, requestBodySpec.awaitResponse())
+		}
+	}
+
+	@Test
+	fun body() {
+		val headerSpec = mockk<WebClient.RequestHeadersSpec<*>>()
+		val supplier: suspend () -> String = mockk()
+		every { requestBodySpec.body(ofType<Mono<String>>()) } returns headerSpec
+		runBlocking {
+			requestBodySpec.body(supplier)
+		}
+		verify {
+			requestBodySpec.body(ofType<Mono<String>>())
+		}
+	}
+
+	@Test
+	fun awaitBody() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		every { spec.bodyToMono<String>() } returns Mono.just("foo")
+		runBlocking {
+			assertEquals("foo", spec.awaitBody<String>())
+		}
 	}
 
 	class Foo

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,15 @@
 
 package org.springframework.web.reactive.function.server
 
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.codec.multipart.Part
+import org.springframework.util.MultiValueMap
+import org.springframework.web.server.WebSession
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.security.Principal
 
 /**
  * Extension for [ServerRequest.bodyToMono] providing a `bodyToMono<Foo>()` variant
@@ -41,3 +47,48 @@ inline fun <reified T : Any> ServerRequest.bodyToMono(): Mono<T> =
  */
 inline fun <reified T : Any> ServerRequest.bodyToFlux(): Flux<T> =
 		bodyToFlux(object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Coroutines variant of [ServerRequest.bodyToMono].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T? =
+		bodyToMono<T>().awaitFirstOrNull()
+
+/**
+ * Coroutines variant of [ServerRequest.formData].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend fun ServerRequest.awaitFormData(): MultiValueMap<String, String> =
+		formData().awaitSingle()
+
+/**
+ * Coroutines variant of [ServerRequest.multipartData].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend fun ServerRequest.awaitMultipartData(): MultiValueMap<String, Part> =
+		multipartData().awaitSingle()
+
+/**
+ * Coroutines variant of [ServerRequest.principal].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend fun ServerRequest.awaitPrincipal(): Principal =
+		principal().awaitSingle()
+
+/**
+ * Coroutines variant of [ServerRequest.session].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend fun ServerRequest.awaitSession(): WebSession =
+		session().awaitSingle()

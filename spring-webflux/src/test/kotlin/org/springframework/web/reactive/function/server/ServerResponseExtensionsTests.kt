@@ -16,12 +16,16 @@
 
 package org.springframework.web.reactive.function.server
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType.*
+import reactor.core.publisher.Mono
 
 /**
  * Mock object based tests for [ServerResponse] Kotlin extensions
@@ -30,7 +34,7 @@ import org.springframework.http.MediaType.*
  */
 class ServerResponseExtensionsTests {
 
-	val bodyBuilder = mockk<ServerResponse.BodyBuilder>(relaxed = true)
+	private val bodyBuilder = mockk<ServerResponse.BodyBuilder>(relaxed = true)
 
 
 	@Test
@@ -63,6 +67,54 @@ class ServerResponseExtensionsTests {
 	fun `BodyBuilder#html`() {
 		bodyBuilder.html()
 		verify { bodyBuilder.contentType(TEXT_HTML) }
+	}
+
+	@Test
+	fun await() {
+		val response = mockk<ServerResponse>()
+		val builder = mockk<ServerResponse.HeadersBuilder<*>>()
+		every { builder.build() } returns Mono.just(response)
+		runBlocking {
+			assertEquals(response, builder.buildAndAwait())
+		}
+	}
+
+	@Test
+	fun `bodyAndAwait with object parameter`() {
+		val response = mockk<ServerResponse>()
+		val body = "foo"
+		every { bodyBuilder.syncBody(ofType<String>()) } returns Mono.just(response)
+		runBlocking {
+			bodyBuilder.bodyAndAwait(body)
+		}
+		verify {
+			bodyBuilder.syncBody(ofType<String>())
+		}
+	}
+
+	@Test
+	fun `renderAndAwait with a vararg parameter`() {
+		val response = mockk<ServerResponse>()
+		every { bodyBuilder.render("foo", any(), any()) } returns Mono.just(response)
+		runBlocking {
+			bodyBuilder.renderAndAwait("foo", "bar", "baz")
+		}
+		verify {
+			bodyBuilder.render("foo", any(), any())
+		}
+	}
+
+	@Test
+	fun `renderAndAwait with a Map parameter`() {
+		val response = mockk<ServerResponse>()
+		val map = mockk<Map<String, *>>()
+		every { bodyBuilder.render("foo", map) } returns Mono.just(response)
+		runBlocking {
+			bodyBuilder.renderAndAwait("foo", map)
+		}
+		verify {
+			bodyBuilder.render("foo", map)
+		}
 	}
 
 	class Foo

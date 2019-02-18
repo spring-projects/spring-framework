@@ -16,10 +16,16 @@
 
 package org.springframework.web.reactive.function.client
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import reactor.core.publisher.Mono
 
 /**
  * Mock object based tests for [ClientResponse] Kotlin extensions.
@@ -28,7 +34,7 @@ import org.springframework.core.ParameterizedTypeReference
  */
 class ClientResponseExtensionsTests {
 
-	val response = mockk<ClientResponse>(relaxed = true)
+	private val response = mockk<ClientResponse>(relaxed = true)
 
 	@Test
 	fun `bodyToMono with reified type parameters`() {
@@ -52,6 +58,35 @@ class ClientResponseExtensionsTests {
 	fun `ResponseSpec#toEntityList with reified type parameters`() {
 		response.toEntityList<List<Foo>>()
 		verify { response.toEntityList(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun awaitBody() {
+		val response = mockk<ClientResponse>()
+		every { response.bodyToMono<String>() } returns Mono.just("foo")
+		runBlocking {
+			assertEquals("foo", response.awaitBody<String>())
+		}
+	}
+
+	@Test
+	fun awaitEntity() {
+		val response = mockk<ClientResponse>()
+		val entity = ResponseEntity("foo", HttpStatus.OK)
+		every { response.toEntity<String>() } returns Mono.just(entity)
+		runBlocking {
+			assertEquals(entity, response.awaitEntity<String>())
+		}
+	}
+
+	@Test
+	fun awaitEntityList() {
+		val response = mockk<ClientResponse>()
+		val entity = ResponseEntity(listOf("foo"), HttpStatus.OK)
+		every { response.toEntityList<String>() } returns Mono.just(entity)
+		runBlocking {
+			assertEquals(entity, response.awaitEntityList<String>())
+		}
 	}
 
 	class Foo

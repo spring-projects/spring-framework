@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.web.reactive.function.client
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.mono
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec
@@ -57,3 +60,30 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToMono(): Mono<T> =
  */
 inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> =
 		bodyToFlux(object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Coroutines variant of [WebClient.RequestHeadersSpec.exchange].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend fun WebClient.RequestHeadersSpec<out WebClient.RequestHeadersSpec<*>>.awaitResponse(): ClientResponse =
+		exchange().awaitSingle()
+
+/**
+ * Coroutines variant of [WebClient.RequestBodySpec.body].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+inline fun <reified T: Any> WebClient.RequestBodySpec.body(crossinline supplier: suspend () -> T)
+		= body(GlobalScope.mono { supplier.invoke() })
+
+/**
+ * Coroutines variant of [WebClient.ResponseSpec.bodyToMono].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T =
+		bodyToMono<T>().awaitSingle()

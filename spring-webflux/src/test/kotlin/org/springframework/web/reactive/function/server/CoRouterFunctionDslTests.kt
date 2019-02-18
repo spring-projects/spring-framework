@@ -22,16 +22,15 @@ import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
 import org.springframework.http.MediaType.*
 import org.springframework.web.reactive.function.server.MockServerRequest.builder
-import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.net.URI
 
 /**
- * Tests for [RouterFunctionDsl].
+ * Tests for [CoRouterFunctionDsl].
  *
  * @author Sebastien Deleuze
  */
-class RouterFunctionDslTests {
+class CoRouterFunctionDslTests {
 
 	@Test
 	fun header() {
@@ -126,13 +125,13 @@ class RouterFunctionDslTests {
 	}
 
 
-	private fun sampleRouter() = router {
+	private fun sampleRouter() = coRouter {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
 		"/api".nest {
 			POST("/foo/", ::handleFromClass)
 			PUT("/foo/", :: handleFromClass)
 			PATCH("/foo/") {
-				ok().build()
+				ok().buildAndAwait()
 			}
 			"/foo/"  { handleFromClass(it) }
 		}
@@ -149,19 +148,19 @@ class RouterFunctionDslTests {
 				ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
 		resources {
 			if (it.path() == "/response.txt") {
-				Mono.just(ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
+				ClassPathResource("/org/springframework/web/reactive/function/response.txt")
 			}
 			else {
-				Mono.empty()
+				null
 			}
 		}
 		path("/baz", ::handle)
-		GET("/rendering") { RenderingResponse.create("index").build() }
+		GET("/rendering") { RenderingResponse.create("index").buildAndAwait() }
 	}
 }
 
 @Suppress("UNUSED_PARAMETER")
-private fun handleFromClass(req: ServerRequest) = ServerResponse.ok().build()
+private suspend fun handleFromClass(req: ServerRequest) = ServerResponse.ok().buildAndAwait()
 
 @Suppress("UNUSED_PARAMETER")
-private fun handle(req: ServerRequest) = ServerResponse.ok().build()
+private suspend fun handle(req: ServerRequest) = ServerResponse.ok().buildAndAwait()
