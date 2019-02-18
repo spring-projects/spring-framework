@@ -309,16 +309,17 @@ fun routes(userHandler: UserHandler): RouterFunction<ServerResponse> = coRouter 
 	GET("/api/user", userHandler::listApi)
 }
 
-class UserHandler(private val client: WebClient) {
+class UserHandler(builder: WebClient.Builder) {
 
-	suspend fun listApi(request: ServerRequest): ServerResponse =
-			ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8).bodyAndAwait(
-			client.get().uri("...").awaitResponse().awaitBody<User>())
+	private val client = builder.baseUrl("...").build()
 
 	suspend fun listView(request: ServerRequest): ServerResponse =
 			ServerResponse.ok().renderAndAwait("users", mapOf("users" to
 			client.get().uri("...").awaitResponse().awaitBody<User>()))
 
+	suspend fun listApi(request: ServerRequest): ServerResponse =
+				ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8).bodyAndAwait(
+				client.get().uri("...").awaitResponse().awaitBody<User>())
 }
 ----
 
