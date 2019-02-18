@@ -294,13 +294,13 @@ for a concrete example.
 
 === Coroutines
 
-As of Spring Framework 5.2, https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines support]
+As of Spring Framework 5.2, https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines] support
 is provided via extensions for WebFlux client and server functional API. A dedicated
 {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-co-router-function-dsl/[`coRouter { }`]
 router DSL is also available.
 
-Coroutines extensions use `await` prefix or `AndAwait` suffix, and most are using similar name than their Reactive
-counterparts except `exchange` in `WebClient.RequestHeadersSpec` which translates to `awaitResponse`.
+Coroutines extensions use `await` prefix or `AndAwait` suffix, and most are using similar names to their Reactive
+counterparts, except `exchange` in `WebClient.RequestHeadersSpec` which translates to `awaitResponse`.
 
 [source,kotlin,indent=0]
 ----
@@ -323,7 +323,7 @@ class UserHandler(builder: WebClient.Builder) {
 }
 ----
 
-Read this https://medium.com/@elizarov/structured-concurrency-722d765aa952[structured concurrency blog post]
+Read this blog post about https://medium.com/@elizarov/structured-concurrency-722d765aa952[structured concurrency]
 to understand how to run code concurrently with Coroutines.
 
 === Kotlin Script Templates
