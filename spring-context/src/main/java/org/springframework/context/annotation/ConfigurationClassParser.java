@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -724,15 +725,11 @@ class ConfigurationClassParser {
 		 */
 		@Override
 		public String toString() {
-			StringBuilder builder = new StringBuilder("[");
-			Iterator<ConfigurationClass> iterator = iterator();
-			while (iterator.hasNext()) {
-				builder.append(iterator.next().getSimpleName());
-				if (iterator.hasNext()) {
-					builder.append("->");
-				}
+			StringJoiner joiner = new StringJoiner("->", "[", "]");
+			for (ConfigurationClass configurationClass : this) {
+				joiner.add(configurationClass.getSimpleName());
 			}
-			return builder.append(']').toString();
+			return joiner.toString();
 		}
 	}
 
@@ -946,7 +943,7 @@ class ConfigurationClassParser {
 			return new AssignableTypeFilter(clazz).match((MetadataReader) this.source, metadataReaderFactory);
 		}
 
-		public ConfigurationClass asConfigClass(ConfigurationClass importedBy) throws IOException {
+		public ConfigurationClass asConfigClass(ConfigurationClass importedBy) {
 			if (this.source instanceof Class) {
 				return new ConfigurationClass((Class<?>) this.source, importedBy);
 			}
@@ -1014,7 +1011,7 @@ class ConfigurationClassParser {
 			return result;
 		}
 
-		public Set<SourceClass> getAnnotations() throws IOException {
+		public Set<SourceClass> getAnnotations() {
 			Set<SourceClass> result = new LinkedHashSet<>();
 			for (String className : this.metadata.getAnnotationTypes()) {
 				try {
