@@ -18,8 +18,6 @@ package org.springframework.messaging.rsocket;
 import java.util.List;
 
 import io.rsocket.Payload;
-import io.rsocket.util.ByteBufPayload;
-import io.rsocket.util.DefaultPayload;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
@@ -28,8 +26,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBuffer;
-import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.reactive.AbstractEncoderMethodReturnValueHandler;
 import org.springframework.util.Assert;
@@ -67,22 +63,10 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 		Assert.isInstanceOf(MonoProcessor.class, headerValue, "Expected MonoProcessor");
 
 		MonoProcessor<Flux<Payload>> monoProcessor = (MonoProcessor<Flux<Payload>>) headerValue;
-		monoProcessor.onNext(encodedContent.map(this::toPayload));
+		monoProcessor.onNext(encodedContent.map(PayloadUtils::asPayload));
 		monoProcessor.onComplete();
 
 		return Mono.empty();
-	}
-
-	private Payload toPayload(DataBuffer dataBuffer) {
-		if (dataBuffer instanceof NettyDataBuffer) {
-			return ByteBufPayload.create(((NettyDataBuffer) dataBuffer).getNativeBuffer());
-		}
-		else if (dataBuffer instanceof DefaultDataBuffer) {
-			return DefaultPayload.create(((DefaultDataBuffer) dataBuffer).getNativeBuffer());
-		}
-		else {
-			return DefaultPayload.create(dataBuffer.asByteBuffer());
-		}
 	}
 
 }

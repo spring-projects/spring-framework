@@ -31,8 +31,8 @@ import org.springframework.messaging.Message;
  */
 public interface HandlerMethodReturnValueHandler {
 
-	/** Header containing a DataBufferFactory to use. */
-	public static final String DATA_BUFFER_FACTORY_HEADER = "dataBufferFactoryHeader";
+	/** Header containing a DataBufferFactory for use in return value handling. */
+	String DATA_BUFFER_FACTORY_HEADER = "dataBufferFactory";
 
 
 	/**

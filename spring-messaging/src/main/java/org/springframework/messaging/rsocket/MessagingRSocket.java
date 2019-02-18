@@ -25,9 +25,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.NettyDataBuffer;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -42,8 +42,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Package private implementation of {@link RSocket} used from
- * {@link MessagingAcceptor}.
+ * Package private implementation of {@link RSocket} that is is hooked into an
+ * RSocket client or server via {@link MessagingAcceptor} to accept and handle
+ * requests.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
@@ -52,24 +53,23 @@ class MessagingRSocket implements RSocket {
 
 	private final ReactiveMessageChannel messageChannel;
 
-	private final NettyDataBufferFactory bufferFactory;
-
-	private final RSocket sendingRSocket;
+	private final RSocketRequester requester;
 
 	@Nullable
 	private final MimeType dataMimeType;
 
+	private final RSocketStrategies strategies;
 
-	MessagingRSocket(ReactiveMessageChannel messageChannel, NettyDataBufferFactory bufferFactory,
-			RSocket sendingRSocket, @Nullable MimeType dataMimeType) {
+
+	MessagingRSocket(ReactiveMessageChannel messageChannel,
+			RSocket sendingRSocket, @Nullable MimeType dataMimeType, RSocketStrategies strategies) {
 
 		Assert.notNull(messageChannel, "'messageChannel' is required");
-		Assert.notNull(bufferFactory, "'bufferFactory' is required");
 		Assert.notNull(sendingRSocket, "'sendingRSocket' is required");
 		this.messageChannel = messageChannel;
-		this.bufferFactory = bufferFactory;
-		this.sendingRSocket = sendingRSocket;
+		this.requester = RSocketRequester.create(sendingRSocket, dataMimeType, strategies);
 		this.dataMimeType = dataMimeType;
+		this.strategies = strategies;
 	}
 
 
@@ -117,8 +117,8 @@ class MessagingRSocket implements RSocket {
 		// Since we do retain(), we need to ensure buffers are released if not consumed,
 		// e.g. error before Flux subscribed to, no handler found, @MessageMapping ignores payload, etc.
 
-		Flux<NettyDataBuffer> payloadDataBuffers = payloads
-				.map(payload -> this.bufferFactory.wrap(payload.retain().sliceData()))
+		Flux<DataBuffer> payloadDataBuffers = payloads
+				.map(payload -> PayloadUtils.asDataBuffer(payload, this.strategies.dataBufferFactory()))
 				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 
 		MonoProcessor<Flux<Payload>> replyMono = MonoProcessor.create();
@@ -146,9 +146,11 @@ class MessagingRSocket implements RSocket {
 			headers.setContentType(this.dataMimeType);
 		}
 
-		headers.setHeader(SendingRSocketMethodArgumentResolver.SENDING_RSOCKET_HEADER, this.sendingRSocket);
+		headers.setHeader(RSocketRequesterMethodArgumentResolver.RSOCKET_REQUESTER_HEADER, this.requester);
 		headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_HEADER, replyMono);
-		headers.setHeader(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, this.bufferFactory);
+
+		DataBufferFactory bufferFactory = this.strategies.dataBufferFactory();
+		headers.setHeader(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, bufferFactory);
 
 		return headers.getMessageHeaders();
 	}

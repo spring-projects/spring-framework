@@ -18,13 +18,11 @@ package org.springframework.messaging.rsocket;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.ReactiveMessageChannel;
@@ -47,7 +45,7 @@ public final class MessagingAcceptor implements SocketAcceptor, Function<RSocket
 
 	private final ReactiveMessageChannel messageChannel;
 
-	private NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
+	private final RSocketStrategies rsocketStrategies;
 
 	@Nullable
 	private MimeType defaultDataMimeType;
@@ -64,8 +62,19 @@ public final class MessagingAcceptor implements SocketAcceptor, Function<RSocket
 	 * or with handler instances.
 	 */
 	public MessagingAcceptor(ReactiveMessageChannel messageChannel) {
+		this(messageChannel, RSocketStrategies.builder().build());
+	}
+
+	/**
+	 * Variant of {@link #MessagingAcceptor(ReactiveMessageChannel)} with an
+	 * {@link RSocketStrategies} for wrapping the sending {@link RSocket} as
+	 * {@link RSocketRequester}.
+	 */
+	public MessagingAcceptor(ReactiveMessageChannel messageChannel, RSocketStrategies rsocketStrategies) {
 		Assert.notNull(messageChannel, "ReactiveMessageChannel is required");
+		Assert.notNull(rsocketStrategies, "RSocketStrategies is required");
 		this.messageChannel = messageChannel;
+		this.rsocketStrategies = rsocketStrategies;
 	}
 
 
@@ -78,17 +87,6 @@ public final class MessagingAcceptor implements SocketAcceptor, Function<RSocket
 	 */
 	public void setDefaultDataMimeType(@Nullable MimeType defaultDataMimeType) {
 		this.defaultDataMimeType = defaultDataMimeType;
-	}
-
-	/**
-	 * Configure the buffer factory to use.
-	 * <p>By default this is initialized with the allocator instance
-	 * {@link PooledByteBufAllocator#DEFAULT}.
-	 * @param bufferFactory the bufferFactory to use
-	 */
-	public void setNettyDataBufferFactory(NettyDataBufferFactory bufferFactory) {
-		Assert.notNull(bufferFactory, "DataBufferFactory is required");
-		this.bufferFactory = bufferFactory;
 	}
 
 
@@ -108,7 +106,7 @@ public final class MessagingAcceptor implements SocketAcceptor, Function<RSocket
 	}
 
 	private MessagingRSocket createRSocket(RSocket sendingRSocket, @Nullable MimeType dataMimeType) {
-		return new MessagingRSocket(this.messageChannel, this.bufferFactory, sendingRSocket, dataMimeType);
+		return new MessagingRSocket(this.messageChannel, sendingRSocket, dataMimeType, this.rsocketStrategies);
 	}
 
 }

@@ -19,11 +19,11 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
+import io.rsocket.Closeable;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.RSocketFactory;
 import io.rsocket.transport.netty.client.TcpClientTransport;
-import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
 import io.rsocket.util.DefaultPayload;
 import org.junit.AfterClass;
@@ -56,7 +56,7 @@ public class RSocketServerToClientIntegrationTests {
 
 	private static AnnotationConfigApplicationContext context;
 
-	private static CloseableChannel serverChannel;
+	private static Closeable server;
 
 	private static MessagingAcceptor clientAcceptor;
 
@@ -67,14 +67,14 @@ public class RSocketServerToClientIntegrationTests {
 
 		context = new AnnotationConfigApplicationContext(ServerConfig.class);
 
+		ReactiveMessageChannel messageChannel = context.getBean("serverChannel", ReactiveMessageChannel.class);
+		RSocketStrategies rsocketStrategies = context.getBean(RSocketStrategies.class);
+
 		clientAcceptor = new MessagingAcceptor(
 				context.getBean("clientChannel", ReactiveMessageChannel.class));
 
-		MessagingAcceptor serverAcceptor = new MessagingAcceptor(
-				context.getBean("serverChannel", ReactiveMessageChannel.class));
-
-		serverChannel = RSocketFactory.receive()
-				.acceptor(serverAcceptor)
+		server = RSocketFactory.receive()
+				.acceptor(new MessagingAcceptor(messageChannel, rsocketStrategies))
 				.transport(TcpServerTransport.create("localhost", 7000))
 				.start()
 				.block();
@@ -82,7 +82,7 @@ public class RSocketServerToClientIntegrationTests {
 
 	@AfterClass
 	public static void tearDownOnce() {
-		serverChannel.dispose();
+		server.dispose();
 	}
 
 
@@ -141,10 +141,10 @@ public class RSocketServerToClientIntegrationTests {
 
 
 		@MessageMapping("connect.echo")
-		void echo(RSocket rsocket) {
+		void echo(RSocketRequester requester) {
 			runTest(() -> {
 				Flux<String> result = Flux.range(1, 3).concatMap(i ->
-						rsocket.requestResponse(payload("echo", "Hello " + i)).map(Payload::getDataUtf8));
+						requester.route("echo").data("Hello " + i).retrieveMono(String.class));
 
 				StepVerifier.create(result)
 						.expectNext("Hello 1")
@@ -155,10 +155,10 @@ public class RSocketServerToClientIntegrationTests {
 		}
 
 		@MessageMapping("connect.echo-async")
-		void echoAsync(RSocket rsocket) {
+		void echoAsync(RSocketRequester requester) {
 			runTest(() -> {
 				Flux<String> result = Flux.range(1, 3).concatMap(i ->
-						rsocket.requestResponse(payload("echo-async", "Hello " + i)).map(Payload::getDataUtf8));
+						requester.route("echo-async").data("Hello " + i).retrieveMono(String.class));
 
 				StepVerifier.create(result)
 						.expectNext("Hello 1 async")
@@ -169,10 +169,9 @@ public class RSocketServerToClientIntegrationTests {
 		}
 
 		@MessageMapping("connect.echo-stream")
-		void echoStream(RSocket rsocket) {
+		void echoStream(RSocketRequester requester) {
 			runTest(() -> {
-				Flux<String> result = rsocket.requestStream(payload("echo-stream", "Hello"))
-						.map(io.rsocket.Payload::getDataUtf8);
+				Flux<String> result = requester.route("echo-stream").data("Hello").retrieveFlux(String.class);
 
 				StepVerifier.create(result)
 						.expectNext("Hello 0")
@@ -185,13 +184,11 @@ public class RSocketServerToClientIntegrationTests {
 		}
 
 		@MessageMapping("connect.echo-channel")
-		void echoChannel(RSocket rsocket) {
+		void echoChannel(RSocketRequester requester) {
 			runTest(() -> {
-				Flux<Payload> payloads = Flux.concat(
-						Flux.just(payload("echo-channel", "Hello 1")),
-						Flux.range(2, 9).map(i -> DefaultPayload.create("Hello " + i)));
-
-				Flux<String> result = rsocket.requestChannel(payloads).map(Payload::getDataUtf8);
+				Flux<String> result = requester.route("echo-channel")
+						.data(Flux.range(1, 10).map(i -> "Hello " + i), String.class)
+						.retrieveFlux(String.class);
 
 				StepVerifier.create(result)
 						.expectNext("Hello 1 async")
@@ -285,20 +282,23 @@ public class RSocketServerToClientIntegrationTests {
 		public RSocketMessageHandler clientMessageHandler() {
 			List<Object> handlers = Collections.singletonList(clientController());
 			RSocketMessageHandler handler = new RSocketMessageHandler(clientChannel(), handlers);
-			addDefaultCodecs(handler);
+			handler.setRSocketStrategies(rsocketStrategies());
 			return handler;
 		}
 
 		@Bean
 		public RSocketMessageHandler serverMessageHandler() {
 			RSocketMessageHandler handler = new RSocketMessageHandler(serverChannel());
-			addDefaultCodecs(handler);
+			handler.setRSocketStrategies(rsocketStrategies());
 			return handler;
 		}
 
-		private void addDefaultCodecs(RSocketMessageHandler handler) {
-			handler.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
-			handler.setEncoders(Collections.singletonList(CharSequenceEncoder.allMimeTypes()));
+		@Bean
+		public RSocketStrategies rsocketStrategies() {
+			return RSocketStrategies.builder()
+					.decoder(StringDecoder.allMimeTypes())
+					.encoder(CharSequenceEncoder.allMimeTypes())
+					.build();
 		}
 	}
 

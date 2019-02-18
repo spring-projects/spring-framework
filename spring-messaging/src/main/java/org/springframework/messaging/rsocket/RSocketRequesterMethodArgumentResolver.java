@@ -31,28 +31,40 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-public class SendingRSocketMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class RSocketRequesterMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	/**
 	 * Message header name that is expected to have the {@link RSocket} to
 	 * initiate new interactions to the remote peer with.
 	 */
-	public static final String SENDING_RSOCKET_HEADER = "sendingRSocket";
+	public static final String RSOCKET_REQUESTER_HEADER = "rsocketRequester";
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return RSocket.class.isAssignableFrom(parameter.getParameterType());
+		Class<?> type = parameter.getParameterType();
+		return RSocketRequester.class.equals(type) || RSocket.class.isAssignableFrom(type);
 	}
 
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter parameter, Message<?> message) {
 
-		Object headerValue = message.getHeaders().get(SENDING_RSOCKET_HEADER);
-		Assert.notNull(headerValue, "Missing '" + SENDING_RSOCKET_HEADER + "'");
-		Assert.isInstanceOf(RSocket.class, headerValue, "Expected header value of type io.rsocket.RSocket");
+		Object headerValue = message.getHeaders().get(RSOCKET_REQUESTER_HEADER);
+		Assert.notNull(headerValue, "Missing '" + RSOCKET_REQUESTER_HEADER + "'");
+		Assert.isInstanceOf(RSocketRequester.class, headerValue, "Expected header value of type RSocketRequester");
 
-		return Mono.just(headerValue);
+		RSocketRequester requester = (RSocketRequester) headerValue;
+
+		Class<?> type = parameter.getParameterType();
+		if (RSocketRequester.class.equals(type)) {
+			return Mono.just(requester);
+		}
+		else if (RSocket.class.isAssignableFrom(type)) {
+			return Mono.just(requester.rsocket());
+		}
+		else {
+			return Mono.error(new IllegalArgumentException("Unexpected parameter type: " + parameter));
+		}
 	}
 
 }

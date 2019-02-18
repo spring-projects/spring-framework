@@ -18,6 +18,7 @@ package org.springframework.messaging.rsocket;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -25,6 +26,7 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.ReactiveSubscribableChannel;
 import org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,6 +43,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 	private final List<Encoder<?>> encoders = new ArrayList<>();
 
+	@Nullable
+	private RSocketStrategies rsocketStrategies;
+
 
 	public RSocketMessageHandler(ReactiveSubscribableChannel inboundChannel) {
 		super(inboundChannel);
@@ -53,6 +58,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 			detectHandlerMethods(handler);
 		}
 	}
+
 
 
 	/**
@@ -69,10 +75,44 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		return this.encoders;
 	}
 
+	/**
+	 * Provide configuration in the form of {@link RSocketStrategies}. This is
+	 * an alternative to using {@link #setEncoders(List)},
+	 * {@link #setDecoders(List)}, and others directly. It is convenient when
+	 * you also need to configure an {@link RSocketRequester} in which case
+	 * the strategies can be configured once and used in multiple places.
+	 * @param rsocketStrategies the strategies to use
+	 */
+	public void setRSocketStrategies(RSocketStrategies rsocketStrategies) {
+		Assert.notNull(rsocketStrategies, "RSocketStrategies must not be null");
+		this.rsocketStrategies = rsocketStrategies;
+		setDecoders(rsocketStrategies.decoders());
+		setEncoders(rsocketStrategies.encoders());
+		setReactiveAdapterRegistry(rsocketStrategies.reactiveAdapterRegistry());
+	}
+
+	/**
+	 * Return the {@code RSocketStrategies} instance provided via
+	 * {@link #setRSocketStrategies rsocketStrategies}, or
+	 * otherwise a new instance populated with the configured
+	 * {@link #setEncoders(List) encoders}, {@link #setDecoders(List) decoders}
+	 * and others.
+	 */
+	public RSocketStrategies getRSocketStrategies() {
+		if (this.rsocketStrategies != null) {
+			return this.rsocketStrategies;
+		}
+		return RSocketStrategies.builder()
+				.decoder(getDecoders().toArray(new Decoder<?>[0]))
+				.encoder(getEncoders().toArray(new Encoder<?>[0]))
+				.reactiveAdapterStrategy(getReactiveAdapterRegistry())
+				.build();
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
-		getArgumentResolverConfigurer().addCustomResolver(new SendingRSocketMethodArgumentResolver());
+		getArgumentResolverConfigurer().addCustomResolver(new RSocketRequesterMethodArgumentResolver());
 		super.afterPropertiesSet();
 	}
 
