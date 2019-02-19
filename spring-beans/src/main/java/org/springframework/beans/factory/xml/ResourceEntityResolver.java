@@ -31,25 +31,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 
 /**
- * EntityResolver implementation that tries to resolve entity references
- * through a {@link org.springframework.core.io.ResourceLoader} (usually,
- * relative to the resource base of an ApplicationContext), if applicable.
- * Extends {@link DelegatingEntityResolver} to also provide DTD and XSD lookup.
- *
- * <p>Allows to use standard XML entities to include XML snippets into an
- * application context definition, for example to split a large XML file
- * into various modules. The include paths can be relative to the
- * application context's resource base as usual, instead of relative
- * to the JVM working directory (the XML parser's default).
- *
- * <p>Note: In addition to relative paths, every URL that specifies a
- * file in the current system root, i.e. the JVM working directory,
- * will be interpreted relative to the application context too.
- *
- * @author Juergen Hoeller
- * @since 31.07.2003
- * @see org.springframework.core.io.ResourceLoader
- * @see org.springframework.context.ApplicationContext
+ * 继承自 DelegatingEntityResolver 类，通过 ResourceLoader 来解析实体的引用。
  */
 public class ResourceEntityResolver extends DelegatingEntityResolver {
 
@@ -70,14 +52,22 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 	}
 
 
+	/**
+	 * 首先，调用父类的方法，进行解析
+	 * 如果失败，使用 resourceLoader ，尝试读取 systemId 对应的 Resource 资源
+	 */
 	@Override
 	@Nullable
 	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws SAXException, IOException {
+		// 调用父类的方法，进行解析
 		InputSource source = super.resolveEntity(publicId, systemId);
 		if (source == null && systemId != null) {
+			// 解析失败，resourceLoader 进行解析
 			String resourcePath = null;
 			try {
+				// 使用 UTF-8 ，解码 systemId
 				String decodedSystemId = URLDecoder.decode(systemId, "UTF-8");
+				// 解析文件资源的相对路径（相对于系统根路径）
 				String givenUrl = new URL(decodedSystemId).toString();
 				String systemRootUrl = new File("").toURI().toURL().toString();
 				// Try relative to resource base if currently in system root.
@@ -97,8 +87,11 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Trying to locate XML entity [" + systemId + "] as resource [" + resourcePath + "]");
 				}
+				// 获得 Resource 资源
 				Resource resource = this.resourceLoader.getResource(resourcePath);
+				// 创建 InputSource 对象
 				source = new InputSource(resource.getInputStream());
+				// 设置 publicId 和 systemId 属性
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
 				if (logger.isDebugEnabled()) {

@@ -48,25 +48,24 @@ import org.springframework.lang.Nullable;
 public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	/**
-	 * Creates a {@link BeanDefinitionBuilder} instance for the
-	 * {@link #getBeanClass bean Class} and passes it to the
-	 * {@link #doParse} strategy method.
-	 * @param element the element that is to be parsed into a single BeanDefinition
-	 * @param parserContext the object encapsulating the current state of the parsing process
-	 * @return the BeanDefinition resulting from the parsing of the supplied {@link Element}
-	 * @throws IllegalStateException if the bean {@link Class} returned from
-	 * {@link #getBeanClass(org.w3c.dom.Element)} is {@code null}
-	 * @see #doParse
+	 * 1.对于 getBeanClass() 方法，AbstractSingleBeanDefinitionParser 类并没有提供具体实现，而是直接返回 null ，
+	 * 意味着它希望子类能够重写该方法。当然，如果没有重写该方法，这会去调用 #getBeanClassName() ，判断子类是否已经重写了该方法
+	 *
+	 * 2.对于 #doParse(Element element, BeanDefinitionBuilder builder) 方法，则是直接空实现。
 	 */
 	@Override
 	protected final AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+		// 创建 BeanDefinitionBuilder 对象
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition();
+		// 获取父类元素
 		String parentName = getParentName(element);
 		if (parentName != null) {
 			builder.getRawBeanDefinition().setParentName(parentName);
 		}
+		// 获取自定义标签中的 class，这个时候会去调用自定义解析中的 getBeanClass()
 		Class<?> beanClass = getBeanClass(element);
 		if (beanClass != null) {
+			// beanClass 为 null，意味着子类并没有重写 getBeanClass() 方法，则尝试去判断是否重写了 getBeanClassName()
 			builder.getRawBeanDefinition().setBeanClass(beanClass);
 		}
 		else {
@@ -75,16 +74,20 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 				builder.getRawBeanDefinition().setBeanClassName(beanClassName);
 			}
 		}
+		// 设置 source 属性
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
+		// 设置 scope 属性
 		BeanDefinition containingBd = parserContext.getContainingBeanDefinition();
 		if (containingBd != null) {
 			// Inner bean definition must receive same scope as containing bean.
 			builder.setScope(containingBd.getScope());
 		}
+		// 设置 lazy-init 属性
 		if (parserContext.isDefaultLazyInit()) {
 			// Default-lazy-init applies to custom bean definitions as well.
 			builder.setLazyInit(true);
 		}
+		// 调用子类的 doParse() 进行解析
 		doParse(element, parserContext, builder);
 		return builder.getBeanDefinition();
 	}

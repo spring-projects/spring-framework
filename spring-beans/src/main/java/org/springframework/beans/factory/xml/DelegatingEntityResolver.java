@@ -26,15 +26,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link EntityResolver} implementation that delegates to a {@link BeansDtdResolver}
- * and a {@link PluggableSchemaResolver} for DTDs and XML schemas, respectively.
- *
- * @author Rob Harrop
- * @author Juergen Hoeller
- * @author Rick Evans
- * @since 2.0
- * @see BeansDtdResolver
- * @see PluggableSchemaResolver
+ * 实现 EntityResolver 接口，分别代理 dtd 的 BeansDtdResolver 和 xml schemas 的 PluggableSchemaResolver
  */
 public class DelegatingEntityResolver implements EntityResolver {
 
@@ -77,13 +69,19 @@ public class DelegatingEntityResolver implements EntityResolver {
 	}
 
 
+	/**
+	 * 如果是 DTD 验证模式，则使用 BeansDtdResolver 来进行解析
+	 * 如果是 XSD 验证模式，则使用 PluggableSchemaResolver 来进行解析。
+	 */
 	@Override
 	@Nullable
 	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws SAXException, IOException {
 		if (systemId != null) {
+			// DTD 模式
 			if (systemId.endsWith(DTD_SUFFIX)) {
 				return this.dtdResolver.resolveEntity(publicId, systemId);
 			}
+			// XSD 模式
 			else if (systemId.endsWith(XSD_SUFFIX)) {
 				return this.schemaResolver.resolveEntity(publicId, systemId);
 			}
