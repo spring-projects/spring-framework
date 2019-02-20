@@ -63,7 +63,7 @@ public interface StompSession {
 	 * {@link StompHeaders} instead of just a destination. The headers must
 	 * contain a destination and may also have other headers such as
 	 * "content-type" or custom headers for the broker to propagate to
-	 * subscribers, or broker-specific, non-standard headers..
+	 * subscribers, or broker-specific, non-standard headers.
 	 * @param headers the message headers
 	 * @param payload the message payload
 	 * @return a Receiptable for tracking receipts
