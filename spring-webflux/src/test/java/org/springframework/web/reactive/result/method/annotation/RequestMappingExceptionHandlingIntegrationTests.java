@@ -93,7 +93,7 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 	public void exceptionFromMethodWithProducesCondition() throws Exception {
 		try {
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("Accept", "text/csv, application/problem+json");
+			headers.add("Accept", "text/plain, application/problem+json");
 			performGet("/SPR-16318", headers, String.class).getBody();
 			fail();
 		}
@@ -152,9 +152,9 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 					});
 		}
 
-		@GetMapping(path = "/SPR-16318", produces = "text/csv")
-		public String handleCsv() throws Exception {
-			throw new Spr16318Exception();
+		@GetMapping(path = "/SPR-16318", produces = "text/plain")
+		public Mono<String> handleTextPlain() throws Exception {
+			return Mono.error(new Spr16318Exception());
 		}
 
 		@ExceptionHandler
