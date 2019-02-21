@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
@@ -209,6 +210,9 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 		// Success and error responses may use different content types
 		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		if (!exchange.getResponse().isCommitted()) {
+			exchange.getResponse().getHeaders().remove(HttpHeaders.CONTENT_TYPE);
+		}
 
 		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(exception, handlerMethod);
 		if (invocable != null) {
