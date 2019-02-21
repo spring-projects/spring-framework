@@ -124,6 +124,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * @see #invokeUnderTrace(org.aopalliance.intercept.MethodInvocation, org.apache.commons.logging.Log)
 	 */
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Log logger = getLoggerForInvocation(invocation);
 		if (isInterceptorEnabled(invocation, logger)) {
@@ -242,6 +243,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * @see #writeToLog(Log, String)
 	 * @see #writeToLog(Log, String, Throwable)
 	 */
+	@Nullable
 	protected abstract Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable;
 
 }
